@@ -1,0 +1,101 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+source("labels_screws_functions.R", local = TRUE)
+```
+
+
+```{r}
+screw_screwhead_long_df
+
+screw_start_df
+
+string <- glue(cat(screw_start_df$side))
+
+map(screw_start_df$side, .f = cat)[1]
+
+paste(screw_start_df$side, sep="", collapse="") 
+
+
+min(st_boundary(c3_lm_screw_screwhead$left_screw_sf))
+
+summary(c3_lm_screw_screwhead$left_screw_sf)
+
+st_nearest_points(screw_list)
+
+left_screwhead_point_1 <- c4_lm_screw_screwhead$left_screw_rotated[[1]][2,]
+left_screwhead_point_2 <- c4_lm_screw_screwhead$left_screw_rotated[[1]][3,]
+
+mean(mat1[1], mat2[1])
+
+c(mean(left_screwhead_point_1[1], left_screwhead_point_2[1]), mean(left_screwhead_point_1[2], left_screwhead_point_2[2]))
+
+screwhead_list
+
+left_rod_df <- screw_screwhead_long_df %>%
+                  select(implant, side, screw_heads) %>%
+                pivot_wider(names_from = side, values_from = "screw_heads")
+
+left_rod_df$left[[1]]
+
+
+left_rod_df <- do.call(rbind, left_rod_df$left)
+
+left_rod_df %>%
+  as_tibble() %>%
+  arrange(V2) %>%
+  as.matrix()
+
+rbind(left_rod_df$left)
+
+transpose(left_rod_df$left)
+
+st_buffer(st_linestring(left_rod_df), dist = 0.001)
+
+sum(str_count(screw_screwhead_long_df$side, pattern = "left"))
+ 
+```
+
+### RODS
+
+```{r}
+
+all_screws <- st_multipolygon((screw_screwhead_long_df$screws))
+
+
+right_rods_long_df <- implants_list$implants_df %>%
+  right_join(screw_screwhead_long_df) %>%
+  select(implant, side, screw_heads)
+
+
+
+if(str_detect(string = right_rods_long_df$side, pattern = "right")){
+  right_rods_wide_df <- right_rods_long_df %>%
+    pivot_wider(names_from = side, values_from = "screw_heads")
+  
+  right_rod_df <- do.call(rbind, right_rods_wide_df$right)
+  
+  right_rod_sf <- st_buffer(st_linestring(right_rod_df), dist = 0.001)
+}else{
+  right_rod_sf <- NULL
+}
+
+
+ggdraw() +
+      draw_image(spine_png, scale = 1, y = 0, valign = 0, x = 0, width = 1) +
+      # draw_image(screw_img, scale = 0.1, y = 0.5, vjust = 0.5, x = -0.03) +
+      draw_text(text = labels_df$labels, x = labels_df$x_left, y = labels_df$y, size = 12, fontface = "bold") +
+      draw_text(text = labels_df$labels, x = labels_df$x_right, y = labels_df$y, size = 12, fontface = "bold") +
+      # geom_point(data = implants_list$implants_df, aes(x = x, y = y), size = 3) +
+      # geom_sf(data = pedicle_screws_sf) + 
+      geom_point(aes(x = 0.5 - iliac_x_offset, y = iliac_y), size = 4) + 
+        ggpattern::geom_sf_pattern(data = all_screws, pattern = "stripe",  pattern_fill = "red",alpha = 0.8, pattern_colour = "blue", pattern_density = 0.01, pattern_spacing = 0.003, angle = 70) +
+  geom_sf(data = left_rod_sf) + 
+  theme_minimal_grid() 
+
+```
+
