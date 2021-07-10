@@ -1,0 +1,262 @@
+#############-----------------------   xxxxxxxxxxxx  ----------------------###############
+
+
+#############-----------------------   POSTERIOR  ----------------------###############
+#############-----------------------   POSTERIOR  ----------------------###############
+#############-----------------------   POSTERIOR  ----------------------###############
+#############-----------------------   POSTERIOR  ----------------------###############
+#############-----------------------   POSTERIOR  ----------------------###############
+
+
+#############-----------------------   LOAD DATA  ----------------------###############
+
+spine_png <- image_read(path = "posterior_spine_figure.png")
+
+# spine_png <- image_read(path = "posterior_spine_3d_model_with_ribs_correct_size.png")
+# posterior_spine_3d_model_with_ribs_correct_size
+
+# spine_png <- image_read(path = "posterior_spine_6_lumbar_vert.png")
+# posterior_spine_6_lumbar_vert
+anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
+
+implant_starts_df <- read_csv(file = "full_coordinates_df.csv") %>%
+  filter(!is.na(x))
+
+#############-----------------------   Build Key Dataframes  ----------------------###############
+
+left_label_x <- 0.32
+right_label_x <- 1 - left_label_x
+
+labels_df <- levels_numbered_df %>%
+  filter(str_detect(level, pattern = "-") == FALSE) %>%
+  mutate(y = c(0.925, 0.88, 0.865, 0.847, 0.828, 0.811, 0.793, 0.779, 0.757, 0.733, 0.711, 0.682, 0.653, 0.623, 0.593, 0.561, 0.53, 0.491, 0.457, 0.421, 0.385, 0.353, 0.311, 0.271, 0.238, 0.21, 0.19, 0.17))
+
+interbody_levels_df <- levels_numbered_df %>%
+  filter(str_detect(level, pattern = "-"))
+
+
+# To move all objects down a certain amount, if creating L6 vertebrae.
+# move_polygon_sf <- function(object_vector_to_move, row_number_to_move, y_to_move){
+#   st_polygon(list(as_tibble(object_vector_to_move[[row_number_to_move]][[1]], .name_repair = make_clean_names) %>%
+#                     rename(y = x_2) %>%
+#                     mutate(y = y - y_to_move) %>%
+#                     as.matrix()))
+# }
+# 
+# lower_vert_df$lowered <- map2(.x = nrow(lower_vert_df), .y = 0.02, .f = ~ move_polygon_sf(object_vector_to_move = lower_vert_df$object_constructed, row_number_to_move = .x, y_to_move = .y))
+
+
+#############-------#############-----------------------   POSTERIOR  ----------------------###############-------###############
+#############-------#############-----------------------   POSTERIOR  ----------------------###############-------###############
+#############-------#############-----------------------   POSTERIOR  ----------------------###############-------###############
+#############-------#############-----------------------   POSTERIOR  ----------------------###############-------###############
+#############-------#############-----------------------   POSTERIOR  ----------------------###############-------###############
+#############-------#############-----------------------   POSTERIOR  ----------------------###############-------###############
+
+#############-----------------------   Build Implants  ----------------------###############
+
+implants_constructed_df <- implant_starts_df %>%
+  filter(category == "implant") %>%
+  mutate(sublaminar_band_length = length) %>%
+  mutate(length_for_tether = length) %>%
+  mutate(object_constructed = pmap(.l =  list(..1 = object, 
+                                              ..2 = x, 
+                                              ..3 = y, 
+                                              ..4 = angle,
+                                              ..5 = length, 
+                                              ..6 = width,
+                                              # ..7 = rod, 
+                                              ..7 = sublaminar_band_length,
+                                              ..8 = length_for_tether), .f = ~ screw_hook_implant_function(implant_type = ..1, 
+                                                                                                           start_x = ..2,
+                                                                                                           y = ..3,
+                                                                                                           angle = ..4,
+                                                                                                           screw_length_mod = ..5,
+                                                                                                           screw_width_mod = ..6, 
+                                                                                                           sublaminar_band_length = ..7, 
+                                                                                                           length_for_tether = ..8)))
+
+
+#############-----------------------   Build Osteotomies  ----------------------###############
+
+osteotomy_df <- implant_starts_df %>%
+  filter(category == "osteotomy") %>%
+  # remove_empty() %>%
+  mutate(object_constructed = pmap(list(..1 = level, 
+                                        ..2 = object,
+                                        ..3 = left_x,
+                                        ..4 = superior_y,
+                                        ..5 = right_x,
+                                        ..6 = inferior_y,
+                                        ..7 = superior_vert_lateral_pars_x, 
+                                        ..8 = superior_vert_inferior_pedicle_y,
+                                        ..9 = superior_lamina_y,
+                                        ..10 = lateral_tp_x, 
+                                        ..11 = inferior_lamina_y,
+                                        ..12 = lateral_pars_x,
+                                        ..13 = inferior_pedicle_y,
+                                        ..14 = superior_tp_y, 
+                                        ..15 = inferior_facet_lateral_border_x,
+                                        ..16 = inferior_facet_medial_border_x,
+                                        ..17 = inferior_facet_superior_border_y,
+                                        ..18 = inferior_facet_inferior_border_y,
+                                        ..19 = x), .f = ~build_osteotomy_function(level = ..1,
+                                                                                  x_click = ..19,
+                                                                                  osteotomy_grade = ..2,
+                                                                                  left_x = ..3,
+                                                                                  superior_y = ..4,
+                                                                                  right_x = ..5, 
+                                                                                  inferior_y = ..6,
+                                                                                  superior_vert_lateral_pars_x = ..7, 
+                                                                                  superior_vert_inferior_pedicle_y = ..8, 
+                                                                                  superior_lamina_y = ..9,
+                                                                                  lateral_tp_x = ..10, 
+                                                                                  inferior_lamina_y = ..11, 
+                                                                                  lateral_pars_x = ..12, 
+                                                                                  inferior_pedicle_y = ..13, 
+                                                                                  superior_tp_y = ..14,
+                                                                                  inferior_facet_lateral_border_x = ..15,
+                                                                                  inferior_facet_medial_border_x = ..16,
+                                                                                  inferior_facet_superior_border_y = ..17, 
+                                                                                  inferior_facet_inferior_border_y = ..18)))
+
+#############-----------------------   Build Decompressions  ----------------------###############
+
+decompression_df <- implant_starts_df %>%
+  filter(approach == "posterior") %>%
+  filter(category == "decompression") %>%
+  mutate(object_constructed = pmap(list(..1 = left_x,
+                                        ..2 = superior_y,
+                                        ..3 = right_x,
+                                        ..4 = inferior_y,
+                                        ..5 = width, 
+                                        ..6 = object,
+                                        ..7 = lateral_pars_x,
+                                        ..8 = superior_tp_y,
+                                        ..9 = side, 
+                                        ..10 = inferior_pedicle_y), 
+                                   .f = ~ build_decompression_function(left_x = ..1, right_x = ..3, superior_y = ..2, inferior_y = ..4, top_width = ..5, object = ..6, x_lateral_pars = ..7, y_inferior_tp = ..8, side = ..9, inferior_pedicle_y = ..10)))
+
+#############-----------------------   Build Open Canal df  ----------------------###############
+
+open_canal_df <- decompression_df %>%
+  filter(object == "laminectomy") %>%
+  mutate(category = "revision")
+
+#############-----------------------   Build Interbody Fusions  ----------------------###############
+
+# interbody_df <- implant_starts_df %>%
+#   filter(category == "interbody") %>%
+#   filter(approach == "posterior") %>%
+#   filter(!is.na(width)) %>%
+#   mutate(object_constructed = pmap(list(..1 = left_x,
+#                                         ..2 = superior_y,
+#                                         ..3 = right_x,
+#                                         ..4 = inferior_y,
+#                                         ..5 = width,
+#                                         ..6 = object), 
+#                                    .f = ~ build_interbody_function(left_x = ..1, right_x = ..3, superior_y = ..2, inferior_y = ..4, top_width = ..5, object = ..6)))
+# 
+
+
+all_interbody_df <- implant_starts_df %>%
+  filter(category == "interbody") %>%
+  filter(approach == "posterior") %>%
+  # filter(!is.na(width)) %>%
+  mutate(object_constructed = pmap(list(..1 = object,
+                                        ..2 = x,
+                                        ..3 = right_x,
+                                        ..4 = left_x,
+                                        ..5 = superior_y,
+                                        ..6 = inferior_y, 
+                                        ..7 = width, 
+                                        ..8 = inferior_facet_lateral_border_x,
+                                        ..9 = inferior_facet_medial_border_x, 
+                                        ..10 = inferior_facet_superior_border_y,
+                                        ..11 = inferior_facet_inferior_border_y), 
+                                   .f = ~ build_interbody_function(object = ..1, 
+                                                                   x_click = ..2, 
+                                                                   left_x = ..3, 
+                                                                   right_x = ..4,
+                                                                   superior_y = ..5,
+                                                                   inferior_y = ..6,
+                                                                   top_width = ..7,
+                                                                   inferior_facet_lateral_border_x = ..8, 
+                                                                   inferior_facet_medial_border_x = ..9,
+                                                                   inferior_facet_superior_border_y = ..10,
+                                                                   inferior_facet_inferior_border_y = ..11)))
+
+# llif_interbody_df <- interbody_df %>%
+#   filter(object == "tlif") %>%
+#   mutate(object = "llif")
+# 
+# plif_interbody_df <- interbody_df %>%
+#   filter(object == "tlif") %>%
+#   mutate(object = "plif") 
+# 
+# all_interbody_df <- interbody_df %>%
+#   union_all(llif_interbody_df) %>%
+#   union_all(plif_interbody_df) %>%
+#   distinct()
+# 
+# rm(llif_interbody_df, interbody_df)
+
+#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+
+anterior_df <- implant_starts_df %>%
+  filter(str_detect(string = category, pattern = "anterior")) %>%
+  remove_empty() 
+
+labels_anterior_df <- anterior_df %>%
+  filter(object == "corpectomy") %>%
+  select(level, x, y) %>%
+  distinct() 
+
+anterior_objects_df <- anterior_df %>%
+  mutate(object_constructed = pmap(list(..1 = object,
+                                        ..2 = width,
+                                        ..3 = inferior_endplate_y,
+                                        ..4 = superior_endplate_y, 
+                                        ..5 = superior_enplate_inferior_body_y, 
+                                        ..6 = inferior_endplate_superior_body_y,
+                                        ..7 = y),
+                                   .f = ~ anterior_implant_function(object_type = ..1, 
+                                                                    body_width = ..2,
+                                                                    inferior_endplate_y = ..3,
+                                                                    superior_endplate_y = ..4,
+                                                                    superior_endplate_inferior_body_y = ..5, 
+                                                                    inferior_endplate_superior_body_y = ..6, y_click = ..7)))
+
+
+
+#############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
+#############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
+#############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
+#############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
+#############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
+#############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
+
+all_implants_constructed_df <- implants_constructed_df %>%
+  union_all(osteotomy_df) %>%
+  union_all(decompression_df) %>%
+  union_all(anterior_objects_df) %>% 
+  union_all(all_interbody_df) %>%
+  select(level, vertebral_number, everything())
+
+revision_implants_df <- all_implants_constructed_df %>%
+  filter(object == "pedicle_screw" | object == "pelvic_screw" | object == "occipital_screw") %>%
+  # filter(str_detect(string = object, pattern = "pedicle_screw")) %>%
+  filter(approach == "posterior") %>%
+  arrange(vertebral_number) %>%
+  distinct() %>%
+  group_by(level, object, side) %>%
+  filter(y == max(y)) %>%
+  ungroup()
+
+rm(osteotomy_df, decompression_df, all_interbody_df)
+
