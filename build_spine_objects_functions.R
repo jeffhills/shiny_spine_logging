@@ -495,7 +495,7 @@ build_osteotomy_function <- function(level,
 #############-----------------------   Build: DECOMPRESSIONS  ----------------------###############
 
 
-build_decompression_function <- function(left_x, right_x, superior_y, inferior_y, top_width, object="x", x_lateral_pars, y_inferior_tp, side, inferior_pedicle_y){
+build_decompression_function <- function(left_x, right_x, superior_y, inferior_y, top_width, object="x", x_lateral_pars, y_inferior_tp, side, inferior_pedicle_y, inferior_facet_superior_border_y = 0.5){
   
   if(object == "laminoplasty"){
     object_start <- c(x_lateral_pars+0.01, inferior_pedicle_y + 0.005)
@@ -507,6 +507,23 @@ build_decompression_function <- function(left_x, right_x, superior_y, inferior_y
     
     decompression_sf <- st_buffer(x = st_linestring(rbind(object_start, point_2, point_3, point_4, point_5, point_6)), dist = 0.003, endCapStyle = "ROUND")
     
+  }
+  
+  if(object == "lateral_extracavitary_approach"){
+    if(side == "right"){
+      point_1 <- c(1-x_lateral_pars, inferior_facet_superior_border_y)
+      point_2 <- c(1-x_lateral_pars + 0.012, inferior_facet_superior_border_y)
+      point_3 <- c(1-x_lateral_pars + 0.012, inferior_facet_superior_border_y-0.007)
+      point_4 <- c(1-x_lateral_pars, inferior_facet_superior_border_y - 0.007)
+    }else{
+      # object_center <- c(x_lateral_pars, inferior_facet_superior_border_y)
+      point_1 <- c(x_lateral_pars, inferior_facet_superior_border_y)
+      point_2 <- c(x_lateral_pars - 0.012, inferior_facet_superior_border_y)
+      point_3 <- c(x_lateral_pars - 0.012, inferior_facet_superior_border_y-0.007)
+      point_4 <- c(x_lateral_pars, inferior_facet_superior_border_y - 0.007)
+    }
+    decompression <- st_linestring(rbind(point_1, point_2, point_3, point_4, point_1))
+    decompression_sf <- st_buffer(x = st_polygon(list(decompression)), dist = 0.008, endCapStyle = "ROUND")  
   }
   
   if(object == "transpedicular_approach"){
@@ -829,6 +846,20 @@ anterior_implant_function <- function(object_type,
     
     object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.003, endCapStyle = "FLAT")
   }
+  
+  if(object_type == "anterior_interbody_implant"){
+    left_x <- 0.5 - (body_width*0.8)
+    right_x <- 0.5 + (body_width*0.8)
+
+    bottom_left <- c(left_x, inferior_endplate_y)
+    bottom_right <- c(right_x, inferior_endplate_y)
+    top_right <- c(right_x, superior_endplate_y)
+    top_left <- c(left_x, superior_endplate_y)
+
+    object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.003, endCapStyle = "FLAT")
+  }
+  
+  
 
   if(object_type == "screw_washer"){
     object_sf <- st_buffer(st_point(c(0.5, y_click)),dist = 0.01, endCapStyle = "ROUND")

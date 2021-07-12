@@ -134,8 +134,19 @@ decompression_df <- implant_starts_df %>%
                                         ..7 = lateral_pars_x,
                                         ..8 = superior_tp_y,
                                         ..9 = side, 
-                                        ..10 = inferior_pedicle_y), 
-                                   .f = ~ build_decompression_function(left_x = ..1, right_x = ..3, superior_y = ..2, inferior_y = ..4, top_width = ..5, object = ..6, x_lateral_pars = ..7, y_inferior_tp = ..8, side = ..9, inferior_pedicle_y = ..10)))
+                                        ..10 = inferior_pedicle_y,
+                                        ..11 = inferior_facet_superior_border_y), 
+                                   .f = ~ build_decompression_function(left_x = ..1,
+                                                                       superior_y = ..2,
+                                                                       right_x = ..3, 
+                                                                       inferior_y = ..4, 
+                                                                       top_width = ..5, 
+                                                                       object = ..6, 
+                                                                       x_lateral_pars = ..7, 
+                                                                       y_inferior_tp = ..8,
+                                                                       side = ..9, 
+                                                                       inferior_pedicle_y = ..10,
+                                                                       inferior_facet_superior_border_y = ..11)))
 
 #############-----------------------   Build Open Canal df  ----------------------###############
 
@@ -241,14 +252,14 @@ anterior_objects_df <- anterior_df %>%
 #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
 #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
 
-all_implants_constructed_df <- implants_constructed_df %>%
+all_points_all_implants_constructed_df <- implants_constructed_df %>%
   union_all(osteotomy_df) %>%
   union_all(decompression_df) %>%
   union_all(anterior_objects_df) %>% 
   union_all(all_interbody_df) %>%
   select(level, vertebral_number, everything())
 
-revision_implants_df <- all_implants_constructed_df %>%
+revision_implants_df <- all_points_all_implants_constructed_df %>%
   filter(object == "pedicle_screw" | object == "pelvic_screw" | object == "occipital_screw") %>%
   # filter(str_detect(string = object, pattern = "pedicle_screw")) %>%
   filter(approach == "posterior") %>%
@@ -256,7 +267,11 @@ revision_implants_df <- all_implants_constructed_df %>%
   distinct() %>%
   group_by(level, object, side) %>%
   filter(y == max(y)) %>%
-  ungroup()
+  ungroup() %>%
+  select(level, vertebral_number, approach, category, object, side, x, y, object_constructed)
+
+all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
+  select(level, vertebral_number, approach, category, object, side, x, y, object_constructed)
 
 rm(osteotomy_df, decompression_df, all_interbody_df)
 

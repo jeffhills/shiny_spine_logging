@@ -1256,7 +1256,8 @@ server <- function(input, output, session) {
                                     "Laminotomy (Hemilaminectomy)" = "laminotomy",
                                     "Diskectomy" = "diskectomy",
                                     "Transpedicular Decompression" = "transpedicular_approach",
-                                    "Costovertebral Decompression" = "costovertebral_approach"
+                                    "Costovertebral Decompression" = "costovertebral_approach",
+                                    "Lateral Extracavitary Approach (modified)" = "lateral_extracavitary_approach"
                                 ),
                                 checkIcon = list(
                                     yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
@@ -1559,12 +1560,12 @@ server <- function(input, output, session) {
         }
     })
     
-    observeEvent(list(all_objects_to_add_list$objects_df, left_supplement_rod_starts_list_reactive()), {
-        if(input$left_supplemental_rods_eligible == TRUE){
+    observeEvent(list(all_objects_to_add_list$objects_df, right_supplement_rod_starts_list_reactive()), {
+        if(input$right_supplemental_rods_eligible == TRUE){
             updateSliderTextInput(session = session,
-                                  inputId = "left_linked_rods",
-                                  choices = left_supplement_rod_starts_list_reactive()$all_levels,
-                                  selected = left_supplement_rod_starts_list_reactive()$linked_starts)
+                                  inputId = "right_linked_rods",
+                                  choices = right_supplement_rod_starts_list_reactive()$all_levels,
+                                  selected = right_supplement_rod_starts_list_reactive()$linked_starts)
         }
     })
     
@@ -1709,8 +1710,6 @@ server <- function(input, output, session) {
                 mutate(integrated_fixation_label = glue("{level_label}_interbody_integrated_fixation")) %>%
                 mutate(expandable_label = glue("{level_label}_interbody_expandable")) %>%
                 mutate(other_label = glue("{level_label}_interbody_other")) %>%
-                # select(-level) %>%
-                # left_join(levels_numbered_df) %>%
                 mutate(composition = map(.x = composition_label, .f = ~input[[.x]])) %>%
                 mutate(device_name = map(.x = device_name_label, .f = ~input[[.x]])) %>%
                 mutate(height = map(.x = height_label, .f = ~input[[.x]])) %>%
@@ -1747,16 +1746,13 @@ server <- function(input, output, session) {
     
     #################################################################### CONSTRUCT IMPLANTS, DECOMPRESSIONS AND PLOT     ####################################################################
     
-    
-    observeEvent(input$plot_click, {
-        output$click_info <-renderText({
-            
-            paste("X = ", round(as.double(input$plot_click$x), 3), ".  Y = ", round(as.double(input$plot_click$y), 3))
-        })
-    })
-    
-    
-    
+    # 
+    # observeEvent(input$plot_click, {
+    #     output$click_info <-renderText({
+    #         paste("X = ", round(as.double(input$plot_click$x), 3), ".  Y = ", round(as.double(input$plot_click$y), 3))
+    #     })
+    # })
+
     all_objects_to_add_list <- reactiveValues()
     
     all_objects_to_add_list$objects_df <- tibble(level = character(),
@@ -1767,13 +1763,13 @@ server <- function(input, output, session) {
                                                  side = character(),
                                                  x = double(),
                                                  y = double(),
-                                                 length = double(),
-                                                 width = double(),
-                                                 angle = double(),
-                                                 left_x = double(), 
-                                                 superior_y = double(),
-                                                 right_x = double(),
-                                                 inferior_y = double(),
+                                                 # length = double(),
+                                                 # width = double(),
+                                                 # angle = double(),
+                                                 # left_x = double(), 
+                                                 # superior_y = double(),
+                                                 # right_x = double(),
+                                                 # inferior_y = double(),
                                                  object_constructed = list())
     
     
@@ -1785,51 +1781,77 @@ server <- function(input, output, session) {
     
     ########################################### object DETAILS REACTIVE ###########################################
     
-    objects_to_add_reactive_list <- reactiveValues()
+    # objects_to_add_reactive_list <- reactiveValues()
+    # 
+    # objects_to_add_reactive_list$object_to_add <- reactive({
+    #     input$object_to_add
+    # })
     
-    objects_to_add_reactive_list$object_to_add <- reactive({
-        input$object_to_add
-    })
-    
+
     #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
     
+    # anterior_interbody_implant
+    # decompression_diskectomy_fusion
+    # diskectomy_fusion_no_interbody_device
+    # diskectomy_fusion
+    
     object_added_reactive_df <- reactive({
+            
+        object_type_filtered_df <- all_implants_constructed_df %>%
+                filter(object == input$object_to_add)
+
+        implant_df <- nearPoints(
+                df = object_type_filtered_df,
+                coordinfo = input$plot_click,
+                xvar = "x",
+                yvar = "y",
+                maxpoints = 1,
+                threshold = 25
+            )
+
         
         if(input$object_to_add == "decompression_diskectomy_fusion" | input$object_to_add == "diskectomy_fusion"){
-            object_type_filtered_df <- all_implants_constructed_df %>%
-                filter(object == input$object_to_add) 
+            anterior_interbody_df <- implant_df %>%
+                select(level, vertebral_number, side, object) %>%
+                mutate(object = "anterior_interbody_implant") %>%
+                left_join(all_implants_constructed_df)
             
-            fusion_df <- nearPoints(
-                df = object_type_filtered_df,
-                coordinfo = input$plot_click,
-                xvar = "x",
-                yvar = "y",
-                maxpoints = 1,
-                threshold = 25
-            ) 
-            
-            implant_df <- fusion_df %>%
-                union_all(fusion_df %>%
-                              mutate(object = "anterior_interbody_implant", category = "anterior_interbody"))
-            
-        }else{
-            object_type_filtered_df <- all_implants_constructed_df %>%
-                filter(object == input$object_to_add) 
-            
-            implant_df <- nearPoints(
-                df = object_type_filtered_df,
-                coordinfo = input$plot_click,
-                xvar = "x",
-                yvar = "y",
-                maxpoints = 1,
-                threshold = 25
-            ) 
+            implant_df <- implant_df %>%
+                union_all(anterior_interbody_df)
         }
-        
+        #     
+        #     fusion_df <- nearPoints(
+        #         df = object_type_filtered_df,
+        #         coordinfo = input$plot_click,
+        #         xvar = "x",
+        #         yvar = "y",
+        #         maxpoints = 1,
+        #         threshold = 25
+        #     ) 
+        #     
+        #     implant_df <- fusion_df %>%
+        #         union_all(fusion_df %>%
+        #                       mutate(object = "anterior_interbody_implant", category = "anterior_interbody"))
+        #     
+        # }else{
+        #     object_type_filtered_df <- all_implants_constructed_df %>%
+        #         filter(object == input$object_to_add) 
+        #     
+        #     implant_df <- nearPoints(
+        #         df = object_type_filtered_df,
+        #         coordinfo = input$plot_click,
+        #         xvar = "x",
+        #         yvar = "y",
+        #         maxpoints = 1,
+        #         threshold = 25
+        #     ) 
+        # }
+        # 
         implant_df
     })
     
     #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
+
     observeEvent(input$plot_click, {
         
         all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
@@ -1850,7 +1872,6 @@ server <- function(input, output, session) {
                     object == "grade_6" ~ 7)
                 ) %>%
                 replace_na(list(object_rank = 1)) %>%
-                # select(level, vertebral_number, approach, category, object, side, object_class, object_rank) %>%
                 group_by(level, object_class) %>%
                 filter(object_rank == max(object_rank)) %>%
                 ungroup() %>%
@@ -1862,8 +1883,15 @@ server <- function(input, output, session) {
     observeEvent(input$plot_double_click, {
         
         object_type_filtered_df <- all_implants_constructed_df %>%
-            filter(object == input$object_to_add) 
+            filter(object == input$object_to_add)
         
+        # implant_to_remove_df <- nearPoints(
+        #     df = all_implants_constructed_df,
+        #     coordinfo = input$plot_double_click,
+        #     xvar = "x",
+        #     yvar = "y",
+        #     maxpoints = 2,
+        #     threshold = 75
         implant_to_remove_df <- nearPoints(
             df = object_type_filtered_df,
             coordinfo = input$plot_double_click,
@@ -1883,19 +1911,653 @@ server <- function(input, output, session) {
     
     
 
-    ################# ############# CONSTRUCT REACTIVE IMPLANTS  #######################  #######################
-    ################# ############# CONSTRUCT REACTIVE IMPLANTS  #######################  #######################
-    ################# ############# CONSTRUCT REACTIVE IMPLANTS  #######################  #######################
-    ################# ############# CONSTRUCT REACTIVE IMPLANTS  #######################  #######################
+    ################# ------------  ############# CONSTRUCT REACTIVE IMPLANTS    ################# ------------  ############# 
+    ################# ------------  ############# CONSTRUCT REACTIVE IMPLANTS    ################# ------------  ############# 
+    ################# ------------  ############# CONSTRUCT REACTIVE IMPLANTS    ################# ------------  ############# 
+    ################# ------------  ############# CONSTRUCT REACTIVE IMPLANTS    ################# ------------  ############# 
     
 
     
     
-    
+    ############################################################ MAKE THE PLOT ###############################################################
+    ############################################################ MAKE THE PLOT ###############################################################
+    ############################################################ MAKE THE PLOT ###############################################################
     ############################################################ MAKE THE PLOT ###############################################################
     ############################################################ MAKE THE PLOT ###############################################################
     ############################################################ MAKE THE PLOT ###############################################################
     
+    
+    ######### ~~~~~~~~~~~~~~  ############# POSTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
+    ######### ~~~~~~~~~~~~~~  ############# POSTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
+    
+    geoms_list_posterior <- reactiveValues()
+    # 
+    ## SCREWS
+    observeEvent(input$open_canal, {
+        if(length(input$open_canal) > 0){
+            open_df <- open_canal_df %>%
+                filter(level %in% input$open_canal)
+            
+            geoms_list_posterior$open_canal_sf <- ggpattern::geom_sf_pattern(
+                data =  st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                pattern_orientation = "radial",
+                pattern = "gradient",
+                fill = "grey50",
+                pattern_fill2 = NA,
+                colour = NA)
+        }
+    }
+    )
+    
+    observeEvent(list(input$left_revision_implants, input$primary_revision), {
+        if((length(input$left_revision_implants) > 1 && (input$primary_revision == "Revision"))){
+            left_revision_implants_constructed_df <- tibble(level = input$left_revision_implants) %>%
+                left_join(revision_implants_df %>% filter(x < 0.5))
+            
+            left_revision_rod_matrix <- left_revision_implants_constructed_df %>%
+                select(x, y) %>%
+                arrange(rev(y)) %>%
+                distinct() %>%
+                as.matrix()
+            left_revision_implants_sf <- st_multipolygon(left_revision_implants_constructed_df$object_constructed)
+            left_revision_rod_sf <- st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND")
+            
+            geoms_list_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_geometrycollection(x = list(left_revision_implants_sf, left_revision_rod_sf)), fill = "black") 
+        }
+    })
+
+    
+    observeEvent(list(input$right_revision_implants, input$primary_revision), {
+        if((length(input$right_revision_implants) > 1 && (input$primary_revision == "Revision"))){
+            right_revision_implants_constructed_df <- tibble(level = input$right_revision_implants) %>%
+                left_join(revision_implants_df %>% filter(x > 0.5))
+            
+            right_revision_rod_matrix <- right_revision_implants_constructed_df %>%
+                select(x, y) %>%
+                arrange(rev(y)) %>%
+                distinct() %>%
+                as.matrix()
+            right_revision_implants_sf <- st_multipolygon(right_revision_implants_constructed_df$object_constructed)
+            right_revision_rod_sf <- st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND")
+            
+            geoms_list_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_geometrycollection(x = list(right_revision_implants_sf, right_revision_rod_sf)), fill = "black") 
+        }
+    })
+
+    observeEvent(list(input$plot_click,
+                      input$plot_double_click, 
+                      input$reset_all,
+                      all_objects_to_add_list$objects_df), {
+        all_posterior_objects_df <- all_objects_to_add_list$objects_df %>%
+            filter(approach == "posterior")
+        ## cement_augmentation
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "cement_augmentation"))){
+            geoms_list_posterior$cement_augmentation_sf_geom <- geom_sf_pattern(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "cement_augmentation")))$object_constructed),
+                                                                      pattern = "plasma",
+                                                                      pattern_alpha = 0.5,
+                                                                      alpha = 0.3,
+                                                                      color = "grey96")
+        }else{
+            geoms_list_posterior$cement_augmentation_sf_geom <- NULL
+        }
+        
+        
+        
+        ## OSTEOTOMIES
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_1"))){
+            geoms_list_posterior$osteotomy_1_sf <- geom_sf(data = st_geometrycollection((all_posterior_objects_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
+        }else{
+            geoms_list_posterior$osteotomy_1_sf <- NULL
+        }
+        
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "complete_facetectomy"))){
+            geoms_list_posterior$osteotomy_facetectomy_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_multipolygon((all_posterior_objects_df %>% filter(object == "complete_facetectomy"))$object_constructed),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.5,
+                pattern_angle = 10,
+                pattern_spacing = 0.01,
+                pattern_density = 0.15,
+            )
+        }else{
+            geoms_list_posterior$osteotomy_facetectomy_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_2"))){
+            geoms_list_posterior$osteotomy_2_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_2"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.5,
+                pattern_angle = 10,
+                pattern_spacing = 0.01,
+                pattern_density = 0.15,
+            )
+        }else{
+            geoms_list_posterior$osteotomy_2_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_3"))){
+            geoms_list_posterior$osteotomy_3_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_3"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.6,
+                pattern_angle = 10,
+                pattern_spacing = 0.03,
+                pattern_density = 0.1
+            )
+        }else{
+            geoms_list_posterior$osteotomy_3_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_4"))){
+            geoms_list_posterior$osteotomy_4_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_4"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.6,
+                pattern_angle = 10,
+                pattern_spacing = 0.02,
+                pattern_density = 0.02
+            )
+        }else{
+            geoms_list_posterior$osteotomy_4_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_5"))){
+            geoms_list_posterior$osteotomy_5_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_5"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                pattern = "crosshatch",
+                pattern_colour = "red",
+                alpha = 0.6,
+                pattern_angle = 10,
+                pattern_spacing = 0.02,
+                pattern_density = 0.02
+            )
+        }else{
+            geoms_list_posterior$osteotomy_5_sf_geom <- NULL
+        }
+        
+        
+        ## Decompresions ##
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "laminectomy"))){
+            geoms_list_posterior$laminectomy_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.7,
+                pattern_spacing = 0.01
+            )
+        }else{
+            geoms_list_posterior$laminectomy_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "sublaminar_decompression"))){
+            geoms_list_posterior$sublaminar_decompression_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_multipolygon((all_posterior_objects_df %>% filter(object == "sublaminar_decompression"))$object_constructed),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.7,
+                pattern_spacing = 0.01
+            )
+        }else{
+            geoms_list_posterior$sublaminar_decompression_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "laminotomy"))){
+            geoms_list_posterior$laminotomy_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_multipolygon((all_posterior_objects_df %>% filter(object == "laminotomy"))$object_constructed),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.7,
+                pattern_spacing = 0.01
+            )
+        }else{
+            geoms_list_posterior$laminotomy_sf_geom <- NULL
+        }
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "transpedicular_approach"))){
+            geoms_list_posterior$transpedicular_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_multipolygon((all_posterior_objects_df %>% filter(object == "transpedicular_approach"))$object_constructed),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.7,
+                pattern_spacing = 0.01
+            )
+        }else{
+            geoms_list_posterior$transpedicular_sf_geom <- NULL
+        }
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "costo"))){
+            geoms_list_posterior$costovertebral_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_multipolygon((all_posterior_objects_df %>% filter(object == "costovertebral_approach" | object == "costotransversectomy"))$object_constructed),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.7,
+                pattern_spacing = 0.01
+            )
+        }else{
+            geoms_list_posterior$costovertebral_sf_geom <- NULL
+        }
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "lateral_extracavitary"))){
+            geoms_list_posterior$lateral_extracavitary_approach_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_multipolygon((all_posterior_objects_df %>% filter(object == "lateral_extracavitary_approach"))$object_constructed),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.7,
+                pattern_spacing = 0.01
+            )
+        }else{
+            geoms_list_posterior$lateral_extracavitary_approach_sf_geom <- NULL
+        }
+        
+        if(any(all_posterior_objects_df$object == "diskectomy")){
+            geoms_list_posterior$diskectomy_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_multipolygon((all_posterior_objects_df %>% filter(object == "diskectomy"))$object_constructed),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.7,
+                pattern_spacing = 0.01
+            )
+        }else{
+            geoms_list_posterior$diskectomy_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "laminoplasty"))){
+            geoms_list_posterior$laminoplasty_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(object == "laminoplasty"))$object_constructed), fill  = "blue") 
+            geoms_list_posterior$laminoplasty_cut_df_sf_geom <- geom_line(data = tibble(x = 0.515, y =  c(max((all_posterior_objects_df %>% filter(object == "laminoplasty"))$superior_lamina_y), min((all_posterior_objects_df %>% filter(object == "laminoplasty"))$inferior_lamina_y) - 0.007)), 
+                                                                aes(x = x, y = y), linetype = "dotted", size = 2, color = "red") 
+        }else{
+            geoms_list_posterior$laminoplasty_sf_geom <- NULL
+            geoms_list_posterior$laminoplasty_cut_df_sf_geom <- NULL
+        }
+        
+        
+        ## INTERBODY
+        if(any(all_posterior_objects_df$object == "tlif") || any(all_posterior_objects_df$object == "llif") ||any(all_posterior_objects_df$object == "plif")){
+            geoms_list_posterior$interbody_device_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(object == "tlif" | object == "plif" | object == "llif"))$object_constructed), fill = "red")
+        }else{
+            geoms_list_posterior$interbody_device_sf_geom <- NULL
+        }
+        
+        if(any(all_posterior_objects_df$object == "no_implant_interbody_fusion")){
+            geoms_list_posterior$no_implant_interbody_fusion_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(object == "no_implant_interbody_fusion"))$object_constructed), fill = "#E66565")
+        }else{
+            geoms_list_posterior$no_implant_interbody_fusion_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "intervertebral_cage"))){
+            geoms_list_posterior$intervertebral_cage_sf_geom <-  ggpattern::geom_sf_pattern(
+                data =  st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "intervertebral_cage"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                pattern = "crosshatch",
+                pattern_fill = "grey90",
+                fill = "#7899F5",
+                alpha = 0.3,
+                pattern_spacing = 0.01,
+                pattern_density = 0.7
+            )
+        }else{
+            geoms_list_posterior$intervertebral_cage_sf_geom <- NULL
+        }
+        
+        ## SCREWS
+        if(any(str_detect((all_posterior_objects_df$object), pattern = "screw"))){
+            if(input$plot_with_patterns_true == TRUE){
+                geoms_list_posterior$screws_geom <- ggpattern::geom_sf_pattern(
+                    data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed),
+                    pattern = "stripe",
+                    pattern_fill = "blue",
+                    pattern_fill2 = "#445566",
+                    alpha = 0.8,
+                    pattern_colour = "blue",
+                    pattern_density = 0.02,
+                    pattern_spacing = 0.01,
+                    pattern_angle = 80
+                )
+            }else{
+                geoms_list_posterior$screws_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed), fill = "blue")
+            }
+            
+        }else{
+            geoms_list_posterior$screws_geom <- NULL
+        }
+        
+        ## HOOKS
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "hook"))){
+            hook_df <- all_posterior_objects_df %>%
+                filter(str_detect(string = object, pattern = "hook"))
+            geoms_list_posterior$hooks_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_multipolygon(hook_df$object_constructed),
+                pattern = "gradient",
+                pattern_fill = "blue",
+                pattern_fill2 = "#445566",
+                alpha = 0.8
+            )
+        }else{
+            geoms_list_posterior$hooks_sf_geom <- NULL
+        }
+        
+        ## SUBLAMINAR BANDS
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "wire"))){
+            geoms_list_posterior$sublaminar_wires_sf_geom <- ggpattern::geom_sf_pattern(
+                data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "wire")))$object_constructed),
+                pattern = "gradient",
+                pattern_fill = "red",
+                pattern_fill2 = "#445566",
+                alpha = 0.8
+            )
+        }else{
+            geoms_list_posterior$sublaminar_wires_sf_geom <- NULL
+        }
+        
+        ## Tethers
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "tether"))){
+            geoms_list_posterior$tethers_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "tether")))$object_constructed))
+        }else{
+            geoms_list_posterior$tethers_sf_geom <- NULL
+        }
+    }
+    )
+    
+    rods_list <- reactiveValues()
+
+        observeEvent(list(input$plot_click, 
+                      input$plot_double_click,
+                      input$reset_all,
+                      left_rod_implants_df_reactive(),
+                      input$add_left_accessory_rod, 
+                      input$left_accessory_rod,
+                      input$add_left_satellite_rod,
+                      input$left_satellite_rod,
+                      input$add_left_intercalary_rod,
+                      input$left_intercalary_rod,
+                      input$left_intercalary_junction,
+                      input$add_left_linked_rods,
+                      input$left_linked_rods),{
+                          ##########RODS ############
+                          ############# Left ROD #################
+                          left_rods_connectors_list <- list()
+                          
+                          if(input$add_left_accessory_rod == TRUE){
+                              accessory_vector <- input$left_accessory_rod
+                          }else{
+                              accessory_vector <- c("a", "b")
+                          }
+                          if(input$add_left_satellite_rod == TRUE){
+                              satellite_vector <- input$left_satellite_rod
+                          }else{
+                              satellite_vector <- c("a", "b")
+                          }
+                          if(input$add_left_intercalary_rod == TRUE){
+                              intercalary_vector <- input$left_intercalary_rod
+                              junction <- input$left_intercalary_junction
+                          }else{
+                              intercalary_vector <- c("a", "b")
+                              junction <- NULL
+                          }
+                          if(input$add_left_linked_rods == TRUE){
+                              linked_vector <- input$left_linked_rods
+                          }else{
+                              linked_vector <- c("a", "b")
+                          }
+                          
+                          left_rods_connectors_list <- build_unilateral_rods_list_function(accessory_rod_vector = accessory_vector,
+                                                                                           satellite_rods_vector = satellite_vector,
+                                                                                           intercalary_rods_vector = intercalary_vector,
+                                                                                           intercalary_junction = junction,
+                                                                                           linked_rods_vector = linked_vector,
+                                                                                           unilateral_full_implant_df = left_rod_implants_df_reactive())
+                          if(length(left_rods_connectors_list$rod_list) > 0){
+                              rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$rod_list), alpha = 0.75)
+                          }else{
+                              rods_list$left_rod_list_sf_geom <- NULL
+                          }
+                          
+                          if(length(left_rods_connectors_list$connector_list) > 0){
+                              rods_list$left_connector_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$connector_list), alpha = 0.75)
+                          }else{
+                              rods_list$left_connector_list_sf_geom <- NULL
+                          }
+                          if(nrow(left_rod_implants_df_reactive()) == 0){
+                              rods_list$left_connector_list_sf_geom <- NULL
+                              rods_list$left_rod_list_sf_geom <- NULL
+                              }
+                      })
+    
+    observeEvent(list(input$plot_click, 
+                      input$plot_double_click,
+                      input$reset_all,
+                      right_rod_implants_df_reactive(),
+                      input$add_right_accessory_rod, 
+                      input$right_accessory_rod,
+                      input$add_right_satellite_rod,
+                      input$right_satellite_rod,
+                      input$add_right_intercalary_rod,
+                      input$right_intercalary_rod,
+                      input$right_intercalary_junction,
+                      input$add_right_linked_rods,
+                      input$right_linked_rods),{
+        ############# RIGHT ROD #################
+        right_rods_connectors_list <- list()
+        if(input$add_right_accessory_rod == TRUE){
+            accessory_vector <- input$right_accessory_rod
+        }else{
+            accessory_vector <- c("a", "b")
+        }
+        if(input$add_right_satellite_rod == TRUE){
+            satellite_vector <- input$right_satellite_rod
+        }else{
+            satellite_vector <- c("a", "b")
+        }
+        if(input$add_right_intercalary_rod == TRUE){
+            intercalary_vector <- input$right_intercalary_rod
+            junction <- input$right_intercalary_junction
+        }else{
+            intercalary_vector <- c("a", "b")
+            junction <- NULL
+        }
+        if(input$add_right_linked_rods == TRUE){
+            linked_vector <- input$right_linked_rods
+        }else{
+            linked_vector <- c("a", "b")
+        }
+        
+        right_rods_connectors_list <- build_unilateral_rods_list_function(accessory_rod_vector = accessory_vector,
+                                                                          satellite_rods_vector = satellite_vector,
+                                                                          intercalary_rods_vector = intercalary_vector,
+                                                                          intercalary_junction = junction,
+                                                                          linked_rods_vector = linked_vector,
+                                                                          unilateral_full_implant_df = right_rod_implants_df_reactive())
+        if(length(right_rods_connectors_list$rod_list) > 0){
+            rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.75)
+        }else{
+            rods_list$right_rod_list_sf_geom <- NULL
+        }
+        
+        if(length(right_rods_connectors_list$connector_list) > 0){
+            rods_list$right_connector_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$connector_list), alpha = 0.75)
+        }else{
+            rods_list$right_connector_list_sf_geom <- NULL
+        }
+        
+        if(nrow(right_rod_implants_df_reactive()) == 0){
+            rods_list$right_rod_list_sf_geom <- NULL
+            rods_list$right_connector_list_sf_geom <- NULL
+        }
+    })
+    
+
+    observeEvent(input$reset_all,{
+        rods_list$left_connector_list_sf_geom <- NULL
+        rods_list$left_rod_list_sf_geom <- NULL
+        rods_list$right_connector_list_sf_geom <- NULL
+        rods_list$right_rod_list_sf_geom <- NULL
+    })
+
+    
+    ######### ~~~~~~~~~~~~~~  ############# ANTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
+    ######### ~~~~~~~~~~~~~~  ############# ANTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
+    
+    geoms_list_anterior <- reactiveValues()
+    
+    observeEvent(list(input$plot_click,
+                      input$plot_double_click,
+                      input$reset_all), {
+        all_anterior_objects_df <- all_objects_to_add_list$objects_df %>%
+            filter(approach == "anterior")
+        
+        if(any(str_detect(string = all_anterior_objects_df$object, pattern = "anterior_disc_arthroplasty"))){
+            anterior_disc_arthroplasty_df <- all_anterior_objects_df %>%
+                filter(object == "anterior_disc_arthroplasty") %>%
+                remove_empty() %>%
+                unnest()
+            
+            geoms_list_anterior$anterior_disc_arthroplasty_sf_geom <-  geom_sf(data = anterior_disc_arthroplasty_df,
+                                                                               aes(geometry = object_constructed, fill = color))
+        }else{
+            geoms_list_anterior$anterior_disc_arthroplasty_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(string = all_anterior_objects_df$object, pattern = "corpectomy"))){
+            geoms_list_anterior$corpectomy_sf_geom <- ggpattern::geom_sf_pattern(
+                data =  st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "corpectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                pattern = "stripe",
+                pattern_colour = "red",
+                alpha = 0.6,
+                pattern_angle = 90,
+                pattern_spacing = 0.01,
+                pattern_density = 0.1
+            )
+        }else{
+            geoms_list_anterior$corpectomy_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(all_anterior_objects_df$object, pattern = "corpectomy_cage"))){
+            geoms_list_anterior$corpectomy_cage_sf_geom <-  ggpattern::geom_sf_pattern(
+                data =  st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "corpectomy_cage"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                pattern = "crosshatch",
+                pattern_fill = "grey90",
+                fill = "#7899F5",
+                alpha = 0.3,
+                pattern_spacing = 0.01,
+                pattern_density = 0.7
+            )
+        }else{
+            geoms_list_anterior$corpectomy_cage_sf_geom <- NULL
+        }
+        
+        if(nrow(all_anterior_objects_df %>% filter(object == "diskectomy_fusion")) > 0){
+            geoms_list_anterior$diskectomy_fusion_sf_geom <-ggpattern::geom_sf_pattern(
+                data =  st_multipolygon((all_anterior_objects_df %>% filter(object == "diskectomy_fusion"))$object_constructed),
+                pattern = "crosshatch",
+                pattern_fill = "grey90",
+                fill = "#7899F5",
+                alpha = 0.3,
+                pattern_spacing = 0.02,
+                pattern_density = 0.7
+            ) 
+        }else{
+            geoms_list_anterior$diskectomy_fusion_sf_geom <- NULL       
+        }
+        
+        if(nrow(all_anterior_objects_df %>% filter(object == "decompression_diskectomy_fusion")) > 0){
+            geoms_list_anterior$decompression_diskectomy_fusion_sf_geom <- ggpattern::geom_sf_pattern(
+                data =  st_multipolygon((all_anterior_objects_df %>% filter(object == "decompression_diskectomy_fusion"))$object_constructed),
+                pattern = "crosshatch",
+                pattern_fill = "grey90",
+                fill = "#7899F5",
+                alpha = 0.3,
+                pattern_spacing = 0.02,
+                pattern_density = 0.7
+            )
+        }else{
+            geoms_list_anterior$decompression_diskectomy_fusion_sf_geom <- NULL 
+        }
+        
+        if(any(str_detect(string = all_anterior_objects_df$object, pattern = "diskectomy_fusion"))){
+            
+            anterior_fusions_selected_df <- all_anterior_objects_df %>%
+                filter(object == "diskectomy_fusion_no_interbody_device" | object == "diskectomy_fusion" | object == "decompression_diskectomy_fusion") %>%
+                distinct() %>%
+                select(-object_constructed) %>%
+                mutate(object = "diskectomy_fusion_no_interbody_device") %>%
+                left_join(all_implants_constructed_df) %>%
+                distinct()
+            
+            geoms_list_anterior$diskectomy_fusion_no_interbody_device_sf_geom <-ggpattern::geom_sf_pattern(
+                data =  st_multipolygon(anterior_fusions_selected_df$object_constructed),
+                pattern = "circle",
+                pattern_fill = "#F5A105",
+                color = "#F7B28F",
+                fill = "#A89E9E",
+                alpha = 0.6,
+                pattern_spacing = 0.005,
+                pattern_density = 0.7)
+        }else{
+            geoms_list_anterior$diskectomy_fusion_no_interbody_device_sf_geom <- NULL
+        }
+        
+        #### interbody implant
+        if(any(str_detect(string = all_anterior_objects_df$object, pattern = "anterior_interbody_implant"))){
+            geoms_list_anterior$anterior_interbody_sf_geom <- ggpattern::geom_sf_pattern(
+                data =  st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_interbody_implant"))$object_constructed),
+                pattern = "crosshatch",
+                pattern_fill = "grey90",
+                fill = "#7899F5",
+                alpha = 0.3,
+                pattern_spacing = 0.02,
+                pattern_density = 0.7
+            ) 
+        }else{
+            geoms_list_anterior$anterior_interbody_sf_geom <- NULL
+        }
+        
+        #### screw_washer
+        if(any(str_detect(string = all_anterior_objects_df$object, pattern = "screw_washer"))){
+            washer_df <- all_anterior_objects_df %>%
+                filter(object == "screw_washer") %>%
+                mutate(object_constructed = pmap(list(..1 = y), .f = ~ st_buffer(x = st_point(c(0.5, ..1)), dist = 0.005)))
+            
+            geoms_list_anterior$screw_washer_sf_geom <- geom_sf(data = st_multipolygon((all_anterior_objects_df %>% filter(object == "screw_washer"))$object_constructed), fill = "#3B86CC")
+            geoms_list_anterior$screw_washer_screw_sf_geom <- geom_sf(data = st_multipolygon(washer_df$object_constructed), fill = "black")
+            
+        }else{
+            geoms_list_anterior$screw_washer_sf_geom <- NULL
+            geoms_list_anterior$screw_washer_screw_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(string = all_anterior_objects_df$object, pattern = "anterior_buttress_plate"))){
+            geoms_list_anterior$anterior_buttress_plate_sf_geom <-ggpattern::geom_sf_pattern(
+                data =  st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_buttress_plate"))$object_constructed),
+                pattern = "circle",
+                pattern_fill = "grey90",
+                fill = "#7899F5",
+                pattern_spacing = 0.01,
+                pattern_density = 0.7
+            )
+        }else{
+            geoms_list_anterior$anterior_buttress_plate_sf_geom <- NULL
+        }
+        
+        if(any(str_detect(string = all_anterior_objects_df$object, pattern = "anterior_plate"))){
+            geoms_list_anterior$anterior_plate_sf_geom <- ggpattern::geom_sf_pattern(
+                data =  st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_plate"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                pattern = "circle",
+                pattern_fill = "grey60",
+                fill = "#3B86CC",
+                pattern_spacing = 0.01,
+                pattern_density = 0.7
+            )
+        }else{
+            geoms_list_anterior$anterior_plate_sf_geom <- NULL
+        }
+    })
+    
+    
+    
+    
+    ######### ~~~~~~~~~~~~~~  ############# MAKE REACTIVE PLOT    ######### ~~~~~~~~~~~~~~  ############# 
+    ######### ~~~~~~~~~~~~~~  ############# MAKE REACTIVE PLOT    ######### ~~~~~~~~~~~~~~  ############# 
     # output$spine_plan
     spine_plan_plot <- reactive({
         ## Create df for plan ##
@@ -1915,81 +2577,82 @@ server <- function(input, output, session) {
 
         if(input$spine_approach == "Anterior"){
             ## Anterior Objects
-            all_anterior_objects_df <- all_objects_to_add_list$objects_df
-
-            if(any(str_detect(string = all_anterior_objects_df$object, pattern = "anterior_disc_arthroplasty"))){
-
-                anterior_disc_arthroplasty_df <- all_anterior_objects_df %>%
-                    filter(object == "anterior_disc_arthroplasty") %>%
-                    remove_empty() %>%
-                    unnest()
-
-            }else{
-                # anterior_disc_arthroplasty_sf <- NULL
-                anterior_disc_arthroplasty_df <- tibble(object_constructed = c(), color = c())
-            }
-
-            if(any(str_detect(string = all_anterior_objects_df$object, pattern = "anterior_buttress_plate"))){
-                anterior_buttress_plate_sf <- st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_buttress_plate"))$object_constructed)
-            }else{
-                anterior_buttress_plate_sf <- NULL
-            }
-
-            if(any(str_detect(string = all_anterior_objects_df$object, pattern = "anterior_plate"))){
-                anterior_plate_sf <- st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_plate"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
-            }else{
-                anterior_plate_sf <- NULL
-            }
-
-            if(any(str_detect(string = all_anterior_objects_df$object, pattern = "corpectomy"))){
-                corpectomy_sf <- st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "corpectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
-            }else{
-                corpectomy_sf <- NULL
-            }
-
-            if(any(str_detect(all_anterior_objects_df$object, pattern = "corpectomy_cage"))){
-                corpectomy_cage_sf <- st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "corpectomy_cage"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
-
-            }else{
-                corpectomy_cage_sf <- NULL
-            }
-
-            if(nrow(all_anterior_objects_df %>% filter(object == "diskectomy_fusion")) > 0){
-                diskectomy_fusion_sf <- st_multipolygon((all_anterior_objects_df %>% filter(object == "diskectomy_fusion"))$object_constructed)
-            }else{
-                diskectomy_fusion_sf <- NULL
-            }
-            if(nrow(all_anterior_objects_df %>% filter(object == "decompression_diskectomy_fusion")) > 0){
-                decompression_diskectomy_fusion_sf <- st_multipolygon((all_anterior_objects_df %>% filter(object == "decompression_diskectomy_fusion"))$object_constructed)
-            }else{
-                decompression_diskectomy_fusion_sf <- NULL
-            }
-
-            if(any(str_detect(string = all_anterior_objects_df$object, pattern = "diskectomy_fusion"))){
-
-                anterior_fusions_selected_df <- all_anterior_objects_df %>%
-                    filter(object == "diskectomy_fusion_no_interbody_device" | object == "diskectomy_fusion" | object == "decompression_diskectomy_fusion") %>%
-                    distinct() %>%
-                    select(-object_constructed) %>%
-                    mutate(object = "diskectomy_fusion_no_interbody_device") %>%
-                    left_join(anterior_objects_df) %>%
-                    distinct()
-
-                diskectomy_fusion_no_interbody_device_sf <- st_multipolygon(anterior_fusions_selected_df$object_constructed)
-            }else{
-                diskectomy_fusion_no_interbody_device_sf <- NULL
-            }
-
-            if(any(str_detect(string = all_anterior_objects_df$object, pattern = "screw_washer"))){
-                screw_washer_sf <- st_multipolygon((all_anterior_objects_df %>% filter(object == "screw_washer"))$object_constructed)
-                washer_df <- all_anterior_objects_df %>%
-                    filter(object == "screw_washer") %>%
-                    mutate(object_constructed = pmap(list(..1 = y), .f = ~ st_buffer(x = st_point(c(0.5, ..1)), dist = 0.005)))
-                screw_washer_screw_sf <- st_multipolygon(washer_df$object_constructed)
-            }else{
-                screw_washer_sf <- NULL
-                screw_washer_screw_sf <- NULL
-            }
+            # all_anterior_objects_df <- all_objects_to_add_list$objects_df
+            # 
+            # if(any(str_detect(string = all_anterior_objects_df$object, pattern = "anterior_disc_arthroplasty"))){
+            # 
+            #     anterior_disc_arthroplasty_df <- all_anterior_objects_df %>%
+            #         filter(object == "anterior_disc_arthroplasty") %>%
+            #         remove_empty() %>%
+            #         unnest()
+            # 
+            # }else{
+            #     # anterior_disc_arthroplasty_sf <- NULL
+            #     anterior_disc_arthroplasty_df <- tibble(object_constructed = c(), color = c())
+            # }
+            # 
+            # if(any(str_detect(string = all_anterior_objects_df$object, pattern = "anterior_buttress_plate"))){
+            #     anterior_buttress_plate_sf <- st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_buttress_plate"))$object_constructed)
+            # }else{
+            #     anterior_buttress_plate_sf <- NULL
+            # }
+            # 
+            # if(any(str_detect(string = all_anterior_objects_df$object, pattern = "anterior_plate"))){
+            #     anterior_plate_sf <- st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_plate"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
+            # }else{
+            #     anterior_plate_sf <- NULL
+            # }
+            # 
+            # if(any(str_detect(string = all_anterior_objects_df$object, pattern = "corpectomy"))){
+            #     corpectomy_sf <- st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "corpectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
+            # }else{
+            #     corpectomy_sf <- NULL
+            # }
+            # 
+            # if(any(str_detect(all_anterior_objects_df$object, pattern = "corpectomy_cage"))){
+            #     corpectomy_cage_sf <- st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "corpectomy_cage"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
+            # 
+            # }else{
+            #     corpectomy_cage_sf <- NULL
+            # }
+            # 
+            # if(nrow(all_anterior_objects_df %>% filter(object == "diskectomy_fusion")) > 0){
+            #     diskectomy_fusion_sf <- st_multipolygon((all_anterior_objects_df %>% filter(object == "diskectomy_fusion"))$object_constructed)
+            # }else{
+            #     diskectomy_fusion_sf <- NULL
+            # }
+            # if(nrow(all_anterior_objects_df %>% filter(object == "decompression_diskectomy_fusion")) > 0){
+            #     decompression_diskectomy_fusion_sf <- st_multipolygon((all_anterior_objects_df %>% filter(object == "decompression_diskectomy_fusion"))$object_constructed)
+            # }else{
+            #     decompression_diskectomy_fusion_sf <- NULL
+            # }
+            # 
+            # if(any(str_detect(string = all_anterior_objects_df$object, pattern = "diskectomy_fusion"))){
+            # 
+            #     anterior_fusions_selected_df <- all_anterior_objects_df %>%
+            #         filter(object == "diskectomy_fusion_no_interbody_device" | object == "diskectomy_fusion" | object == "decompression_diskectomy_fusion") %>%
+            #         distinct() %>%
+            #         select(-object_constructed) %>%
+            #         mutate(object = "diskectomy_fusion_no_interbody_device") %>%
+            #         left_join(anterior_objects_df) %>%
+            #         distinct()
+            # 
+            #     diskectomy_fusion_no_interbody_device_sf <- st_multipolygon(anterior_fusions_selected_df$object_constructed)
+            # }else{
+            #     diskectomy_fusion_no_interbody_device_sf <- NULL
+            # }
+            # 
+            # if(any(str_detect(string = all_anterior_objects_df$object, pattern = "screw_washer"))){
+            #     screw_washer_sf <- st_multipolygon((all_anterior_objects_df %>% filter(object == "screw_washer"))$object_constructed)
+            #     washer_df <- all_anterior_objects_df %>%
+            #         filter(object == "screw_washer") %>%
+            #         mutate(object_constructed = pmap(list(..1 = y), .f = ~ st_buffer(x = st_point(c(0.5, ..1)), dist = 0.005)))
+            #     screw_washer_screw_sf <- st_multipolygon(washer_df$object_constructed)
+            # }else{
+            #     screw_washer_sf <- NULL
+            #     screw_washer_screw_sf <- NULL
+            # }
+            
 
             ggdraw() +
                 draw_image(
@@ -2015,71 +2678,73 @@ server <- function(input, output, session) {
                     size = input$label_text_size,
                     fontface = "bold"
                 ) +
-                ggpattern::geom_sf_pattern(
-                    data =  diskectomy_fusion_no_interbody_device_sf,
-                    pattern = "circle",
-                    pattern_fill = "#F5A105",
-                    color = "#F7B28F",
-                    fill = "#A89E9E",
-                    alpha = 0.6,
-                    pattern_spacing = 0.005,
-                    pattern_density = 0.7) +
-                geom_sf(data = anterior_disc_arthroplasty_df,
-                        aes(geometry = object_constructed, fill = color)) +
-                ggpattern::geom_sf_pattern(
-                    data =  decompression_diskectomy_fusion_sf,
-                    pattern = "crosshatch",
-                    pattern_fill = "grey90",
-                    fill = "#7899F5",
-                    alpha = 0.3,
-                    pattern_spacing = 0.02,
-                    pattern_density = 0.7
-                ) +
-                ggpattern::geom_sf_pattern(
-                    data =  diskectomy_fusion_sf,
-                    pattern = "crosshatch",
-                    pattern_fill = "grey90",
-                    fill = "#7899F5",
-                    alpha = 0.3,
-                    pattern_spacing = 0.02,
-                    pattern_density = 0.7
-                ) +
-                ggpattern::geom_sf_pattern(
-                    data =  corpectomy_sf,
-                    pattern = "stripe",
-                    pattern_colour = "red",
-                    alpha = 0.6,
-                    pattern_angle = 90,
-                    pattern_spacing = 0.01,
-                    pattern_density = 0.1
-                ) +
-                ggpattern::geom_sf_pattern(
-                    data =  corpectomy_cage_sf,
-                    pattern = "crosshatch",
-                    pattern_fill = "grey90",
-                    fill = "#7899F5",
-                    alpha = 0.3,
-                    pattern_spacing = 0.01,
-                    pattern_density = 0.7
-                ) +
-                ggpattern::geom_sf_pattern(
-                    data =  anterior_buttress_plate_sf,
-                    pattern = "circle",
-                    pattern_fill = "grey90",
-                    fill = "#7899F5",
-                    pattern_spacing = 0.01,
-                    pattern_density = 0.7
-                ) +
-                ggpattern::geom_sf_pattern(
-                    data =  anterior_plate_sf,
-                    pattern = "circle",
-                    pattern_fill = "grey60",
-                    fill = "#3B86CC",
-                    pattern_spacing = 0.01,
-                    pattern_density = 0.7
-                ) +
-                geom_sf(data = screw_washer_sf, fill = "#3B86CC") +
-                geom_sf(data = screw_washer_screw_sf, fill = "black") +
+                reactiveValuesToList(geoms_list_anterior) +
+                # ggpattern::geom_sf_pattern(
+                #     data =  diskectomy_fusion_no_interbody_device_sf,
+                #     pattern = "circle",
+                #     pattern_fill = "#F5A105",
+                #     color = "#F7B28F",
+                #     fill = "#A89E9E",
+                #     alpha = 0.6,
+                #     pattern_spacing = 0.005,
+                #     pattern_density = 0.7) +
+                # geom_sf(data = anterior_disc_arthroplasty_df,
+                #         aes(geometry = object_constructed, fill = color)) +
+                # ggpattern::geom_sf_pattern(
+                #     data =  decompression_diskectomy_fusion_sf,
+                #     pattern = "crosshatch",
+                #     pattern_fill = "grey90",
+                #     fill = "#7899F5",
+                #     alpha = 0.3,
+                #     pattern_spacing = 0.02,
+                #     pattern_density = 0.7
+                # ) +
+                # ggpattern::geom_sf_pattern(
+                #     data =  diskectomy_fusion_sf,
+                #     pattern = "crosshatch",
+                #     pattern_fill = "grey90",
+                #     fill = "#7899F5",
+                #     alpha = 0.3,
+                #     pattern_spacing = 0.02,
+                #     pattern_density = 0.7
+                # ) +
+                # ggpattern::geom_sf_pattern(
+                #     data =  corpectomy_sf,
+                #     pattern = "stripe",
+                #     pattern_colour = "red",
+                #     alpha = 0.6,
+                #     pattern_angle = 90,
+                #     pattern_spacing = 0.01,
+                #     pattern_density = 0.1
+                # ) +
+                # ggpattern::geom_sf_pattern(
+                #     data =  corpectomy_cage_sf,
+                #     pattern = "crosshatch",
+                #     pattern_fill = "grey90",
+                #     fill = "#7899F5",
+                #     alpha = 0.3,
+                #     pattern_spacing = 0.01,
+                #     pattern_density = 0.7
+                # ) +
+                # ggpattern::geom_sf_pattern(
+                #     data =  anterior_buttress_plate_sf,
+                #     pattern = "circle",
+                #     pattern_fill = "grey90",
+                #     fill = "#7899F5",
+                #     pattern_spacing = 0.01,
+                #     pattern_density = 0.7
+                # ) +
+                # ggpattern::geom_sf_pattern(
+                #     data =  anterior_plate_sf,
+                #     pattern = "circle",
+                #     pattern_fill = "grey60",
+                #     fill = "#3B86CC",
+                #     pattern_spacing = 0.01,
+                #     pattern_density = 0.7
+                # ) +
+                # geom_sf(data = screw_washer_sf, fill = "#3B86CC") +
+                # geom_sf(data = screw_washer_screw_sf, fill = "black") +
+            geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
                 geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) +
                 ylim(input$crop_y[1], y_start_with_text) +
                 xlim(x_left_limit, x_right_limit) +
@@ -2087,615 +2752,46 @@ server <- function(input, output, session) {
 
         }else{
             ### POSTERIOR
-            all_posterior_objects_df <- all_objects_to_add_list$objects_df %>%
-                filter(approach == "posterior")
-
-            ##########RODS ############
-            ############# Left ROD #################
-            left_rods_connectors_list <- list()
-
-            # if(nrow(left_rod_implants_df_reactive()) > 0){
-            if(input$add_left_accessory_rod == TRUE){
-                accessory_vector <- input$left_accessory_rod
-            }else{
-                accessory_vector <- c("a", "b")
-            }
-            if(input$add_left_satellite_rod == TRUE){
-                satellite_vector <- input$left_satellite_rod
-            }else{
-                satellite_vector <- c("a", "b")
-            }
-            if(input$add_left_intercalary_rod == TRUE){
-                intercalary_vector <- input$left_intercalary_rod
-                junction <- input$left_intercalary_junction
-            }else{
-                intercalary_vector <- c("a", "b")
-                junction <- NULL
-            }
-            if(input$add_left_linked_rods == TRUE){
-                linked_vector <- input$left_linked_rods
-            }else{
-                linked_vector <- c("a", "b")
-            }
-
-            left_rods_connectors_list <- build_unilateral_rods_list_function(accessory_rod_vector = accessory_vector,
-                                                                             satellite_rods_vector = satellite_vector,
-                                                                             intercalary_rods_vector = intercalary_vector,
-                                                                             intercalary_junction = junction,
-                                                                             linked_rods_vector = linked_vector,
-                                                                             unilateral_full_implant_df = left_rod_implants_df_reactive())
-            if(length(left_rods_connectors_list$rod_list) > 0){
-                left_rod_list_sf <- st_multipolygon(left_rods_connectors_list$rod_list)
-            }else{
-                left_rod_list_sf <- NULL
-            }
-            if(length(left_rods_connectors_list$connector_list) > 0){
-                left_connector_list_sf <- st_multipolygon(left_rods_connectors_list$connector_list)
-            }else{
-                left_connector_list_sf <- NULL
-            }
-            ############# RIGHT ROD #################
-
-            right_rods_connectors_list <- list()
-            if(input$add_right_accessory_rod == TRUE){
-                accessory_vector <- input$right_accessory_rod
-            }else{
-                accessory_vector <- c("a", "b")
-            }
-            if(input$add_right_satellite_rod == TRUE){
-                satellite_vector <- input$right_satellite_rod
-            }else{
-                satellite_vector <- c("a", "b")
-            }
-            if(input$add_right_intercalary_rod == TRUE){
-                intercalary_vector <- input$right_intercalary_rod
-                junction <- input$right_intercalary_junction
-            }else{
-                intercalary_vector <- c("a", "b")
-                junction <- NULL
-            }
-            if(input$add_right_linked_rods == TRUE){
-                linked_vector <- input$right_linked_rods
-            }else{
-                linked_vector <- c("a", "b")
-            }
-
-            right_rods_connectors_list <- build_unilateral_rods_list_function(accessory_rod_vector = accessory_vector,
-                                                                             satellite_rods_vector = satellite_vector,
-                                                                             intercalary_rods_vector = intercalary_vector,
-                                                                             intercalary_junction = junction,
-                                                                             linked_rods_vector = linked_vector,
-                                                                             unilateral_full_implant_df = right_rod_implants_df_reactive())
-            if(length(right_rods_connectors_list$rod_list) > 0){
-                right_rod_list_sf <- st_multipolygon(right_rods_connectors_list$rod_list)
-            }else{
-                right_rod_list_sf <- NULL
-            }
-            if(length(right_rods_connectors_list$connector_list) > 0){
-                right_connector_list_sf <- st_multipolygon(right_rods_connectors_list$connector_list)
-            }else{
-                right_connector_list_sf <- NULL
-            }
-
-
-            if((length(input$left_revision_implants) > 1 && (input$primary_revision == "Revision"))){
-                left_revision_implants_constructed_df <- tibble(level = input$left_revision_implants) %>%
-                    left_join(revision_implants_df %>% filter(x < 0.5))
-
-                left_revision_rod_matrix <- left_revision_implants_constructed_df %>%
-                    select(x, y) %>%
-                    arrange(rev(y)) %>%
-                    distinct() %>%
-                    as.matrix()
-                left_revision_implants_sf <- st_multipolygon(left_revision_implants_constructed_df$object_constructed)
-                left_revision_rod_sf <- st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND")
-
-                left_revision_implants_rod_sf <- st_geometrycollection(x = list(left_revision_implants_sf, left_revision_rod_sf))
-            }else{
-                left_revision_implants_rod_sf <- NULL
-            }
-            if((length(input$right_revision_implants) > 1 && (input$primary_revision == "Revision"))){
-                right_revision_implants_constructed_df <- tibble(level = input$right_revision_implants) %>%
-                    left_join(revision_implants_df %>% filter(x > 0.5))
-
-                right_revision_rod_matrix <- right_revision_implants_constructed_df %>%
-                    select(x, y) %>%
-                    arrange(rev(y)) %>%
-                    distinct() %>%
-                    as.matrix()
-                right_revision_implants_sf <- st_multipolygon(right_revision_implants_constructed_df$object_constructed)
-                right_revision_rod_sf <- st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND")
-
-                right_revision_implants_rod_sf <- st_geometrycollection(x = list(right_revision_implants_sf, right_revision_rod_sf))
-            }else{
-                right_revision_implants_rod_sf <- NULL
-            }
-
-            if(length(input$open_canal) > 0){
-                open_df <- open_canal_df %>%
-                    filter(level %in% input$open_canal)
-                open_canal_sf <- st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
-            }else{
-                open_canal_sf <- NULL
-            }
-            ## SCREWS
-            if(any(str_detect((all_posterior_objects_df$object), pattern = "screw"))){
-                screws_sf <- st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed)
-            }else{
-                screws_sf <- NULL
-            }
-
-            ## HOOKS
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "hook"))){
-                hook_df <- all_posterior_objects_df %>%
-                    filter(str_detect(string = object, pattern = "hook"))
-
-                hooks_sf <- st_multipolygon(hook_df$object_constructed)
-            }else{
-                hooks_sf <- NULL
-            }
-            ## SUBLAMINAR BANDS
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "wire"))){
-                sublaminar_wires_sf <- st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "wire")))$object_constructed)
-            }else{
-                sublaminar_wires_sf <- NULL
-            }
-
-            ## Tethers
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "tether"))){
-                tethers_sf <- st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "tether")))$object_constructed)
-            }else{
-                tethers_sf <- NULL
-            }
-
-            ## cement_augmentation
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "cement_augmentation"))){
-                cement_augmentation_sf <- st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "cement_augmentation")))$object_constructed)
-            }else{
-                cement_augmentation_sf <- NULL
-            }
-
-            ## OSTEOTOMIES
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_1"))){
-                osteotomy_1_sf <- st_geometrycollection((all_posterior_objects_df %>% filter(object == "grade_1"))$object_constructed)
-            }else{
-                osteotomy_1_sf <- NULL
-            }
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "complete_facetectomy"))){
-                osteotomy_facetectomy_sf <- st_multipolygon((all_posterior_objects_df %>% filter(object == "complete_facetectomy"))$object_constructed)
-            }else{
-                osteotomy_facetectomy_sf <- NULL
-            }
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_2"))){
-                osteotomy_2_sf <-  st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_2"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
-            }else{
-                osteotomy_2_sf <- NULL
-            }
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_3"))){
-                osteotomy_3_sf <- st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_3"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
-
-            }else{
-                osteotomy_3_sf <- NULL
-            }
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_4"))){
-                osteotomy_4_sf <- st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_4"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
-            }else{
-                osteotomy_4_sf <- NULL
-            }
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_5"))){
-                osteotomy_5_sf <- st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_5"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
-            }else{
-                osteotomy_5_sf <- NULL
-            }
-
-
-            ## Decompresions ##
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "laminectomy"))){
-                laminectomy_sf <- st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
-            }else{
-                laminectomy_sf <- NULL
-            }
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "sublaminar_decompression"))){
-                sublaminar_decompression_sf <- st_multipolygon((all_posterior_objects_df %>% filter(object == "sublaminar_decompression"))$object_constructed)
-            }else{
-                sublaminar_decompression_sf <- NULL
-            }
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "laminotomy"))){
-                laminotomy_sf <- st_multipolygon((all_posterior_objects_df %>% filter(object == "laminotomy"))$object_constructed)
-            }else{
-                laminotomy_sf <- NULL
-            }
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "laminoplasty"))){
-                laminoplasty_sf <- st_multipolygon((all_posterior_objects_df %>% filter(object == "laminoplasty"))$object_constructed)
-                laminoplasty_cut_df <- tibble(x = 0.515, y =  c(max((all_posterior_objects_df %>% filter(object == "laminoplasty"))$superior_lamina_y), min((all_posterior_objects_df %>% filter(object == "laminoplasty"))$inferior_lamina_y) - 0.007))
-            }else{
-                laminoplasty_sf <- NULL
-                laminoplasty_cut_df <- tibble(x = numeric(), y = numeric())
-            }
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "transpedicular_approach"))){
-                transpedicular_sf <- st_multipolygon((all_posterior_objects_df %>% filter(object == "transpedicular_approach"))$object_constructed)
-            }else{
-                transpedicular_sf <- NULL
-            }
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "costo"))){
-                costovertebral_sf <- st_multipolygon((all_posterior_objects_df %>% filter(object == "costovertebral_approach" | object == "costotransversectomy"))$object_constructed)
-            }else{
-                costovertebral_sf <- NULL
-            }
-
-            if(any(all_posterior_objects_df$object == "diskectomy")){
-                diskectomy_sf <- st_multipolygon((all_posterior_objects_df %>% filter(object == "diskectomy"))$object_constructed)
-            }else{
-                diskectomy_sf <- NULL
-            }
-
-            ## INTERBODY
-            if(any(all_posterior_objects_df$object == "tlif") || any(all_posterior_objects_df$object == "llif") ||any(all_posterior_objects_df$object == "plif")){
-                interbody_device_sf <- st_multipolygon((all_posterior_objects_df %>% filter(object == "tlif" | object == "plif" | object == "llif"))$object_constructed)
-            }else{
-                interbody_device_sf <- NULL
-            }
-
-            if(any(all_posterior_objects_df$object == "no_implant_interbody_fusion")){
-                no_implant_interbody_fusion_sf <- st_multipolygon((all_posterior_objects_df %>% filter(object == "no_implant_interbody_fusion"))$object_constructed)
-            }else{
-                no_implant_interbody_fusion_sf <- NULL
-            }
-
-
-            if(any(str_detect(all_posterior_objects_df$object, pattern = "intervertebral_cage"))){
-                intervertebral_cage_sf <- st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "intervertebral_cage"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE)
-
-            }else{
-                intervertebral_cage_sf <- NULL
-            }
-
-
-            # all_rods_sf <- st_geometrycollection(all_rods_reactive_list())
-
-            if(input$plot_with_patterns_true == TRUE){
-                screws_geom <- ggpattern::geom_sf_pattern(
-                    data = screws_sf,
-                    pattern = "stripe",
-                    pattern_fill = "blue",
-                    pattern_fill2 = "#445566",
-                    alpha = 0.8,
-                    pattern_colour = "blue",
-                    pattern_density = 0.02,
-                    pattern_spacing = 0.01,
-                    pattern_angle = 80
-                )
-            }else{
-                screws_geom <- geom_sf(data = screws_sf, fill = "blue")
-            }
-            
             if(input$lumbar_vertebrae_6 == TRUE){
                 l6_statement <- "Note: 6 Lumbar Vertebrae"
             }else{
                 l6_statement <- " "
             }
-            
-            # ggdraw() +
-            #     draw_image(
-            #         spine_png,
-            #         scale = 1,
-            #         y = 0,
-            #         valign = 0,
-            #         x = 0,
-            #         height = 1
-            #         # width = 1
-            #     ) +
-            #     draw_text(
-            #         text = labels_df$level,
-            #         x = x_left_limit + 0.05,
-            #         y = labels_df$y,
-            #         size = input$label_text_size,
-            #         fontface = "bold"
-            #     ) +
-            #     draw_text(
-            #         text = labels_df$level,
-            #         x = x_right_limit - 0.05,
-            #         y = labels_df$y,
-            #         size = input$label_text_size,
-            #         fontface = "bold"
-            #     ) 
-                figure_list <- list(geom_sf_pattern(data = cement_augmentation_sf,
-                                pattern = "plasma",
-                                pattern_alpha = 0.5,
-                                alpha = 0.3,
-                                color = "grey96"),
-                ggpattern::geom_sf_pattern(
-                    data =  open_canal_sf,
-                    pattern_orientation = "radial",
-                    pattern = "gradient",
-                    fill = "grey50",
-                    pattern_fill2 = NA,
-                    colour = NA),
-                geom_sf(data = left_revision_implants_rod_sf, fill = "black"),
-                geom_sf(data = right_revision_implants_rod_sf, fill = "black"),
-                geom_sf(data = no_implant_interbody_fusion_sf, fill = "#E66565"),
-                geom_sf(data = interbody_device_sf, fill = "red"),
-                ggpattern::geom_sf_pattern(
-                    data = laminectomy_sf,
-                    pattern = "stripe",
-                    pattern_colour = "red",
-                    alpha = 0.7,
-                    pattern_spacing = 0.01
-                ),
-                ggpattern::geom_sf_pattern(
-                    data = sublaminar_decompression_sf,
-                    pattern = "stripe",
-                    pattern_colour = "red",
-                    alpha = 0.7,
-                    pattern_spacing = 0.01
-                ),
-                ggpattern::geom_sf_pattern(
-                    data = laminotomy_sf,
-                    pattern = "stripe",
-                    pattern_colour = "red",
-                    alpha = 0.7,
-                    pattern_spacing = 0.01
-                ),
-                ggpattern::geom_sf_pattern(
-                    data = transpedicular_sf,
-                    pattern = "stripe",
-                    pattern_colour = "red",
-                    alpha = 0.7,
-                    pattern_spacing = 0.01
-                ),
-                ggpattern::geom_sf_pattern(
-                    data = costovertebral_sf,
-                    pattern = "stripe",
-                    pattern_colour = "red",
-                    alpha = 0.7,
-                    pattern_spacing = 0.01
-                ),
-                geom_sf(data = diskectomy_sf, fill = "black", alpha = 0.7),
-                geom_sf(data = osteotomy_1_sf, color = "red", size = 1),
-                ggpattern::geom_sf_pattern(
-                    data = osteotomy_facetectomy_sf,
-                    pattern = "stripe",
-                    pattern_colour = "red",
-                    alpha = 0.5,
-                    pattern_angle = 10,
-                    pattern_spacing = 0.01,
-                    pattern_density = 0.15,
-                ),
-                ggpattern::geom_sf_pattern(
-                    data = osteotomy_2_sf,
-                    pattern = "stripe",
-                    pattern_colour = "red",
-                    alpha = 0.5,
-                    pattern_angle = 10,
-                    pattern_spacing = 0.01,
-                    pattern_density = 0.15,
-                ),
-                ggpattern::geom_sf_pattern(
-                    data = osteotomy_3_sf,
-                    pattern = "stripe",
-                    pattern_colour = "red",
-                    alpha = 0.6,
-                    pattern_angle = 10,
-                    pattern_spacing = 0.03,
-                    pattern_density = 0.1,
-                ),
-                ggpattern::geom_sf_pattern(
-                    data = osteotomy_4_sf,
-                    pattern = "stripe",
-                    pattern_colour = "red",
-                    alpha = 0.6,
-                    pattern_angle = 10,
-                    pattern_spacing = 0.02,
-                    pattern_density = 0.02,
-                ),
-                ggpattern::geom_sf_pattern(
-                    data = osteotomy_5_sf,
-                    pattern = "crosshatch",
-                    pattern_colour = "red",
-                    alpha = 0.6,
-                    pattern_angle = 10,
-                    pattern_spacing = 0.02,
-                    pattern_density = 0.02,
-                ),
-                ggpattern::geom_sf_pattern(
-                    data =  intervertebral_cage_sf,
-                    pattern = "crosshatch",
-                    pattern_fill = "grey90",
-                    fill = "#7899F5",
-                    alpha = 0.3,
-                    pattern_spacing = 0.01,
-                    pattern_density = 0.7
-                ),
-                screws_geom,
-                geom_sf(data = laminoplasty_sf, fill  = "blue"),
-                geom_line(data = laminoplasty_cut_df, aes(x = x, y = y), linetype = "dotted", size = 2, color = "red"),
-                ggpattern::geom_sf_pattern(
-                    data = hooks_sf,
-                    pattern = "gradient",
-                    pattern_fill = "blue",
-                    pattern_fill2 = "#445566",
-                    alpha = 0.8
-                ),
-                ggpattern::geom_sf_pattern(
-                    data = sublaminar_wires_sf,
-                    pattern = "gradient",
-                    pattern_fill = "red",
-                    pattern_fill2 = "#445566",
-                    alpha = 0.8
-                ),
-                geom_sf(data = tethers_sf),
-                geom_sf(data = left_rod_list_sf, alpha = 0.75),
-                geom_sf(data = left_connector_list_sf, alpha = 0.75),
-                geom_sf(data = right_rod_list_sf, alpha = 0.75),
-                geom_sf(data = right_connector_list_sf, alpha = 0.75),
-                geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE))
-                # ,
-                # annotate("text", x = 0.65, y = input$crop_y[1], 0.01, label = l6_statement),
-                # ylim(input$crop_y[1], y_start_with_text),
-                # xlim(x_left_limit, x_right_limit))
 
-
-            # ggdraw() +
-            #     draw_image(
-            #         spine_png,
-            #         scale = 1,
-            #         y = 0,
-            #         valign = 0,
-            #         x = 0,
-            #         height = 1
-            #         # width = 1
-            #     ) +
-            #     draw_text(
-            #         text = labels_df$level,
-            #         x = x_left_limit + 0.05,
-            #         y = labels_df$y,
-            #         size = input$label_text_size,
-            #         fontface = "bold"
-            #     ) +
-            #     draw_text(
-            #         text = labels_df$level,
-            #         x = x_right_limit - 0.05,
-            #         y = labels_df$y,
-            #         size = input$label_text_size,
-            #         fontface = "bold"
-            #     ) +
-            #     geom_sf_pattern(data = cement_augmentation_sf,
-            #                     pattern = "plasma",
-            #                     pattern_alpha = 0.5,
-            #                     alpha = 0.3,
-            #                     color = "grey96") +
-            #     ggpattern::geom_sf_pattern(
-            #         data =  open_canal_sf,
-            #         pattern_orientation = "radial",
-            #         pattern = "gradient",
-            #         fill = "grey50",
-            #         pattern_fill2 = NA,
-            #         colour = NA) +
-            #     geom_sf(data = left_revision_implants_rod_sf, fill = "black") +
-            #     geom_sf(data = right_revision_implants_rod_sf, fill = "black") +
-            #     geom_sf(data = no_implant_interbody_fusion_sf, fill = "#E66565") +
-            #     geom_sf(data = interbody_device_sf, fill = "red") +
-            #     ggpattern::geom_sf_pattern(
-            #         data = laminectomy_sf,
-            #         pattern = "stripe",
-            #         pattern_colour = "red",
-            #         alpha = 0.7,
-            #         pattern_spacing = 0.01
-            #     ) +
-            #     ggpattern::geom_sf_pattern(
-            #         data = sublaminar_decompression_sf,
-            #         pattern = "stripe",
-            #         pattern_colour = "red",
-            #         alpha = 0.7,
-            #         pattern_spacing = 0.01
-            #     ) +
-            #     ggpattern::geom_sf_pattern(
-            #         data = laminotomy_sf,
-            #         pattern = "stripe",
-            #         pattern_colour = "red",
-            #         alpha = 0.7,
-            #         pattern_spacing = 0.01
-            #     ) +
-            #     ggpattern::geom_sf_pattern(
-            #         data = transpedicular_sf,
-            #         pattern = "stripe",
-            #         pattern_colour = "red",
-            #         alpha = 0.7,
-            #         pattern_spacing = 0.01
-            #     ) +
-            #     ggpattern::geom_sf_pattern(
-            #         data = costovertebral_sf,
-            #         pattern = "stripe",
-            #         pattern_colour = "red",
-            #         alpha = 0.7,
-            #         pattern_spacing = 0.01
-            #     ) +
-            #     geom_sf(data = diskectomy_sf, fill = "black", alpha = 0.7) +
-            #     geom_sf(data = osteotomy_1_sf, color = "red", size = 1) +
-            #     ggpattern::geom_sf_pattern(
-            #         data = osteotomy_facetectomy_sf,
-            #         pattern = "stripe",
-            #         pattern_colour = "red",
-            #         alpha = 0.5,
-            #         pattern_angle = 10,
-            #         pattern_spacing = 0.01,
-            #         pattern_density = 0.15,
-            #     ) +
-            #     ggpattern::geom_sf_pattern(
-            #         data = osteotomy_2_sf,
-            #         pattern = "stripe",
-            #         pattern_colour = "red",
-            #         alpha = 0.5,
-            #         pattern_angle = 10,
-            #         pattern_spacing = 0.01,
-            #         pattern_density = 0.15,
-            #     ) +
-            #     ggpattern::geom_sf_pattern(
-            #         data = osteotomy_3_sf,
-            #         pattern = "stripe",
-            #         pattern_colour = "red",
-            #         alpha = 0.6,
-            #         pattern_angle = 10,
-            #         pattern_spacing = 0.03,
-            #         pattern_density = 0.1,
-            #     ) +
-            #     ggpattern::geom_sf_pattern(
-            #         data = osteotomy_4_sf,
-            #         pattern = "stripe",
-            #         pattern_colour = "red",
-            #         alpha = 0.6,
-            #         pattern_angle = 10,
-            #         pattern_spacing = 0.02,
-            #         pattern_density = 0.02,
-            #     ) +
-            #     ggpattern::geom_sf_pattern(
-            #         data = osteotomy_5_sf,
-            #         pattern = "crosshatch",
-            #         pattern_colour = "red",
-            #         alpha = 0.6,
-            #         pattern_angle = 10,
-            #         pattern_spacing = 0.02,
-            #         pattern_density = 0.02,
-            #     ) +
-            #     ggpattern::geom_sf_pattern(
-            #         data =  intervertebral_cage_sf,
-            #         pattern = "crosshatch",
-            #         pattern_fill = "grey90",
-            #         fill = "#7899F5",
-            #         alpha = 0.3,
-            #         pattern_spacing = 0.01,
-            #         pattern_density = 0.7
-            #     ) +
-            #     screws_geom +
-            #     geom_sf(data = laminoplasty_sf, fill  = "blue") +
-            #     geom_line(data = laminoplasty_cut_df, aes(x = x, y = y), linetype = "dotted", size = 2, color = "red") +
-            #     ggpattern::geom_sf_pattern(
-            #         data = hooks_sf,
-            #         pattern = "gradient",
-            #         pattern_fill = "blue",
-            #         pattern_fill2 = "#445566",
-            #         alpha = 0.8
-            #     ) +
-            #     ggpattern::geom_sf_pattern(
-            #         data = sublaminar_wires_sf,
-            #         pattern = "gradient",
-            #         pattern_fill = "red",
-            #         pattern_fill2 = "#445566",
-            #         alpha = 0.8
-            #     ) +
-            #     geom_sf(data = tethers_sf) +
-            #     geom_sf(data = left_rod_list_sf, alpha = 0.75) +
-            #     geom_sf(data = left_connector_list_sf, alpha = 0.75) +
-            #     geom_sf(data = right_rod_list_sf, alpha = 0.75) +
-            #     geom_sf(data = right_connector_list_sf, alpha = 0.75) +
-            #     geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) +
-            #     annotate("text", x = 0.65, y = input$crop_y[1] + 0.01, label = l6_statement) +
-            #     ylim(input$crop_y[1], y_start_with_text) +
-            #     xlim(x_left_limit, x_right_limit)
+            ggdraw() +
+                draw_image(
+                    spine_png,
+                    scale = 1,
+                    y = 0,
+                    valign = 0,
+                    x = 0,
+                    height = 1
+                    # width = 1
+                ) +
+                reactiveValuesToList(geoms_list_posterior) +
+                reactiveValuesToList(rods_list) +
+                draw_text(
+                    text = labels_df$level,
+                    x = x_left_limit + 0.05,
+                    y = labels_df$y,
+                    size = input$label_text_size,
+                    fontface = "bold"
+                ) +
+                draw_text(
+                    text = labels_df$level,
+                    x = x_right_limit - 0.05,
+                    y = labels_df$y,
+                    size = input$label_text_size,
+                    fontface = "bold"
+                ) +
+                geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly
+                geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) +
+                annotate("text", x = 0.65, y = input$crop_y[1] + 0.01, label = l6_statement) +
+                ylim(input$crop_y[1], y_start_with_text)  +
+                xlim(x_left_limit, x_right_limit)
 
         }
-        
-        figure_list
+
     })
 
     
@@ -2709,55 +2805,19 @@ server <- function(input, output, session) {
     
     
     output$spine_plan <- renderPlot({
-        # spine_plan_plot()
-        
-        x_left_limit <- 0.3 - input$label_text_offset/100
-        x_right_limit <- 1-x_left_limit
-        
-        plot_top_y <- input$crop_y[2]
-        
-        y_spacing <- 0.025*input$crop_y[2]
-        
-        y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
-        
-        ggdraw() +
-            draw_image(
-                spine_png,
-                scale = 1,
-                y = 0,
-                valign = 0,
-                x = 0,
-                height = 1
-                # width = 1
-            ) +
-            draw_text(
-                text = labels_df$level,
-                x = x_left_limit + 0.05,
-                y = labels_df$y,
-                size = input$label_text_size,
-                fontface = "bold"
-            ) +
-            draw_text(
-                text = labels_df$level,
-                x = x_right_limit - 0.05,
-                y = labels_df$y,
-                size = input$label_text_size,
-                fontface = "bold"
-            ) +
-            spine_plan_plot() +
-            ylim(input$crop_y[1], y_start_with_text)+
-            xlim(x_left_limit, x_right_limit)
+        spine_plan_plot() 
+
     })
     
-    # observeEvent(input$lumbar_vertebrae_6, {
-    #     output$spine_plan <- renderPlot({
-    #         spine_plan_plot()
-    #     })
-    # }) 
-    # 
-    # output$spine_plot_for_implants_tab <- renderPlot({
-    #      spine_plan_plot()
-    # })
+    observeEvent(input$lumbar_vertebrae_6, {
+        output$spine_plan <- renderPlot({
+            spine_plan_plot()
+        })
+    })
+
+    output$spine_plot_for_implants_tab <- renderPlot({
+         spine_plan_plot()
+    })
     
     
     ##########################################  MAKE UI's FOR screw ##################### ##################### 
@@ -3075,76 +3135,9 @@ server <- function(input, output, session) {
                         screw_type == "Red" ~ "Reduction", 
                         screw_type == "Offset" ~ "Offset"
                     )) %>%
-                    mutate(screw_size_type = if_else(screw_size == "xNAmm", paste(screw_type), paste(screw_size, screw_type)))
+                    mutate(screw_size_type = if_else(screw_size == "xNAmm", paste(screw_type), paste(screw_size, screw_type))) %>%
+                    mutate(screw_size_type = str_remove_all(string = screw_size_type, pattern = "xmm "))
                 
-                
-                # if(any(names(screw_test_df) == "screw_diameter")){
-                #     if(any(names(screw_test_df) == "screw_length")){
-                #         screw_details_df <- screw_test_df %>%
-                #             replace_na(list(screw_diameter = "")) %>%
-                #             mutate(screw_size = glue("{screw_diameter}x{screw_length}mm")) %>%
-                #             mutate(side = if_else(str_detect(screw_type_label, "left"), "left", "right")) %>%
-                #             select(level, side, screw_type, screw_diameter, screw_size) %>%
-                #             mutate(screw_type = case_when(
-                #                 screw_type == "U" ~ "Uniaxial",
-                #                 screw_type == "M" ~ "Monoaxial",
-                #                 screw_type == "P" ~ "Polyaxial", 
-                #                 screw_type == "Red" ~ "Reduction", 
-                #                 screw_type == "Offset" ~ "Offset"
-                #             )) %>%
-                #             mutate(screw_size_type = if_else(screw_size == "xNAmm", paste(screw_type), paste(screw_size, screw_type)))
-                #     }else{
-                #         screw_details_df <- screw_test_df %>%
-                #             replace_na(list(screw_diameter = "")) %>%
-                #             mutate(screw_length = "") %>%
-                #             mutate(screw_size = glue("{screw_diameter}x{screw_length}mm")) %>%
-                #             mutate(side = if_else(str_detect(screw_type_label, "left"), "left", "right")) %>%
-                #             select(level, side, screw_type, screw_diameter, screw_size) %>%
-                #             mutate(screw_type = case_when(
-                #                 screw_type == "U" ~ "Uniaxial",
-                #                 screw_type == "M" ~ "Monoaxial",
-                #                 screw_type == "P" ~ "Polyaxial", 
-                #                 screw_type == "Red" ~ "Reduction", 
-                #                 screw_type == "Offset" ~ "Offset"
-                #             )) %>%
-                #             mutate(screw_size_type = if_else(screw_size == "xNAmm", paste(screw_type), paste(screw_size, screw_type)))
-                #     }
-                #     
-                # 
-                # }else{
-                #     if(any(names(screw_test_df) == "screw_length")){
-                #         screw_details_df <- screw_test_df %>%
-                #             mutate(screw_diameter = "") %>%
-                #             mutate(screw_size = glue("{screw_length}mm")) %>%
-                #             mutate(side = if_else(str_detect(screw_type_label, "left"), "left", "right")) %>%
-                #             select(level, side, screw_type, screw_diameter, screw_size) %>%
-                #             mutate(screw_type = case_when(
-                #                 screw_type == "U" ~ "Uniaxial",
-                #                 screw_type == "M" ~ "Monoaxial",
-                #                 screw_type == "P" ~ "Polyaxial", 
-                #                 screw_type == "Red" ~ "Reduction", 
-                #                 screw_type == "Offset" ~ "Offset"
-                #             )) %>%
-                #             mutate(screw_size_type = if_else(screw_size == "xmm", paste(screw_type), paste(screw_size, screw_type)))
-                #     }else{
-                #         
-                #         screw_details_df <- screw_test_df %>%
-                #             replace_na(list(screw_diameter = "")) %>%
-                #             mutate(screw_length = "") %>%
-                #             mutate(screw_size = glue("{screw_diameter}x{screw_length}mm")) %>%
-                #             mutate(side = if_else(str_detect(screw_type_label, "left"), "left", "right")) %>%
-                #             select(level, side, screw_type, screw_diameter, screw_size) %>%
-                #             mutate(screw_type = case_when(
-                #                 screw_type == "U" ~ "Uniaxial",
-                #                 screw_type == "M" ~ "Monoaxial",
-                #                 screw_type == "P" ~ "Polyaxial", 
-                #                 screw_type == "Red" ~ "Reduction", 
-                #                 screw_type == "Offset" ~ "Offset"
-                #             )) %>%
-                #             mutate(screw_size_type = if_else(screw_size == "xNAmm", paste(screw_type), paste(screw_size, screw_type)))
-                #     }
-                #     
-                # }
 
             }else{
                 screw_details_df <- tibble(level = character(), side = character(), screw_diameter = character(), screw_length = character(), screw_type = character(), screw_size = character(), screw_size_type = character())
