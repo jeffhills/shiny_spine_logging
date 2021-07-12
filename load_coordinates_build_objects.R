@@ -156,19 +156,6 @@ open_canal_df <- decompression_df %>%
 
 #############-----------------------   Build Interbody Fusions  ----------------------###############
 
-# interbody_df <- implant_starts_df %>%
-#   filter(category == "interbody") %>%
-#   filter(approach == "posterior") %>%
-#   filter(!is.na(width)) %>%
-#   mutate(object_constructed = pmap(list(..1 = left_x,
-#                                         ..2 = superior_y,
-#                                         ..3 = right_x,
-#                                         ..4 = inferior_y,
-#                                         ..5 = width,
-#                                         ..6 = object), 
-#                                    .f = ~ build_interbody_function(left_x = ..1, right_x = ..3, superior_y = ..2, inferior_y = ..4, top_width = ..5, object = ..6)))
-# 
-
 
 all_interbody_df <- implant_starts_df %>%
   filter(category == "interbody") %>%
@@ -197,20 +184,6 @@ all_interbody_df <- implant_starts_df %>%
                                                                    inferior_facet_superior_border_y = ..10,
                                                                    inferior_facet_inferior_border_y = ..11)))
 
-# llif_interbody_df <- interbody_df %>%
-#   filter(object == "tlif") %>%
-#   mutate(object = "llif")
-# 
-# plif_interbody_df <- interbody_df %>%
-#   filter(object == "tlif") %>%
-#   mutate(object = "plif") 
-# 
-# all_interbody_df <- interbody_df %>%
-#   union_all(llif_interbody_df) %>%
-#   union_all(plif_interbody_df) %>%
-#   distinct()
-# 
-# rm(llif_interbody_df, interbody_df)
 
 #############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
 #############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
@@ -220,7 +193,7 @@ all_interbody_df <- implant_starts_df %>%
 #############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
 
 anterior_df <- implant_starts_df %>%
-  filter(str_detect(string = category, pattern = "anterior")) %>%
+  filter(approach == "anterior") %>%
   remove_empty() 
 
 labels_anterior_df <- anterior_df %>%
@@ -233,15 +206,16 @@ anterior_objects_df <- anterior_df %>%
                                         ..2 = width,
                                         ..3 = inferior_endplate_y,
                                         ..4 = superior_endplate_y, 
-                                        ..5 = superior_enplate_inferior_body_y, 
+                                        ..5 = superior_endplate_inferior_body_y, 
                                         ..6 = inferior_endplate_superior_body_y,
-                                        ..7 = y),
+                                        ..7 = y, 
+                                        ..8 = direction),
                                    .f = ~ anterior_implant_function(object_type = ..1, 
                                                                     body_width = ..2,
                                                                     inferior_endplate_y = ..3,
                                                                     superior_endplate_y = ..4,
                                                                     superior_endplate_inferior_body_y = ..5, 
-                                                                    inferior_endplate_superior_body_y = ..6, y_click = ..7)))
+                                                                    inferior_endplate_superior_body_y = ..6, y_click = ..7, direction = ..8)))
 
 
 
@@ -261,17 +235,16 @@ all_points_all_implants_constructed_df <- implants_constructed_df %>%
 
 revision_implants_df <- all_points_all_implants_constructed_df %>%
   filter(object == "pedicle_screw" | object == "pelvic_screw" | object == "occipital_screw") %>%
-  # filter(str_detect(string = object, pattern = "pedicle_screw")) %>%
   filter(approach == "posterior") %>%
   arrange(vertebral_number) %>%
   distinct() %>%
   group_by(level, object, side) %>%
   filter(y == max(y)) %>%
   ungroup() %>%
-  select(level, vertebral_number, approach, category, object, side, x, y, object_constructed)
+  select(level, vertebral_number, approach, category, object, side, x, y, fusion, object_constructed)
 
 all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
-  select(level, vertebral_number, approach, category, object, side, x, y, object_constructed)
+  select(level, body_interspace, vertebral_number, approach, category, object, side, x, y, fusion, direction, object_constructed)
 
 rm(osteotomy_df, decompression_df, all_interbody_df)
 

@@ -48,10 +48,10 @@ op_note_procedure_performed_summary_classifier_function <- function(object){
     object == "anterior_disc_arthroplasty" ~ "Total disk arthroplasty",
     object == "decompression_diskectomy_fusion" ~ "Anterior diskectomy and fusion with decompression of the central canal and nerve roots",
     object == "diskectomy_fusion" ~ "Anterior diskectomy and fusion",
-    object == "diskectomy_fusion_no_interbody_device" ~ "Anterior diskectomy and fusion with decompression of the central canal",
+    object == "diskectomy_fusion_no_interbody_device" ~ "Anterior diskectomy and fusion",
     object == "anterior_interbody_implant" ~ "Insertion of interbody biomechanical implant",
     object == "corpectomy" ~ "Anterior vertebral corpectomy",
-    object == "corpectomy_cage" ~ "Insertion of intervertebral biomechanical implant",
+    object == "corpectomy_cage" ~ "Anterior insertion of intervertebral biomechanical implant",
     object == "anterior_plate" ~ "Anterior spinal instrumentation (distinct from an interbody implant)",
     object == "anterior_buttress_plate" ~ "Anterior spinal instrumentation (distinct from an interbody implant)",
     object == "screw_washer" ~ "Anterior spinal instrumentation (distinct from an interbody implant)"
@@ -92,14 +92,14 @@ op_note_procedure_performed_summary_per_line_function <- function(procedure_type
     procedure_type == 'Transforaminal lumbar interbody fusion and insertion of interbody device' ~ 'one',
     procedure_type == 'Interbody fusion (without interbody implant)' ~ 'one',
     procedure_type == 'Posterior lumbar interbody fusion and insertion of interbody device' ~ 'one',
+    procedure_type == "Insertion of intervertebral biomechanical implant" ~ 'one',
     ## Anterior ##
     procedure_type ==  "Total disk arthroplasty"~ 'one',
     procedure_type == "Anterior diskectomy and fusion with decompression of the central canal and nerve roots"~ 'one',
     procedure_type == "Anterior diskectomy and fusion"~ 'one',
-    procedure_type == "Anterior diskectomy and fusion with decompression of the central canal"~ 'one',
-    procedure_type == "Insertion of interbody biomechanical implant"~ 'one',
+    procedure_type == "Insertion of interbody biomechanical implant"~ 'multiple',
     procedure_type == "Anterior vertebral corpectomy"~ 'one',
-    procedure_type == "Insertion of intervertebral biomechanical implant"~ 'multiple',
+    procedure_type == "Anterior insertion of intervertebral biomechanical implant"~ 'multiple',
     procedure_type == "Anterior spinal instrumentation (distinct from an interbody implant)"~ 'multiple',
     procedure_type == "Anterior spinal instrumentation (distinct from an interbody implant)"~ 'multiple',
     procedure_type == "Anterior spinal instrumentation (distinct from an interbody implant)" ~ 'multiple',
@@ -157,10 +157,10 @@ op_note_procedure_category_function <- function(object){
     object == "anterior_disc_arthroplasty" ~ "total disk arthroplasty",
     object == "decompression_diskectomy_fusion" ~ "anterior diskectomy and fusion with decompression of the central canal and nerve roots",
     object == "diskectomy_fusion" ~ "anterior diskectomy and fusion",
-    object == "diskectomy_fusion_no_interbody_device" ~ "anterior diskectomy and fusion with decompression of the central canal",
+    object == "diskectomy_fusion_no_interbody_device" ~ "anterior diskectomy and fusion",
     object == "anterior_interbody_implant" ~ "insertion of interbody biomechanical implant",
     object == "corpectomy" ~ "anterior vertebral corpectomy",
-    object == "corpectomy_cage" ~ "insertion of intervertebral biomechanical implant",
+    object == "corpectomy_cage" ~ "anterior insertion of intervertebral biomechanical implant",
     object == "anterior_plate" ~ "anterior spinal instrumentation (distinct from an interbody implant)",
     object == "anterior_buttress_plate" ~ "anterior spinal instrumentation (distinct from an interbody implant)",
     object == "screw_washer" ~ "anterior spinal instrumentation (distinct from an interbody implant)"
@@ -211,47 +211,12 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
     procedure_cat == "total disk arthroplasty" ~ "distinct",
     procedure_cat == "anterior diskectomy and fusion with decompression of the central canal and nerve roots" ~ "distinct",
     procedure_cat == "anterior diskectomy and fusion" ~ "distinct",
-    procedure_cat == "anterior diskectomy and fusion with decompression of the central canal" ~ "distinct",
     procedure_cat == "insertion of interbody biomechanical implant" ~ "distinct",
     procedure_cat == "anterior vertebral corpectomy" ~ "distinct",
-    procedure_cat == "insertion of intervertebral biomechanical implant" ~ "distinct",
+    procedure_cat == "anterior insertion of intervertebral biomechanical implant" ~ "combine",
     procedure_cat == "anterior spinal instrumentation (distinct from an interbody implant)" ~ "combine"
   )
   
-  
-  # paragraph_type <- case_when(
-  #   procedure_cat == 'vertebral cement augmentation' ~ "combine",
-  #   procedure_cat == 'posterior spinal instrumentation' ~ "combine",
-  #   procedure_cat == 'occiput instrumentation' ~ "combine",
-  #   procedure_cat == 'pelvic instrumentation' ~ "combine",
-  #   procedure_cat == 'spinous process posterior tethering/wiring' ~ "combine",
-  #   procedure_cat == 'complete facetectomy' ~ "combine",
-  #   procedure_cat == 'inferior facetectomies' ~ "combine",
-  #   procedure_cat == 'posterior column osteotomies' ~ "combine",
-  #   procedure_cat == 'pedicle subtraction osteotomy' ~ "distinct",
-  #   procedure_cat == 'extended pedicle subtraction osteotomy' ~ "distinct",
-  #   procedure_cat == 'vertebral column resection' ~ "distinct",
-  #   procedure_cat == 'costovertebral approach with costotransversectomy' ~ "combine",
-  #   procedure_cat == 'decompression' ~ "combine",
-  #   procedure_cat == 'decompression using a costovertebral approach' ~ "distinct",
-  #   procedure_cat == 'decompression using a transpedicular approach' ~ "distinct",
-  #   procedure_cat == 'reexploration with revision decompression' ~ "combine",
-  #   procedure_cat == 'reexploration with revision decompression using a costovertebral approach' ~ "distinct",
-  #   procedure_cat == 'reexploration with revision decompression using a transpedicular approach' ~ "distinct",
-  #   procedure_cat == 'laminoplasty' ~ "combine",
-  #   procedure_cat == 'lateral lumbar interbody fusion and insertion of interbody device' ~ "distinct",
-  #   procedure_cat == 'transforaminal lumbar interbody fusion and insertion of interbody device' ~ "distinct",
-  #   procedure_cat == 'interbody fusion (without interbody implant)' ~ "distinct",
-  #   procedure_cat == 'posterior lumbar interbody fusion and insertion of interbody device' ~ "distinct",
-  #   #anterior#
-  #   procedure_cat == "disk arthroplasty" ~ "distinct",
-  #   procedure_cat == "anterior diskectomy and fusion with decompression of the central canal and nerve roots" ~ "distinct",
-  #   procedure_cat == "anterior diskectomy and fusion" ~ "distinct",
-  #   procedure_cat == "insertion of interbody biomechanical implant" ~ "distinct",
-  #   procedure_cat == "anterior vertebral corpectomy" ~ "distinct",
-  #   procedure_cat == "insertion of intervertebral biomechanical implant" ~ "distinct",
-  #   procedure_cat == "insertion of interbody biomechanical implant" ~ "distinct",
-  #   procedure_cat == "anterior spinal instrumentation" ~ "combine")
   paragraph_type
 }
 
@@ -286,7 +251,6 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
       select(level = value) %>%
       mutate(level = if_else(level == "Iliac" | level =="S2AI", "S1", level)) %>%
       mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-      # left_join(levels_numbered_df) %>%
       arrange(vertebral_number) %>%
       distinct()
     
@@ -295,7 +259,7 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
   
   if(object == "anterior_buttress_plate"){
     statement_df <- levels_nested_df %>%
-      mutate(statements = glue("At the {level} level, I placed an anterior buttress plate. After selecting an appropriately sized plate and length for the screws, I held the plate into position and drilled and tapped the path for the screw. I then inserted the screw to secure the plate to the anterior vertebral body."))
+      mutate(statements = glue("At the {level} level, I placed an anterior buttress plate. After selecting an appropriately sized plate and length for the screws, I held the plate into position and drilled and tapped the path for the screw. I then inserted the screw to secure the plate to the anterior vertebral body. The plate had adequate coverage of the intervertebral disc space."))
     
     statement <- glue_collapse(statement_df$statements, sep = " ")
   }
@@ -347,11 +311,14 @@ anterior_op_note_distinct_paragraph_function <- function(levels_nested_df){
       
       object == "diskectomy_fusion" ~ glue("I then proceeded with the diskectomy and interbody fusion of the {level} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. This completed the anterior diskectomy of {level} interspace and partially completed the fusion of {level}."),
       
-      object == "diskectomy_fusion_no_interbody_device" ~ glue("I then proceeded with the diskectomy, decompression, and interbody fusion of the {level} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the disc was excised. The endplates were distracted and the and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. Once I was satisfied with the endplate preparation, bone graft was placed into the disk space. This completed the anterior diskectomy and fusion of the {level} interspace."),
+      object == "diskectomy_fusion_no_interbody_device" ~ glue("I then proceeded with the diskectomy and interbody fusion of the {level} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the disc was excised. The endplates were distracted and the and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. Once I was satisfied with the endplate preparation, bone graft was placed into the disk space. This completed the anterior diskectomy and interbody fusion of the {level} interspace."),
       
       object == "anterior_interbody_implant" ~ glue("I then proceeded with the insertion of the interbody implant into the {level} interspace. I again confirmed that the endplates were adequately decorticated and appropriately level. Once I was fully satisfied with the preparation of the endplates, I used trials and measured the disk space to determine the appropriate size of the interbody implant. {implant_statement} I then inserted the interbody implant into the disk space of {level}. The final position was confirmed using intraoperative xray. This completed the anterior interbody implant at {level}."),
       
-      object == "corpectomy" ~ glue("I then proceeded with decompression and anterior vertebral body corpectomy at the {level} vertebral level. I confirmed that the exposure had been carried cranially to visualze the entire {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} disk, the anterior body of {level} and caudally to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} disk space. First I started with the diskectomies. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} and {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} disc's were completely excised. Once I was satisfied with the diskectomies, I used a combination of a burr and rongeur's to excise roughly 80% of the {level} vertebral body. I carried the corpectomy dorsally to the posterior longitudinal ligament, effectively decompressing the central canal. This completed the vertebral body corpectomy at {level}.")
+      object == "corpectomy" ~ glue("I then proceeded with decompression and anterior vertebral body corpectomy at the {level} vertebral level. I confirmed that the exposure had been carried cranially to visualze the entire {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} disk, the anterior body of {level} and caudally to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} disk space. First I started with the diskectomies. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} and {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} disc's were completely excised. Once I was satisfied with the diskectomies, I used a combination of a burr and rongeur's to excise roughly 80% of the {level} vertebral body. I carried the corpectomy dorsally to the posterior longitudinal ligament, effectively decompressing the central canal. This completed the vertebral body corpectomy at {level}."),
+      
+      object == "corpectomy_cage" ~ glue("I then proceeded with the insertion of the intervertebral implant into the {level} interspace. I again confirmed that the endplates were adequately decorticated and appropriately level. Once I was fully satisfied with the preparation of the endplates, I used trials and measured the interspace to determine the appropriate size of the interbody implant. {implant_statement} I then inserted the  implant into the {level} space. The final position was confirmed using intraoperative xray. This completed the insertion of the intervertebral implant at {level}."),
+      
     )
     )
   
@@ -378,7 +345,6 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
         filter(!is.na(level)) %>%
         mutate(level = if_else(level == "Iliac" | level == "S2AI", "S1", level)) %>%
         mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-        # left_join(levels_numbered_df) %>%
         arrange(vertebral_number) %>%
         distinct()
     }else{
@@ -423,8 +389,8 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df){
   
   anterior_df <- all_objects_to_add_df %>%
     select(level, vertebral_number, object, side, implant_statement) %>%
-    separate(level, into = c("cranial", "caudal"), remove = FALSE) %>%
-    mutate(level = if_else(object == "anterior_buttress_plate", caudal, level)) %>%
+    # separate(level, into = c("cranial", "caudal"), remove = FALSE) %>%
+    # mutate(level = if_else(object == "anterior_buttress_plate", caudal, level)) %>%
     mutate(order_number = row_number())
 
   anterior_df <- anterior_df %>%
@@ -442,7 +408,7 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df){
     arrange(object)
   
   anterior_procedure_category_nested_df <- anterior_df %>%
-    mutate(procedure_category = op_note_procedure_category_function(object = object)) %>%
+    mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
     mutate(paragraphs_combine_or_distinct = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
     select(level, vertebral_number , procedure_category, object, side, paragraphs_combine_or_distinct, implant_statement) %>%
     group_by(procedure_category) %>%
@@ -547,11 +513,11 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   if(max(all_objects_to_add_df$vertebral_number)<11){
     microscope_statement <- if_else(microscope_statement == "none", "", microscope_statement)
     
-    first_paragraph_list$surgical_approach <- paste(glue("A standard {anterior_approach_laterality}-sided Smith Robinson approach was utilized to get to the anterior cervical spine. The skin, subcutaneous tissue were incised, the platysma was transected, and then blunt dissection was carried out between the sternocleidomastoid and carotid sheath laterally, and trachea and esophogus medially, down to the prevertebral fascia. Once the anterior spine was palpated, fluoroscopy was used to localize and confirm levels. "), 
+    first_paragraph_list$surgical_approach <- paste(glue("A standard {anterior_approach_laterality} Smith Robinson approach was utilized to get to the anterior cervical spine. The skin, subcutaneous tissue were incised, the platysma was transected, and then blunt dissection was carried out between the sternocleidomastoid and carotid sheath laterally, and trachea and esophogus medially, down to the prevertebral fascia. Once the anterior spine was palpated, fluoroscopy was used to localize and confirm levels. "), 
                                                     glue("The longus coli was elevated bilaterally from {proximal_exposure_level$level[[1]]} proximally and to {distal_exposure_level$level[[1]]} distally."),
                                                     microscope_statement)
   }else{
-    first_paragraph_list$surgical_approach <- glue("The anterior approach to the spine was carried out with assistance from our vascular surgeon. A {anterior_approach_laterality} incision was made on and the approach was carried out down toward the spine. Once the approach was complete, levels were confirmed using fluoroscopy. ")
+    first_paragraph_list$surgical_approach <- glue("The anterior approach to the spine was carried out with assistance from our vascular surgeon. A {anterior_approach_laterality} incision was made and the approach was carried out down toward the spine. Once the approach was complete, levels were confirmed using fluoroscopy. ")
   }
   
   procedure_details_list$approach_statement <- glue_collapse(x = first_paragraph_list, sep = " ")
@@ -924,7 +890,7 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro, 
                                           .f = ~op_note_distinct_technique_statement(object = ..1, level = ..2, side = ..3, interbody_statement = ..4))) %>% 
       select(object, level, object, tech_statement_detail) %>%
       unnest(tech_statement_detail) %>%
-      mutate(procedure_category = op_note_procedure_category_function(object = object)) %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
       mutate(tech_statement = paste(tech_statement_detail, glue("This completed the {procedure_category} at the {level} {if_else(str_detect(level, '-'), 'interspace', 'level')}.")))
     
     statement <- glue_collapse(df_with_statement$tech_statement, sep = "\n\n")
@@ -950,7 +916,7 @@ op_note_procedure_paragraphs_function <- function(objects_added_df, revision_dec
       mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
       unnest(revision_level) %>%
       mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
-      mutate(procedure_category = op_note_procedure_category_function(object = object)) %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
       select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
       mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
       group_by(procedure_category, procedures_combine, object) %>%
@@ -962,7 +928,7 @@ op_note_procedure_paragraphs_function <- function(objects_added_df, revision_dec
       select(-data)
   }else{
     df_for_paragraphs <- objects_added_df %>%
-      mutate(procedure_category = op_note_procedure_category_function(object = object)) %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
       select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
       mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
       group_by(procedure_category, procedures_combine, object) %>%
@@ -1213,7 +1179,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   ############# COMPLETING INSTRUMENTATION ###########
   ############# COMPLETING INSTRUMENTATION ###########
   posterior_implants_all_df <- all_objects_to_add_df %>%
-    mutate(procedure_category = op_note_procedure_category_function(object = object)) %>%
+    mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
     filter(str_detect(string = procedure_category, pattern = "instrumentation")) %>%
     left_join(levels_numbered_df) %>%
     select(level, vertebral_number, procedure_category, object, side) %>%

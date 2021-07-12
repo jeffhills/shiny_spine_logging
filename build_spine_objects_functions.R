@@ -737,7 +737,8 @@ anterior_implant_function <- function(object_type,
                                       superior_endplate_y, 
                                       inferior_endplate_y, 
                                       superior_endplate_inferior_body_y = NULL,
-                                      inferior_endplate_superior_body_y = NULL){
+                                      inferior_endplate_superior_body_y = NULL, 
+                                      direction = "superior"){
   
   left_body_x <- 0.5 - (body_width*0.9)
   right_body_x <- 0.5 + (body_width*0.9)
@@ -775,7 +776,7 @@ anterior_implant_function <- function(object_type,
                                                  bottom_left))), dist = 0.002, endCapStyle = "FLAT")
   }
   
-  if(object_type == "anterior_plate" | object_type == "anterior_buttress_plate"){
+  if(object_type == "anterior_plate"){
     left_x <- left_cage_x
     right_x <- right_cage_x
     
@@ -783,6 +784,33 @@ anterior_implant_function <- function(object_type,
     bottom_right <- c(right_x, inferior_endplate_y)
     top_right <- c(right_x, superior_endplate_y)
     top_left <- c(left_x, superior_endplate_y)
+    
+    object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.0015, endCapStyle = "ROUND")
+  }
+  
+  if(object_type == "anterior_buttress_plate" && direction == "superior"){
+    left_x <- left_cage_x
+    right_x <- right_cage_x
+    
+    mid_body <- (superior_endplate_y - inferior_endplate_y)/2 + inferior_endplate_y
+    
+    bottom_left <- c(left_x, mid_body)
+    bottom_right <- c(right_x, mid_body)
+    top_right <- c(right_x, superior_endplate_y + 0.01)
+    top_left <- c(left_x, superior_endplate_y + 0.01)
+    
+    object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.0015, endCapStyle = "ROUND")
+  }
+  
+  if(object_type == "anterior_buttress_plate" && direction == "inferior"){
+    left_x <- left_cage_x
+    right_x <- right_cage_x
+    mid_body <- (superior_endplate_y - inferior_endplate_y)/2 + inferior_endplate_y
+    
+    top_left <- c(left_x, mid_body)
+    top_right <- c(right_x, mid_body)
+    bottom_right <- c(right_x, inferior_endplate_y - 0.01)
+    bottom_left <- c(left_x, inferior_endplate_y - 0.01)
     
     object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.0015, endCapStyle = "ROUND")
   }
@@ -799,9 +827,21 @@ anterior_implant_function <- function(object_type,
     object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.0015, endCapStyle = "ROUND")
   }
   
+  if(object_type == "diskectomy_fusion_no_interbody_device"){
+    left_x <- 0.5 - (body_width*1.1)
+    right_x <- 0.5 + (body_width*1.1)
+    
+    bottom_left <- c(left_x, inferior_endplate_y)
+    bottom_right <- c(right_x, inferior_endplate_y)
+    top_right <- c(right_x, superior_endplate_y)
+    top_left <- c(left_x, superior_endplate_y)
+    
+    object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.003, endCapStyle = "FLAT")
+  }
+  
   if(object_type == "diskectomy_fusion"){
-    left_x <- 0.5 - (body_width*0.8)
-    right_x <- 0.5 + (body_width*0.8)
+    left_x <- 0.5 - (body_width*1.1)
+    right_x <- 0.5 + (body_width*1.1)
     
     bottom_left <- c(left_x, inferior_endplate_y)
     bottom_right <- c(right_x, inferior_endplate_y)
@@ -818,8 +858,8 @@ anterior_implant_function <- function(object_type,
   }
   
   if(object_type == "decompression_diskectomy_fusion"){
-    left_x <- 0.5 - (body_width*0.8)
-    right_x <- 0.5 + (body_width*0.8)
+    left_x <- 0.5 - (body_width*1.1)
+    right_x <- 0.5 + (body_width*1.1)
     
     bottom_left <- c(left_x, inferior_endplate_y)
     bottom_right <- c(right_x, inferior_endplate_y)
@@ -833,18 +873,6 @@ anterior_implant_function <- function(object_type,
     
     object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.002, endCapStyle = "FLAT")
     
-  }
-  
-  if(object_type == "diskectomy_fusion_no_interbody_device"){
-    left_x <- 0.5 - (body_width*1.1)
-    right_x <- 0.5 + (body_width*1.1)
-    
-    bottom_left <- c(left_x, inferior_endplate_y)
-    bottom_right <- c(right_x, inferior_endplate_y)
-    top_right <- c(right_x, superior_endplate_y)
-    top_left <- c(left_x, superior_endplate_y)
-    
-    object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.003, endCapStyle = "FLAT")
   }
   
   if(object_type == "anterior_interbody_implant"){

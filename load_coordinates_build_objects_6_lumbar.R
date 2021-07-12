@@ -146,7 +146,7 @@ l6_spine_png <- image_read(path = "posterior_spine_6_lumbar_vert.png")
 
 # spine_png <- image_read(path = "posterior_spine_6_lumbar_vert.png")
 # posterior_spine_6_lumbar_vert
-l6_anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
+l6_anterior_spine_png <- image_read(path = "anterior_spine_6_lumbar_vert.png")
 
 l6_implant_starts_df <- read_csv(file = "full_coordinates_df.csv") %>%
   filter(!is.na(x)) %>%
@@ -178,7 +178,7 @@ shifted_down_df <- l6_implant_starts_df %>%
                          "inferior_facet_inferior_border_y",
                          "inferior_endplate_y",
                          "superior_endplate_y", 
-                         "superior_enplate_inferior_body_y",
+                         "superior_endplate_inferior_body_y",
                          "inferior_endplate_superior_body_y"), .funs = ~ .x - 0.03)
 
 
@@ -372,15 +372,16 @@ l6_anterior_objects_df <- l6_anterior_df %>%
                                         ..2 = width,
                                         ..3 = inferior_endplate_y,
                                         ..4 = superior_endplate_y, 
-                                        ..5 = superior_enplate_inferior_body_y, 
+                                        ..5 = superior_endplate_inferior_body_y, 
                                         ..6 = inferior_endplate_superior_body_y,
-                                        ..7 = y),
+                                        ..7 = y,
+                                        ..8 = direction),
                                    .f = ~ anterior_implant_function(object_type = ..1, 
                                                                     body_width = ..2,
                                                                     inferior_endplate_y = ..3,
                                                                     superior_endplate_y = ..4,
                                                                     superior_endplate_inferior_body_y = ..5, 
-                                                                    inferior_endplate_superior_body_y = ..6, y_click = ..7)))
+                                                                    inferior_endplate_superior_body_y = ..6, y_click = ..7, direction = ..8)))
 
 
 
@@ -391,14 +392,14 @@ l6_anterior_objects_df <- l6_anterior_df %>%
 #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
 #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
 
-l6_all_implants_constructed_df <- l6_implants_constructed_df %>%
+l6_all_points_all_implants_constructed_df <- l6_implants_constructed_df %>%
   union_all(l6_osteotomy_df) %>%
   union_all(l6_decompression_df) %>%
   union_all(l6_anterior_objects_df) %>% 
   union_all(l6_all_interbody_df) %>%
   select(level, vertebral_number, everything())
 
-l6_revision_implants_df <- l6_all_implants_constructed_df %>%
+l6_revision_implants_df <- l6_all_points_all_implants_constructed_df %>%
   filter(object == "pedicle_screw" | object == "pelvic_screw" | object == "occipital_screw") %>%
   filter(approach == "posterior") %>%
   arrange(vertebral_number) %>%
@@ -406,6 +407,9 @@ l6_revision_implants_df <- l6_all_implants_constructed_df %>%
   group_by(level, object, side) %>%
   filter(y == max(y)) %>%
   ungroup()
+
+l6_all_implants_constructed_df <- l6_all_points_all_implants_constructed_df %>%
+  select(level, body_interspace, vertebral_number, approach, category, object, side, x, y, fusion, direction, object_constructed)
 
 rm(l6_osteotomy_df, l6_decompression_df, l6_all_interbody_df)
 

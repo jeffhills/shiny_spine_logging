@@ -60,6 +60,7 @@ jh_get_vertebral_number_function <- function(level_to_get_number){
       level_to_get_number == 'S1' ~ 25,
       level_to_get_number == "Sacro-iliac" ~ 25.5,
       level_to_get_number == 'Iliac' ~ 26,
+      level_to_get_number == 'Sacro-iliac' ~ 26.5,
       level_to_get_number == 'S2AI' ~ 27
     )
   return(vert_number)
@@ -120,6 +121,7 @@ jh_get_vertebral_level_function <- function(number) {
     number == 25 ~ 'S1',
     number == 25.5 ~ "Sacro-iliac",
     number == 26 ~ 'Iliac',
+    number == 26.5 ~ 'Sacro-iliac',
     number == 27 ~ 'S2AI'
   )
   return(level)
@@ -448,36 +450,116 @@ jh_make_shiny_table_column_function <- function(input_type,
 
 ##########################################  DETERMINE ANTERIOR FUSION LEVELS ##################### #####################
 
-anterior_fusion_levels_function <- function(all_objects_added_df){
-  anterior_fusion_implants_df <- all_objects_added_df %>%
-    filter(approach == "anterior") %>%
-    select(level, vertebral_number, object) %>%
-    filter(object != "screw_washer") %>%
-    filter(object != "anterior_disc_arthroplasty") %>%
-    distinct()
+fusion_levels_df_function <- function(all_objects_to_add_df){
+  if(any(all_objects_to_add_df$fusion == "yes")){
+    fusion_range_df <- all_objects_to_add_df %>%
+      filter(fusion == "yes") %>%
+      select(level, body_interspace) %>%
+      mutate(level = if_else(level == "S2AI", "S1", level)) %>%
+      mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+      arrange(vertebral_number) 
+    
+    if(any(fusion_range_df$body_interspace == "body")){
+      fusion_bodies_df <- fusion_range_df %>%
+        filter(body_interspace == "body") %>%
+        filter(vertebral_number == min(vertebral_number) | vertebral_number == max(vertebral_number)) %>%
+        select(vertebral_number) %>%
+        distinct() %>%
+        mutate(vertebral_number = if_else(vertebral_number == min(vertebral_number), vertebral_number + 0.5, vertebral_number - 0.5))
+      
+      fusions_levels_df <- tibble(vertebral_number = seq(from = min(fusion_bodies_df$vertebral_number), to = max(fusion_bodies_df$vertebral_number), by = 1)) %>%
+        mutate(level = jh_get_vertebral_level_function(number = vertebral_number))  %>%
+        union_all(fusion_range_df %>%
+                    filter(body_interspace == "interspace") %>%
+                    select(level, vertebral_number) %>%
+                    distinct()) %>%
+        arrange(vertebral_number) %>%
+        distinct()
+    }else{
+      fusions_levels_df <- tibble(vertebral_number = seq(from = min(fusion_range_df$vertebral_number), to = max(fusion_range_df$vertebral_number), by = 1)) %>%
+        mutate(level = jh_get_vertebral_level_function(number = vertebral_number))  %>%
+        arrange(vertebral_number) %>%
+        distinct()
+    }
+
+  }else{
+    fusions_levels_df <- tibble(level = character(), vertebral_number = double(), category = character())
+  }
   
-  corpectomy_df <- anterior_fusion_implants_df %>%
-    filter(str_detect(string = object, pattern = "corpectomy")) %>%
-    select(level, object) %>%
-    distinct() %>%
-    mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x))) %>%
-    unnest() %>%
-    unnest() %>%
-    filter(str_detect(string = level, pattern = "-")) %>%
-    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-    mutate(object = "fusion") %>%
-    distinct()
   
-  fusion_levels_df <- anterior_fusion_implants_df %>%
-    union_all(corpectomy_df) %>%
-    filter(str_detect(level, pattern = "-")) %>%
-    mutate(object = "fusion") %>%
-    distinct() %>%
-    arrange(vertebral_number)
   
-  return(fusion_levels_df)
-  
+  return(fusions_levels_df)
 }
+
+jh_fusion_category_function <- function(fusion_vector, all_objects_df){
+  
+  fusions_ranked_df <- all_objects_df %>%
+    filter(body_interspace == "body") %>%
+    select(vertebral_number, approach, object) %>%
+    distinct() %>%
+    mutate(vertebral_number = vertebral_number - 0.5) %>%
+    union_all(all_objects_df %>%
+                filter(body_interspace == "body") %>%
+                select(vertebral_number, approach, object) %>%
+                distinct() %>%
+                mutate(vertebral_number = vertebral_number + 0.5)) %>%
+    mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+    filter(!is.na(level)) %>%
+    distinct() %>%
+    union_all(all_objects_df %>% filter(body_interspace == "interspace")) %>%
+    arrange(vertebral_number) %>%
+    select(level, vertebral_number, approach, object) %>%
+    mutate(fusion_category = if_else(approach == "anterior", "anterior_interbody_fusion",
+                              case_when(
+                                str_detect(object, "screw") | str_detect(object, "hook") |str_detect(object, "wire") ~ "posterolateral_fusion",
+                                str_detect(object, "lif") | str_detect(object, "interbody") |str_detect(object, "cage")| str_detect(object, "extracav")  ~ "posterior_interbody_fusion",
+                              ))) %>%
+    mutate(fusion_rank = if_else(str_detect(string = fusion_category, pattern = "interbody"), 1, 2)) 
+  
+  fusion_df <- tibble(level = fusion_vector) %>%
+    left_join(fusions_ranked_df) %>%
+    mutate(fusion_rank = if_else(is.na(fusion_rank), 9, fusion_rank)) %>%
+    group_by(level, approach) %>%
+    filter(fusion_rank == min(fusion_rank)) %>%
+    select(level, vertebral_number, object = fusion_category) %>%
+    distinct() %>%
+    ungroup() %>%
+    mutate(category = "fusion")
+  
+  return(fusion_df)
+}
+
+# anterior_fusion_levels_function <- function(all_objects_added_df){
+#   anterior_fusion_implants_df <- all_objects_added_df %>%
+#     filter(approach == "anterior") %>%
+#     select(level, vertebral_number, object) %>%
+#     filter(object != "screw_washer") %>%
+#     filter(object != "anterior_disc_arthroplasty") %>%
+#     distinct()
+#   
+#   corpectomy_df <- anterior_fusion_implants_df %>%
+#     filter(str_detect(string = object, pattern = "corpectomy")) %>%
+#     select(level, object) %>%
+#     distinct() %>%
+#     mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x))) %>%
+#     unnest() %>%
+#     unnest() %>%
+#     filter(str_detect(string = level, pattern = "-")) %>%
+#     mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+#     mutate(object = "fusion") %>%
+#     distinct()
+#   
+#   fusion_levels_df <- anterior_fusion_implants_df %>%
+#     union_all(corpectomy_df) %>%
+#     filter(str_detect(level, pattern = "-")) %>%
+#     mutate(object = "fusion") %>%
+#     distinct() %>%
+#     arrange(vertebral_number)
+#   
+#   return(fusion_levels_df)
+#   
+# }
+
 
 
 
