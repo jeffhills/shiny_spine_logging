@@ -498,8 +498,8 @@ ui <- dashboardPage(skin = "black",
             ),
             tabItem(tabName = "implant_details",   
                     ###########################################
-                    box(width = 7, status = "info", title = div(style = "font-size:22px; font-weight:bold; text-align:left", "Add Implant/Fusion Details:"),
-                        box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "Fusion Details:"),
+                    box(width = 7, status = "info", title = div(style = "font-size:22px; font-weight:bold; text-align:left", "Implant & Fusion Details:"),
+                        box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "Bone Graft & Biologics:"),
                             fluidRow(
                                 column(width = 5, 
                                        conditionalPanel(condition = "input.fusion_procedure_performed == true",
@@ -509,6 +509,15 @@ ui <- dashboardPage(skin = "black",
                                                                                          "Local Autograft",
                                                                                          "Morselized Autograft (separate fascial incision)",
                                                                                          "Structural Allograft")
+                                                        )
+                                       ),
+                                       conditionalPanel(condition = "input.fusion_procedure_performed == true",
+                                                        awesomeCheckboxGroup(inputId = "biologics", width = "100%",
+                                                                             label = "Select any other biologics:",
+                                                                             choices = c("Bone Marrow Aspirate",
+                                                                                         "Cell Based Allograft",
+                                                                                         "DBM"
+                                                                                         )
                                                         )
                                        )
                                 ),
@@ -617,14 +626,14 @@ ui <- dashboardPage(skin = "black",
                                                                                  choices_vector = c("None", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/quarter in"),
                                                                                  initial_value_selected = "None",
                                                                                  picker_choose_multiple = FALSE),
-                                             jh_make_shiny_table_column_function(input_type = "radioGroupButtons", 
+                                             jh_make_shiny_table_column_function(input_type = "awesomeRadio", 
                                                                                  left_input_id = "left_main_rod_material", 
                                                                                  left_label = "Material:",
                                                                                  right_input_id = "right_main_rod_material", 
                                                                                  right_label = "Material:",
                                                                                  left_column_percent_width = 50,
                                                                                  right_column_percent_width = 50,
-                                                                                 checkboxes_inline = FALSE,
+                                                                                 checkboxes_inline = TRUE,
                                                                                  button_size = "normal",
                                                                                  choices_vector = c("Non-instrumented", "Titanium", "Cobalt Chrome", "Stainless Steel"),
                                                                                  initial_value_selected = "Non-instrumented",
@@ -1336,10 +1345,11 @@ server <- function(input, output, session) {
                               inputId = "left_main_rod_size", 
                               selected = if_else(input$left_main_rod_size == "None", "5.5mm", input$left_main_rod_size)
             )
-            updateSliderTextInput(session = session, 
-                                  inputId = "left_main_rod_material", 
-                                  choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
-                                  selected = if_else(input$left_main_rod_material == "Non-instrumented", "Titanium", input$left_main_rod_material)
+            updateAwesomeRadio(session = session, 
+                               inputId = "left_main_rod_material",
+                               inline = TRUE,
+                               choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
+                               selected = if_else(input$left_main_rod_material == "Non-instrumented", "Titanium", input$left_main_rod_material)
             )
         }
     })
@@ -1349,10 +1359,11 @@ server <- function(input, output, session) {
                               inputId = "right_main_rod_size", 
                               selected = if_else(input$right_main_rod_size == "None", "5.5mm", input$right_main_rod_size)
             )
-            updateSliderTextInput(session = session, 
-                                  inputId = "right_main_rod_material", 
-                                  choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
-                                  selected = if_else(input$right_main_rod_material == "Non-instrumented", "Titanium", input$right_main_rod_material)
+            updateAwesomeRadio(session = session, 
+                               inputId = "right_main_rod_material", 
+                               inline = TRUE,
+                               choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
+                               selected = if_else(input$right_main_rod_material == "Non-instrumented", "Titanium", input$right_main_rod_material)
             )
         }
     })
@@ -1385,7 +1396,8 @@ server <- function(input, output, session) {
             select(level, vertebral_number, object, x, y, side) %>%
             filter(side == "left")
         
-        jh_cranial_and_caudal_list_for_supplementary_rods_function(all_added_objects_df, osteotomy_site = osteotomy_level_reactive())
+        starts_list <- jh_cranial_and_caudal_list_for_supplementary_rods_function(all_added_objects_df, osteotomy_site = osteotomy_level_reactive())
+        starts_list
     })
     
     observeEvent(list(all_objects_to_add_list$objects_df, left_supplement_rod_starts_list_reactive()), {

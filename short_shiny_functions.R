@@ -761,7 +761,7 @@ jh_cranial_and_caudal_list_for_supplementary_rods_function <- function(all_objec
   if(nrow(implant_df) > 3 & !is.null(osteotomy_site)){
     
     osteotomy_df <- tibble(level = osteotomy_site) %>%
-      mutate(number = jh_get_vertebral_number_function(level_to_get_number = level))
+      mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))
 
 
     cranial_satellite_df <- implant_df %>%
@@ -792,7 +792,7 @@ jh_cranial_and_caudal_list_for_supplementary_rods_function <- function(all_objec
   if(nrow(implant_df) > 3 & !is.null(osteotomy_site)){
     
     osteotomy_df <- tibble(level = osteotomy_site) %>%
-      mutate(number = jh_get_vertebral_number_function(level_to_get_number = level))
+      mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))
       # left_join(levels_numbered_df)
     
     cranial_intercalary_df <- implant_df %>%
