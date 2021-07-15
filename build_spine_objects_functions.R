@@ -357,8 +357,11 @@ screw_hook_implant_function <- function(implant_type,
     object <- tether_function(tether_start_y = y, tether_length = length_for_tether)
   }
   
-  if(implant_type == "cement_augmentation"){
-    object <- st_buffer(x = st_point(x = c(0.5, y)), dist = 0.01, endCapStyle = "ROUND")
+  if(implant_type == "vertebroplasty"){
+    object <- st_buffer(x = st_point(x = c(0.5, y)), dist = 0.007, endCapStyle = "ROUND")
+  }
+  if(implant_type == "vertebral_cement_augmentation"){
+    object <- st_buffer(x = st_point(x = c(0.5, y)), dist = 0.011, endCapStyle = "ROUND")
   }
   
   return(object)
@@ -640,29 +643,29 @@ build_interbody_function <- function(object = "xx",
     interbody_sf <- st_buffer(st_polygon(list(interbody)), dist = 0.0025, endCapStyle = "ROUND")
   }
   
-  if(object == "tlif" | object == "no_implant_interbody_fusion"){
-    if(x_click < 0.5){
-      #start top left and then work in counterclockwise
-      point_1 <- c(inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
-      point_2 <- c(inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
-      point_3 <- c(inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
-      point_4 <- c(inferior_facet_medial_border_x, inferior_facet_superior_border_y)
-    }else{
-      #start top left and then work in counterclockwise
-      point_1 <- c(1- inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
-      point_2 <- c(1 - inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
-      point_3 <- c(1 - inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
-      point_4 <- c(1 - inferior_facet_medial_border_x, inferior_facet_superior_border_y)
-    }
-    
-    interbody <- st_linestring(rbind(point_1,
-                                        point_2,
-                                        point_3,
-                                        point_4,
-                                        point_1))
-    
-    interbody_sf <- st_buffer(st_polygon(list(interbody)), dist = 0.0025, endCapStyle = "ROUND")
-  }
+  # if(object == "tlif" | object == "no_implant_interbody_fusion"){
+  #   if(x_click < 0.5){
+  #     #start top left and then work in counterclockwise
+  #     point_1 <- c(inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
+  #     point_2 <- c(inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
+  #     point_3 <- c(inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
+  #     point_4 <- c(inferior_facet_medial_border_x, inferior_facet_superior_border_y)
+  #   }else{
+  #     #start top left and then work in counterclockwise
+  #     point_1 <- c(1- inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
+  #     point_2 <- c(1 - inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
+  #     point_3 <- c(1 - inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
+  #     point_4 <- c(1 - inferior_facet_medial_border_x, inferior_facet_superior_border_y)
+  #   }
+  #   
+  #   interbody <- st_linestring(rbind(point_1,
+  #                                       point_2,
+  #                                       point_3,
+  #                                       point_4,
+  #                                       point_1))
+  #   
+  #   interbody_sf <- st_buffer(st_polygon(list(interbody)), dist = 0.0025, endCapStyle = "ROUND")
+  # }
   
   if(object == "plif"){
     if(x_click < 0.5){

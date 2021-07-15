@@ -86,7 +86,7 @@ ui <- dashboardPage(skin = "black",
                                           size = "sm",
                                           choices = c("Spinal Condition (Degen)" = "spinal_condition",
                                                       "Deformity" = "deformity", 
-                                                      "Neoplasm" = "neoplastm", 
+                                                      "Neoplasm" = "neoplasm", 
                                                       "Lesion (trauma, infection)" = "lesion"),
                                           justified = TRUE,
                                           direction = "vertical",
@@ -141,14 +141,6 @@ ui <- dashboardPage(skin = "black",
                                           )
                                    )
                                ),
-                               # fluidRow(
-                               #     column(width = 5, 
-                               #            h5(strong("Bone Density or HU:")) 
-                               #     ),
-                               #     column(width = 7,
-                               #            textInput(inputId = "bone_density", label = NULL, width = "100%", placeholder = "T-score or HU")
-                               #     )
-                               # ),
                                textInput(inputId = "relevant_history", label = "Other Comments/History:"),
                            ),
                            box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Surgical Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE, 
@@ -271,7 +263,7 @@ ui <- dashboardPage(skin = "black",
                                                           tags$td(width = "70%", 
                                                                   radioGroupButtons(inputId = "spine_approach", 
                                                                                     label = NULL,
-                                                                                    choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior")),
+                                                                                    choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior or Lateral")),
                                                                                                        tags$span(icon("fas fa-user", style = "color: steelblue"), strong("Posterior"))),
                                                                                     choiceValues = list("Anterior", "Posterior"),
                                                                                     selected = "Posterior", 
@@ -334,14 +326,27 @@ ui <- dashboardPage(skin = "black",
                                                          click = "plot_click",
                                                          dblclick = "plot_double_click"),
                                               textOutput(outputId = "currently_adding"),
-                                              switchInput(
-                                                  inputId = "lumbar_vertebrae_6",
-                                                  label = "6 Lumbar Vertebrae:", 
-                                                  value = FALSE, 
-                                                  onLabel = "Yes", 
-                                                  offLabel = "No", 
-                                                  size = "small",
-                                                  onStatus = "success"
+                                              fluidRow(
+                                                  switchInput(
+                                                      inputId = "lumbar_vertebrae_6",
+                                                      label = "6 Lumbar Vertebrae:", 
+                                                      value = FALSE, 
+                                                      onLabel = "Yes", 
+                                                      offLabel = "No", 
+                                                      size = "small",
+                                                      onStatus = "success"
+                                                  )
+                                              ),
+                                              fluidRow(
+                                                  actionBttn(
+                                                      inputId = "implants_complete",
+                                                      size = "sm", 
+                                                      block = TRUE,
+                                                      label = "Click when finished to Add Implant Details",
+                                                      style = "simple",
+                                                      color = "success", 
+                                                      icon = icon("fas fa-arrow-circle-right")
+                                                  )
                                               )
                                        )   
                                    )
@@ -420,7 +425,7 @@ ui <- dashboardPage(skin = "black",
                                                         inputId = "add_implants",
                                                         size = "sm", 
                                                         block = TRUE,
-                                                        label = "Add Surgical Implants (Screws, Hooks, Tethers, Structural Allograft, etc.)",
+                                                        label = "Add Surgical Implants (Screws, Hooks, Wires, Tethers, etc.)",
                                                         style = "simple",
                                                         color = "primary"
                                                         ),
@@ -429,6 +434,14 @@ ui <- dashboardPage(skin = "black",
                                                         inputId = "add_decompressions",
                                                         size = "sm", block = TRUE,
                                                         label = "Add Decompressions",
+                                                        style = "simple",
+                                                        color = "primary"
+                                                    ),
+                                                    br(),
+                                                    actionBttn(
+                                                        inputId = "add_special_approach",
+                                                        size = "sm", block = TRUE,
+                                                        label = "Add Special Approach (Costovertebral, etc)",
                                                         style = "simple",
                                                         color = "primary"
                                                     ),
@@ -449,7 +462,16 @@ ui <- dashboardPage(skin = "black",
                                                         color = "primary"
                                                     ),
                                                     br(),
+                                                    actionBttn(
+                                                        inputId = "add_other",
+                                                        size = "sm", block = TRUE,
+                                                        label = "Add Other (cement, structural allograft, etc)",
+                                                        style = "simple",
+                                                        color = "primary"
+                                                    ),
+                                                    br(),
                                                     uiOutput(outputId = "intervertebral_cage_ui"),
+                                                    uiOutput(outputId = "tumor_resection_ui"),
                                                     br(), 
                                                     div(style = "font-size:16px; font-weight:bold; text-align:left", "2. Select Implant/Procedure, & Click Spine to Add:"),
                                                     ),
@@ -464,18 +486,17 @@ ui <- dashboardPage(skin = "black",
                                            choices = c(
                                                "Pedicle Screws" = "pedicle_screw",
                                                "Pelvic Screws" = "pelvic_screw",
-                                               "Lateral Mass Screws" = "lateral_mass_screw",
-                                               "Pars Screws" = "pars_screw",
-                                               "Transarticular Screw" = "transarticular_screw",
                                                "Occipital Screws" = "occipital_screw",
+                                               "Transarticular Screw" = "transarticular_screw",
+                                               "Pars Screws" = "pars_screw",
                                                "Translaminar Screws" = "translaminar_screw",
+                                               "Lateral Mass Screws" = "lateral_mass_screw",
                                                "TP Hook" = "tp_hook",
                                                "Laminar Hook (Downgoing)" = "laminar_downgoing_hook",
                                                "Laminar Hook (Upgoing)" = "laminar_upgoing_hook",
                                                "Pedicle Hook" = "pedicle_hook",
                                                "Tether (Spinous Process)" = "tether",
-                                               "Sublaminar Wire" = "sublaminar_wire" ,
-                                               "Cement Augmentation" = "cement_augmentation"
+                                               "Sublaminar Wire" = "sublaminar_wire"  
                                            ),
                                            checkIcon = list(
                                                yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
@@ -558,6 +579,30 @@ ui <- dashboardPage(skin = "black",
                                                      label = "Structural allograft was inserted:",
                                                      value = NULL,
                                                      width = "100%")
+                                       ),
+                                       conditionalPanel(
+                                           condition = "input.biologics.indexOf('Bone Marrow Aspirate') > -1",
+                                           jh_make_shiny_table_row_function(left_column_label = "Bone Marrow Aspirate Volume (cc):",
+                                                                            left_column_percent_width = 60, 
+                                                                            font_size = 16,
+                                                                            input_type = "numeric",
+                                                                            input_id = "bone_marrow_aspirate_volume", initial_value_selected = 0, min = 0, max = 500, step = 5)
+                                       ),
+                                       conditionalPanel(
+                                           condition = "input.biologics.indexOf('Cell Based Allograft') > -1",
+                                           jh_make_shiny_table_row_function(left_column_label = "Cell Based Allograft Volume (cc):",
+                                                                            left_column_percent_width = 60, 
+                                                                            font_size = 16,
+                                                                            input_type = "numeric",
+                                                                            input_id = "cell_based_allograft_volume", initial_value_selected = 0, min = 0, max = 500, step = 5)
+                                       ),
+                                       conditionalPanel(
+                                           condition = "input.biologics.indexOf('DBM') > -1",
+                                           jh_make_shiny_table_row_function(left_column_label = "DBM Volume (cc):",
+                                                                            left_column_percent_width = 60, 
+                                                                            font_size = 16,
+                                                                            input_type = "numeric",
+                                                                            input_id = "dbm_volume", initial_value_selected = 0, min = 0, max = 500, step = 5)
                                        )
                                 ),
                                 column(width = 3,
@@ -774,7 +819,18 @@ ui <- dashboardPage(skin = "black",
                     ),
                     box(width = 5, status = "primary",
                         plotOutput("spine_plot_for_implants_tab",
-                                   height = 750)
+                                   height = 750),
+                        fluidRow(
+                            actionBttn(
+                                inputId = "implant_details_complete",
+                                size = "sm", 
+                                block = TRUE,
+                                label = "Click when finished to Upload Data & Generate Operative Note",
+                                style = "simple",
+                                color = "success", 
+                                icon = icon("fas fa-arrow-circle-right")
+                            )
+                        )
                     )
                     ###########################################
             ),
@@ -932,7 +988,7 @@ ui <- dashboardPage(skin = "black",
                     box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Pedicle Screw Details:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                         tableOutput("pedicle_screw_details_table")
                     ),
-                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody implants:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody implants:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
                         tableOutput(outputId = "interbody_details_table")
                     )
                     ###########################################
@@ -953,6 +1009,14 @@ ui <- dashboardPage(skin = "black",
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
     
+    observeEvent(input$implants_complete, {
+        updateTabItems(session = session, inputId = "tabs", selected = "implant_details")
+    })
+    
+    observeEvent(input$implant_details_complete, {
+        updateTabItems(session = session, inputId = "tabs", selected = "operative_note")
+    })
+    
     observeEvent(input$lumbar_vertebrae_6, ignoreInit = TRUE,{
         if(input$lumbar_vertebrae_6 == TRUE){
             ## first backup L5
@@ -970,6 +1034,10 @@ server <- function(input, output, session) {
                     l5_all_implants_constructed_df <<- all_implants_constructed_df
                     l5_spine_png <<- spine_png
                     l5_open_canal_df <<- open_canal_df
+                    l5_labels_anterior_df <<- labels_anterior_df
+                    
+                    labels_anterior_df <<- labels_anterior_df  %>%
+                        add_row(level = "L6", x = 0.5, y = 0.14)
                     
                     spine_png <<- l6_spine_png
                     
@@ -979,7 +1047,7 @@ server <- function(input, output, session) {
                     levels_numbered_df <<- l6_levels_numbered_df
             
                     all_implants_constructed_df <<- all_implants_constructed_df %>%
-                        filter(vertebral_number < 24.2) %>%
+                        filter(vertebral_number < 23.9) %>%
                         union_all(l6_all_implants_constructed_df)
                     
                     anterior_df <<- l6_anterior_df
@@ -997,10 +1065,14 @@ server <- function(input, output, session) {
 
             labels_df <<- l5_labels_df
             levels_numbered_df <<- l5_levels_numbered_df
+            
+            labels_anterior_df <<- l5_labels_anterior_df
+            
+            all_implants_constructed_df <<- l5_all_implants_constructed_df
 
-            all_implants_constructed_df <<- all_implants_constructed_df %>%
-                filter(vertebral_number < 24.2) %>%
-                union_all(l5_all_implants_constructed_df)
+            # all_implants_constructed_df <<- all_implants_constructed_df %>%
+            #     filter(vertebral_number < 24.2) %>%
+            #     union_all(l5_all_implants_constructed_df)
 
             anterior_df <<- l5_anterior_df
             # implant_starts_df <- l5_implant_starts_df
@@ -1017,49 +1089,15 @@ server <- function(input, output, session) {
     ########################################## RENDER UI'S    ########################################## 
 
     ################------------------  Approaches    ----------------------######################  
-    # 
-    # spine_approaches_list_reactive <- reactive({
-    #     if(input$spine_approach == "Anterior"){
-    #         approach_choices <- c("Left-sided", 
-    #                               "Right-Sided",
-    #                               "Paramedian",
-    #                               "Lateral Transpsoas",
-    #                               "Lateral Antepsoas",
-    #                               "Thoracoabdominal",
-    #                               "Thoracotomy",
-    #                               "Transperitoneal",
-    #                               "Retroperitoneal")
-    #         approach_selected <- "Left-sided"
-    #     }
-    #     if(input$spine_approach == "Posterior"){
-    #         approach_choices <- c("Midline",
-    #                               "Paraspinal or Paramedian",
-    #                               "Stab")
-    #         approach_selected <- "Midline"
-    #     }
-    #     
-    #     list(approach_choices = approach_choices, 
-    #          approach_selected = approach_selected)
-    # })
-    # 
-    # observeEvent(input$spine_approach,  {
-    #     updatePrettyRadioButtons(session = session, 
-    #                              inputId = "approach_specified",
-    #                              prettyOptions = list(bigger = TRUE, 
-    #                                                   status = "info",
-    #                                                   animation = "jelly"), 
-    #                              label = NULL, 
-    #                              inline = TRUE,
-    #                              choices = spine_approaches_list_reactive()$approach_choices,
-    #                              selected = spine_approaches_list_reactive()$approach_selected)
-    #     
-    # })
+
     
     ################------------------  Diagnoses    ----------------------######################  
     
     observeEvent(input$primary_diagnosis_group,{
         if(input$primary_diagnosis_group == "spinal_condition"){
-            updatePickerInput(session = session, inputId = "diagnosis_subgroup", label = NULL, 
+            updatePickerInput(session = session, 
+                              inputId = "diagnosis_subgroup", 
+                              label = NULL, 
                               choices = c("Spinal Stenosis", 
                                           "Myelopathy", 
                                           "Foraminal Stenosis",
@@ -1074,7 +1112,9 @@ server <- function(input, output, session) {
         }
         
         if(input$primary_diagnosis_group == "neoplasm"){
-            updatePickerInput(session = session, inputId = "diagnosis_subgroup", label = NULL, 
+            updatePickerInput(session = session,
+                              inputId = "diagnosis_subgroup",
+                              label = NULL, 
                               choices = c("Metastatic Disease to the Spinal column",
                                           "Primary Neoplasm of the spine",
                                           "Other"))
@@ -1082,7 +1122,9 @@ server <- function(input, output, session) {
         }
         
         if(input$primary_diagnosis_group == "lesion"){
-            updatePickerInput(session = session, inputId = "diagnosis_subgroup", label = NULL, 
+            updatePickerInput(session = session,
+                              inputId = "diagnosis_subgroup", 
+                              label = NULL, 
                               choices = c("Traumatic Burst Fracture", 
                                           "Fracture Dislocation", 
                                           "Osteomyelitis/Diskitis",
@@ -1110,6 +1152,35 @@ server <- function(input, output, session) {
         }
     })
     
+    output$tumor_resection_ui <- renderUI({
+        
+        if(input$primary_diagnosis_group == "neoplasm"){
+            actionBttn(
+                inputId = "add_tumor_resection",
+                size = "sm", block = TRUE,
+                label = "Add Tumor Resection",
+                style = "simple",
+                color = "primary"
+            )
+        }else{
+            NULL
+        }
+    })
+    
+    observeEvent(input$add_tumor_resection, {
+        updateRadioGroupButtons(session = session, 
+                                inputId = "object_to_add",
+                                choices = c(
+                                    "Partial Excision of Posterior Elements" = "excision_posterior_elements",
+                                    "Partial Excision of Vertebral Body (w/o decompression)" = "excision_body_no_decompression",
+                                    "Complete Vertebral Corpectomy" = "excision_complete"
+                                ),
+                                checkIcon = list(
+                                    yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
+                                ),
+                                selected = "intervertebral_cage"
+        )
+    })
     
     ################------------------  Operative Report Details    ----------------------######################  
     
@@ -1219,6 +1290,7 @@ server <- function(input, output, session) {
             NULL
         }
     })
+    
     observeEvent(input$add_intervertebral_cage, {
         updateRadioGroupButtons(session = session, 
                                 inputId = "object_to_add",
@@ -1232,6 +1304,7 @@ server <- function(input, output, session) {
         )
     })
     
+
     observeEvent(list(input$add_implants, input$spine_approach), {
         if(input$spine_approach == "Posterior"){
             updateRadioGroupButtons(session = session, 
@@ -1239,19 +1312,17 @@ server <- function(input, output, session) {
                                     choices = c(
                                         "Pedicle Screws" = "pedicle_screw",
                                         "Pelvic Screws" = "pelvic_screw",
-                                        "Lateral Mass Screws" = "lateral_mass_screw",
-                                        "Pars Screws" = "pars_screw",
-                                        "Transarticular Screw" = "transarticular_screw",
                                         "Occipital Screws" = "occipital_screw",
+                                        "Transarticular Screw" = "transarticular_screw",
+                                        "Pars Screws" = "pars_screw",
                                         "Translaminar Screws" = "translaminar_screw",
+                                        "Lateral Mass Screws" = "lateral_mass_screw",
                                         "TP Hook" = "tp_hook",
                                         "Laminar Hook (Downgoing)" = "laminar_downgoing_hook",
                                         "Laminar Hook (Upgoing)" = "laminar_upgoing_hook",
                                         "Pedicle Hook" = "pedicle_hook",
-                                        "Tether" = "tether",
-                                        "Sublaminar Wire" = "sublaminar_wire" , 
-                                        "Cement Augmentation" = "cement_augmentation"
-                                    ),
+                                        "Tether (Spinous Process)" = "tether",
+                                        "Sublaminar Wire" = "sublaminar_wire"                                     ),
                                     checkIcon = list(
                                         yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
                                     ),
@@ -1302,9 +1373,35 @@ server <- function(input, output, session) {
         updateRadioGroupButtons(session = session, 
                                 inputId = "object_to_add", 
                                 choices = c("TLIF" = "tlif",
-                                            # "LLIF" = "llif",
                                             "PLIF" = "plif", 
                                             "Interbody Fusion, No Implant" = "no_implant_interbody_fusion"),
+                                checkIcon = list(
+                                    yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
+                                ),
+                                selected = "TLIF"
+        )
+    })
+    
+    observeEvent(input$add_special_approach, {
+        updateRadioGroupButtons(session = session, 
+                                inputId = "object_to_add", 
+                                choices = c(                                
+                                    "Transpedicular Decompression" = "transpedicular_approach",
+                                    "Costovertebral Decompression" = "costovertebral_approach",
+                                    "Lateral Extracavitary Approach (modified)" = "lateral_extracavitary_approach", 
+                                    "Costotransversectomy" = "costotransversectomy"),
+                                checkIcon = list(
+                                    yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
+                                ),
+                                selected = "TLIF"
+        )
+    })
+    
+    observeEvent(input$add_other, {
+        updateRadioGroupButtons(session = session, 
+                                inputId = "object_to_add", 
+                                choices = c("Vertebroplasty" = "vertebroplasty",
+                                            "Vertebral Augmentation (cavity creation, then cement)" = "vertebral_cement_augmentation"),
                                 checkIcon = list(
                                     yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
                                 ),
@@ -1524,7 +1621,7 @@ server <- function(input, output, session) {
     })
     
     observeEvent(list(all_objects_to_add_list$objects_df, right_supplement_rod_starts_list_reactive()), {
-        if(nrow(right_rod_implants_df_reactive()) > 3){
+        if(nrow(right_rod_implants_df_reactive()) > 2){
             updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
         }
     })
@@ -1967,15 +2064,24 @@ server <- function(input, output, session) {
                       all_objects_to_add_list$objects_df), {
         all_posterior_objects_df <- all_objects_to_add_list$objects_df %>%
             filter(approach == "posterior")
-        ## cement_augmentation
-        if(any(str_detect(all_posterior_objects_df$object, pattern = "cement_augmentation"))){
-            geoms_list_posterior$cement_augmentation_sf_geom <- geom_sf_pattern(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "cement_augmentation")))$object_constructed),
+        ## vertebroplasty
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "vertebroplasty"))){
+            geoms_list_posterior$vertebroplasty_sf_geom <- geom_sf_pattern(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "vertebroplasty")))$object_constructed),
                                                                       pattern = "plasma",
                                                                       pattern_alpha = 0.5,
                                                                       alpha = 0.3,
                                                                       color = "grey96")
         }else{
-            geoms_list_posterior$cement_augmentation_sf_geom <- NULL
+            geoms_list_posterior$vertebroplasty_sf_geom <- NULL
+        }
+        if(any(str_detect(all_posterior_objects_df$object, pattern = "vertebral_cement_augmentation"))){
+            geoms_list_posterior$vertebroplasty_sf_geom <- geom_sf_pattern(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "vertebroplasty")))$object_constructed),
+                                                                                pattern = "plasma",
+                                                                                pattern_alpha = 0.5,
+                                                                                alpha = 0.3,
+                                                                                color = "grey75")
+        }else{
+            geoms_list_posterior$vertebroplasty_sf_geom <- NULL
         }
         
         
@@ -3321,7 +3427,7 @@ server <- function(input, output, session) {
         data_wide <- all_objects_to_add_list$objects_df %>%
             as_tibble() %>%
             select(-object_constructed) %>%
-            mutate(category = op_note_procedure_category_function(object = object)) %>%
+            mutate(category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
             union_all(fusion_df) %>%
             arrange(vertebral_number) %>%
             select(level, approach, category, procedure = object, side) %>%
@@ -3478,7 +3584,7 @@ server <- function(input, output, session) {
         if(spine_instrumented == TRUE | spine_treated == TRUE){
             uiv_ppx_df <- all_objects_to_add_list$objects_df %>%
                 filter(level == upper_treated_vertebrae | level == uiv) %>%
-                filter(str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "tether") | str_detect(string = object, pattern = "wire") | str_detect(string = object, pattern = "cement_augmentation")) %>%
+                filter(str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "tether") | str_detect(string = object, pattern = "wire") | str_detect(string = object, pattern = "vertebroplasty")) %>%
                 select(level, object) %>%
                 distinct()
         }else{
@@ -3563,10 +3669,8 @@ server <- function(input, output, session) {
                              ebl = input$ebl,
                              complications = complication_statement,
                              operative_note = input$operative_note_text
-                             # operative_note = HTML(op_note_text_reactive())
         )
-        
-        
+
         summary_df
         
     })

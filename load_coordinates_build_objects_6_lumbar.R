@@ -148,20 +148,44 @@ l6_spine_png <- image_read(path = "posterior_spine_6_lumbar_vert.png")
 # posterior_spine_6_lumbar_vert
 l6_anterior_spine_png <- image_read(path = "anterior_spine_6_lumbar_vert.png")
 
-l6_implant_starts_df <- read_csv(file = "full_coordinates_df.csv") %>%
+# l6_implant_starts_df <- read_csv(file = "full_coordinates_df.csv") %>%
+#   filter(!is.na(x)) %>%
+#   filter(vertebral_number > 24.2)
+# 
+# # kept_same_df <- l6_implant_starts_df %>%
+# #   filter(vertebral_number < 24.2)
+# 
+# s1_to_l6_changed_df <- l6_implant_starts_df %>%
+#   # filter(vertebral_number > 24) %>%
+#   filter(vertebral_number < 25.5) %>%
+#   mutate(level = str_replace_all(string = level, pattern = "S1", replacement = "L6"))
+# 
+# shifted_down_df <- l6_implant_starts_df %>%
+#   filter(vertebral_number > 24) %>%
+#   mutate(level = str_replace_all(string = level, pattern = "L5", replacement = "L6")) %>%
+#   mutate(vertebral_number = vertebral_number + 1) %>%
+#   mutate_at(.vars = vars("y", 
+#                          "superior_y", 
+#                          "inferior_y", 
+#                          "superior_vert_inferior_pedicle_y", 
+#                          "superior_lamina_y",
+#                          "inferior_lamina_y", 
+#                          "inferior_pedicle_y",
+#                          "body_center_y", 
+#                          "superior_tp_y", 
+#                          "inferior_tp_y", 
+#                          "inferior_facet_superior_border_y",
+#                          "inferior_facet_inferior_border_y",
+#                          "inferior_endplate_y",
+#                          "superior_endplate_y", 
+#                          "superior_endplate_inferior_body_y",
+#                          "inferior_endplate_superior_body_y"), .funs = ~ .x - 0.03)
+
+l6_implant_starts_lower_only_df <- read_csv(file = "full_coordinates_df.csv") %>%
   filter(!is.na(x)) %>%
-  filter(vertebral_number > 24.2)
+  filter(vertebral_number > 23.9)
 
-# kept_same_df <- l6_implant_starts_df %>%
-#   filter(vertebral_number < 24.2)
-
-s1_to_l6_changed_df <- l6_implant_starts_df %>%
-  # filter(vertebral_number > 24) %>%
-  filter(vertebral_number < 25.5) %>%
-  mutate(level = str_replace_all(string = level, pattern = "S1", replacement = "L6"))
-
-shifted_down_df <- l6_implant_starts_df %>%
-  filter(vertebral_number > 24) %>%
+l5_to_l6_shifted_down_df <-l6_implant_starts_lower_only_df %>%
   mutate(level = str_replace_all(string = level, pattern = "L5", replacement = "L6")) %>%
   mutate(vertebral_number = vertebral_number + 1) %>%
   mutate_at(.vars = vars("y", 
@@ -179,11 +203,18 @@ shifted_down_df <- l6_implant_starts_df %>%
                          "inferior_endplate_y",
                          "superior_endplate_y", 
                          "superior_endplate_inferior_body_y",
-                         "inferior_endplate_superior_body_y"), .funs = ~ .x - 0.03)
+                         "inferior_endplate_superior_body_y"), .funs = ~ .x - 0.04)
 
 
-l6_implant_starts_df <- s1_to_l6_changed_df %>%
-  union_all(shifted_down_df)
+l6_implant_starts_df <- l6_implant_starts_lower_only_df %>%
+  filter(vertebral_number < 24.7) %>%
+  mutate(level = str_replace_all(string = level, pattern = "S1", replacement = "L6")) %>%
+  union_all(l5_to_l6_shifted_down_df) %>%
+  # union_all(l6_implant_starts_unchanged_df) %>%
+  arrange(vertebral_number) 
+
+# l6_implant_starts_df <- s1_to_l6_changed_df %>%
+#   union_all(shifted_down_df)
 
 #############-----------------------   Build Key Dataframes  ----------------------###############
 

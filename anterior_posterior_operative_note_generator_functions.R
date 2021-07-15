@@ -4,7 +4,8 @@
 
 op_note_procedure_performed_summary_classifier_function <- function(object){
   procedure_category <- case_when(
-    object == "cement_augmentation" ~ "Vertebral cement augmentation",
+    object == "vertebroplasty" ~ "Vertebroplasty",
+    object == "vertebral_cement_augmentation" ~ "Vertebral body augmentation",
     object == "laminar_downgoing_hook" ~ "Posterior spinal instrumentation",
     object == "laminar_upgoing_hook" ~ "Posterior spinal instrumentation",
     object == "lateral_mass_screw" ~ "Posterior spinal instrumentation",
@@ -59,122 +60,13 @@ op_note_procedure_performed_summary_classifier_function <- function(object){
   procedure_category
 }
 
-op_note_procedure_performed_summary_per_line_function <- function(procedure_type){
-  procedures_per_line <- case_when(
-    procedure_type == 'Vertebral cement augmentation' ~ 'multiple',
-    procedure_type == 'Posterior spinal instrumentation' ~ 'multiple',
-    procedure_type == 'Occiput instrumentation' ~ 'multiple',
-    procedure_type == 'Pelvic instrumentation' ~ 'multiple',
-    procedure_type == 'Spinous process posterior tethering/wiring' ~ 'multiple',
-    procedure_type == 'Complete facetectomy' ~ 'multiple',
-    procedure_type == 'Inferior facetectomies' ~ 'multiple',
-    procedure_type == 'Posterior column osteotomy' ~ 'multiple',
-    procedure_type == 'Pedicle subtraction osteotomy' ~ 'one',
-    procedure_type == 'Extended three column osteotomy (vertebral body partial corpectomy)' ~ 'one',
-    procedure_type == 'Vertebral column resection' ~ 'one',
-    procedure_type == 'Costovertebral approach with costotransversectomy' ~ 'multiple',
-    procedure_type == 'Decompression with diskectomy and laminotomy' ~ 'multiple',
-    procedure_type == 'Decompression with laminotomy and medial facetectomy' ~ 'multiple',
-    procedure_type == 'Decompression with central laminectomy' ~ 'multiple',
-    procedure_type == 'Decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies' ~ 'multiple',
-    procedure_type == "Reexploration and revision decompression with diskectomy and laminotomy" ~ 'multiple',
-    procedure_type == "Reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies" ~ 'multiple',
-    procedure_type == "Reexploration and revision decompression with central laminectomy" ~ 'multiple',
-    procedure_type == "Reexploration and revision decompression with laminotomy and medial facetectomy"~ 'multiple',
-    procedure_type == 'Laminoplasty' ~ 'multiple',
-    procedure_type == 'Decompression using a transpedicular approach' ~ 'one',
-    procedure_type == 'Decompression using a costovertebral approach' ~ 'one',
-    procedure_type == "Decompression using a modified lateral extracavitary approach" ~ 'one',
-    procedure_type == 'Reexploration and revision decompression using a transpedicular approach' ~ 'one',
-    procedure_type == 'Reexploration and revision decompression using a costovertebral approach' ~ 'one',
-    procedure_type == 'Interbody fusion (without interbody implant)' ~ 'one',
-    procedure_type == 'Lateral lumbar interbody fusion and insertion of interbody device' ~ 'one',
-    procedure_type == 'Transforaminal lumbar interbody fusion and insertion of interbody device' ~ 'one',
-    procedure_type == 'Interbody fusion (without interbody implant)' ~ 'one',
-    procedure_type == 'Posterior lumbar interbody fusion and insertion of interbody device' ~ 'one',
-    procedure_type == "Insertion of intervertebral biomechanical implant" ~ 'one',
-    ## Anterior ##
-    procedure_type ==  "Total disk arthroplasty"~ 'one',
-    procedure_type == "Anterior diskectomy and fusion with decompression of the central canal and nerve roots"~ 'one',
-    procedure_type == "Anterior diskectomy and fusion"~ 'one',
-    procedure_type == "Insertion of interbody biomechanical implant"~ 'multiple',
-    procedure_type == "Anterior vertebral corpectomy"~ 'one',
-    procedure_type == "Anterior insertion of intervertebral biomechanical implant"~ 'multiple',
-    procedure_type == "Anterior spinal instrumentation (distinct from an interbody implant)"~ 'multiple',
-    procedure_type == "Anterior spinal instrumentation (distinct from an interbody implant)"~ 'multiple',
-    procedure_type == "Anterior spinal instrumentation (distinct from an interbody implant)" ~ 'multiple',
-    procedure_type == "Insertion of intervertebral biomechanical device" ~ 'one'
-    
-  )
-  procedures_per_line
-}
-
-
-op_note_procedure_category_function <- function(object){
-  procedure_category <- case_when(
-    object == "cement_augmentation" ~ "vertebral cement augmentation",
-    object == "laminar_downgoing_hook" ~ "posterior spinal instrumentation",
-    object == "laminar_upgoing_hook" ~ "posterior spinal instrumentation",
-    object == "lateral_mass_screw" ~ "posterior spinal instrumentation",
-    object == "occipital_screw" ~ "occiput instrumentation",
-    object == "pars_screw" ~ "posterior spinal instrumentation",
-    object == "pedicle_hook" ~ "posterior spinal instrumentation",
-    object == "pedicle_screw" ~ "posterior spinal instrumentation",
-    object == "laminar_downgoing_hook" ~ "posterior spinal instrumentation",
-    object == "sublaminar_wire" ~ "posterior spinal instrumentation",
-    object == "tp_hook" ~ "posterior spinal instrumentation",
-    object == "translaminar_screw" ~ "posterior spinal instrumentation",
-    object == "transarticular_screw" ~ "posterior spinal instrumentation",
-    object == "pelvic_screw" ~ "pelvic instrumentation",
-    object == "tether" ~ "spinous process posterior tethering/wiring",
-    object == "costovertebral_approach" ~ "decompression using a costovertebral approach",
-    object == "revision_costovertebral_approach" ~ "reexploration with revision decompression using a costovertebral approach",
-    object == "transpedicular_approach" ~ "decompression using a transpedicular approach",
-    object == "revision_transpedicular_approach" ~ "reexploration with revision decompression using a transpedicular approach",
-    object == "lateral_extracavitary_approach" ~ "decompression using a modified lateral extracavitary approach",
-    object == "diskectomy" ~ "decompression",
-    object == "sublaminar_decompression" ~ "decompression",
-    object == "laminectomy" ~ "decompression",
-    object == "laminotomy" ~ "decompression",
-    object == "revision_diskectomy" ~ "reexploration with revision decompression",
-    object == "revision_sublaminar_decompression" ~ "reexploration with revision decompression",
-    object == "revision_laminectomy" ~ "reexploration with revision decompression",
-    object == "revision_laminotomy" ~ "reexploration with revision decompression",
-    object == "laminoplasty" ~ "laminoplasty",
-    object == "grade_1" ~ "inferior facetectomies",
-    object == "complete_facetectomy" ~ "complete facetectomy",
-    object == "grade_2" ~ "posterior column osteotomy",
-    object == "grade_3" ~ "pedicle subtraction osteotomy",
-    object == "grade_4" ~ "extended three column osteotomy (vertebral body partial corpectomy)",
-    object == "grade_5" ~ "vertebral column resection",
-    object == "costotransversectomy" ~ "costovertebral approach with costotransversectomy",
-    object == "no_implant_interbody_fusion" ~ "interbody fusion (without interbody implant)",
-    object == "llif" ~ "lateral lumbar interbody fusion and insertion of interbody device",
-    object == "plif" ~ "posterior lumbar interbody fusion and insertion of interbody device",
-    object == "tlif" ~ "transforaminal lumbar interbody fusion and insertion of interbody device",
-    object == "intervertebral_cage" ~ "insertion of intervertebral biomechanical implant",
-    #anterior#
-    object == "anterior_disc_arthroplasty" ~ "total disk arthroplasty",
-    object == "decompression_diskectomy_fusion" ~ "anterior diskectomy and fusion with decompression of the central canal and nerve roots",
-    object == "diskectomy_fusion" ~ "anterior diskectomy and fusion",
-    object == "diskectomy_fusion_no_interbody_device" ~ "anterior diskectomy and fusion",
-    object == "anterior_interbody_implant" ~ "insertion of interbody biomechanical implant",
-    object == "corpectomy" ~ "anterior vertebral corpectomy",
-    object == "corpectomy_cage" ~ "anterior insertion of intervertebral biomechanical implant",
-    object == "anterior_plate" ~ "anterior spinal instrumentation (distinct from an interbody implant)",
-    object == "anterior_buttress_plate" ~ "anterior spinal instrumentation (distinct from an interbody implant)",
-    object == "screw_washer" ~ "anterior spinal instrumentation (distinct from an interbody implant)"
-  )
-  procedure_category
-}
-
-
 op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
   
   procedure_cat <- str_to_lower(procedure_cat)
   
   paragraph_type <- case_when(
-    procedure_cat == "vertebral cement augmentation" ~ "combine",
+    procedure_cat == "vertebroplasty" ~ "combine",
+    procedure_cat == "vertebral body augmentation" ~ "combine",
     procedure_cat == "posterior spinal instrumentation" ~ "combine",
     procedure_cat == "occiput instrumentation" ~ "combine",
     procedure_cat == "pelvic instrumentation" ~ "combine",
@@ -183,7 +75,7 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
     procedure_cat == "reexploration with revision decompression using a costovertebral approach" ~ "distinct",
     procedure_cat == "decompression using a transpedicular approach" ~ "distinct",
     procedure_cat == "reexploration with revision decompression using a transpedicular approach" ~ "distinct",
-    procedure_cat == "decompression using a modified lateral extracavitary approach" ~ "distinct",
+    procedure_cat == "decompression using a modified lateral extracavitary approach" ~ "combine",
     procedure_cat == "decompression" ~ "combine",
     procedure_cat == "reexploration with revision decompression" ~ "combine",
     procedure_cat == 'decompression with diskectomy and laminotomy' ~ 'combine',
@@ -201,7 +93,7 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
     procedure_cat == "pedicle subtraction osteotomy" ~ "distinct",
     procedure_cat == "extended three column osteotomy (vertebral body partial corpectomy)" ~ "distinct",
     procedure_cat == "vertebral column resection" ~ "distinct",
-    procedure_cat == "costovertebral approach with costotransversectomy" ~ "distinct",
+    procedure_cat == "costovertebral approach with costotransversectomy" ~ "combine",
     procedure_cat == "interbody fusion (without interbody implant)" ~ "distinct",
     procedure_cat == "lateral lumbar interbody fusion and insertion of interbody device" ~ "distinct",
     procedure_cat == "posterior lumbar interbody fusion and insertion of interbody device" ~ "distinct",
@@ -220,6 +112,115 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
   paragraph_type
 }
 
+
+# op_note_procedure_performed_summary_per_line_function <- function(procedure_type){
+#   procedures_per_line <- case_when(
+#     procedure_type == 'Vertebral cement augmentation' ~ 'multiple',
+#     procedure_type == 'Posterior spinal instrumentation' ~ 'multiple',
+#     procedure_type == 'Occiput instrumentation' ~ 'multiple',
+#     procedure_type == 'Pelvic instrumentation' ~ 'multiple',
+#     procedure_type == 'Spinous process posterior tethering/wiring' ~ 'multiple',
+#     procedure_type == 'Complete facetectomy' ~ 'multiple',
+#     procedure_type == 'Inferior facetectomies' ~ 'multiple',
+#     procedure_type == 'Posterior column osteotomy' ~ 'multiple',
+#     procedure_type == 'Pedicle subtraction osteotomy' ~ 'one',
+#     procedure_type == 'Extended three column osteotomy (vertebral body partial corpectomy)' ~ 'one',
+#     procedure_type == 'Vertebral column resection' ~ 'one',
+#     procedure_type == 'Costovertebral approach with costotransversectomy' ~ 'multiple',
+#     procedure_type == 'Decompression with diskectomy and laminotomy' ~ 'multiple',
+#     procedure_type == 'Decompression with laminotomy and medial facetectomy' ~ 'multiple',
+#     procedure_type == 'Decompression with central laminectomy' ~ 'multiple',
+#     procedure_type == 'Decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies' ~ 'multiple',
+#     procedure_type == "Reexploration and revision decompression with diskectomy and laminotomy" ~ 'multiple',
+#     procedure_type == "Reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies" ~ 'multiple',
+#     procedure_type == "Reexploration and revision decompression with central laminectomy" ~ 'multiple',
+#     procedure_type == "Reexploration and revision decompression with laminotomy and medial facetectomy"~ 'multiple',
+#     procedure_type == 'Laminoplasty' ~ 'multiple',
+#     procedure_type == 'Decompression using a transpedicular approach' ~ 'one',
+#     procedure_type == 'Decompression using a costovertebral approach' ~ 'one',
+#     procedure_type == "Decompression using a modified lateral extracavitary approach" ~ 'multiple',
+#     procedure_type == 'Reexploration and revision decompression using a transpedicular approach' ~ 'one',
+#     procedure_type == 'Reexploration and revision decompression using a costovertebral approach' ~ 'one',
+#     procedure_type == 'Interbody fusion (without interbody implant)' ~ 'one',
+#     procedure_type == 'Lateral lumbar interbody fusion and insertion of interbody device' ~ 'one',
+#     procedure_type == 'Transforaminal lumbar interbody fusion and insertion of interbody device' ~ 'one',
+#     procedure_type == 'Interbody fusion (without interbody implant)' ~ 'one',
+#     procedure_type == 'Posterior lumbar interbody fusion and insertion of interbody device' ~ 'one',
+#     procedure_type == "Insertion of intervertebral biomechanical implant" ~ 'one',
+#     ## Anterior ##
+#     procedure_type ==  "Total disk arthroplasty"~ 'one',
+#     procedure_type == "Anterior diskectomy and fusion with decompression of the central canal and nerve roots"~ 'one',
+#     procedure_type == "Anterior diskectomy and fusion"~ 'one',
+#     procedure_type == "Insertion of interbody biomechanical implant"~ 'multiple',
+#     procedure_type == "Anterior vertebral corpectomy"~ 'one',
+#     procedure_type == "Anterior insertion of intervertebral biomechanical implant"~ 'multiple',
+#     procedure_type == "Anterior spinal instrumentation (distinct from an interbody implant)"~ 'multiple',
+#     procedure_type == "Anterior spinal instrumentation (distinct from an interbody implant)"~ 'multiple',
+#     procedure_type == "Anterior spinal instrumentation (distinct from an interbody implant)" ~ 'multiple',
+#     procedure_type == "Insertion of intervertebral biomechanical device" ~ 'one'
+#     
+#   )
+#   procedures_per_line
+# }
+
+
+# op_note_procedure_category_function <- function(object){
+#   procedure_category <- case_when(
+#     object == "vertebroplasty" ~ "vertebral cement augmentation",
+#     object == "laminar_downgoing_hook" ~ "posterior spinal instrumentation",
+#     object == "laminar_upgoing_hook" ~ "posterior spinal instrumentation",
+#     object == "lateral_mass_screw" ~ "posterior spinal instrumentation",
+#     object == "occipital_screw" ~ "occiput instrumentation",
+#     object == "pars_screw" ~ "posterior spinal instrumentation",
+#     object == "pedicle_hook" ~ "posterior spinal instrumentation",
+#     object == "pedicle_screw" ~ "posterior spinal instrumentation",
+#     object == "laminar_downgoing_hook" ~ "posterior spinal instrumentation",
+#     object == "sublaminar_wire" ~ "posterior spinal instrumentation",
+#     object == "tp_hook" ~ "posterior spinal instrumentation",
+#     object == "translaminar_screw" ~ "posterior spinal instrumentation",
+#     object == "transarticular_screw" ~ "posterior spinal instrumentation",
+#     object == "pelvic_screw" ~ "pelvic instrumentation",
+#     object == "tether" ~ "spinous process posterior tethering/wiring",
+#     object == "costovertebral_approach" ~ "decompression using a costovertebral approach",
+#     object == "revision_costovertebral_approach" ~ "reexploration with revision decompression using a costovertebral approach",
+#     object == "transpedicular_approach" ~ "decompression using a transpedicular approach",
+#     object == "revision_transpedicular_approach" ~ "reexploration with revision decompression using a transpedicular approach",
+#     object == "lateral_extracavitary_approach" ~ "decompression using a modified lateral extracavitary approach",
+#     object == "diskectomy" ~ "decompression",
+#     object == "sublaminar_decompression" ~ "decompression",
+#     object == "laminectomy" ~ "decompression",
+#     object == "laminotomy" ~ "decompression",
+#     object == "revision_diskectomy" ~ "reexploration with revision decompression",
+#     object == "revision_sublaminar_decompression" ~ "reexploration with revision decompression",
+#     object == "revision_laminectomy" ~ "reexploration with revision decompression",
+#     object == "revision_laminotomy" ~ "reexploration with revision decompression",
+#     object == "laminoplasty" ~ "laminoplasty",
+#     object == "grade_1" ~ "inferior facetectomies",
+#     object == "complete_facetectomy" ~ "complete facetectomy",
+#     object == "grade_2" ~ "posterior column osteotomy",
+#     object == "grade_3" ~ "pedicle subtraction osteotomy",
+#     object == "grade_4" ~ "extended three column osteotomy (vertebral body partial corpectomy)",
+#     object == "grade_5" ~ "vertebral column resection",
+#     object == "costotransversectomy" ~ "costovertebral approach with costotransversectomy",
+#     object == "no_implant_interbody_fusion" ~ "interbody fusion (without interbody implant)",
+#     object == "llif" ~ "lateral lumbar interbody fusion and insertion of interbody device",
+#     object == "plif" ~ "posterior lumbar interbody fusion and insertion of interbody device",
+#     object == "tlif" ~ "transforaminal lumbar interbody fusion and insertion of interbody device",
+#     object == "intervertebral_cage" ~ "insertion of intervertebral biomechanical implant",
+#     #anterior#
+#     object == "anterior_disc_arthroplasty" ~ "total disk arthroplasty",
+#     object == "decompression_diskectomy_fusion" ~ "anterior diskectomy and fusion with decompression of the central canal and nerve roots",
+#     object == "diskectomy_fusion" ~ "anterior diskectomy and fusion",
+#     object == "diskectomy_fusion_no_interbody_device" ~ "anterior diskectomy and fusion",
+#     object == "anterior_interbody_implant" ~ "insertion of interbody biomechanical implant",
+#     object == "corpectomy" ~ "anterior vertebral corpectomy",
+#     object == "corpectomy_cage" ~ "anterior insertion of intervertebral biomechanical implant",
+#     object == "anterior_plate" ~ "anterior spinal instrumentation (distinct from an interbody implant)",
+#     object == "anterior_buttress_plate" ~ "anterior spinal instrumentation (distinct from an interbody implant)",
+#     object == "screw_washer" ~ "anterior spinal instrumentation (distinct from an interbody implant)"
+#   )
+#   procedure_category
+# }
 
 
 extract_levels_function <- function(input_df){
@@ -627,22 +628,22 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
       mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
       select(level, object, vertebral_number) %>%
       mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_procedure_performed_summary_per_line_function(procedure_type = procedure_class)) 
+      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
   }else{
     summary_nested_df <- objects_added_df %>%
       select(level, object, vertebral_number) %>%
       mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_procedure_performed_summary_per_line_function(procedure_type = procedure_class)) 
+      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
   }
   
   
   summary_single_statements <- summary_nested_df %>%
-    filter(procedures_per_line == "one") %>%
+    filter(procedures_per_line == "distinct") %>%
     mutate(procedure_performed_statement = glue("{procedure_class} at {level}"))%>%
     select(procedure_class, procedure_performed_statement)
   
   summary_multiple_nested <- summary_nested_df %>%
-    filter(procedures_per_line == "multiple") %>%
+    filter(procedures_per_line == "combine") %>%
     group_by(procedure_class) %>%
     nest() %>%
     ungroup() %>%
@@ -765,7 +766,8 @@ op_note_technique_combine_statement <- function(object, levels_side_df){
   
   
   technique_statement <- case_when(
-    object == "cement_augmentation" ~ glue("For vertebral body cement augmentation, a cannula was inserted into the vertebral body through the pedicle. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Cement augmentation was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
+    object == "vertebroplasty" ~ glue("For vertebral body cement augmentation, a cannula was inserted into the vertebral body through the pedicle. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebroplasty was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
+    object == "vertebral_cement_augmentation" ~ glue("For vertebral body cement augmentation, I first created a cavity within the vertebral body. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebral augmentation was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
     object == "laminar_downgoing_hook" ~ glue("For downgoing laminar hooks, the ligamentum flavum was removed at the site of the hook insertion. A hook was then inserted securely under the lamina {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
     object == "laminar_upgoing_hook" ~ glue("For upgoing laminar hooks, the inferior edge of the cranial lamina was identified and the plane between the lamina and ligamentum was developed and the upgoing hook is then placed within this plane, secured to the lamina aimed cranially {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
     object == "lateral_mass_screw" ~ glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a high speed burr and the screw path drilled incrementally to the far cortex. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
@@ -799,6 +801,7 @@ op_note_technique_combine_statement <- function(object, levels_side_df){
     object == 'revision_sublaminar_decompression' ~ glue("Using a combination of a high-speed burr and Kerrison rongeurs, I performed a reexploration and revision decompression bilaterally at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace. First, I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. I proceeded with partial laminectomies and excised the scar and underlying ligamentum flavum. The medial facet was partially excised and a foraminotomy performed on the left and right at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace, to fully decompress the exiting and traversing nerve roots within the neural foramen and lateral recess. Following the revision decompression, the canal and foramen were palpated to confirm an adequate decompression had been completed."),
     
     object == 'costotransversectomy' ~ glue("For the costotransversectomy, the rib was identified and a subperiosteal dissection was carried out laterally 6-7cm. Once the medial rib was skeletonized and a safe, subperiorsteal plane was confirmed, 5-6cm of the medial rib was transected. This process was completed {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}, allowing a safe costovertebral approach to the anterior vertebral body."),
+    object == 'lateral_extracavitary_approach' ~ glue("For the modified lateral extracavitary approach at {glue_collapse(levels_side_df$level, sep = ', ', last = ' and ')}, the pedicle of {glue_collapse(levels_side_df$level, sep = ', ', last = ' and ')} was identified and using a combination of a high-speed burr, Kerrison rongeurs and osteotome, the inferior and superior facets were fully resected, allowing access to the interspace. The lateral border of the disk space was identified and the dissection was carried out anteriorly around the entire anterior portion of the vertebral body. This was carried out {glue_collapse(levels_side_df$level_side, sep = ', ', last = ' and ')} and allowed safe access to the anterior longitudinal ligament and the most anterior portion of the vertbral body."),
     
     object == 'laminoplasty' ~ glue("For laminoplasty, an opening and hinge trough was created with a high-speed burr angled perpendicular to the lamina at the lateral mass-lamina junction. This was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}. After all troughs were completed, greenstick fractures were created to open the lamina at the laminoplasty levels, the ligamentum flavum at the proximal and distal levels was excised, and laminoplasty plates were sequentially secured into place. The spinous processes were trimmed and the canal was palpated to confirm an adequate decompression had been completed.")
   )
@@ -831,8 +834,7 @@ op_note_distinct_technique_statement <- function(object, level, side, interbody_
     object == 'revision_costovertebral_approach' ~ glue("I then proceeded with a costovertebral approach for a reexploration and revision decompression from the {side} at {level}. The {side} {level} rib was identified, skeletonized, and 5-6cm of the rib was resected to allow access to the dorsal vertebral body. Using a combination of a high-speed burr, currettes, and Kerrison rongeurs, the scar and posterior elements were carefully resected until I found the plane between scar and dura. The {side} {level} pedicle was skeletonized and resected, to allow full decompression of the spinal cord at the {level} level. Following the revision decompression, the canal was palpated to confirm an adequate decompression had been completed."),
     object == 'grade_3' ~ glue("I then proceeded with the pedicle subtraction osteotomy at the level of {level}. The posterior elements of {level} were completely removed. A complete central laminectomy was performed and confirmed at the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} level in order to prevent compression after osteotomy closure. A temporary rod was placed and starting on the contralateral side, a complete superior facetectomy was performed and any dorsal bone and scar was removed, and the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} nerve root was visualized and tracked laterally. Then a cut was made through the pars just inferior to the pedicle, and the superior facet of the inferior vertebra was resected, allowing the {level} nerve root to be visualized and tracked laterally. Next, the transverse process was resected. Once the {level} pedicle was completely skeletonized, and the cranial and caudal nerve roots identified and a full decompression was confirmed from the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} pedicle to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level} pedicle, a subperiosteal plane was developed around the anterior portion of the {level} body and retractors were held in place to protect the retroperitoneal  structures. Next, the pedicle was resected down to the dorsal vertebral body, leaving a lip medially to protect the neural structures. The dura, cranial and caudal nerve roots were protected and a high speed burr was used to develop a defect in the vertebral body at the level of the pedicle. The lateral portion of the pedicle wall was taken down, allowing easier access to the vertebral body and the vertebral body was hollowed out, taking care to leave adequate anterior body and cortex. The remaining pedicle walls were then resected with a box osteotome. We then placed a temporary rod and repeated the same process on the contralateral pedicle. Once an adequate defect had been generated in the vertebral body, the dorsal wall of the vertebral body was impacted. The nerve roots were checked again and the underside of the thecal sac was palpated to confirm no bony impingement. Once we were satisfied that the thecal sac was fully decompressed circumferentially and that the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} and {level} nerve roots were completely free, the osteotomy was closed, and the other rod was placed into position and set screws final tightened to lock the osteotomy in position. Intraoperative xray was performed to confirm appropriate alignment."),
     object == 'grade_4' ~ glue("I then proceeded with an extended three column osteotomy (partial corpectomy) at the level of {level}. The posterior elements of {level} were completely removed. A complete central laminectomy was performed and confirmed at the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} level in order to prevent compression after osteotomy closure. A temporary rod was placed and starting on the contralateral side, a complete superior facetectomy was performed and any dorsal bone and scar was removed, and the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} nerve root was visualized and tracked laterally. Then a cut was made through the pars just inferior to the pedicle, and the superior facet of the inferior vertebra was resected, allowing the {level} nerve root to be visualized and tracked laterally. Next, the transverse process was resected. Once the {level} pedicle was completely skeletonized, and the cranial and caudal nerve roots identified and a full decompression was confirmed from the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} pedicle to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level} pedicle, a subperiosteal plane was developed around the anterior portion of the {level} body and retractors were held in place to protect the retroperitoneal  structures. Next, the pedicle was resected down to the dorsal vertebral body, leaving a lip medially to protect the neural structures. The dura, cranial and caudal nerve roots were protected and a high speed burr was used to develop a defect in the vertebral body. The lateral portion of the pedicle wall was taken down, allowing easier access to the vertebral body and the vertebral body was hollowed out, extending up into the cranial disk space, taking care not to perforate the anterior cortex. The remaining pedicle walls were then resected with a box osteotome. We then placed a temporary rod and repeated the same process on the contralateral pedicle. Once roughly 50% of the vertebral body had been resected, the dorsal wall of the vertebral body was impacted. The nerve roots were checked again and the underside of the thecal sac was palpated to confirm no bony impingement. Once we were satisfied that the thecal sac was fully decompressed circumferentially and that the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} and {level} nerve roots were completely free, the osteotomy was closed, and the other rod was placed into position and set screws final tightened to lock the osteotomy in position. Intraoperative xray was performed to confirm appropriate alignment."),
-    # object == 'grade_5' ~ glue("I then proceeded with a vertebral column resection at the level of {level}. The posterior elements of {level} were completely removed. A complete central laminectomy was performed and confirmed at the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} level in order to prevent compression after osteotomy closure. A temporary rod was placed and starting on the contralateral side, a complete superior facetectomy was performed and any dorsal bone and scar was removed, and the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} nerve root was visualized and tracked laterally. Then a cut was made through the pars just inferior to the pedicle, and the superior facet of the inferior vertebra was resected, allowing the {level} nerve root to be visualized and tracked laterally. Next, the transverse process was resected. Once the {level} pedicle was completely skeletonized, and the cranial and caudal nerve roots identified and a full decompression was confirmed from the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} pedicle to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level} pedicle, a subperiosteal plane was developed around the entire anterior portion of the {level} body and retractors were held in place to protect the anterior structures. Next, the pedicle was resected down to the dorsal vertebral body, leaving a lip medially to protect the neural structures. The dura, cranial and caudal nerve roots were protected and a high speed burr was used to develop a defect in the vertebral body. The lateral portion of the pedicle wall was taken down, allowing easier access to the vertebral body and the vertebral body was hollowed out, extending up into the cranial and caudal disk space. Any remaining pedicle walls were then resected with an osteotome. We then placed a temporary rod and repeated the same process from the contralateral pedicle. Once 80-90% of the vertebral body had been resected, the nerve roots were checked again and the dorsal wall of the vertebral body was impacted. The nerve roots and the ventral thecal sac were checked again to confirm no bony impingement. Once we were satisfied that the thecal sac was fully decompressed circumferentially and that the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} and {level} nerve roots were completely free, the remaining vertebral body was resected and the other rod was placed into position."),
-    object == 'grade_5' ~ glue("I then proceeded with a vertebral column resection at the level of {level}. A complete central decompression was performed and confirmed extending from the {cranial_level} pedicle to the {caudal_level} pedicle in order to prevent neural compression after osteotomy closure. A complete facetectomy was performed superiorly and any dorsal bone was removed, allowing the {cranial_level} nerve root to be visualized and tracked laterally. Similarly, a complete facetectomy was performed inferiorly, allowing the {level} nerve root to be visualized and tracked laterally. Next, the transverse process was resected and the {level} pedicles were completely skeletonized. The cranial and caudal nerve roots were then free and a full decompression was confirmed from the {cranial_level} pedicle to the {caudal_level} pedicle.{thoracic_nerve_ligation_statement}Once we were satisfied with the neuromonitoring data, the nerve roots were ligated with sutures. ',' ')} In preparation for the vertebral column resection, a unilateral stabilizing rod was placed on the convex side and secured with set screws multiple levels above and below the {level} level. Starting on the concavity, a combination of blunt and electrocautery dissection was used to develop a subperiosteal plane around the entire anterior portion of the {level} body and retractors were held in place to protect the anterior and neural structures. A lateral pedicle body window was developed for accessing the cancellous bone of the vertebral body and using currettes and rongeurs, the accessible cancellous vertebral body was removed, extending up toward the cranial and caudal disk space. The remaining pedicle of {level} was resected down to the dorsal vertebral body, allowing the spinal cord to drift medially. The same process was then carried out on the convexity to access the cancellous vertebral body and remove the convex pedicle. The entire vertebral body was removed except for a thin anterior section, preserving the anterior longitudinal ligament. Discectomies were performed at the {cranial_interspace} and {caudal_interspace}, taking care to preserve the endplates. Once the entire body had been removed, a plane was developed between the ventral dural sac and the posterior body wall to be sure the dural sac was completely free from the body wall. An impactor was then used to impact the posterior body wall, completing the vertebral column resection. The dural sac was again inspected to confirm no potential sites of impingement. We then turned toward closure of the resection site. Starting with compression on the convexity, the site was closed through alternating compression on the convexity and slight distraction on the concave side. Once I was satisfied with the closure, rods were secured into place bilaterally with set screws."),
+    object == 'grade_5' ~ glue("I then proceeded with a vertebral column resection at the level of {level}. A complete central decompression was performed and confirmed extending from the {cranial_level} pedicle to the {caudal_level} pedicle in order to prevent neural compression after osteotomy closure. A complete facetectomy was performed superiorly and any dorsal bone was removed, allowing the {cranial_level} nerve root to be visualized and tracked laterally. Similarly, a complete facetectomy was performed inferiorly, allowing the {level} nerve root to be visualized and tracked laterally. Next, the transverse process was resected and the {level} pedicles were completely skeletonized. The cranial and caudal nerve roots were then free and a full decompression was confirmed from the {cranial_level} pedicle to the {caudal_level} pedicle.{thoracic_nerve_ligation_statement} In preparation for the vertebral column resection, a unilateral stabilizing rod was placed on the convex side and secured with set screws multiple levels above and below the {level} level. Starting on the concavity, a combination of blunt and electrocautery dissection was used to develop a subperiosteal plane around the entire anterior portion of the {level} body and retractors were held in place to protect the anterior and neural structures. A lateral pedicle body window was developed for accessing the cancellous bone of the vertebral body and using currettes and rongeurs, the accessible cancellous vertebral body was removed, extending up toward the cranial and caudal disk space. The remaining pedicle of {level} was resected down to the dorsal vertebral body, allowing the spinal cord to drift medially. The same process was then carried out on the convexity to access the cancellous vertebral body and remove the convex pedicle. The entire vertebral body was removed except for a thin anterior section, preserving the anterior longitudinal ligament. Discectomies were performed at the {cranial_interspace} and {caudal_interspace}, taking care to preserve the endplates. Once the entire body had been removed, a plane was developed between the ventral dural sac and the posterior body wall to be sure the dural sac was completely free from the body wall. An impactor was then used to impact the posterior body wall, completing the vertebral column resection. The dural sac was again inspected to confirm no potential sites of impingement. We then turned toward closure of the resection site. Starting with compression on the convexity, the site was closed through alternating compression on the convexity and slight distraction on the concave side. Once I was satisfied with the closure, rods were secured into place bilaterally with set screws."),
     object == 'no_implant_interbody_fusion' ~ glue("I then proceeded with the interbody fusion from the {side} side at the level of {level}. The inferior and superior facets of {str_replace_all(level, '-', ' and ')}, respectively, were resected and the exiting and traversing nerve roots were appropriately protected. The annulus was incised, allowing access to the disk space. The disk was excised and endplates were prepped using a combination of currettes, shavers, and pituitary rongeurs. Once the endplates were adequately prepped, the size was confirmed and the interbody implant was placed into position along with allograft. The final position was confirmed using intraoperative xray."),
     object == 'plif' ~ glue("I then proceeded with the posterior lumbar interbody fusion (PLIF) procedure and placement of interbody implant at the level of {level}. The inferior and superior facets of {str_replace_all(level, '-', ' and ')}, respectively, were partially resected and the exiting and traversing nerve roots were appropriately protected. The dura was retracted in order to access the disc space. The annulus was incised, allowing access to the disk space. The disk was excised and endplates were prepped using a combination of currettes, shavers, and pituitary rongeurs. Once the endplates were adequately prepped, trials were used to determine the appropriate size of the implant. {interbody_statement} Once I was satisfied with the size and fit of the trial, the interbody implant was placed into the interbody space along with allograft bone. The final position of the implant was confirmed using intraoperative xray."),
     object == "tlif" ~ glue("I then proceeded with the transforaminal interbody fusion (TLIF) procedure and placement of interbody implant from the {side} side at the level of {level}. The inferior and superior facets of {str_replace_all(level, '-', ' and ')}, respectively, were resected and the exiting and traversing nerve roots were appropriately protected. The annulus was incised, allowing access to the disk space. The disk was excised and endplates were prepped using a combination of currettes, shavers, and pituitary rongeurs. Once the endplates were adequately prepped, trials were used to determine the appropriate size of the implant. {interbody_statement} Once I was satisfied with the size and fit of the trial, the interbody implant was placed into the interbody space along with allograft bone. The final position of the implant was confirmed using intraoperative xray."),
@@ -985,22 +987,22 @@ op_note_procedures_present_listed_function <- function(objects_added_df,
       mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
       select(level, object, vertebral_number) %>%
       mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_procedure_performed_summary_per_line_function(procedure_type = procedure_class)) 
+      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
   }else{
     summary_nested_df <- objects_added_df %>%
       select(level, object, vertebral_number) %>%
       mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_procedure_performed_summary_per_line_function(procedure_type = procedure_class)) 
+      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
   }
   
   
   summary_single_statements <- summary_nested_df %>%
-    filter(procedures_per_line == "one") %>%
+    filter(procedures_per_line == "distinct") %>%
     mutate(procedure_performed_statement = glue("{str_to_lower(procedure_class)} at {level}"))%>%
     select(procedure_class, procedure_performed_statement)
   
   summary_multiple_nested <- summary_nested_df %>%
-    filter(procedures_per_line == "multiple") %>%
+    filter(procedures_per_line == "combine") %>%
     group_by(procedure_class) %>%
     nest() %>%
     ungroup() %>%
@@ -1352,22 +1354,22 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
       mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
       select(level, object, vertebral_number) %>%
       mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_procedure_performed_summary_per_line_function(procedure_type = procedure_class)) 
+      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
   }else{
     summary_nested_df <- objects_added_df %>%
       select(level, object, vertebral_number) %>%
       mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_procedure_performed_summary_per_line_function(procedure_type = procedure_class)) 
+      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
   }
   
   
   summary_single_statements <- summary_nested_df %>%
-    filter(procedures_per_line == "one") %>%
+    filter(procedures_per_line == "distinct") %>%
     mutate(procedure_performed_statement = glue("{procedure_class} at {level}"))%>%
     select(procedure_class, procedure_performed_statement)
   
   summary_multiple_nested <- summary_nested_df %>%
-    filter(procedures_per_line == "multiple") %>%
+    filter(procedures_per_line == "combine") %>%
     group_by(procedure_class) %>%
     nest() %>%
     ungroup() %>%
