@@ -1,6 +1,6 @@
 #############-----------------------   xxxxxxxxxxxx  ----------------------###############
 
-rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "4B2AA28A4D6EFBC6CA1F49EC0FB385F7")
+# rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "4B2AA28A4D6EFBC6CA1F49EC0FB385F7")
 
 #############-----------------------   POSTERIOR  ----------------------###############
 #############-----------------------   POSTERIOR  ----------------------###############
@@ -162,12 +162,13 @@ all_interbody_df <- implant_starts_df %>%
   filter(category == "interbody") %>%
   filter(approach == "posterior") %>%
   # filter(!is.na(width)) %>%
+  replace_na(list(superior_endplate_y = 0, inferior_endplate_y = 0, inferior_facet_lateral_border_x = 0, inferior_facet_medial_border_x = 0, inferior_facet_superior_border_y = 0, inferior_facet_inferior_border_y = 0)) %>%
   mutate(object_constructed = pmap(list(..1 = object,
                                         ..2 = x,
                                         ..3 = right_x,
                                         ..4 = left_x,
-                                        ..5 = superior_y,
-                                        ..6 = inferior_y, 
+                                        ..5 = superior_endplate_y,
+                                        ..6 = inferior_endplate_y, 
                                         ..7 = width, 
                                         ..8 = inferior_facet_lateral_border_x,
                                         ..9 = inferior_facet_medial_border_x, 
@@ -177,8 +178,8 @@ all_interbody_df <- implant_starts_df %>%
                                                                    x_click = ..2, 
                                                                    left_x = ..3, 
                                                                    right_x = ..4,
-                                                                   superior_y = ..5,
-                                                                   inferior_y = ..6,
+                                                                   y_superior_endplate = ..5,
+                                                                   y_inferior_endplate = ..6,
                                                                    top_width = ..7,
                                                                    inferior_facet_lateral_border_x = ..8, 
                                                                    inferior_facet_medial_border_x = ..9,
@@ -242,10 +243,10 @@ revision_implants_df <- all_points_all_implants_constructed_df %>%
   group_by(level, object, side) %>%
   filter(y == max(y)) %>%
   ungroup() %>%
-  select(level, vertebral_number, approach, category, object, side, x, y, fusion, object_constructed)
+  select(level, vertebral_number, approach, category, implant, object, side, x, y, fusion, object_constructed)
 
 all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
-  select(level, body_interspace, vertebral_number, approach, category, object, side, x, y, fusion, direction, object_constructed)
+  select(level, body_interspace, vertebral_number, approach, category, implant, object, side, x, y, fusion, direction, object_constructed)
 
 rm(osteotomy_df, decompression_df, all_interbody_df)
 

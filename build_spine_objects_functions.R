@@ -576,27 +576,28 @@ build_decompression_function <- function(left_x, right_x, superior_y, inferior_y
 
 build_interbody_function <- function(object = "xx",
                                      x_click = 0.5,
-                                     left_x, 
-                                     right_x,
-                                     superior_y, 
-                                     inferior_y,
-                                     top_width,
+                                     left_x = 0.48, 
+                                     right_x = 0.52,
+                                     y_superior_endplate = 0.5, 
+                                     y_inferior_endplate = 0.49,
+                                     top_width = 0.1,
                                      inferior_facet_lateral_border_x = 0.47,
                                      inferior_facet_medial_border_x = 0.49,
                                      inferior_facet_superior_border_y = 0.5,
                                      inferior_facet_inferior_border_y = 0.5){
 
   if(object == "intervertebral_cage"){
-    left_body_x <- left_x
-    right_body_x <- right_x 
-    left_cage_x <- left_x + 0.01
-    right_cage_x <- right_x - 0.01
+
+    left_body_x <- inferior_facet_lateral_border_x
+    right_body_x <- 1 - inferior_facet_lateral_border_x
+    left_cage_x <- inferior_facet_medial_border_x
+    right_cage_x <- 1- inferior_facet_medial_border_x
     
-    inferior_endplate_y <- inferior_y
-    lowest_y <- inferior_y - 0.005
+    inferior_endplate_y <- y_inferior_endplate
+    lowest_y <- y_inferior_endplate - 0.005
     
-    superior_endplate_y <- superior_y - 0.005
-    highest_y <- superior_y 
+    superior_endplate_y <- y_superior_endplate 
+    highest_y <- y_superior_endplate + 0.005
     
     bottom_left <- c(left_cage_x, inferior_endplate_y)
     bottom_far_left <- c(left_body_x, lowest_y)
@@ -619,7 +620,7 @@ build_interbody_function <- function(object = "xx",
     
   }
   
-  if(object == "tlif" | object == "no_implant_interbody_fusion"){
+  if(object == "tlif"){
     if(x_click < 0.5){
       #start top left and then work in counterclockwise
       point_1 <- c(inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
@@ -642,30 +643,31 @@ build_interbody_function <- function(object = "xx",
     
     interbody_sf <- st_buffer(st_polygon(list(interbody)), dist = 0.0025, endCapStyle = "ROUND")
   }
+  if(object == "no_implant_interbody_fusion"){
+    if(x_click < 0.5){
+      #start top left and then work in counterclockwise
+      point_1 <- c(inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
+      point_2 <- c(inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
+      point_3 <- c(inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
+      point_4 <- c(inferior_facet_medial_border_x, inferior_facet_superior_border_y)
+    }else{
+      #start top left and then work in counterclockwise
+      point_1 <- c(1- inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
+      point_2 <- c(1 - inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
+      point_3 <- c(1 - inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
+      point_4 <- c(1 - inferior_facet_medial_border_x, inferior_facet_superior_border_y)
+    }
+    
+    interbody <- st_linestring(rbind(point_1,
+                                     point_2,
+                                     point_3,
+                                     point_4,
+                                     point_1))
+    
+    interbody_sf <- st_buffer(st_polygon(list(interbody)), dist = 0.0025, endCapStyle = "ROUND")
+  }
   
-  # if(object == "tlif" | object == "no_implant_interbody_fusion"){
-  #   if(x_click < 0.5){
-  #     #start top left and then work in counterclockwise
-  #     point_1 <- c(inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
-  #     point_2 <- c(inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
-  #     point_3 <- c(inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
-  #     point_4 <- c(inferior_facet_medial_border_x, inferior_facet_superior_border_y)
-  #   }else{
-  #     #start top left and then work in counterclockwise
-  #     point_1 <- c(1- inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
-  #     point_2 <- c(1 - inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
-  #     point_3 <- c(1 - inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
-  #     point_4 <- c(1 - inferior_facet_medial_border_x, inferior_facet_superior_border_y)
-  #   }
-  #   
-  #   interbody <- st_linestring(rbind(point_1,
-  #                                       point_2,
-  #                                       point_3,
-  #                                       point_4,
-  #                                       point_1))
-  #   
-  #   interbody_sf <- st_buffer(st_polygon(list(interbody)), dist = 0.0025, endCapStyle = "ROUND")
-  # }
+
   
   if(object == "plif"){
     if(x_click < 0.5){
@@ -831,6 +833,18 @@ anterior_implant_function <- function(object_type,
   }
   
   if(object_type == "diskectomy_fusion_no_interbody_device"){
+    left_x <- 0.5 - (body_width*1.1)
+    right_x <- 0.5 + (body_width*1.1)
+    
+    bottom_left <- c(left_x, inferior_endplate_y)
+    bottom_right <- c(right_x, inferior_endplate_y)
+    top_right <- c(right_x, superior_endplate_y)
+    top_left <- c(left_x, superior_endplate_y)
+    
+    object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.003, endCapStyle = "FLAT")
+  }
+  
+  if(object_type == "diskectomy_only"){
     left_x <- 0.5 - (body_width*1.1)
     right_x <- 0.5 + (body_width*1.1)
     

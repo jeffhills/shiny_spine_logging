@@ -148,39 +148,6 @@ l6_spine_png <- image_read(path = "posterior_spine_6_lumbar_vert.png")
 # posterior_spine_6_lumbar_vert
 l6_anterior_spine_png <- image_read(path = "anterior_spine_6_lumbar_vert.png")
 
-# l6_implant_starts_df <- read_csv(file = "full_coordinates_df.csv") %>%
-#   filter(!is.na(x)) %>%
-#   filter(vertebral_number > 24.2)
-# 
-# # kept_same_df <- l6_implant_starts_df %>%
-# #   filter(vertebral_number < 24.2)
-# 
-# s1_to_l6_changed_df <- l6_implant_starts_df %>%
-#   # filter(vertebral_number > 24) %>%
-#   filter(vertebral_number < 25.5) %>%
-#   mutate(level = str_replace_all(string = level, pattern = "S1", replacement = "L6"))
-# 
-# shifted_down_df <- l6_implant_starts_df %>%
-#   filter(vertebral_number > 24) %>%
-#   mutate(level = str_replace_all(string = level, pattern = "L5", replacement = "L6")) %>%
-#   mutate(vertebral_number = vertebral_number + 1) %>%
-#   mutate_at(.vars = vars("y", 
-#                          "superior_y", 
-#                          "inferior_y", 
-#                          "superior_vert_inferior_pedicle_y", 
-#                          "superior_lamina_y",
-#                          "inferior_lamina_y", 
-#                          "inferior_pedicle_y",
-#                          "body_center_y", 
-#                          "superior_tp_y", 
-#                          "inferior_tp_y", 
-#                          "inferior_facet_superior_border_y",
-#                          "inferior_facet_inferior_border_y",
-#                          "inferior_endplate_y",
-#                          "superior_endplate_y", 
-#                          "superior_endplate_inferior_body_y",
-#                          "inferior_endplate_superior_body_y"), .funs = ~ .x - 0.03)
-
 l6_implant_starts_lower_only_df <- read_csv(file = "full_coordinates_df.csv") %>%
   filter(!is.na(x)) %>%
   filter(vertebral_number > 23.9)
@@ -359,13 +326,29 @@ l6_interbody_df <- l6_implant_starts_df %>%
   filter(category == "interbody") %>%
   filter(approach == "posterior") %>%
   filter(!is.na(width)) %>%
-  mutate(object_constructed = pmap(list(..1 = left_x,
-                                        ..2 = superior_y,
+  replace_na(list(superior_endplate_y = 0, inferior_endplate_y = 0, inferior_facet_lateral_border_x = 0, inferior_facet_medial_border_x = 0, inferior_facet_superior_border_y = 0, inferior_facet_inferior_border_y = 0)) %>%
+  mutate(object_constructed = pmap(list(..1 = object,
+                                        ..2 = x,
                                         ..3 = right_x,
-                                        ..4 = inferior_y,
-                                        ..5 = width,
-                                        ..6 = object), 
-                                   .f = ~ build_interbody_function(left_x = ..1, right_x = ..3, superior_y = ..2, inferior_y = ..4, top_width = ..5, object = ..6)))
+                                        ..4 = left_x,
+                                        ..5 = superior_endplate_y,
+                                        ..6 = inferior_endplate_y, 
+                                        ..7 = width, 
+                                        ..8 = inferior_facet_lateral_border_x,
+                                        ..9 = inferior_facet_medial_border_x, 
+                                        ..10 = inferior_facet_superior_border_y,
+                                        ..11 = inferior_facet_inferior_border_y), 
+                                   .f = ~ build_interbody_function(object = ..1, 
+                                                                   x_click = ..2, 
+                                                                   left_x = ..3, 
+                                                                   right_x = ..4,
+                                                                   y_superior_endplate = ..5,
+                                                                   y_inferior_endplate = ..6,
+                                                                   top_width = ..7,
+                                                                   inferior_facet_lateral_border_x = ..8, 
+                                                                   inferior_facet_medial_border_x = ..9,
+                                                                   inferior_facet_superior_border_y = ..10,
+                                                                   inferior_facet_inferior_border_y = ..11)))
 
 
 l6_llif_interbody_df <- l6_interbody_df %>%
@@ -440,7 +423,7 @@ l6_revision_implants_df <- l6_all_points_all_implants_constructed_df %>%
   ungroup()
 
 l6_all_implants_constructed_df <- l6_all_points_all_implants_constructed_df %>%
-  select(level, body_interspace, vertebral_number, approach, category, object, side, x, y, fusion, direction, object_constructed)
+  select(level, body_interspace, vertebral_number, approach, category,implant, object, side, x, y, fusion, direction, object_constructed)
 
 rm(l6_osteotomy_df, l6_decompression_df, l6_all_interbody_df)
 

@@ -636,30 +636,21 @@ make_interbody_ui_function <-  function(level = NULL){
 
 ##########################################  MAKE UI's FOR screw ##################### ##################### 
 ##########################################  MAKE UI's FOR screw ##################### ##################### 
-
 make_screw_sizes_ui_function <-  function(level = NULL, left_screw_level = "no_screw", right_screw_level = "no_screw", left_selected = "Unknown", right_selected = "Unknown"){
   if(left_screw_level != "no_screw"){
-    left_diameter <- textInput(inputId = glue("left_{str_to_lower(level)}_screw_diameter"), 
-                               label = NULL, 
-                               placeholder = "D",
-                               width = "90%")
-    left_length <- textInput(inputId = glue("left_{str_to_lower(level)}_screw_length"),
-                             label = NULL,
-                             placeholder = "L",
-                             width = "90%")
+    left_diameter <- numericInput(inputId = glue("left_{str_to_lower(level)}_screw_diameter"), label = NULL, value = NULL, min = 1, max = 12, step = 0.5
+    ) 
+    left_length <- numericInput(inputId = glue("left_{str_to_lower(level)}_screw_length"), label = NULL, value = NULL, min = 1, max = 140, step = 5
+    ) 
   }else{
     left_diameter <- NULL
     left_length <- NULL
   }
   if(right_screw_level != "no_screw"){
-    right_diameter <- textInput(inputId = glue("right_{str_to_lower(level)}_screw_diameter"), 
-                                label = NULL, 
-                                placeholder = "D",
-                                width = "90%")
-    right_length <- textInput(inputId = glue("right_{str_to_lower(level)}_screw_length"),
-                              label = NULL,
-                              placeholder = "L",
-                              width = "90%")
+    right_diameter <- numericInput(inputId = glue("right_{str_to_lower(level)}_screw_diameter"), label = NULL, value = NULL, min = 1, max = 12, step = 0.5
+    ) 
+    right_length <- numericInput(inputId = glue("right_{str_to_lower(level)}_screw_length"), label = NULL, value = NULL, min = 1, max = 140, step = 5
+    ) 
   }else{
     right_diameter <- NULL
     right_length <- NULL
@@ -667,25 +658,118 @@ make_screw_sizes_ui_function <-  function(level = NULL, left_screw_level = "no_s
   
   tags$tr(width = "100%", 
           tags$td(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center; padding-bottom:10px", paste(level))),
-          tags$td(width = "10%", div(id = "my_small_text_input", 
-                                     left_diameter
+          tags$td(width = "10%", div(
+            left_diameter
           )
           ),
-          tags$td(width = "10%", div(id = "my_small_text_input", 
-                                     left_length
+          tags$td(width = "10%", div(
+            left_length
           )
           ),
-          tags$td(width = "10%", div(id = "my_small_text_input", 
-                                     right_diameter
+          tags$td(width = "10%", div( 
+            right_diameter
           )
           ),
-          tags$td(width = "10%", div(id = "my_small_text_input", 
-                                     right_length
+          tags$td(width = "10%", div(
+            right_length
           )
           )
   )
-  
 }
+
+make_screw_types_function <-  function(level = NULL, left_screw_level = "no_screw", right_screw_level = "no_screw", left_selected = "P", right_selected = "P"){
+  if(left_screw_level != "no_screw"){
+    left_ui <- radioGroupButtons(   #"option2",
+      inputId = glue("left_{str_to_lower(level)}_screw_type"),
+      label = NULL,
+      choices = c("M", "U", "P", "Red", "Offset"),
+      selected = left_selected,
+      checkIcon = list(yes = icon("wrench")),
+      size = "xs",
+      justified = TRUE,
+      width = "95%"
+    )
+  }else{
+    left_ui <- NULL
+  }
+  if(right_screw_level != "no_screw"){
+    right_ui <- radioGroupButtons(   #"option2",
+      inputId = glue("right_{str_to_lower(level)}_screw_type"),
+      label = NULL,
+      choices = c("M", "U", "P", "Red", "Offset"),
+      selected = right_selected,
+      checkIcon = list(yes = icon("wrench")),
+      justified = TRUE,
+      width = "95%",
+      size = "xs"
+    )
+  }else{
+    right_ui <- NULL
+  }
+  tags$tr(width = "100%", 
+          tags$td(width = "7%", div(style = "font-size:14px; font-weight:bold; text-align:center; padding-bottom:10px",   paste(level))),
+          tags$td(width = "45%",
+                  left_ui
+                  # div(id = "my_small_button_input",
+                  #     left_ui)
+          ),
+          tags$td(width = "45%",
+                  right_ui
+                  # div(id = "my_small_button_input",
+                  #     right_ui)
+          )
+  )
+}
+# make_screw_sizes_ui_function <-  function(level = NULL, left_screw_level = "no_screw", right_screw_level = "no_screw", left_selected = "Unknown", right_selected = "Unknown"){
+#   if(left_screw_level != "no_screw"){
+#     left_diameter <- textInput(inputId = glue("left_{str_to_lower(level)}_screw_diameter"), 
+#                                label = NULL, 
+#                                placeholder = "D",
+#                                width = "90%")
+#     left_length <- textInput(inputId = glue("left_{str_to_lower(level)}_screw_length"),
+#                              label = NULL,
+#                              placeholder = "L",
+#                              width = "90%")
+#   }else{
+#     left_diameter <- NULL
+#     left_length <- NULL
+#   }
+#   if(right_screw_level != "no_screw"){
+#     right_diameter <- textInput(inputId = glue("right_{str_to_lower(level)}_screw_diameter"), 
+#                                 label = NULL, 
+#                                 placeholder = "D",
+#                                 width = "90%")
+#     right_length <- textInput(inputId = glue("right_{str_to_lower(level)}_screw_length"),
+#                               label = NULL,
+#                               placeholder = "L",
+#                               width = "90%")
+#   }else{
+#     right_diameter <- NULL
+#     right_length <- NULL
+#   }
+#   
+#   tags$tr(width = "100%", 
+#           tags$td(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center; padding-bottom:10px", paste(level))),
+#           tags$td(width = "10%", div(id = "my_small_text_input", 
+#                                      left_diameter
+#           )
+#           ),
+#           tags$td(width = "10%", div(id = "my_small_text_input", 
+#                                      left_length
+#           )
+#           ),
+#           tags$td(width = "10%", div(id = "my_small_text_input", 
+#                                      right_diameter
+#           )
+#           ),
+#           tags$td(width = "10%", div(id = "my_small_text_input", 
+#                                      right_length
+#           )
+#           )
+#   )
+# }
+
+
 ##########################################  MAKE UI's FOR screw type ##################### ##################### 
 ##########################################  MAKE UI's FOR screw type ##################### ##################### 
 make_screw_types_function <-  function(level = NULL, left_screw_level = "no_screw", right_screw_level = "no_screw", left_selected = "P", right_selected = "P"){
