@@ -195,41 +195,27 @@ build_pedicle_hook_function <- function(x_start, y_start){
   
   if(x_start < 0.5){
     start <- c(x_start, y_start)
-    
     point_2 <- c(start[1], start[2] - y_lenth)
-    
     point_3 <- c(start[1] + x_width*0.5, start[2] - y_lenth)
-    
     point_4 <- c(point_3[1], point_3[2] + y_lenth*0.75)
-    
     point_5 <- point_3
-    
     point_6 <- c(point_2[1] + x_width, point_2[2])
-    
     point_7 <- c(point_6[1], point_6[2] + y_lenth*0.75)
     
     hook <- st_linestring(rbind(start, point_3, point_4, point_5, point_6, point_7))
-    
     hook_sf <- st_buffer(hook, dist = 0.002, endCapStyle = "ROUND")
   }
   
   if(x_start > 0.5){
     start <- c(x_start, y_start)
-    
     point_2 <- c(start[1], start[2] - y_lenth)
-    
     point_3 <- c(start[1] - x_width*0.5, start[2] - y_lenth)
-    
     point_4 <- c(point_3[1], point_3[2] + y_lenth*0.75)
-    
     point_5 <- point_3
-    
     point_6 <- c(point_2[1] - x_width, point_2[2])
-    
     point_7 <- c(point_6[1], point_6[2] + y_lenth*0.75)
     
     hook <- st_linestring(rbind(start, point_3, point_4, point_5, point_6, point_7))
-    
     hook_sf <- st_buffer(hook, dist = 0.002, endCapStyle = "ROUND")
   }
   
@@ -241,23 +227,28 @@ build_pedicle_hook_function <- function(x_start, y_start){
 tether_function <- function(tether_start_y, tether_length){
   
   superior_start <- c(0.5, tether_start_y)
-  
   superior_left <- superior_start - c(0.005, 0)
-  
   superior_right <- superior_start + c(0.005, 0)
-  
   inferior_center <- c(0.5, tether_start_y - tether_length)
-  
   inferior_left <- inferior_center - c(0.005, 0)
-  
   inferior_right <- inferior_center + c(0.005, 0)
-  
   tether <- st_linestring(rbind(superior_left, inferior_right, inferior_left, superior_right, superior_left))
-  
   tether_sf <- st_buffer(x = tether, dist = 0.001, endCapStyle = "ROUND")
   
   return(tether_sf)
+}
+
+#############-----------------------   Build: Crosslink  ----------------------###############
+crosslink_function <- function(crosslink_start_y, width){
   
+  left_point <- c(0.5 - width*0.65, crosslink_start_y - 0.002)
+  mid_point <- c(0.5, crosslink_start_y + 0.002)
+  right_point <- c(0.5 + width*0.65, crosslink_start_y - 0.002)
+
+  crosslink <- st_linestring(rbind(left_point, mid_point, right_point))
+  crosslink_sf <- st_buffer(x = crosslink, dist = 0.0035, endCapStyle = "ROUND")
+  
+  return(crosslink_sf)
 }
 
 #############-----------------------   Build: Sublaminar Band  ----------------------###############
@@ -276,15 +267,11 @@ build_sublaminar_band_function <- function(x_start, y_top, y_length){
     point_4 <- c(start[1] + x_width, start[2] - y_length*0.5)
     
     sublaminar_superior_point <- point_2
-    
     sublaminar_inferior_point <- point_4
     
     connector <- st_buffer(st_linestring(rbind(start, point_2, point_3, point_4)), dist = .0015)
     
-    # sublaminar_portion <- st_buffer(st_linestring(rbind(sublaminar_superior_point, sublaminar_inferior_point)), dist = .0005)
-    
     sublaminar_portion <- st_buffer(st_linestring(rbind(start, point_2, point_4, start)), dist = .0005)
-    
     sublaminar_wire_sf <- st_polygon(sublaminar_portion)  
   }
   
@@ -295,17 +282,10 @@ build_sublaminar_band_function <- function(x_start, y_top, y_length){
     point_4 <- c(start[1] - x_width, start[2] - y_length*0.5)
     
     sublaminar_superior_point <- point_2
-    
     sublaminar_inferior_point <- point_4
     
     connector <- st_buffer(st_linestring(rbind(start, point_2, point_3, point_4)), dist = .0015)
-    
-    # sublaminar_portion <- st_buffer(st_linestring(rbind(sublaminar_superior_point, sublaminar_inferior_point)), dist = .0005)
-    
     sublaminar_portion <- st_buffer(st_linestring(rbind(start, point_2, point_4, start)), dist = .0001)
-    
-    # sublaminar_wire_sf <- st_polygon(st_union(connector, sublaminar_portion))  
-    
     sublaminar_wire_sf <- st_polygon(sublaminar_portion)  
   }
   
@@ -355,6 +335,10 @@ screw_hook_implant_function <- function(implant_type,
   
   if(implant_type == "tether"){
     object <- tether_function(tether_start_y = y, tether_length = length_for_tether)
+  }
+  
+  if(implant_type == "crosslink"){
+    object <- crosslink_function(crosslink_start_y = y, width = screw_width_mod)
   }
   
   if(implant_type == "vertebroplasty"){

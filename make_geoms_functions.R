@@ -276,6 +276,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }
   
   return(geoms_list_posterior = geoms_list_posterior)
+  
 }
 
 

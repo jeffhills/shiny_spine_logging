@@ -66,7 +66,6 @@ implants_constructed_df <- implant_starts_df %>%
                                               ..4 = angle,
                                               ..5 = length, 
                                               ..6 = width,
-                                              # ..7 = rod, 
                                               ..7 = sublaminar_band_length,
                                               ..8 = length_for_tether), .f = ~ screw_hook_implant_function(implant_type = ..1, 
                                                                                                            start_x = ..2,
@@ -243,10 +242,12 @@ revision_implants_df <- all_points_all_implants_constructed_df %>%
   group_by(level, object, side) %>%
   filter(y == max(y)) %>%
   ungroup() %>%
-  select(level, vertebral_number, approach, category, implant, object, side, x, y, fusion, object_constructed)
+  select(-ends_with("_x"), -ends_with("_y"))
+  # select(level, vertebral_number, approach, category, implant, object, side, x, y, fusion, interbody_fusion,fixation_uiv_liv, object_constructed)
 
 all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
-  select(level, body_interspace, vertebral_number, approach, category, implant, object, side, x, y, fusion, direction, object_constructed)
+  select(-ends_with("_x"), -ends_with("_y"))
+  # select(level, body_interspace, vertebral_number, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv, direction, object_constructed)
 
 rm(osteotomy_df, decompression_df, all_interbody_df)
 

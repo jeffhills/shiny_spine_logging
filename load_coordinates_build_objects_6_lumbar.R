@@ -423,7 +423,8 @@ l6_revision_implants_df <- l6_all_points_all_implants_constructed_df %>%
   ungroup()
 
 l6_all_implants_constructed_df <- l6_all_points_all_implants_constructed_df %>%
-  select(level, body_interspace, vertebral_number, approach, category,implant, object, side, x, y, fusion, direction, object_constructed)
+  select(-ends_with("_x"), -ends_with("_y"))
+  # select(level, body_interspace, vertebral_number, approach, category,implant, object, side, x, y, fusion,interbody_fusion, direction, fixation_uiv_liv, object_constructed)
 
 rm(l6_osteotomy_df, l6_decompression_df, l6_all_interbody_df)
 

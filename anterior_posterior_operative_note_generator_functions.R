@@ -13,6 +13,7 @@ op_note_procedure_performed_summary_classifier_function <- function(object){
     object == "pars_screw" ~ "Posterior spinal instrumentation",
     object == "pedicle_hook" ~ "Posterior spinal instrumentation",
     object == "pedicle_screw" ~ "Posterior spinal instrumentation",
+    object == "crosslink" ~ "Posterior spinal instrumentation",
     object == "laminar_downgoing_hook" ~ "Posterior spinal instrumentation",
     object == "sublaminar_wire" ~ "Posterior spinal instrumentation",
     object == "tp_hook" ~ "Posterior spinal instrumentation",
@@ -728,8 +729,7 @@ op_note_technique_combine_statement <- function(object, levels_side_df){
     }
     
     pelvic_screw_statement <- glue_collapse(pelvic_screws_statement_list, sep = " ")
-    
-    
+
   }else{
     pelvic_screw_statement <- ""
     
@@ -750,7 +750,6 @@ op_note_technique_combine_statement <- function(object, levels_side_df){
       left != "xx" & right == "xx" ~ glue("At {level}, {left}."), 
       left == "xx" & right == "xx" ~ glue(""))) %>%
     mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-    # left_join(levels_numbered_df) %>%
     arrange(vertebral_number)
   
   levels_side_df <- levels_side_df %>%
@@ -850,7 +849,7 @@ op_note_distinct_technique_statement <- function(object, level, side, interbody_
 #############-----------------------               End              ----------------------###############
 
 
-#############-----------------------   Generate a FULL PARARAPH ----------------------###############
+#############-----------------------   Generate a FULL PARAGRAPH ----------------------###############
 
 create_full_paragraph_statement_function <- function(procedure_paragraph_intro, df_with_levels_object_nested, paragraphs_combined_or_distinct){
   if(paragraphs_combined_or_distinct == "combine"){
@@ -923,7 +922,6 @@ op_note_procedure_paragraphs_function <- function(objects_added_df, revision_dec
       replace_na(list(implant_statement = " ", screw_size_type = " ", revision_level = FALSE)) %>%
       mutate(revision_label = paste0("revision_", object)) %>%
       mutate(object = if_else(revision_level == FALSE, object, if_else(category == "decompression", revision_label, object))) %>%
-      # mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), paste0(object))) %>%
       select(-revision_label) %>%
       mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
       select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
@@ -1082,6 +1080,13 @@ op_note_posterior_function <- function(all_objects_to_add_df,
       mutate(implant_statement = " ")
   }
   
+    crosslink_df <- all_objects_to_add_df %>%
+      filter(object == "crosslink") %>%
+      select(level, object)
+    
+    all_objects_to_add_df <- all_objects_to_add_df %>%
+      filter(object != "crosslink")
+  
   additional_procedures_for_numbered_list <- c(as.character(glue("Application of {glue_collapse(bone_graft_vector, sep = ', ', last = ', and ')}")))
   
   additional_procedures_for_numbered_list <- append(additional_procedures_for_numbered_list, additional_procedures_vector)
@@ -1117,17 +1122,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     head_position == "Mayfield" ~ "A Mayfield head holder was applied to the patient's skull for positioning and secured to the bed.",
   )
 
-  # if(any(str_detect(additional_procedures_vector, "Halo"))){
-  #   first_paragraph_list$head_statement <- "A Halo was applied to the patient's skull for positioning and the pins were sequentially tightened to the appropriate torque."
-  # }else{
-  #   if(any(str_detect(additional_procedures_vector, "Tongs"))){
-  #     first_paragraph_list$head_statement <- "Cranial tongs were applied to the patient's skull for positioning and an appropriate weight was selected for cranial traction."
-  #   }else{
-  #     first_paragraph_list$head_statement <- "The proneview faceplate was used to pad and secure the patient's head and face during surgery. "
-  #   }
-  #   
-  # } 
-  
+
   first_paragraph_list$positioning <- paste("The patient was then positioned prone on the OR table and all bony prominences were appropriately padded.",
                                             "After prepping and draping in the standard fashion, a surgical timeout was performed.")
   ############### JUST START OVER AT THIS POINT IF IT IS A MULTIPLE POSITION CASE
@@ -1135,15 +1130,6 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     first_paragraph_list <- list()
     first_paragraph_list$positioning <- paste("The patient was then positioned prone on the OR table and all bony prominences were appropriately padded.")
     
-    # if(any(str_detect(additional_procedures_vector, "Halo"))){
-    #   first_paragraph_list$head_statement <- "A Halo applied to the patient's skull was used for safely positioning the head."
-    # }else{
-    #   if(any(str_detect(additional_procedures_vector, "Tongs"))){
-    #     first_paragraph_list$head_statement <- "Cranial tongs applied to the patient's skull with an appropriate weight for cranial traction was used to position the head."
-    #   }else{
-    #     first_paragraph_list$head_statement <- "The proneview faceplate was used to pad and secure the patient's head and face during surgery. "
-    #   }
-    # }
     first_paragraph_list$head_statement <- case_when(
       head_position == "Proneview Faceplate" ~ "The proneview faceplate was used to pad and secure the patient's head and face during surgery.",
       head_position == "Cranial Tongs" ~ "Cranial tongs applied to the patient's skull with an appropriate weight for cranial traction was used to position the head.",
@@ -1229,34 +1215,69 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     mutate(level = if_else(level == "Ileum", "Pelvis", level)) %>%
     mutate(level = if_else(level == "S2AI", "Pelvis", level))
   
+  # if(nrow(posterior_implant_df) > 0){
+  #   if(any(str_detect(posterior_implant_df$side, "bilateral"))){
+  #     procedure_details_list$posterior_instrumentation_rods <- paste("To complete the spinal instrumentation, a ", 
+  #                                                                    glue("{left_main_rod_size} {left_main_rod_material} rod was contoured for the left and a {right_main_rod_size} {right_main_rod_material}"),
+  #                                                                    "rod was contoured for the right and the rods placed into position and secured with set screws.",
+  #                                                                    additional_rods_statement,
+  #                                                                    "The set screws were then tightened with a final tightener to the appropriate torque. Intraoperative Xray was used to confirm the final position of all implants. This completed the instrumentation of ",
+  #                                                                    glue_collapse(x = posterior_implants_all_df$level, sep = ', ', last = ', and '), 
+  #                                                                    ".") 
+  #     
+  #   }else{
+  #     if(any(str_detect(posterior_implant_df$side, "left"))){
+  #       procedure_details_list$posterior_instrumentation_rods <- paste("To complete the spinal instrumentation, a ", 
+  #                                                                      glue("{left_main_rod_size} {left_main_rod_material}"),
+  #                                                                      " rod was contoured for the left and placed into position and secured with set screws.",
+  #                                                                      additional_rods_statement,
+  #                                                                      "The set screws were then tightened with a final tightener to the appropriate torque. Intraoperative Xray was used to confirm the final position of all implants. This completed the instrumentation of ",
+  #                                                                      glue_collapse(x = posterior_implants_all_df$level, sep = ', ', last = ', and '), 
+  #                                                                      ".") 
+  #     }else{
+  #       procedure_details_list$posterior_instrumentation_rods <- paste("To complete the spinal instrumentation, a ", 
+  #                                                                      glue("{right_main_rod_size} {right_main_rod_material}"),
+  #                                                                      " rod was contoured for the right and placed into position and secured with set screws.",
+  #                                                                      additional_rods_statement,
+  #                                                                      "The set screws were then tightened with a final tightener to the appropriate torque. Intraoperative Xray was used to confirm the final position of all implants. This completed the instrumentation of ",
+  #                                                                      glue_collapse(x = posterior_implants_all_df$level, sep = ', ', last = ', and '), 
+  #                                                                      ".") 
+  #     }
+  #   }
+  # }
+  
   if(nrow(posterior_implant_df) > 0){
-    
+    rod_statements_list <- list()
     if(any(str_detect(posterior_implant_df$side, "bilateral"))){
-      procedure_details_list$posterior_instrumentation_rods <- paste("To complete the spinal instrumentation, a ", 
-                                                                     glue("{left_main_rod_size} {left_main_rod_material} rod was contoured for the left and a {right_main_rod_size} {right_main_rod_material}"),
-                                                                     "rod was contoured for the right and the rods placed into position and secured with set screws.",
-                                                                     additional_rods_statement,
-                                                                     "The set screws were then tightened with a final tightener to the appropriate torque. Intraoperative Xray was used to confirm the final position of all implants. This completed the instrumentation of ",
-                                                                     glue_collapse(x = posterior_implants_all_df$level, sep = ', ', last = ', and '), 
-                                                                     ".") 
+      rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} rod was contoured for the left and a {right_main_rod_size} {right_main_rod_material} rod was contoured for the right and the rods placed into position and secured with set screws.")
+      rod_statements_list$additional_rods_statement <- additional_rods_statement
+      rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
       
+      if(nrow(crosslink_df) > 0){
+        rod_statements_list$crosslink <- glue("To increase the rigidity of the construct, a crosslink connector was applied at the level of {glue_collapse(crosslink_df$level, sep = ', ', last = ' and ')}.")
+      }
+      rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants.")
+      rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = posterior_implants_all_df$level, sep = ', ', last = ', and ')}.")
+      
+      procedure_details_list$posterior_instrumentation_rods <- glue_collapse(rod_statements_list, sep = " ")
     }else{
       if(any(str_detect(posterior_implant_df$side, "left"))){
-        procedure_details_list$posterior_instrumentation_rods <- paste("To complete the spinal instrumentation, a ", 
-                                                                       glue("{left_main_rod_size} {left_main_rod_material}"),
-                                                                       " rod was contoured for the left and placed into position and secured with set screws.",
-                                                                       additional_rods_statement,
-                                                                       "The set screws were then tightened with a final tightener to the appropriate torque. Intraoperative Xray was used to confirm the final position of all implants. This completed the instrumentation of ",
-                                                                       glue_collapse(x = posterior_implants_all_df$level, sep = ', ', last = ', and '), 
-                                                                       ".") 
+        rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} rod was contoured for the left and the rod was placed into position and secured with set screws.")
+        rod_statements_list$additional_rods_statement <- additional_rods_statement
+        rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
+        rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants.")
+        rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = posterior_implants_all_df$level, sep = ', ', last = ', and ')}.")
+        
+        procedure_details_list$posterior_instrumentation_rods <- glue_collapse(rod_statements_list, sep = " ")
+        
       }else{
-        procedure_details_list$posterior_instrumentation_rods <- paste("To complete the spinal instrumentation, a ", 
-                                                                       glue("{right_main_rod_size} {right_main_rod_material}"),
-                                                                       " rod was contoured for the right and placed into position and secured with set screws.",
-                                                                       additional_rods_statement,
-                                                                       "The set screws were then tightened with a final tightener to the appropriate torque. Intraoperative Xray was used to confirm the final position of all implants. This completed the instrumentation of ",
-                                                                       glue_collapse(x = posterior_implants_all_df$level, sep = ', ', last = ', and '), 
-                                                                       ".") 
+        rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {right_main_rod_size} {right_main_rod_material} rod was contoured for the right and the rod was placed into position and secured with set screws.")
+        rod_statements_list$additional_rods_statement <- additional_rods_statement
+        rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
+        rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants.")
+        rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = posterior_implants_all_df$level, sep = ', ', last = ', and ')}.")
+        
+        procedure_details_list$posterior_instrumentation_rods <- glue_collapse(rod_statements_list, sep = " ")
       }
     }
     
