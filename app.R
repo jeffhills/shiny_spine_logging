@@ -59,6 +59,57 @@ ui <- dashboardPage(skin = "black",
                      )
     ),
     dashboardBody(
+        tags$head(
+            tags$style(
+                "#posterior_bmp_size {
+                font-size: small;
+                max-width: -webkit-fill-available;
+                        text-align: left;
+                }"),
+            tags$style(
+                "#posterior_bmp_number {
+                        width: -webkit-fill-available;
+                        text-align: center;
+                }"),
+            tags$style(
+                "#posterior_bmp_dosage {
+                        width: -webkit-fill-available;
+                text-align: center;
+                font-size: medium;
+                font-weight: bold;
+                border-style: solid;
+                border-color: burlywood;
+                        }"),
+            tags$style(
+                "#anterior_bmp_size {
+                font-size: small;
+                max-width: -webkit-fill-available;
+                        text-align: left;
+                }"),
+            tags$style(
+                "#anterior_bmp_number {
+                        width: -webkit-fill-available;
+                        text-align: center;
+                }"),
+            tags$style(
+                "#anterior_bmp_dosage {
+                        width: -webkit-fill-available;
+                text-align: center;
+                font-size: medium;
+                font-weight: bold;
+                border-style: solid;
+                border-color: burlywood;
+                        }"),
+            tags$style(
+                "#all_objects_table {
+                        overflow-x: auto;
+                }"),
+            tags$style(
+                "#redcap_details_wide_df {
+                        overflow-x: auto;
+                }"
+            ),
+        ),
         tabItems(
             tabItem(tabName = "patient_details_procedures",
                     column(width = 4, 
@@ -184,38 +235,43 @@ ui <- dashboardPage(skin = "black",
                                                                                  font_size = 14, 
                                                                                  choices_vector = unique(interbody_levels_df$level)
                                                 ),
-                                                jh_make_shiny_table_row_function(left_column_label = "Select Levels to remove instrumentation:",
-                                                                                 input_type = "picker", 
-                                                                                 input_id = "removal_instrumentation_levels", 
-                                                                                 left_column_percent_width = 60, 
-                                                                                 font_size = 14, 
-                                                                                 choices_vector = unique(labels_df$level)
-                                                ),
                                                 fluidRow(
                                                     column(width = 6,
-                                                           h5(strong("Left Implants:"))
-                                                    ),
-                                                    column(width = 6,
-                                                           h5(strong("Right Implants:"))
-                                                    )
-                                                ),
-                                                fluidRow(
-                                                    column(width = 6,
-                                                           pickerInput(
-                                                               inputId = "left_revision_implants",
-                                                               label = NULL,
-                                                               choices = unique((revision_implants_df %>% filter(x < 0.5))$level),
-                                                               multiple = TRUE,
-                                                               width = "100%"
+                                                           dropdownButton(icon = icon("fas fa-screwdriver"),
+                                                                          up = TRUE, circle = FALSE, status = "info", label = "Left Revision Implants", tooltip = "Click to add Revision Implants", 
+                                                                    width = "100%",
+                                                                    style = "info",
+                                                                    column(6, 
+                                                                           awesomeCheckboxGroup(inputId = "left_revision_implants",
+                                                                                                label = "Implants Present:",
+                                                                                                choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                                                           )
+                                                                           ), 
+                                                                    column(6, 
+                                                                           awesomeCheckboxGroup(inputId = "left_revision_implants_removed",
+                                                                                                label = "Implants Removed:",status = "danger",
+                                                                                                choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                                                           )
+                                                                           )
                                                            )
                                                     ),
                                                     column(width = 6,
-                                                           pickerInput(
-                                                               inputId = "right_revision_implants",
-                                                               label = NULL,
-                                                               choices = unique((revision_implants_df %>% filter(x > 0.5))$level),
-                                                               multiple = TRUE,
-                                                               width = "100%"
+                                                           dropdownButton(icon = icon("fas fa-screwdriver"),
+                                                                          up = TRUE, circle = FALSE, status = "info", label = "right Revision Implants", tooltip = "Click to add Revision Implants", 
+                                                                          width = "100%",
+                                                                          style = "info",
+                                                                          column(6, 
+                                                                                 awesomeCheckboxGroup(inputId = "right_revision_implants",
+                                                                                                      label = "Implants Present:",
+                                                                                                      choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                                                                 )
+                                                                          ), 
+                                                                          column(6, 
+                                                                                 awesomeCheckboxGroup(inputId = "right_revision_implants_removed",
+                                                                                                      label = "Implants Removed:",status = "danger",
+                                                                                                      choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                                                                 )
+                                                                          )
                                                            )
                                                     )
                                                 )
@@ -262,8 +318,16 @@ ui <- dashboardPage(skin = "black",
                                                       max = 10,
                                                       value = -8
                                                   ),
-                                                  switchInput(onLabel = "Plot with Patterns (slower)", offLabel = "Plot for Speed",
+                                                  switchInput(label = "Plot with patterns (slower):",
+                                                              onLabel = "Yes",
+                                                              offLabel = "No",
                                                               inputId = "plot_with_patterns_true",
+                                                              value = FALSE
+                                                  ),
+                                                  switchInput(label = "Plot Summary Table:",
+                                                              onLabel = "Yes",
+                                                              offLabel = "No",
+                                                              inputId = "plot_summary_table",
                                                               value = FALSE
                                                   ),
                                                   circle = TRUE,
@@ -285,7 +349,7 @@ ui <- dashboardPage(skin = "black",
                                                               label = "Spine Region",
                                                               min = 0,
                                                               max = 1,
-                                                              value = c(0.05,0.45), direction = "rtl",
+                                                              value = c(0.05,0.42), direction = "rtl",
                                                               behaviour = "drag",color = "#0036FD",
                                                               orientation = "vertical",
                                                               height = "600px", width = "3px",
@@ -562,198 +626,172 @@ ui <- dashboardPage(skin = "black",
                                    )
                             )
                         ),
-                        fluidRow(
-                            column(width = 6, 
-                                   conditionalPanel(condition = "input.posterior_fusion_performed == true",
-                                                    box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "POSTERIOR Bone Graft & Biologics:"),
-                                                        fluidRow(
-                                                            column(width = 7, 
-                                                                   awesomeCheckboxGroup(inputId = "posterior_bone_graft", width = "100%",
-                                                                                        label = "Select any bone graft used:",
-                                                                                        choices = c("Morselized Allograft",
-                                                                                                    "Local Autograft",
-                                                                                                    "Morselized Autograft (separate fascial incision)"
-                                                                                        )
-                                                                   )
-                                                                   ),
-                                                            column(width = 5, 
-                                                                   awesomeCheckboxGroup(inputId = "posterior_biologics", width = "100%",
-                                                                                        label = "Select any other biologics used:",
-                                                                                        choices = c("Bone Marrow Aspirate",
-                                                                                                    "Cell Based Allograft",
-                                                                                                    "DBM"
-                                                                                        )
-                                                                   )
-                                                            )
+                        conditionalPanel(condition = "input.posterior_fusion_performed == true",
+                                         box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "POSTERIOR Bone Graft & Biologics:"),
+                                             ## NEW
+                                             fluidRow(
+                                                 column(6,
+                                                        div(style = "font-size:16px; font-weight:bold; text-align:left", "Select any bone graft used:"),
+                                                        prettyCheckboxGroup(inputId = "posterior_bone_graft",
+                                                                            shape = "curve", outline = TRUE, status = "primary", width = "95%", bigger = TRUE,
+                                                                            label = NULL,
+                                                                            choices = c("Morselized Allograft",
+                                                                                        "Local Autograft",
+                                                                                        "Morselized Autograft (separate fascial incision)"
+                                                                            )
+                                                        )
+                                                 ),
+                                                 column(6,
+                                                        div(style = "font-size:16px; font-weight:bold; text-align:left", "Other Biologics:"),
+                                                        prettyCheckboxGroup(inputId = "posterior_biologics",
+                                                                            shape = "curve", outline = TRUE, status = "primary", width = "95%",bigger = TRUE,
+                                                                            label = NULL,
+                                                                            choices = c("Bone Marrow Aspirate",
+                                                                                        "Cell Based Allograft",
+                                                                                        "DBM"
+                                                                            )
+                                                        )
+                                                 )
+                                             ),
+                                             fluidRow(
+                                                 column(6,
+                                                        conditionalPanel(
+                                                            condition = "input.posterior_bone_graft.indexOf('Morselized Allograft') > -1",
+                                                            jh_make_shiny_table_row_function(left_column_label = "Allograft (cc):",bottom_margin = "5px",
+                                                                                             left_column_percent_width = 60,
+                                                                                             font_size = 16,
+                                                                                             input_type = "numeric",
+                                                                                             input_id = "posterior_allograft_amount",
+                                                                                             initial_value_selected = 0,
+                                                                                             min = 0, max = 500, step = 30)
+                                                        )
+                                                 ),
+                                                 column(6,
+                                                        conditionalPanel(
+                                                            condition = "input.posterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
+                                                            jh_make_shiny_table_row_function(left_column_label = "Bone Marrow Aspirate Volume (cc):",bottom_margin = "5px",
+                                                                                             left_column_percent_width = 60,
+                                                                                             font_size = 16,
+                                                                                             input_type = "numeric",
+                                                                                             input_id = "posterior_bone_marrow_aspirate_volume",
+                                                                                             initial_value_selected = 0,
+                                                                                             min = 0,
+                                                                                             max = 500,
+                                                                                             step = 5)
                                                         ),
-                                                        fluidRow(
-                                                            column(width = 12, 
-                                                                   jh_make_shiny_table_row_function(left_column_label = "BMP Kits:",
-                                                                                                    left_column_percent_width = 60, 
-                                                                                                    font_size = 16,
-                                                                                                    input_type = "numeric",
-                                                                                                    input_id = "posterior_bmp_number", 
-                                                                                                    initial_value_selected = 0, 
-                                                                                                    min = 0, 
-                                                                                                    max = 20, 
-                                                                                                    step = 1),
-                                                                   conditionalPanel(condition = "input.posterior_bmp_number > 0",
-                                                                                    radioGroupButtons(
-                                                                                        inputId = "posterior_bmp_size",
-                                                                                        label = NULL,
-                                                                                        choices = c("XXS" = 1.05, "XS" = 2.1, "Sm" = 4.2, "M" = 8.4, "L" = 12),
-                                                                                        size = "sm",
-                                                                                        selected = 12,
-                                                                                        justified = TRUE,
-                                                                                        checkIcon = list(
-                                                                                            yes = tags$i(class = "fa fa-check-square",
-                                                                                                         style = "color: steelblue"),
-                                                                                            no = tags$i(class = "fa fa-square-o",
-                                                                                                        style = "color: steelblue"))
-                                                                                    )
-                                                                   ),
-                                                                   conditionalPanel(
-                                                                       condition = "input.posterior_bone_graft.indexOf('Morselized Allograft') > -1",
-                                                                       jh_make_shiny_table_row_function(left_column_label = "Allograft (cc):",
-                                                                                                        left_column_percent_width = 60, 
-                                                                                                        font_size = 16,
-                                                                                                        input_type = "numeric",
-                                                                                                        input_id = "posterior_allograft_amount", initial_value_selected = 0, min = 0, max = 500, step = 30)
-                                                                   ),
-                                                                   conditionalPanel(
-                                                                       condition = "input.posterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
-                                                                       jh_make_shiny_table_row_function(left_column_label = "Bone Marrow Aspirate Volume (cc):",
-                                                                                                        left_column_percent_width = 60, 
-                                                                                                        font_size = 16,
-                                                                                                        input_type = "numeric",
-                                                                                                        input_id = "posterior_bone_marrow_aspirate_volume", 
-                                                                                                        initial_value_selected = 0, 
-                                                                                                        min = 0,
-                                                                                                        max = 500,
-                                                                                                        step = 5)
-                                                                   ),
-                                                                   conditionalPanel(
-                                                                       condition = "input.posterior_biologics.indexOf('Cell Based Allograft') > -1",
-                                                                       jh_make_shiny_table_row_function(left_column_label = "Cell Based Allograft Volume (cc):",
-                                                                                                        left_column_percent_width = 60, 
-                                                                                                        font_size = 16,
-                                                                                                        input_type = "numeric",
-                                                                                                        input_id = "posterior_cell_based_allograft_volume", 
-                                                                                                        initial_value_selected = 0,
-                                                                                                        min = 0,
-                                                                                                        max = 500,
-                                                                                                        step = 5)
-                                                                   ),
-                                                                   conditionalPanel(
-                                                                       condition = "input.posterior_biologics.indexOf('DBM') > -1",
-                                                                       jh_make_shiny_table_row_function(left_column_label = "DBM Volume (cc):",
-                                                                                                        left_column_percent_width = 60, 
-                                                                                                        font_size = 16,
-                                                                                                        input_type = "numeric",
-                                                                                                        input_id = "posterior_dbm_volume", initial_value_selected = 0, min = 0, max = 500, step = 5)
-                                                                   )
-                                                            )
+                                                        conditionalPanel(
+                                                            condition = "input.posterior_biologics.indexOf('Cell Based Allograft') > -1",
+                                                            jh_make_shiny_table_row_function(left_column_label = "Cell Based Allograft Volume (cc):",bottom_margin = "5px",
+                                                                                             left_column_percent_width = 60,
+                                                                                             font_size = 16,
+                                                                                             input_type = "numeric",
+                                                                                             input_id = "posterior_cell_based_allograft_volume",
+                                                                                             initial_value_selected = 0,
+                                                                                             min = 0,
+                                                                                             max = 500,
+                                                                                             step = 5)
+                                                        ),
+                                                        conditionalPanel(
+                                                            condition = "input.posterior_biologics.indexOf('DBM') > -1",
+                                                            jh_make_shiny_table_row_function(left_column_label = "DBM Volume (cc):",bottom_margin = "5px",
+                                                                                             left_column_percent_width = 60,
+                                                                                             font_size = 16,
+                                                                                             input_type = "numeric",
+                                                                                             input_id = "posterior_dbm_volume",
+                                                                                             initial_value_selected = 0, min = 0, max = 500, step = 5)
                                                         )
-                                                    )
-                                   )
-                            ),
-                            column(width = 6, 
-                                   conditionalPanel(condition = "input.anterior_fusion_performed == true",
-                                                    box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "ANTERIOR Bone Graft & Biologics:"),
-                                                        fluidRow(
-                                                            column(width = 7, 
-                                                                   awesomeCheckboxGroup(inputId = "anterior_bone_graft", width = "100%",
-                                                                                        label = "Select any bone graft used:",
-                                                                                        choices = c("Morselized Allograft",
-                                                                                                    "Local Autograft",
-                                                                                                    "Morselized Autograft\n(separate fascial incision)"
-                                                                                        )
-                                                                   )
-                                                            ),
-                                                            column(width = 5, 
-                                                                   awesomeCheckboxGroup(inputId = "anterior_biologics", width = "100%",
-                                                                                        label = "Select any other biologics used:",
-                                                                                        choices = c("Bone Marrow Aspirate",
-                                                                                                    "Cell Based Allograft",
-                                                                                                    "DBM"
-                                                                                        )
-                                                                   )
-                                                                   ),
-                                                        ), 
-                                                        fluidRow(
-                                                            column(width = 12, 
-                                                                   jh_make_shiny_table_row_function(left_column_label = "BMP Kits:",
-                                                                                                    left_column_percent_width = 60, 
-                                                                                                    font_size = 16,
-                                                                                                    input_type = "numeric",
-                                                                                                    input_id = "anterior_bmp_number", 
-                                                                                                    initial_value_selected = 0, 
-                                                                                                    min = 0, 
-                                                                                                    max = 20, 
-                                                                                                    step = 1),
-                                                                   conditionalPanel(condition = "input.anterior_bmp_number > 0",
-                                                                                    radioGroupButtons(
-                                                                                        inputId = "anterior_bmp_size",
-                                                                                        label = NULL,
-                                                                                        choices = c("XXS" = 1.05, "XS" = 2.1, "Sm" = 4.2, "M" = 8.4, "L" = 12),
-                                                                                        size = "sm",
-                                                                                        selected = 12,
-                                                                                        justified = TRUE,
-                                                                                        checkIcon = list(
-                                                                                            yes = tags$i(class = "fa fa-check-square",
-                                                                                                         style = "color: steelblue"),
-                                                                                            no = tags$i(class = "fa fa-square-o",
-                                                                                                        style = "color: steelblue"))
-                                                                                    )
-                                                                   ),
-                                                                   conditionalPanel(
-                                                                       condition = "input.anterior_bone_graft.indexOf('Morselized Allograft') > -1",
-                                                                       jh_make_shiny_table_row_function(left_column_label = "Allograft (cc):",
-                                                                                                        left_column_percent_width = 60, 
-                                                                                                        font_size = 16,
-                                                                                                        input_type = "numeric",
-                                                                                                        input_id = "anterior_allograft_amount", initial_value_selected = 0, min = 0, max = 500, step = 30)
-                                                                   ),
-                                                                   conditionalPanel(
-                                                                       condition = "input.anterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
-                                                                       jh_make_shiny_table_row_function(left_column_label = "Bone Marrow Aspirate Volume (cc):",
-                                                                                                        left_column_percent_width = 60, 
-                                                                                                        font_size = 16,
-                                                                                                        input_type = "numeric",
-                                                                                                        input_id = "anterior_bone_marrow_aspirate_volume", 
-                                                                                                        initial_value_selected = 0, 
-                                                                                                        min = 0,
-                                                                                                        max = 500,
-                                                                                                        step = 5)
-                                                                   ),
-                                                                   conditionalPanel(
-                                                                       condition = "input.anterior_biologics.indexOf('Cell Based Allograft') > -1",
-                                                                       jh_make_shiny_table_row_function(left_column_label = "Cell Based Allograft Volume (cc):",
-                                                                                                        left_column_percent_width = 60, 
-                                                                                                        font_size = 16,
-                                                                                                        input_type = "numeric",
-                                                                                                        input_id = "anterior_cell_based_allograft_volume", 
-                                                                                                        initial_value_selected = 0,
-                                                                                                        min = 0,
-                                                                                                        max = 500,
-                                                                                                        step = 5)
-                                                                   ),
-                                                                   conditionalPanel(
-                                                                       condition = "input.anterior_biologics.indexOf('DBM') > -1",
-                                                                       jh_make_shiny_table_row_function(left_column_label = "DBM Volume (cc):",
-                                                                                                        left_column_percent_width = 60, 
-                                                                                                        font_size = 16,
-                                                                                                        input_type = "numeric",
-                                                                                                        input_id = "anterior_dbm_volume", initial_value_selected = 0, min = 0, max = 500, step = 5)
-                                                                   )
-                                                            )
-                                                        )
-                                                    )
-                                   )
-                            )
+                                                 )
+                                             ),
+                                             jh_make_bmp_ui_function(anterior_posterior = "posterior"),
+                                         )
                         ),
-                        box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody Implant Details:"), collapsible = TRUE,  
-                            uiOutput(outputId = "interbody_implants_ui")
+                        conditionalPanel(condition = "input.anterior_fusion_performed == true",
+                                         box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "ANTERIOR Bone Graft & Biologics:"),
+                                             fluidRow(
+                                                 tags$table(width = "100%",
+                                                            tags$tr(
+                                                                tags$td(width = "50%",
+                                                                        div(style = "font-size:16px; font-weight:bold; text-align:left", "Select any bone graft used:")
+                                                                ),
+                                                                tags$td(width = "50%",
+                                                                        div(style = "font-size:16px; font-weight:bold; text-align:left", "Other Biologics:")
+                                                                )
+                                                            ),
+                                                            tags$tr(
+                                                                tags$td(width = "50%",
+                                                                        prettyCheckboxGroup(inputId = "anterior_bone_graft", 
+                                                                                            shape = "curve", outline = TRUE, status = "primary", width = "95%", bigger = TRUE,
+                                                                                            label = NULL, 
+                                                                                            choices = c("Morselized Allograft",
+                                                                                                        "Local Autograft",
+                                                                                                        "Morselized Autograft (separate fascial incision)"
+                                                                                            )
+                                                                        )
+                                                                ),
+                                                                tags$td(width = "50%",
+                                                                        prettyCheckboxGroup(inputId = "anterior_biologics", 
+                                                                                            shape = "curve", outline = TRUE, status = "primary", width = "95%",bigger = TRUE,
+                                                                                            label = NULL,
+                                                                                            choices = c("Bone Marrow Aspirate",
+                                                                                                        "Cell Based Allograft",
+                                                                                                        "DBM"
+                                                                                            )
+                                                                        )
+                                                                )
+                                                            )
+                                                 )
+                                             ),
+                                             fluidRow(
+                                                 column(width = 12, 
+                                                        conditionalPanel(
+                                                            condition = "input.anterior_bone_graft.indexOf('Morselized Allograft') > -1",
+                                                            jh_make_shiny_table_row_function(left_column_label = "Allograft (cc):",
+                                                                                             left_column_percent_width = 60, 
+                                                                                             font_size = 16,
+                                                                                             input_type = "numeric",
+                                                                                             input_id = "anterior_allograft_amount", initial_value_selected = 0, min = 0, max = 500, step = 30)
+                                                        ),
+                                                        conditionalPanel(
+                                                            condition = "input.anterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
+                                                            jh_make_shiny_table_row_function(left_column_label = "Bone Marrow Aspirate Volume (cc):",
+                                                                                             left_column_percent_width = 60, 
+                                                                                             font_size = 16,
+                                                                                             input_type = "numeric",
+                                                                                             input_id = "anterior_bone_marrow_aspirate_volume", 
+                                                                                             initial_value_selected = 0, 
+                                                                                             min = 0,
+                                                                                             max = 500,
+                                                                                             step = 5)
+                                                        ),
+                                                        conditionalPanel(
+                                                            condition = "input.anterior_biologics.indexOf('Cell Based Allograft') > -1",
+                                                            jh_make_shiny_table_row_function(left_column_label = "Cell Based Allograft Volume (cc):",
+                                                                                             left_column_percent_width = 60, 
+                                                                                             font_size = 16,
+                                                                                             input_type = "numeric",
+                                                                                             input_id = "anterior_cell_based_allograft_volume", 
+                                                                                             initial_value_selected = 0,
+                                                                                             min = 0,
+                                                                                             max = 500,
+                                                                                             step = 5)
+                                                        ),
+                                                        conditionalPanel(
+                                                            condition = "input.anterior_biologics.indexOf('DBM') > -1",
+                                                            jh_make_shiny_table_row_function(left_column_label = "DBM Volume (cc):",
+                                                                                             left_column_percent_width = 60, 
+                                                                                             font_size = 16,
+                                                                                             input_type = "numeric",
+                                                                                             input_id = "anterior_dbm_volume", initial_value_selected = 0, min = 0, max = 500, step = 5)
+                                                        )
+                                                 )
+                                             ),
+                                             jh_make_bmp_ui_function(anterior_posterior = "anterior")
+                                         )
+                        ),
+                        conditionalPanel(condition = "input.fusion_procedure_performed == true",
+                                         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody Implant Details:"), collapsible = TRUE,  
+                                             uiOutput(outputId = "interbody_implants_ui")
+                                         )
                         ),
                         conditionalPanel(condition = "input.fusion_procedure_performed == true & input.spine_approach.indexOf('Posterior') > -1",
                                          box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "Rod Details:"), collapsible = TRUE,
@@ -802,107 +840,10 @@ ui <- dashboardPage(skin = "black",
                                                                                  choices_vector = c("Non-instrumented", "Titanium", "Cobalt Chrome", "Stainless Steel"),
                                                                                  initial_value_selected = "Non-instrumented",
                                                                                  picker_choose_multiple = FALSE),
-                                             jh_make_shiny_table_column_function(input_type = "awesomeCheckbox", 
-                                                                                 left_input_id = "add_left_accessory_rod", 
-                                                                                 right_input_id = "add_right_accessory_rod", 
-                                                                                 left_label = "Left Accessory Rod:",
-                                                                                 right_label = "Right Accessory Rod:",
-                                                                                 left_condition_statement = "input.left_supplemental_rods_eligible == true", 
-                                                                                 right_condition_statement = "input.right_supplemental_rods_eligible == true", 
-                                                                                 initial_value_selected = FALSE,
-                                                                                 status = "success"),
-                                             jh_make_shiny_table_column_function(input_type = "sliderTextInput", 
-                                                                                 left_input_id = "left_accessory_rod", 
-                                                                                 right_input_id = "right_accessory_rod", 
-                                                                                 left_condition_statement = "input.add_left_accessory_rod == true", 
-                                                                                 right_condition_statement = "input.add_right_accessory_rod == true", 
-                                                                                 choices_vector = c("a", "b"),
-                                                                                 initial_value_selected = c("a", "b")
-                                                                                ),
-                                             jh_make_shiny_table_column_function(input_type = "awesomeCheckbox", 
-                                                                                 left_input_id = "add_left_satellite_rod", 
-                                                                                 left_label = "Left Satellite Rod:",
-                                                                                 right_input_id = "add_right_satellite_rod", 
-                                                                                 right_label = "Right Satellite Rod:",
-                                                                                 left_condition_statement = "input.left_supplemental_rods_eligible == true", 
-                                                                                 right_condition_statement = "input.right_supplemental_rods_eligible == true", 
-                                                                                 initial_value_selected = FALSE,
-                                                                                 status = "success"),
-                                             jh_make_shiny_table_column_function(input_type = "sliderTextInput", 
-                                                                                 left_input_id = "left_satellite_rod", 
-                                                                                 right_input_id = "right_satellite_rod", 
-                                                                                 left_condition_statement = "input.add_left_satellite_rod == true", 
-                                                                                 right_condition_statement = "input.add_right_satellite_rod == true", 
-                                                                                 choices_vector = c("a", "b"),
-                                                                                 initial_value_selected = c("a", "b")
-                                             ),
-                                             jh_make_shiny_table_column_function(input_type = "awesomeCheckbox", 
-                                                                                 left_input_id = "add_left_intercalary_rod", 
-                                                                                 left_label = "Left Intercalary Rod:",
-                                                                                 right_input_id = "add_right_intercalary_rod", 
-                                                                                 right_label = "Right Intercalary Rod:",
-                                                                                 left_condition_statement = "input.left_supplemental_rods_eligible == true", 
-                                                                                 right_condition_statement = "input.right_supplemental_rods_eligible == true", 
-                                                                                 initial_value_selected = FALSE,
-                                                                                 status = "success"),
-                                             tags$table(width = "95%",
-                                                        tags$tr(
-                                                            tags$td(width = "5%"),
-                                                            tags$td(width = "30%",
-                                                                    conditionalPanel(condition = "input.add_left_intercalary_rod == true",
-                                                                                     sliderTextInput(
-                                                                                         inputId = "left_intercalary_rod",
-                                                                                         label = NULL,
-                                                                                         choices = c("a", "b"),
-                                                                                         selected = c("a", "b")
-                                                                                     )
-                                                                    )),
-                                                            tags$td(width = "2.5%"),
-                                                            tags$td(width = "15%",
-                                                                    conditionalPanel(condition = "input.add_left_intercalary_rod == true",
-                                                                                     pickerInput(inputId = "left_intercalary_junction",
-                                                                                                 label = "Junction Level:",
-                                                                                                 choices = c("a", "b"),
-                                                                                                 width = "fit",
-                                                                                                 inline = TRUE)
-                                                            )),
-                                                            tags$td(width = "30%",
-                                                                    conditionalPanel(condition = "input.add_right_intercalary_rod == true",
-                                                                                     sliderTextInput(
-                                                                                         inputId = "right_intercalary_rod",
-                                                                                         label = NULL,
-                                                                                         choices = c("a", "b"),
-                                                                                         selected = c("a", "b")
-                                                                                     )
-                                                                    )),
-                                                            tags$td(width = "2.5%"),
-                                                            tags$td(width = "15%",
-                                                                    conditionalPanel(condition = "input.add_right_intercalary_rod == true",
-                                                                                     pickerInput(inputId = "right_intercalary_junction",
-                                                                                                 label = "Junction Level:",
-                                                                                                 choices = c("a", "b"),
-                                                                                                 width = "fit",
-                                                                                                 inline = TRUE)
-                                                                    )),
-                                                        )
-                                             ),
-                                             jh_make_shiny_table_column_function(input_type = "awesomeCheckbox", 
-                                                                                 left_input_id = "add_left_linked_rods", 
-                                                                                 left_label = "Left Linked Rods (Overlapping Region):",
-                                                                                 right_input_id = "add_right_linked_rods", 
-                                                                                 right_label = "Right Linked Rods (Overlapping Region):",
-                                                                                 left_condition_statement = "input.left_supplemental_rods_eligible == true", 
-                                                                                 right_condition_statement = "input.right_supplemental_rods_eligible == true", 
-                                                                                 initial_value_selected = FALSE,
-                                                                                 status = "success"),
-                                             jh_make_shiny_table_column_function(input_type = "sliderTextInput", 
-                                                                                 left_input_id = "left_linked_rods", 
-                                                                                 right_input_id = "right_linked_rods", 
-                                                                                 left_condition_statement = "input.add_left_linked_rods == true", 
-                                                                                 right_condition_statement = "input.add_right_linked_rods == true", 
-                                                                                 choices_vector = c("a", "b"),
-                                                                                 initial_value_selected = c("a", "b")
-                                                                                 ),
+                                             jh_make_supplemental_rod_ui_function(rod_type = "accessory_rod", input_label = "Accessory Rod"),
+                                             jh_make_supplemental_rod_ui_function(rod_type = "satellite_rod", input_label = "Satellite Rod"),
+                                             jh_make_supplemental_rod_ui_function(rod_type = "intercalary_rod", input_label = "Intercalary Rod"),
+                                             jh_make_supplemental_rod_ui_function(rod_type = "linked_rods", input_label = "Linked Rods"),
                                              jh_make_shiny_table_column_function(input_type = "awesomeCheckbox", 
                                                                                  left_input_id = "add_left_custom_rods", 
                                                                                  left_label = "Customize Left Rod Construct:",
@@ -1000,18 +941,18 @@ ui <- dashboardPage(skin = "black",
                         jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Findings:", input_type = "text", input_id = "surgical_findings", initial_value_selected = ""),
                         jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Specimens:", input_type = "text", input_id = "specimens_removed", initial_value_selected = ""),
                         hr(),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Estimated Blood Loss:", input_type = "numeric", input_id = "ebl", initial_value_selected = 0, min = 0, max = 50000, step = 100),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Urine Output:", input_type = "numeric", input_id = "urine_output", initial_value_selected = 0, min = 0, max = 50000, step = 100),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Crystalloids:", input_type = "numeric", input_id = "crystalloids_administered", min = 0, max = 100000, step = 100),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Colloids:", input_type = "numeric", input_id = "colloids_administered", min = 0, max = 100000, step = 100),
+                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Estimated Blood Loss:", input_type = "numeric", input_id = "ebl", initial_value_selected = NULL, min = 0, max = 50000, step = 100),
+                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Urine Output:", input_type = "numeric", input_id = "urine_output", initial_value_selected = NULL, min = 0, max = 50000, step = 100),
+                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Crystalloids:", input_type = "numeric", input_id = "crystalloids_administered", initial_value_selected = NULL, min = 0, max = 100000, step = 100),
+                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Colloids:", input_type = "numeric", input_id = "colloids_administered", min = 0, initial_value_selected = NULL, max = 100000, step = 100),
                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Transfusions/Cell Saver", input_type = "switch", input_id = "transfusion", switch_input_on_label = "Yes", switch_input_off_label = "No"),
                         conditionalPanel(condition = "input.transfusion == true",
                                          box(width = 12, 
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cell Saver Transfused (cc):", input_type = "numeric", input_id = "cell_saver_transfused", min = 0, max = 10000, step = 100),
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "pRBC units transfused:", input_type = "numeric", input_id = "prbc_transfused", min = 0, max = 100, step = 1),
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "FFP units transfused:", input_type = "numeric", input_id = "ffp_transfused", min = 0, max = 100, step = 1),
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cryoprecipitate units transfused:", input_type = "numeric", input_id = "cryoprecipitate_transfused", min = 0, max = 100, step = 1),
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Platelet units transfused:", input_type = "numeric", input_id = "platelets_transfused", min = 0, max = 100, step = 1),
+                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cell Saver Transfused (cc):", input_type = "numeric", input_id = "cell_saver_transfused",initial_value_selected = NULL, min = 0, max = 10000, step = 100),
+                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "pRBC units transfused:", input_type = "numeric", input_id = "prbc_transfused", initial_value_selected = NULL, min = 0, max = 100, step = 1),
+                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "FFP units transfused:", input_type = "numeric", input_id = "ffp_transfused", initial_value_selected = NULL, min = 0, max = 100, step = 1),
+                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cryoprecipitate units transfused:", input_type = "numeric", input_id = "cryoprecipitate_transfused", initial_value_selected = NULL, min = 0, max = 100, step = 1),
+                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Platelet units transfused:", input_type = "numeric", input_id = "platelets_transfused", initial_value_selected = NULL, min = 0, max = 100, step = 1),
                                          )
                         ),
                         hr(),
@@ -1049,7 +990,7 @@ ui <- dashboardPage(skin = "black",
                                                                             "Repair of dural/CSF leak",
                                                                             "Dural Graft",
                                                                             "Removal of spinal instrumentation",
-                                                                            "Exploration of spinal prior fusion",
+                                                                            "Exploration of prior spinal fusion",
                                                                             "Open treatment of vertebral fracture",
                                                                             "Other"), 
                                                          initial_value_selected = "Spinal Cord Monitoring"),
@@ -1063,8 +1004,6 @@ ui <- dashboardPage(skin = "black",
                         div(style = "font-size:18px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
                         uiOutput(outputId = "drains_ui"),
                         hr(),
-                        # jh_make_shiny_table_row_function(left_column_label = "Deep drains:", input_type = "checkbox", input_id = "deep_drains", left_column_percent_width = 45, font_size = 14, initial_value_selected = 1, choices_vector = c("0", "1", "2", "3", "4", "5"), checkboxes_inline = TRUE, return_as_full_table = TRUE),       
-                        # jh_make_shiny_table_row_function(left_column_label = "Superficial drains:", input_type = "checkbox", input_id = "superficial_drains", left_column_percent_width = 45, font_size = 14, initial_value_selected = 1, choices_vector = c("0", "1", "2", "3", "4", "5"), checkboxes_inline = TRUE, return_as_full_table = TRUE),       
                         # hr(),
                         jh_make_shiny_table_row_function(left_column_label = "Select any used during closure:", 
                                                          input_type = "checkbox", 
@@ -1199,6 +1138,37 @@ server <- function(input, output, session) {
         updateTabItems(session = session, inputId = "tabs", selected = "operative_note")
     })
     
+    ###### ######  -----------   ######### UPDATE TABS ###### ######  -----------   ######### 
+    
+    observeEvent(input$crop_y,ignoreNULL = TRUE, {
+        symptom_option_list <- list()
+        if(input$crop_y[2] > 0.6){
+            symptom_option_list$'Neck & Uppers:' <- c("Neck Pain", "Left Arm Pain", "Right Arm Pain", "Left Arm Weakness", "Right Arm Weakness")
+        }
+        if(input$crop_y[2] > 0.5 & input$crop_y[1] < 0.65){
+            symptom_option_list$'Thoracic:' <- c("Mid Back Pain", "Kyphosis")
+        }
+        if(input$crop_y[1] < 0.3){
+            symptom_option_list$'Lower & Legs:' = c("Low Back Pain", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness")
+        }
+        
+        if(input$crop_y[2] > 0.45){
+            symptom_option_list$'Functional:' <- c("Myelopathy: Nurick 1 (Root Symptomts)",
+                                                  "Myelopathy: Nurick 2 (Normal gait but symptoms of cord compression)",
+                                                  "Myelopathy: Nurick 3 (Gait Abnormalities)",
+                                                  "Myelopathy: Nurick 4 (Significant Gait Abnormalities, preventing employment)",
+                                                  "Myelopathy: Nurick 5 (Depended on Assistive Device for Ambulating)",
+                                                  "Myelopathy: Nurick 6 (Wheelchair bound)")
+        }
+        if(input$crop_y[1] < 0.5){
+            symptom_option_list$'Deformity' = c("Coronal Imbalance", "Sagittal Imbalance", "Chin on chest deformity", "Flatback Syndrome")
+        }
+
+            symptom_option_list$'Other' = c("Loss of bladder control", "Bowel Incontinence", "Other Symptoms")
+
+        updatePickerInput(session = session, inputId = "symptoms", label = NULL, choices = symptom_option_list)
+    })
+    
     ###### ######  -----------   ######### Change to 6 Lumbar Vertebrae ###### ######  -----------   ######### 
     
     observeEvent(input$lumbar_vertebrae_6, ignoreInit = TRUE,{
@@ -1261,6 +1231,13 @@ server <- function(input, output, session) {
             open_canal_df <<- l5_open_canal_df
         }
         
+    })
+    
+    #########-------------------################   UPDATE MultiPosition    #########-------------------################     
+    observeEvent(list(input$plot_click, all_objects_to_add_list$objects_df), {
+        if(any(all_objects_to_add_list$objects_df$approach == "anterior") & any(all_objects_to_add_list$objects_df$approach == "posterior")){
+            updateSwitchInput(session = session, inputId = "multiple_approach", value = TRUE)
+        }
     })
 
     #########-------------------################   UPDATE CHOICES    #########-------------------################ 
@@ -1541,7 +1518,8 @@ server <- function(input, output, session) {
         updateRadioGroupButtons(session = session, 
                                 inputId = "object_to_add", 
                                 choices = c("Vertebroplasty" = "vertebroplasty",
-                                            "Vertebral Augmentation (cavity creation, then cement)" = "vertebral_cement_augmentation"),
+                                            "Vertebral Augmentation (cavity creation, then cement)" = "vertebral_cement_augmentation",
+                                            "Structural Allograft Strut" = "structural_allograft"),
                                 checkIcon = list(
                                     yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
                                 ),
@@ -1570,29 +1548,33 @@ server <- function(input, output, session) {
     ######### ######### CROSSLINKS ################# #########
     
     observeEvent(list(input$plot_click, input$plot_double_click, input$reset_all),ignoreNULL = TRUE, ignoreInit = TRUE, {
-        crosslink_choices_df <- left_rod_implants_df_reactive() %>%
-            union_all(right_rod_implants_df_reactive()) %>%
-            arrange(vertebral_number) %>%
-            select(level, vertebral_number) %>%
-            distinct()
-        
-        choices_df <- levels_numbered_df %>%
-            mutate(body_interspace = jh_check_body_or_interspace_function(level = level)) %>%
-            filter(body_interspace == "body") %>%
-            filter(vertebral_number >= min(crosslink_choices_df$vertebral_number)) %>%
-            filter(vertebral_number < max(crosslink_choices_df$vertebral_number))
-        
-        updateCheckboxGroupButtons(session = session, 
-                                   inputId = "crosslink_connectors", 
-                                   choices = choices_df$level,
-                                   label = "Add crosslinks at:",
-                                   selected = input$crosslink_connectors,
-                                   checkIcon = list(
-                                       yes = tags$i(class = "fa fa-check-square",
-                                                    style = "color: steelblue"),
-                                       no = tags$i(class = "fa fa-square-o",
-                                                   style = "color: steelblue"))
-        )
+        if(input$spine_approach == "Posterior"){
+            crosslink_choices_df <- left_rod_implants_df_reactive() %>%
+                union_all(right_rod_implants_df_reactive()) %>%
+                arrange(vertebral_number) %>%
+                select(level, vertebral_number) %>%
+                distinct()
+            
+            if(nrow(crosslink_choices_df)>2){
+                choices_df <- levels_numbered_df %>%
+                    mutate(body_interspace = jh_check_body_or_interspace_function(level = level)) %>%
+                    filter(body_interspace == "body") %>%
+                    filter(vertebral_number >= min(crosslink_choices_df$vertebral_number)) %>%
+                    filter(vertebral_number < max(crosslink_choices_df$vertebral_number))
+                
+                updateCheckboxGroupButtons(session = session, 
+                                           inputId = "crosslink_connectors", 
+                                           choices = choices_df$level,
+                                           label = "Add crosslinks at:",
+                                           selected = input$crosslink_connectors,
+                                           checkIcon = list(
+                                               yes = tags$i(class = "fa fa-check-square",
+                                                            style = "color: steelblue"),
+                                               no = tags$i(class = "fa fa-square-o",
+                                                           style = "color: steelblue"))
+                )   
+            }
+        }
     })
     
     ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
@@ -1698,12 +1680,12 @@ server <- function(input, output, session) {
             
             if(!is.null(osteotomy_level_reactive())){
                 updatePickerInput(session = session, inputId = "left_intercalary_junction",
-                                  label = "Intercalary Junction:",
+                                  label = "Junction:",
                                   choices = choices_df$level,
                                   selected = osteotomy_level_reactive())
             }else{
                 updatePickerInput(session = session, inputId = "left_intercalary_junction",
-                                  label = "Intercalary Junction:",
+                                  label = "Junction:",
                                   choices = choices_df$level,
                                   selected = head(x = tail(choices_df$level, 3), 1)
                                   )
@@ -1820,12 +1802,12 @@ server <- function(input, output, session) {
             
             if(!is.null(osteotomy_level_reactive())){
                 updatePickerInput(session = session, inputId = "right_intercalary_junction",
-                                  label = "Intercalary Junction:",
+                                  label = "Junction:",
                                   choices = choices_df$level,
                                   selected = osteotomy_level_reactive())
             }else{
                 updatePickerInput(session = session, inputId = "right_intercalary_junction",
-                                  label = "Intercalary Junction:",
+                                  label = "Junction:",
                                   choices = choices_df$level,
                                   selected = head(x = tail(choices_df$level, 3), 1)
                 )
@@ -2287,6 +2269,163 @@ server <- function(input, output, session) {
         }
     })
     
+    
+    
+    ################## ------------- POSTERIOR BMP UI AND RESULTS ---------------#######################
+    ################## ------------- POSTERIOR BMP UI AND RESULTS ---------------#######################
+    posterior_bmp_dose_list <- reactiveValues()
+    posterior_bmp_dose_list$xxs <- 0
+    posterior_bmp_dose_list$xs <- 0
+    posterior_bmp_dose_list$sm <- 0
+    posterior_bmp_dose_list$m <- 0
+    posterior_bmp_dose_list$l <- 0
+    
+    posterior_bmp_kit_list <- reactiveValues()
+    posterior_bmp_kit_list$"XXS Kits:" <- 0
+    posterior_bmp_kit_list$"XS Kits:" <- 0
+    posterior_bmp_kit_list$"Sm Kits:" <- 0
+    posterior_bmp_kit_list$"M Kits:" <- 0
+    posterior_bmp_kit_list$"L Kits:" <- 0
+    
+    observeEvent(input$add_posterior_xxs_bmp_button, {
+        posterior_bmp_dose_list$xxs <- posterior_bmp_dose_list$xxs + 1.05
+        posterior_bmp_kit_list$"XXS Kits:" <- posterior_bmp_kit_list$"XXS Kits:" + 1
+    })
+    observeEvent(input$add_posterior_xs_bmp_button, {
+        posterior_bmp_dose_list$xs <- posterior_bmp_dose_list$xs + 2.1
+        posterior_bmp_kit_list$"XS Kits:" <- posterior_bmp_kit_list$"XS Kits:" + 1
+    })
+    observeEvent(input$add_posterior_sm_bmp_button, {
+        posterior_bmp_dose_list$sm <- posterior_bmp_dose_list$sm + 4.2
+        posterior_bmp_kit_list$"Sm Kits:" <- posterior_bmp_kit_list$"Sm Kits:"+1
+    })
+    observeEvent(input$add_posterior_m_bmp_button, {
+        posterior_bmp_dose_list$m <- posterior_bmp_dose_list$m + 8.04
+        posterior_bmp_kit_list$"M Kits:" <- posterior_bmp_kit_list$"M Kits:" +1
+    })
+    observeEvent(input$add_posterior_l_bmp_button, {
+        posterior_bmp_dose_list$l <- posterior_bmp_dose_list$l + 12
+        posterior_bmp_kit_list$"L Kits:" <- posterior_bmp_kit_list$"L Kits:" + 1
+    })
+    
+    observeEvent(input$reset_posterior_bmp, {
+        posterior_bmp_dose_list$xxs <- 0
+        posterior_bmp_dose_list$xs <- 0
+        posterior_bmp_dose_list$sm <- 0
+        posterior_bmp_dose_list$m <- 0
+        posterior_bmp_dose_list$l <- 0
+        posterior_bmp_kit_list$"XXS Kits:" <- 0
+        posterior_bmp_kit_list$"XS Kits:" <- 0
+        posterior_bmp_kit_list$"Sm Kits:" <- 0
+        posterior_bmp_kit_list$"M Kits:" <- 0
+        posterior_bmp_kit_list$"L Kits:" <- 0
+    })
+    
+    output$posterior_bmp_kits <- renderUI({
+        bmp_kit_list <- reactiveValuesToList(posterior_bmp_kit_list)
+        if(length(bmp_kit_list) > 0){
+            bmp_kits_df <- enframe(bmp_kit_list) %>%
+                filter(value != 0) %>%
+                mutate(statement = as.character(glue("{name} {value}")))
+            kit_statement <- glue_collapse(bmp_kits_df$statement, sep = "<br>")
+        }else{
+            kit_statement <- "none"
+        }
+        HTML(kit_statement)
+    })
+    
+    posterior_bmp_dose_reactive <- reactive({
+        Reduce("+", reactiveValuesToList(posterior_bmp_dose_list))
+    })
+    output$posterior_bmp_dosage <- renderUI({
+        posterior_dose_statement <- glue("{posterior_bmp_dose_reactive()}mg")
+        
+        (div(style = "font-size:18px; 
+                   text-align: center;
+                   font-weight: bold;
+                   border-style: solid;
+                   border-color: burlywood", 
+             as.character(posterior_dose_statement)))
+    })
+    
+    ################## ------------- anterior BMP UI AND RESULTS ---------------#######################
+    ################## ------------- anterior BMP UI AND RESULTS ---------------#######################
+    anterior_bmp_dose_list <- reactiveValues()
+    anterior_bmp_dose_list$xxs <- 0
+    anterior_bmp_dose_list$xs <- 0
+    anterior_bmp_dose_list$sm <- 0
+    anterior_bmp_dose_list$m <- 0
+    anterior_bmp_dose_list$l <- 0
+    
+    anterior_bmp_kit_list <- reactiveValues()
+    anterior_bmp_kit_list$"XXS Kits:" <- 0
+    anterior_bmp_kit_list$"XS Kits:" <- 0
+    anterior_bmp_kit_list$"Sm Kits:" <- 0
+    anterior_bmp_kit_list$"M Kits:" <- 0
+    anterior_bmp_kit_list$"L Kits:" <- 0
+    
+    observeEvent(input$add_anterior_xxs_bmp_button, {
+        anterior_bmp_dose_list$xxs <- anterior_bmp_dose_list$xxs + 1.05
+        anterior_bmp_kit_list$"XXS Kits:" <- anterior_bmp_kit_list$"XXS Kits:" + 1
+    })
+    observeEvent(input$add_anterior_xs_bmp_button, {
+        anterior_bmp_dose_list$xs <- anterior_bmp_dose_list$xs + 2.1
+        anterior_bmp_kit_list$"XS Kits:" <- anterior_bmp_kit_list$"XS Kits:" + 1
+    })
+    observeEvent(input$add_anterior_sm_bmp_button, {
+        anterior_bmp_dose_list$sm <- anterior_bmp_dose_list$sm + 4.2
+        anterior_bmp_kit_list$"Sm Kits:" <- anterior_bmp_kit_list$"Sm Kits:"+1
+    })
+    observeEvent(input$add_anterior_m_bmp_button, {
+        anterior_bmp_dose_list$m <- anterior_bmp_dose_list$m + 8.04
+        anterior_bmp_kit_list$"M Kits:" <- anterior_bmp_kit_list$"M Kits:" +1
+    })
+    observeEvent(input$add_anterior_l_bmp_button, {
+        anterior_bmp_dose_list$l <- anterior_bmp_dose_list$l + 12
+        anterior_bmp_kit_list$"L Kits:" <- anterior_bmp_kit_list$"L Kits:" + 1
+    })
+    
+    observeEvent(input$reset_anterior_bmp, {
+        anterior_bmp_dose_list$xxs <- 0
+        anterior_bmp_dose_list$xs <- 0
+        anterior_bmp_dose_list$sm <- 0
+        anterior_bmp_dose_list$m <- 0
+        anterior_bmp_dose_list$l <- 0
+        anterior_bmp_kit_list$"XXS Kits:" <- 0
+        anterior_bmp_kit_list$"XS Kits:" <- 0
+        anterior_bmp_kit_list$"Sm Kits:" <- 0
+        anterior_bmp_kit_list$"M Kits:" <- 0
+        anterior_bmp_kit_list$"L Kits:" <- 0
+    })
+    
+    output$anterior_bmp_kits <- renderUI({
+        bmp_kit_list <- reactiveValuesToList(anterior_bmp_kit_list)
+        if(length(bmp_kit_list) > 0){
+            bmp_kits_df <- enframe(bmp_kit_list) %>%
+                filter(value != 0) %>%
+                mutate(statement = as.character(glue("{name} {value}")))
+            kit_statement <- glue_collapse(bmp_kits_df$statement, sep = "<br>")
+        }else{
+            kit_statement <- "none"
+        }
+        HTML(kit_statement)
+    })
+    
+    anterior_bmp_dose_reactive <- reactive({
+        Reduce("+", reactiveValuesToList(anterior_bmp_dose_list))
+    })
+    output$anterior_bmp_dosage <- renderUI({
+        anterior_dose_statement <- glue("{anterior_bmp_dose_reactive()}mg")
+        
+        (div(style = "font-size:18px; 
+                   text-align: center;
+                   font-weight: bold;
+                   border-style: solid;
+                   border-color: burlywood", 
+             as.character(anterior_dose_statement)))
+    })
+    
+    
     ################------------------  Screw Size RESULTS  ----------------------######################  
     ################------------------  Screw Size RESULTS  ----------------------######################  
     
@@ -2375,9 +2514,7 @@ server <- function(input, output, session) {
         }
         screw_details_df
     })
-    
 
-    
     
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
@@ -2388,8 +2525,7 @@ server <- function(input, output, session) {
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
     
     ############# ~~~~~~~~~~~~~~ ################## MAKE THE SUMMARY TABLE FOR THE PLOT    ############# ~~~~~~~~~~~~~~ ################## 
-    
-    plan_reactive_df <- reactive({
+     plan_reactive_df <- reactive({
         
         anti_fibrinolytic <- case_when(
             length(input$anti_fibrinolytic) == 0 ~ "--",
@@ -2400,31 +2536,31 @@ server <- function(input, output, session) {
             length(input$anti_fibrinolytic) > 0 & ("Tranexamic Acid (TXA)" %in% input$anti_fibrinolytic) == FALSE ~ toString(input$anti_fibrinolytic)
         )
         
-        if(input$spine_approach == "anterior"){
-            bmp_size <- case_when(input$anterior_bmp_size == 1.05 ~ "XXS", 
-                                  input$anterior_bmp_size == 2.1 ~ "XS", 
-                                  input$anterior_bmp_size == 4.2 ~ "Sm", 
-                                  input$anterior_bmp_size == 8.4 ~ "M", 
-                                  input$anterior_bmp_size == 12 ~ "L")
-            bmp_mg_dose <- as.double(input$anterior_bmp_size)*as.double(input$anterior_bmp_number)
-            bmp_text <- if_else(input$anterior_bmp_number == 0 | is.null(input$anterior_bmp_number), "--", paste(input$anterior_bmp_number, input$anterior_bmp_size, "(", as.character(bmp_mg_dose), "mg)", sep = ""))
-            bmp <- if_else(bmp_text == "None", "None", paste(bmp_text, "(", as.character(bmp_mg_dose), "mg)"))
-        }else{
-            bmp_size <- case_when(input$posterior_bmp_size == 1.05 ~ "XXS", 
-                                  input$posterior_bmp_size == 2.1 ~ "XS", 
-                                  input$posterior_bmp_size == 4.2 ~ "Sm", 
-                                  input$posterior_bmp_size == 8.4 ~ "M", 
-                                  input$posterior_bmp_size == 12 ~ "L")  
-            
-            bmp_mg_dose <- as.double(input$posterior_bmp_size)*as.double(input$posterior_bmp_number)
-            bmp_text <- if_else(input$posterior_bmp_number == 0 | is.null(input$posterior_bmp_number), "--", paste(input$posterior_bmp_number, input$posterior_bmp_size, "(", as.character(bmp_mg_dose), "mg)", sep = ""))
-            bmp <- if_else(bmp_text == "None", "None", paste(bmp_text, "(", as.character(bmp_mg_dose), "mg)"))
-            }
+        # if(input$spine_approach == "Anterior"){
+        #     bmp_size <- case_when(input$anterior_bmp_size == 1.05 ~ "XXS", 
+        #                           input$anterior_bmp_size == 2.1 ~ "XS", 
+        #                           input$anterior_bmp_size == 4.2 ~ "Sm", 
+        #                           input$anterior_bmp_size == 8.4 ~ "M", 
+        #                           input$anterior_bmp_size == 12 ~ "L")
+        #     bmp_mg_dose <- as.double(input$anterior_bmp_size)*as.double(input$anterior_bmp_number)
+        #     bmp_text <- if_else(input$anterior_bmp_number == 0 | is.null(input$anterior_bmp_number), "--", paste(input$anterior_bmp_number, input$anterior_bmp_size, "(", as.character(bmp_mg_dose), "mg)", sep = ""))
+        #     bmp <- if_else(bmp_text == "None", "None", paste(bmp_text, "(", as.character(bmp_mg_dose), "mg)"))
+        # }else{
+        #     bmp_size <- case_when(input$posterior_bmp_size == 1.05 ~ "XXS", 
+        #                           input$posterior_bmp_size == 2.1 ~ "XS", 
+        #                           input$posterior_bmp_size == 4.2 ~ "Sm", 
+        #                           input$posterior_bmp_size == 8.4 ~ "M", 
+        #                           input$posterior_bmp_size == 12 ~ "L")  
+        #     
+        #     bmp_mg_dose <- as.double(input$posterior_bmp_size)*as.double(input$posterior_bmp_number)
+        #     bmp_text <- if_else(input$posterior_bmp_number == 0 | is.null(input$posterior_bmp_number), "--", paste(input$posterior_bmp_number, input$posterior_bmp_size, "(", as.character(bmp_mg_dose), "mg)", sep = ""))
+        #     bmp <- if_else(bmp_text == "None", "None", paste(bmp_text, "(", as.character(bmp_mg_dose), "mg)"))
+            # }
 
         
         age <- if_else(paste(input$date_of_birth) == "1900-01-01", "", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0)))
         
-        allograft_statement <- if(input$spine_approach == "anterior"){
+        allograft_statement <- if(input$spine_approach == "Anterior"){
             if_else(input$anterior_allograft_amount == 0, "--", paste(input$anterior_allograft_amount, "cc", sep = ""))
         }else{
             if_else(input$posterior_allograft_amount == 0, "--", paste(input$posterior_allograft_amount, "cc", sep = ""))
@@ -2437,7 +2573,7 @@ server <- function(input, output, session) {
                          "Preop Abx:" = toString(input$preop_antibiotics), 
                          "Antifibrinolytic:" = anti_fibrinolytic,
                          "Allograft" = allograft_statement,
-                         "BMP:" = bmp_text, 
+                         # "BMP:" = bmp_text, 
                          "Left Rod:" = if_else(nrow(left_rod_implants_df_reactive()) > 1, paste(input$left_main_rod_size, input$left_main_rod_material, sep = " "), "--"), 
                          "Right Rod:" = if_else(nrow(right_rod_implants_df_reactive()) > 1, paste(input$right_main_rod_size, input$right_main_rod_material, sep = " "), "--"))
 
@@ -2473,41 +2609,84 @@ server <- function(input, output, session) {
     )
     ######## ~~~~~~~~~~~ PRIOR Implants ---
     
-    observeEvent(list(input$left_revision_implants, input$primary_revision), ignoreNULL = TRUE, ignoreInit = TRUE, {
+    observeEvent(list(input$left_revision_implants, input$primary_revision, input$left_revision_implants_removed), ignoreNULL = TRUE, ignoreInit = TRUE, {
         if((length(input$left_revision_implants) > 1 && (input$primary_revision == "Revision"))){
-            left_revision_implants_constructed_df <- tibble(level = input$left_revision_implants) %>%
-                left_join(revision_implants_df %>% filter(x < 0.5))
             
-            left_revision_rod_matrix <- left_revision_implants_constructed_df %>%
-                select(x, y) %>%
-                arrange(rev(y)) %>%
-                distinct() %>%
-                as.matrix()
-            left_revision_implants_sf <- st_multipolygon(left_revision_implants_constructed_df$object_constructed)
-            left_revision_rod_sf <- st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND")
+            revision_implants_retained_vector <- keep(.x = input$left_revision_implants, .p = ~ .x %in% input$left_revision_implants_removed == FALSE)
             
-            geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_geometrycollection(x = list(left_revision_implants_sf, left_revision_rod_sf)), fill = "black") 
+            if(length(input$left_revision_implants_removed)>0){
+                revision_implants_removed_vector <- discard(.x = input$left_revision_implants_removed, .p = ~ .x %in% input$left_revision_implants == FALSE)
+                
+                left_revision_implants_removed_df <- tibble(level = revision_implants_removed_vector) %>%
+                    left_join(revision_implants_df %>% filter(side == "left"))
+                
+                left_revision_implants_removed_sf <- st_multipolygon(left_revision_implants_removed_df$object_constructed)
+                
+                geoms_list_revision_posterior$left_revision_implants_removed_sf_geom <- geom_sf(data = left_revision_implants_removed_sf, color = "black", fill = "grey98")  
+            }
+            
+            if(length(revision_implants_retained_vector)>0){
+                
+                left_revision_implants_constructed_df <- tibble(level = revision_implants_retained_vector) %>%
+                    left_join(revision_implants_df %>% filter(side == "left"))
+                
+                left_revision_implants_sf <- st_multipolygon(left_revision_implants_constructed_df$object_constructed)
+                
+                left_revision_rod_matrix <- left_revision_implants_constructed_df %>%
+                    select(x, y) %>%
+                    arrange(rev(y)) %>%
+                    distinct() %>%
+                    as.matrix()
+                
+                if(nrow(left_revision_rod_matrix) > 1){
+                    left_revision_rod_sf <- st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND")
+                    geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_geometrycollection(x = list(left_revision_implants_sf, left_revision_rod_sf)), fill = "black") 
+                }else{
+                    geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = left_revision_implants_sf, fill = "black") 
+                }
+            }
         }
     })
 
-    
-    observeEvent(list(input$right_revision_implants, input$primary_revision),ignoreNULL = TRUE, ignoreInit = TRUE, {
+    observeEvent(list(input$right_revision_implants, input$primary_revision, input$right_revision_implants_removed), ignoreNULL = TRUE, ignoreInit = TRUE, {
         if((length(input$right_revision_implants) > 1 && (input$primary_revision == "Revision"))){
-            right_revision_implants_constructed_df <- tibble(level = input$right_revision_implants) %>%
-                left_join(revision_implants_df %>% filter(x > 0.5))
             
-            right_revision_rod_matrix <- right_revision_implants_constructed_df %>%
-                select(x, y) %>%
-                arrange(rev(y)) %>%
-                distinct() %>%
-                as.matrix()
-            right_revision_implants_sf <- st_multipolygon(right_revision_implants_constructed_df$object_constructed)
-            right_revision_rod_sf <- st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND")
+            revision_implants_retained_vector <- keep(.x = input$right_revision_implants, .p = ~ .x %in% input$right_revision_implants_removed == FALSE)
             
-            geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_geometrycollection(x = list(right_revision_implants_sf, right_revision_rod_sf)), fill = "black") 
+            if(length(input$right_revision_implants_removed)>0){
+                revision_implants_removed_vector <- discard(.x = input$right_revision_implants_removed, .p = ~ .x %in% input$right_revision_implants == FALSE)
+                
+                right_revision_implants_removed_df <- tibble(level = revision_implants_removed_vector) %>%
+                    left_join(revision_implants_df %>% filter(side == "right"))
+                
+                right_revision_implants_removed_sf <- st_multipolygon(right_revision_implants_removed_df$object_constructed)
+                
+                geoms_list_revision_posterior$right_revision_implants_removed_sf_geom <- geom_sf(data = right_revision_implants_removed_sf, color = "black", fill = "grey98")  
+            }
+            
+            if(length(revision_implants_retained_vector)>0){
+                
+                right_revision_implants_constructed_df <- tibble(level = revision_implants_retained_vector) %>%
+                    left_join(revision_implants_df %>% filter(side == "right"))
+                
+                right_revision_implants_sf <- st_multipolygon(right_revision_implants_constructed_df$object_constructed)
+                
+                right_revision_rod_matrix <- right_revision_implants_constructed_df %>%
+                    select(x, y) %>%
+                    arrange(rev(y)) %>%
+                    distinct() %>%
+                    as.matrix()
+                
+                if(nrow(right_revision_rod_matrix) > 1){
+                    right_revision_rod_sf <- st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND")
+                    geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_geometrycollection(x = list(right_revision_implants_sf, right_revision_rod_sf)), fill = "black") 
+                }else{
+                    geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = right_revision_implants_sf, fill = "black") 
+                } 
+            }
         }
     })
-    
+
     ######## ~~~~~~~~~~~ POSTERIOR GEOMS  ---
     observeEvent(list(input$plot_click,
                       input$plot_double_click,
@@ -2681,9 +2860,17 @@ server <- function(input, output, session) {
         x_right_limit <- 1-x_left_limit
         plot_top_y <- input$crop_y[2]
         y_spacing <- 0.025*input$crop_y[2]
-        y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
-
-        plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+        
+        if(input$plot_summary_table == TRUE){
+            y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
+            plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+            
+            plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
+        }else{
+            y_start_with_text <- plot_top_y
+            # plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+            plan_table_geom <- geom_sf(data = NULL)
+        }
         
         if(input$lumbar_vertebrae_6 == TRUE){
             l6_statement <- "Note: 6 Lumbar Vertebrae"
@@ -2693,7 +2880,21 @@ server <- function(input, output, session) {
 
         if(input$spine_approach == "Anterior"){
             labels_anterior_cropped_df <- labels_anterior_df %>%
-                filter(between(y, input$crop_y[1], y_start_with_text))
+                filter(between(y, input$crop_y[1], y_start_with_text)) %>% 
+                mutate(x_left = x_left_limit + 0.05) %>%
+                mutate(x_right = x_right_limit - 0.05) %>%
+                select(level, x_left, x_right, y)
+            
+            labels_anterior_cropped_df <- labels_anterior_cropped_df %>%
+                union_all(tibble(level = " ", 
+                                 x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
+                                 x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
+                                 y = min(labels_anterior_cropped_df$y) - 0.075)) %>%
+                union_all(tibble(level = " ", 
+                                 x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
+                                 x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
+                                 y = max(labels_anterior_cropped_df$y) + 0.05))
+            
             
             ggdraw() +
                 draw_image(
@@ -2707,14 +2908,14 @@ server <- function(input, output, session) {
                 )  +
                 draw_text(
                     text = labels_anterior_cropped_df$level,
-                    x = x_left_limit + 0.05,
+                    x = labels_anterior_cropped_df$x_left,
                     y = labels_anterior_cropped_df$y,
                     size = input$label_text_size,
                     fontface = "bold"
                 ) +
                 draw_text(
                     text = labels_anterior_cropped_df$level,
-                    x = x_right_limit - 0.05,
+                    x = labels_anterior_cropped_df$x_right,
                     y = labels_anterior_cropped_df$y,
                     size = input$label_text_size,
                     fontface = "bold"
@@ -2723,14 +2924,25 @@ server <- function(input, output, session) {
                 reactiveValuesToList(geoms_list_anterior_interbody) +
                 reactiveValuesToList(geoms_list_anterior_instrumentation) +
                 geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
-                geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) +
-                ylim(input$crop_y[1], y_start_with_text) +
-                xlim(x_left_limit, x_right_limit) 
+                plan_table_geom 
 
         }else{
             ### POSTERIOR
             labels_posterior_df <- labels_df %>%
-                filter(between(y, input$crop_y[1], y_start_with_text))
+                filter(between(y, input$crop_y[1], y_start_with_text)) %>%
+                mutate(x_left = x_left_limit + 0.05) %>%
+                mutate(x_right = x_right_limit - 0.05) %>%
+                select(-vertebral_number)
+            
+            labels_posterior_df <- labels_posterior_df %>%
+                union_all(tibble(level = " ", 
+                                 x_left = min(labels_posterior_df$x_left) - 0.03,
+                                 x_right = max(labels_posterior_df$x_right) + 0.03, 
+                                 y = min(labels_posterior_df$y) - 0.03)) %>%
+                union_all(tibble(level = " ", 
+                                 x_left = min(labels_posterior_df$x_left) - 0.03,
+                                 x_right = max(labels_posterior_df$x_right) + 0.03, 
+                                 y = max(labels_posterior_df$y) + 0.03))
 
             ggdraw() +
                 draw_image(
@@ -2747,23 +2959,22 @@ server <- function(input, output, session) {
                 reactiveValuesToList(rods_list) +
                 draw_text(
                     text = labels_posterior_df$level,
-                    x = x_left_limit + 0.05,
+                    x = labels_posterior_df$x_left,
                     y = labels_posterior_df$y,
                     size = input$label_text_size,
                     fontface = "bold"
                 ) +
                 draw_text(
                     text = labels_posterior_df$level,
-                    x = x_right_limit - 0.05,
+                    x = labels_posterior_df$x_right,
                     y = labels_posterior_df$y,
                     size = input$label_text_size,
                     fontface = "bold"
                 ) +
-                geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly
-                geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) +
-                annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement) +
-                ylim(input$crop_y[1], y_start_with_text)  +
-                xlim(x_left_limit, x_right_limit)
+                plan_table_geom +
+                annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement) 
+                # ylim(input$crop_y[1], y_start_with_text)  +
+                # xlim(x_left_limit, x_right_limit)
         }
     })
 
@@ -2821,16 +3032,31 @@ server <- function(input, output, session) {
         if(length(input$prior_fusion_levels) > 0){
             updateCheckboxGroupButtons(session = session, 
                                        inputId = "additional_procedures", 
-                                       selected = append(input$additional_procedures, "Exploration of spinal prior fusion"))
+                                       selected = append(input$additional_procedures, "Exploration of prior spinal fusion"))
         }
     })
-    observeEvent(input$removal_instrumentation_levels, {
-        if(length(input$removal_instrumentation_levels) > 0){
-            updateCheckboxGroupButtons(session = session, 
-                                       inputId = "additional_procedures", 
-                                       selected = append(input$additional_procedures, "Removal of spinal instrumentation"))
+    
+    observeEvent(list(input$left_revision_implants, input$left_revision_implants_removed), {
+        
+        if(length(input$left_revision_implants_removed)>0){
+            revision_implants_removed_vector <- discard(.x = input$left_revision_implants_removed, .p = ~ .x %in% input$left_revision_implants == FALSE)
+            
+            updateAwesomeCheckboxGroup(session = session, 
+                                       inputId = "left_revision_implants_removed", 
+                                       selected = revision_implants_removed_vector)
         }
+        
+ 
+        
     })
+    
+    # observeEvent(list(input$left_revision_implants_removed, input$right_revision_implants_removed), {
+    #     if(length(input$left_revision_implants_removed) > 0 | length(input$left_revision_implants_removed) > 0){
+    #         updateCheckboxGroupButtons(session = session, 
+    #                                    inputId = "additional_procedures", 
+    #                                    selected = append(input$additional_procedures, "Removal of spinal instrumentation"))
+    #     }
+    # })
     
     observeEvent(input$fusion_procedure_performed, {
         if(input$fusion_procedure_performed == TRUE){
@@ -2891,25 +3117,30 @@ server <- function(input, output, session) {
     })
     
     additional_procedures_vector_reactive <- reactive({
-        additional_procedures_vector <- discard(append(input$additional_procedures, input$additional_procedures_other), .p = ~ (.x == "Other" | .x == ""))
-        age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "--", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
-        
-        if(any(str_detect(string = input$head_positioning, pattern = "Tongs"))){
-            additional_procedures_vector <- append(additional_procedures_vector, c("Application of Cranial Tongs"))
-        } 
-        if(any(str_detect(string = input$head_positioning, pattern = "Mayfield"))){
-            additional_procedures_vector <- append(additional_procedures_vector, c("Application of Cranial Tongs using Mayfield head holder"))
+        # additional_procedures_vector <-list()
+        additional_procedures_vector <- discard(input$additional_procedures, .p = ~ (.x == "Other"))
+
+        age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
+
+        if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0){
+            additional_procedures_vector$removal_instrumentation <- "Removal of spinal instrumentation"
         }
-        
+
+        if(any(str_detect(string = input$head_positioning, pattern = "Tongs"))){
+            additional_procedures_vector$head_positioning <- "Application of Cranial Tongs"
+        }
+        if(any(str_detect(string = input$head_positioning, pattern = "Mayfield"))){
+            additional_procedures_vector$head_positioning <- "Application of Cranial Tongs using Mayfield head holder"
+        }
+
         if(any(str_detect(string = input$head_positioning, pattern = "Halo"))){
-            if(age < 18){
-                additional_procedures_vector <- append(additional_procedures_vector, c("Application of Halo for thin skull osteology (pediatric)"))
+            if(age < 18 & age > 0){
+                additional_procedures_vector$head_positioning <- "Application of Halo for thin skull osteology (pediatric)"
             }else{
-                additional_procedures_vector <- append(additional_procedures_vector, c("Application of Halo"))
+                additional_procedures_vector$head_positioning <- "Application of Halo"
             }
         }
-        
-        
+        as_vector(additional_procedures_vector)
     })
 
     
@@ -2931,14 +3162,14 @@ server <- function(input, output, session) {
             complication_statement <- "none"
         }
         
-        ### FLuids/Transfusions ###
-        fluids_transfusions_list <- list(crystalloids_statement =if_else(input$crystalloids_administered == 0, glue("none"), glue("-Crystalloids: {input$cell_saver_transfused}cc")),
-                                         colloids_statement =if_else(input$colloids_administered == 0, glue("none"), glue("-Colloids: {input$colloids_administered}cc")) ,
-                                         cell_saver_transfused_statement =if_else(input$cell_saver_transfused == 0, glue("none"), glue("-Cell Saver: {input$cell_saver_transfused}cc")),
-                                         prbc_transfused_statement =if_else(input$prbc_transfused == 0, glue("none"), glue("-pRBC's transfused: {input$prbc_transfused} {if_else(input$prbc_transfused >1, 'units', 'unit')}")),
-                                         ffp_transfused_statement =if_else(input$ffp_transfused == 0, glue("none"), glue("-FFP transfused: {input$ffp_transfused} {if_else(input$ffp_transfused >1, 'units', 'unit')}")), 
-                                         cryo_transfused_statement =if_else(input$cryoprecipitate_transfused == 0, glue("none"), glue("-Cryoprecipitate transfused: {input$cryoprecipitate_transfused} {if_else(input$cryoprecipitate_transfused >1, 'units', 'unit')}")), 
-                                         platelets_transfused_statement =if_else(input$platelets_transfused == 0, glue("none"), glue("-Platelets transfused: {input$platelets_transfused} {if_else(input$platelets_transfused >1, 'units', 'unit')}")))
+        ### FLuids/Transfusions ###if_else(is.na(input$ebl), "See anesthesia records", paste(input$ebl)),
+        fluids_transfusions_list <- list(crystalloids_statement =if_else(is.na(input$crystalloids_administered), glue("none"), glue("-Crystalloids: {input$cell_saver_transfused}cc")),
+                                         colloids_statement =if_else(is.na(input$colloids_administered), glue("none"), glue("-Colloids: {input$colloids_administered}cc")) ,
+                                         cell_saver_transfused_statement =if_else(is.na(input$cell_saver_transfused), glue("none"), glue("-Cell Saver: {input$cell_saver_transfused}cc")),
+                                         prbc_transfused_statement =if_else(is.na(input$prbc_transfused), glue("none"), glue("-pRBC's transfused: {input$prbc_transfused} {if_else(input$prbc_transfused >1, 'units', 'unit')}")),
+                                         ffp_transfused_statement =if_else(is.na(input$ffp_transfused), glue("none"), glue("-FFP transfused: {input$ffp_transfused} {if_else(input$ffp_transfused >1, 'units', 'unit')}")), 
+                                         cryo_transfused_statement =if_else(is.na(input$cryoprecipitate_transfused), glue("none"), glue("-Cryoprecipitate transfused: {input$cryoprecipitate_transfused} {if_else(input$cryoprecipitate_transfused >1, 'units', 'unit')}")), 
+                                         platelets_transfused_statement =if_else(is.na(input$platelets_transfused), glue("none"), glue("-Platelets transfused: {input$platelets_transfused} {if_else(input$platelets_transfused >1, 'units', 'unit')}")))
         
         
         fluids_transfusions_list <- discard(.x = fluids_transfusions_list, .p = ~ .x == "none")
@@ -3009,16 +3240,12 @@ server <- function(input, output, session) {
                                                                            additional_rods_statement = added_rods_statement_reactive(),
                                                                            antibiotics = input$preop_antibiotics,
                                                                            additional_procedures_vector = additional_procedures_vector_reactive(),
-                                                                           # additional_procedures_vector = discard(append(input$additional_procedures, input$additional_procedures_other), .p = ~ (.x == "Other" | .x == "")),
                                                                            prior_fusion_levels_vector = input$prior_fusion_levels,
-                                                                           instrumentation_removal_vector = input$removal_instrumentation_levels,
-                                                                           bmp = if_else(input$posterior_bmp_number == 0, 0, (as.double(input$posterior_bmp_number)*as.double(input$posterior_bmp_size))),
+                                                                           instrumentation_removal_vector = unique(c(input$left_revision_implants_removed, input$right_revision_implants_removed)),
+                                                                           bmp = posterior_bmp_dose_reactive(),
                                                                            bone_graft_vector = input$posterior_bone_graft,
                                                                            morselized_allograft = input$posterior_allograft_amount,
                                                                            morselized_autograft_separate = 0,
-                                                                           # structural_allograft_location = input$structural_allograft_location,
-                                                                           # structural_autograft_harvest = input$structural_autograft_harvest_location,
-                                                                           # structural_autograft_location = input$structural_autograft_location,
                                                                            deep_drains = input$deep_drains_posterior,
                                                                            superficial_drains = input$superficial_drains_posterior,
                                                                            end_procedure_details = input$additional_end_procedure_details,
@@ -3045,7 +3272,8 @@ server <- function(input, output, session) {
                                                                          microscope_statement = "none", 
                                                                          antibiotics = input$preop_antibiotics, 
                                                                          additional_procedures_vector = input$additional_procedures, 
-                                                                         bmp = if_else(input$anterior_bmp_number == 0, 0, (as.double(input$anterior_bmp_number)*as.double(input$anterior_bmp_size))), 
+                                                                         bmp = anterior_bmp_dose_reactive(),
+                                                                         # bmp = if_else(input$anterior_bmp_number == 0, 0, (as.double(input$anterior_bmp_number)*as.double(input$anterior_bmp_size))), 
                                                                          bone_graft_vector = input$anterior_bone_graft,
                                                                          morselized_allograft = input$anterior_allograft_amount,
                                                                          # morselized_autograft_separate = 0,
@@ -3098,7 +3326,7 @@ server <- function(input, output, session) {
                                                procedure_results_list$procedures_numbered_paragraph,
                                                if_else(input$surgical_findings == "", "none", input$surgical_findings),
                                                if_else(input$specimens_removed == "", "none", input$specimens_removed),
-                                               input$ebl,
+                                               if_else(is.na(input$ebl), "See anesthesia records", paste(input$ebl)),
                                                fluids_transfusions_statement,
                                                complication_statement,
                                                procedure_results_list$procedure_details_paragraph # glue_collapse(x = procedure_results$procedure_details_list, sep = '\n\n'),
@@ -3204,9 +3432,19 @@ server <- function(input, output, session) {
             surgery_details_list$prior_fusion_levels <- glue_collapse(input$prior_fusion_levels, sep = "; ")   
         }
         
-        ##########   levels_instrumentation_removed #############
-        if(length(input$removal_instrumentation_levels)>0){
-            surgery_details_list$levels_instrumentation_removed <- glue_collapse(input$removal_instrumentation_levels, sep = "; ")   
+        # ##########   levels_instrumentation_removed #############
+        # if(length(input$left_revision_implants_removed) > 0){
+        #     removal_df <- tibble(levels_removed = input$left_revision_implants_removed)
+        # }
+        if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0){
+            removal_df <- tibble(levels_removed = input$left_revision_implants_removed) %>%
+                union_all(tibble(levels_removed = input$right_revision_implants_removed)) %>%
+                distinct() %>%
+                mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = levels_removed)) %>%
+                arrange(vertebral_number)
+
+            surgery_details_list$levels_instrumentation_removed <- glue_collapse(removal_df$levels_removed, sep = ",")
+
         }
 
         ##########   staged_procedure #############
@@ -3235,7 +3473,7 @@ server <- function(input, output, session) {
         surgery_details_list$fusion <- if_else(length(input$fusion_levels_confirmed) > 0, "yes", "no")
         
         ##########   number of fused vertebrae  #############
-        surgery_details_list$number_of_fusion_levels <- if_else(length(input$fusion_levels_confirmed) >0, paste((length(input$fusion_levels_confirmed) + 1)), "0")
+        surgery_details_list$number_of_fusion_levels <- if_else(length(input$fusion_levels_confirmed) >0, paste(length(input$fusion_levels_confirmed) + 1), "0")
         
         ##########   interspaces_fused #############
         if(length(input$fusion_levels_confirmed) >0){
@@ -3371,73 +3609,127 @@ server <- function(input, output, session) {
         }
         
         ##########   RODS  #############
-        surgery_details_list$left_rod <- if_else(input$left_main_rod_size == "None", "None", paste(input$left_main_rod_size, input$left_main_rod_material))
-        surgery_details_list$right_rod <- if_else(input$right_main_rod_size == "None", "None", paste(input$right_main_rod_size, input$right_main_rod_material))
-
-        supplemental_rods_df <- tibble(supplemental_rod = c("accessory_rod",
-                                                            "satellite_rod",
-                                                            "intercalary_rod",
-                                                            "linked_rods",
-                                                            "accessory_rod",
-                                                            "satellite_rod",
-                                                            "intercalary_rod",
-                                                            "linked_rods"),
-                                       side = c("left", "left", "left", "left", "right", "right", "right", "right"),
-                                       yes_no = c(input$add_left_accessory_rod,
-                                                  input$add_left_satellite_rod,
-                                                  input$add_left_intercalary_rod,
-                                                  input$add_left_linked_rods,
-                                                  input$add_right_accessory_rod,
-                                                  input$add_right_satellite_rod,
-                                                  input$add_right_intercalary_rod,
-                                                  input$add_right_linked_rods)) %>%
-            filter(yes_no == TRUE)
         
-        if(nrow(supplemental_rods_df %>% filter(side == "left")) >0){
-            surgery_details_list$left_supplemental_rods <- glue_collapse((supplemental_rods_df %>% filter(side == "left"))$supplemental_rod, sep = "; ")
-        }else{
-            surgery_details_list$left_supplemental_rods <- "none"
-        }
-        
-        if(nrow(supplemental_rods_df %>% filter(side == "right")) >0){
-            surgery_details_list$right_supplemental_rods <- glue_collapse((supplemental_rods_df %>% filter(side == "right"))$supplemental_rod, sep = "; ")
-        }else{
-            surgery_details_list$right_supplemental_rods <- "none"
-        }
-        
-        ############# CROSSLINKS #############
-        
-        if(length(input$crosslink_connectors) > 0){
-            surgery_details_list$crosslink_connector_levels <- glue_collapse(input$crosslink_connectors, sep = "; ")
-        }else{
-            surgery_details_list$crosslink_connector_levels <- "none"
-        }
-
-        #################### SPINE UIV PPX  #########################
-        if(nrow(all_vertebrae_fixation_df) > 0){
-            uiv_ppx_df <- all_objects_to_add_list$objects_df %>%
-                filter(level == surgery_details_list$upper_treated_vertebrae | level == surgery_details_list$uiv) %>%
-                filter(str_detect(string = object, pattern = "hook") |
-                           str_detect(string = object, pattern = "tether") |
-                           str_detect(string = object, pattern = "wire") |
-                           str_detect(string = object, pattern = "vertebroplasty") |
-                           str_detect(string = object, pattern = "vertebral_cement_augmentation")) %>%
-                select(level, object) %>%
-                distinct()
-            if(nrow(uiv_ppx_df) > 0){
-                surgery_details_list$uiv_ppx_used <- "yes"
-                surgery_details_list$uiv_ppx <- str_replace(string = glue_collapse(x = unique(uiv_ppx_df$object), sep = "; "), pattern = "_", replacement = " ")
+        if(str_detect(surgery_details_list$main_approach, "posterior")){
+            surgery_details_list$left_rod <- if_else(input$left_main_rod_size == "None", "None", paste(input$left_main_rod_size, input$left_main_rod_material))
+            surgery_details_list$right_rod <- if_else(input$right_main_rod_size == "None", "None", paste(input$right_main_rod_size, input$right_main_rod_material))
+            
+            supplemental_rods_df <- tibble(supplemental_rod = c("accessory_rod",
+                                                                "satellite_rod",
+                                                                "intercalary_rod",
+                                                                "linked_rods",
+                                                                "accessory_rod",
+                                                                "satellite_rod",
+                                                                "intercalary_rod",
+                                                                "linked_rods"),
+                                           side = c("left", "left", "left", "left", "right", "right", "right", "right"),
+                                           yes_no = c(input$add_left_accessory_rod,
+                                                      input$add_left_satellite_rod,
+                                                      input$add_left_intercalary_rod,
+                                                      input$add_left_linked_rods,
+                                                      input$add_right_accessory_rod,
+                                                      input$add_right_satellite_rod,
+                                                      input$add_right_intercalary_rod,
+                                                      input$add_right_linked_rods)) %>%
+                filter(yes_no == TRUE)
+            
+            if(nrow(supplemental_rods_df %>% filter(side == "left")) >0){
+                surgery_details_list$left_supplemental_rods <- glue_collapse((supplemental_rods_df %>% filter(side == "left"))$supplemental_rod, sep = "; ")
             }else{
-                surgery_details_list$uiv_ppx_used <- "no"
+                surgery_details_list$left_supplemental_rods <- "none"
+            }
+            
+            if(nrow(supplemental_rods_df %>% filter(side == "right")) >0){
+                surgery_details_list$right_supplemental_rods <- glue_collapse((supplemental_rods_df %>% filter(side == "right"))$supplemental_rod, sep = "; ")
+            }else{
+                surgery_details_list$right_supplemental_rods <- "none"
+            }
+            
+            ############# CROSSLINKS #############
+            
+            if(length(input$crosslink_connectors) > 0){
+                surgery_details_list$crosslink_connector_levels <- glue_collapse(input$crosslink_connectors, sep = "; ")
+            }else{
+                surgery_details_list$crosslink_connector_levels <- "none"
+            }
+            
+            #################### SPINE UIV PPX  #########################
+            if(nrow(all_vertebrae_fixation_df) > 0){
+                uiv_ppx_df <- all_objects_to_add_list$objects_df %>%
+                    filter(level == surgery_details_list$upper_treated_vertebrae | level == surgery_details_list$uiv) %>%
+                    filter(str_detect(string = object, pattern = "hook") |
+                               str_detect(string = object, pattern = "tether") |
+                               str_detect(string = object, pattern = "wire") |
+                               str_detect(string = object, pattern = "vertebroplasty") |
+                               str_detect(string = object, pattern = "vertebral_cement_augmentation")) %>%
+                    select(level, object) %>%
+                    distinct()
+                if(nrow(uiv_ppx_df) > 0){
+                    surgery_details_list$uiv_ppx_used <- "yes"
+                    surgery_details_list$uiv_ppx <- str_replace(string = glue_collapse(x = unique(uiv_ppx_df$object), sep = "; "), pattern = "_", replacement = " ")
+                }else{
+                    surgery_details_list$uiv_ppx_used <- "no"
+                }
             }
         }
 
-        #################### BMP  #######################
-        if(str_detect(surgery_details_list$main_approach, "anterior")){
-            surgery_details_list$anterior_bmp_mg_dose <- if_else(input$anterior_bmp_number == 0, "0", paste((as.double(input$anterior_bmp_number)*as.double(input$anterior_bmp_size))))
+        #################### BMP & ALLOGRAFT  #######################
+        if(str_detect(surgery_details_list$main_approach, "anterior") & surgery_details_list$fusion == "yes"){
+            # surgery_details_list$anterior_bmp_mg_dose <- if_else(input$anterior_bmp_number == 0, "0", paste((as.double(input$anterior_bmp_number)*as.double(input$anterior_bmp_size))))
+            surgery_details_list$anterior_bmp_mg_dose <-  anterior_bmp_dose_reactive()
+            if(length(input$anterior_bone_graft) > 0){
+                surgery_details_list$anterior_bone_graft <- glue_collapse(input$anterior_bone_graft, sep = "; ")
+                
+                if(str_detect(string = surgery_details_list$anterior_bone_graft, pattern = "Morselized Allograft")){
+                    surgery_details_list$anterior_allograft_amount <- paste(input$anterior_allograft_amount)
+                }
+                    
+            }
+
+            if(length(input$anterior_biologics)>0){
+                
+                anterior_bma <- if_else("Bone Marrow Aspirate" %in% input$anterior_biologics, glue("Bone Marrow Aspirate ({input$anterior_bone_marrow_aspirate_volume})cc"), glue("xx"))
+                anterior_cell_based <- if_else("Cell Based Allograft" %in% input$anterior_biologics, glue("Cell Based Allograft ({input$anterior_cell_based_allograft_volume})cc"), glue("xx"))
+                anterior_dbm <- if_else("DBM" %in% input$anterior_biologics, glue("DBM ({input$anterior_dbm_volume})cc"), glue("xx"))
+                
+                anterior_biologics_vector <- discard(c(as.character(anterior_bma), as.character(anterior_cell_based), as.character(anterior_dbm)), .p = ~ .x == "xx")
+                
+                if(length(anterior_biologics_vector) > 0){
+                    surgery_details_list$anterior_biologics <- glue_collapse(anterior_biologics_vector, sep = "; ") 
+                }else{
+                    surgery_details_list$anterior_biologics <- "xx"
+                }
+            }
+            
         }
-        if(str_detect(surgery_details_list$main_approach, "posterior")){
-            surgery_details_list$posterior_bmp_mg_dose <- if_else(input$posterior_bmp_number == 0, "0", paste((as.double(input$posterior_bmp_number)*as.double(input$posterior_bmp_size))))        }
+        
+        if(str_detect(surgery_details_list$main_approach, "posterior") & surgery_details_list$fusion == "yes"){
+            # surgery_details_list$posterior_bmp_mg_dose <- if_else(input$posterior_bmp_number == 0, "0", paste((as.double(input$posterior_bmp_number)*as.double(input$posterior_bmp_size))))
+            surgery_details_list$posterior_bmp_mg_dose <-  posterior_bmp_dose_reactive()
+
+            if(length(input$posterior_bone_graft) > 0){
+                surgery_details_list$posterior_bone_graft <- glue_collapse(input$posterior_bone_graft, sep = "; ")
+                
+                if(str_detect(string = surgery_details_list$posterior_bone_graft, pattern = "Morselized Allograft")){
+                    surgery_details_list$anterior_allograft_amount <- paste(input$posterior_allograft_amount)
+                }
+                
+            }
+ 
+            if(length(input$posterior_biologics)>0){
+                posterior_bma <- if_else("Bone Marrow Aspirate" %in% input$posterior_biologics, glue("Bone Marrow Aspirate ({input$posterior_bone_marrow_aspirate_volume})cc"), glue("xx"))
+                posterior_cell_based <- if_else("Cell Based Allograft" %in% input$posterior_biologics, glue("Cell Based Allograft ({input$posterior_cell_based_allograft_volume})cc"), glue("xx"))
+                posterior_dbm <- if_else("DBM" %in% input$posterior_biologics, glue("DBM ({input$posterior_dbm_volume})cc"), glue("xx"))
+                
+                posterior_biologics_vector <- discard(c(as.character(posterior_bma), as.character(posterior_cell_based), as.character(posterior_dbm)), .p = ~ .x == "xx")
+                
+                if(length(posterior_biologics_vector) > 0){
+                    surgery_details_list$posterior_biologics <- glue_collapse(posterior_biologics_vector, sep = "; ") 
+                }else{
+                    surgery_details_list$posterior_biologics <- "xx"
+                }
+            }
+        }
 
         ####### complications  #####
         complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
@@ -3481,52 +3773,52 @@ server <- function(input, output, session) {
         intraop_details_list$neuromonitoring <- if_else(length(input$neuromonitoring) >0, glue_collapse(input$neuromonitoring, sep = '; '), glue("none"))
         
         ################### antifibrinolytic  #########################
-        
-        antifibrinolytics_replaced <- str_replace_all(string = input$anti_fibrinolytic,
-                                                      pattern = "Tranexamic Acid (TXA)",
-                                                      replacement = glue("Tranexamic Acid (TXA) Loading: {input$txa_loading}mg/kg, Maint: {input$txa_maintenance}mg/kg/hr"))
-        
         if(length(input$anti_fibrinolytic) > 0){
-            intraop_details_list$anti_fibrinolytic <- glue_collapse(antifibrinolytics_replaced, sep = "; ")
+            
+            antifibrinolytics_vector <- str_to_lower(as.character(glue_collapse(input$anti_fibrinolytic, sep = "; ")))
+            
+            intraop_details_list$anti_fibrinolytic <- str_replace_all(string = antifibrinolytics_vector,
+                                                          pattern = "tranexamic acid \\(txa\\)",
+                                                          replacement = glue("tranexamic acid (txa) Loading: {input$txa_loading}mg/kg, Maint: {input$txa_maintenance}mg/kg/hr"))
         }else{
             intraop_details_list$anti_fibrinolytic <- "none"
         }
 
         ####### surgical findings #####
-        intraop_details_list$surgical_findings <- input$surgical_findings
+        intraop_details_list$surgical_findings <- if_else(input$surgical_findings == "", "none", input$surgical_findings)
         
         ####### Specimens  #####
-        intraop_details_list$specimens <- input$specimens_removed
+        intraop_details_list$specimens <- if_else(input$specimens_removed == "", "none", input$specimens_removed)
         
         ####### EBL  #####
-        intraop_details_list$ebl_ml <- paste0(input$ebl)
+        intraop_details_list$ebl_ml <- if_else(is.na(input$ebl), "xx", paste(input$ebl))
         
         ####### Urine Output  #####
-        intraop_details_list$urine_output <- paste0(input$urine_output)
+        intraop_details_list$urine_output <- if_else(is.na(input$urine_output), "xx", paste(input$urine_output)) 
         
         ####### Crystalloids  #####
-        intraop_details_list$crystalloids_ml <- paste0(input$crystalloids_administered)
+        intraop_details_list$crystalloids_ml <- if_else(is.na(input$crystalloids_administered), "xx", paste(input$crystalloids_administered))
         
         ####### Colloids  #####
-        intraop_details_list$colloids_ml <- paste0(input$colloids_administered)
+        intraop_details_list$colloids_ml <- if_else(is.na(input$colloids_administered), "xx", paste(input$colloids_administered)) 
         
         ####### Transfusion  #####
         intraop_details_list$transfusion <- if_else(input$transfusion == TRUE, "yes", "no")
         
         ####### cell_saver  #####
-        intraop_details_list$cell_saver_cc <- paste0(input$cell_saver_transfused)
+        intraop_details_list$cell_saver_cc <- if_else(is.na(input$cell_saver_transfused), "xx", paste(input$cell_saver_transfused)) 
         
         ####### prbc  #####
-        intraop_details_list$prbc_units <- paste0(input$prbc_transfused)
+        intraop_details_list$prbc_units <- if_else(is.na(input$prbc_transfused), "xx", paste(input$prbc_transfused)) 
         
         ####### ffp  #####
-        intraop_details_list$ffp_units <- paste0(input$ffp_transfused)
+        intraop_details_list$ffp_units <- if_else(is.na(input$ffp_transfused), "xx", paste(input$ffp_transfused)) 
         
         ####### cryoprecipitate  #####
-        intraop_details_list$cryoprecipitate_units <- paste0(input$cryoprecipitate_transfused)
+        intraop_details_list$cryoprecipitate_units <- if_else(is.na(input$cryoprecipitate_transfused), "xx", paste(input$cryoprecipitate_transfused)) 
         
         ####### platelets  #####
-        intraop_details_list$platelets_units <- paste0(input$platelets_transfused)
+        intraop_details_list$platelets_units <- if_else(is.na(input$platelets_transfused), "xx", paste(input$platelets_transfused))  
         
         ####### complications  #####
         complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
@@ -3556,7 +3848,8 @@ server <- function(input, output, session) {
         ####### GENERATE DATAFRAME #####
         
         intraop_details_df <- enframe(intraop_details_list) %>%
-            mutate(across(everything(), ~ as.character(.x))) 
+            mutate(across(everything(), ~ as.character(.x))) %>%
+            filter(value != "xx")
         
         intraop_details_df
         

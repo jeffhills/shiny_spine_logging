@@ -10,17 +10,16 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }else{
     geoms_list_posterior$vertebroplasty_sf_geom <- NULL
   }
+  
   if(any(str_detect(all_posterior_objects_df$object, pattern = "vertebral_cement_augmentation"))){
-    geoms_list_posterior$vertebroplasty_sf_geom <- geom_sf_pattern(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "vertebroplasty")))$object_constructed),
+    geoms_list_posterior$vertebroplasty_sf_geom <- geom_sf_pattern(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "vertebral_cement_augmentation")))$object_constructed),
                                                                    pattern = "plasma",
                                                                    pattern_alpha = 0.5,
-                                                                   alpha = 0.3,
+                                                                   alpha = 0.6,
                                                                    color = "grey75")
   }else{
-    geoms_list_posterior$vertebroplasty_sf_geom <- NULL
+    geoms_list_posterior$vertebral_cement_augmentation_sf_geom <- NULL
   }
-  
-  
   
   ## OSTEOTOMIES
   if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_1"))){
@@ -268,12 +267,27 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
     geoms_list_posterior$sublaminar_wires_sf_geom <- NULL
   }
   
+  ##structural_allograft
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "structural_allograft"))){
+    geoms_list_posterior$structural_allograft_sf_geom <- ggpattern::geom_sf_pattern(
+      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "structural_allograft"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+      pattern = "plasma",
+      pattern_alpha = 0.6,
+      alpha = 0.6,
+      fill = "brown"
+    )
+    
+  }else{
+    geoms_list_posterior$structural_allograft_sf_geom <- NULL
+  }
+  
   ## Tethers
   if(any(str_detect(all_posterior_objects_df$object, pattern = "tether"))){
     geoms_list_posterior$tethers_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "tether")))$object_constructed))
   }else{
     geoms_list_posterior$tethers_sf_geom <- NULL
   }
+  
   
   return(geoms_list_posterior = geoms_list_posterior)
   

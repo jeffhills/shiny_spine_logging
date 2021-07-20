@@ -67,14 +67,18 @@ implants_constructed_df <- implant_starts_df %>%
                                               ..5 = length, 
                                               ..6 = width,
                                               ..7 = sublaminar_band_length,
-                                              ..8 = length_for_tether), .f = ~ screw_hook_implant_function(implant_type = ..1, 
+                                              ..8 = length_for_tether, 
+                                              ..9 = superior_y, 
+                                              ..10 = inferior_y), .f = ~ screw_hook_implant_function(implant_type = ..1, 
                                                                                                            start_x = ..2,
                                                                                                            y = ..3,
                                                                                                            angle = ..4,
                                                                                                            screw_length_mod = ..5,
                                                                                                            screw_width_mod = ..6, 
                                                                                                            sublaminar_band_length = ..7, 
-                                                                                                           length_for_tether = ..8)))
+                                                                                                           length_for_tether = ..8, 
+                                                                                                     y_superior = ..9, 
+                                                                                                     y_inferior = ..10)))
 
 
 #############-----------------------   Build Osteotomies  ----------------------###############

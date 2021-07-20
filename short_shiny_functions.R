@@ -4,6 +4,42 @@ vertebral_numbers_vector <- c(0,0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 
 
 levels_numbered_df <- tibble(level = levels_vector, vertebral_number = vertebral_numbers_vector)
 
+# levels_numbered_df %>%
+#   mutate(body_interspace = jh_check_body_or_interspace_function(level = level)) %>%
+#   filter(body_interspace == "body")
+
+vertebral_bodies_vector <- c('C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'S1')
+
+interspaces_vector <- c('O-C1', 'C1-C2', 'C2-C3', 'C3-C4', 'C4-C5', 'C5-C6', 'C6-C7', 'C7-T1', 'T1-T2', 'T2-T3', 'T3-T4', 'T4-T5', 'T5-T6', 'T6-T7', 'T7-T8', 'T8-T9', 'T9-T10', 'T10-T11', 'T11-T12', 'T12-L1', 'L1-L2', 'L2-L3', 'L3-L4', 'L4-L5', 'L5-S1', 'L4-S1', 'L5-L6', 'L6-S1', 'Sacro-iliac')
+
+jh_reorder_levels_function <- function(level_vector){
+  levels <- tibble(level = as.character(level_vector)) %>%
+    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+    arrange(vertebral_number) %>%
+    select(level) %>%
+    as_vector()
+  return(levels)
+}
+
+jh_convert_body_levels_to_interspace_vector_function <- function(vertebral_bodies_vector){
+  levels_vector <- unique(
+    append(
+      map(.x = vertebral_bodies_vector, 
+          .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_interspace), 
+      map(.x = vertebral_bodies_vector, 
+          .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_interspace)))
+  discard(levels_vector, .p = ~ is.na(.x) | .x == "Sacro-iliac")
+  
+  return(jh_reorder_levels_function(level_vector = discard(levels_vector, .p = ~ is.na(.x) | .x == "Sacro-iliac")))
+}
+
+jh_check_body_or_interspace_function <- function(level){
+  result <- case_when(level %in% vertebral_bodies_vector ~ "body",
+            level %in% interspaces_vector ~ "interspace")
+  
+  result
+}
+
 jh_get_vertebral_number_function <- function(level_to_get_number){
   vert_number <-
     case_when(
@@ -153,6 +189,84 @@ jh_get_cranial_caudal_interspace_body_list_function <- function(level){
   
 }
 
+jh_make_bmp_ui_function <-  function(anterior_posterior){
+  fluidRow(  
+    column(12, 
+           tags$table(
+             tags$tr(
+               tags$td(width = "20%",
+                       div(style = "font-size:18px; font-weight:bold; text-align:left;", "Add BMP Kits:"),
+                       actionBttn(
+                         inputId = glue("reset_{anterior_posterior}_bmp"),
+                         label = "Reset",
+                         style = "simple", 
+                         size = "xs",
+                         color = "danger", 
+                         icon = icon("undo-alt")
+                       )
+               ),
+               tags$td(width = "10%",
+                       actionBttn(
+                         inputId = glue("add_{anterior_posterior}_xxs_bmp_button"),
+                         label = "XXS",
+                         style = "simple", size = "sm",block = TRUE,
+                         color = "success", 
+                         icon = icon("thumbs-up")
+                       )
+               ),
+               tags$td(width = "1%"),
+               tags$td(width = "10%",
+                       actionBttn(
+                         inputId = glue("add_{anterior_posterior}_xs_bmp_button"),
+                         label = "XS",
+                         style = "simple", size = "sm",block = TRUE,
+                         color = "success", 
+                         icon = icon("thumbs-up")
+                       )
+               ),
+               tags$td(width = "1%"),
+               tags$td(width = "10%",
+                       actionBttn(
+                         inputId = glue("add_{anterior_posterior}_sm_bmp_button"),
+                         label = "Sm",
+                         style = "simple", size = "sm",block = TRUE,
+                         color = "success", 
+                         icon = icon("thumbs-up")
+                       )
+               ),
+               tags$td(width = "1%"),
+               tags$td(width = "10%",
+                       actionBttn(
+                         inputId = glue("add_{anterior_posterior}_m_bmp_button"),
+                         label = "M",
+                         style = "simple", size = "sm",block = TRUE,
+                         color = "success", 
+                         icon = icon("thumbs-up")
+                       )
+               ),
+               tags$td(width = "1%"),
+               tags$td(width = "10%",
+                       actionBttn(
+                         inputId = glue("add_{anterior_posterior}_l_bmp_button"),
+                         label = "L",
+                         style = "simple", size = "sm",block = TRUE,
+                         color = "success", 
+                         icon = icon("thumbs-up")
+                       )
+               ),
+               tags$td(width = "1%"),
+               tags$td(width = "12%",
+                       htmlOutput(outputId = glue("{anterior_posterior}_bmp_kits"))
+               ),
+               tags$td(with = "10%",
+                       htmlOutput(outputId = glue("{anterior_posterior}_bmp_dosage"))
+               )
+             )
+           )
+    )
+  )
+}
+
 
 jh_make_shiny_table_row_function <- function(left_column_label,
                                              left_column_percent_width = 30,
@@ -163,64 +277,83 @@ jh_make_shiny_table_row_function <- function(left_column_label,
                                              min = 0,
                                              max = 50000,
                                              step = 100, 
-                                             choices_vector = c("picker_choice"), 
+                                             choices_vector = c("picker_choice"),
+                                             choose_multiple = TRUE,
                                              switch_input_on_label = "Yes", 
                                              switch_input_off_label = "No",
                                              checkboxes_inline = FALSE,
                                              button_size = "sm",
                                              return_as_full_table = TRUE,
-                                             text_align = "left"){
+                                             text_align = "left", 
+                                             top_margin = "auto",
+                                             bottom_margin = "auto"){
   
   right_column_percent_width <- 100 - left_column_percent_width
+  label_style <- glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}; margin-top:{top_margin}; margin-bottom:{bottom_margin}")
   
   if(input_type == "numeric"){
     row <- tags$tr(width = "100%",
-                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}"), paste(left_column_label))),
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), numericInput(inputId = input_id, label = NULL,value = initial_value_selected, min = min, max = max, step = step))
     )  
   }
   if(input_type == "text"){
     row <- tags$tr(width = "100%",
-                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}"), paste(left_column_label))),
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), textInput(inputId = input_id, label = NULL, value = initial_value_selected))
     )  
   }
   if(input_type == "picker"){
     row <- tags$tr(width = "100%",
-                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}"), paste(left_column_label))),
-                   tags$td(width = paste0(right_column_percent_width, "%"), pickerInput(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, multiple = TRUE))
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   tags$td(width = paste0(right_column_percent_width, "%"), pickerInput(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, multiple = choose_multiple))
     )  
   }
   
   if(input_type == "switch"){
     row <- tags$tr(width = "100%",
-                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}"), paste(left_column_label))),
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), switchInput(inputId = input_id, label = NULL, onLabel = switch_input_on_label, offLabel = switch_input_off_label))
     )  
   }
   
   if(input_type == "checkbox"){
     row <- tags$tr(width = "100%",
-                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}"), paste(left_column_label))),
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), awesomeCheckboxGroup(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, inline = checkboxes_inline))
     )  
   }
+  if(input_type == "checkboxGroupButtons"){
+    row <- tags$tr(width = "100%",
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   tags$td(width = paste0(right_column_percent_width, "%"), checkboxGroupButtons(inputId = input_id,
+                                                                                                 label = NULL, 
+                                                                                                 justified = TRUE, 
+                                                                                                 choices = choices_vector, 
+                                                                                                 selected = initial_value_selected, 
+                                                                                                 checkIcon = list(
+                                                                                                   yes = tags$i(class = "fas fa-check",
+                                                                                                                style = "color: steelblue")),
+                                                                                                 direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical")))
+    )  
+  }
+  
   if(input_type == "radioGroupButtons"){
     row <- tags$tr(width = "100%",
-                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}"), paste(left_column_label))),
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), radioGroupButtons(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical")))
     )  
   }
   if(input_type == "awesomeRadio"){
     row <- tags$tr(width = "100%",
-                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}"), paste(left_column_label))),
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), awesomeRadio(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, inline = checkboxes_inline, status = "success"))
     )  
   }
   if(input_type == "date"){
     row <- tags$tr(width = "100%",
-                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}"), paste(left_column_label))),
-                   tags$td(width = paste0(right_column_percent_width, "%"), dateInput(inputId = input_id, label = NULL, format = "mm-dd-yyyy", autoclose = TRUE))
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   tags$td(width = paste0(right_column_percent_width, "%"), dateInput(inputId = input_id, label = NULL, format = "mm-dd-yyyy", autoclose = TRUE, startview = "decade"))
     )  
   }
   # return(row)
@@ -233,6 +366,146 @@ jh_make_shiny_table_row_function <- function(left_column_label,
   }
 
 }
+
+jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
+  
+  left_input_identifier <- as.character(glue("add_left_{rod_type}"))
+  right_input_identifier <- as.character(glue("add_right_{rod_type}"))
+  rod_material_vector <- c("Titanium", "Cobalt Chrome", "Stainless Steel")
+  rod_size_vector <- c("None", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/quarter in")
+  
+  left_table <- tags$table(
+    tags$tr(
+      tags$td(width = "35%",
+              awesomeCheckbox(
+                inputId = left_input_identifier,
+                label = input_label,
+                value = FALSE,
+                status = "success")
+      ),
+      tags$td(width = "35%",
+              conditionalPanel(condition = glue("input.{left_input_identifier} == true"),
+                               prettyRadioButtons(inputId = as.character(glue("left_{rod_type}_material")), 
+                                                  label = NULL, 
+                                                  choices = rod_material_vector, 
+                                                  selected = "Titanium", 
+                                                  outline = TRUE, 
+                                                  shape = "round", 
+                                                  inline = FALSE,
+                                                  status = "primary",
+                                                  width = "90%"
+                               )
+              )
+      ),
+      tags$td(width = "30%",
+              conditionalPanel(condition = glue("input.{left_input_identifier} == true"),
+                               pickerInput(inputId = as.character(glue("left_{rod_type}_size")), 
+                                           label = NULL, 
+                                           choices = rod_size_vector, 
+                                           selected = "5.5mm", 
+                                           multiple = FALSE, width = "90%"
+                               )
+              )
+      )
+    )
+  )
+  
+  right_table <- tags$table(
+    tags$tr(
+      tags$td(width = "35%",
+              awesomeCheckbox(
+                inputId = right_input_identifier,
+                label = input_label,
+                value = FALSE,
+                status = "success")
+      ),
+      tags$td(width = "35%",
+              conditionalPanel(condition = glue("input.{right_input_identifier} == true"),
+                               prettyRadioButtons(inputId = as.character(glue("right_{rod_type}_material")), 
+                                                  label = NULL, 
+                                                  choices = rod_material_vector, 
+                                                  selected = "Titanium", 
+                                                  outline = TRUE, 
+                                                  shape = "round", 
+                                                  inline = FALSE, 
+                                                  status = "primary", 
+                                                  width = "90%")
+              )
+      ),
+      tags$td(width = "30%",
+              conditionalPanel(condition = glue("input.{right_input_identifier} == true"),
+                               pickerInput(inputId = as.character(glue("right_{rod_type}_size")), 
+                                           label = NULL, 
+                                           choices = rod_size_vector, 
+                                           selected = "5.5mm", 
+                                           multiple = FALSE, width = "90%"
+                               )
+              )
+      )
+    )
+  )
+  
+  full_ui <- column(width = 12, 
+                    fixedRow(
+                      column(6, 
+                             conditionalPanel(condition = "input.left_supplemental_rods_eligible == true", 
+                                              left_table
+                             )
+                      ),
+                      column(6, 
+                             conditionalPanel(condition = "input.right_supplemental_rods_eligible == true",
+                                              right_table
+                             )
+                      )
+                    ),
+                    if(rod_type == "intercalary_rod"){
+                      fixedRow(
+                        column(4, 
+                               conditionalPanel(condition = glue("input.{left_input_identifier} == true"), 
+                                                sliderTextInput(inputId = as.character(glue("left_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                               )
+                        ),
+                        column(2, 
+                               conditionalPanel(condition = glue("input.{left_input_identifier} == true"), 
+                                                pickerInput(inputId = "left_intercalary_junction",
+                                                            label = "Junction:",
+                                                            choices = c("a", "b"),
+                                                            width = "fit")
+                               )
+                        ),
+                        column(4, 
+                               conditionalPanel(condition = glue("input.{right_input_identifier} == true"), 
+                                                sliderTextInput(inputId = as.character(glue("right_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                               )
+                        ),
+                        conditionalPanel(condition = glue("input.{right_input_identifier} == true"), 
+                                         pickerInput(inputId = "right_intercalary_junction",
+                                                     label = "Junction:",
+                                                     choices = c("a", "b"),
+                                                     width = "fit")
+                        )
+                      ) 
+                    }else{
+                      fixedRow(
+                        column(6, 
+                               conditionalPanel(condition = glue("input.{left_input_identifier} == true"), 
+                                                sliderTextInput(inputId = as.character(glue("left_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                               )
+                        ),
+                        column(6, 
+                               conditionalPanel(condition = glue("input.{right_input_identifier} == true"), 
+                                                sliderTextInput(inputId = as.character(glue("right_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                               )
+                        )
+                      ) 
+                    }
+  ) 
+  
+  return(full_ui)
+}
+
+
+
 
 
 jh_make_shiny_table_column_function <- function(input_type,
@@ -256,15 +529,19 @@ jh_make_shiny_table_column_function <- function(input_type,
                                                 button_size = "sm",
                                                 font_size = 14, 
                                                 status = NULL,
-                                                table_percent_width = 95,
-                                                text_align = "left"){
+                                                table_percent_width = 100,
+                                                text_align = "left",
+                                                bottom_margin = "auto",
+                                                top_margin = "auto"
+                                                ){
 
 
   if(input_type == "title"){
-    left_shiny_input <-  div(style = glue("font-size:{font_size}px; font-weight:bold; text-align:{text_align}"), left_label)
+    left_shiny_input <-  div(style = glue("font-size:{font_size}px; font-weight:bold; text-align:{text_align}; margin-bottom:{bottom_margin}; margin-top:{top_margin}"), left_label)
     
-    right_shiny_input <-div(style = glue("font-size:{font_size}px; font-weight:bold; text-align:{text_align}"), right_label)
+    right_shiny_input <-div(style = glue("font-size:{font_size}px; font-weight:bold; text-align:{text_align}; margin-bottom:{bottom_margin}; margin-top:{top_margin}"), right_label)
   }
+  
   
   if(input_type == "numericInput"){
     left_shiny_input <-numericInput(inputId = left_input_id, 
@@ -614,7 +891,7 @@ make_interbody_ui_function <-  function(level = NULL){
                     prettyCheckboxGroup(
                       inputId = glue("{level_input_id}_interbody_integrated_fixation"),
                       label = NULL, choices = c("Integrated Fixation"),
-                      fill = TRUE,
+                      outline = TRUE,
                       # value = FALSE,
                       status = "danger",
                       shape = "curve"
@@ -623,7 +900,7 @@ make_interbody_ui_function <-  function(level = NULL){
                       inputId = glue("{level_input_id}_interbody_expandable"),
                       label = NULL,
                       choices = c("Expandable"),
-                      fill = TRUE,
+                      outline = TRUE,
                       status = "danger",
                       shape = "curve"
                     )

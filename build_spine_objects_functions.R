@@ -293,6 +293,24 @@ build_sublaminar_band_function <- function(x_start, y_top, y_length){
   
 }
 
+structural_allograft_function <- function(y_bottom, y_top, width){
+  left_x <- 0.5 - width*0.35
+  right_x <- 0.5 + width*0.35
+  
+  bottom_left <- c(left_x, y_bottom)
+  bottom_right <- c(right_x, y_bottom)
+  top_left <- c(left_x, y_top)
+  top_right <- c(right_x, y_top)
+  
+  allograft <- st_linestring(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))
+  
+  allograft_sf <- st_buffer(x = st_polygon(list(allograft)), dist = 0.003, endCapStyle = "ROUND")
+  
+  return(allograft_sf)
+}
+
+
+
 #############-----------------------   Build: screws/hooks/other combined  ----------------------###############
 
 screw_hook_implant_function <- function(implant_type,
@@ -306,7 +324,9 @@ screw_hook_implant_function <- function(implant_type,
                                         hook_width_mod = 1,
                                         hook_thickness_percent_mod = 1, 
                                         sublaminar_band_length = 0.01, 
-                                        length_for_tether = 0.02){
+                                        length_for_tether = 0.02, 
+                                        y_superior, 
+                                        y_inferior){
 
   
   if(str_detect(string = implant_type, pattern = "screw")){
@@ -342,12 +362,15 @@ screw_hook_implant_function <- function(implant_type,
   }
   
   if(implant_type == "vertebroplasty"){
-    object <- st_buffer(x = st_point(x = c(0.5, y)), dist = 0.007, endCapStyle = "ROUND")
+    object <- st_buffer(x = st_point(x = c(0.5, y)), dist = 0.0085, endCapStyle = "ROUND")
   }
   if(implant_type == "vertebral_cement_augmentation"){
     object <- st_buffer(x = st_point(x = c(0.5, y)), dist = 0.011, endCapStyle = "ROUND")
   }
   
+  if(implant_type == "structural_allograft"){
+    object <- structural_allograft_function(y_bottom = y_inferior, y_top = y_superior, width = screw_width_mod)
+  }
   return(object)
 }
 
