@@ -20,7 +20,7 @@ jh_reorder_levels_function <- function(level_vector){
     as_vector()
   return(levels)
 }
-
+#################################
 jh_convert_body_levels_to_interspace_vector_function <- function(vertebral_bodies_vector){
   levels_vector <- unique(
     append(
@@ -32,14 +32,63 @@ jh_convert_body_levels_to_interspace_vector_function <- function(vertebral_bodie
   
   return(jh_reorder_levels_function(level_vector = discard(levels_vector, .p = ~ is.na(.x) | .x == "Sacro-iliac")))
 }
-
+#################################
 jh_check_body_or_interspace_function <- function(level){
   result <- case_when(level %in% vertebral_bodies_vector ~ "body",
             level %in% interspaces_vector ~ "interspace")
   
   result
 }
-
+#################################
+jh_get_exiting_nerve_root_function <- function(interspace){
+  if(str_detect(string = interspace, pattern = "-") == FALSE){
+    exiting_root <- case_when(
+      str_starts(string = interspace, pattern = "O") ~ "C1",
+      interspace == "C1" ~ "C2",
+      interspace == "C2" ~ "C3",
+      interspace == "C3" ~ "C4",
+      interspace == "C4" ~ "C5",
+      interspace == "C5" ~ "C6",
+      interspace == "C6" ~ "C7",
+      interspace == "C7" ~ "C8",
+      str_starts(string = interspace, pattern = "T") ~ interspace,
+      str_starts(string = interspace, pattern = "L") ~ interspace,
+      str_starts(string = interspace, pattern = "S1") ~ interspace,
+      interspace == "S2AI" ~ "none",
+      interspace == "Iliac" ~ "none"
+    )
+  }else{
+    exiting_root <- case_when(
+      interspace == 'O-C1' ~ "C1",
+      interspace ==  'C1-C2' ~ 'C2', 
+      interspace == 'C2-C3' ~ 'C3', 
+      interspace == 'C3-C4' ~ 'C4', 
+      interspace == 'C4-C5' ~ 'C5', 
+      interspace == 'C5-C6' ~ 'C6', 
+      interspace == 'C6-C7' ~ 'C7', 
+      interspace == 'C7-T1' ~ 'C8', 
+      interspace == 'T1-T2' ~ 'T1', 
+      interspace == 'T2-T3' ~ 'T2', 
+      interspace == 'T3-T4' ~ 'T3', 
+      interspace == 'T4-T5' ~ 'T4', 
+      interspace == 'T5-T6' ~ 'T5', 
+      interspace == 'T6-T7' ~ 'T6', 
+      interspace == 'T7-T8' ~ 'T7', 
+      interspace == 'T8-T9' ~ 'T8', 
+      interspace == 'T9-T10' ~ 'T9', 
+      interspace == 'T10-T11' ~ 'T10', 
+      interspace == 'T11-T12' ~ 'T11', 
+      interspace == 'T12-L1' ~ 'T12', 
+      interspace == 'L1-L2' ~ 'L1', 
+      interspace == 'L2-L3' ~ 'L2', 
+      interspace == 'L3-L4' ~ 'L3', 
+      interspace == 'L4-L5' ~ 'L4', 
+      interspace == 'L5-S1' ~ 'L5'
+    )
+  }
+  return(exiting_root)
+}
+#################################
 jh_get_vertebral_number_function <- function(level_to_get_number){
   vert_number <-
     case_when(
@@ -101,7 +150,7 @@ jh_get_vertebral_number_function <- function(level_to_get_number){
     )
   return(vert_number)
 }
-
+#################################
 jh_get_vertebral_level_function <- function(number) {
   level = case_when(
     number == 0 ~ 'Occiput',
@@ -163,6 +212,56 @@ jh_get_vertebral_level_function <- function(number) {
   return(level)
 }
 
+###################################
+
+jh_get_level_range_vector_function <- function(object_df, interspace_or_body_or_all = "body"){
+  range_df <- object_df %>%
+    filter(vertebral_number == min(vertebral_number) | vertebral_number == max(vertebral_number)) %>%
+    arrange(vertebral_number) %>%
+    select(level, vertebral_number) %>%
+    mutate(level = if_else(level == "S2AI", "S1", level)) %>%
+    mutate(level = if_else(str_detect(string = level, pattern = "Iliac"), "S1", level)) %>%
+    mutate(level = if_else(level == "Occiput", "C1", level)) %>%
+    select(level) %>%
+    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))
+  
+  cranial_level_type <- jh_check_body_or_interspace_function(level = head(range_df$level, 1)) 
+  caudal_level_type <- jh_check_body_or_interspace_function(level = tail(range_df$level, 1)) 
+  
+  if(cranial_level_type == "body"){
+    cranial_body_number <-  head(range_df$vertebral_number, 1)
+    cranial_interspace_number <-  head(range_df$vertebral_number, 1) - 0.5
+  }else{
+    cranial_body_number <-  head(range_df$vertebral_number, 1) - 0.5
+    cranial_interspace_number <-  head(range_df$vertebral_number, 1)
+  }
+  
+  if(caudal_level_type == "body"){
+    caudal_body_number <-  tail(range_df$vertebral_number, 1)
+    caudal_interspace_number <-  tail(range_df$vertebral_number, 1) + 0.5
+  }else{
+    caudal_body_number <-  tail(range_df$vertebral_number, 1) + 0.5
+    caudal_interspace_number <-  tail(range_df$vertebral_number, 1)
+  }
+  
+  if(interspace_or_body_or_all == "body"){
+    range_number_vector <- seq(cranial_body_number, caudal_body_number, by = 1)
+  }
+  
+  if(interspace_or_body_or_all == "interspace"){
+    range_number_vector <- seq(cranial_interspace_number, caudal_interspace_number, by = 1)
+  }
+  
+  if(interspace_or_body_or_all == "all"){
+    range_number_vector <- seq(cranial_interspace_number, caudal_interspace_number, by = 0.5)
+  }
+  levels_range_vector <- jh_get_vertebral_level_function(number = range_number_vector)
+  
+  return(levels_range_vector)
+}
+
+#################################
+
 jh_get_cranial_caudal_interspace_body_list_function <- function(level){
   
   if(str_detect(level, "-")){
@@ -188,6 +287,100 @@ jh_get_cranial_caudal_interspace_body_list_function <- function(level){
   ))
   
 }
+
+#################################
+jh_filter_objects_by_y_range_function <- function(y_min = 0, y_max = 1, object_vector, full_y_range_df = all_objects_y_range_df){
+  
+  filtered_df <- full_y_range_df %>%
+    filter(between(y, y_min, y_max))
+  
+  filtered_vector <- discard(.x = object_vector, .p = ~ .x %in% filtered_df$object == FALSE)
+  
+  return(filtered_vector)
+  
+}
+#################################
+jh_filter_osteotomies_function <- function(full_df_to_filter){
+  objects_in_sequence_df <- full_df_to_filter %>%
+    union_all(tibble(level = "x", object = c("grade_1", "grade_3", "grade_4", "grade_5"))) %>%
+    union_all(tibble(level = "x-x", object = "grade_2")) %>%
+    mutate(order_number = row_number())
+  
+  grade_5_osteotomy_df <- objects_in_sequence_df %>%
+    filter(object == "grade_5") 
+  
+  grade_4_osteotomy_df <- objects_in_sequence_df %>%
+    filter(object == "grade_4") 
+  
+  grade_3_osteotomy_df <- objects_in_sequence_df %>%
+    filter(object == "grade_3") 
+  
+  grade_2_osteotomy_df <- objects_in_sequence_df %>%
+    filter(object == "grade_2") %>%
+    separate(col = level, into = c("proximal_level", "distal_level"), remove = FALSE)
+  
+  grade_1_osteotomy_df <- objects_in_sequence_df %>%
+    filter(object == "grade_1") 
+  
+  if(nrow(grade_1_osteotomy_df) > 0){
+    grade_1_osteotomy_df <- grade_1_osteotomy_df %>%
+      mutate(distal_level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
+      mutate(keep_remove = if_else(level %in% grade_2_osteotomy_df$proximal_level | 
+                                     level %in% grade_2_osteotomy_df$proximal_level |
+                                     level %in% grade_3_osteotomy_df$level |
+                                     level %in% grade_4_osteotomy_df$level |
+                                     level %in% grade_5_osteotomy_df$level |       
+                                     distal_level %in% grade_3_osteotomy_df$level |
+                                     distal_level %in% grade_4_osteotomy_df$level |
+                                     distal_level %in% grade_5_osteotomy_df$level, "remove", "keep"))
+  }
+  
+  if(nrow(grade_2_osteotomy_df)>0){
+    grade_2_osteotomy_df <- grade_2_osteotomy_df %>%
+      mutate(keep_remove = if_else(proximal_level %in% grade_3_osteotomy_df$level |
+                                     proximal_level %in% grade_4_osteotomy_df$level |
+                                     proximal_level %in% grade_5_osteotomy_df$level |
+                                     distal_level %in% grade_3_osteotomy_df$level |
+                                     distal_level %in% grade_4_osteotomy_df$level |
+                                     distal_level %in% grade_5_osteotomy_df$level, "remove", "keep")) %>%
+        select(-proximal_level, -distal_level)
+  }
+  
+  if(nrow(grade_3_osteotomy_df)>0){
+    grade_3_osteotomy_df <- grade_3_osteotomy_df %>%
+      mutate(keep_remove = if_else(level %in% grade_4_osteotomy_df$level |
+                                     level %in% grade_5_osteotomy_df$level, "remove", "keep"))
+  }
+  if(nrow(grade_4_osteotomy_df)>0){
+    grade_4_osteotomy_df <- grade_4_osteotomy_df %>%
+      mutate(keep_remove = if_else(level %in% grade_5_osteotomy_df$level, "remove", "keep"))
+  }
+  
+  if(nrow(grade_5_osteotomy_df)>0){
+    grade_5_osteotomy_df <- grade_5_osteotomy_df %>%
+      mutate(keep_remove = "keep")
+  }
+
+  
+  all_grades_df <- grade_1_osteotomy_df %>%
+    union_all(grade_2_osteotomy_df) %>%
+    union_all(grade_3_osteotomy_df) %>%
+    union_all(grade_4_osteotomy_df) %>%
+    union_all(grade_5_osteotomy_df) %>%
+    select(level, order_number, side, object, keep_remove)
+  
+  final_filtered_full_df <- objects_in_sequence_df %>%
+    left_join(all_grades_df)%>%
+    select(order_number, level, keep_remove, everything()) %>%
+    replace_na(list(keep_remove = "keep")) %>%
+    filter(keep_remove == "keep") %>%
+    select(-keep_remove, -order_number) %>%
+    filter(level != "x") %>%
+    filter(level != "x-x")
+  
+  return(final_filtered_full_df)
+}
+
 
 jh_make_bmp_ui_function <-  function(anterior_posterior){
   fluidRow(  
@@ -268,7 +461,8 @@ jh_make_bmp_ui_function <-  function(anterior_posterior){
 }
 
 
-jh_make_shiny_table_row_function <- function(left_column_label,
+jh_make_shiny_table_row_function <- function(required_option = FALSE,
+                                             left_column_label,
                                              left_column_percent_width = 30,
                                              font_size = 14, 
                                              input_type,
@@ -286,25 +480,48 @@ jh_make_shiny_table_row_function <- function(left_column_label,
                                              return_as_full_table = TRUE,
                                              text_align = "left", 
                                              top_margin = "auto",
-                                             bottom_margin = "auto"){
+                                             bottom_margin = "auto", 
+                                             individual_buttons = FALSE,
+                                             check_icon_for_radiogroupbuttons = list(
+                                               yes = tags$i(class = "fa fa-check-square", 
+                                                            style = "color: steelblue"),
+                                               no = tags$i(class = "fa fa-square-o", 
+                                                           style = "color: steelblue"))){
   
   right_column_percent_width <- 100 - left_column_percent_width
+  
   label_style <- glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}; margin-top:{top_margin}; margin-bottom:{bottom_margin}")
+  
+  if(required_option == TRUE){
+    left_column_percent_width <- left_column_percent_width - 3
+    required_label_style <- glue("font-size:{paste(font_size)}px; color:red; font-weight:bold; text-align:{text_align}; margin-top:{top_margin}; margin-bottom:{bottom_margin}")
+  }
+  
+  # tags$div(style = "font-size:xxxpx; font-weight:bold; text-align:xxx; margin-top:xxx; margin-bottom:xxx", "xxxx")
   
   if(input_type == "numeric"){
     row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), numericInput(inputId = input_id, label = NULL,value = initial_value_selected, min = min, max = max, step = step))
     )  
   }
   if(input_type == "text"){
     row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), textInput(inputId = input_id, label = NULL, value = initial_value_selected))
     )  
   }
   if(input_type == "picker"){
     row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), pickerInput(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, multiple = choose_multiple))
     )  
@@ -312,19 +529,28 @@ jh_make_shiny_table_row_function <- function(left_column_label,
   
   if(input_type == "switch"){
     row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
-                   tags$td(width = paste0(right_column_percent_width, "%"), switchInput(inputId = input_id, label = NULL, onLabel = switch_input_on_label, offLabel = switch_input_off_label))
+                   tags$td(width = paste0(right_column_percent_width, "%"), switchInput(inputId = input_id, label = NULL, value = initial_value_selected, onLabel = switch_input_on_label, offLabel = switch_input_off_label))
     )  
   }
   
   if(input_type == "checkbox"){
     row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), awesomeCheckboxGroup(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, inline = checkboxes_inline))
     )  
   }
   if(input_type == "checkboxGroupButtons"){
     row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), checkboxGroupButtons(inputId = input_id,
                                                                                                  label = NULL, 
@@ -340,20 +566,29 @@ jh_make_shiny_table_row_function <- function(left_column_label,
   
   if(input_type == "radioGroupButtons"){
     row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
-                   tags$td(width = paste0(right_column_percent_width, "%"), radioGroupButtons(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical")))
+                   tags$td(width = paste0(right_column_percent_width, "%"), radioGroupButtons(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical"), checkIcon = check_icon_for_radiogroupbuttons, individual = individual_buttons))
     )  
   }
   if(input_type == "awesomeRadio"){
     row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), awesomeRadio(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, inline = checkboxes_inline, status = "success"))
     )  
   }
   if(input_type == "date"){
     row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
-                   tags$td(width = paste0(right_column_percent_width, "%"), dateInput(inputId = input_id, label = NULL, format = "mm-dd-yyyy", autoclose = TRUE, startview = "decade"))
+                   tags$td(width = paste0(right_column_percent_width, "%"), dateInput(inputId = input_id, label = NULL, format = "mm-dd-yyyy", value = "", max = Sys.Date(), autoclose = TRUE, startview = "decade"))
     )  
   }
   # return(row)
@@ -793,16 +1028,19 @@ jh_fusion_category_function <- function(fusion_vector, all_objects_df){
                               ))) %>%
     mutate(fusion_rank = if_else(str_detect(string = fusion_category, pattern = "interbody"), 1, 2)) 
   
-  fusion_df <- tibble(level = fusion_vector) %>%
-    left_join(fusions_ranked_df) %>%
-    mutate(fusion_rank = if_else(is.na(fusion_rank), 9, fusion_rank)) %>%
-    group_by(level, approach) %>%
-    filter(fusion_rank == min(fusion_rank)) %>%
-    select(level, vertebral_number, object = fusion_category) %>%
-    distinct() %>%
-    ungroup() %>%
-    mutate(category = "fusion")
-  
+  if(length(fusion_vector)>0){
+    fusion_df <- tibble(level = fusion_vector) %>%
+      left_join(fusions_ranked_df) %>%
+      mutate(fusion_rank = if_else(is.na(fusion_rank), 9, fusion_rank)) %>%
+      group_by(level, approach) %>%
+      filter(fusion_rank == min(fusion_rank)) %>%
+      select(level, vertebral_number, object = fusion_category) %>%
+      distinct() %>%
+      ungroup() %>%
+      mutate(category = "fusion")
+  }else{
+    fusion_df <- tibble(level = character(), vertebral_number = double(), object = character())
+  }
   return(fusion_df)
 }
 
@@ -1211,13 +1449,49 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
                                                 satellite_rods_vector = c("a", "b"),
                                                 intercalary_rods_vector = c("a", "b"), 
                                                 linked_rods_vector = c("a", "b"),
+                                                revision_rods_retained_df = tibble(level = character(), vertebral_number = double(), x = double(), y = double()),
                                                 unilateral_full_implant_df, 
                                                 intercalary_junction){
 
-  if(!is.null(unilateral_full_implant_df)){
+  if(!is.null(unilateral_full_implant_df) && nrow(unilateral_full_implant_df)>0){
     rods_list <- list()
     connector_list <- list()
     all_levels_vector <- c("Occiput", "C1", "C1-C2", "C2", "C2-C3", "C3", "C3-C4", "C4", "C4-C5", "C5", "C5-C6", "C6", "C6-C7", "C7", "C7-T1", "T1", "T1-T2", "T2", "T2-T3", "T3", "T3-T4", "T4", "T4-T5", "T5", "T5-T6", "T6", "T6-T7", "T7", "T7-T8", "T8", "T8-T9", "T9", "T9-T10", "T10", "T10-T11", "T11", "T11-T12", "T12", "T12-L1", "L1", "L1-L2", "L2", "L2-L3", "L3", "L3-L4", "L4", "L4-L5", "L5", "L5-S1", "S1", "Iliac", "S2AI")
+    
+    if(nrow(revision_rods_retained_df) > 0){
+      unilateral_full_implant_df <- revision_rods_retained_df %>% 
+        filter(prior_rod_connected == "no") %>%
+        select(level, vertebral_number, x, y) %>%
+        union_all(unilateral_full_implant_df)%>%
+        arrange(y)
+      
+      revision_implants_retained_df <- revision_rods_retained_df %>% 
+        filter(prior_rod_connected == "yes")
+      
+      if(nrow(revision_implants_retained_df)>0){
+        if(min(unilateral_full_implant_df$y) > max(revision_implants_retained_df$y)){
+          connector_matrix <- revision_implants_retained_df %>%
+            select(x, y) %>%
+            filter(y == max(y)) %>%
+            union_all(unilateral_full_implant_df %>% select(x, y) %>% filter(y == min(y))) %>% 
+            as.matrix()
+          
+          connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
+          
+        }else{
+          connector_matrix <- revision_implants_retained_df %>%
+            select(x, y) %>%
+            filter(y == min(y)) %>%
+            union_all(unilateral_full_implant_df %>% select(x, y) %>% filter(y == max(y))) %>% 
+            as.matrix()
+          
+          connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
+        }
+      }
+
+        
+    }
+
     implant_levels_vector <- unilateral_full_implant_df$level
     
     if(nrow(unilateral_full_implant_df) >1){

@@ -182,7 +182,11 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "laminoplasty"))){
     geoms_list_posterior$laminoplasty_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(object == "laminoplasty"))$object_constructed), fill  = "blue") 
-    geoms_list_posterior$laminoplasty_cut_df_sf_geom <- geom_line(data = tibble(x = 0.515, y =  c(max((all_posterior_objects_df %>% filter(object == "laminoplasty"))$superior_lamina_y), min((all_posterior_objects_df %>% filter(object == "laminoplasty"))$inferior_lamina_y) - 0.007)), 
+    geoms_list_posterior$laminoplasty_cut_df_sf_geom <- geom_line(data = tibble(x = 0.515,
+                                                                                # y = c(max(as_tibble(st_coordinates(head(all_posterior_objects_df %>% filter(object == "laminoplasty"), 1)$object_constructed))$Y), 
+                                                                                      # min(as_tibble(st_coordinates(tail(all_posterior_objects_df %>% filter(object == "laminoplasty"), 1)$object_constructed))$Y))),
+                                                                                y =  c(max((all_posterior_objects_df %>% filter(object == "laminoplasty"))$y + 0.01),
+                                                                                       min((all_posterior_objects_df %>% filter(object == "laminoplasty"))$y) - 0.01)),
                                                                   aes(x = x, y = y), linetype = "dotted", size = 2, color = "red") 
   }else{
     geoms_list_posterior$laminoplasty_sf_geom <- NULL

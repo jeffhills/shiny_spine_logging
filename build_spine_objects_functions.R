@@ -440,31 +440,29 @@ build_osteotomy_function <- function(level,
     
   }
   
-  if(osteotomy_grade == "complete_facetectomy"){
-    if(x_click < 0.5){
-      #start top left and then work in counterclockwise
-      point_1 <- c(inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
-      point_2 <- c(inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
-      point_3 <- c(inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
-      point_4 <- c(inferior_facet_medial_border_x, inferior_facet_superior_border_y)
-    }else{
-      #start top left and then work in counterclockwise
-      point_1 <- c(1- inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
-      point_2 <- c(1 - inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
-      point_3 <- c(1 - inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
-      point_4 <- c(1 - inferior_facet_medial_border_x, inferior_facet_superior_border_y)
-    }
-    
-    
-    
-    osteotomy_sf <- st_linestring(rbind(point_1,
-                                        point_2,
-                                        point_3,
-                                        point_4,
-                                        point_1))
-    
-    osteotomy_sf <- st_buffer(st_polygon(list(osteotomy_sf)), dist = 0.0025, endCapStyle = "ROUND")
-  }
+  # if(osteotomy_grade == "complete_facetectomy"){
+  #   if(x_click < 0.5){
+  #     #start top left and then work in counterclockwise
+  #     point_1 <- c(inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
+  #     point_2 <- c(inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
+  #     point_3 <- c(inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
+  #     point_4 <- c(inferior_facet_medial_border_x, inferior_facet_superior_border_y)
+  #   }else{
+  #     #start top left and then work in counterclockwise
+  #     point_1 <- c(1- inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
+  #     point_2 <- c(1 - inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
+  #     point_3 <- c(1 - inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
+  #     point_4 <- c(1 - inferior_facet_medial_border_x, inferior_facet_superior_border_y)
+  #   }
+  # 
+  #   osteotomy_sf <- st_linestring(rbind(point_1,
+  #                                       point_2,
+  #                                       point_3,
+  #                                       point_4,
+  #                                       point_1))
+  #   
+  #   osteotomy_sf <- st_buffer(st_polygon(list(osteotomy_sf)), dist = 0.0025, endCapStyle = "ROUND")
+  # }
   
   if(osteotomy_grade == "grade_3" | osteotomy_grade == "grade_4" | osteotomy_grade == "grade_5"){
     
@@ -505,7 +503,40 @@ build_osteotomy_function <- function(level,
 #############-----------------------   Build: DECOMPRESSIONS  ----------------------###############
 
 
-build_decompression_function <- function(left_x, right_x, superior_y, inferior_y, top_width, object="x", x_lateral_pars, y_inferior_tp, side, inferior_pedicle_y, inferior_facet_superior_border_y = 0.5){
+build_decompression_function <- function(left_x, 
+                                         right_x, 
+                                         superior_y, 
+                                         inferior_y, 
+                                         top_width, 
+                                         object="x",
+                                         x_lateral_pars, 
+                                         y_inferior_tp, side,
+                                         inferior_pedicle_y,
+                                         inferior_facet_superior_border_y = 0.5){
+  
+  if(object == "complete_facetectomy"){
+    if(left_x < 0.5){
+      #start top left and then work in counterclockwise
+      point_1 <- c(left_x, superior_y)
+      point_2 <- c(left_x, inferior_y)
+      point_3 <- c(right_x, inferior_y)
+      point_4 <- c(right_x, superior_y)
+    }else{
+      #start top left and then work in counterclockwise
+      point_1 <- c(left_x, superior_y)
+      point_2 <- c(left_x, inferior_y)
+      point_3 <- c(right_x, inferior_y)
+      point_4 <- c(right_x, superior_y)
+    }
+    
+    decompression_sf <- st_linestring(rbind(point_1,
+                                        point_2,
+                                        point_3,
+                                        point_4,
+                                        point_1))
+    
+    decompression_sf <- st_buffer(st_polygon(list(decompression_sf)), dist = 0.0025, endCapStyle = "ROUND")
+  }
   
   if(object == "laminoplasty"){
     object_start <- c(x_lateral_pars+0.01, inferior_pedicle_y + 0.005)

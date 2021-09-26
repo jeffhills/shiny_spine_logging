@@ -1,0 +1,14 @@
+name: spine_templating_logging
+title: spine_templating_logging
+username:
+account: hills-apps
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3825489
+bundleId: 5072449
+url: https://hills-apps.shinyapps.io/spine_templating_logging/
+when: 1632626980.36418
+lastSyncTime: 1632626980.36418
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: 2020 Depuy Spine Coding Guide.pdf|new_spine_figure.pptx|spine_3d_models.pptx|old|testing_docs

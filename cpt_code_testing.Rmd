@@ -1,0 +1,1832 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(shiny)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+library(shinyWidgets)
+library(shinyBS)
+library(cowplot)
+library(magick)
+library(ggpattern)
+library(glue)
+library(rlist)
+library(janitor)
+library(lubridate)
+library(redcapAPI)
+library(ggpmisc)
+library(rclipboard)
+library(nngeo)
+library(shinydashboard)
+
+library(tictoc)
+
+# rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "4B2AA28A4D6EFBC6CA1F49EC0FB385F7")
+
+rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "58C0BC0A6CA8B8DFB21A054C2F5A3C49")
+
+source("short_shiny_functions.R", local = TRUE)
+source("build_spine_objects_functions.R", local = TRUE)
+source("load_coordinates_build_objects.R", local = TRUE)
+source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
+
+
+posterior_test_df <- all_implants_constructed_df %>%
+  filter(object == "pelvic_screw" | object == "pedicle_screw") %>%
+  filter(vertebral_number %in% c(20, 21,23,24,25)) %>%
+  # filter(between(vertebral_number, 22, 25)) %>%
+  mutate(implant_statement = NULL) %>%
+  mutate(screw_size_type = "polyaxial") %>%
+  union_all(all_implants_constructed_df %>% filter(object == "tlif") %>% filter(between(vertebral_number, 23, 25))) %>%
+  union_all(all_implants_constructed_df %>% filter(object == "crosslink") %>% filter(level == "L3") %>% mutate(screw_size_type = "a")) %>%
+  union_all(all_implants_constructed_df %>% filter(object == "grade_5") %>% filter(level == "L3") %>% mutate(screw_size_type = "a polyaxial")) %>%
+  union_all(all_implants_constructed_df %>% filter(object == "intervertebral_cage") %>% filter(level == "L3") %>% mutate(implant_statement = "An expandablle cage was chosen to implant."))
+
+posterior_test_df
+
+anterior_test_df <- all_implants_constructed_df %>%
+  filter(approach == "anterior") %>%
+  filter(between(vertebral_number, 22, 25)) %>%
+  filter(object == "decompression_diskectomy_fusion" | object == "diskectomy_fusion" | object == "diskectomy_fusion_no_interbody_device" | object == "anterior_interbody_implant" | object == "anterior_buttress_plate")
+```
+```{r}
+all_patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
+            type.convert() %>%
+            select(record_id, last_name, first_name, date_of_birth) %>%
+            mutate(last_name = str_to_lower(last_name), 
+                   first_name = str_to_lower(first_name))
+
+test_redcap_patient_df <- all_patient_ids_df %>%
+  filter(last_name == "testlast")
+
+redcap_patient_prior_procedures_export_df <- exportRecords(rcon = rcon, records = test_redcap_patient_df$record_id[[1]]) %>%
+  as_tibble()  %>%
+  filter(redcap_repeat_instrument == "procedures_by_level_repeating")  %>%
+  type.convert() 
+
+redcap_patient_prior_procedures_export_df %>%
+  select(record_id, dos_surg_repeating, approach_repeating, side, str_replace_all(string = str_to_lower(levels_numbered_df$level), pattern = "-", replacement = "_")) %>%
+  pivot_longer(cols = str_replace_all(string = str_to_lower(levels_numbered_df$level), pattern = "-", replacement = "_"), names_to = "level", values_to = "object") %>%
+  filter(!is.na(object)) %>%
+  mutate(dos_surg_repeating = date(dos_surg_repeating)) %>%
+  rename(approach = approach_repeating) %>%
+  mutate(level = str_to_title(str_replace_all(string = level, pattern = "_", replacement = "-"))) %>%
+  left_join(all_implants_constructed_df) %>%
+  select(-width, -angle, -direction, -sublaminar_band_length, -length_for_tether) %>%
+  filter(!is.na(vertebral_number))
+
+redcap_patient_prior_procedures_export_df
+
+  group_by(record_id) %>%
+  filter(dos_surg_repeating == max(dos_surg_repeating))
+  
+  rev_test_df <- revision_implants_df %>%
+    filter(between(vertebral_number, 17, 21)) 
+  
+  rev_test_df %>%
+    select(vertebral_number) %>%
+    add_row(vertebral_number = min(rev_test_df$vertebral_number) -1)
+
+  
+  
+
+```
+
+```{r}
+revision_test_vector <- c("L2", "L3", "L4")
+revision_removed_vector <- c()
+revision_test_vector <- c()
+
+revision_implants_retained_df <- tibble(level = revision_test_vector, side = "left") %>%
+  filter(level %in% revision_removed_vector == FALSE) %>%
+  left_join(revision_implants_df)
+
+revision_implants_retained_df
+
+posterior_test_df
+
+op_note_procedure_paragraphs_function(objects_added_df = posterior_test_df)
+
+```
+
+
+```{r}
+
+new_test_df <- posterior_test_df %>%
+  filter(object != "crosslink")
+
+
+ facetectomy_test <- all_implants_constructed_df %>%
+   filter(object == "complete_facetectomy") %>%
+   filter(between(vertebral_number, 19, 22)) %>%
+   select(level, vertebral_number, object, side, everything()) %>%
+   mutate(implant_statement = " ", screw_size_type = " ")
+
+ facetectomy_test
+ 
+    df_for_paragraphs <- facetectomy_test %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
+      mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+      group_by(procedure_category, procedures_combine, object) %>%
+      nest() %>%
+      ungroup() %>%
+      group_by(procedure_category, procedures_combine) %>%
+      nest() %>%
+      mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
+      select(-data)  
+
+
+df_for_paragraphs$nested_data[[1]]
+
+  # THIS CREATES A DATAFRAME WITH NESTED DATAFRAMES.... full dataframe names = 'procedure_category, procedures_combine, nested_data'
+  # nested df names ('nested_data') = 'object, level, vertebral_number, side, implant_statement, screw_size_type'
+  
+df_for_paragraphs
+
+  procedures_op_full_df <- df_for_paragraphs %>%
+    mutate(procedure_statement = pmap(list(..1 = procedure_category,
+                                           ..2 = nested_data, 
+                                           ..3 = procedures_combine),
+                                      .f = ~create_full_paragraph_statement_function(procedure_paragraph_intro = ..1,
+                                                                                     df_with_levels_object_nested = ..2, 
+                                                                                     paragraphs_combined_or_distinct = ..3))) %>%
+    select(procedure_category, procedures_combine, procedure_statement) %>%
+    unnest(procedure_statement)
+  
+  procedures_op_full_df
+  
+  create_full_paragraph_statement_function(procedure_paragraph_intro = "decompression with a complete facetectomy",
+                                           df_with_levels_object_nested = df_for_paragraphs$nested_data[[1]], paragraphs_combined_or_distinct = "combine")
+  
+  
+```
+```{r}
+nest_test <- df_for_paragraphs$nested_data[[1]] %>%
+      group_by(object) %>%
+      nest() %>%
+      mutate(object_levels_side_df = data) %>% ### this creates a dataframe with only two columns: 'object' and 'object_levels_side_df'. #The nested dataframe has columns: level, vertebral_number, side, implant_statement, screw_size_type
+      select(-data)
+
+
+nest_test %>%
+      mutate(tech_statement = map2(.x = object, .y = object_levels_side_df, .f = ~ op_note_technique_combine_statement(object = .x, levels_side_df = .y))) %>%
+      select(object, tech_statement) %>%
+      unnest(tech_statement) %>%
+      distinct()
+
+nest_test$object_levels_side_df[[1]]
+```
+
+```{r}
+
+levelside_test <- nest_test$object_levels_side_df[[1]]
+
+levelside_test
+
+  screw_statements_wide_df <- levelside_test%>%
+    mutate(unilateral_screw_statement = str_to_lower(glue("a {screw_size_type} screw was inserted on the {side}"))) %>%
+    select(level, screw_size_type, side, unilateral_screw_statement) %>%
+    pivot_wider(names_from = side, values_from = unilateral_screw_statement) %>%
+    unnest()
+
+screw_statements_wide_df
+  
+  screw_statements_df <- tibble(level = character(), left = character(), right = character(), unilateral_screw_statement = character()) %>%
+    union_all(screw_statements_wide_df) %>%
+    replace_na(replace = list(left = "xx", right = "xx")) %>%
+    mutate(screw_statement = case_when(
+      left != "xx" & right != "xx" ~ glue("At {level}, {left} and {right}."), 
+      left == "xx" & right != "xx" ~ glue("At {level}, {right}."), 
+      left != "xx" & right == "xx" ~ glue("At {level}, {left}."), 
+      left == "xx" & right == "xx" ~ glue(""))) %>%
+    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+    arrange(vertebral_number)
+  
+  screw_statements_df
+  
+  levelside_test
+  
+  exiting_roots_df <- levelside_test %>%
+    mutate(exiting_root = jh_get_exiting_nerve_root_function(interspace = level)) %>%
+    filter(!is.na(exiting_root)) %>%
+    group_by(exiting_root) %>%
+    add_tally(name = "number_per_level") %>%
+    mutate(exiting_roots_statement = as.character(if_else(number_per_level == 1, glue("the {side} {exiting_root} exiting nerve root"), glue("the left and right {exiting_root} exiting nerve roots")))) %>%
+    ungroup() %>%
+    select(-side) %>%
+    distinct() %>%
+    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+    arrange(vertebral_number)   
+  
+  exiting_roots_df
+    
+  levelside_test <- levelside_test %>%
+    group_by(level) %>%
+    add_tally(name = "number_per_level") %>%
+    mutate(level_side = as.character(if_else(number_per_level == 1, glue("on the {side} at {level}"), glue("on the left and on the right at {level}")))) %>%
+    ungroup() %>%
+    select(-side) %>%
+    distinct() %>%
+    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+    arrange(vertebral_number)   
+  
+ levels_side_df <- levelside_test %>%
+    mutate(across(everything(), ~ replace_na(data = .x, replace = " ")))
+ 
+ levelside_test
+ 
+
+```
+
+```{r}
+  exiting_roots_df <- levels_side_df %>%
+    mutate(exiting_root = jh_get_exiting_nerve_root_function(interspace = level)) %>%
+    filter(!is.na(exiting_root))
+  
+  if(nrow(exiting_roots_df)>0){
+    exiting_roots_df <- exiting_roots_df %>%
+      group_by(exiting_root) %>%
+      add_tally(name = "number_per_level") %>%
+      mutate(exiting_roots_statement = as.character(if_else(number_per_level == 1, glue("the {side} {exiting_root} exiting nerve root"), glue("the left and right {exiting_root} exiting nerve roots")))) %>%
+      ungroup() %>%
+      select(-side) %>%
+      distinct() %>%
+      mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+      arrange(vertebral_number) 
+  }else{
+    exiting_roots_df <- exiting_roots_df %>%
+    mutate(exiting_roots_statement = " ")
+  }
+
+levelside_test
+```
+
+
+```{r}
+
+object <- "complete_facetectomy"
+
+levels_side_df <- levelside_test
+
+levels_side_df
+
+pelvic_screw_statement <- ""
+
+  technique_statement <- case_when(
+    object == "vertebroplasty" ~ glue("For vertebral body cement augmentation, a cannula was inserted into the vertebral body through the pedicle. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebroplasty was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."),
+    object == "vertebral_cement_augmentation" ~ glue("For vertebral body cement augmentation, I first created a cavity within the vertebral body. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebral augmentation was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."),
+    object == "laminar_downgoing_hook" ~ glue("For downgoing laminar hooks, the ligamentum flavum was removed at the site of the hook insertion. A hook was then inserted securely under the lamina {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
+    object == "laminar_upgoing_hook" ~ glue("For upgoing laminar hooks, the inferior edge of the cranial lamina was identified and the plane between the lamina and ligamentum was developed and the upgoing hook is then placed within this plane, secured to the lamina aimed cranially {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
+    object == "lateral_mass_screw" ~ glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a high speed burr and the screw path drilled incrementally to the far cortex. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
+    object == "occipital_screw" ~ glue("An appropriately sized occipital plate was selected and was placed centered in the midline and just caudal to the external occipital protuberance, but cranial to the foramen magnum. The plate was held in place to identify the appropriate start points for the occipital screws. The occipital screws were drilled incrementally until the anterior cortex was penetrated. The length of the path was measured to acheive bicortical fixation. The screw paths were then tapped and the screws placed, securing the plate to the occiput."),
+    object == "pars_screw" ~ glue("For pars screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. Once the start point was identified, the superficial cortex was opened at the entry point using the high speed burr. A drill was used to cannulate a screw path, aiming as dorsal as possible while not perforating the dorsal cortex of the pars. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
+    object == "pedicle_screw" ~ glue("For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a high speed burr. A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
+    object == "translaminar_screw" ~ glue("For translaminar screw fixation, the starting point was identified using the spinolaminar junction and in the central plane of the contralateral lamina. A burr hole was made to open the superficial cortex, the path was then cannulated and intralaminar screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
+    object == "pedicle_hook" ~ glue("For pedicle hooks, a pedicle finder was carefully placed just under the inferior facet and above the superior facet, until the pedicle was found. Once the pedicle was identified, a pedicle hook was inserted directly toward the inferior pedicle, secured within the residual facet joint {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
+    object == "pelvic_screw" ~ glue(" "),
+    object == "sublaminar_wire" ~ glue("For sublaminar wiring, the doubled-up sublaminar was was bent into a hook shape and and passed under the inferior lamina from a caudal to cranial direction. Once the wire was safely passed, the tip of the wire was cut and the two strands were directed in opposite directions of the midline to be attached to the rods on the left and right side. Wires were passed under {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."),
+    object == "tether" ~ glue("For posterior vertebral tethering, a hole was drilled in the transverse process over the lamina. A band was then thread through the hole and tied in a figure-8 fashion, tethering {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."),
+    object == "tp_hook" ~ glue("For transverse process hooks, the cranial edge of the transverse process was identified. A transverse process finder was used to develop the plane and a transverse process hook was placed securely into position along the superior edge of the transverse process."),
+    object == 'complete_facetectomy' ~ glue("For a complete facetectomy, the inferior, superior, medial and lateral borders of the inferior and superior facet were identified. Both the superior and inferior facet were completely excised and the underlying exiting nerve root decompressed. I performed a complete facetectomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}. This effectively decompressed {glue_collapse(x = exiting_roots_df$exiting_roots_statement, sep = ', ', last = ' and ')}."),
+    # object == 'grade_1' ~ glue("The inferior, superior, medial and lateral borders of the inferior facet were identified. The inferior facets {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} were excised and the bone was morselized to be used as morselized autograft."),
+    # object == 'grade_2' ~ glue("For the posterior column osteotomies, a small rent was made in the interlaminar space to develop the plane between the ligamentum and the dura. A Kerrison rongeur was then used to excise the ligamentum. this was carried out laterally in both directions until the facets were encountered. The superior and inferior facet were both adequately resected to fully release the posterior column. I performed posterior column (Smith-Peterson) osteotomies at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}"),
+    
+    # object == 'diskectomy' ~ glue("For a diskectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. I performed a diskectomy with partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Using a high-speed burr and Kerrison rongeurs, I first performed a foraminotomy and excised the ligamentum flavum. The dural sac was identified and traversing root was protected. The annulus was then incised and the diseased disk materal was removed. Following the decompression, the canal and foramen and lateral recess were palpated to confirm an appropriate decompression had been completed."),
+    # object == 'laminotomy' ~ glue("For the laminotomy, the cranial and caudal laminar edges, pars, and facet joints were used as landmarks. Once I had determined the laminotomy site, I used a combination of a high-speed burr and Kerrison rongeurs to resect the bone dorsal to the nerve root. I performed a laminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Following the decompression, the foramen was palpated to confirm an adequate decompression had been completed."),
+    # object == 'laminectomy' ~ glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}. First, using a combination of a high-speed burr and Kerrison rongeurs, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. Following the decompression, the canal was palpated to confirm an adequate decompression had been completed."),
+    # object == 'sublaminar_decompression' ~ glue("Using a combination of a high-speed burr and Kerrison rongeurs, I performed a partial laminectomy bilaterally at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace. First, I resected the dorsal lamina and then excised the ligamentum flavum, exposing the dura. To fully decompress the exiting and traversing nerve roots within the neural foramen and lateral recess, the medial facet was partially excised and a foraminotomy performed on the left and right at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace. Following the decompression, the canal and foramen were palpated to confirm an adequate decompression had been completed."),
+    # object == 'revision_diskectomy' ~ glue("For the revision diskectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. I performed a revision and reexploration with diskectomy and partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. Using a high-speed burr and Kerrison rongeurs, I performed a foraminotomy and excised the scar and ligamentum. The dural sac was identified and traversing root was protected. The annulus and disk space were identified and the diseased disk material was excised. Following the revision decompression, the canal and foramen and lateral recess were palpated to confirm an adequate decompression had been completed."),
+    # object == 'revision_laminotomy' ~ glue("For the revision laminotomy, the cranial and caudal laminar edges, pars, and facet joints were used as landmarks. I carefully exposed the dorsal elements until I had identified the edges of the laminar defect. Once I determined the laminotomy site, I used a combination of a high-speed burr and Kerrison rongeurs to resect the bone dorsal to the nerve root. I performed a revision laminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Following the decompression, the foramen was palpated to confirm an adequate decompression had been completed."),
+    # object == 'revision_laminectomy' ~ glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a reexploration and revision laminectomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}. Using a combination of a high-speed burr, currettes and Kerrison rongeurs, I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. I removed any dorsal lamina, ligamentum flavum and scar thought to still be causing compression. The central canal was palpated to confirm full decompression of the thecal sac. Following the revision decompression, the canal was palpated to confirm an adequate decompression had been completed."),
+    # object == 'revision_sublaminar_decompression' ~ glue("Using a combination of a high-speed burr and Kerrison rongeurs, I performed a reexploration and revision decompression bilaterally at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace. First, I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. I proceeded with partial laminectomies and excised the scar and underlying ligamentum flavum. The medial facet was partially excised and a foraminotomy performed on the left and right at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace, to fully decompress the exiting and traversing nerve roots within the neural foramen and lateral recess. Following the revision decompression, the canal and foramen were palpated to confirm an adequate decompression had been completed."),
+    # object == 'costotransversectomy' ~ glue("For the costotransversectomy, the rib was identified and a subperiosteal dissection was carried out laterally 6-7cm. Once the medial rib was skeletonized and a safe, subperiorsteal plane was confirmed, 5-6cm of the medial rib was transected. This process was completed {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}, allowing a safe costovertebral approach to the anterior vertebral body."),
+    # object == 'lateral_extracavitary_approach' ~ glue("For the modified lateral extracavitary approach at {glue_collapse(levels_side_df$level, sep = ', ', last = ' and ')}, the pedicle of {glue_collapse(levels_side_df$level, sep = ', ', last = ' and ')} was identified and using a combination of a high-speed burr, Kerrison rongeurs and osteotome, the inferior and superior facets were fully resected, allowing access to the interspace. The lateral border of the disk space was identified and the dissection was carried out anteriorly around the entire anterior portion of the vertebral body. This was carried out {glue_collapse(levels_side_df$level_side, sep = ', ', last = ' and ')} and allowed safe access to the anterior longitudinal ligament and the most anterior portion of the vertbral body."),
+    # object == 'laminoplasty' ~ glue("For laminoplasty, an opening and hinge trough was created with a high-speed burr angled perpendicular to the lamina at the lateral mass-lamina junction. This was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}. After all troughs were completed, greenstick fractures were created to open the lamina at the laminoplasty levels, the ligamentum flavum at the proximal and distal levels was excised, and laminoplasty plates were sequentially secured into place. The spinous processes were trimmed and the canal was palpated to confirm an adequate decompression had been completed.")
+  )
+  
+  technique_statement
+  
+  technique_statement <- str_replace_all(string = technique_statement, pattern = "a na ", replacement = "a ")
+  
+  technique_statement
+  
+  levelside_test %>%
+        mutate(exiting_root = jh_get_exiting_nerve_root_function(interspace = level)) %>%
+    filter(!is.na(exiting_root)) %>%
+    select(level, exiting_root, side) %>%
+    group_by(exiting_root) %>%
+    add_tally(name = "number_per_level") %>%
+        mutate(exiting_roots_statement = as.character(if_else(number_per_level == 1, glue("the {side} {exiting_root} exiting nerve root"), glue("the left and right {exiting_root} exiting nerve roots")))) %>%
+    ungroup() %>%
+    select(-side) %>%
+    distinct() %>%
+    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+    arrange(vertebral_number)
+  
+  
+
+
+```
+
+```{r}
+
+left_test_revision_df <- tibble(level = c("T12", "L1", "L2", "L3"), side = c("left", "left", "left", "left"), remove_retain = c("remove", "retain", "retain", "retain"), prior_rod_connected = c("no", "no", "yes", "yes"))
+
+revision_implants_df <- left_test_revision_df %>%
+  mutate(side = "right") %>%
+  union_all(left_test_revision_df)
+
+
+
+left_revision_implants_statements_df <- test_revision_df %>%  
+    filter(side == "left")
+
+right_revision_implants_statements_df <- test_revision_df %>%  
+    filter(side == "right")
+
+if(nrow(left_revision_implants_statements_df)>0){
+  left_revision_implants_statements_df
+  
+}
+
+left_revision_implants_statements_df
+
+
+test <- tibble(side = character())
+
+test
+
+
+
+revision_implants_df
+
+
+revision_implants_paragraph_function(revision_implants_details_df = revision_implants_df)
+
+
+if(any(revision_implants_df$prior_rod_connected == "yes")){
+  "Rod connectors were used to connect the new rod to the previously placed construct."
+}
+
+```
+
+```{r}
+revision_implants_paragraph_function <- function(revision_implants_details_df){
+  revision_implants_statements_list <- list()
+
+left_revision_implants_statements_df <- revision_implants_df %>%  
+  filter(side == "left")
+
+  if(nrow(left_revision_implants_statements_df) > 0){
+
+    left_implants_prior_rod_connected_yes_vector <- (left_revision_implants_statements_df %>% filter(prior_rod_connected == "yes"))$level
+    left_implants_prior_rod_connected_no_vector <- (left_revision_implants_statements_df %>% filter(prior_rod_connected == "no"))$level
+    
+    left_implants_prior_implants_retained_vector <- (left_revision_implants_statements_df %>% filter(remove_retain == "retain"))$level
+    left_implants_prior_implants_removed_vector <- (left_revision_implants_statements_df %>% filter(remove_retain == "remove"))$level
+
+    
+    if(length(left_implants_prior_implants_removed_vector) > 0){
+      revision_implants_statements_list$left_remove_implants_start <- paste("I then proceeded with removal of prior spinal instrumentation on the left.")
+      
+      
+      if(length(left_implants_prior_rod_connected_no_vector) > 0 & length(left_implants_prior_rod_connected_yes_vector) > 0){
+        if(jh_get_vertebral_number_function(level_to_get_number = tail(left_implants_prior_rod_connected_no_vector, 1)) < jh_get_vertebral_number_function(level_to_get_number = head(left_implants_prior_rod_connected_yes_vector, 1))){  ## this means that new rod is connected proximal to the old construct
+          
+          revision_implants_statements_list$left_cut_rod <- glue("Once the instrumentation on the left was adequately exposed, the rod was cut between {tail(left_implants_prior_rod_connected_no_vector, 1)} and {head(left_implants_prior_rod_connected_yes_vector, 1)}.")
+          
+          revision_implants_statements_list$left_remove_implants <- glue("The {glue_collapse(left_implants_prior_implants_removed_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_removed_vector)>1, 'implants were', 'implant was')} then removed.") 
+                    
+          revision_implants_statements_list$left_retain_implants <- glue("The {glue_collapse(left_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_retained_vector)>1, 'implants were', 'implant was')} left in place on the left.")
+          
+        }else{ ### the new rod is connected distal to the old construct
+          revision_implants_statements_list$left_cut_rod <- glue("Once the instrumentation on the left was adequately exposed, the rod was cut between {tail(left_implants_prior_rod_connected_yes_vector, 1)} and {head(left_implants_prior_rod_connected_no_vector, 1)}.")
+          
+          revision_implants_statements_list$left_remove_implants <- glue("The {glue_collapse(left_implants_prior_implants_removed_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_removed_vector)>1, 'implants were', 'implant was')} then removed.") 
+          revision_implants_statements_list$left_retain_implants <- glue("The {glue_collapse(left_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_retained_vector)>1, 'implants were', 'implant was')} left in place on the left.")
+        }
+      }
+      
+      if(length(left_implants_prior_rod_connected_no_vector) > 0 & length(left_implants_prior_rod_connected_yes_vector) == 0){
+        revision_implants_statements_list$left_remove_rod <- glue("Once the instrumentation on the left was adequately exposed, the set screws were removed and the prior rod was completely removed.")
+        
+        if(length(left_implants_prior_implants_removed_vector) > 0){
+          revision_implants_statements_list$left_remove_implants <- glue("The {glue_collapse(left_implants_prior_implants_removed_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_removed_vector)>1, 'implants were', 'implant was')} then removed.") 
+                    
+        }
+        
+        if(length(left_implants_prior_implants_retained_vector) > 0){
+          revision_implants_statements_list$left_retain_implants <- glue("The {glue_collapse(left_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_retained_vector)>1, 'implants were', 'implant was')} left in place on the left.")
+        }
+      }
+      
+      if(length(left_implants_prior_rod_connected_no_vector) == 0 & length(left_implants_prior_rod_connected_yes_vector) > 0){
+        if(length(left_implants_prior_implants_retained_vector) > 0){
+          revision_implants_statements_list$left_retain_all_implants <- glue("The implants on the left at {glue_collapse(left_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} were left in place, connected to the prior rod.")
+        }
+      }
+    }else{
+      revision_implants_statements_list$left_retain_all_implants <- glue("The implants on the left at {glue_collapse(left_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} were left in place, connected to the prior rod.")
+    }
+
+  }
+
+right_revision_implants_statements_df <- revision_implants_df %>%  
+  filter(side == "right")
+
+  if(nrow(right_revision_implants_statements_df) > 0){
+
+    right_implants_prior_rod_connected_yes_vector <- (right_revision_implants_statements_df %>% filter(prior_rod_connected == "yes"))$level
+    right_implants_prior_rod_connected_no_vector <- (right_revision_implants_statements_df %>% filter(prior_rod_connected == "no"))$level
+    
+    right_implants_prior_implants_retained_vector <- (right_revision_implants_statements_df %>% filter(remove_retain == "retain"))$level
+    right_implants_prior_implants_removed_vector <- (right_revision_implants_statements_df %>% filter(remove_retain == "remove"))$level
+
+    
+    if(length(right_implants_prior_implants_removed_vector) > 0){
+      revision_implants_statements_list$right_remove_implants_start <- paste("I then proceeded with removal of prior spinal instrumentation on the right.")
+      
+      
+      if(length(right_implants_prior_rod_connected_no_vector) > 0 & length(right_implants_prior_rod_connected_yes_vector) > 0){
+        if(jh_get_vertebral_number_function(level_to_get_number = tail(right_implants_prior_rod_connected_no_vector, 1)) < jh_get_vertebral_number_function(level_to_get_number = head(right_implants_prior_rod_connected_yes_vector, 1))){  ## this means that new rod is connected proximal to the old construct
+          
+          revision_implants_statements_list$right_cut_rod <- glue("Once the instrumentation on the right was adequately exposed, the rod was cut between {tail(right_implants_prior_rod_connected_no_vector, 1)} and {head(right_implants_prior_rod_connected_yes_vector, 1)}.")
+          
+          revision_implants_statements_list$right_remove_implants <- glue("The {glue_collapse(right_implants_prior_implants_removed_vector, sep = ', ', last = ' and ')} {if_else(length(right_implants_prior_implants_removed_vector)>1, 'implants were', 'implant was')} then removed.") 
+                    
+          revision_implants_statements_list$right_retain_implants <- glue("The {glue_collapse(right_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} {if_else(length(right_implants_prior_implants_retained_vector)>1, 'implants were', 'implant was')} left in place on the right.")
+          
+        }else{ ### the new rod is connected distal to the old construct
+          revision_implants_statements_list$right_cut_rod <- glue("Once the instrumentation on the right was adequately exposed, the rod was cut between {tail(right_implants_prior_rod_connected_yes_vector, 1)} and {head(right_implants_prior_rod_connected_no_vector, 1)}.")
+          
+          revision_implants_statements_list$right_remove_implants <- glue("The {glue_collapse(right_implants_prior_implants_removed_vector, sep = ', ', last = ' and ')} {if_else(length(right_implants_prior_implants_removed_vector)>1, 'implants were', 'implant was')} then removed.") 
+          revision_implants_statements_list$right_retain_implants <- glue("The {glue_collapse(right_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} {if_else(length(right_implants_prior_implants_retained_vector)>1, 'implants were', 'implant was')} left in place on the right.")
+        }
+      }
+      
+      if(length(right_implants_prior_rod_connected_no_vector) > 0 & length(right_implants_prior_rod_connected_yes_vector) == 0){
+        revision_implants_statements_list$right_remove_rod <- glue("Once the instrumentation on the right was adequately exposed, the set screws were removed and the prior rod was completely removed.")
+        
+        if(length(right_implants_prior_implants_removed_vector) > 0){
+          revision_implants_statements_list$right_remove_implants <- glue("The {glue_collapse(right_implants_prior_implants_removed_vector, sep = ', ', last = ' and ')} {if_else(length(right_implants_prior_implants_removed_vector)>1, 'implants were', 'implant was')} then removed.") 
+                    
+        }
+        
+        if(length(right_implants_prior_implants_retained_vector) > 0){
+          revision_implants_statements_list$right_retain_implants <- glue("The {glue_collapse(right_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} {if_else(length(right_implants_prior_implants_retained_vector)>1, 'implants were', 'implant was')} left in place on the right.")
+        }
+      }
+      
+      if(length(right_implants_prior_rod_connected_no_vector) == 0 & length(right_implants_prior_rod_connected_yes_vector) > 0){
+        if(length(right_implants_prior_implants_retained_vector) > 0){
+          revision_implants_statements_list$right_retain_all_implants <- glue("The implants on the right at {glue_collapse(right_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} were left in place, connected to the prior rod.")
+        }
+      }
+    }else{
+      revision_implants_statements_list$right_retain_all_implants <- glue("The implants on the right at {glue_collapse(right_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} were left in place, connected to the prior rod.")
+    }
+  }
+
+if(length(revision_implants_statements_list)>0){
+  revision_paragraph <- paste(glue_collapse(revision_implants_statements_list, sep = " "))
+}else{
+  revision_paragraph <- ""
+}
+
+return(revision_paragraph)
+}
+
+
+```
+
+
+
+
+
+```{r}
+revision_implants_statements_list <- list()
+
+left_revision_implants_statements_df <- revision_implants_df %>%  
+  filter(side == "left")
+
+  if(nrow(left_revision_implants_statements_df) > 0){
+
+    left_implants_prior_rod_connected_yes_vector <- (left_revision_implants_statements_df %>% filter(prior_rod_connected == "yes"))$level
+    left_implants_prior_rod_connected_no_vector <- (left_revision_implants_statements_df %>% filter(prior_rod_connected == "no"))$level
+    
+    left_implants_prior_implants_retained_vector <- (left_revision_implants_statements_df %>% filter(remove_retain == "retain"))$level
+    left_implants_prior_implants_removed_vector <- (left_revision_implants_statements_df %>% filter(remove_retain == "remove"))$level
+
+    
+    if(length(left_implants_prior_implants_removed_vector) > 0){
+      revision_implants_statements_list$left_remove_implants_start <- paste("I then proceeded with removal of prior spinal instrumentation on the left.")
+      
+      
+      if(length(left_implants_prior_rod_connected_no_vector) > 0 & length(left_implants_prior_rod_connected_yes_vector) > 0){
+        if(jh_get_vertebral_number_function(level_to_get_number = tail(left_implants_prior_rod_connected_no_vector, 1)) < jh_get_vertebral_number_function(level_to_get_number = head(left_implants_prior_rod_connected_yes_vector, 1))){  ## this means that new rod is connected proximal to the old construct
+          
+          revision_implants_statements_list$left_cut_rod <- glue("Once the instrumentation on the left was adequately exposed, the rod was cut between {tail(left_implants_prior_rod_connected_no_vector, 1)} and {head(left_implants_prior_rod_connected_yes_vector, 1)}.")
+          
+          revision_implants_statements_list$left_remove_implants <- glue("The {glue_collapse(left_implants_prior_implants_removed_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_removed_vector)>1, 'implants were', 'implant was')} then removed.") 
+                    
+          revision_implants_statements_list$left_retain_implants <- glue("The {glue_collapse(left_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_retained_vector)>1, 'implants were', 'implant was')} left in place on the left.")
+          
+        }else{ ### the new rod is connected distal to the old construct
+          revision_implants_statements_list$left_cut_rod <- glue("Once the instrumentation on the left was adequately exposed, the rod was cut between {tail(left_implants_prior_rod_connected_yes_vector, 1)} and {head(left_implants_prior_rod_connected_no_vector, 1)}.")
+          
+          revision_implants_statements_list$left_remove_implants <- glue("The {glue_collapse(left_implants_prior_implants_removed_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_removed_vector)>1, 'implants were', 'implant was')} then removed.") 
+          revision_implants_statements_list$left_retain_implants <- glue("The {glue_collapse(left_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_retained_vector)>1, 'implants were', 'implant was')} left in place on the left.")
+        }
+      }
+      
+      if(length(left_implants_prior_rod_connected_no_vector) > 0 & length(left_implants_prior_rod_connected_yes_vector) == 0){
+        revision_implants_statements_list$left_remove_rod <- glue("Once the instrumentation on the left was adequately exposed, the set screws were removed and the prior rod was completely removed.")
+        
+        if(length(left_implants_prior_implants_removed_vector) > 0){
+          revision_implants_statements_list$left_remove_implants <- glue("The {glue_collapse(left_implants_prior_implants_removed_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_removed_vector)>1, 'implants were', 'implant was')} then removed.") 
+                    
+        }
+        
+        if(length(left_implants_prior_implants_retained_vector) > 0){
+          revision_implants_statements_list$left_retain_implants <- glue("The {glue_collapse(left_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} {if_else(length(left_implants_prior_implants_retained_vector)>1, 'implants were', 'implant was')} left in place on the left.")
+        }
+      }
+      
+      if(length(left_implants_prior_rod_connected_no_vector) == 0 & length(left_implants_prior_rod_connected_yes_vector) > 0){
+        if(length(left_implants_prior_implants_retained_vector) > 0){
+          revision_implants_statements_list$left_retain_all_implants <- glue("The implants on the left at {glue_collapse(left_implants_prior_implants_retained_vector, sep = ', ', last = ' and ')} were left in place, connected to the prior rod.")
+        }
+      }
+    }
+  }
+
+
+glue_collapse(revision_implants_statements_list, sep = " ")
+```
+
+
+```{r}
+
+max(as_vector(map(.x = right_implants_prior_rod_connected_yes_vector, .f = ~ jh_get_vertebral_number_function(level_to_get_number = .x))))
+
+tail(left_implants_prior_rod_connected_no_vector, 1)
+head(left_implants_prior_rod_connected_yes_vector, 1)
+
+jh_get_vertebral_number_function(level_to_get_number = tail(left_implants_prior_rod_connected_no_vector, 1))
+
+jh_get_vertebral_number_function(level_to_get_number = head(left_implants_prior_rod_connected_yes_vector, 1))
+
+
+```
+
+
+
+
+
+
+
+```{r}
+test_object <- "pedicle_screw"
+screw_statements_df
+
+test_statement <- case_when(
+  test_object == "adf" ~ "wrong",
+  test_object == "test_screw" ~ "this worked",
+  test_object == "pedicle_screw" ~ as.character(glue("For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a high speed burr. A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}")), 
+)
+
+test_statement
+
+```
+
+
+
+
+
+```{r}
+
+    df_with_statement <- df_for_paragraphs$nested_data[[1]] %>%
+      group_by(object) %>%
+      nest() %>% 
+      mutate(object_levels_side_df = data) %>%  ### this creates a dataframe with only two columns: 'object' and 'object_levels_side_df'. #The nested dataframe has columns: level, vertebral_number, side, implant_statement, screw_size_type
+      select(-data) %>%
+      mutate(tech_statement = map2(.x = object, .y = object_levels_side_df, .f = ~ op_note_technique_combine_statement(object = .x, levels_side_df = .y))) %>%
+      select(object, tech_statement) %>%
+      unnest(tech_statement) %>%
+      distinct()
+    
+
+df_with_statement
+
+
+    df_levels <- df_with_levels_object_nested %>%
+      select(level, vertebral_number) %>%
+      distinct() %>%
+      arrange(vertebral_number)
+    
+    if(procedure_paragraph_intro == "pelvic instrumentation" | procedure_paragraph_intro == "posterior spinal instrumentation"){
+      if(procedure_paragraph_intro == "pelvic instrumentation"){
+        statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
+      }
+      if(procedure_paragraph_intro == "posterior spinal instrumentation"){
+        statement <- glue("I then proceeded with the posterior spinal instrumentation. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+      }
+      
+    }else{
+      statement <- glue("I then proceeded with the {procedure_paragraph_intro}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    }
+    
+    
+    
+```
+
+
+
+
+```{r}
+all_patient_ids_df
+
+        patient_details_dftest <- tibble(last_name = "Bryan",
+               first_name = "Krista",
+               date_of_birth = paste(paste(date("1966-12-04"))),
+               # date_of_birth = if_else(paste(input$date_of_birth) == "1900-01-01", "--", paste(input$date_of_birth)),
+               sex = "Female")
+
+
+            
+                record_number <- joined_df$record_id[[1]]
+                
+                max_repeat_instances_df <- exportRecords(rcon = rcon, records = record_id) %>%
+                    as_tibble() %>%
+                    select(redcap_repeat_instrument, redcap_repeat_instance) %>%
+                    remove_missing() %>%
+                    group_by(redcap_repeat_instrument) %>%
+                    filter(redcap_repeat_instance == max(redcap_repeat_instance)) %>%
+                    ungroup()
+                
+                repeat_list <- as.list(deframe(max_repeat_instances_df))
+                
+
+                record_number <- joined_df$record_id[[1]]
+                
+                max_repeat_instances_df <- exportRecords(rcon = rcon, records = record_number) %>%
+                    as_tibble() %>%
+                    select(redcap_repeat_instrument, redcap_repeat_instance) %>%
+                    remove_missing() %>%
+                    group_by(redcap_repeat_instrument) %>%
+                    filter(redcap_repeat_instance == max(redcap_repeat_instance)) %>%
+                    ungroup()
+          
+                max_repeat_instances_df 
+                
+                
+                repeat_list <- as.list(deframe(max_repeat_instances_df))
+                
+```
+
+
+```{r}
+one <- head(all_implants_constructed_df, 2)
+
+min(one$object_constructed)
+
+st_nearest_points()
+
+matrix <- st_coordinates(one$object_constructed[[1]])
+
+max(as_tibble(st_coordinates(one$object_constructed[[1]]))$Y)
+
+
+valuetest <- list()
+
+valuetest$name <- 25
+
+valuetest$date <- 25
+
+Reduce("+",valuetest)
+
+str_length(string = "dsfsd")
+
+if_else(str_length(as.character("ddd")) > 0, 25, 0)
+
+
+level_test_df <- all_implants_constructed_df %>%
+  filter(body_interspace == "interspace") %>%
+  select(level, vertebral_number) %>%
+  distinct() %>%
+  arrange(vertebral_number)
+
+level_test_df
+
+glue_collapse(x = level_test_df$level, sep = "' ~ 'xxx', \n")
+
+map(.x = level_test_df$level, .f = ~ if_else(str_starts(string = .x, pattern = "C"), jh_get_cranial_caudal_interspace_body_list_function()))
+
+jh_get_exiting_nerve_root_function <- function(interspace){
+  exiting_root <- case_when(
+    interspace == 'O-C1' ~ "C1",
+    interspace ==  'C1-C2' ~ 'C2', 
+    interspace == 'C2-C3' ~ 'C3', 
+    interspace == 'C3-C4' ~ 'C4', 
+    interspace == 'C4-C5' ~ 'C5', 
+    interspace == 'C5-C6' ~ 'C6', 
+    interspace == 'C6-C7' ~ 'C7', 
+    interspace == 'C7-T1' ~ 'C8', 
+    interspace == 'T1-T2' ~ 'T1', 
+    interspace == 'T2-T3' ~ 'T2', 
+    interspace == 'T3-T4' ~ 'T3', 
+    interspace == 'T4-T5' ~ 'T4', 
+    interspace == 'T5-T6' ~ 'T5', 
+    interspace == 'T6-T7' ~ 'T6', 
+    interspace == 'T7-T8' ~ 'T7', 
+    interspace == 'T8-T9' ~ 'T8', 
+    interspace == 'T9-T10' ~ 'T9', 
+    interspace == 'T10-T11' ~ 'T10', 
+    interspace == 'T11-T12' ~ 'T11', 
+    interspace == 'T12-L1' ~ 'T12', 
+    interspace == 'L1-L2' ~ 'L1', 
+    interspace == 'L2-L3' ~ 'L2', 
+    interspace == 'L3-L4' ~ 'L3', 
+    interspace == 'L4-L5' ~ 'L4', 
+    interspace == 'L5-S1' ~ 'L5'
+  )
+  
+  return(exiting_root)
+}
+
+
+jh_get_exiting_nerve_root_function(interspace = "L4-L5")
+
+
+levels_numbered_df %>%
+  # filter(between(vertebral_number, 4, 20)) %>%
+  # filter(str_detect(level, "-")) %>%
+  mutate(exiting_root = jh_get_exiting_nerve_root_function(interspace = level)) %>%
+  filter(!is.na(exiting_root))
+
+
+facetectomy_test_df <- all_implants_constructed_df %>%
+  filter(object == "complete_facetectomy") %>%
+  filter(between(vertebral_number, 4, 20))
+
+screw_test <- all_implants_constructed_df %>%
+  filter(object == "pedicle_screw") %>%
+  filter(between(vertebral_number, 4, 20))
+
+test_df <- facetectomy_test_df %>%
+  union_all(screw_test) %>%
+  mutate(implant_statement = "") %>%
+  mutate(screw_size_type = "")
+
+
+"implant_statement" %in% names(fectectomy_test_df)
+
+op_note_procedure_paragraphs_function(objects_added_df = test_df, revision_decompression_vector = vector())
+
+
+    df_for_paragraphs <- test_df %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
+      mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+      group_by(procedure_category, procedures_combine, object) %>%
+      nest() %>%
+      ungroup() %>%
+      group_by(procedure_category, procedures_combine) %>%
+      nest() %>%
+      mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
+      select(-data)  
+    
+    df_for_paragraphs$nested_data[[1]]
+    
+  procedures_op_full_dftest <- df_for_paragraphs %>%
+    # replace_na(list(procedures_combine = "distinct", procedure_category = "insertion of intervertebral biomechanical implant")) %>%
+    mutate(procedure_statement = pmap(list(..1 = procedure_category,
+                                           ..2 = nested_data, 
+                                           ..3 = procedures_combine),
+                                      .f = ~create_full_paragraph_statement_function(procedure_paragraph_intro = ..1,
+                                                                                     df_with_levels_object_nested = ..2, 
+                                                                                     paragraphs_combined_or_distinct = ..3))) %>%
+    select(procedure_category, procedures_combine, procedure_statement) %>%
+    unnest(procedure_statement)
+  
+df_for_paragraphs
+  
+create_full_paragraph_statement_function(procedure_paragraph_intro = "decompression with a complete facetectomy", df_with_levels_object_nested = df_for_paragraphs$nested_data[[1]], paragraphs_combined_or_distinct = "combine")
+
+
+
+    df_with_statement <- df_for_paragraphs$nested_data[[1]] %>%
+      group_by(object) %>%
+      nest() %>% 
+      mutate(object_levels_side_df = data) 
+    
+    
+    ### this creates a dataframe with only two columns: 'object' and 'object_levels_side_df'. #The nested dataframe has columns: level, vertebral_number, side, implant_statement, screw_size_type
+      
+    df_with_statement$object_levels_side_df
+    select(-data) %>%
+      mutate(tech_statement = map2(.x = object, .y = object_levels_side_df, .f = ~ op_note_technique_combine_statement(object = .x, levels_side_df = .y))) %>%
+      select(object, tech_statement) %>%
+      unnest(tech_statement) %>%
+      distinct()
+    
+    df_levels <- df_with_levels_object_nested %>%
+      select(level, vertebral_number) %>%
+      distinct() %>%
+      arrange(vertebral_number)
+
+    
+exiting_roots_df <- df_with_statement$object_levels_side_df %>%
+    mutate(exiting_root = jh_get_exiting_nerve_root_function(interspace = level)) %>%
+    filter(!is.na(exiting_root))
+    group_by(exiting_root) %>%
+    add_tally(name = "number_per_level") %>%
+    mutate(exiting_roots_statement = as.character(if_else(number_per_level == 1, glue("the {side} {level} exiting nerve root"), glue("the left and right {level} exiting nerve roots")))) %>%
+    ungroup() %>%
+    select(-side) %>%
+    distinct() %>%
+    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+    arrange(vertebral_number)    
+    
+```
+
+```{r}
+
+shinyApp(
+  ui = basicPage(
+    actionButton("show", "Show modal dialog"),
+    verbatimTextOutput("dataInfo")
+  ),
+
+  server = function(input, output) {
+    # reactiveValues object for storing current data set.
+    vals <- reactiveValues(data = NULL)
+
+    # Return the UI for a modal dialog with data selection input. If 'failed' is
+    # TRUE, then display a message that the previous value was invalid.
+    modal_box <- function(){
+      modalDialog(
+        tabBox(title = "Data",
+               tabPanel(title = "Entry 1",
+                        textInput("dataset", "Choose data set",
+                                  placeholder = 'Try "mtcars" or "abc"'
+                        )
+               ),
+               tabPanel(title = "tab 2", 
+                        actionBttn(inputId = "action 2"))
+        )
+      )
+    }
+    
+        # Show modal when button is clicked.
+    
+    test_start <- reactiveValues()
+    test_start$a <- 5
+    
+    observeEvent(test_start, {
+      showModal(modal_box())
+    })
+
+  }
+)
+    
+    
+
+
+```
+
+
+
+```{r}
+exportNextRecordName(rcon = rcon)
+
+if_else("yes" %in% posterior_test_df$interbody_fusion, "yes", "no")
+
+length(unique((all_implants_constructed_df %>%
+             filter(interbody_fusion == "yes"))$level) )
+
+interspace_fusion_df <- all_implants_constructed_df %>%
+             filter(interbody_fusion == "yes") %>%
+  select(level, body_interspace) %>%
+  distinct()
+
+if(any(interspace_fusion_df$body_interspace == "body")){
+  interspace_fusion_df %>%
+    filter(body_interspace == "body") %>%
+    mutate(cranial_interspace = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_interspace)) %>%
+    mutate(caudal_interspace = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_interspace)) %>%
+    unnest() %>%
+    select(-level) %>%
+    pivot_longer(names_to = "interspace", values_to = "level", cols = c(cranial_interspace, caudal_interspace))
+}
+
+mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_interspace))
+
+posterior_test_df
+
+crosslink_df <- posterior_test_df %>%
+  filter(object == "crosslink")
+
+crosslink_df
+```
+
+
+
+```{r}
+vert <- all_implants_constructed_df %>%
+  filter(object == "vertebral_cement_augmentation") %>%
+  filter(between(vertebral_number, 20, 24))
+
+vert
+
+vert_list <- jh_make_posterior_geoms_function(all_posterior_objects_df = vert)
+vert_list <-  geom_sf_pattern(data = st_multipolygon((vert %>% filter(str_detect(string = object, pattern = "vertebroplasty")))$object_constructed),
+                                                                   pattern = "plasma",
+                                                                   pattern_alpha = 0.5,
+                                                                   alpha = 0.3,
+                                                                   color = "grey96")
+
+```
+
+
+
+```{r}
+y_top <- 0.5
+y_bottom <- 0.2
+
+x_left <- 0.4
+
+cropped_lab <- labels_df %>%
+  filter(between(y, y_bottom, y_top)) %>%
+  mutate(x = x_left) %>%
+  select(-vertebral_number)
+
+cropped_lab <- cropped_lab %>%
+  union_all(tibble(level = " ", x = min(cropped_lab$x) - 0.01, y = min(cropped_lab$y) - 0.05))
+  add_row(level = " ", x = min(x_left) - 0.01, y = min(y) - 0.05)
+
+cropped_lab
+
+ggdraw() +
+  draw_image(
+    spine_png,
+    scale = 1,
+    y = 0,
+    valign = 0,
+    x = 0,
+    height = 1, 
+    clip = "on"
+    # width = 1
+  ) +
+  # ylim(0.2, 0.5) +
+  # xlim(0.3, 0.7) +
+  vert_list +
+  draw_text(
+    text = cropped_lab$level,
+    x = cropped_lab$x + 0.02,
+    y = cropped_lab$y,
+    size = 16,
+    fontface = "bold"
+  ) 
+
+
+  geom_sf(data = st_multipolygon(posterior_test_df$object_constructed)) +
+  geom_sf(data = st_multipolygon(crosslink_df$object_constructed), fill = "gold") 
+
+
+levels_numbered_df %>%
+  mutate(body_interspace = jh_check_body_or_interspace_function(level = level)) %>%
+  filter(body_interspace == "body")
+
+labels_anterior_df
+
+
+labels_anterior_df %>%
+                  filter(between(y, 0.2, 0.6)) %>%
+                mutate(x_left = 0.35 + 0.05) %>%
+                mutate(x_right = 0.45 - 0.05)
+                select(level, x_left, x_right, y)
+                
+                
+                
+main_dose <- 10
+
+vec <- c("amicar", "txa", "other")
+
+vec_string <- as.character(glue_collapse(vec, sep = "; "))
+
+vec2 <- "tranexamic acid (txa); desmopressin (ddavp)"
+str_replace_all(string = vec2, pattern = "tranexamix \\(txa\\)", replacement = glue("txa with starting dose of {main_dose}"))
+
+
+s1 <- all_implants_constructed_df %>%
+  filter(object == "structural_allograft") %>%
+  filter(level == "S1")
+
+ggdraw() +
+  draw_image(
+    spine_png,
+    scale = 1,
+    y = 0,
+    valign = 0,
+    x = 0,
+    height = 1, 
+    clip = "on"
+    # width = 1
+  ) +
+  geom_sf(data = st_multipolygon(s1$object_constructed))
+
+
+region_list <- list('Neck & Uppers:' = c("Neck Pain", "Left Arm Pain", "Right Arm Pain", "Left Arm Weakness", "Right Arm Weakness"),
+             'Thoracic:' = c("Mid Back Pain", "Kyphosis"),
+             "Lower & Legs:" = c("Low Back Pain", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness"), 
+             "Functional:" = c("Myelopathy: Nurick 1 (Root Symptomts)",
+                               "Myelopathy: Nurick 2 (Normal gait but symptoms of cord compression)",
+                               "Myelopathy: Nurick 3 (Gait Abnormalities)",
+                               "Myelopathy: Nurick 4 (Significant Gait Abnormalities, preventing employment)",
+                               "Myelopathy: Nurick 5 (Depended on Assistive Device for Ambulating)",
+                               "Myelopathy: Nurick 6 (Wheelchair bound)"),
+             "Deformity" = c("Coronal deformity", "Sagittal Imbalance", "Chin on chest deformity", "Flatback Syndrome"),
+             'Other' = c("Loss of bladder control", "Bowel Incontinence", "Other Symptoms")
+        )
+
+region_list$`Neck & Uppers:`
+
+region_list$'Back & back:' <- c("Left Leg", "Right Leg")
+
+region_list
+```
+```{r}
+            if(length(input$left_revision_implants_removed)>0){
+                left_revision_implants_removed_df <- tibble(level = input$left_revision_implants_removed) %>%
+                    left_join(revision_implants_df %>% filter(x < 0.5))
+                
+                left_revision_implants_constructed_df <- tibble(level = input$left_revision_implants) %>%
+                    anti_join(left_revision_implants_removed_df %>% select(level)) %>%
+                    left_join(revision_implants_df %>% filter(x < 0.5))
+                
+                if(nrow(left_revision_implants_constructed_df)>0){
+                    left_revision_implants_matrix_removed_sf <- st_multipolygon(left_revision_implants_removed_df$object_constructed)
+                    
+                    geoms_list_revision_posterior$left_revision_implants_removed_sf_geom <- geom_sf(data = st_geometrycollection(x = list(left_revision_implants_matrix_removed_sf)), color = "black", fill = "grey98")  
+                    
+                }
+            }else{
+                left_revision_implants_constructed_df <- tibble(level = input$left_revision_implants) %>%
+                    left_join(revision_implants_df %>% filter(x < 0.5))
+            }
+            
+            if(nrow(left_revision_implants_constructed_df)>0){
+                left_revision_rod_matrix <- left_revision_implants_constructed_df %>%
+                    select(x, y) %>%
+                    arrange(rev(y)) %>%
+                    distinct() %>%
+                    as.matrix()
+                left_revision_implants_sf <- st_multipolygon(left_revision_implants_constructed_df$object_constructed)
+                left_revision_rod_sf <- st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND")
+                
+                geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_geometrycollection(x = list(left_revision_implants_sf, left_revision_rod_sf)), fill = "black")    
+            }
+        
+
+```
+
+```{r}
+revision_implants <- c("L3", "L4", "L5")
+
+revision_implants_removed <- c("L4", "L5", "L6")
+revision_implants_removed <- vector()
+
+map(.x = revision_implants_removed, )
+
+"x" %in% c("a", "b", "c") == FALSE
+
+
+keep(.x = revision_implants, .p = ~ .x %in% revision_implants_removed == FALSE)
+
+discard(.x = revision_implants_removed, .p = ~ .x %in% revision_implants == FALSE)
+
+revision_implants_df
+
+
+unique(c(revision_implants, revision_implants_removed))
+
+append(revision_implants, c("L2"))
+
+tmatrix <- tibble(revision_implants) %>%
+  mutate(x = 1) %>%
+  as.matrix()
+
+nrow(tmatrix)
+
+c(vector(), vector())
+
+revision_implants_removed <- list("L4", "L5", "L6")
+
+any(revision_implants_removed == "L4")
+
+tibble(procedure_performed_statement = str_to_lower(revision_implants_removed)) 
+
+test <- discard(c("L4", "L5", "L6"), .p = ~ (.x == "L4"))
+
+test$ddd <- "caad"
+
+as_vector(test)
+
+```
+
+
+
+
+```{r}
+
+jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
+    
+  left_input_identifier <- as.character(glue("add_left_{rod_type}"))
+  right_input_identifier <- as.character(glue("add_right_{rod_type}"))
+  rod_material_vector <- c("Titanium", "Cobalt Chrome", "Stainless Steel")
+  rod_size_vector <- c("None", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/quarter in")
+  
+  left_table <- tags$table(
+    tags$tr(
+      tags$td(width = "35%",
+              awesomeCheckbox(
+                inputId = left_input_identifier,
+                label = input_label,
+                value = FALSE,
+                status = "success")
+      ),
+      tags$td(width = "35%",
+              conditionalPanel(condition = glue("input.{left_input_identifier} == true"),
+                               prettyRadioButtons(inputId = as.character(glue("left_{rod_type}_material")), 
+                                                  label = NULL, 
+                                                  choices = rod_material_vector, 
+                                                  selected = "Titanium", 
+                                                  outline = TRUE, 
+                                                  shape = "round", 
+                                                  inline = FALSE,
+                                                  status = "primary",
+                                                  width = "90%"
+                               )
+              )
+      ),
+      tags$td(width = "30%",
+              conditionalPanel(condition = glue("input.{left_input_identifier} == true"),
+                               pickerInput(inputId = as.character(glue("left_{rod_type}_size")), 
+                                           label = NULL, 
+                                           choices = rod_size_vector, 
+                                           selected = "5.5mm", 
+                                           multiple = FALSE, width = "90%"
+                               )
+              )
+      )
+    )
+  )
+  
+  right_table <- tags$table(
+    tags$tr(
+            tags$td(width = "35%",
+              awesomeCheckbox(
+                inputId = right_input_identifier,
+                label = input_label,
+                value = FALSE,
+                status = "success")
+      ),
+      tags$td(width = "35%",
+              conditionalPanel(condition = glue("input.{right_input_identifier} == true"),
+                               prettyRadioButtons(inputId = as.character(glue("right_{rod_type}_material")), 
+                                                  label = NULL, 
+                                                  choices = rod_material_vector, 
+                                                  selected = "Titanium", 
+                                                  outline = TRUE, 
+                                                  shape = "round", 
+                                                  inline = FALSE, 
+                                                  status = "primary", 
+                                                  width = "90%")
+              )
+      ),
+      tags$td(width = "30%",
+              conditionalPanel(condition = glue("input.{right_input_identifier} == true"),
+                               pickerInput(inputId = as.character(glue("right_{rod_type}_size")), 
+                                           label = NULL, 
+                                           choices = rod_size_vector, 
+                                           selected = "5.5mm", 
+                                           multiple = FALSE, width = "90%"
+                                           )
+              )
+      )
+    )
+  )
+  
+  full_ui <- column(width = 12, 
+                    fixedRow(
+                      column(6, 
+                             conditionalPanel(condition = "input.left_supplemental_rods_eligible == true", 
+                                              left_table
+                                              )
+                      ),
+                      column(6, 
+                             conditionalPanel(condition = "input.right_supplemental_rods_eligible == true",
+                                              right_table
+                             )
+                      )
+                    ),
+                    if(rod_type == "intercalary_rod"){
+                      fixedRow(
+                        column(4, 
+                               conditionalPanel(condition = glue("input.{left_input_identifier} == true"), 
+                                                sliderTextInput(inputId = as.character(glue("left_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                               )
+                        ),
+                        column(2, 
+                               conditionalPanel(condition = glue("input.{left_input_identifier} == true"), 
+                                                pickerInput(inputId = "left_intercalary_junction",
+                                                            label = "Junction:",
+                                                            choices = c("a", "b"),
+                                                            width = "fit",
+                                                            inline = TRUE)
+                               )
+                        ),
+                        column(4, 
+                               conditionalPanel(condition = glue("input.{right_input_identifier} == true"), 
+                                                sliderTextInput(inputId = as.character(glue("right_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                               )
+                        ),
+                        conditionalPanel(condition = glue("input.{right_input_identifier} == true"), 
+                                         pickerInput(inputId = "right_intercalary_junction",
+                                                     label = "Junction:",
+                                                     choices = c("a", "b"),
+                                                     width = "fit",
+                                                     inline = TRUE)
+                        )
+                      ) 
+                    }else{
+                      fixedRow(
+                        column(6, 
+                               conditionalPanel(condition = glue("input.{left_input_identifier} == true"), 
+                                                sliderTextInput(inputId = as.character(glue("left_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                               )
+                        ),
+                        column(6, 
+                               conditionalPanel(condition = glue("input.{right_input_identifier} == true"), 
+                                                sliderTextInput(inputId = as.character(glue("right_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                               )
+                        )
+                      ) 
+                    }
+  ) 
+    
+return(full_ui)
+}
+
+
+jh_make_supplemental_rod_ui_function(rod_type = "accessory_rod", input_label = "Accessory Rod")
+
+```
+
+
+
+```{r}
+interspace_fusion_df <- posterior_test_df %>%
+             filter(interbody_fusion == "yes") %>%
+  select(level, body_interspace) %>%
+  distinct()
+test_list <- list()
+
+(interspace_fusion_df %>% filter(body_interspace == "interspace"))$level
+
+test_list$interbody_fusion <- unique((interspace_fusion_df %>% filter(body_interspace == "interspace"))$level)
+
+if(any(interspace_fusion_df$body_interspace == "body")){
+  
+  # jh_convert_body_levels_to_interspace_vector_function(vertebral_bodies_vector = (interspace_fusion_df$body_interspace == "body")$level)
+  # 
+  # test_list$interbody_fusion <- append(test_list$interbody_fusion, 
+  #                                      jh_convert_body_levels_to_interspace_vector_function(vertebral_bodies_vector = (interspace_fusion_df$body_interspace == "body")$level))
+  
+  test_list$interbody_fusion <- jh_reorder_levels_function(level_vector = append(test_list$interbody_fusion, 
+                                       jh_convert_body_levels_to_interspace_vector_function(vertebral_bodies_vector = (interspace_fusion_df %>% filter(body_interspace == "body"))$level)))
+                                       
+}
+
+# test_list$interbody_fusion <- jh_reorder_levels_function(level_vector = test_list$interbody_fusion)
+
+
+jh_convert_body_levels_to_interspace_vector_function <- function(vertebral_bodies_vector){
+  levels_vector <- unique(
+    append(
+      map(.x = vertebral_bodies_vector, 
+          .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_interspace), 
+      map(.x = vertebral_bodies_vector, 
+          .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_interspace)))
+  
+  return(jh_reorder_levels_function(level_vector = levels_vector))
+}
+
+test_list$interbody_fusion
+
+jh_convert_body_levels_to_interspace_vector_function(vertebral_bodies_vector = c("L4", "L5", "L2", "L3"))
+
+
+posterior_test_df %>%
+                filter(vertebral_number == min(vertebral_number) | vertebral_number == max(vertebral_number)) %>%
+  select(level, body_interspace, vertebral_number) %>%
+  mutate(vertebral_number = if_else(vertebral_number == max(vertebral_number), 
+                                    if_else(body_interspace == "body", vertebral_number, vertebral_number + 0.5), 
+                                    if_else(body_interspace == "body", vertebral_number, vertebral_number - 0.5)))
+                mutate(vertebral_number = if_else(body_interspace == "interspace", vertebral_number - 0.5, vertebral_number)) %>%
+                select(vertebral_number)
+                
+                
+all_implants_constructed_df %>%
+  filter(implant == "yes") %>%
+  select(body_interspace, object) %>%
+  distinct()
+
+jh_convert_body_levels_to_interspace_vector_function(vertebral_bodies_vector = c("Occiput", "L5", "S1", "Iliac"))
+
+names(all_implants_constructed_df)
+
+posterior_test_df %>%
+  filter(level == "C2") %>%
+  filter(level != "S2AI") %>%
+  filter(level != "Iliac") %>%
+  filter(fixation_uiv_liv == "yes") %>%
+  select(level, vertebral_number, body_interspace) %>%
+  distinct() %>%
+  arrange(vertebral_number)
+  filter(vertebral_number == min(vertebral_number) | vertebral_number == max(vertebral_number)) %>%
+
+
+
+jh_check_body_or_interspace_function(level = "")
+  
+  
+  a <- TRUE
+  b <- FALSE
+  x <- TRUE
+  xx <- FALSE
+  
+  keep(.x = c(a, b, x, xx), .p = ~ .x == TRUE)
+  
+  jh_check_body_or_interspace_function(level = "C2-C3") == "interspace"
+  
+  if(jh_check_body_or_interspace_function("C2-C3") == "interspace"){
+    print("true")
+  }else{
+    print("no")
+  }
+  
+  
+  all_implants_constructed_df %>%
+    filter(str_detect(string = object, pattern = "hook") | 
+                           str_detect(string = object, pattern = "tether") | 
+                           str_detect(string = object, pattern = "wire") | 
+                           str_detect(string = object, pattern = "vertebroplasty") |
+                           str_detect(string = object, pattern = "vertebral_cement_augmentation")) %>%
+                select(level, object) %>%
+    distinct()
+  
+  
+  if_else(2+2 == 4, "yes", " ")
+  
+  if_else("yes" %in% posterior_test_df$interbody_fusion, "yes", "no")
+
+  
+  if_else(any(str_detect(string = posterior_test_df$object, pattern = "pelvic_screw")), "yes", "no") 
+  
+  if_else(any(posterior_test_df$object == "grade_3") |
+                                                  any(posterior_test_df$object == "grade_4") |
+                                                  any(posterior_test_df$object == "grade_5") |
+                                                  any(posterior_test_df$object == "grade_6"), "yes", "no")
+  
+  
+  posterior_test_df %>%
+                filter(object == "grade_3" | object == "grade_4" | object == "grade_5") %>%
+                select(level) %>%
+                distinct() %>%
+                as_vector()
+  
+  
+test_list <- list()
+
+test_list$interbody_fusion <- "L3-4"
+test_list$abx <- "ancef"
+test_list$pso <- "yes"
+test_list$decompression <- "multiple_levels"
+
+enframe(test_list) %>%
+  mutate(across(.cols = everything(), .fns = ~ as.character(.x))) %>%
+  pivot_wider(names_from = name, values_from = value)
+
+
+
+patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
+  type.convert() %>%
+  select(record_id, last_name, first_name, date_of_birth)
+
+
+patient_ids_df %>%
+  mutate(last_name = str_to_lower(last_name), first_name = str_to_lower(first_name))
+
+next_id <- 9
+
+joined_df <- tibble(last_name = "jonestest", first_name = "bob", date_of_birth = "1955-01-05") %>%
+  left_join(patient_ids_df %>% mutate(last_name = str_to))
+
+if(!is.na(joined_df$record_id[[1]])){
+  record_id <- joined_df$record_id[[1]]
+}else{
+  record_id <- exportNextRecordName(rcon = rcon)
+}
+
+match_foundtest <- if_else(!is.na(joined_df$record_id[[1]]), TRUE, FALSE)
+
+match_foundtest
+
+max_repeat_instances_df <- exportRecords(rcon = rcon, records = record_id) %>%
+  as_tibble() %>%
+  select(redcap_repeat_instrument, redcap_repeat_instance) 
+  # remove_missing() %>%
+  group_by(redcap_repeat_instrument) %>%
+  filter(redcap_repeat_instance == max(redcap_repeat_instance))
+  
+max_repeat_instances_df
+repeat_list <- as.list(deframe(max_repeat_instances_df))
+
+repeat_list$surgical_details
+repeat_list$procedures_by_level_repeating
+repeat_list$screw_details_repeating
+
+
+```
+
+
+```{r}
+ui <- fluidPage(
+  # dateInput("date1", "Date:", value = "2012-02-29"),
+
+ dateInput(inputId = "date_input", label = "date:",
+           format = "mm-dd-yyyy", autoclose = TRUE, startview = "decade"),
+ br(),
+ textOutput(outputId = "date_text"),
+ textOutput(outputId = "date_text2"),
+ textOutput(outputId = "date_text3"),
+ textOutput(outputId = "date_text4")
+)
+
+server = function(input, output) { 
+  
+  output$date_text <- renderText({
+    as.character(input$date_input)
+  })
+  
+    output$date_text2 <- renderText({
+    as.character.Date(input$date_input)
+  })
+    
+      output$date_text3 <- renderText({
+    paste(input$date_input)
+  })
+      
+        output$date_text4 <- renderText({
+    ymd(input$date_input)
+  })
+  }
+
+shinyApp(ui, server)
+```
+
+
+
+```{r}
+        new_record_number <- exportNextRecordName(rcon = rcon)
+        
+        ##### uploaded patient details #######
+        patient_df_for_upload <- tibble(last_name = "smith_test", first_name = "joe", date_of_birth = "01-05-1955", sex = "male") %>%
+            mutate(record_id = new_record_number) %>%
+            select(record_id, everything())
+        
+        posterior_test_df %>%
+          replace_na(list(implant_statement = " "))
+
+importRecords(rcon = rcon, data = patient_df_for_upload, returnContent = "count")
+
+
+test_vect <- c("nothing", "amicar", "txa", "abx")
+
+txa_loading <- 10
+
+antifibrin <- glue_collapse(str_replace_all(string = test_vect, pattern = "txa", replacement = glue("TXA loading {txa_loading}")), sep = "; ")
+
+test_list <- list()
+
+test_list$abx <- glue_collapse(c("Ancef", "Vanc"), sep = "; ")
+
+test_list$antifibrin <- glue_collapse(str_replace_all(string = test_vect, pattern = "txa", replacement = glue("TXA loading {txa_loading}")), sep = "; ")
+
+
+test_list$complications <- "durotomy"
+
+
+enframe(test_list) %>%
+  mutate(across(everything(), ~ as.character(.x))) 
+  unnest()
+  
+all_implants_constructed_df %>%
+  filter((body_interspace == "interspace" & fusion == "yes") | object == "corpectomy" | object == "corpectomy_cage" | object == "grade_5") %>%
+  select(approach, object) %>%
+  distinct()
+
+```
+
+
+
+
+
+```{r}
+approach_test <- all_implants_constructed_df %>%
+  select(approach) %>%
+  distinct()
+
+case_when(
+            any(approach_test$approach == "anterior") & any(approach_test$approach == "posterior") ~ "combined anterior posterior",
+            any(approach_test$approach == "posterior") & any(approach_test$approach == "anterior") == FALSE ~ "posterior",
+            any(approach_test$approach == "anterior") & any(approach_test$approach == "posterior") == FALSE ~ "anterior"
+        )
+
+all_implants_constructed_df %>%
+  filter(fusion == "yes") %>%
+  select(object) %>%
+  tabyl(object)
+
+posterior_test_df <- posterior_test_df %>%
+  filter(object != "grade_5")
+
+        if(any(posterior_test_df$object == "corpectomy") | any(posterior_test_df$object == "grade_5")){
+            corpectomy_fusion_df <- posterior_test_df %>%
+                filter(object == "corpectomy_cage" | 
+                           object == "corpectomy" |
+                           object == "grade_5") %>%
+                select(-vertebral_number) %>%
+                mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_interspace)) %>%
+                union_all(posterior_test_df %>%
+                              filter(object == "corpectomy_cage" | 
+                                         object == "corpectomy" |
+                                         object == "grade_5") %>%
+                              select(-vertebral_number) %>%
+                              mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_interspace))) %>%
+            unnest(level) %>%
+            mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+                select(level, vertebral_number, approach, category, object) %>%
+                distinct()    
+        }else{
+            corpectomy_fusion_df = tibble(level = character(), vertebral_number = double(), approach = character(), category = character(), object = character())
+        }
+
+corpectomy_fusion_df
+
+        interbody_fusion_dftest <- posterior_test_df %>%
+            filter(object == "tlif" | 
+                       object == "plif" | 
+                       object == "llif" | 
+                       object == "diskectomy_fusion" | 
+                       object == "anterior_interbody_implant" | 
+                       object == "no_implant_interbody_fusion" |
+                       object == "diskectomy_fusion_no_interbody_device" | 
+                       object == "diskectomy_fusion" | 
+                       object == "decompression_diskectomy_fusion") %>%
+            select(level, vertebral_number, approach, category, object) %>%
+            union_all(corpectomy_fusion_df) %>%
+            arrange(vertebral_number) %>%
+            distinct()
+        
+        interbody_fusion_dftest
+        
+        interbody_fusion_dftestvec <- interbody_fusion_dftest %>%
+            select(level) %>%
+            distinct() %>%
+            as_vector()
+        
+        length(interbody_fusion_dftestvec)
+        
+if_else(length(interbody_fusion_dftestvec) >0, toString(interbody_fusion_dftestvec), "none")
+```
+
+
+
+```{r}
+revision_decompression_vector_test <- c("L1", "L2", "L3", "L4")
+
+fusion_levels_confirmed <- c("L1-L2", "L2-L3", "L3-L4", "L4-L5")
+
+op_note_procedure_paragraphs_function(objects_added_df = posterior_test_df, revision_decompression_vector = revision_decompression_vector_test)
+
+
+posterior_approach_objects_df <- posterior_test_df %>%
+  filter(approach == "posterior") 
+
+posterior_approach_objects_df
+
+if(length(fusion_levels_confirmed)>0){
+  fusions_df <- tibble(level = fusion_levels_confirmed) %>%
+    left_join(levels_numbered_df)
+}else{
+  fusions_df <- tibble(level = character(), vertebral_number = double(), object = character())
+}
+
+if(nrow(posterior_approach_objects_df) > 0){
+  
+  if(any(str_detect(all_objects_to_add_list$objects_df$object, "screw"))){
+    posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
+      filter(approach == "posterior") %>%
+      left_join(screw_details_results_reactive_df() %>% select(level, side, screw_size_type)) %>%
+      filter(object != "intervertebral_cage") %>%
+      left_join(interbody_details_df_reactive()) %>%
+      union_all(interbody_details_df_reactive() %>% filter(object == "intervertebral_cage"))
+  }else{
+    posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
+      filter(approach == "posterior") %>%
+      filter(object != "intervertebral_cage") %>%
+      left_join(interbody_details_df_reactive()) %>%
+      union_all(interbody_details_df_reactive() %>% filter(object == "intervertebral_cage")) %>%
+      # mutate(implant_statement = "", screw_size_type = "")
+      mutate(screw_size_type = "")
+  }
+  
+  if("screw_length" %in% names(posterior_approach_objects_df)) {
+    posterior_approach_objects_df <- posterior_approach_objects_df
+  }else{
+    posterior_approach_objects_df <- posterior_approach_objects_df %>%
+      mutate(screw_length = " ")
+  }
+}
+  
+```
+
+
+
+```{r}
+test <- posterior_test_df %>%
+      mutate(revision_levels_vector = list(revision_decompression_vector_test)) %>%
+      select(level, vertebral_number, approach, category, object, side, revision_levels_vector, implant_statement, screw_size_type) %>%
+      mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
+      select(-revision_levels_vector) %>%
+      mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
+      unnest(revision_level) %>%
+      mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
+      mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+      group_by(procedure_category, procedures_combine, object) %>%
+      nest() %>%
+      ungroup() %>%
+      group_by(procedure_category, procedures_combine) %>%
+      nest() %>%
+      mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
+      select(-data)
+
+
+test <- posterior_test_df %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
+      mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+      group_by(procedure_category, procedures_combine, object) %>%
+      nest() %>%
+      ungroup() %>%
+      group_by(procedure_category, procedures_combine) %>%
+      nest() %>%
+      mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
+      select(-data) 
+
+posterior_test_df
+
+test <- posterior_test_df %>%
+  filter(category != "decompression") %>%
+      mutate(revision_levels_vector = list(revision_decompression_vector_test)) %>%
+      select(level, vertebral_number, approach, category, object, side, revision_levels_vector, implant_statement, screw_size_type) %>%
+      mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
+      select(-revision_levels_vector) %>%
+        mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
+      unnest(revision_level) %>%
+  # replace_na(list(implant_statement = " ", screw_size_type = " ", revision_level = FALSE)) %>%
+  # print()
+      mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
+      mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+  # print()
+      group_by(procedure_category, procedures_combine, object) %>%
+      nest() %>%
+      ungroup() %>%
+  # print() %>%
+      group_by(procedure_category, procedures_combine) %>%
+      nest() %>%
+      mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
+      select(-data)
+
+
+test %>%
+    mutate(procedure_statement = pmap(list(..1 = procedure_category,
+                                           ..2 = nested_data, 
+                                           ..3 = procedures_combine),
+                                      .f = ~create_full_paragraph_statement_function(procedure_paragraph_intro = ..1,
+                                                                                     df_with_levels_object_nested = ..2, 
+                                                                                     paragraphs_combined_or_distinct = ..3))) %>%
+    select(procedure_category, procedures_combine, procedure_statement) %>%
+    unnest(procedure_statement)
+```
+
+
+
+```{r}
+all_procedures_for_cpt_df <- all_implants_constructed_df %>%
+  select(level, vertebral_number, approach, object) %>%
+  distinct() %>%
+  mutate(category = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
+    mutate(level_region = case_when(str_starts(string = level, pattern = "O") ~ "cranial", 
+                            str_starts(string = level, pattern = "C1") ~ "c1", 
+                            str_starts(string = level, pattern = "C") ~ "cervical", 
+                            str_starts(string = level, pattern = "T") ~ "thoracic", 
+                            str_starts(string = level, pattern = "L") ~ "lumbar", 
+                            str_starts(string = level, pattern = "Ili") ~ "pelvis", 
+                            str_starts(string = level, pattern = "S2") ~ "pelvis", 
+                            str_starts(string = level, pattern = "S1") ~ "sacrum")) %>%
+  arrange(approach, category, vertebral_number) %>%
+  select(level_region, approach, object, category) %>%
+  distinct()
+  
+
+all_procedures_for_cpt_df
+
+# write_csv(x = all_procedures_for_cpt_df, file = "all_procedures_for_cpt_df.csv", na = "")
+
+all_implants_constructed_df %>%
+  filter(str_detect(object, "cage"))
+
+
+revision_decompression_vector_test <- c("L2", "L3", "L4")
+
+posterior_test_df %>%
+      mutate(revision_levels_vector = list(revision_decompression_vector_test)) %>%
+  # print()
+      select(level, vertebral_number, approach, category, object, side, revision_levels_vector) %>%
+      mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
+      select(-revision_levels_vector) %>%
+  # print()
+      mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
+      unnest(revision_level) %>%
+  # print()
+      mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
+      select(level, object, vertebral_number) %>%
+      mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
+      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+
+
+all_implants_constructed_df %>%
+  select(category, object) %>%
+  filter(category == "decompression") %>%
+  distinct()
+
+
+posterior_test_df
+
+test <- posterior_test_df %>%
+      mutate(revision_levels_vector = list(revision_decompression_vector_test)) %>%
+      select(level, vertebral_number, approach, category, object, side, revision_levels_vector, implant_statement, screw_size_type) %>%
+      mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
+      select(-revision_levels_vector) %>%
+      mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
+      unnest(revision_level) %>%
+      mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
+      mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+      group_by(procedure_category, procedures_combine, object) %>%
+      nest() %>%
+      ungroup() %>%
+      group_by(procedure_category, procedures_combine) %>%
+      nest() %>%
+      mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
+    # mutate(nested_data = map_df(.x = nested_data, .f = ~ replace_na(list(implant_statement = " ", screw_size_type = " ")))) %>%
+      select(-data)
+
+
+test
+test %>%
+    mutate(procedure_statement = pmap(list(..1 = procedure_category,
+                                           ..2 = nested_data, 
+                                           ..3 = procedures_combine),
+                                      .f = ~create_full_paragraph_statement_function(procedure_paragraph_intro = ..1,
+                                                                                     df_with_levels_object_nested = ..2, 
+                                                                                     paragraphs_combined_or_distinct = ..3))) %>%
+    select(procedure_category, procedures_combine, procedure_statement) %>%
+    unnest(procedure_statement)
+
+```
+

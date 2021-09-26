@@ -1,0 +1,937 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(shiny)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+library(shinyWidgets)
+library(shinyBS)
+library(cowplot)
+library(magick)
+library(ggpattern)
+library(glue)
+library(rlist)
+library(janitor)
+library(lubridate)
+library(redcapAPI)
+library(ggpmisc)
+library(rclipboard)
+library(nngeo)
+library(shinydashboard)
+
+library(tictoc)
+
+# rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "4B2AA28A4D6EFBC6CA1F49EC0FB385F7")
+
+rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "58C0BC0A6CA8B8DFB21A054C2F5A3C49")
+
+source("short_shiny_functions.R", local = TRUE)
+source("build_spine_objects_functions.R", local = TRUE)
+source("load_coordinates_build_objects.R", local = TRUE)
+source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
+
+
+posterior_test_df <- all_implants_constructed_df %>%
+  filter(object == "pelvic_screw" | object == "pedicle_screw") %>%
+  filter(vertebral_number %in% c(20, 21,23,24,25)) %>%
+  # filter(between(vertebral_number, 22, 25)) %>%
+  mutate(implant_statement = NULL) %>%
+  mutate(screw_size_type = "polyaxial") %>%
+  union_all(all_implants_constructed_df %>% filter(object == "tlif") %>% filter(between(vertebral_number, 23, 25))) %>%
+  union_all(all_implants_constructed_df %>% filter(object == "crosslink") %>% filter(level == "L3") %>% mutate(screw_size_type = "a")) %>%
+  union_all(all_implants_constructed_df %>% filter(object == "grade_5") %>% filter(level == "L3") %>% mutate(screw_size_type = "a polyaxial")) %>%
+  union_all(all_implants_constructed_df %>% filter(object == "intervertebral_cage") %>% filter(level == "L3") %>% mutate(implant_statement = "An expandablle cage was chosen to implant."))
+
+posterior_test_df
+
+anterior_test_df <- all_implants_constructed_df %>%
+  filter(approach == "anterior") %>%
+  filter(between(vertebral_number, 22, 25)) %>%
+  filter(object == "decompression_diskectomy_fusion" | object == "diskectomy_fusion" | object == "diskectomy_fusion_no_interbody_device" | object == "anterior_interbody_implant" | object == "anterior_buttress_plate")
+
+
+
+# shinyApp(
+#   ui = basicPage(
+#     column(6,
+#            ),
+#     column(6, 
+#            plotOutput(outputId = "plot"))
+#   ),
+# 
+#   server = function(input, output) {
+#     
+#     
+#     
+#     output$plot <- renderPlot({
+#                   ggdraw() +
+#                 draw_image(
+#                     spine_png,
+#                     scale = 1,
+#                     y = 0,
+#                     valign = 0,
+#                     x = 0,
+#                     height = 1
+#                     # width = 1
+#                 ) 
+#                 # reactiveValuesToList(geoms_list_revision_posterior) 
+#                 # reactiveValuesToList(geoms_list_posterior) +
+#                 # reactiveValuesToList(rods_list) 
+#     })
+# 
+# 
+#   }
+# )
+```
+
+
+```{r}
+adult_choices_test <- c("Adult Idiopathic Scoliosis",
+                           "Degenerative Scoliosis",
+                           "Adolescent Idiopathic Scoliosis",
+                           "Scoliosis associated with another condition",
+                           "Secondary Kyphosis",
+                           "Chin on Chest Deformity",
+                           "Scheurmanns Kyphosis",
+                           "Degenerative Spondylolisthesis", 
+                           "Congenital Spondylolisthesis",
+                           "Lumbar Disc Herniation",
+                           "Spinal Stenosis",
+                           "Flatback Syndrome",
+                           "Other"
+                           )
+
+revision_dx_list_test <- list('Implant' = c("Mal-Positioned Implants", "Failure (pull-out/fracture) of Implants", "Pseudarthrosis"), 
+                                     'Junctional' = c("Proximal Junctional Failure", "Adjacent Segment Degeneration", "Distal Junctional Failure", "Vertebral Fracture"),
+                                     'Infection' = c("Early Infection/Wound Drainage", "Late Infection (>6mo)"),
+                                     'Malalignment' = c("Coronal Malalignment", "Sagittal Malalignment"),
+                                     'Neurologic' = c("Motor Deficit", "Radicular Pain", "Neurogenic Claudication")
+)
+
+
+new_list <- append(x = list('primary_dx' = adult_choices_test), revision_dx_list_test)
+
+new_list
+
+new_list <- list()
+
+new_list$first <- "This is one"
+
+new_list$two <- "Thisis two"
+
+new_list
+
+as_vector(new_list)
+
+Vectorize(new_list)
+
+as.vector(new_list)
+
+unlist(new_list, use.names = FALSE)
+
+rev_test <- c("L4", "L5")
+
+test_op <- no_implants_op_note_posterior_function(additional_procedures_vector = c("Irrigation and Debridement"))
+
+test_op$procedure_details_paragraph
+
+test_op$procedures_numbered_paragraph
+
+test_op
+
+
+op_test_list <- list()
+
+op_test_list$'Patient' <- "Bob Smith"
+
+op_test_list$'Date of Surgery' <- "08-09-1955"
+
+op_test_list$'Primary Surgeon:' <- "Hills"
+
+op_test_list$'Surgical Assistants:' <- "Hills Assistant"
+
+enframe(op_test_list, name = "section_header", value = "result") %>%
+  unnest()
+
+
+section_headers <- c("\nPatient:",
+                                 "\nDate of Surgery:",
+                                 "\nPrimary Surgeon:",
+                                 "\nSurgical Assistants:",
+                                 "\nPre-operative Diagnosis:",
+                                 "\nPost-operative Diagnosis:",
+                                 "\nIndications:",
+                                 "\nProcedures Performed:",
+                                 "\nSurgery Description:")
+
+
+test_list <- list()
+
+test_list$spinal_cord <- "Spinal Cord Monitoring"
+test_list$tongs <- "Application of tongs"
+test_list$explore <- "Fusion explore"
+
+unlist(test_list, use.names = FALSE)
+
+as_vector(test_list)
+
+vector_test <- c("added 1 test", "second added")
+
+vector_test$two <- "asdfds"
+
+as.list(c())
+
+vector_test
+
+emptydf <- posterior_test_df %>%
+  filter(level == "ads")
+
+if_else("yes" %in% emptydf$interbody_fusion, "yes", "no")
+
+
+posterior_test_df %>%
+                filter(vertebral_number == min(vertebral_number) | vertebral_number == max(vertebral_number)) %>%
+                arrange(vertebral_number) %>%
+  select(level) %>%
+  mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))
+
+
+jh_get_level_range_vector_function <- function(object_df, interspace_or_body_or_all = "body"){
+  range_df <- object_df %>%
+    filter(vertebral_number == min(vertebral_number) | vertebral_number == max(vertebral_number)) %>%
+    arrange(vertebral_number) %>%
+    select(level, vertebral_number) %>%
+    mutate(level = if_else(level == "S2AI", "S1", level)) %>%
+    mutate(level = if_else(str_detect(string = level, pattern = "Iliac"), "S1", level)) %>%
+    mutate(level = if_else(level == "Occiput", "C1", level)) %>%
+    select(level) %>%
+    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))
+  
+  cranial_level_type <- jh_check_body_or_interspace_function(level = head(range_df$level, 1)) 
+  caudal_level_type <- jh_check_body_or_interspace_function(level = tail(range_df$level, 1)) 
+  
+  if(cranial_level_type == "body"){
+    cranial_body_number <-  head(range_df$vertebral_number, 1)
+    cranial_interspace_number <-  head(range_df$vertebral_number, 1) - 0.5
+  }else{
+    cranial_body_number <-  head(range_df$vertebral_number, 1) - 0.5
+    cranial_interspace_number <-  head(range_df$vertebral_number, 1)
+  }
+  
+  if(caudal_level_type == "body"){
+    caudal_body_number <-  tail(range_df$vertebral_number, 1)
+    caudal_interspace_number <-  tail(range_df$vertebral_number, 1) + 0.5
+  }else{
+    caudal_body_number <-  tail(range_df$vertebral_number, 1) + 0.5
+    caudal_interspace_number <-  tail(range_df$vertebral_number, 1)
+  }
+  
+  if(interspace_or_body_or_all == "body"){
+    range_number_vector <- seq(cranial_body_number, caudal_body_number, by = 1)
+  }
+  
+  if(interspace_or_body_or_all == "interspace"){
+    range_number_vector <- seq(cranial_interspace_number, caudal_interspace_number, by = 1)
+  }
+  
+  if(interspace_or_body_or_all == "all"){
+    range_number_vector <- seq(cranial_interspace_number, caudal_interspace_number, by = 0.5)
+    }
+  levels_range_vector <- jh_get_vertebral_level_function(number = range_number_vector)
+  
+  return(levels_range_vector)
+}
+
+jh_check_body_or_interspace_function(level = "Occiput")
+jh_check_body_or_interspace_function
+
+vertebral_bodies_vector  
+
+head(posterior_test_df$vertebral_number, 1) + 0.5
+
+jh_get_vertebral_number_function(level_to_get_number = c("L1", "L2"))
+
+jh_get_level_range_vector_function(object_df = posterior_test_df, interspace_or_body_or_all = "body")
+
+jh_get_vertebral_level_function(number = c(1,2,3))
+
+plot_grid()
+
+```
+
+
+
+```{r}
+server <- function(input, output) {
+  output$plot <- renderPlot({
+    input$goPlot # Re-run when button is clicked
+
+    # Create 0-row data frame which will be used to store data
+    dat <- data.frame(x = numeric(0), y = numeric(0))
+
+    withProgress(message = 'Making plot', value = 0, {
+      # Number of times we'll go through the loop
+      n <- 10
+
+      for (i in 1:n) {
+        # Each time through the loop, add another row of data. This is
+        # a stand-in for a long-running computation.
+        dat <- rbind(dat, data.frame(x = rnorm(1), y = rnorm(1)))
+
+        # Increment the progress bar, and update the detail text.
+        incProgress(1/n, detail = paste("Doing part", i))
+
+        # Pause for 0.1 seconds to simulate a long computation.
+        Sys.sleep(0.1)
+      }
+    })
+
+    plot(dat$x, dat$y)
+  })
+}
+
+ui <- shinyUI(basicPage(
+  plotOutput('plot', width = "300px", height = "300px"),
+  actionButton('goPlot', 'Go plot')
+))
+
+shinyApp(ui = ui, server = server)
+```
+
+
+```{r}
+ui <- dashboardPage(
+  dashboardHeader(title = "Value boxes"),
+  dashboardSidebar(),
+  dashboardBody(
+    fluidRow(
+      # A static valueBox
+      valueBox(10 * 2, "New Orders", icon = icon("credit-card")),
+
+      # Dynamic valueBoxes
+      valueBoxOutput("progressBox"),
+
+      valueBoxOutput("approvalBox")
+    ),
+    fluidRow(
+      # Clicking this will increment the progress amount
+      box(width = 4, actionButton("count", "Increment progress"))
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$progressBox <- renderValueBox({
+    valueBox(
+      paste0(25 + input$count, "%"), "Progress", icon = icon("list"),
+      color = "purple"
+    )
+  })
+
+  output$approvalBox <- renderValueBox({
+    valueBox(
+      "80%", "Approval", icon = icon("thumbs-up", lib = "glyphicon"),
+      color = "yellow"
+    )
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+
+```{r}
+shinyApp(
+  ui = basicPage(
+    column(6,
+           dropdownButton(icon = icon("fas fa-screwdriver"),
+                                                                          up = FALSE, circle = FALSE, status = "info", label = "Left Revision Implants", tooltip = "Click to add Revision Implants", 
+                                                                    width = "100%",
+                                                                    style = "info",
+                                                                    column(6, 
+                                                                           awesomeCheckboxGroup(inputId = "left_revision_implants",
+                                                                                                label = "Implants Present:",
+                                                                                                choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                                                           )
+                                                                           ), 
+                                                                    column(6, 
+                                                                           awesomeCheckboxGroup(inputId = "left_revision_implants_removed",
+                                                                                                label = "Implants Removed:",status = "danger",
+                                                                                                choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                                                           )
+                                                                           )
+                                                           ),
+           tableOutput(outputId = "revision_table"),
+           conditionalPanel(condition = "input.left_revision_implants.length > 0", textInput(inputId = "trest", label = "test"))
+           ),
+    column(6, 
+           plotOutput(outputId = "plot"))
+  ),
+
+  server = function(input, output) {
+    
+    left_revision_implants_reactive_list <- reactive({
+        if(length(input$left_revision_implants_removed)>0){
+            removed_df <- tibble(level = input$left_revision_implants_removed, side = "left") %>%
+                left_join(revision_implants_df)
+        }else{
+            removed_df <- revision_implants_df %>%
+                filter(level == "xxx")
+        }
+        
+        if(length(input$left_revision_implants)>0){
+            retained_df <- tibble(level = input$left_revision_implants, side = "left") %>%
+                # filter(level %in% input$left_revision_implants_removed == FALSE) %>%
+                left_join(revision_implants_df) %>%
+                anti_join(removed_df)
+        }else{
+            retained_df <- revision_implants_df %>%
+                filter(level == "xxx")
+        }
+        
+        list(retained_df = retained_df,
+             removed_df = removed_df)
+      
+    })
+    
+    output$revision_table <- renderTable({
+      left_revision_implants_reactive_list()$retained_df %>%
+        select(level, side, object)
+    })
+    
+    geoms_list_revision_posterior <- reactiveValues()
+
+    observeEvent(left_revision_implants_reactive_list(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+        if(nrow(left_revision_implants_reactive_list()$retained_df)>0){
+            geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(left_revision_implants_reactive_list()$retained_df$object_constructed), fill = "black")
+        }
+
+        if(nrow(left_revision_implants_reactive_list()$removed_df)>0){
+            geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(left_revision_implants_reactive_list()$removed_df$object_constructed), color = "black", fill = "grey99")
+        }
+    })
+    
+    output$plot <- renderPlot({
+                  ggdraw() +
+                draw_image(
+                    spine_png,
+                    scale = 1,
+                    y = 0,
+                    valign = 0,
+                    x = 0,
+                    height = 1
+                    # width = 1
+                ) +
+                reactiveValuesToList(geoms_list_revision_posterior)
+                # reactiveValuesToList(geoms_list_posterior) +
+                # reactiveValuesToList(rods_list) 
+    })
+
+
+  }
+)
+
+
+```
+
+
+```{r}
+test_osteotomy_df <- all_implants_constructed_df %>%
+  filter(object == "grade_2" | object == "grade_1") 
+  # filter(object == "pedicle_screw") %>%
+  # select(level, vertebral_number, x, y)
+
+new_test_df <- test_osteotomy_df %>%
+  mutate(keep_dis = if_else((level == "L3" | level == "L4") & object == "grade_1", "keep", "discard")) %>%
+  filter(keep_dis == "keep") %>%
+  union_all(test_osteotomy_df %>%
+              mutate(keep_dis = if_else((level == "L4-L5" | level == "L3-L4") & object == "grade_2", "keep", "discard")) %>%
+              filter(keep_dis == "keep")) %>%
+  union_all(posterior_test_df) 
+  # filter(object != "grade_5")
+
+new_test_df %>%
+# all_objects_to_add_list$objects_df %>%
+                # mutate(object_class = if_else(object %in% c("grade_1", "grade_2", "grade_3", "grade_4", "grade_5", "grade_6"), "osteotomy", object)) %>%
+                mutate(object_class = if_else(str_detect(string = object, pattern = "grade_"), "osteotomy", object)) %>%
+  # mutate(osteotomy_level = if_else(body_interspace == "interspace", map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level), list(level))) %>%
+  # unnest(osteotomy_level)
+                mutate(osteotomy_level = if_else(object == "grade_2", 
+                                                 jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level,
+                                                 level)) %>%
+  select(level, object_class, osteotomy_level, everything())
+                mutate(object_rank = case_when(
+                    object == "grade_1" ~ 1,
+                    object == "grade_2" ~ 2,
+                    object == "grade_3" ~ 3,
+                    object == "grade_4" ~ 4,
+                    object == "grade_5" ~ 5,
+                    object == "grade_6" ~ 6)
+                ) %>%
+                replace_na(list(object_rank = 1)) %>%
+                group_by(osteotomy_level, object_class) %>%
+                filter(object_rank == max(object_rank)) %>%
+                ungroup() %>%
+  select(level, object_rank, osteotomy_level, everything())
+                select(-object_rank, -osteotomy_level)
+
+new_test_df %>%
+  select(level, vertebral_number, body_interspace, object, side) %>%
+  mutate(osteotomy_number = if_else(condition = (object == "grade_2"), vertebral_number -0.5, vertebral_number)) %>%
+  mutate(osteotomy_number = jh_get_vertebral_level_function(number = osteotomy_number))
+                
+jh_get_cranial_caudal_interspace_body_list_function(level = "L4-L5")$cranial_level
+
+jh_get_vertebral_number_function(level_to_get_number = "L4-L5")
+
+
+jh_filter_osteotomy_levels_function <- function(full_df){
+  full_df
+}
+
+ordered_df <- new_test_df %>%
+  mutate(implant_order = row_number()) %>%
+  select(implant_order, level, vertebral_number, body_interspace, approach, object, side)
+
+ordered_df %>%
+  filter(str_detect(string = object, pattern = "grade_2")) %>%
+  mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level)) %>%
+  unnest(level) %>%
+  union_all(ordered_df %>%
+  filter(str_detect(string = object, pattern = "grade_2")) %>%
+  mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level)) %>%
+  unnest(level)) %>%
+  distinct()
+
+
+  mutate(level_number = if_else(body_interspace == "interspace", level_number, level))
+
+tibble()
+  
+# ordered_df %>%
+#   separate(col = level, into = c("level", "inferior_level"), sep = "-") %>%
+#   pivot_longer(cols = c(level, inferior_level), names_to = "label", values_to = "level") %>%
+#   select(-label) %>%
+#   select(implant_order, level, everything()) %>%
+#   filter(!is.na(level)) %>%
+
+
+osteotomy_df <- ordered_df %>%
+  mutate(osteotomy_class = if_else(str_detect(object, "grade_"), object, "not")) %>%
+  filter(osteotomy_class != "not")
+
+osteotomy_df
+
+osteotomy_rank_function <- function(osteotomy_grade, level, full_df){
+  osteotomy_df <- full_df %>%
+  filter(str_detect(object, "grade_"))
+  
+  vector_to_check <- as_vector(str_split(string = level, pattern = "-"))
+  
+  
+  any()
+  
+}
+
+
+str_detect(string = str_split(string = "L4-L5", pattern = "-"), pattern = "L6")
+
+
+wide_df <- new_test_df %>%
+  union_all(tibble(level = "x", 
+       object = c("grade_1", "grade_2", "grade_3", "grade_4", "grade_5"))) %>%
+  select(level, side, object) %>%
+  filter(str_detect(object, "grade_")) %>%
+  pivot_wider(names_from = object, values_from = level) %>%
+  unnest() 
+
+
+(str_split(string = "L4-L5", pattern = "-"))
+
+as_vector(str_split(string = "L4-L5", pattern = "-"))
+
+
+wide_df
+
+(new_test_df %>% filter(object == "grade_2"))$level
+```
+
+
+
+
+```{r}
+
+grade_2_df <- new_test_df %>%
+  filter(object == "grade_2") %>%
+  filter(level == "L3-L4")
+
+new_full_df <- new_test_df %>%
+  filter(object != "grade_2")
+
+grade_2_df
+
+if(grade_2_df == "grade_2"){
+  
+}
+
+checking_2_df <- grade_2_df %>%
+  separate(level, c("cranial_level", "caudal_level"))
+checking_2_df
+
+
+
+
+
+jh_osteotomy_remove_function <- function(osteotomy_grade, level, full_df){
+  if(osteotomy_grade %in% c("grade_1", "grade_2", "grade_3", "grade_4") == TRUE){
+    
+    if(osteotomy_grade == "grade_1"){
+      vector_to_check <- c(level, jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace)
+      
+      cranial_check <- any(str_detect((full_df %>% filter(object %in% c("grade_2", "grade_3", "grade_4", "grade_5")))$level, pattern = vector_to_check[[1]]))
+      caudal_check <- any(str_detect((full_df %>% filter(object %in% c("grade_2", "grade_3", "grade_4", "grade_5")))$level, pattern = vector_to_check[[2]]))
+    }
+    
+    if(osteotomy_grade == "grade_2"){
+      vector_to_check <- as_vector(str_split(string = level, pattern = "-"))
+      
+      cranial_check <- any(str_detect((full_df %>% filter(object %in% c("grade_3", "grade_4", "grade_5")))$level, pattern = vector_to_check[[1]]))
+      caudal_check <- any(str_detect((full_df %>% filter(object %in% c("grade_3", "grade_4", "grade_5")))$level, pattern = vector_to_check[[2]]))
+    }
+    
+    if(osteotomy_grade == "grade_3"){
+      cranial_check <- any(str_detect((full_df %>% filter(object %in% c("grade_4", "grade_5")))$level, pattern = level))
+      caudal_check <- cranial_check
+    }
+    
+    if(osteotomy_grade == "grade_4"){
+      cranial_check <- any(str_detect((full_df %>% filter(object %in% c("grade_5")))$level, pattern = level))
+      caudal_check <- cranial_check
+    }
+  }else{
+    cranial_check <- FALSE
+    caudal_check <- FALSE
+  }
+  
+  return(any(cranial_check, caudal_check))
+  
+}
+
+cranial_check <- any(str_detect((new_full_df %>% filter(object %in% c("grade_3", "grade_4", "grade_5")))$level, pattern = checking_2_df$cranial_level[[1]])) 
+caudal_check <- any(str_detect((new_full_df %>% filter(object %in% c("grade_3", "grade_4", "grade_5")))$level, pattern = checking_2_df$caudal_level[[1]]))
+
+jh_get_cranial_caudal_interspace_body_list_function(level = "L3")$caudal_interspace
+
+(new_full_df %>% filter(object %in% c("grade_3", "grade_4", "grade_5")))$level
+
+
+new_test_df %>%
+  mutate(remove_osteotomy = pmap(.l = list(..1 = level, ..2 = object, ..3 = new_test_df), 
+                                 .f = ~ jh_osteotomy_remove_function(osteotomy_grade = ..2, level = ..1, full_df = ..3)))
+
+filter_osteotomies <- pmap(.l = list(..1 = new_test_df$level, ..2 = new_test_df$object, ..3 = new_test_df), 
+                                 .f = ~ jh_osteotomy_remove_function(osteotomy_grade = ..2, level = ..1, full_df = ..3))
+
+
+
+
+jh_osteotomy_remove_function(osteotomy_grade = "grade_1", level = "L3", full_df = new_test_df)
+
+(new_test_df %>% filter(object %in% c("grade_2", "grade_3", "grade_4", "grade_5")))$level
+
+
+checking_df <- new_test_df %>%
+  mutate(proximal_level = map(.x = level, .f = ~jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level)) %>%
+  unnest(proximal_level) %>%
+  mutate(distal_level = map(.x = level, .f = ~jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level)) %>%
+  unnest(distal_level) %>%
+  select(contains("level"), everything())
+
+checking_df %>%
+  mutate(remove_keep = map(.x = checking_df))
+  select(contains("level"), everything())
+  
+jh_ost_checking_function <- function(object_to_check, level_to_check, full_df){
+  full_df <- full_df %>%
+    select(level, object, side) %>%
+    mutate(proximal_level = map(.x = level, .f = ~jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level)) %>%
+    unnest(proximal_level) %>%
+    mutate(distal_level = map(.x = level, .f = ~jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level)) %>%
+    unnest(distal_level) %>%
+    select(contains("level"), everything())
+  
+  if(object_to_check == "grade_1"){
+    remove <- (level_to_check %in% (full_df %>% filter(object == "grade_2"))$distal_level) |
+      (level_to_check %in% (full_df %>% filter(object == "grade_2"))$proximal_level) |
+      (level_to_check %in% (full_df %>% filter(object == "grade_3" | object == "grade_4" | object == "grade_5"))$level) |
+      (level_to_check %in% (full_df %>% filter(object == "grade_3" | object == "grade_4" | object == "grade_5"))$proximal_level)
+  }
+  
+  if(object_to_check == "grade_2"){
+    proximal_level <- as_vector(str_split(string = level_to_check, pattern = "-"))[[1]]
+    distal_level <- as_vector(str_split(string = level_to_check, pattern = "-"))[[2]]
+    remove <- (proximal_level %in% (full_df %>% filter(object == "grade_3" | object == "grade_4" | object == "grade_5"))$level) | (distal_level %in% (full_df %>% filter(object == "grade_3" | object == "grade_4" | object == "grade_5"))$level)
+  }
+    if(object_to_check == "grade_3"){
+    remove <- (level_to_check %in% (full_df %>% filter(object == "grade_4" | object == "grade_5"))$level)
+  }
+  
+}
+
+as_vector(str_split(string = "L4-L5", pattern = "-"))[[1]]
+
+
+
+  new_test_df %>%
+    union_all(tibble(level = "x", object = c("grade_1", "grade_3", "grade_4", "grade_5"))) %>%
+    union_all(tibble(level = "x-x", object = "grade_2")) %>%
+    mutate(order_number = row_number())
+  
+```
+
+```{r}
+checking_df <- new_test_df %>%
+  mutate(proximal_level = map(.x = level, .f = ~jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level)) %>%
+  unnest(proximal_level) %>%
+  mutate(distal_level = map(.x = level, .f = ~jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level)) %>%
+  unnest(distal_level) %>%
+  select(contains("level"), everything())
+
+checking_df %>%
+  mutate(proximal_level = if_else(object == "grade_2", proximal_level, level)) %>%
+  mutate(distal_level = if_else(object == "grade_2" | object == "grade_1", distal_level, level)) %>%
+  mutate(levels_to_check = pmap(.l = list(..1 = level, 
+                                          ..2 = proximal_level,
+                                          ..3 = distal_level), .f = ~list(..1, ..2, ..3))) %>%
+  select(contains("level"), everything())
+
+```
+```{r}
+new_test_df 
+
+new_test_df %>%
+  select(level, vertebral_number, object, side) %>% 
+  filter(str_detect(object, "grade_")) %>%
+  mutate(proximal_level = map(.x = level, .f = ~jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level)) %>%
+  unnest(proximal_level) %>%
+  mutate(distal_level = map(.x = level, .f = ~jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level)) %>%
+  unnest(distal_level) %>%
+  pivot_longer(cols = c(level, proximal_level, distal_level), names_to = "level_label", values_to = "level") %>%
+  select(-level_label) %>%  
+  union_all(tibble(level = "xx", vertebral_number = 55, side = "central", object = c("grade_1", "grade_2", "grade_3", "grade_4", "grade_5"))) %>%
+  pivot_wider(names_from = object, values_from = level) %>%
+  unnest()
+```
+
+
+
+
+
+```{r}
+
+full_testing_df <- new_test_df %>%
+  union_all(tibble(level = "xx", object = c("grade_1", "grade_2", "grade_3", "grade_4", "grade_5")))
+
+level_to_check <- "L3"
+distal_interspace_to_check <- jh_get_cranial_caudal_interspace_body_list_function(level = level_to_check)$caudal_interspace
+
+distal_interspace_to_check
+
+any(distal_interspace_to_check %in% (full_testing_df %>% filter(object == "grade_2"))$level) | 
+  any(level_to_check %in% (full_testing_df %>% filter(object == "grade_2"))$level)
+
+new_test_df
+
+```
+
+```{r}
+
+jh_filter_osteotomies_function <- function(full_df_to_filter){
+  objects_in_sequence_df <- full_df_to_filter %>%
+    mutate(order_number = row_number())
+
+grade_5_osteotomy_df <- objects_in_sequence_df %>%
+  filter(object == "grade_5") 
+
+grade_4_osteotomy_df <- objects_in_sequence_df %>%
+  filter(object == "grade_4") 
+
+grade_3_osteotomy_df <- objects_in_sequence_df %>%
+  filter(object == "grade_3") 
+
+grade_2_osteotomy_df <- objects_in_sequence_df %>%
+  filter(object == "grade_2") %>%
+  separate(col = level, into = c("proximal_level", "distal_level"), remove = FALSE)
+
+grade_1_osteotomy_df <- objects_in_sequence_df %>%
+  filter(object == "grade_1") 
+
+if(nrow(grade_1_osteotomy_df) > 0){
+  grade_1_osteotomy_df <- grade_1_osteotomy_df %>%
+    mutate(distal_level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
+    mutate(keep_remove = if_else(level %in% grade_2_osteotomy_df$proximal_level | 
+                                   level %in% grade_2_osteotomy_df$proximal_level |
+                                   level %in% grade_3_osteotomy_df$level |
+                                   level %in% grade_4_osteotomy_df$level |
+                                   level %in% grade_5_osteotomy_df$level |       
+                                   distal_level %in% grade_3_osteotomy_df$level |
+                                   distal_level %in% grade_4_osteotomy_df$level |
+                                   distal_level %in% grade_5_osteotomy_df$level, "remove", "keep"))
+}
+
+if(nrow(grade_2_osteotomy_df)>0){
+  grade_2_osteotomy_df <- grade_2_osteotomy_df %>%
+    mutate(keep_remove = if_else(proximal_level %in% grade_3_osteotomy_df$level |
+                                 proximal_level %in% grade_4_osteotomy_df$level |
+                                 proximal_level %in% grade_5_osteotomy_df$level, "remove", "keep"))
+}
+
+if(nrow(grade_3_osteotomy_df)>0){
+  grade_3_osteotomy_df <- grade_3_osteotomy_df %>%
+  mutate(keep_remove = if_else(level %in% grade_4_osteotomy_df$level |
+                                 level %in% grade_5_osteotomy_df$level, "remove", "keep"))
+}
+if(nrow(grade_4_osteotomy_df)>0){
+  grade_4_osteotomy_df <- grade_4_osteotomy_df %>%
+  mutate(keep_remove = if_else(level %in% grade_5_osteotomy_df$level, "remove", "keep"))
+}
+
+
+all_grades_df <- grade_1_osteotomy_df %>%
+  union_all(grade_2_osteotomy_df) %>%
+  union_all(grade_3_osteotomy_df) %>%
+  union_all(grade_4_osteotomy_df) %>%
+  union_all(grade_5_osteotomy_df) %>%
+  select(level, side, object, keep_remove)
+
+final_filtered_full_df <- objects_in_sequence_df %>%
+  left_join(all_grades_df)%>%
+  select(order_number, level, keep_remove, everything()) %>%
+  replace_na(list(keep_remove = "keep")) %>%
+  filter(keep_remove == "keep") %>%
+  select(-keep_remove, -order_number)
+
+return(final_filtered_full_df)
+}
+
+grade_1_test
+
+new3 <- new_test_df %>% 
+  union_all(new_test_df%>%
+  filter(object == "grade_1") %>%
+  mutate(level = c("T12", "L1", "L2", "L3"))) %>%
+  distinct() %>%
+  union_all(l5s1_2)
+
+l5s1_2 <- all_implants_constructed_df %>%
+  filter(object == "grade_2") %>%
+  filter(level == "L5-S1") 
+
+jh_filter_osteotomies_function(full_df_to_filter = l5s1_2)
+
+new_test_df %>%
+  head(2)
+
+jh_get_vertebral_level_function(number = -1)
+
+max((revision_implants_df %>%  filter(vertebral_number > jh_get_vertebral_number_function(level_to_get_number = "L3-L4")))$y)
+
+jh_get_vertebral_number_function(level_to_get_number = "L3-L4")
+
+
+```
+
+
+```{r}
+all_objects_y_range_df <- all_implants_constructed_df %>%
+  select(object, y) %>%
+  group_by(object) %>%
+  filter(y == min(y) | y == max(y)) %>%
+  ungroup() %>%
+  distinct()
+
+
+all_objects_y_range_df %>%
+  filter(between(y, 0.8, 1))
+
+```
+
+
+
+```{r}
+
+all_implants_constructed_df %>%
+  filter(object == "anterior_buttress_plate")
+
+
+required_optiontest <- TRUE
+
+               tags$table(
+                   tags$tr(
+                     if(required_optiontest == TRUE){
+                     tags$td(width = "3%", div(style = "font-size:16px; font-weight:bold; text-align:left; color:red", "***"))
+                   },
+                       tags$td(width = "35%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Primary Surgeon:")),
+                       tags$td(width = "5%"),
+                       tags$td(width = "60%", div(style = "font-size:16px; font-weight:bold; text-align:left", "yes")),
+                   )
+               )
+
+```
+
+
+```{r}
+cell_save_test <- 0
+prb_test <- 10
+
+tags$table(
+  if(cell_save_test > 0){
+    tags$tr(
+      tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Cell Saver Transfused (cc):")),
+      tags$td(width = "5%"),
+      tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(cell_save_test)))
+    )
+  },
+  if(prb_test > 0){
+    tags$tr(
+      tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "pRBC units transfused:")),
+      tags$td(width = "5%"),
+      tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(prb_test)))
+    )
+  }
+)
+
+
+```
+
+
+
+```{r}
+rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = "2A930AE845C92CBF95467E59ADBA0D20")
+
+        all_patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
+            type.convert() %>%
+            select(record_id, last_name, first_name, date_of_birth) %>%
+            mutate(last_name = str_to_lower(last_name),
+                   first_name = str_to_lower(first_name))
+
+
+        if(redcapAPI::exportNextRecordName(rcon = rcon)>1){
+            all_patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
+                type.convert() %>%
+                select(record_id, last_name, first_name, date_of_birth) %>%
+                mutate(last_name = str_to_lower(last_name),
+                       first_name = str_to_lower(first_name))   
+        }else{
+            all_patient_ids_df <- tibble()
+        }
+        
+        nrow(all_patient_ids_df)
+
+```
+

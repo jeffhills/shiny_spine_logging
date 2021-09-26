@@ -1,0 +1,225 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+### WORKS
+```{r}
+test_make_ui <-  function(screw_level, selected = NULL){
+        prettyRadioButtons(
+            inputId = screw_level,
+            label = screw_level,
+            choices = c("Poly", "Uni", "Mono", "Reduction"),
+            selected = selected
+        )}
+    
+if (interactive()) {
+  shinyApp(
+    fluidPage(
+      checkboxGroupButtons(
+        inputId = "levels",
+        label = "Label",
+        choices = c("l1", 
+                    "l2", "l3", "l4", "l5")
+      ),
+      uiOutput("ui"),
+      verbatimTextOutput(outputId = "info"),
+      tableOutput(outputId = "table")
+    ),
+    function(input, output) {
+      level_names <- reactive({
+        input$levels
+        })
+      
+      implant_details_selected_reactive <- reactive({
+                details_df <- tibble(level = level_names()) %>%
+          mutate(level_count = row_number()) 
+
+        max_levels <- nrow(details_df)     
+        req(max_levels > 0)
+        levels_count <- seq(from = 1, to = max_levels, by = 1)
+        
+        map(.x = levels_count, .f = ~input[[level_names()[.x]]])
+      })
+      
+      
+      output$table <- renderTable({
+        
+        details_df <- tibble(level = level_names()) %>%
+          mutate(level_count = row_number()) 
+
+        max_levels <- nrow(details_df)     
+        req(max_levels > 0)
+        levels_count <- seq(from = 1, to = max_levels, by = 1)
+        
+        input_list <- map(.x = levels_count, .f = ~input[[level_names()[.x]]])
+        
+        details_df %>%
+          mutate(details = input_list)
+
+      })
+      
+            ui_list <- reactive({
+        map2(.x = level_names(), .y = implant_details_selected_reactive(), .f = ~test_make_ui(screw_level = .x, selected = .y))
+
+      })
+
+            
+            output$ui <- renderUI({
+        ui_list()
+        # map(.x = level_names(), .f = ~test_make_ui(screw_level = .x))
+
+      })
+      
+    }
+  )
+}
+```
+
+
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+datasetInput <- function(id, filter = NULL) {
+  names <- ls("package:datasets")
+  if (!is.null(filter)) {
+    data <- lapply(names, get, "package:datasets")
+    names <- names[vapply(data, filter, logical(1))]
+  }
+  
+  selectInput(NS(id, "dataset"), "Pick a dataset", choices = names)
+  
+  # tibble(name_1 = c(1,2), name_2 = c(4, 5))
+  
+}
+
+
+shiny::
+
+```
+
+
+```{r}
+
+test_make_ui <-  function(screw_level){
+        radioGroupButtons(
+            inputId = screw_level,
+            label = screw_level,
+            choices = c("Poly", "Uni", "Mono", "Reduction"),
+            selected = "Poly"
+        )}
+    
+
+if (interactive()) {
+  shinyApp(
+    fluidPage(
+      # tags$style(HTML("body {background-color: black; color: white; }")),
+      # tags$style(HTML("body a {color: purple}")),
+      # tags$style(HTML("#info {background-color: teal; color: orange; }")),
+      checkboxGroupButtons(
+        inputId = "levels",
+        label = "Label",
+        choices = c("l1", 
+                    "l2", "l3", "l4", "l5")
+      ),
+      uiOutput("ui"),
+      verbatimTextOutput(outputId = "info"),
+      tableOutput(outputId = "table")
+      # 
+      # tagAppendAttributes(
+      #   textOutput("info"),
+      #   class = "shiny-report-theme"
+      # )
+    ),
+    function(input, output) {
+      level_names <- reactive({
+        input$levels
+        })
+      
+      ui_list <- reactive({
+        info <- getCurrentOutputInfo()
+        
+        ui_list <- map(.x = level_names(), .f = ~test_make_ui(screw_level = .x))
+        
+        return(list(ui_info = info, 
+                    ui_items = ui_list))
+      })
+      
+      output$ui <- renderUI({
+        ui_list()$ui_items
+
+      })
+
+      
+      # output$info <- renderPrint({
+      #   # input[[level_names()[1]]] ### GOOD
+      #   
+      #   details_df <- tibble(level = level_names()) %>%
+      #     mutate(level_count = row_number()) 
+      #   # mutate(details = input[[level_count]])
+      #   
+      #   max_levels <- nrow(details_df)     
+      #   req(max_levels > 0)
+      #   levels_count <- seq(from = 1, to = max_levels, by = 1)
+      #   
+      #   input_list <- list()
+      #   
+      #   for (i in levels_count) {
+      #     input_list <- append(input_list, input[[level_names()[i]]])
+      #   }
+      #   
+      #   # values <- map_chr(.x = levels_count, .f = ~ input[[.x]])
+      #   
+      #   # input[[level_names()[1]]] ### GOOD
+      #   
+      #   # input_list <- list()
+      #   # 
+      #   #   input_list <- append(input_list, input[[i]])
+      #   # 
+      #   glue_collapse(input_list)
+      #   
+      #   # values
+      #   
+      # })
+      
+      output$table <- renderTable({
+        
+        details_df <- tibble(level = level_names()) %>%
+          mutate(level_count = row_number()) 
+        # mutate(details = input[[level_count]])
+        
+        max_levels <- nrow(details_df)     
+        req(max_levels > 0)
+        levels_count <- seq(from = 1, to = max_levels, by = 1)
+        
+        input_list <- list()
+        
+        for (i in levels_count) {
+          input_list <- append(input_list, input[[level_names()[i]]])
+        }
+        
+        details_df %>%
+          mutate(details = input_list)
+        
+        # levels_count <- seq(from = 1, nrow(details_df), by = 1)
+        # 
+        # map(.x = levels_count, .f = ~ input[[.x]])
+        
+      })
+      
+      
+    }
+  )
+}
+
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

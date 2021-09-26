@@ -164,7 +164,6 @@ open_canal_df <- decompression_df %>%
 all_interbody_df <- implant_starts_df %>%
   filter(category == "interbody") %>%
   filter(approach == "posterior") %>%
-  # filter(!is.na(width)) %>%
   replace_na(list(superior_endplate_y = 0, inferior_endplate_y = 0, inferior_facet_lateral_border_x = 0, inferior_facet_medial_border_x = 0, inferior_facet_superior_border_y = 0, inferior_facet_inferior_border_y = 0)) %>%
   mutate(object_constructed = pmap(list(..1 = object,
                                         ..2 = x,
@@ -252,6 +251,13 @@ revision_implants_df <- all_points_all_implants_constructed_df %>%
 all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
   select(-ends_with("_x"), -ends_with("_y"))
   # select(level, body_interspace, vertebral_number, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv, direction, object_constructed)
+
+all_objects_y_range_df <- all_implants_constructed_df %>%
+  select(object, y) %>%
+  group_by(object) %>%
+  filter(y == min(y) | y == max(y)) %>%
+  ungroup() %>%
+  distinct()
 
 rm(osteotomy_df, decompression_df, all_interbody_df)
 
