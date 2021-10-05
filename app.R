@@ -1,10 +1,10 @@
 ####################### SURGICAL PLANNING V2 ###########################
 
 library(shiny)
+library(shinyWidgets)
 library(sf)
 library(tidyverse)
 library(ggplot2)
-library(shinyWidgets)
 library(shinyBS)
 library(cowplot)
 library(magick)
@@ -14,13 +14,13 @@ library(rlist)
 library(janitor)
 library(lubridate)
 library(redcapAPI)
-library(ggpmisc)
+# library(ggpmisc)
 library(rclipboard)
 library(nngeo)
 library(shinydashboard)
-
-library(shinyauthr)
-library(sodium)
+# 
+# library(shinyauthr)
+# library(sodium)
 
 # rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "58C0BC0A6CA8B8DFB21A054C2F5A3C49")
 rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = "2A930AE845C92CBF95467E59ADBA0D20")
@@ -37,898 +37,819 @@ source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 rclipboardSetup()
 
 ui <- dashboardPage(skin = "black",
-    dashboardHeader(title = "Spine Operative Logging and Automated Report Generation", titleWidth = 650,
-                    dropdownMenuOutput(outputId = "upload_to_redcap_task")
-                    
-    ),
-    dashboardSidebar(width = 350,collapsed = TRUE,
-                     sidebarMenu(id = "tabs", 
-                         menuItem(text = "Patient Details & Surgical Procedures", 
-                                  tabName = "patient_details_procedures", 
-                                  icon = icon("screwdriver")
-                         ),
-                         menuItem(text = "Implant & Additional Procedural Details",
-                                  tabName = "implant_details",
-                                  icon = icon("ruler")
-                         ),
-                         menuItem(text = "Upload Data & Generate Operative Note",
-                                  tabName = "operative_note",
-                                  icon = icon("clipboard")
-                         ),
-                         br(),
-                         menuItem(text = "Review Data Tables",
-                                  tabName = "tables",
-                                  icon = icon("table")
-                         )
-                     )
-    ),
-    dashboardBody(
-        tags$head(
-            tags$style(
-                "#posterior_bmp_size {
-                font-size: small;
-                max-width: -webkit-fill-available;
-                        text-align: left;
-                }"),
-            tags$style(
-                "#posterior_bmp_number {
-                        width: -webkit-fill-available;
-                        text-align: center;
-                }"),
-            tags$style(
-                "#posterior_bmp_dosage {
-                        width: -webkit-fill-available;
-                text-align: center;
-                font-size: medium;
-                font-weight: bold;
-                border-style: solid;
-                border-color: burlywood;
-                        }"),
-            tags$style(
-                "#anterior_bmp_size {
-                font-size: small;
-                max-width: -webkit-fill-available;
-                        text-align: left;
-                }"),
-            tags$style(
-                "#anterior_bmp_number {
-                        width: -webkit-fill-available;
-                        text-align: center;
-                }"),
-            tags$style(
-                "#anterior_bmp_dosage {
-                        width: -webkit-fill-available;
-                text-align: center;
-                font-size: medium;
-                font-weight: bold;
-                border-style: solid;
-                border-color: burlywood;
-                        }"),
-            tags$style(
-                "#surgery_summary_table_tab {
-                        overflow-x: auto;
-                }"),
-            tags$style(
-                "#redcap_details_wide_df_tab {
-                        overflow-x: auto;
-                }"),
-            tags$style(
-                "#interbody_details_table_tab {
-                        overflow-x: auto;
-                }"),
-            tags$style(
-                "#all_objects_table {
-                        overflow-x: auto;
-                }"),
-            tags$style(
-                "#redcap_details_wide_df {
-                        overflow-x: auto;
-                }"),
-            tags$style(
-                "#pedicle_screw_details_table_tab {
-                        overflow-x: auto;
-                }"),
-        ),
-        tabItems(
-            tabItem(tabName = "patient_details_procedures",
-                    column(width = 4, 
-                           box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Patient Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE,
-                               fluidRow(column(12, 
-                                               uiOutput(outputId = "patient_details_ui"),
-                                               )
-                               ),
-                               fluidRow(
-                                   column(12, 
-                                          radioGroupButtons(
-                                              inputId = "primary_diagnosis_group",
-                                              label = "Diagnosis Category:",
-                                              choices = c("Degenerative" = "spinal_condition",
-                                                          "Deformity" = "deformity", 
-                                                          "Neoplasm" = "neoplasm", 
-                                                          "Lesion (trauma, infection)" = "lesion"),
-                                              individual = TRUE, width = "100%", direction = "horizontal", size = "sm", 
-                                              checkIcon = list(
-                                                  yes = tags$i(class = "fa fa-circle", 
-                                                               style = "color: steelblue"),
-                                                  no = tags$i(class = "fa fa-circle-o", 
-                                                              style = "color: steelblue"))
-                                          ))
-                               ),
-                               fluidRow(
-                                   column(width = 5, 
-                                          tags$div(style = "font-size:16px; font-weight:bold", "Diagnosis Subgroup:"),
-                                          conditionalPanel(condition = "input.primary_revision.indexOf('Primary') > -1",
-                                                           tags$div(style = "font-size:12px; font-weight:bold", "(Select all that apply)")),
-                                          conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
-                                                           tags$div(style = "font-size:12px; font-weight:bold", "(Select all that apply, including primary diagnosis and indication for revision)"))
-                                   ),
-                                   column(width = 7,
-                                          pickerInput(inputId = "diagnosis_subgroup", label = NULL,
-                                                      choices = c("Spinal Stenosis",
-                                                                  "Myelopathy",
-                                                                  "Foraminal Stenosis",
-                                                                  "Degenerative Spondylolisthesis",
-                                                                  "Pseudarthrosis",
-                                                                  "Lumbar Disc Herniation",
-                                                                  "Other"), 
-                                                      multiple = TRUE
-                                          ),
-                                          conditionalPanel(condition = "input.diagnosis_subgroup.indexOf('Other') > -1",
-                                                           textInput(inputId = "diagnosis_subgroup_other", label = "Other:"))
-                                   )
-                               ),
-                               br(),
-                               fluidRow(
-                                   column(width = 5, 
-                                          tags$div(style = "font-size:16px; font-weight:bold", "Symptoms:"),
-                                          tags$div(style = "font-size:12px; font-weight:bold", "(Adjust Spine Region for Other Options)"),
-                                   ),
-                                   column(width = 7,
-                                          pickerInput(
-                                              inputId = "symptoms",
-                                              label = NULL,
-                                              choices = list('Neck & Uppers:' = c("Neck Pain", "Left Arm Pain", "Right Arm Pain", "Left Arm Weakness", "Right Arm Weakness"),
-                                                             'Thoracic:' = c("Mid Back Pain", "Kyphosis"),
-                                                             "Lower & Legs:" = c("Low Back Pain", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness"), 
-                                                             "Functional:" = c("Myelopathy: Nurick 1 (Root Symptomts)",
-                                                                               "Myelopathy: Nurick 2 (Normal gait but symptoms of cord compression)",
-                                                                               "Myelopathy: Nurick 3 (Gait Abnormalities)",
-                                                                               "Myelopathy: Nurick 4 (Significant Gait Abnormalities, preventing employment)",
-                                                                               "Myelopathy: Nurick 5 (Depended on Assistive Device for Ambulating)",
-                                                                               "Myelopathy: Nurick 6 (Wheelchair bound)"),
-                                                             "Deformity" = c("Coronal deformity", "Sagittal Imbalance", "Chin on chest deformity", "Flatback Syndrome"),
-                                                             'Other' = c("Loss of bladder control", "Bowel Incontinence", "Other")
-                                              ),
-                                              multiple = TRUE, 
-                                              width = "100%"
-                                          ),
-                                          conditionalPanel(condition = "input.symptoms.indexOf('Other') > -1",
-                                                           textInput(inputId = "symptoms_other", label = "Other:"))
-                                   )
-                               ),
-                               textInput(inputId = "relevant_history", label = "Other Comments/History:"),
-                           ),
-                           
-                           box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Surgical Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE, 
-                               uiOutput(outputId = "surgical_details_ui"),
-                               jh_make_shiny_table_row_function(left_column_label = "Staged Procedure?", input_type = "switch", input_id = "staged_procedure", left_column_percent_width = 50, font_size = 16, switch_input_on_label = "Yes", switch_input_off_label = "No"), 
-                               conditionalPanel(condition = "input.staged_procedure == true",
-                                                jh_make_shiny_table_row_function(left_column_label = "Stage Number:",
-                                                                                 input_type = "awesomeRadio",
-                                                                                 input_id = "stage_number", 
-                                                                                 left_column_percent_width = 50, font_size = 14, choices_vector = c(1,2,3,4,5), checkboxes_inline = TRUE, 
-                                                                                 initial_value_selected = 1)
-                               ),
-                               jh_make_shiny_table_row_function(left_column_label = "Multiple Approach, single stage?", input_type = "switch", input_id = "multiple_approach", left_column_percent_width = 50, font_size = 16, switch_input_on_label = "Yes", switch_input_off_label = "No"),
-                                                tags$hr(),
-                               ),
-                           actionBttn(inputId = "edit_patient", label = "Edit Patient Details", icon = icon("fas fa-user-edit"), size = "md", block = TRUE)
+                    dashboardHeader(title = "Spine Operative Logging and Automated Report Generation", titleWidth = 650,
+                                    dropdownMenuOutput(outputId = "upload_to_redcap_task")
+                                    
                     ),
-                    column(width = 8, 
-                           box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Surgical Procedures:"), solidHeader = TRUE, status = "primary",
-                               box(width = 7, 
-                                   fluidRow(
-                                       column(width =  11, 
-                                              tags$table(
-                                                  tags$tr(width = "100%",
-                                                          tags$td(width = "30%", tags$div(style = "font-size:18px; font-weight:bold; text-align:left", "Select Approach:")),
-                                                          tags$td(width = "70%", 
-                                                                  radioGroupButtons(inputId = "spine_approach", 
-                                                                                    label = NULL,
-                                                                                    choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior or Lateral")),
-                                                                                                       tags$span(icon("fas fa-user", style = "color: steelblue"), strong("Posterior"))),
-                                                                                    choiceValues = list("Anterior", "Posterior"),
-                                                                                    selected = "Posterior", 
-                                                                                    direction = "horizontal",
-                                                                                    checkIcon = list(yes = icon("check")),
-                                                                                    justified = TRUE
-                                                                  )
-                                                                  )
-                                                  )
-                                              ) 
-                                       ),
-                                       column(width = 1, 
-                                              dropdownButton(
-                                                  sliderInput(
-                                                      inputId = "label_text_size",
-                                                      label = "Label Text Size",
-                                                      value = 14,
-                                                      min = 9,
-                                                      max = 20
-                                                  ),
-                                                  sliderInput(
-                                                      inputId = "label_text_offset",
-                                                      label = "Move Labels Lateral",
-                                                      min = -10,
-                                                      max = 10,
-                                                      value = -8
-                                                  ),
-                                                  switchInput(label = "Plot with patterns (slower):",
-                                                              onLabel = "Yes",
-                                                              offLabel = "No",
-                                                              inputId = "plot_with_patterns_true",
-                                                              value = FALSE
-                                                  ),
-                                                  switchInput(label = "Plot Summary Table:",
-                                                              onLabel = "Yes",
-                                                              offLabel = "No",
-                                                              inputId = "plot_summary_table",
-                                                              value = FALSE
-                                                  ),
-                                                  circle = TRUE,
-                                                  icon = icon("gear"),
-                                                  size = "sm",
-                                                  inline = TRUE,
-                                                  right = TRUE
-                                              )
-                                       )
+                    dashboardSidebar(width = 350,collapsed = TRUE,
+                                     sidebarMenu(id = "tabs", 
+                                                 menuItem(text = "Patient Details & Surgical Procedures", 
+                                                          tabName = "patient_details_procedures", 
+                                                          icon = icon("screwdriver")
+                                                 ),
+                                                 menuItem(text = "Implant & Additional Procedural Details",
+                                                          tabName = "implant_details",
+                                                          icon = icon("ruler")
+                                                 ),
+                                                 menuItem(text = "Upload Data & Generate Operative Note",
+                                                          tabName = "operative_note",
+                                                          icon = icon("clipboard")
+                                                 ),
+                                                 br(),
+                                                 menuItem(text = "Review Data Tables",
+                                                          tabName = "tables",
+                                                          icon = icon("table")
+                                                 )
+                                     )
+                    ),
+                    dashboardBody(
+                        tags$head(
+                            tags$style(
+                                "#posterior_bmp_size {
+                font-size: small;
+                max-width: -webkit-fill-available;
+                        text-align: left;
+                }"),
+                tags$style(
+                    "#posterior_bmp_number {
+                        width: -webkit-fill-available;
+                        text-align: center;
+                }"),
+                tags$style(
+                    "#posterior_bmp_dosage {
+                        width: -webkit-fill-available;
+                text-align: center;
+                font-size: medium;
+                font-weight: bold;
+                border-style: solid;
+                border-color: burlywood;
+                        }"),
+                tags$style(
+                    "#anterior_bmp_size {
+                font-size: small;
+                max-width: -webkit-fill-available;
+                        text-align: left;
+                }"),
+                tags$style(
+                    "#anterior_bmp_number {
+                        width: -webkit-fill-available;
+                        text-align: center;
+                }"),
+                tags$style(
+                    "#anterior_bmp_dosage {
+                        width: -webkit-fill-available;
+                text-align: center;
+                font-size: medium;
+                font-weight: bold;
+                border-style: solid;
+                border-color: burlywood;
+                        }"),
+                tags$style(
+                    "#surgery_summary_table_tab {
+                        overflow-x: auto;
+                }"),
+                tags$style(
+                    "#redcap_details_wide_df_tab {
+                        overflow-x: auto;
+                }"),
+                tags$style(
+                    "#interbody_details_table_tab {
+                        overflow-x: auto;
+                }"),
+                tags$style(
+                    "#all_objects_table {
+                        overflow-x: auto;
+                }"),
+                tags$style(
+                    "#redcap_details_wide_df {
+                        overflow-x: auto;
+                }"),
+                tags$style(
+                    "#pedicle_screw_details_table_tab {
+                        overflow-x: auto;
+                }"),
+                        ),
+                tabItems(
+                    tabItem(tabName = "patient_details_procedures",
+                            column(width = 3, 
+                                   box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Patient Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE,
+                                       uiOutput(outputId = "patient_details_ui"),
+                                       br(),
+                                       actionBttn(inputId = "edit_patient", label = "Edit Patient Details", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
                                    ),
-                                   fluidRow(
-                                       column(width = 2,
-                                              fluidRow(
-                                                  column(width = 9,
-                                                         div(style = "font-size:12px; text-align:center", "Change Lumbar Anatomy")
-                                                  ),
-                                                  column(width = 3,
-                                                         dropdownButton(circle = TRUE,size = "xs",
-                                                                        label = "Transitional Anatomy",
-                                                                        icon = icon("fas fa-asterisk"), 
-                                                                        awesomeRadio(
-                                                                            inputId = "lumbar_vertebrae_count",
-                                                                            label = "Number of Lumbar Vertebrae:", 
-                                                                            choices = c("4", "5", "6"),
-                                                                            selected = "5",
-                                                                            inline = TRUE, 
-                                                                            status = "success"
-                                                                        )
-                                                         )
-                                                  )
-                                              ),
-                                              br(),
-                                              noUiSliderInput(inputId = "crop_y",
-                                                              label = "Spine Region",
-                                                              min = 0,
-                                                              max = 1,
-                                                              value = c(0.05,0.42), direction = "rtl",
-                                                              behaviour = "drag",color = "#0036FD",
-                                                              orientation = "vertical",
-                                                              height = "600px", width = "3px",
-                                                              inline = TRUE)
-                                       ), 
-                                       column(width = 10,
-                                              div(style = "font-size:16px; font-weight:bold; font-style:italic; text-align:center", "Add Procedures in Order Performed"),
-                                              div(style = "font-size:12px; text-align:center", "Double click to remove an item."),
-                                              plotOutput("spine_plan",
-                                                         height = 750,
-                                                         click = "plot_click",
-                                                         dblclick = "plot_double_click")
-                                       )   
-                                   )
-                               ),
-                               box(width = 5, ##### RIGHT COLUMN NEXT TO SPINE PLOT
-                                   box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),collapsible = TRUE,  
-                                       conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
-                                                    fluidRow(
-                                                        prettyRadioButtons(
-                                                                   inputId = "approach_specified_posterior",
-                                                                   label = NULL, 
-                                                                   inline = TRUE,
-                                                                   choices = c("Midline",
-                                                                               "Paraspinal or Paramedian", 
-                                                                               "Stab"),
-                                                                   icon = icon("check"), 
-                                                                   bigger = TRUE,
-                                                                   status = "info"
-                                                               )
-                                                        ),
-                                                        fluidRow(
-                                                            column(width = 6, 
-                                                                   prettyRadioButtons(
-                                                                       inputId = "approach_open_mis",
-                                                                       label = NULL, 
-                                                                       inline = TRUE,
-                                                                       choices = c("Open",
-                                                                                   "Minimally Invasive"),
-                                                                       selected = "Open",
-                                                                       icon = icon("check"), 
-                                                                       bigger = TRUE,
-                                                                       status = "success"
-                                                                   )
-                                                            ), 
-                                                            column(width = 6, 
-                                                                   prettyCheckboxGroup(
-                                                                       inputId = "approach_robot_navigation",
-                                                                       label = NULL, 
-                                                                       inline = TRUE,
-                                                                       choices = c("Robotic Assistance",
-                                                                                   "Navigation Assistance"),
-                                                                       icon = icon("check"), 
-                                                                       bigger = TRUE,
-                                                                       status = "success"
-                                                                   )
-                                                            )
-                                                        )
-                                   ),
-                                   conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
-                                                    prettyRadioButtons(
-                                                        inputId = "approach_specified_anterior",
-                                                        label = NULL,
-                                                        inline = TRUE,
-                                                        choices = c("Left-sided", 
-                                                                    "Right-sided",
-                                                                    "Paramedian",
-                                                                    "Lateral Transpsoas",
-                                                                    "Lateral Antepsoas",
-                                                                    "Thoracoabdominal",
-                                                                    "Thoracotomy",
-                                                                    "Transperitoneal",
-                                                                    "Retroperitoneal"),
-                                                        selected = "Left-sided",
-                                                        icon = icon("check"),
-                                                        bigger = TRUE,
-                                                        status = "info"
-                                                        )
-                                                    )
-                                   ),
-                                   uiOutput(outputId = "currently_adding_ui"),
-                                   conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
-                                                    div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Procedure & Click Spine to Add:")
-                                   ),
-                                   conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
-                                                    div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Category:"),
-                                                    actionBttn(
-                                                        inputId = "add_implants",
-                                                        size = "sm", 
-                                                        block = TRUE,
-                                                        label = "Add Surgical Implants (Screws, Hooks, Wires, Tethers, etc.)",
-                                                        style = "simple",
-                                                        color = "primary"
-                                                        ),
-                                                    br(),
-                                                    actionBttn(
-                                                        inputId = "add_decompressions",
-                                                        size = "sm", block = TRUE,
-                                                        label = "Add Decompressions",
-                                                        style = "simple",
-                                                        color = "primary"
-                                                    ),
-                                                    br(),
-                                                    actionBttn(
-                                                        inputId = "add_osteotomies",
-                                                        size = "sm", block = TRUE,
-                                                        label = "Add Osteotomies/Facetectomies",
-                                                        style = "simple",
-                                                        color = "primary"
-                                                    ),
-                                                    br(),
-                                                    actionBttn(
-                                                        inputId = "add_interbody",
-                                                        size = "sm", block = TRUE,
-                                                        label = "Add Interbody Fusion",
-                                                        style = "simple",
-                                                        color = "primary"
-                                                    ),
-                                                    br(),
-                                                    actionBttn(
-                                                        inputId = "add_special_approach",
-                                                        size = "sm", block = TRUE,
-                                                        label = "Add Special Approach (Costovertebral, etc)",
-                                                        style = "simple",
-                                                        color = "primary"
-                                                    ),
-                                                    br(),
-                                                    actionBttn(
-                                                        inputId = "add_other",
-                                                        size = "sm", block = TRUE,
-                                                        label = "Add Other (cement, structural allograft, etc)",
-                                                        style = "simple",
-                                                        color = "primary"
-                                                    ),
-                                                    uiOutput(outputId = "intervertebral_cage_ui"),
-                                                    uiOutput(outputId = "tumor_resection_ui"),
-                                                    br(), 
-                                                    div(style = "font-size:20px; font-weight:bold; text-align:left", "2. Select Implant/Procedure & Click Spine to Add:"),
-                                                    ),
-                                   div(class = "form-group shiny-input-container shiny-input-radiogroup shiny-input-container-inline", style = "width: 100%;text-align: -webkit-center;", 
-                                       radioGroupButtons(
-                                           inputId = "object_to_add",
-                                           direction = "vertical",
-                                           width = "95%",
-                                           justified = TRUE,
-                                           individual = FALSE,
-                                           label = NULL,
-                                           choices = c(
-                                               "Pedicle Screws" = "pedicle_screw",
-                                               "Pelvic Screws" = "pelvic_screw",
-                                               "Occipital Screws" = "occipital_screw",
-                                               "Transarticular Screw" = "transarticular_screw",
-                                               "Pars Screws" = "pars_screw",
-                                               "Translaminar Screws" = "translaminar_screw",
-                                               "Lateral Mass Screws" = "lateral_mass_screw",
-                                               "TP Hook" = "tp_hook",
-                                               "Laminar Hook (Downgoing)" = "laminar_downgoing_hook",
-                                               "Laminar Hook (Upgoing)" = "laminar_upgoing_hook",
-                                               "Pedicle Hook" = "pedicle_hook",
-                                               "Tether (Spinous Process)" = "tether",
-                                               "Sublaminar Wire" = "sublaminar_wire"  
-                                           ),
-                                           checkIcon = list(
-                                               yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
-                                           ),
-                                           selected = "pedicle_screw"
-                                       )
-                                   ),
-                                   # br(),
-                                   # br(),
-                                   actionBttn(
-                                       inputId = "reset_all",
-                                       size = "xs", block = TRUE,
-                                       label = "Reset & Clear All",
-                                       style = "simple",
-                                       color = "danger"
-                                   )
-                               )## end of little box to the right of the spine
-                           ),### end of the full box
-                           actionBttn(
-                               inputId = "implants_complete",
-                               size = "md", 
-                               block = TRUE,
-                               label = "Click when finished to Add Implant Details",
-                               style = "simple",
-                               color = "success", 
-                               icon = icon("fas fa-arrow-circle-right")
-                           )
-                    ) ## closes the right column 
-            ),
-            tabItem(tabName = "implant_details",   
-                    ###########################################
-                    box(width = 7, status = "info", title = div(style = "font-size:22px; font-weight:bold; text-align:left", "Implant & Fusion Details:"),
-                        fluidRow(
-                            column(width = 4, 
-                                   dropdownButton(size = "xs", label = NULL, 
-                                                  switchInput(
-                                                      inputId = "fusion_procedure_performed",
-                                                      width = '100%',
-                                                      inline = TRUE,
-                                                      label = "Fusion:",
-                                                      onLabel = "Yes",
-                                                      offLabel = "No",
-                                                      value = FALSE,
-                                                      size = "mini"
-                                                  ),
-                                                  switchInput(
-                                                      inputId = "anterior_fusion_performed",
-                                                      width = '100%',
-                                                      inline = TRUE,
-                                                      label = "Fusion:",
-                                                      onLabel = "Yes",
-                                                      offLabel = "No",
-                                                      value = FALSE,
-                                                      size = "mini"
-                                                  ),
-                                                  switchInput(
-                                                      inputId = "posterior_fusion_performed",
-                                                      width = '100%',
-                                                      inline = TRUE,
-                                                      label = "Fusion:",
-                                                      onLabel = "Yes",
-                                                      offLabel = "No",
-                                                      value = FALSE,
-                                                      size = "mini"
-                                                  ),
-                                                  switchInput(label = "Left Supplemental Rods Eligible:",
-                                                              inputId = "left_supplemental_rods_eligible",
-                                                              size = "mini",
-                                                              onLabel = "Yes",
-                                                              offLabel = "No", 
-                                                              value = FALSE
-                                                  ),
-                                                  switchInput(label = "Right Supplemental Rods Eligible:",
-                                                              inputId = "right_supplemental_rods_eligible",
-                                                              size = "mini",
-                                                              onLabel = "Yes",
-                                                              offLabel = "No", 
-                                                              value = FALSE
-                                                  )
+                                   br(),
+                                   box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Diagnosis, Symptoms, Procedure Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE,
+                                       uiOutput(outputId = "diagnosis_symptoms_ui"),
+                                       br(),
+                                       actionBttn(inputId = "edit_diagnosis_symptoms", label = "Edit", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
                                    )
                             ),
-                            # column(width = 4, 
-                            #        conditionalPanel(condition = "input.fusion_procedure_performed == true",
-                            #                         dropdown(icon = icon("link"),
-                            #                                  # size = "lg",
-                            #                                  width = "100%",
-                            #                                  label = "Confirm Fusion Levels",
-                            #                                  style = "unite",
-                            #                                  checkboxGroupButtons(inputId = "fusion_levels_confirmed",
-                            #                                                       label = "Select/Confirm Fusion Levels:",
-                            #                                                       choices = interbody_levels_df$level,
-                            #                                                       size = "sm",
-                            #                                                       direction = "vertical",
-                            #                                                       checkIcon = list(
-                            #                                                           yes = tags$i(class = "fa fa-check-square",
-                            #                                                                        style = "color: steelblue"),
-                            #                                                           no = tags$i(class = "fa fa-square-o",
-                            #                                                                       style = "color: steelblue"))
-                            #                                  )
-                            #                         )
-                            #        )
-                            # )
-                        ),
-                        conditionalPanel(condition = "input.posterior_fusion_performed == true",
-                                         box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "POSTERIOR Bone Graft & Biologics:"),
-                                             ## NEW
-                                             fluidRow(
-                                                 column(6,
-                                                        div(style = "font-size:16px; font-weight:bold; text-align:left", "Select any bone graft used:"),
-                                                        prettyCheckboxGroup(inputId = "posterior_bone_graft",
-                                                                            shape = "curve", outline = TRUE, status = "primary", width = "95%", bigger = TRUE,
-                                                                            label = NULL,
-                                                                            choices = c("Morselized Allograft",
-                                                                                        "Local Autograft",
-                                                                                        "Morselized Autograft (separate fascial incision)"
-                                                                            )
-                                                        )
-                                                 ),
-                                                 column(6,
-                                                        div(style = "font-size:16px; font-weight:bold; text-align:left", "Other Biologics:"),
-                                                        prettyCheckboxGroup(inputId = "posterior_biologics",
-                                                                            shape = "curve", outline = TRUE, status = "primary", width = "95%",bigger = TRUE,
-                                                                            label = NULL,
-                                                                            choices = c("Bone Marrow Aspirate",
-                                                                                        "Cell Based Allograft",
-                                                                                        "DBM"
-                                                                            )
-                                                        )
-                                                 )
-                                             ),
-                                             fluidRow(
-                                                 column(6,
-                                                        conditionalPanel(
-                                                            condition = "input.posterior_bone_graft.indexOf('Morselized Allograft') > -1",
-                                                            jh_make_shiny_table_row_function(left_column_label = "Allograft (cc):",bottom_margin = "5px",
-                                                                                             left_column_percent_width = 60,
-                                                                                             font_size = 16,
-                                                                                             input_type = "numeric",
-                                                                                             input_id = "posterior_allograft_amount",
-                                                                                             initial_value_selected = 0,
-                                                                                             min = 0, max = 500, step = 30)
-                                                        )
-                                                 ),
-                                                 column(6,
-                                                        conditionalPanel(
-                                                            condition = "input.posterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
-                                                            jh_make_shiny_table_row_function(left_column_label = "Bone Marrow Aspirate Volume (cc):",bottom_margin = "5px",
-                                                                                             left_column_percent_width = 60,
-                                                                                             font_size = 16,
-                                                                                             input_type = "numeric",
-                                                                                             input_id = "posterior_bone_marrow_aspirate_volume",
-                                                                                             initial_value_selected = 0,
-                                                                                             min = 0,
-                                                                                             max = 500,
-                                                                                             step = 5)
-                                                        ),
-                                                        conditionalPanel(
-                                                            condition = "input.posterior_biologics.indexOf('Cell Based Allograft') > -1",
-                                                            jh_make_shiny_table_row_function(left_column_label = "Cell Based Allograft Volume (cc):",bottom_margin = "5px",
-                                                                                             left_column_percent_width = 60,
-                                                                                             font_size = 16,
-                                                                                             input_type = "numeric",
-                                                                                             input_id = "posterior_cell_based_allograft_volume",
-                                                                                             initial_value_selected = 0,
-                                                                                             min = 0,
-                                                                                             max = 500,
-                                                                                             step = 5)
-                                                        ),
-                                                        conditionalPanel(
-                                                            condition = "input.posterior_biologics.indexOf('DBM') > -1",
-                                                            jh_make_shiny_table_row_function(left_column_label = "DBM Volume (cc):",bottom_margin = "5px",
-                                                                                             left_column_percent_width = 60,
-                                                                                             font_size = 16,
-                                                                                             input_type = "numeric",
-                                                                                             input_id = "posterior_dbm_volume",
-                                                                                             initial_value_selected = 0, min = 0, max = 500, step = 5)
-                                                        )
-                                                 )
-                                             ),
-                                             jh_make_bmp_ui_function(anterior_posterior = "posterior"),
-                                         )
-                        ),
-                        conditionalPanel(condition = "input.anterior_fusion_performed == true",
-                                         box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "ANTERIOR Bone Graft & Biologics:"),
-                                             fluidRow(
-                                                 tags$table(width = "100%",
-                                                            tags$tr(
-                                                                tags$td(width = "50%",
-                                                                        div(style = "font-size:16px; font-weight:bold; text-align:left", "Select any bone graft used:")
-                                                                ),
-                                                                tags$td(width = "50%",
-                                                                        div(style = "font-size:16px; font-weight:bold; text-align:left", "Other Biologics:")
-                                                                )
-                                                            ),
-                                                            tags$tr(
-                                                                tags$td(width = "50%",
-                                                                        prettyCheckboxGroup(inputId = "anterior_bone_graft", 
-                                                                                            shape = "curve", outline = TRUE, status = "primary", width = "95%", bigger = TRUE,
-                                                                                            label = NULL, 
-                                                                                            choices = c("Morselized Allograft",
-                                                                                                        "Local Autograft",
-                                                                                                        "Morselized Autograft (separate fascial incision)"
-                                                                                            )
-                                                                        )
-                                                                ),
-                                                                tags$td(width = "50%",
-                                                                        prettyCheckboxGroup(inputId = "anterior_biologics", 
-                                                                                            shape = "curve", outline = TRUE, status = "primary", width = "95%",bigger = TRUE,
+                            column(width = 9, 
+                                   box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Surgical Procedures:"), solidHeader = TRUE, status = "primary",
+                                       box(width = 7, 
+                                           fluidRow(
+                                               column(width =  11, 
+                                                      tags$table(
+                                                          tags$tr(width = "100%",
+                                                                  tags$td(width = "30%", tags$div(style = "font-size:18px; font-weight:bold; text-align:left", "Select Approach:")),
+                                                                  tags$td(width = "70%", 
+                                                                          radioGroupButtons(inputId = "spine_approach", 
                                                                                             label = NULL,
-                                                                                            choices = c("Bone Marrow Aspirate",
-                                                                                                        "Cell Based Allograft",
-                                                                                                        "DBM"
-                                                                                            )
-                                                                        )
-                                                                )
-                                                            )
-                                                 )
-                                             ),
-                                             fluidRow(
-                                                 column(width = 12, 
-                                                        conditionalPanel(
-                                                            condition = "input.anterior_bone_graft.indexOf('Morselized Allograft') > -1",
-                                                            jh_make_shiny_table_row_function(left_column_label = "Allograft (cc):",
-                                                                                             left_column_percent_width = 60, 
-                                                                                             font_size = 16,
-                                                                                             input_type = "numeric",
-                                                                                             input_id = "anterior_allograft_amount", initial_value_selected = 0, min = 0, max = 500, step = 30)
-                                                        ),
-                                                        conditionalPanel(
-                                                            condition = "input.anterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
-                                                            jh_make_shiny_table_row_function(left_column_label = "Bone Marrow Aspirate Volume (cc):",
-                                                                                             left_column_percent_width = 60, 
-                                                                                             font_size = 16,
-                                                                                             input_type = "numeric",
-                                                                                             input_id = "anterior_bone_marrow_aspirate_volume", 
-                                                                                             initial_value_selected = 0, 
-                                                                                             min = 0,
-                                                                                             max = 500,
-                                                                                             step = 5)
-                                                        ),
-                                                        conditionalPanel(
-                                                            condition = "input.anterior_biologics.indexOf('Cell Based Allograft') > -1",
-                                                            jh_make_shiny_table_row_function(left_column_label = "Cell Based Allograft Volume (cc):",
-                                                                                             left_column_percent_width = 60, 
-                                                                                             font_size = 16,
-                                                                                             input_type = "numeric",
-                                                                                             input_id = "anterior_cell_based_allograft_volume", 
-                                                                                             initial_value_selected = 0,
-                                                                                             min = 0,
-                                                                                             max = 500,
-                                                                                             step = 5)
-                                                        ),
-                                                        conditionalPanel(
-                                                            condition = "input.anterior_biologics.indexOf('DBM') > -1",
-                                                            jh_make_shiny_table_row_function(left_column_label = "DBM Volume (cc):",
-                                                                                             left_column_percent_width = 60, 
-                                                                                             font_size = 16,
-                                                                                             input_type = "numeric",
-                                                                                             input_id = "anterior_dbm_volume", initial_value_selected = 0, min = 0, max = 500, step = 5)
-                                                        )
-                                                 )
-                                             ),
-                                             jh_make_bmp_ui_function(anterior_posterior = "anterior")
-                                         )
-                        ),
-                        conditionalPanel(condition = "input.fusion_procedure_performed == true",
-                                         uiOutput(outputId = "interbody_implants_ui")
-                        ),
-                        conditionalPanel(condition = "input.fusion_procedure_performed == true & input.spine_approach.indexOf('Posterior') > -1",
-                                         box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "Rod Details:"), collapsible = TRUE,
-                                             fluidRow(column(4), 
-                                                      column(4, 
-                                                             dropdown(icon = icon("link"),
-                                                                      width = "60%",
-                                                                      label = "Add Crosslink",
-                                                                      style = "unite",
-                                                                      checkboxGroupButtons(inputId = "crosslink_connectors",
-                                                                                           label = "Add crosslinks at:",
-                                                                                           choices = vertebral_bodies_vector,
-                                                                                           individual = FALSE,
-                                                                                           # justified = TRUE,
-                                                                                           direction = "vertical",
-                                                                                           checkIcon = list(
-                                                                                               yes = tags$i(class = "fa fa-check-square",
-                                                                                                            style = "color: steelblue"),
-                                                                                               no = tags$i(class = "fa fa-square-o",
-                                                                                                           style = "color: steelblue"))
-                                                                      )
-                                                             )
+                                                                                            choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior or Lateral")),
+                                                                                                               tags$span(icon("fas fa-user", style = "color: steelblue"), strong("Posterior"))),
+                                                                                            choiceValues = list("Anterior", "Posterior"),
+                                                                                            selected = "Posterior", 
+                                                                                            direction = "horizontal",
+                                                                                            checkIcon = list(yes = icon("check")),
+                                                                                            justified = TRUE
+                                                                          )
+                                                                  )
+                                                          )
+                                                      ) 
+                                               ),
+                                               column(width = 1, 
+                                                      dropdownButton(
+                                                          sliderInput(
+                                                              inputId = "label_text_size",
+                                                              label = "Label Text Size",
+                                                              value = 14,
+                                                              min = 9,
+                                                              max = 20
+                                                          ),
+                                                          sliderInput(
+                                                              inputId = "label_text_offset",
+                                                              label = "Move Labels Lateral",
+                                                              min = -10,
+                                                              max = 10,
+                                                              value = -8
+                                                          ),
+                                                          switchInput(label = "Plot with patterns (slower):",
+                                                                      onLabel = "Yes",
+                                                                      offLabel = "No",
+                                                                      inputId = "plot_with_patterns_true",
+                                                                      value = FALSE
+                                                          ),
+                                                          switchInput(label = "Plot Summary Table:",
+                                                                      onLabel = "Yes",
+                                                                      offLabel = "No",
+                                                                      inputId = "plot_summary_table",
+                                                                      value = FALSE
+                                                          ),
+                                                          circle = TRUE,
+                                                          icon = icon("fas fa-cog"),
+                                                          size = "sm",
+                                                          inline = TRUE,
+                                                          right = TRUE
+                                                      )
+                                               )
+                                           ),
+                                           fluidRow(
+                                               column(width = 2,
+                                                      fluidRow(
+                                                          column(width = 9,
+                                                                 div(style = "font-size:12px; text-align:center", "Change Lumbar Anatomy")
+                                                          ),
+                                                          column(width = 3,
+                                                                 dropdownButton(circle = TRUE,size = "xs",
+                                                                                label = "Transitional Anatomy",
+                                                                                icon = icon("fas fa-asterisk"), 
+                                                                                awesomeRadio(
+                                                                                    inputId = "lumbar_vertebrae_count",
+                                                                                    label = "Number of Lumbar Vertebrae:", 
+                                                                                    choices = c("4", "5", "6"),
+                                                                                    selected = "5",
+                                                                                    inline = TRUE, 
+                                                                                    status = "success"
+                                                                                )
+                                                                 )
+                                                          )
                                                       ),
-                                                      column(4)
-                                             ),
-                                             jh_make_shiny_table_column_function(input_type = "title", left_label = "Left Rod(s):",right_label = "Right Rods(s):", font_size = 20, text_align = "left"),
-                                             jh_make_shiny_table_column_function(input_type = "pickerInput", 
-                                                                                 left_input_id = "left_main_rod_size", 
-                                                                                 left_label = "Size:",
-                                                                                 right_input_id = "right_main_rod_size", 
-                                                                                 right_label = "Size:",
-                                                                                 left_column_percent_width = 50,
-                                                                                 right_column_percent_width = 50,
-                                                                                 choices_vector = c("None", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/quarter in"),
-                                                                                 initial_value_selected = "None",
-                                                                                 picker_choose_multiple = FALSE),
-                                             jh_make_shiny_table_column_function(input_type = "awesomeRadio", 
-                                                                                 left_input_id = "left_main_rod_material", 
-                                                                                 left_label = "Material:",
-                                                                                 right_input_id = "right_main_rod_material", 
-                                                                                 right_label = "Material:",
-                                                                                 left_column_percent_width = 50,
-                                                                                 right_column_percent_width = 50,
-                                                                                 checkboxes_inline = TRUE,
-                                                                                 button_size = "normal",
-                                                                                 choices_vector = c("Non-instrumented", "Titanium", "Cobalt Chrome", "Stainless Steel"),
-                                                                                 initial_value_selected = "Non-instrumented",
-                                                                                 picker_choose_multiple = FALSE),
-                                             jh_make_supplemental_rod_ui_function(rod_type = "accessory_rod", input_label = "Accessory Rod"),
-                                             jh_make_supplemental_rod_ui_function(rod_type = "satellite_rod", input_label = "Satellite Rod"),
-                                             jh_make_supplemental_rod_ui_function(rod_type = "intercalary_rod", input_label = "Intercalary Rod"),
-                                             jh_make_supplemental_rod_ui_function(rod_type = "linked_rods", input_label = "Linked Rods"),
-                                             jh_make_shiny_table_column_function(input_type = "awesomeCheckbox", 
-                                                                                 left_input_id = "add_left_custom_rods", 
-                                                                                 left_label = "Customize Left Rod Construct:",
-                                                                                 right_input_id = "add_right_custom_rods", 
-                                                                                 right_label = "Customize Right Rod Construct:",
-                                                                                 left_condition_statement = "input.left_supplemental_rods_eligible == true", 
-                                                                                 right_condition_statement = "input.right_supplemental_rods_eligible == true", 
-                                                                                 initial_value_selected = FALSE,
-                                                                                 status = "success"),
-                                             fixedRow(
-                                                 column(width = 6,
-                                                        conditionalPanel(condition = "input.add_left_custom_rods == true",
-                                                                         awesomeRadio(inputId = "left_custom_rods_number", label = "Number of Left Total Rods:",choices = c(2,3,4,5), inline = TRUE, selected = 2),
-                                                                         uiOutput(outputId = "left_custom_rods_ui")
-                                                        )
-                                                 ),
-                                                 column(width = 6,
-                                                        conditionalPanel(condition = "input.add_right_custom_rods == true",
-                                                                         awesomeRadio(inputId = "right_custom_rods_number", label = "Number of Right Total Rods:",choices = c(2,3,4,5), inline = TRUE, selected = 2),
-                                                                         uiOutput(outputId = "right_custom_rods_ui")
-                                                        )
+                                                      br(),
+                                                      noUiSliderInput(inputId = "crop_y",
+                                                                      label = "Spine Region",
+                                                                      min = 0,
+                                                                      max = 1,
+                                                                      value = c(0.05,0.42), direction = "rtl",
+                                                                      behaviour = "drag",color = "#0036FD",
+                                                                      orientation = "vertical",
+                                                                      height = "600px", width = "3px",
+                                                                      inline = TRUE)
+                                               ), 
+                                               column(width = 10,
+                                                      div(style = "font-size:16px; font-weight:bold; font-style:italic; text-align:center", "Add Procedures in Order Performed"),
+                                                      div(style = "font-size:12px; text-align:center", "Double click to remove an item."),
+                                                      plotOutput("spine_plan",
+                                                                 height = 750,
+                                                                 click = "plot_click",
+                                                                 dblclick = "plot_double_click")
+                                               )   
+                                           )
+                                       ),
+                                       box(width = 5, ##### RIGHT COLUMN NEXT TO SPINE PLOT
+                                           box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),collapsible = TRUE,  
+                                               conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
+                                                                fluidRow(
+                                                                    prettyRadioButtons(
+                                                                        inputId = "approach_specified_posterior",
+                                                                        label = NULL, 
+                                                                        inline = TRUE,
+                                                                        choices = c("Midline",
+                                                                                    "Paraspinal or Paramedian", 
+                                                                                    "Stab"),
+                                                                        icon = icon("check"), 
+                                                                        bigger = TRUE,
+                                                                        status = "info"
+                                                                    )
+                                                                ),
+                                                                fluidRow(
+                                                                    column(width = 6, 
+                                                                           prettyRadioButtons(
+                                                                               inputId = "approach_open_mis",
+                                                                               label = NULL, 
+                                                                               inline = TRUE,
+                                                                               choices = c("Open",
+                                                                                           "Minimally Invasive"),
+                                                                               selected = "Open",
+                                                                               icon = icon("check"), 
+                                                                               bigger = TRUE,
+                                                                               status = "success"
+                                                                           )
+                                                                    ), 
+                                                                    column(width = 6, 
+                                                                           prettyCheckboxGroup(
+                                                                               inputId = "approach_robot_navigation",
+                                                                               label = NULL, 
+                                                                               inline = TRUE,
+                                                                               choices = c("Robotic Assistance",
+                                                                                           "Navigation Assistance"),
+                                                                               icon = icon("check"), 
+                                                                               bigger = TRUE,
+                                                                               status = "success"
+                                                                           )
+                                                                    )
+                                                                )
+                                               ),
+                                               conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
+                                                                prettyRadioButtons(
+                                                                    inputId = "approach_specified_anterior",
+                                                                    label = NULL,
+                                                                    inline = TRUE,
+                                                                    choices = c("Left-sided", 
+                                                                                "Right-sided",
+                                                                                "Paramedian",
+                                                                                "Lateral Transpsoas",
+                                                                                "Lateral Antepsoas",
+                                                                                "Thoracoabdominal",
+                                                                                "Thoracotomy",
+                                                                                "Transperitoneal",
+                                                                                "Retroperitoneal"),
+                                                                    selected = "Left-sided",
+                                                                    icon = icon("check"),
+                                                                    bigger = TRUE,
+                                                                    status = "info"
+                                                                )
+                                               )
+                                           ),
+                                           uiOutput(outputId = "currently_adding_ui"),
+                                           conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
+                                                            div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Procedure & Click Spine to Add:")
+                                           ),
+                                           conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
+                                                            div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Category:"),
+                                                            actionBttn(
+                                                                inputId = "add_implants",
+                                                                size = "sm", 
+                                                                block = TRUE,
+                                                                label = "Add Surgical Implants (Screws, Hooks, Wires, Tethers, etc.)",
+                                                                style = "simple",
+                                                                color = "primary"
+                                                            ),
+                                                            br(),
+                                                            actionBttn(
+                                                                inputId = "add_decompressions",
+                                                                size = "sm", block = TRUE,
+                                                                label = "Add Decompressions",
+                                                                style = "simple",
+                                                                color = "primary"
+                                                            ),
+                                                            br(),
+                                                            actionBttn(
+                                                                inputId = "add_osteotomies",
+                                                                size = "sm", block = TRUE,
+                                                                label = "Add Osteotomies/Facetectomies",
+                                                                style = "simple",
+                                                                color = "primary"
+                                                            ),
+                                                            br(),
+                                                            actionBttn(
+                                                                inputId = "add_interbody",
+                                                                size = "sm", block = TRUE,
+                                                                label = "Add Interbody Fusion",
+                                                                style = "simple",
+                                                                color = "primary"
+                                                            ),
+                                                            br(),
+                                                            actionBttn(
+                                                                inputId = "add_special_approach",
+                                                                size = "sm", block = TRUE,
+                                                                label = "Add Special Approach (Costovertebral, etc)",
+                                                                style = "simple",
+                                                                color = "primary"
+                                                            ),
+                                                            br(),
+                                                            actionBttn(
+                                                                inputId = "add_other",
+                                                                size = "sm", block = TRUE,
+                                                                label = "Add Other (cement, structural allograft, etc)",
+                                                                style = "simple",
+                                                                color = "primary"
+                                                            ),
+                                                            uiOutput(outputId = "intervertebral_cage_ui"),
+                                                            br(),
+                                                            uiOutput(outputId = "tumor_resection_ui"),
+                                                            br(), 
+                                                            div(style = "font-size:20px; font-weight:bold; text-align:left", "2. Select Implant/Procedure & Click Spine to Add:"),
+                                           ),
+                                           div(class = "form-group shiny-input-container shiny-input-radiogroup shiny-input-container-inline", style = "width: 100%;text-align: -webkit-center;", 
+                                               radioGroupButtons(
+                                                   inputId = "object_to_add",
+                                                   direction = "vertical",
+                                                   width = "95%",
+                                                   justified = TRUE,
+                                                   individual = FALSE,
+                                                   label = NULL,
+                                                   choices = c(
+                                                       "Pedicle Screws" = "pedicle_screw",
+                                                       "Pelvic Screws" = "pelvic_screw",
+                                                       "Occipital Screws" = "occipital_screw",
+                                                       "Transarticular Screw" = "transarticular_screw",
+                                                       "Pars Screws" = "pars_screw",
+                                                       "Translaminar Screws" = "translaminar_screw",
+                                                       "Lateral Mass Screws" = "lateral_mass_screw",
+                                                       "TP Hook" = "tp_hook",
+                                                       "Laminar Hook (Downgoing)" = "laminar_downgoing_hook",
+                                                       "Laminar Hook (Upgoing)" = "laminar_upgoing_hook",
+                                                       "Pedicle Hook" = "pedicle_hook",
+                                                       "Tether (Spinous Process)" = "tether",
+                                                       "Sublaminar Wire" = "sublaminar_wire"  
+                                                   ),
+                                                   checkIcon = list(
+                                                       yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
+                                                   ),
+                                                   selected = "pedicle_screw"
+                                               )
+                                           ),
+                                           # br(),
+                                           # br(),
+                                           actionBttn(
+                                               inputId = "reset_all",
+                                               size = "xs", block = TRUE,
+                                               label = "Reset & Clear All",
+                                               style = "simple",
+                                               color = "danger"
+                                           )
+                                       )## end of little box to the right of the spine
+                                   ),### end of the full box
+                                   actionBttn(
+                                       inputId = "implants_complete",
+                                       size = "md", 
+                                       block = TRUE,
+                                       label = "Click when finished to Add Implant Details",
+                                       style = "simple",
+                                       color = "success", 
+                                       icon = icon("fas fa-arrow-circle-right")
+                                   )
+                            ) ## closes the right column 
+                    ),
+                    tabItem(tabName = "implant_details",   
+                            ###########################################
+                            box(width = 7, status = "info", title = div(style = "font-size:22px; font-weight:bold; text-align:left", "Implant & Fusion Details:"),
+                                fluidRow(
+                                    column(width = 4, 
+                                           dropdownButton(size = "xs", label = NULL, 
+                                                          switchInput(
+                                                              inputId = "fusion_procedure_performed",
+                                                              width = '100%',
+                                                              inline = TRUE,
+                                                              label = "Fusion:",
+                                                              onLabel = "Yes",
+                                                              offLabel = "No",
+                                                              value = FALSE,
+                                                              size = "mini"
+                                                          ),
+                                                          switchInput(
+                                                              inputId = "anterior_fusion_performed",
+                                                              width = '100%',
+                                                              inline = TRUE,
+                                                              label = "Fusion:",
+                                                              onLabel = "Yes",
+                                                              offLabel = "No",
+                                                              value = FALSE,
+                                                              size = "mini"
+                                                          ),
+                                                          switchInput(
+                                                              inputId = "posterior_fusion_performed",
+                                                              width = '100%',
+                                                              inline = TRUE,
+                                                              label = "Fusion:",
+                                                              onLabel = "Yes",
+                                                              offLabel = "No",
+                                                              value = FALSE,
+                                                              size = "mini"
+                                                          ),
+                                                          switchInput(label = "Left Supplemental Rods Eligible:",
+                                                                      inputId = "left_supplemental_rods_eligible",
+                                                                      size = "mini",
+                                                                      onLabel = "Yes",
+                                                                      offLabel = "No", 
+                                                                      value = FALSE
+                                                          ),
+                                                          switchInput(label = "Right Supplemental Rods Eligible:",
+                                                                      inputId = "right_supplemental_rods_eligible",
+                                                                      size = "mini",
+                                                                      onLabel = "Yes",
+                                                                      offLabel = "No", 
+                                                                      value = FALSE
+                                                          )
+                                           )
+                                    ),
+                                    # column(width = 4, 
+                                    #        conditionalPanel(condition = "input.fusion_procedure_performed == true",
+                                    #                         dropdown(icon = icon("link"),
+                                    #                                  # size = "lg",
+                                    #                                  width = "100%",
+                                    #                                  label = "Confirm Fusion Levels",
+                                    #                                  style = "unite",
+                                    #                                  checkboxGroupButtons(inputId = "fusion_levels_confirmed",
+                                    #                                                       label = "Select/Confirm Fusion Levels:",
+                                    #                                                       choices = interbody_levels_df$level,
+                                    #                                                       size = "sm",
+                                    #                                                       direction = "vertical",
+                                    #                                                       checkIcon = list(
+                                    #                                                           yes = tags$i(class = "fa fa-check-square",
+                                    #                                                                        style = "color: steelblue"),
+                                    #                                                           no = tags$i(class = "fa fa-square-o",
+                                    #                                                                       style = "color: steelblue"))
+                                    #                                  )
+                                    #                         )
+                                    #        )
+                                    # )
+                                ),
+                                conditionalPanel(condition = "input.posterior_fusion_performed == true",
+                                                 box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "POSTERIOR Bone Graft & Biologics:"),
+                                                     ## NEW
+                                                     fluidRow(
+                                                         column(6,
+                                                                div(style = "font-size:16px; font-weight:bold; text-align:left", "Select any bone graft used:"),
+                                                                prettyCheckboxGroup(inputId = "posterior_bone_graft",
+                                                                                    shape = "curve", outline = TRUE, status = "primary", width = "95%", bigger = TRUE,
+                                                                                    label = NULL,
+                                                                                    choices = c("Morselized Allograft",
+                                                                                                "Local Autograft",
+                                                                                                "Morselized Autograft (separate fascial incision)"
+                                                                                    )
+                                                                )
+                                                         ),
+                                                         column(6,
+                                                                div(style = "font-size:16px; font-weight:bold; text-align:left", "Other Biologics:"),
+                                                                prettyCheckboxGroup(inputId = "posterior_biologics",
+                                                                                    shape = "curve", outline = TRUE, status = "primary", width = "95%",bigger = TRUE,
+                                                                                    label = NULL,
+                                                                                    choices = c("Bone Marrow Aspirate",
+                                                                                                "Cell Based Allograft",
+                                                                                                "DBM"
+                                                                                    )
+                                                                )
+                                                         )
+                                                     ),
+                                                     fluidRow(
+                                                         column(6,
+                                                                conditionalPanel(
+                                                                    condition = "input.posterior_bone_graft.indexOf('Morselized Allograft') > -1",
+                                                                    jh_make_shiny_table_row_function(left_column_label = "Allograft (cc):",bottom_margin = "5px",
+                                                                                                     left_column_percent_width = 60,
+                                                                                                     font_size = 16,
+                                                                                                     input_type = "numeric",
+                                                                                                     input_id = "posterior_allograft_amount",
+                                                                                                     initial_value_selected = 0,
+                                                                                                     min = 0, max = 500, step = 30)
+                                                                )
+                                                         ),
+                                                         column(6,
+                                                                conditionalPanel(
+                                                                    condition = "input.posterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
+                                                                    jh_make_shiny_table_row_function(left_column_label = "Bone Marrow Aspirate Volume (cc):",bottom_margin = "5px",
+                                                                                                     left_column_percent_width = 60,
+                                                                                                     font_size = 16,
+                                                                                                     input_type = "numeric",
+                                                                                                     input_id = "posterior_bone_marrow_aspirate_volume",
+                                                                                                     initial_value_selected = 0,
+                                                                                                     min = 0,
+                                                                                                     max = 500,
+                                                                                                     step = 5)
+                                                                ),
+                                                                conditionalPanel(
+                                                                    condition = "input.posterior_biologics.indexOf('Cell Based Allograft') > -1",
+                                                                    jh_make_shiny_table_row_function(left_column_label = "Cell Based Allograft Volume (cc):",bottom_margin = "5px",
+                                                                                                     left_column_percent_width = 60,
+                                                                                                     font_size = 16,
+                                                                                                     input_type = "numeric",
+                                                                                                     input_id = "posterior_cell_based_allograft_volume",
+                                                                                                     initial_value_selected = 0,
+                                                                                                     min = 0,
+                                                                                                     max = 500,
+                                                                                                     step = 5)
+                                                                ),
+                                                                conditionalPanel(
+                                                                    condition = "input.posterior_biologics.indexOf('DBM') > -1",
+                                                                    jh_make_shiny_table_row_function(left_column_label = "DBM Volume (cc):",bottom_margin = "5px",
+                                                                                                     left_column_percent_width = 60,
+                                                                                                     font_size = 16,
+                                                                                                     input_type = "numeric",
+                                                                                                     input_id = "posterior_dbm_volume",
+                                                                                                     initial_value_selected = 0, min = 0, max = 500, step = 5)
+                                                                )
+                                                         )
+                                                     ),
+                                                     jh_make_bmp_ui_function(anterior_posterior = "posterior"),
                                                  )
-                                             )
-                                         )
-                        ##################### NEW
-                        ),
-                        conditionalPanel(condition = "input.fusion_procedure_performed == true",
-                                         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
-                                             uiOutput(outputId = "screw_details_ui"),
-                                             uiOutput(outputId = "screw_types_ui")
-                                             )
-                        )
-                    ),
-                    box(width = 5, status = "primary",
-                        fluidRow(
-                            actionBttn(
-                                inputId = "return_to_add_implants_tab",
-                                size = "sm", 
-                                block = TRUE,
-                                label = "Click to Return",
-                                style = "simple",
-                                color = "primary", 
-                                icon = icon("fas fa-arrow-circle-left")
-                            )
-                        ),
-                        plotOutput("spine_plot_for_implants_tab",
-                                   height = 725),
-                        fluidRow(
-                            actionBttn(
-                                inputId = "implant_details_complete",
-                                size = "sm", 
-                                block = TRUE,
-                                label = "Click when finished to Upload Data & Generate Operative Note",
-                                style = "simple",
-                                color = "success", 
-                                icon = icon("fas fa-arrow-circle-right")
-                            )
-                        )
-                    )
-                    ###########################################
-            ),
-            tabItem(tabName = "operative_note",
-                    rclipboardSetup(),
-                    ###########################################
-                    box(width = 12, 
-                        fluidRow(
-                            actionBttn(
-                                inputId = "return_to_add_implant_details_tab",
-                                size = "sm", 
-                                block = TRUE,
-                                label = "Click to Return",
-                                style = "simple",
-                                color = "primary", 
-                                icon = icon("fas fa-arrow-circle-left")
-                            )
-                        )),
-                    box(width = 4, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Additional Surgical Details:"),status = "info", solidHeader = TRUE,
-                        actionBttn(
-                            inputId = "edit_additional_surgical_details",
-                            size = "sm", 
-                            block = TRUE,
-                            label = "Click to Edit",
-                            style = "simple",
-                            color = "royal", 
-                            icon = icon("fas fa-user-edit"),
+                                ),
+                                conditionalPanel(condition = "input.anterior_fusion_performed == true",
+                                                 box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "ANTERIOR Bone Graft & Biologics:"),
+                                                     fluidRow(
+                                                         tags$table(width = "100%",
+                                                                    tags$tr(
+                                                                        tags$td(width = "50%",
+                                                                                div(style = "font-size:16px; font-weight:bold; text-align:left", "Select any bone graft used:")
+                                                                        ),
+                                                                        tags$td(width = "50%",
+                                                                                div(style = "font-size:16px; font-weight:bold; text-align:left", "Other Biologics:")
+                                                                        )
+                                                                    ),
+                                                                    tags$tr(
+                                                                        tags$td(width = "50%",
+                                                                                prettyCheckboxGroup(inputId = "anterior_bone_graft", 
+                                                                                                    shape = "curve", outline = TRUE, status = "primary", width = "95%", bigger = TRUE,
+                                                                                                    label = NULL, 
+                                                                                                    choices = c("Morselized Allograft",
+                                                                                                                "Local Autograft",
+                                                                                                                "Morselized Autograft (separate fascial incision)"
+                                                                                                    )
+                                                                                )
+                                                                        ),
+                                                                        tags$td(width = "50%",
+                                                                                prettyCheckboxGroup(inputId = "anterior_biologics", 
+                                                                                                    shape = "curve", outline = TRUE, status = "primary", width = "95%",bigger = TRUE,
+                                                                                                    label = NULL,
+                                                                                                    choices = c("Bone Marrow Aspirate",
+                                                                                                                "Cell Based Allograft",
+                                                                                                                "DBM"
+                                                                                                    )
+                                                                                )
+                                                                        )
+                                                                    )
+                                                         )
+                                                     ),
+                                                     fluidRow(
+                                                         column(width = 12, 
+                                                                conditionalPanel(
+                                                                    condition = "input.anterior_bone_graft.indexOf('Morselized Allograft') > -1",
+                                                                    jh_make_shiny_table_row_function(left_column_label = "Allograft (cc):",
+                                                                                                     left_column_percent_width = 60, 
+                                                                                                     font_size = 16,
+                                                                                                     input_type = "numeric",
+                                                                                                     input_id = "anterior_allograft_amount", initial_value_selected = 0, min = 0, max = 500, step = 30)
+                                                                ),
+                                                                conditionalPanel(
+                                                                    condition = "input.anterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
+                                                                    jh_make_shiny_table_row_function(left_column_label = "Bone Marrow Aspirate Volume (cc):",
+                                                                                                     left_column_percent_width = 60, 
+                                                                                                     font_size = 16,
+                                                                                                     input_type = "numeric",
+                                                                                                     input_id = "anterior_bone_marrow_aspirate_volume", 
+                                                                                                     initial_value_selected = 0, 
+                                                                                                     min = 0,
+                                                                                                     max = 500,
+                                                                                                     step = 5)
+                                                                ),
+                                                                conditionalPanel(
+                                                                    condition = "input.anterior_biologics.indexOf('Cell Based Allograft') > -1",
+                                                                    jh_make_shiny_table_row_function(left_column_label = "Cell Based Allograft Volume (cc):",
+                                                                                                     left_column_percent_width = 60, 
+                                                                                                     font_size = 16,
+                                                                                                     input_type = "numeric",
+                                                                                                     input_id = "anterior_cell_based_allograft_volume", 
+                                                                                                     initial_value_selected = 0,
+                                                                                                     min = 0,
+                                                                                                     max = 500,
+                                                                                                     step = 5)
+                                                                ),
+                                                                conditionalPanel(
+                                                                    condition = "input.anterior_biologics.indexOf('DBM') > -1",
+                                                                    jh_make_shiny_table_row_function(left_column_label = "DBM Volume (cc):",
+                                                                                                     left_column_percent_width = 60, 
+                                                                                                     font_size = 16,
+                                                                                                     input_type = "numeric",
+                                                                                                     input_id = "anterior_dbm_volume", initial_value_selected = 0, min = 0, max = 500, step = 5)
+                                                                )
+                                                         )
+                                                     ),
+                                                     jh_make_bmp_ui_function(anterior_posterior = "anterior")
+                                                 )
+                                ),
+                                conditionalPanel(condition = "input.fusion_procedure_performed == true",
+                                                 uiOutput(outputId = "interbody_implants_ui")
+                                ),
+                                conditionalPanel(condition = "input.fusion_procedure_performed == true & input.spine_approach.indexOf('Posterior') > -1",
+                                                 box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "Rod Details:"), collapsible = TRUE,
+                                                     fluidRow(column(4), 
+                                                              column(4, 
+                                                                     dropdown(icon = icon("link"),
+                                                                              width = "60%",
+                                                                              label = "Add Crosslink",
+                                                                              style = "unite",
+                                                                              checkboxGroupButtons(inputId = "crosslink_connectors",
+                                                                                                   label = "Add crosslinks at:",
+                                                                                                   choices = vertebral_bodies_vector,
+                                                                                                   individual = FALSE,
+                                                                                                   # justified = TRUE,
+                                                                                                   direction = "vertical",
+                                                                                                   checkIcon = list(
+                                                                                                       yes = tags$i(class = "fa fa-check-square",
+                                                                                                                    style = "color: steelblue"),
+                                                                                                       no = tags$i(class = "fa fa-square-o",
+                                                                                                                   style = "color: steelblue"))
+                                                                              )
+                                                                     )
+                                                              ),
+                                                              column(4)
+                                                     ),
+                                                     jh_make_shiny_table_column_function(input_type = "title", left_label = "Left Rod(s):",right_label = "Right Rods(s):", font_size = 20, text_align = "left"),
+                                                     jh_make_shiny_table_column_function(input_type = "pickerInput", 
+                                                                                         left_input_id = "left_main_rod_size", 
+                                                                                         left_label = "Size:",
+                                                                                         right_input_id = "right_main_rod_size", 
+                                                                                         right_label = "Size:",
+                                                                                         left_column_percent_width = 50,
+                                                                                         right_column_percent_width = 50,
+                                                                                         choices_vector = c("None", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/quarter in"),
+                                                                                         initial_value_selected = "None",
+                                                                                         picker_choose_multiple = FALSE),
+                                                     jh_make_shiny_table_column_function(input_type = "awesomeRadio", 
+                                                                                         left_input_id = "left_main_rod_material", 
+                                                                                         left_label = "Material:",
+                                                                                         right_input_id = "right_main_rod_material", 
+                                                                                         right_label = "Material:",
+                                                                                         left_column_percent_width = 50,
+                                                                                         right_column_percent_width = 50,
+                                                                                         checkboxes_inline = TRUE,
+                                                                                         button_size = "normal",
+                                                                                         choices_vector = c("Non-instrumented", "Titanium", "Cobalt Chrome", "Stainless Steel"),
+                                                                                         initial_value_selected = "Non-instrumented",
+                                                                                         picker_choose_multiple = FALSE),
+                                                     jh_make_supplemental_rod_ui_function(rod_type = "accessory_rod", input_label = "Accessory Rod"),
+                                                     jh_make_supplemental_rod_ui_function(rod_type = "satellite_rod", input_label = "Satellite Rod"),
+                                                     jh_make_supplemental_rod_ui_function(rod_type = "intercalary_rod", input_label = "Intercalary Rod"),
+                                                     jh_make_supplemental_rod_ui_function(rod_type = "linked_rods", input_label = "Linked Rods"),
+                                                     jh_make_shiny_table_column_function(input_type = "awesomeCheckbox", 
+                                                                                         left_input_id = "add_left_custom_rods", 
+                                                                                         left_label = "Customize Left Rod Construct:",
+                                                                                         right_input_id = "add_right_custom_rods", 
+                                                                                         right_label = "Customize Right Rod Construct:",
+                                                                                         left_condition_statement = "input.left_supplemental_rods_eligible == true", 
+                                                                                         right_condition_statement = "input.right_supplemental_rods_eligible == true", 
+                                                                                         initial_value_selected = FALSE,
+                                                                                         status = "success"),
+                                                     fixedRow(
+                                                         column(width = 6,
+                                                                conditionalPanel(condition = "input.add_left_custom_rods == true",
+                                                                                 awesomeRadio(inputId = "left_custom_rods_number", label = "Number of Left Total Rods:",choices = c(2,3,4,5), inline = TRUE, selected = 2),
+                                                                                 uiOutput(outputId = "left_custom_rods_ui")
+                                                                )
+                                                         ),
+                                                         column(width = 6,
+                                                                conditionalPanel(condition = "input.add_right_custom_rods == true",
+                                                                                 awesomeRadio(inputId = "right_custom_rods_number", label = "Number of Right Total Rods:",choices = c(2,3,4,5), inline = TRUE, selected = 2),
+                                                                                 uiOutput(outputId = "right_custom_rods_ui")
+                                                                )
+                                                         )
+                                                     )
+                                                 )
+                                                 ##################### NEW
+                                ),
+                                conditionalPanel(condition = "input.fusion_procedure_performed == true",
+                                                 box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
+                                                     uiOutput(outputId = "screw_details_ui"),
+                                                     uiOutput(outputId = "screw_types_ui")
+                                                 )
+                                )
                             ),
-                        uiOutput(outputId = "additional_surgical_details_ui")
-                        ),
-                    box(width = 8, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Data Upload:"),status = "success", solidHeader = TRUE,
-                        actionBttn(inputId = "preview_redcap_upload", label = "Upload to Redcap Project", icon = icon("upload"), style = "jelly", color = "primary", size = "md"),
+                            box(width = 5, status = "primary",
+                                fluidRow(
+                                    actionBttn(
+                                        inputId = "return_to_add_implants_tab",
+                                        size = "sm", 
+                                        block = TRUE,
+                                        label = "Click to Return",
+                                        style = "simple",
+                                        color = "primary", 
+                                        icon = icon("fas fa-arrow-circle-left")
+                                    )
+                                ),
+                                plotOutput("spine_plot_for_implants_tab",
+                                           height = 725),
+                                fluidRow(
+                                    actionBttn(
+                                        inputId = "implant_details_complete",
+                                        size = "sm", 
+                                        block = TRUE,
+                                        label = "Click when finished to Upload Data & Generate Operative Note",
+                                        style = "simple",
+                                        color = "success", 
+                                        icon = icon("fas fa-arrow-circle-right")
+                                    )
+                                )
+                            )
+                            ###########################################
                     ),
-                    box(width = 8, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Operative Note Generator:"),status = "success", solidHeader = TRUE,
-                        actionBttn(
-                            inputId = "generate_operative_note",
-                            block = TRUE,
-                            size = "md",
-                            label = "Click to Generate Operative Note",
-                            style = "float",
-                            color = "primary"
-                        ),
-                        br(),
-                        textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 750),
-                        br(),
-                        br(),
-                        uiOutput("clipboard_ui")
+                    tabItem(tabName = "operative_note",
+                            rclipboardSetup(),
+                            ###########################################
+                            box(width = 12, 
+                                fluidRow(
+                                    actionBttn(
+                                        inputId = "return_to_add_implant_details_tab",
+                                        size = "sm", 
+                                        block = TRUE,
+                                        label = "Click to Return",
+                                        style = "simple",
+                                        color = "primary", 
+                                        icon = icon("fas fa-arrow-circle-left")
+                                    )
+                                )),
+                            box(width = 4, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Additional Surgical Details:"),status = "info", solidHeader = TRUE,
+                                actionBttn(
+                                    inputId = "edit_additional_surgical_details",
+                                    size = "sm", 
+                                    block = TRUE,
+                                    label = "Click to Edit",
+                                    style = "simple",
+                                    color = "royal", 
+                                    icon = icon("fas fa-user-edit"),
+                                ),
+                                uiOutput(outputId = "additional_surgical_details_ui")
+                            ),
+                            box(width = 8, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Data Upload:"),status = "success", solidHeader = TRUE,
+                                actionBttn(inputId = "preview_redcap_upload", label = "Upload to Redcap Project", icon = icon("upload"), style = "jelly", color = "primary", size = "md"),
+                            ),
+                            box(width = 8, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Operative Note Generator:"),status = "success", solidHeader = TRUE,
+                                actionBttn(
+                                    inputId = "generate_operative_note",
+                                    block = TRUE,
+                                    size = "md",
+                                    label = "Click to Generate Operative Note",
+                                    style = "float",
+                                    color = "primary"
+                                ),
+                                br(),
+                                textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 750),
+                                br(),
+                                br(),
+                                uiOutput("clipboard_ui")
+                            )
+                            ###########################################
+                    ),
+                    tabItem(tabName = "tables",
+                            ###########################################
+                            box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Patient Details Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
+                                tableOutput(outputId = "patient_details_redcap_df")
+                            ),
+                            box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Summary Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
+                                tableOutput(outputId = "summary_table")
+                            ),
+                            box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Intraoperative Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                                tableOutput(outputId = "intraoperative_details_table")
+                            ),
+                            box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Specifics"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                                tableOutput(outputId = "redcap_details_wide_df")
+                            ),
+                            box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                                tableOutput("pedicle_screw_details_table")
+                            ),
+                            box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody implants:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
+                                tableOutput(outputId = "interbody_details_table")
+                            ),
+                            box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All objects table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                                tableOutput(outputId = "all_objects_table")
+                            ),
+                            box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Left Revision Implants table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                                tableOutput(outputId = "left_revision_implants_table")
+                            ),
+                            ###########################################
                     )
-                    ###########################################
-            ),
-            tabItem(tabName = "tables",
-                    ###########################################
-                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Patient Details Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                        tableOutput(outputId = "patient_details_redcap_df")
-                    ),
-                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Summary Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                        tableOutput(outputId = "summary_table")
-                    ),
-                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Intraoperative Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                        tableOutput(outputId = "intraoperative_details_table")
-                    ),
-                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Specifics"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                        tableOutput(outputId = "redcap_details_wide_df")
-                    ),
-                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                        tableOutput("pedicle_screw_details_table")
-                    ),
-                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody implants:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                        tableOutput(outputId = "interbody_details_table")
-                    ),
-                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All objects table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                        tableOutput(outputId = "all_objects_table")
-                    ),
-                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Left Revision Implants table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                        tableOutput(outputId = "left_revision_implants_table")
-                    ),
-                    ###########################################
-            )
-        )
-    )
-    )
+                )
+                    )
+)
 # )
 
 
@@ -956,9 +877,9 @@ server <- function(input, output, session) {
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
-
-
-    modal_box <- function(starting_first_name = "",
+    
+    
+    startup_modal_box <- function(starting_first_name = "",
                           starting_last_name = "", 
                           starting_dob = "",
                           starting_dos = "", 
@@ -975,13 +896,28 @@ server <- function(input, output, session) {
                           left_rod_status = "retained_connected",
                           left_implants_still_connected = "",
                           right_rod_status = "retained_connected",
-                          right_implants_still_connected = ""
-                          ){
-        modalDialog(size = "l", easyClose = FALSE, footer = modalButton("Proceed"),
+                          right_implants_still_connected = "",
+                          button_proceed = "proceed_to_details"
+    ){
+        if(button_proceed == "proceed_to_details"){
+            footer_button <- actionBttn(
+                        inputId = "close_startup_modal",
+                        label = "Proceed",
+                        style = "simple", 
+                        color = "primary",
+                        icon = icon("arrow-right")
+                    )
+        }else{
+            footer_button <- modalButton("Proceed")
+        }
+        
+        modalDialog(size = "l", 
+                    easyClose = FALSE, 
+                    footer = footer_button,
                     column(12, 
                            fluidRow(
                                column(8, 
-                                      tags$div(style = "font-size:22px; font-weight:bold", "Entered Required Details to Proceed"),
+                                      tags$div(style = "font-size:22px; font-weight:bold", "Enter Required Details to Proceed"),
                                ),
                                column(4, 
                                       actionBttn(inputId = "test_patient_button", label = "Use Test Patient", size = "sm")),
@@ -994,19 +930,22 @@ server <- function(input, output, session) {
                                       textInput(inputId = "patient_first_name", label = "Patient First Name", value = starting_first_name),
                                ),
                                column(4, 
+                                      textInput(inputId = "hospital", label = "Hospital/Institution:"),
+                               )
+                           ),
+                           fluidRow(
+                               column(4, 
                                       awesomeRadio(
                                           inputId = "sex",
                                           label = "Sex:", 
                                           choices = c("Male", "Female"),
                                           selected = starting_sex, 
-                                          inline = FALSE 
-                                      ))
-                           ),
-                           fluidRow(
-                               column(6, 
+                                          inline = TRUE
+                                      )),
+                               column(4, 
                                       dateInput(inputId = "date_of_birth", label = "Date of Birth:", value = starting_dob,format = "mm-dd-yyyy", max = Sys.Date())
                                ),
-                               column(6, 
+                               column(4, 
                                       dateInput(inputId = "date_of_surgery", label = "Date of Surgery:", value = starting_dos,format = "mm-dd-yyyy", max = Sys.Date())
                                )
                            ),
@@ -1027,19 +966,6 @@ server <- function(input, output, session) {
                                                                        checkboxes_inline = TRUE, 
                                                                        individual_buttons = TRUE),
                                       conditionalPanel("input.primary_revision.indexOf('Revision') > -1",
-                                                       # jh_make_shiny_table_row_function(left_column_label = "Indication for Revision:",
-                                                       #                                  input_type = "picker", 
-                                                       #                                  input_id = "revision_indication",
-                                                       #                                  initial_value_selected = indication_for_revision,
-                                                       #                                  left_column_percent_width = 60, 
-                                                       #                                  font_size = 16, 
-                                                       #                                  choices_vector = list('Implant' = c("Mal-Positioned Implants", "Failure (pull-out/fracture) of Implants", "Pseudarthrosis"), 
-                                                       #                                                        'Junctional' = c("Proximal Junctional Failure", "Adjacent Segment Degeneration", "Distal Junctional Failure", "Vertebral Fracture"),
-                                                       #                                                        'Infection' = c("Early Infection/Wound Drainage", "Late Infection (>6mo)"),
-                                                       #                                                        'Malalignment' = c("Coronal Malalignment", "Sagittal Malalignment"),
-                                                       #                                                        'Neurologic' = c("Motor Deficit", "Radicular Pain", "Neurogenic Claudication")
-                                                       #                                  ) 
-                                                       # ),
                                                        jh_make_shiny_table_row_function(left_column_label = "Select Levels with Prior Decompression:",
                                                                                         input_type = "picker", 
                                                                                         input_id = "open_canal",  
@@ -1114,51 +1040,51 @@ server <- function(input, output, session) {
                                                                         fluidRow(
                                                                             column(4, 
                                                                                    conditionalPanel(condition = "input.left_revision_implants.length > 1", 
-                                                                                                             awesomeRadio(
-                                                                                                                 inputId = "left_revision_rod_status",
-                                                                                                                 label = "Prior Left Rod was:", 
-                                                                                                                 choices = c("Removed" = "removed",
-                                                                                                                             "Retained" = "retained",
-                                                                                                                             "Retained & Connected" = "retained_connected", 
-                                                                                                                             "Partially Retained & Connected" = "partially_retained_connected"),
-                                                                                                                 selected = left_rod_status,
-                                                                                                                 inline = FALSE, 
-                                                                                                                 status = "success"
-                                                                                                             ))
-                                                                                   ),
+                                                                                                    awesomeRadio(
+                                                                                                        inputId = "left_revision_rod_status",
+                                                                                                        label = "Prior Left Rod was:", 
+                                                                                                        choices = c("Removed" = "removed",
+                                                                                                                    "Retained" = "retained",
+                                                                                                                    "Retained & Connected" = "retained_connected", 
+                                                                                                                    "Partially Retained & Connected" = "partially_retained_connected"),
+                                                                                                        selected = left_rod_status,
+                                                                                                        inline = FALSE, 
+                                                                                                        status = "success"
+                                                                                                    ))
+                                                                            ),
                                                                             column(2,
                                                                                    conditionalPanel(condition = "input.left_revision_rod_status.indexOf('partially_retained_connected') > -1",
-                                                                                                             pickerInput(inputId = "left_revision_implants_connected_to_prior_rod", 
-                                                                                                                         label = "Select screws connected to the old rod:", 
-                                                                                                                         choices = c(""), 
-                                                                                                                         selected = left_implants_still_connected,
-                                                                                                                         multiple = TRUE
-                                                                                                             )
-                                                                                            )
+                                                                                                    pickerInput(inputId = "left_revision_implants_connected_to_prior_rod", 
+                                                                                                                label = "Select screws connected to the old rod:", 
+                                                                                                                choices = c(""), 
+                                                                                                                selected = left_implants_still_connected,
+                                                                                                                multiple = TRUE
+                                                                                                    )
+                                                                                   )
                                                                             ),
                                                                             column(4, 
                                                                                    conditionalPanel(condition = "input.right_revision_implants.length > 1", 
-                                                                                                             awesomeRadio(
-                                                                                                                 inputId = "right_revision_rod_status",
-                                                                                                                 label = "Prior Right Rod was:", 
-                                                                                                                 choices = c("Removed" = "removed",
-                                                                                                                             "Retained" = "retained",
-                                                                                                                             "Retained & Connected" = "retained_connected", 
-                                                                                                                             "Partially Retained & Connected" = "partially_retained_connected"),
-                                                                                                                 selected = right_rod_status,
-                                                                                                                 inline = FALSE, 
-                                                                                                                 status = "success"
-                                                                                                             ))
+                                                                                                    awesomeRadio(
+                                                                                                        inputId = "right_revision_rod_status",
+                                                                                                        label = "Prior Right Rod was:", 
+                                                                                                        choices = c("Removed" = "removed",
+                                                                                                                    "Retained" = "retained",
+                                                                                                                    "Retained & Connected" = "retained_connected", 
+                                                                                                                    "Partially Retained & Connected" = "partially_retained_connected"),
+                                                                                                        selected = right_rod_status,
+                                                                                                        inline = FALSE, 
+                                                                                                        status = "success"
+                                                                                                    ))
                                                                             ),
                                                                             column(2, 
                                                                                    conditionalPanel(condition = "input.right_revision_rod_status.indexOf('partially_retained_connected') > -1",
-                                                                                                             pickerInput(inputId = "right_revision_implants_connected_to_prior_rod", 
-                                                                                                                         label = "Select screws connected to the old rod:", 
-                                                                                                                         choices = c(""), 
-                                                                                                                         selected = right_implants_still_connected,
-                                                                                                                         multiple = TRUE
-                                                                                                             )
-                                                                                            )
+                                                                                                    pickerInput(inputId = "right_revision_implants_connected_to_prior_rod", 
+                                                                                                                label = "Select screws connected to the old rod:", 
+                                                                                                                choices = c(""), 
+                                                                                                                selected = right_implants_still_connected,
+                                                                                                                multiple = TRUE
+                                                                                                    )
+                                                                                   )
                                                                             )
                                                                         )
                                                        )
@@ -1173,10 +1099,10 @@ server <- function(input, output, session) {
     
     
     
-    showModal(modal_box(starting_first_name = "", starting_last_name = "", starting_dob = "", starting_dos = ""))
-
+    showModal(startup_modal_box(starting_first_name = "", starting_last_name = "", starting_dob = "", starting_dos = ""))
+    
     observeEvent(input$edit_patient, {
-        showModal(modal_box(starting_first_name = input$patient_first_name, 
+        showModal(startup_modal_box(starting_first_name = input$patient_first_name, 
                             starting_last_name = input$patient_last_name, 
                             starting_dob = input$date_of_birth,
                             starting_dos = input$date_of_surgery, 
@@ -1193,10 +1119,12 @@ server <- function(input, output, session) {
                             left_rod_status = input$left_revision_rod_status,
                             left_implants_still_connected = input$left_revision_implants_connected_to_prior_rod,
                             right_rod_status = input$right_revision_rod_status,
-                            right_implants_still_connected = input$right_revision_implants_connected_to_prior_rod
-                            ))
+                            right_implants_still_connected = input$right_revision_implants_connected_to_prior_rod,
+                            button_proceed = "exit"
+        ))
     })
     
+
     observeEvent(input$test_patient_button, {
         updateTextInput(session = session, inputId = "patient_last_name", value = "TestLAST")
         updateTextInput(session = session, inputId = "patient_first_name", value = "TestFIRST")
@@ -1205,10 +1133,12 @@ server <- function(input, output, session) {
         updateAwesomeRadio(session = session, inputId = "sex", selected = "Male")
     })
     
+    
+    ############### RETRIEVE EXISTING PATIENT #########################
     existing_patient_data <- reactiveValues()
     existing_patient_data$match_found <- FALSE
     existing_patient_data$patient_df <- tibble(level = character())
-    
+
     observeEvent(input$search_for_prior_patient, ignoreInit = TRUE, {
         all_patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
             type.convert() %>%
@@ -1260,7 +1190,7 @@ server <- function(input, output, session) {
             tags$div(style = "font-size:12px; font-weight:bold; color:darkblue; font-family:sans-serif;", "No Match")
         }
     })
-
+    
     observeEvent(existing_patient_data$patient_df, {
         if(existing_patient_data$match_found == TRUE){
             updateRadioGroupButtons(session = session, 
@@ -1306,8 +1236,345 @@ server <- function(input, output, session) {
             }
         }
     })
+    ############### RETRIEVE EXISTING PATIENT COMPLETE #########################
+
     
-    #### ROW TITLES ###
+    ############ STARTUP MODAL BOX 2: #################
+    startup_modal_box_diagnosis_symptoms <- function(diagnosis_category_value = NULL,
+                                                     primary_diagnosis_value = NULL, 
+                                                     other_diagnosis = NULL,
+                                                     symptoms_initial_value = NULL,
+                                                     stage_number_value = 1,
+                                                     staged_procedure_initial_value = FALSE,
+                                                     multiple_approach_initial_value = FALSE,
+                                                     spinal_regions_selected = c("Lumbar")
+                                                     ){
+        modalDialog(size = "l", easyClose = FALSE, footer = modalButton("Proceed"),
+                    box(width = 12, title = "Diagnosis, Symptoms, Procedure", solidHeader = TRUE, status = "info",
+                        column(12,
+                               tags$div(style = "font-size:20px; font-weight:bold", "Select All Relevant Spinal Regions:"),
+                               fluidRow(
+                                   checkboxGroupButtons(
+                                       inputId = "spinal_regions",
+                                       label = NULL,
+                                       choices = c("Lumbosacral",
+                                                   "Lumbar", 
+                                                   "Thoracolumbar",
+                                                   "Thoracic",
+                                                   "Cervicothoracic",
+                                                   "Cervical"),
+                                       individual = TRUE,
+                                       size = "normal", 
+                                       justified = TRUE,
+                                       selected = spinal_regions_selected,
+                                       checkIcon = list(
+                                           yes = tags$i(class = "fa fa-circle", 
+                                                        style = "color: steelblue"),
+                                           no = tags$i(class = "fa fa-circle-o", 
+                                                       style = "color: steelblue"))
+                                   )
+                               ),
+                               hr(),
+                               br(),
+                               tags$div(style = "font-size:20px; font-weight:bold", "Select Diagnostic Categories:"),
+                               tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply)"),
+                               fluidRow(
+                                   checkboxGroupButtons(
+                                       inputId = "diagnosis_category",
+                                       label = NULL,
+                                       justified = TRUE,
+                                       choices = c("Degenerative", "Deformity", "Trauma", "Infection", "Tumor", "Congenital", "Complication", "Other"),
+                                       status = "primary", 
+                                       selected = diagnosis_category_value,
+                                       checkIcon = list(
+                                           yes = icon("ok", 
+                                                      lib = "glyphicon"))
+                                   )
+                               ),
+                               br(),
+                               # tableOutput(outputId = "diagnosis_options"),
+                               fluidRow(
+                                   column(width = 5,
+                                          tags$div(style = "font-size:18px; font-weight:bold", "Diagnosis:"),
+                                          conditionalPanel(condition = "input.primary_revision.indexOf('Primary') > -1",
+                                                           tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply)")),
+                                          conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
+                                                           tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply, including primary diagnosis and indication for revision)"))
+                                   ),
+                                   column(width = 7,
+                                          pickerInput(inputId = "primary_diagnosis",
+                                                      label = "Diagnosis Search:",
+                                                      choices = spine_icd10_codes_df$diagnosis,
+                                                      options = list('live-search' = TRUE),
+                                                      multiple = TRUE,
+                                                      selected = primary_diagnosis_value)
+                                   )
+                               ),
+                               hr(), 
+                               br(),
+                               fluidRow(
+                                   column(width = 5,
+                                          tags$div(style = "font-size:18px; font-weight:bold", "Symptoms:")
+                                          # tags$div(style = "font-size:14px; font-weight:bold", "Select Appropriate Spine Regions"),
+                                   ),
+                                   column(width = 7,
+                                          pickerInput(
+                                              inputId = "symptoms",
+                                              label = NULL,
+                                              choices = list('Neck & Uppers:' = c("Neck Pain", "Left Arm Pain", "Right Arm Pain", "Left Arm Weakness", "Right Arm Weakness"),
+                                                             'Thoracic:' = c("Mid Back Pain", "Kyphosis"),
+                                                             "Lower & Legs:" = c("Low Back Pain", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness"),
+                                                             "Functional:" = c("Myelopathy: Nurick 1 (Root Symptomts)",
+                                                                               "Myelopathy: Nurick 2 (Normal gait but symptoms of cord compression)",
+                                                                               "Myelopathy: Nurick 3 (Gait Abnormalities)",
+                                                                               "Myelopathy: Nurick 4 (Significant Gait Abnormalities, preventing employment)",
+                                                                               "Myelopathy: Nurick 5 (Depended on Assistive Device for Ambulating)",
+                                                                               "Myelopathy: Nurick 6 (Wheelchair bound)"),
+                                                             "Deformity" = c("Coronal deformity", "Sagittal Imbalance", "Chin on chest deformity", "Flatback Syndrome"),
+                                                             'Other' = c("Quadriplegia", "Paraplegia", "Loss of bladder control", "Bowel Incontinence", "Other")
+                                              ),
+                                              multiple = TRUE,
+                                              selected = symptoms_initial_value,
+                                              width = "100%"
+                                          ),
+                                          conditionalPanel(condition = "input.symptoms.indexOf('Other') > -1",
+                                                           textInput(inputId = "symptoms_other", label = "Other:"))
+                                   )
+                               ),
+                               fluidRow(
+                                   textInput(inputId = "relevant_history", label = "Other Comments/History:")
+                               ),
+                               hr(), 
+                               br(), 
+                               tags$div(style = "font-size:20px; font-weight:bold", "Procedure: Stage & Approach:"),
+                               fluidRow(
+                                   uiOutput(outputId = "surgical_details_ui")
+                               ),
+                               jh_make_shiny_table_row_function(left_column_label = "Staged Procedure?", 
+                                                                input_type = "switch", 
+                                                                input_id = "staged_procedure", 
+                                                                left_column_percent_width = 50,
+                                                                font_size = 16, 
+                                                                switch_input_on_label = "Yes", 
+                                                                switch_input_off_label = "No",
+                                                                initial_value_selected = staged_procedure_initial_value,),
+                               conditionalPanel(condition = "input.staged_procedure == true",
+                                                jh_make_shiny_table_row_function(left_column_label = "Stage Number:",
+                                                                                 input_type = "awesomeRadio",
+                                                                                 input_id = "stage_number",
+                                                                                 left_column_percent_width = 50, font_size = 14, choices_vector = c(1,2,3,4,5), checkboxes_inline = TRUE,
+                                                                                 initial_value_selected = stage_number_value)
+                               ),
+                               jh_make_shiny_table_row_function(left_column_label = "Multiple Approach, single stage?", 
+                                                                input_type = "switch", 
+                                                                input_id = "multiple_approach",
+                                                                left_column_percent_width = 50, 
+                                                                font_size = 16, 
+                                                                switch_input_on_label = "Yes", 
+                                                                switch_input_off_label = "No",
+                                                                initial_value_selected = multiple_approach_initial_value)
+                               )
+                    )
+        )
+    }
+    
+    observeEvent(input$close_startup_modal, {
+        removeModal()
+        
+        if(input$patient_last_name == "TestLAST"){
+            spine_region <- "Thoracolumbar"
+            diagnosis_category <- c("Deformity")
+            dx <- c("Flatback syndrome, thoracolumbar region")
+            symptoms <- "Low Back Pain"
+        }else{
+            spine_region <- input$spinal_regions
+            diagnosis_category <- input$diagnosis_category
+            dx <- input$primary_diagnosis
+            symptoms <- input$symptoms
+        }
+        
+        showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = diagnosis_category,
+                                                       primary_diagnosis_value = dx, 
+                                                       symptoms_initial_value = symptoms,
+                                                       stage_number_value = input$stage_number,
+                                                       staged_procedure_initial_value = input$staged_procedure,
+                                                       multiple_approach_initial_value = input$multiple_approach,
+                                                       spinal_regions_selected = spine_region
+                                                       ))
+    })
+    
+    observeEvent(input$edit_diagnosis_symptoms, {
+        showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = input$diagnosis_category,
+                                                       primary_diagnosis_value = input$primary_diagnosis,  
+                                                       symptoms_initial_value = input$symptoms,
+                                                       stage_number_value = input$stage_number,
+                                                       staged_procedure_initial_value = input$staged_procedure,
+                                                       multiple_approach_initial_value = input$multiple_approach,
+                                                       spinal_regions_selected = input$spinal_regions))
+    })
+    
+    
+    ############ UPDATE DIAGNOSIS & SYMPTOMS OPTIONS ##############
+    diagnosis_choices_reactive_list <- reactive({
+        spine_regions <- str_to_lower(paste(input$spinal_regions, collapse = ", "))
+
+        building_diagnosis_choices_df <- spine_icd10_codes_df %>%
+            filter(site == "all")
+            
+        if(str_detect(spine_regions, "cervic")){
+            building_diagnosis_choices_df <- spine_icd10_codes_df %>%
+                filter(site_number == 4 | site_number == 5) %>%
+                union_all(building_diagnosis_choices_df)
+        }
+        
+        if(str_detect(spine_regions, "thoracic")){
+            if(str_detect(spine_regions, "cervic")){
+                building_diagnosis_choices_df <- spine_icd10_codes_df %>%
+                    filter(site_number > 2) %>%
+                    union_all(building_diagnosis_choices_df)
+            }else{
+                building_diagnosis_choices_df <- spine_icd10_codes_df %>%
+                    filter(site_number == 2 | site_number == 3) %>%
+                    union_all(building_diagnosis_choices_df)
+            }
+        }
+        
+        if(str_detect(spine_regions, "lumb")){
+            building_diagnosis_choices_df <- spine_icd10_codes_df %>%
+                filter(site_number <3) %>%
+                union_all(building_diagnosis_choices_df)
+        }
+        
+        final_diagnosis_choices_df <- building_diagnosis_choices_df %>%
+            distinct() %>%
+            filter(spine_category %in% input$diagnosis_category) %>%
+            arrange(category_number, site_number) 
+        
+        if(str_detect(string = spine_regions, pattern = "cerv") == FALSE){
+            final_diagnosis_choices_df <- final_diagnosis_choices_df %>%
+                filter(str_detect(diagnosis, "cerv", negate = TRUE))
+        }
+        
+        
+        
+        spine_diagnosis_choices_list <- list()
+        
+        if(any(final_diagnosis_choices_df$spine_category == "Degenerative")){
+            spine_diagnosis_choices_list$Degenerative <- (final_diagnosis_choices_df %>%
+                                                              select(spine_category, diagnosis) %>%
+                                                              filter(spine_category == "Degenerative"))$diagnosis
+        }
+        if(any(final_diagnosis_choices_df$spine_category == "Deformity")){
+            spine_diagnosis_choices_list$Deformity <- (final_diagnosis_choices_df %>%
+                                                              select(spine_category, diagnosis) %>%
+                                                              filter(spine_category == "Deformity") %>%
+                                                           filter(str_detect(string = diagnosis, pattern = "Infant|Juveni|Adolescent", negate = TRUE)))$diagnosis
+            
+            spine_diagnosis_choices_list$'Pediatric Deformity' <- (final_diagnosis_choices_df %>%
+                                                           select(spine_category, diagnosis) %>%
+                                                           filter(spine_category == "Deformity") %>%
+                                                           filter(str_detect(string = diagnosis, pattern = "Infant|Juveni|Adolescent")))$diagnosis
+        }
+        if(any(final_diagnosis_choices_df$spine_category == "Trauma")){
+            spine_diagnosis_choices_list$Trauma <- (final_diagnosis_choices_df %>%
+                                                              select(spine_category, diagnosis) %>%
+                                                              filter(spine_category == "Trauma"))$diagnosis
+        }
+        if(any(final_diagnosis_choices_df$spine_category == "Infection")){
+            spine_diagnosis_choices_list$Infection <- (final_diagnosis_choices_df %>%
+                                                              select(spine_category, diagnosis) %>%
+                                                              filter(spine_category == "Infection"))$diagnosis
+        }
+        if(any(final_diagnosis_choices_df$spine_category == "Tumor")){
+            spine_diagnosis_choices_list$Tumor <- (final_diagnosis_choices_df %>%
+                                                              select(spine_category, diagnosis) %>%
+                                                              filter(spine_category == "Tumor"))$diagnosis
+        }
+        if(any(final_diagnosis_choices_df$spine_category == "Congenital")){
+            spine_diagnosis_choices_list$Congenital <- (final_diagnosis_choices_df %>%
+                                                              select(spine_category, diagnosis) %>%
+                                                              filter(spine_category == "Congenital"))$diagnosis
+        }
+        if(any(final_diagnosis_choices_df$spine_category == "Complication")){
+            spine_diagnosis_choices_list$Complication <- (final_diagnosis_choices_df %>%
+                                                       select(spine_category, diagnosis) %>%
+                                                       filter(spine_category == "Complication"))$diagnosis
+        }
+        if(any(final_diagnosis_choices_df$spine_category == "Other")){
+            spine_diagnosis_choices_list$Other <- (final_diagnosis_choices_df %>%
+                                                            select(spine_category, diagnosis) %>%
+                                                            filter(spine_category == "Other"))$diagnosis
+        }
+        spine_diagnosis_choices_list
+    })
+    
+
+    observeEvent(list(input$diagnosis_category, input$spinal_regions, diagnosis_choices_reactive_list()),ignoreNULL = TRUE, ignoreInit = TRUE, {
+        spine_regions_text <- str_to_lower(paste(input$spinal_regions, collapse = ", "))
+        symptom_option_list <- list()
+        
+        if(str_detect(string = spine_regions_text, pattern = "cerv")){
+            symptom_option_list$'Neck & Arms:' <- c("Neck Pain", "Left Arm Pain", "Right Arm Pain", "Left Arm Weakness", "Right Arm Weakness")
+        }
+        
+        if(str_detect(string = spine_regions_text, pattern = "cerv")){
+            symptom_option_list$'Myelopathy:' <- c("Myelopathy: Nurick 1 (Root Symptomts)",
+                                                   "Myelopathy: Nurick 2 (Normal gait but symptoms of cord compression)",
+                                                   "Myelopathy: Nurick 3 (Gait Abnormalities)",
+                                                   "Myelopathy: Nurick 4 (Significant Gait Abnormalities, preventing employment)",
+                                                   "Myelopathy: Nurick 5 (Depended on Assistive Device for Ambulating)",
+                                                   "Myelopathy: Nurick 6 (Wheelchair bound)")
+        }
+        
+        
+        if(str_detect(string = spine_regions_text, pattern = "thor")){
+            symptom_option_list$'Thoracic:' <- c("Mid Back Pain", "Kyphosis")
+        }
+        
+        if(str_detect(string = spine_regions_text, pattern = "lumb")){
+            symptom_option_list$'Low Back & Legs:' = c("Low Back Pain", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness")
+        }
+        
+        symptom_option_list$'Deformity' <- c("Coronal Imbalance", "Sagittal Imbalance (Inability to stand up, debilitating fatigue, difficulty maintaining horizontal gaze)")
+        
+        if(str_detect(string = spine_regions_text, pattern = "cerv")){
+            symptom_option_list$'Deformity' <- append(symptom_option_list$'Deformity', "Chin on chest with inability to maintain horizontal gaze")
+        }
+        
+        symptom_option_list$'Other' = c("Loss of bladder control", 
+                                        "Bowel Incontinence", 
+                                        "Complete Loss of Motor & Sensory Function (Spinal Cord Injury)", 
+                                        "Incomplete Loss of Motor & Sensory Function (Spinal Cord Injury)")
+        
+        updatePickerInput(session = session, 
+                          inputId = "symptoms",
+                          label = NULL,
+                          choices = symptom_option_list)
+        
+        
+        diagnosis_options_list <- diagnosis_choices_reactive_list()
+        
+        age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+        
+        if(age > 30){
+            diagnosis_options_list$'Pediatric Deformity' <- NULL
+        }
+
+        
+        updatePickerInput(session = session,
+                          inputId = "primary_diagnosis",
+                          label = "Diagnosis Search:",
+                          options = list('live-search' = TRUE),
+                          selected = input$primary_diagnosis,
+                          choices = diagnosis_options_list) 
+    })
+    
+    
+ 
+    
+    
+    
+    ####     ####     #### TEXT UI  ###    ####     ####     #### 
     output$patient_details_ui <- renderUI({
         age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
         details <- glue("{input$patient_first_name} {input$patient_last_name}, {age}yo {input$sex}")
@@ -1315,9 +1582,45 @@ server <- function(input, output, session) {
         tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", details)
     })
     
-    output$surgical_details_ui <- renderUI({
-        details <- glue("Date of Surgery: {month(input$date_of_surgery, label = TRUE)} {day(input$date_of_surgery)}, {year(input$date_of_surgery)}")
-        tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", details)
+    output$diagnosis_symptoms_ui <- renderUI({
+        if(!is.null(input$date_of_surgery)){
+          dos <- glue("Date of Surgery: {month(input$date_of_surgery, label = TRUE)} {day(input$date_of_surgery)}, {year(input$date_of_surgery)}")  
+        }else{
+            dos <- "Date of Surgery:"
+        }
+
+        if(!is.null(input$multiple_approach)){
+            if(input$multiple_approach == TRUE){
+                staged_procedure_text <- "Multiple Approach, Single Stage"   
+            }else if(input$staged_procedure == FALSE && input$multiple_approach == FALSE){
+                staged_procedure_text <- "Single Stage"   
+            }else{
+                staged_procedure_text <- paste("Stage", input$stage_number)
+            }
+        }else{
+            staged_procedure_text <- " "
+        }
+        
+        if(!is.null(input$primary_diagnosis)){
+            diagnosis <- glue("Diagnosis: {glue_collapse(x = input$primary_diagnosis, sep = ', ', last = ' and ')}")
+        }else{
+            diagnosis <- "Diagnosis:"
+        }
+        
+        if(!is.null(input$symptoms)){
+            symptoms <- glue("Symptoms: {glue_collapse(x = input$symptoms, sep = ', ', last = ' and ')}")
+        }else{
+            symptoms <- "Symptoms:"
+        }
+       
+        column(12, 
+               tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", dos),
+               tags$div(style = "font-size:20; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", staged_procedure_text),
+               br(),
+               tags$div(style = "font-size:18px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", diagnosis),
+               br(),
+               tags$div(style = "font-size:18px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", symptoms)
+        )
     })
     
     
@@ -1333,6 +1636,7 @@ server <- function(input, output, session) {
             )
         )
     })
+    
     
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup COMPLETE  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup COMPLETE  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
@@ -1377,154 +1681,165 @@ server <- function(input, output, session) {
                                                              dressing_details = NULL){
         additional_details_modal <- modalDialog(size = "l", easyClose = FALSE, fade = fade_appearance,
                                                 footer = actionBttn(inputId = "additional_surgical_details_complete", label = "Continue", icon = icon("fas fa-check-square"), style = "simple", color = "success"),
-                    box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Additional Surgical Details:"),status = "info", solidHeader = TRUE,
-                        if(required_options_missing == TRUE){
-                            div(style = "font-size:22px; font-weight:bold; font-style:italic; text-align:center; color:red", "*** Please Make Selections for Required Fields***")
-                        },
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Primary Surgeon:", input_type = "text", input_id = "primary_surgeon", initial_value_selected = primary_surgeon),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Assistants:", input_type = "text", input_id = "surgical_assistants", initial_value_selected = surgical_assistants),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Preoperative Diagnosis:", input_type = "text", input_id = "preoperative_diagnosis", initial_value_selected = preoperative_diagnosis),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Postoperative Diagnosis:", input_type = "text", input_id = "postoperative_diagnosis", initial_value_selected = postoperative_diagnosis),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Surgical Indications:", input_type = "text", input_id = "indications", initial_value_selected = indications),
-                        hr(),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30,
-                                                         left_column_label = "Neuromonitoring used:",
-                                                         input_type = "checkbox",
-                                                         input_id = "neuromonitoring", choices_vector = c("EMG", "SSEP", "tc MEP", "DNEP (Cord Stimulation)", "H reflex"),
-                                                         checkboxes_inline = TRUE,
-                                                         initial_value_selected = neuromonitoring),
-                        jh_make_shiny_table_row_function(left_column_label = "Preop Antibiotics:",
-                                                         input_type = "picker",
-                                                         input_id = "preop_antibiotics",
-                                                         left_column_percent_width = 30,
-                                                         font_size = 14,
-                                                         choices_vector = c("None (Antibiotics were held)", "Cefazolin (Ancef)", "Vancomycin", "Ceftriaxone", "Gentamycin", "Clindamycin", "Aztreonam", "Unknown", "Other"),
-                                                         initial_value_selected = preop_antibiotics),
-                        jh_make_shiny_table_row_function(left_column_label = "Antifibrinolytic:",
-                                                         input_type = "picker",
-                                                         input_id = "anti_fibrinolytic",
-                                                         left_column_percent_width = 30,
-                                                         font_size = 14,
-                                                         choices_vector = c("None", "Tranexamic Acid (TXA)", "Amicar", "Desmopressin (DDAVP)", "Other"),
-                                                         initial_value_selected = anti_fibrinolytic,
-                        ),
-                        conditionalPanel(condition = "input.anti_fibrinolytic.indexOf('Tranexamic Acid (TXA)') > -1",
-                                         jh_make_shiny_table_row_function(left_column_label = "TXA Loading (mg/kg):    ",
-                                                                          input_type = "numeric",
-                                                                          input_id = "txa_loading",
-                                                                          left_column_percent_width = 50,
-                                                                          font_size = 13, min = 0, max = 200, 
-                                                                          initial_value_selected = txa_loading, 
-                                                                          step = 5,
-                                                                          text_align = "right",
-                                         ),
-                                         jh_make_shiny_table_row_function(left_column_label = "TXA Maintenance (mg/kg/hr):    ",
-                                                                          input_type = "numeric",
-                                                                          input_id = "txa_maintenance",
-                                                                          left_column_percent_width = 50,
-                                                                          font_size = 13, min = 0, max = 50, 
-                                                                          initial_value_selected = txa_maintenance, 
-                                                                          step = 5, 
-                                                                          text_align = "right",
-                                         ),
-                        ),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Findings:", input_type = "text", input_id = "surgical_findings", initial_value_selected = surgical_findings),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Specimens:", input_type = "text", input_id = "specimens_removed", initial_value_selected = specimens_removed),
-                        hr(),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Estimated Blood Loss:", input_type = "numeric", input_id = "ebl", initial_value_selected = ebl, min = 0, max = 50000, step = 100),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Urine Output:", input_type = "numeric", input_id = "urine_output", initial_value_selected = urine_output, min = 0, max = 50000, step = 100),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Crystalloids:", input_type = "numeric", input_id = "crystalloids_administered", initial_value_selected = crystalloids_administered, min = 0, max = 100000, step = 100),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Colloids:", input_type = "numeric", input_id = "colloids_administered", min = 0, initial_value_selected = colloids_administered, max = 100000, step = 100),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Transfusions/Cell Saver", input_type = "switch", input_id = "transfusion", switch_input_on_label = "Yes", switch_input_off_label = "No", initial_value_selected = transfusion),
-                        conditionalPanel(condition = "input.transfusion == true",
-                                         box(width = 12,
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cell Saver Transfused (cc):", input_type = "numeric", input_id = "cell_saver_transfused",initial_value_selected = cell_saver_transfused, min = 0, max = 10000, step = 100),
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "pRBC units transfused:", input_type = "numeric", input_id = "prbc_transfused", initial_value_selected = prbc_transfused, min = 0, max = 100, step = 1),
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "FFP units transfused:", input_type = "numeric", input_id = "ffp_transfused", initial_value_selected = ffp_transfused, min = 0, max = 100, step = 1),
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cryoprecipitate units transfused:", input_type = "numeric", input_id = "cryoprecipitate_transfused", initial_value_selected = cryoprecipitate_transfused, min = 0, max = 100, step = 1),
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Platelet units transfused:", input_type = "numeric", input_id = "platelets_transfused", initial_value_selected = platelets_transfused, min = 0, max = 100, step = 1),
-                                         )
-                        ),
-                        hr(),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Intraoperative Complications (including durotomy)?", input_type = "switch", input_id = "intraoperative_complications_true_false", initial_value_selected = intraoperative_complications_true_false),
-                        conditionalPanel(condition = "input.intraoperative_complications_true_false == true",
-                                         box(width = 12,
-                                             br(),
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Select any:", input_type = "checkbox", input_id = "intraoperative_complications_vector", choices_vector = c("Durotomy", "Nerve Root Injury", "Loss of Neuromonitoring Data with Return", "Loss of Neuromonitoring Data without Return"), initial_value_selected = intraoperative_complications_vector),
-                                             jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Other Intraoperative Complications:", input_type = "text", input_id = "other_intraoperative_complications", initial_value_selected = other_intraoperative_complications)
-                                         )
-                        ),
-                        br(),
-                        jh_make_shiny_table_row_function(left_column_percent_width = 20,
-                                                         left_column_label = "Head Positioning:",
-                                                         input_type = "radioGroupButtons",
-                                                         input_id = "head_positioning",
-                                                         required_option = TRUE,
-                                                         button_size = "xs",
-                                                         checkboxes_inline = TRUE,
-                                                         choices_vector = c("Supine/Lateral", "Proneview Faceplate", "Cranial Tongs", "Halo", "Mayfield"),
-                                                         initial_value_selected = head_positioning),
-                        br(),
-                        jh_make_shiny_table_row_function(left_column_label = "Additional Procedures:",
-                                                         input_id = "additional_procedures",
-                                                         left_column_percent_width = 20,
-                                                         checkboxes_inline = FALSE,
-                                                         input_type = "checkboxGroupButtons",
-                                                         choices_vector = additional_procedures_choices,
-                                                         initial_value_selected = additional_procedures),
-                        conditionalPanel(condition = "input.additional_procedures.indexOf('Other') > -1",
-                                         tags$table(width = "90%" ,
-                                                    jh_make_shiny_table_row_function(left_column_label = "Other Procedures:", input_type = "text", input_id = "additional_procedures_other", left_column_percent_width = 30, font_size = 12, initial_value_selected = additional_procedures_other,)
-                                         )
-                        ),
-                        br(),
-                        hr(),
-                        div(style = "font-size:18px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
-                        uiOutput(outputId = "drains_ui"),
-                        hr(),
-                        jh_make_shiny_table_row_function(left_column_label = "Select any used during closure:",
-                                                         input_type = "checkbox",
-                                                         input_id = "additional_end_procedure_details",
-                                                         left_column_percent_width = 45,
-                                                         font_size = 14,
-                                                         choices_vector = c("Vancomycin Powder",
-                                                                            "Antibiotic Beads"),
-                                                         initial_value_selected = additional_end_procedure_details,
-                                                         return_as_full_table = TRUE),
-                        hr(),
-                        jh_make_shiny_table_row_function(left_column_label = "Skin Closure:",
-                                                         input_type = "checkbox",
-                                                         input_id = "closure_details",
-                                                         left_column_percent_width = 45,
-                                                         font_size = 14,
-                                                         required_option = TRUE,
-                                                         choices_vector = c("Subcutaneous suture",
-                                                                            "Nylon",
-                                                                            "Staples"),
-                                                         initial_value_selected = closure_details,
-                                                         return_as_full_table = TRUE),
-                        hr(),
-                        jh_make_shiny_table_row_function(left_column_label = "Skin/Dressing:",
-                                                         input_type = "checkbox",
-                                                         input_id = "dressing_details",
-                                                         required_option = TRUE,
-                                                         left_column_percent_width = 45,
-                                                         font_size = 14,
-                                                         choices_vector = c(
-                                                             "Steristrips",
-                                                             "Dermabond",
-                                                             "Prineo",
-                                                             "an Incisional Wound Vac",
-                                                             "a water tight dressing"),
-                                                         initial_value_selected = dressing_details,
-                                                         return_as_full_table = TRUE),
-                        br()
-                    )
+                                                box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Additional Surgical Details:"),status = "info", solidHeader = TRUE,
+                                                    if(required_options_missing == TRUE){
+                                                        div(style = "font-size:22px; font-weight:bold; font-style:italic; text-align:center; color:red", "*** Please Make Selections for Required Fields***")
+                                                    },
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Primary Surgeon:", input_type = "text", input_id = "primary_surgeon", initial_value_selected = primary_surgeon),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Assistants:", input_type = "text", input_id = "surgical_assistants", initial_value_selected = surgical_assistants),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Preoperative Diagnosis:", input_type = "text", input_id = "preoperative_diagnosis", initial_value_selected = preoperative_diagnosis),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Postoperative Diagnosis:", input_type = "text", input_id = "postoperative_diagnosis", initial_value_selected = postoperative_diagnosis),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Surgical Indications:", input_type = "text", input_id = "indications", initial_value_selected = indications),
+                                                    hr(),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30,
+                                                                                     left_column_label = "Neuromonitoring used:",
+                                                                                     input_type = "checkbox",
+                                                                                     input_id = "neuromonitoring", choices_vector = c("EMG", "SSEP", "tc MEP", "DNEP (Cord Stimulation)", "H reflex"),
+                                                                                     checkboxes_inline = TRUE,
+                                                                                     initial_value_selected = neuromonitoring),
+                                                    jh_make_shiny_table_row_function(left_column_label = "Preop Antibiotics:",
+                                                                                     input_type = "picker",
+                                                                                     input_id = "preop_antibiotics",
+                                                                                     left_column_percent_width = 30,
+                                                                                     font_size = 14,
+                                                                                     choices_vector = c("None (Antibiotics were held)", "Cefazolin (Ancef)", "Vancomycin", "Ceftriaxone", "Gentamycin", "Clindamycin", "Aztreonam", "Unknown", "Other"),
+                                                                                     initial_value_selected = preop_antibiotics),
+                                                    jh_make_shiny_table_row_function(left_column_label = "Antifibrinolytic:",
+                                                                                     input_type = "picker",
+                                                                                     input_id = "anti_fibrinolytic",
+                                                                                     left_column_percent_width = 30,
+                                                                                     font_size = 14,
+                                                                                     choices_vector = c("None", "Tranexamic Acid (TXA)", "Amicar", "Desmopressin (DDAVP)", "Other"),
+                                                                                     initial_value_selected = anti_fibrinolytic,
+                                                    ),
+                                                    conditionalPanel(condition = "input.anti_fibrinolytic.indexOf('Tranexamic Acid (TXA)') > -1",
+                                                                     jh_make_shiny_table_row_function(left_column_label = "TXA Loading (mg/kg):    ",
+                                                                                                      input_type = "numeric",
+                                                                                                      input_id = "txa_loading",
+                                                                                                      left_column_percent_width = 50,
+                                                                                                      font_size = 13, min = 0, max = 200, 
+                                                                                                      initial_value_selected = txa_loading, 
+                                                                                                      step = 5,
+                                                                                                      text_align = "right",
+                                                                     ),
+                                                                     jh_make_shiny_table_row_function(left_column_label = "TXA Maintenance (mg/kg/hr):    ",
+                                                                                                      input_type = "numeric",
+                                                                                                      input_id = "txa_maintenance",
+                                                                                                      left_column_percent_width = 50,
+                                                                                                      font_size = 13, min = 0, max = 50, 
+                                                                                                      initial_value_selected = txa_maintenance, 
+                                                                                                      step = 5, 
+                                                                                                      text_align = "right",
+                                                                     ),
+                                                    ),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Findings:", input_type = "text", input_id = "surgical_findings", initial_value_selected = surgical_findings),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Specimens:", input_type = "text", input_id = "specimens_removed", initial_value_selected = specimens_removed),
+                                                    hr(),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Estimated Blood Loss:", input_type = "numeric", input_id = "ebl", initial_value_selected = ebl, min = 0, max = 50000, step = 100),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Urine Output:", input_type = "numeric", input_id = "urine_output", initial_value_selected = urine_output, min = 0, max = 50000, step = 100),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Crystalloids:", input_type = "numeric", input_id = "crystalloids_administered", initial_value_selected = crystalloids_administered, min = 0, max = 100000, step = 100),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Colloids:", input_type = "numeric", input_id = "colloids_administered", min = 0, initial_value_selected = colloids_administered, max = 100000, step = 100),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Transfusions/Cell Saver", input_type = "switch", input_id = "transfusion", switch_input_on_label = "Yes", switch_input_off_label = "No", initial_value_selected = transfusion),
+                                                    conditionalPanel(condition = "input.transfusion == true",
+                                                                     box(width = 12,
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cell Saver Transfused (cc):", input_type = "numeric", input_id = "cell_saver_transfused",initial_value_selected = cell_saver_transfused, min = 0, max = 10000, step = 100),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "pRBC units transfused:", input_type = "numeric", input_id = "prbc_transfused", initial_value_selected = prbc_transfused, min = 0, max = 100, step = 1),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "FFP units transfused:", input_type = "numeric", input_id = "ffp_transfused", initial_value_selected = ffp_transfused, min = 0, max = 100, step = 1),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cryoprecipitate units transfused:", input_type = "numeric", input_id = "cryoprecipitate_transfused", initial_value_selected = cryoprecipitate_transfused, min = 0, max = 100, step = 1),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Platelet units transfused:", input_type = "numeric", input_id = "platelets_transfused", initial_value_selected = platelets_transfused, min = 0, max = 100, step = 1),
+                                                                     )
+                                                    ),
+                                                    hr(),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Intraoperative Complications (including durotomy)?", input_type = "switch", input_id = "intraoperative_complications_true_false", initial_value_selected = intraoperative_complications_true_false),
+                                                    conditionalPanel(condition = "input.intraoperative_complications_true_false == true",
+                                                                     box(width = 12,
+                                                                         br(),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Select any:",
+                                                                                                          input_type = "checkbox", input_id = "intraoperative_complications_vector", 
+                                                                                                          choices_vector = c("Durotomy", "Nerve Root Injury", "Loss of Neuromonitoring Data with Return", "Loss of Neuromonitoring Data without Return"), 
+                                                                                                          initial_value_selected = intraoperative_complications_vector),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Other Intraoperative Complications:", input_type = "text", input_id = "other_intraoperative_complications", initial_value_selected = other_intraoperative_complications)
+                                                                     )
+                                                    ),
+                                                    br(),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 20,
+                                                                                     left_column_label = "Head Positioning:",
+                                                                                     input_type = "radioGroupButtons",
+                                                                                     input_id = "head_positioning",
+                                                                                     required_option = TRUE,
+                                                                                     button_size = "xs",
+                                                                                     checkboxes_inline = TRUE,
+                                                                                     choices_vector = c("Supine/Lateral", "Proneview Faceplate", "Cranial Tongs", "Halo", "Mayfield"),
+                                                                                     initial_value_selected = head_positioning),
+                                                    br(),
+                                                    jh_make_shiny_table_row_function(left_column_label = "Additional Procedures:",
+                                                                                     input_id = "additional_procedures",
+                                                                                     left_column_percent_width = 20,
+                                                                                     checkboxes_inline = FALSE,
+                                                                                     input_type = "checkboxGroupButtons",
+                                                                                     choices_vector = additional_procedures_choices,
+                                                                                     initial_value_selected = additional_procedures),
+                                                    conditionalPanel(condition = "input.additional_procedures.indexOf('Other') > -1",
+                                                                     tags$table(width = "90%" ,
+                                                                                jh_make_shiny_table_row_function(left_column_label = "Other Procedures:", input_type = "text", input_id = "additional_procedures_other", left_column_percent_width = 30, font_size = 12, initial_value_selected = additional_procedures_other,)
+                                                                     )
+                                                    ),
+                                                    br(),
+                                                    hr(),
+                                                    div(style = "font-size:18px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
+                                                    uiOutput(outputId = "drains_ui"),
+                                                    hr(),
+                                                    jh_make_shiny_table_row_function(left_column_label = "Select any used during closure:",
+                                                                                     input_type = "checkbox",
+                                                                                     input_id = "additional_end_procedure_details",
+                                                                                     left_column_percent_width = 45,
+                                                                                     font_size = 14,
+                                                                                     choices_vector = c("Vancomycin Powder",
+                                                                                                        "Antibiotic Beads"),
+                                                                                     initial_value_selected = additional_end_procedure_details,
+                                                                                     return_as_full_table = TRUE),
+                                                    hr(),
+                                                    jh_make_shiny_table_row_function(left_column_label = "Skin Closure:",
+                                                                                     input_type = "checkbox",
+                                                                                     input_id = "closure_details",
+                                                                                     left_column_percent_width = 45,
+                                                                                     font_size = 14,
+                                                                                     required_option = TRUE,
+                                                                                     choices_vector = c("Subcutaneous suture",
+                                                                                                        "Nylon",
+                                                                                                        "Staples"),
+                                                                                     initial_value_selected = closure_details,
+                                                                                     return_as_full_table = TRUE),
+                                                    hr(),
+                                                    jh_make_shiny_table_row_function(left_column_label = "Skin/Dressing:",
+                                                                                     input_type = "checkbox",
+                                                                                     input_id = "dressing_details",
+                                                                                     required_option = TRUE,
+                                                                                     left_column_percent_width = 45,
+                                                                                     font_size = 14,
+                                                                                     choices_vector = c(
+                                                                                         "Steristrips",
+                                                                                         "Dermabond",
+                                                                                         "Prineo",
+                                                                                         "an Incisional Wound Vac",
+                                                                                         "a water tight dressing"),
+                                                                                     initial_value_selected = dressing_details,
+                                                                                     return_as_full_table = TRUE),
+                                                    br()
+                                                )
         )
         
         return(additional_details_modal)
     }
     
+    observeEvent(input$intraoperative_complications_vector, {
+        if(any(input$intraoperative_complications_vector == "Durotomy")){
+         updateTextInput(session = session, inputId = "postoperative_diagnosis", value = paste(input$postoperative_diagnosis, "Accidental puncture or laceration of dura during a procedure", sep = "; "))
+                             
+        }
+    }
+    )
+
     additional_procedures_options_reactive_vector <- reactive({
         additional_procedures_choices <- list()
         additional_procedures_choices$neuromonitoring <- "Spinal Cord Monitoring"
@@ -1538,7 +1853,7 @@ server <- function(input, output, session) {
         if(any(str_detect(string = input$head_positioning, pattern = "Mayfield"))){
             additional_procedures_choices$head_positioning <- "Application of Cranial Tongs using Mayfield head holder"
         }
-
+        
         if(any(str_detect(string = input$head_positioning, pattern = "Halo"))){
             age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
             if(age < 18 & age > 0){
@@ -1547,7 +1862,7 @@ server <- function(input, output, session) {
                 additional_procedures_choices$head_positioning <- "Application of Halo"
             }
         }
-            
+        
         additional_procedures_choices$halo_removal <- "Removal of tongs or Halo applied by another inidividual"
         additional_procedures_choices$irrigation_debridement <- "Irrigation and Debridement"
         additional_procedures_choices$open_biopsy <- "Open Biopsy of vertebral body"
@@ -1562,7 +1877,7 @@ server <- function(input, output, session) {
         }
         additional_procedures_choices$vertebral_fx_open_tx <- "Open treatment of vertebral fracture"
         additional_procedures_choices$other <- "Other"
-
+        
         unlist(additional_procedures_choices, use.names = FALSE)
     })
     
@@ -1571,43 +1886,43 @@ server <- function(input, output, session) {
                       input$prior_fusion_levels, 
                       input$head_positioning, 
                       input$approach_robot_navigation), ignoreInit = TRUE, {
-        additional_procedures_list <- as.list(input$additional_procedures)
-        
-        if("Robotic Assistance" %in% input$approach_robot_navigation){
-            additional_procedures_list$robot <- "Use of stereotactic navigation system for screw placement"
-        }
-        if("Navigation Assistance" %in% input$approach_robot_navigation){
-            additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
-        }
-        
-        if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0){
-            additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
-        }
-        if(length(input$prior_fusion_levels)>0){
-            additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
-        }
-        
-        if(any(str_detect(string = input$head_positioning, pattern = "Tongs"))){
-            additional_procedures_list$head_positioning <- "Application of Cranial Tongs"
-        }
-        if(any(str_detect(string = input$head_positioning, pattern = "Mayfield"))){
-            additional_procedures_list$head_positioning <- "Application of Cranial Tongs using Mayfield head holder"
-        }
-        
-        if(any(str_detect(string = input$head_positioning, pattern = "Halo"))){
-            age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
-            if(age < 18 & age > 0){
-                additional_procedures_list$head_positioning <- "Application of Halo for thin skull osteology (pediatric)"
-            }else{
-                additional_procedures_list$head_positioning <- "Application of Halo"
-            }
-        }
-        
-        updateCheckboxGroupButtons(session = session, 
-                                   inputId = "additional_procedures", 
-                                   choices = additional_procedures_options_reactive_vector(),
-                                   selected = unlist(additional_procedures_list, use.names = FALSE))
-    })
+                          additional_procedures_list <- as.list(input$additional_procedures)
+                          
+                          if("Robotic Assistance" %in% input$approach_robot_navigation){
+                              additional_procedures_list$robot <- "Use of stereotactic navigation system for screw placement"
+                          }
+                          if("Navigation Assistance" %in% input$approach_robot_navigation){
+                              additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
+                          }
+                          
+                          if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0){
+                              additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
+                          }
+                          if(length(input$prior_fusion_levels)>0){
+                              additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
+                          }
+                          
+                          if(any(str_detect(string = input$head_positioning, pattern = "Tongs"))){
+                              additional_procedures_list$head_positioning <- "Application of Cranial Tongs"
+                          }
+                          if(any(str_detect(string = input$head_positioning, pattern = "Mayfield"))){
+                              additional_procedures_list$head_positioning <- "Application of Cranial Tongs using Mayfield head holder"
+                          }
+                          
+                          if(any(str_detect(string = input$head_positioning, pattern = "Halo"))){
+                              age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
+                              if(age < 18 & age > 0){
+                                  additional_procedures_list$head_positioning <- "Application of Halo for thin skull osteology (pediatric)"
+                              }else{
+                                  additional_procedures_list$head_positioning <- "Application of Halo"
+                              }
+                          }
+                          
+                          updateCheckboxGroupButtons(session = session, 
+                                                     inputId = "additional_procedures", 
+                                                     choices = additional_procedures_options_reactive_vector(),
+                                                     selected = unlist(additional_procedures_list, use.names = FALSE))
+                      })
     
     additional_procedures_vector_reactive <- reactive({
         additional_procedures_list <- as.list(input$additional_procedures)
@@ -1616,28 +1931,25 @@ server <- function(input, output, session) {
             additional_procedures_list$other <- input$additional_procedures_other
         }
         additional_procedures_list <- discard(additional_procedures_list, .p = ~ (.x == "Other"))
-
+        
         unlist(additional_procedures_list, use.names = FALSE)
     })
-
+    
     
     observeEvent(input$implant_details_complete, ignoreInit = TRUE, once = TRUE, {
-        if(!is.null(input$diagnosis_subgroup)){
-            preop_dx <- glue_collapse(x = map(.x = input$diagnosis_subgroup, 
-                                      .f = ~ if_else(.x == "Other", input$diagnosis_subgroup_other, .x)),
-                              sep = ", ", last = " and ")
+        if(!is.null(input$primary_diagnosis)){
+            preop_dx <- glue_collapse(x = input$primary_diagnosis, sep = "; ")
             
-            postop_dx <- glue_collapse(x = map(.x = input$diagnosis_subgroup, 
-                                              .f = ~ if_else(.x == "Other", input$diagnosis_subgroup_other, .x)),
-                                      sep = ", ", last = " and ")
+            postop_dx <- glue_collapse(x = input$primary_diagnosis, sep = "; ")
+
         }else{
             preop_dx <- " "
             postop_dx <- " "
         }
         if(!is.null(input$symptoms)){
             symptoms <- glue_collapse(x = map(.x = input$symptoms, 
-                                             .f = ~ if_else(.x == "Other", input$symptoms_other, .x)),
-                                     sep = ", ", last = " and ")
+                                              .f = ~ if_else(.x == "Other", input$symptoms_other, .x)),
+                                      sep = ", ", last = " and ")
         }else{
             symptoms <- " "
         }
@@ -1662,15 +1974,15 @@ server <- function(input, output, session) {
                 }
             }
         } 
-
-        procedure_indications <- str_to_sentence(glue_collapse(indications_list, sep = " "))
+        
+        procedure_indications <- str_remove_all(str_remove_all(string = str_to_sentence(glue_collapse(indications_list, sep = " ")), pattern = " initial encounter"), pattern = " initial encounter for")
         
         add_procedures_list <- list()
         
         if(length(input$prior_fusion_levels)>0){
             add_procedures_list$exploration_of_fusion <- "Exploration of prior spinal fusion"
         }
-        if(str_detect(string = str_to_lower(toString(input$diagnosis_subgroup)), pattern = "infection")){
+        if(str_detect(string = str_to_lower(toString(input$primary_diagnosis)), pattern = "infection")){
             add_procedures_list$irrigation_debridement <- "Irrigation and Debridement"
         }
         
@@ -1683,7 +1995,7 @@ server <- function(input, output, session) {
         )
     })
     
-
+    
     
     observeEvent(input$edit_additional_surgical_details, ignoreInit = TRUE, {
         showModal(
@@ -1727,7 +2039,7 @@ server <- function(input, output, session) {
         required_options$head_position <- input$head_positioning
         required_options$closure_details <- input$closure_details
         required_options$dressing_details <- input$dressing_details
-
+        
         if(is.null(required_options$head_position) |
            is.null(required_options$closure_details) |
            is.null(required_options$dressing_details)){
@@ -1787,14 +2099,29 @@ server <- function(input, output, session) {
                        tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", input$surgical_assistants)),
                    ),
                    tags$tr(
+                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                       tags$td(width = "5%"),
+                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                   ),
+                   tags$tr(
                        tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Preoperative Diagnosis:")),
                        tags$td(width = "5%"),
                        tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", input$preoperative_diagnosis)),
                    ),
                    tags$tr(
+                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                       tags$td(width = "5%"),
+                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                   ),
+                   tags$tr(
                        tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Postoperative Diagnosis:")),
                        tags$td(width = "5%"),
                        tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", input$postoperative_diagnosis)),
+                   ),
+                   tags$tr(
+                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                       tags$td(width = "5%"),
+                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
                    ),
                    tags$tr(
                        tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Surgical Indications:")),
@@ -1804,12 +2131,17 @@ server <- function(input, output, session) {
                    tags$tr(
                        tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "---")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", " ")),
+                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", "---")),
                    ),
                    tags$tr(
                        tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Neuromonitoring used:")),
                        tags$td(width = "5%"),
                        tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", toString(input$neuromonitoring))),
+                   ),
+                   tags$tr(
+                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", " ")),
+                       tags$td(width = "5%"),
+                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", " ")),
                    ),
                    tags$tr(
                        tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Preoperative Antibiotics:")),
@@ -1974,22 +2306,8 @@ server <- function(input, output, session) {
                        tags$td(width = "5%"),
                        tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", toString(input$dressing_details))),
                    )
-               ),
-               # hr(),
-               # jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Intraoperative Complications (including durotomy)?", input_type = "switch", input_id = "intraoperative_complications_true_false"),
-               # conditionalPanel(condition = "input.intraoperative_complications_true_false == true",
-               #                  box(width = 12,
-               #                      br(),
-               #                      jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Select any:", input_type = "checkbox", input_id = "intraoperative_complications_vector", choices_vector = c("Durotomy", "Nerve Root Injury", "Loss of Neuromonitoring Data with Return", "Loss of Neuromonitoring Data without Return"), initial_value_selected = NULL),
-               #                      jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Other Intraoperative Complications:", input_type = "text", input_id = "other_intraoperative_complications", initial_value_selected = NULL)
-               #                  )
-               # ),
-               # conditionalPanel(condition = "input.additional_procedures.indexOf('Other') > -1",
-               #                  tags$table(width = "90%" ,
-               #                             jh_make_shiny_table_row_function(left_column_label = "Other Procedures:", input_type = "text", input_id = "additional_procedures_other", left_column_percent_width = 30, font_size = 12, initial_value_selected = "",)
-               #                  )
-               # ),
                )
+        )
     })
     
     
@@ -2017,17 +2335,12 @@ server <- function(input, output, session) {
         updateTabItems(session = session, inputId = "tabs", selected = "implant_details")
     })
     
-    # observeEvent(fusion_levels_computed_reactive_df(),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    #     updateCheckboxGroupButtons(session = session, 
-    #                                inputId = "fusion_levels_confirmed", 
-    #                                selected = fusion_levels_computed_reactive_df()$level)
-    # })
-     
+    
     observeEvent(input$implants_complete,ignoreNULL = TRUE, ignoreInit = TRUE, {
         
         if(length(fusion_levels_computed_reactive_df()$level)>0){
             showModal(
-                modalDialog(title = "Confirm Fusion Levels", easyClose = TRUE,
+                modalDialog(title = "Confirm Fusion Levels", easyClose = TRUE, footer = modalButton(label = "Confirmed"),
                             column(6, 
                                    prettyCheckboxGroup(
                                        inputId = "fusion_levels_confirmed",
@@ -2037,97 +2350,93 @@ server <- function(input, output, session) {
                                        selected = fusion_levels_computed_reactive_df()$level,
                                        icon = icon("check"), 
                                        status = "success"
-                                       )
-                                   )))
+                                   )
+                            )))
         }
     })
     
     ###### ######  -----------   ######### UPDATE TABS ###### ######  -----------   ######### 
     
-    observeEvent(input$crop_y,ignoreNULL = TRUE, {
-        symptom_option_list <- list()
-        if(input$crop_y[2] > 0.6){
-            symptom_option_list$'Neck & Uppers:' <- c("Neck Pain", "Left Arm Pain", "Right Arm Pain", "Left Arm Weakness", "Right Arm Weakness")
-        }
-        if(input$crop_y[2] > 0.5 & input$crop_y[1] < 0.65){
-            symptom_option_list$'Thoracic:' <- c("Mid Back Pain", "Kyphosis")
-        }
-        if(input$crop_y[1] < 0.3){
-            symptom_option_list$'Lower & Legs:' = c("Low Back Pain", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness")
-        }
+    observeEvent(input$spinal_regions, {
+        spine_regions_text <- paste(input$spinal_regions, collapse = ", ")
         
-        if(input$crop_y[2] > 0.45){
-            symptom_option_list$'Functional:' <- c("Myelopathy: Nurick 1 (Root Symptomts)",
-                                                  "Myelopathy: Nurick 2 (Normal gait but symptoms of cord compression)",
-                                                  "Myelopathy: Nurick 3 (Gait Abnormalities)",
-                                                  "Myelopathy: Nurick 4 (Significant Gait Abnormalities, preventing employment)",
-                                                  "Myelopathy: Nurick 5 (Depended on Assistive Device for Ambulating)",
-                                                  "Myelopathy: Nurick 6 (Wheelchair bound)")
-        }
-        if(input$crop_y[1] < 0.5){
-            symptom_option_list$'Deformity' = c("Coronal Imbalance", "Sagittal Imbalance", "Chin on chest deformity", "Flatback Syndrome")
-        }
+        upper_y <- if_else(str_detect(spine_regions_text, "Cervical"), 0.94,
+                           if_else(str_detect(spine_regions_text, "Cervicothoracic"), 0.94,
+                           if_else(str_detect(spine_regions_text, "Thoracic"), 0.77, 
+                                   if_else(str_detect(spine_regions_text, "Thoracolumbar"), 0.55, 
+                                           if_else(str_detect(spine_regions_text, "Lumbar"), 0.4, 
+                                                   if_else(str_detect(spine_regions_text, "Lumbosacral"), 0.32, 0.4))))))
+        
+        lower_y <- if_else(str_detect(spine_regions_text, "Lumbosacral"), 0.1,
+                           if_else(str_detect(spine_regions_text, "Lumbar"), 0.1, 
+                                   if_else(str_detect(spine_regions_text, "Thoracolumbar"), 0.1, 
+                                           if_else(str_detect(spine_regions_text, "Thoracic"), 0.35, 
+                                                   if_else(str_detect(spine_regions_text, "Cervicothoracic"), 0.6,
+                                                   if_else(str_detect(spine_regions_text, "Cervical"), 0.71, 0.1))))))
+        
+        updateNoUiSliderInput(session = session, inputId = "crop_y", value = c(lower_y, upper_y))
+    }
+    )
+    
 
-            symptom_option_list$'Other' = c("Loss of bladder control", "Bowel Incontinence", "Other")
+    
 
-        updatePickerInput(session = session, inputId = "symptoms", label = NULL, choices = symptom_option_list)
-    })
     
     ###### ######  -----------   ######### Change to 6 Lumbar Vertebrae ###### ######  -----------   ######### 
     
     observeEvent(input$lumbar_vertebrae_count, ignoreInit = TRUE,{
         if(input$lumbar_vertebrae_count == "6"){
             ## first backup L5
-                    l5_levels_vector <<- levels_vector
-                    l5_labels_df <<- labels_df
-                    l5_vertebral_numbers_vector <<- vertebral_numbers_vector
-                    l5_levels_numbered_df <<- levels_numbered_df
-                    l5_jh_get_vertebral_number_function <<- jh_get_vertebral_number_function
-                    l5_jh_get_vertebral_level_function <<- jh_get_vertebral_level_function
-                    l5_spine_png <<- spine_png
-                    l5_anterior_spine_jpg <<- anterior_spine_jpg
-                    l5_interbody_levels_df <<-interbody_levels_df
-                    l5_revision_implants_df <<- revision_implants_df
-                    l5_anterior_df <<- anterior_df
-                    l5_all_implants_constructed_df <<- all_implants_constructed_df
-                    l5_spine_png <<- spine_png
-                    l5_open_canal_df <<- open_canal_df
-                    l5_labels_anterior_df <<- labels_anterior_df
-                    
-                    labels_anterior_df <<- labels_anterior_df  %>%
-                        add_row(level = "L6", x = 0.5, y = 0.14)
-                    
-                    spine_png <<- l6_spine_png
-                    
-                    anterior_spine_jpg <<- l6_anterior_spine_png
-                    
-                    labels_df <<- l6_labels_df
-                    levels_numbered_df <<- l6_levels_numbered_df
+            l5_levels_vector <<- levels_vector
+            l5_labels_df <<- labels_df
+            l5_vertebral_numbers_vector <<- vertebral_numbers_vector
+            l5_levels_numbered_df <<- levels_numbered_df
+            l5_jh_get_vertebral_number_function <<- jh_get_vertebral_number_function
+            l5_jh_get_vertebral_level_function <<- jh_get_vertebral_level_function
+            l5_spine_png <<- spine_png
+            l5_anterior_spine_jpg <<- anterior_spine_jpg
+            l5_interbody_levels_df <<-interbody_levels_df
+            l5_revision_implants_df <<- revision_implants_df
+            l5_anterior_df <<- anterior_df
+            l5_all_implants_constructed_df <<- all_implants_constructed_df
+            l5_spine_png <<- spine_png
+            l5_open_canal_df <<- open_canal_df
+            l5_labels_anterior_df <<- labels_anterior_df
             
-                    all_implants_constructed_df <<- all_implants_constructed_df %>%
-                        filter(vertebral_number < 23.9) %>%
-                        union_all(l6_all_implants_constructed_df)
-                    
-                    anterior_df <<- l6_anterior_df
-                    # implant_starts_df <- l6_implant_starts_df
-                    jh_get_vertebral_number_function <<- l6_jh_get_vertebral_number_function
-                    jh_get_vertebral_level_function <<- l6_jh_get_vertebral_level_function
-                    revision_implants_df <<- l6_revision_implants_df
-                    open_canal_df <<- l6_open_canal_df
-                    
+            labels_anterior_df <<- labels_anterior_df  %>%
+                add_row(level = "L6", x = 0.5, y = 0.14)
+            
+            spine_png <<- l6_spine_png
+            
+            anterior_spine_jpg <<- l6_anterior_spine_png
+            
+            labels_df <<- l6_labels_df
+            levels_numbered_df <<- l6_levels_numbered_df
+            
+            all_implants_constructed_df <<- all_implants_constructed_df %>%
+                filter(vertebral_number < 23.9) %>%
+                union_all(l6_all_implants_constructed_df)
+            
+            anterior_df <<- l6_anterior_df
+            # implant_starts_df <- l6_implant_starts_df
+            jh_get_vertebral_number_function <<- l6_jh_get_vertebral_number_function
+            jh_get_vertebral_level_function <<- l6_jh_get_vertebral_level_function
+            revision_implants_df <<- l6_revision_implants_df
+            open_canal_df <<- l6_open_canal_df
+            
         }
         
         if(input$lumbar_vertebrae_count == "5" | input$lumbar_vertebrae_count == "4"){
             spine_png <<- l5_spine_png
             anterior_spine_jpg <<-l5_anterior_spine_jpg 
-
+            
             labels_df <<- l5_labels_df
             levels_numbered_df <<- l5_levels_numbered_df
             
             labels_anterior_df <<- l5_labels_anterior_df
             
             all_implants_constructed_df <<- l5_all_implants_constructed_df
-
+            
             anterior_df <<- l5_anterior_df
             jh_get_vertebral_number_function <<- l5_jh_get_vertebral_number_function
             jh_get_vertebral_level_function <<- l5_jh_get_vertebral_level_function
@@ -2143,121 +2452,15 @@ server <- function(input, output, session) {
             updateSwitchInput(session = session, inputId = "multiple_approach", value = TRUE)
         }
     })
-
+    
     #########-------------------################   UPDATE CHOICES    #########-------------------################ 
     #########-------------------################   UPDATE CHOICES    #########-------------------################ 
     #########-------------------################   UPDATE CHOICES    #########-------------------################ 
     
     ################----------  Diagnoses    ------------######################  
     
-    observeEvent(list(input$primary_diagnosis_group, input$primary_revision), ignoreNULL = TRUE, ignoreInit = TRUE,{
-        
-        primary_degen_dx_options <- c("Spinal Stenosis", 
-                                      "Myelopathy", 
-                                      "Foraminal Stenosis",
-                                      "Degenerative (acquired) Spondylolisthesis",
-                                      "Spondylolysis",
-                                      "Spondylolisthesis",
-                                      "Pseudarthrosis",
-                                      "Lumbar Disc Herniation",
-                                      "Cauda Equina Syndrome",
-                                      "Other"
-                                      )
-        
-        primary_neoplasm_dx_options <- c("Metastatic Disease to the Spinal column",
-                                         "Primary Neoplasm of the spine",
-                                         "Other"
-                                         )
-        
-        primary_lesion_dx_options <- c("Traumatic Burst Fracture", 
-                                       "Fracture Dislocation", 
-                                       "Osteomyelitis/Diskitis",
-                                       "Traumatic Spondylolisthesis",
-                                       "Cauda Equina Syndrome",
-                                       "Other"
-                                       )
-        
-        primary_pediatric_deformity_dx_options <- c("Infantile Scoliosis", 
-                               "Juvenile Scoliosis",
-                               "Congenital Scoliosis", 
-                               "Neurogenic Scoliosis", 
-                               "Syndromic Scoliosis",
-                               "Idiopathic Scoliosis",
-                               "Scoliosis associated with another condition",
-                               "Hemivertebra",
-                               "Secondary Kyphosis",
-                               "Scheurmanns Kyphosis",
-                               "Acquired Spondylolisthesis", 
-                               "Congenital Spondylolisthesis",
-                               "Other"
-                               )
-        
-        primary_adult_deformity_dx_options <- c("Adult Idiopathic Scoliosis",
-                           "Degenerative Scoliosis",
-                           "Adolescent Idiopathic Scoliosis",
-                           "Scoliosis associated with another condition",
-                           "Secondary Kyphosis",
-                           "Chin on Chest Deformity",
-                           "Scheurmanns Kyphosis",
-                           "Degenerative Spondylolisthesis", 
-                           "Congenital Spondylolisthesis",
-                           "Lumbar Disc Herniation",
-                           "Spinal Stenosis",
-                           "Flatback Syndrome",
-                           "Other"
-                           )
-        
-        if(input$primary_revision == "Revision"){
-            revision_dx_list <- list('Implant' = c("Mal-Positioned Implants", "Failure (pull-out/fracture) of Implants", "Pseudarthrosis"), 
-                                     'Junctional' = c("Proximal Junctional Failure", "Adjacent Segment Degeneration", "Distal Junctional Failure", "Vertebral Fracture"),
-                                     'Infection' = c("Early Infection/Wound Drainage", "Late Infection (>6mo)"),
-                                     'Malalignment' = c("Coronal Malalignment", "Sagittal Malalignment"),
-                                     'Neurologic' = c("Motor Deficit", "Radicular Pain", "Neurogenic Claudication")
-            )
-            if(input$primary_diagnosis_group == "spinal_condition"){
-                dx_options <- append(x = list('Primary Diagnoses' = primary_degen_dx_options), revision_dx_list)
-            }
-            if(input$primary_diagnosis_group == "neoplasm"){
-                dx_options <- append(x = list('Primary Diagnoses' = primary_neoplasm_dx_options), revision_dx_list)
-            }
-            if(input$primary_diagnosis_group == "lesion"){
-                dx_options <- append(x = list('Primary Diagnoses' = primary_lesion_dx_options), revision_dx_list)
-            }
-            if(input$primary_diagnosis_group == "deformity"){
-                age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-                if(age <19){
-                    dx_options <- append(x = list('Primary Diagnoses' = primary_pediatric_deformity_dx_options), revision_dx_list)
-                }else{
-                    dx_options <- append(x = list('Primary Diagnoses' = primary_adult_deformity_dx_options), revision_dx_list)
-                }
-            }
-        }else{
-            if(input$primary_diagnosis_group == "spinal_condition"){
-                dx_options <- primary_degen_dx_options
-            }
-            if(input$primary_diagnosis_group == "neoplasm"){
-                dx_options <- primary_neoplasm_dx_options
-            }
-            if(input$primary_diagnosis_group == "lesion"){
-                dx_options <- primary_lesion_dx_options
-            }
-            if(input$primary_diagnosis_group == "deformity"){
-                age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-                if(age < 19){
-                    dx_options <- primary_pediatric_deformity_dx_options
-                }else{
-                    dx_options <- primary_adult_deformity_dx_options
-                }
-            }
-        }
-        updatePickerInput(session = session, 
-                          inputId = "diagnosis_subgroup",
-                          label = NULL,
-                          choices = dx_options)
-    })
-    
     output$tumor_resection_ui <- renderUI({
-        if(input$primary_diagnosis_group == "neoplasm"){
+        if(str_detect(str_to_lower(string = paste(input$primary_diagnosis, collapse = ", ")), pattern = "neoplasm")){
             actionBttn(
                 inputId = "add_tumor_resection",
                 size = "sm", block = TRUE,
@@ -2273,38 +2476,38 @@ server <- function(input, output, session) {
     
     output$drains_ui <- renderUI({
         anterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
-                                                                      input_type = "awesomeRadio",
-                                                                      input_id = "deep_drains_anterior", 
-                                                                      left_column_percent_width = 45, 
-                                                                      font_size = 14, 
-                                                                      initial_value_selected = 0, 
-                                                                      choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                                      checkboxes_inline = TRUE, return_as_full_table = TRUE)
+                                                          input_type = "awesomeRadio",
+                                                          input_id = "deep_drains_anterior", 
+                                                          left_column_percent_width = 45, 
+                                                          font_size = 14, 
+                                                          initial_value_selected = 0, 
+                                                          choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                          checkboxes_inline = TRUE, return_as_full_table = TRUE)
         anterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
-                                                                             input_type = "awesomeRadio",
-                                                                             input_id = "superficial_drains_anterior", 
-                                                                             left_column_percent_width = 45, 
-                                                                             font_size = 14, 
-                                                                             initial_value_selected = 0, 
-                                                                             choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                                             checkboxes_inline = TRUE, return_as_full_table = TRUE)
+                                                                 input_type = "awesomeRadio",
+                                                                 input_id = "superficial_drains_anterior", 
+                                                                 left_column_percent_width = 45, 
+                                                                 font_size = 14, 
+                                                                 initial_value_selected = 0, 
+                                                                 choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                                 checkboxes_inline = TRUE, return_as_full_table = TRUE)
         
         posterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
-                                                                       input_type = "awesomeRadio",
-                                                                       input_id = "deep_drains_posterior", 
-                                                                       left_column_percent_width = 45, 
-                                                                       font_size = 14, 
-                                                                       initial_value_selected = 1, 
-                                                                       choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                                       checkboxes_inline = TRUE, return_as_full_table = TRUE)
+                                                           input_type = "awesomeRadio",
+                                                           input_id = "deep_drains_posterior", 
+                                                           left_column_percent_width = 45, 
+                                                           font_size = 14, 
+                                                           initial_value_selected = 1, 
+                                                           choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                           checkboxes_inline = TRUE, return_as_full_table = TRUE)
         posterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Posterior Superficial drains:", 
-                                                                              input_type = "awesomeRadio",
-                                                                              input_id = "superficial_drains_posterior", 
-                                                                              left_column_percent_width = 45, 
-                                                                              font_size = 14, 
-                                                                              initial_value_selected = 1, 
-                                                                              choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                                              checkboxes_inline = TRUE, return_as_full_table = TRUE)
+                                                                  input_type = "awesomeRadio",
+                                                                  input_id = "superficial_drains_posterior", 
+                                                                  left_column_percent_width = 45, 
+                                                                  font_size = 14, 
+                                                                  initial_value_selected = 1, 
+                                                                  choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                                  checkboxes_inline = TRUE, return_as_full_table = TRUE)
         
         drains_list <- list()
         if(nrow(all_objects_to_add_list$objects_df)>0){
@@ -2315,7 +2518,7 @@ server <- function(input, output, session) {
             if(any(all_objects_to_add_list$objects_df$approach == "posterior")){
                 drains_list$posterior_deep <- posterior_deep
                 drains_list$posterior_superficial <- posterior_superficial
-
+                
             }
         }else{
             if(input$spine_approach == "Posterior"){
@@ -2415,7 +2618,7 @@ server <- function(input, output, session) {
                 "Sublaminar Wire" = "sublaminar_wire")
             
             implant_options <- jh_filter_objects_by_y_range_function(y_min = input$crop_y[1], y_max = input$crop_y[2], object_vector = implants_vector)
-
+            
             updateRadioGroupButtons(session = session, 
                                     inputId = "object_to_add", 
                                     choices = implant_options,
@@ -2675,7 +2878,7 @@ server <- function(input, output, session) {
                                   label = "Junction:",
                                   choices = choices_df$level,
                                   selected = head(x = tail(choices_df$level, 3), 1)
-                                  )
+                )
             }
             
         }
@@ -2689,8 +2892,8 @@ server <- function(input, output, session) {
                                   selected = left_supplement_rod_starts_list_reactive()$linked_starts)
         }
     })
-
-
+    
+    
     # 
     output$left_custom_rods_ui <- renderUI({
         if(input$add_left_custom_rods == TRUE){
@@ -2699,7 +2902,7 @@ server <- function(input, output, session) {
                 filter(side == "left") %>%
                 filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
                 mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
-
+            
             if(input$left_custom_rods_number > 1){
                 column(12,
                        pickerInput(inputId = "left_custom_rod_1",label = "Rod 1 Connects to:",
@@ -2711,22 +2914,22 @@ server <- function(input, output, session) {
                                    multiple = TRUE,
                                    options = list(`actions-box` = TRUE)),
                        if(input$left_custom_rods_number > 2){
-                            pickerInput(inputId = "left_custom_rod_3",label = "Rod 3 Connects to:",
-                                               choices = left_implants_df$implant_label,
-                                               multiple = TRUE,
-                                               options = list(`actions-box` = TRUE))
+                           pickerInput(inputId = "left_custom_rod_3",label = "Rod 3 Connects to:",
+                                       choices = left_implants_df$implant_label,
+                                       multiple = TRUE,
+                                       options = list(`actions-box` = TRUE))
                        },
                        if(input$left_custom_rods_number > 3){
                            pickerInput(inputId = "left_custom_rod_4",label = "Rod 4 Connects to:",
-                                                choices = left_implants_df$implant_label,
-                                                multiple = TRUE,
-                                                options = list(`actions-box` = TRUE))
+                                       choices = left_implants_df$implant_label,
+                                       multiple = TRUE,
+                                       options = list(`actions-box` = TRUE))
                        },
                        if(input$left_custom_rods_number > 4){
                            pickerInput(inputId = "left_custom_rod_5",label = "Rod 5 Connects to:",
-                                                choices = left_implants_df$implant_label,
-                                                multiple = TRUE,
-                                                options = list(`actions-box` = TRUE))
+                                       choices = left_implants_df$implant_label,
+                                       multiple = TRUE,
+                                       options = list(`actions-box` = TRUE))
                        }
                 )
             }
@@ -2734,7 +2937,7 @@ server <- function(input, output, session) {
             NULL
         }
     })
-
+    
     # ################------------------  Right RODS    ----------------------######################  
     # 
     observeEvent(input$reset_all,ignoreNULL = TRUE, ignoreInit = TRUE, {
@@ -2826,7 +3029,7 @@ server <- function(input, output, session) {
                 filter(side == "right") %>%
                 filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
                 mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
-
+            
             if(input$right_custom_rods_number > 1){
                 column(12,
                        pickerInput(inputId = "right_custom_rod_1",label = "Rod 1 Connects to:",
@@ -2861,9 +3064,9 @@ server <- function(input, output, session) {
             NULL
         }
     })
-
+    
     ################------------------  Fusion Levels   ----------------------######################  
-
+    
     # observeEvent(fusion_levels_computed_reactive_df(),ignoreNULL = TRUE, ignoreInit = TRUE, {
     #     updateCheckboxGroupButtons(session = session, 
     #                                inputId = "fusion_levels_confirmed", 
@@ -2897,7 +3100,7 @@ server <- function(input, output, session) {
     ################# ------------  #############  ADDING PROCEDURES & BUILDING REACTIVE DATAFRAMES   ################# ------------  ############# 
     ################# ------------  #############  ADDING PROCEDURES & BUILDING REACTIVE DATAFRAMES   ################# ------------  ############# 
     ################# ------------  #############  ADDING PROCEDURES & BUILDING REACTIVE DATAFRAMES   ################# ------------  ############# 
-
+    
     #########------------------------- ADD TO PLOT -------------------------###########
     
     all_objects_to_add_list <- reactiveValues()
@@ -2926,19 +3129,19 @@ server <- function(input, output, session) {
     
     ########################################### object DETAILS REACTIVE ###########################################
     #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
-        object_added_reactive_df <- reactive({
+    object_added_reactive_df <- reactive({
         object_type_filtered_df <- all_implants_constructed_df %>%
-                filter(object == input$object_to_add)
-
+            filter(object == input$object_to_add)
+        
         implant_df <- nearPoints(
-                df = object_type_filtered_df,
-                coordinfo = input$plot_click,
-                xvar = "x",
-                yvar = "y",
-                maxpoints = 1,
-                threshold = 25
-            )
-
+            df = object_type_filtered_df,
+            coordinfo = input$plot_click,
+            xvar = "x",
+            yvar = "y",
+            maxpoints = 1,
+            threshold = 25
+        )
+        
         if(input$object_to_add == "decompression_diskectomy_fusion" | input$object_to_add == "diskectomy_fusion"){
             anterior_interbody_df <- implant_df %>%
                 select(level, vertebral_number, side, object) %>%
@@ -2948,12 +3151,12 @@ server <- function(input, output, session) {
             implant_df <- implant_df %>%
                 union_all(anterior_interbody_df)
         }
-
+        
         implant_df
     })
     
     #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
-
+    
     observeEvent(input$plot_click, {
         
         all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
@@ -3114,7 +3317,7 @@ server <- function(input, output, session) {
                 mutate(expandable = if_else(expandable == "xx", "Static", "Expandable")) %>%
                 select(level, vertebral_number, approach, object, composition, device_name, height, integrated_fixation, expandable, other, implant_statement) %>%
                 mutate(across(everything(), ~ replace_na(.x, " "))) 
-
+            
             
         }else{
             interbody_details_df <- tibble(level = character(), vertebral_number = double(), object = character(), approach = character(),  composition = character(), implant_statement = character())
@@ -3122,7 +3325,7 @@ server <- function(input, output, session) {
         interbody_details_df
     })
     
-
+    
     ################------------------  Screw Size Details UI  ----------------------######################  
     ################------------------  Screw Size Details UI  ----------------------######################  
     output$screw_details_ui <- renderUI({
@@ -3131,7 +3334,7 @@ server <- function(input, output, session) {
             distinct() %>%
             filter(str_detect(object, "screw")) %>%
             arrange(vertebral_number)
-
+        
         if(nrow(all_implants) > 0){
             implants_wide_df <- all_implants %>%
                 mutate(level_side = str_to_lower(paste(level, side, object, sep = "_"))) %>%
@@ -3193,7 +3396,7 @@ server <- function(input, output, session) {
             distinct() %>%
             filter(str_detect(object, "screw")) %>%
             arrange(vertebral_number)
-
+        
         if(nrow(all_implants) > 0){
             implants_wide_df <- all_implants %>%
                 mutate(level_side = paste(level, side, object, sep = "_")) %>%
@@ -3508,7 +3711,7 @@ server <- function(input, output, session) {
         }else{
             removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
         }
-
+        
         if(length(input$left_revision_implants)>0){
             retained_df <- tibble(level = input$left_revision_implants, side = "left") %>%
                 filter(level %in% input$left_revision_implants_removed == FALSE) %>%
@@ -3550,7 +3753,7 @@ server <- function(input, output, session) {
             
             revision_implants_status_df <- revision_implants_status_df %>%
                 select(level, vertebral_number, side, remove_retain, prior_rod_connected, object, x, y)
-
+            
         }else{
             retained_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), x = double(), y = double())
             revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
@@ -3577,9 +3780,9 @@ server <- function(input, output, session) {
         
         if(input$left_revision_rod_status == "partially_retained_connected"){
             updatePickerInput(session = session, inputId = "left_revision_implants_connected_to_prior_rod", 
-                               choices = left_revision_implants_reactive_list()$retained_df$level, 
+                              choices = left_revision_implants_reactive_list()$retained_df$level, 
                               selected = left_revision_implants_reactive_list()$retained_df$level
-                              )
+            )
         }
     })
     
@@ -3672,17 +3875,17 @@ server <- function(input, output, session) {
         }
     })
     
-
+    
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
-
+    
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
     
     ############# ~~~~~~~~~~~~~~ ################## MAKE THE SUMMARY TABLE FOR THE PLOT    ############# ~~~~~~~~~~~~~~ ################## 
-     plan_reactive_df <- reactive({
+    plan_reactive_df <- reactive({
         
         anti_fibrinolytic <- case_when(
             length(input$anti_fibrinolytic) == 0 ~ "--",
@@ -3711,7 +3914,7 @@ server <- function(input, output, session) {
                          # "BMP:" = bmp_text, 
                          "Left Rod:" = if_else(nrow(left_rod_implants_df_reactive()) > 1, paste(input$left_main_rod_size, input$left_main_rod_material, sep = " "), "--"), 
                          "Right Rod:" = if_else(nrow(right_rod_implants_df_reactive()) > 1, paste(input$right_main_rod_size, input$right_main_rod_material, sep = " "), "--"))
-
+        
         enframe(plan_vector, name = "descriptor", value = "value") %>%
             filter(!is.null(value)) %>%
             filter(value != "--") %>%
@@ -3722,7 +3925,7 @@ server <- function(input, output, session) {
     
     ######### ~~~~~~~~~~~~~~  ############# POSTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
     ######### ~~~~~~~~~~~~~~  ############# POSTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
-
+    
     geoms_list_posterior <- reactiveValues()
     geoms_list_revision_posterior <- reactiveValues()
     
@@ -3763,47 +3966,47 @@ server <- function(input, output, session) {
             geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(right_revision_implants_reactive_list()$retained_df$object_constructed), fill = "black")
         }
     })
-
-
+    
+    
     ###### REVISION RODS ---
     observeEvent(list(left_revision_implants_reactive_list(), req(input$left_revision_rod_status), input$left_revision_implants_connected_to_prior_rod), ignoreInit = TRUE, ignoreNULL = TRUE, {
-
-       if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
-           if(input$left_revision_rod_status == "removed"){
-               geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
-           }else if(input$left_revision_rod_status == "retained_connected" | input$left_revision_rod_status == "retained"){
-               # if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
-               left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
-                   select(x, y) %>%
-                   mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-                   mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-                   arrange(rev(y)) %>%
-                   distinct() %>%
-                   as.matrix()
-               
-               geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-           }else if(input$left_revision_rod_status == "partially_retained_connected"){
-               
-               if(nrow(left_revision_implants_reactive_list()$retained_df %>% filter(prior_rod_connected == "yes"))>1){
-                   left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
-                       filter(prior_rod_connected == "yes") %>%
-                       select(x, y) %>%
-                       mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-                       mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-                       arrange(rev(y)) %>%
-                       distinct() %>%
-                       as.matrix() 
-                   geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")   
-               }else{
-                   geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
-               }
-
-           } else{
-               geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
-           }
-       }else{
-           geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
-       }
+        
+        if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
+            if(input$left_revision_rod_status == "removed"){
+                geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+            }else if(input$left_revision_rod_status == "retained_connected" | input$left_revision_rod_status == "retained"){
+                # if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
+                left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
+                    select(x, y) %>%
+                    mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+                    mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+                    arrange(rev(y)) %>%
+                    distinct() %>%
+                    as.matrix()
+                
+                geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
+            }else if(input$left_revision_rod_status == "partially_retained_connected"){
+                
+                if(nrow(left_revision_implants_reactive_list()$retained_df %>% filter(prior_rod_connected == "yes"))>1){
+                    left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
+                        filter(prior_rod_connected == "yes") %>%
+                        select(x, y) %>%
+                        mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+                        mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+                        arrange(rev(y)) %>%
+                        distinct() %>%
+                        as.matrix() 
+                    geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")   
+                }else{
+                    geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+                }
+                
+            } else{
+                geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+            }
+        }else{
+            geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+        }
     })
     
     observeEvent(list(right_revision_implants_reactive_list(), req(input$right_revision_rod_status), input$right_revision_implants_connected_to_prior_rod), ignoreInit = TRUE, ignoreNULL = TRUE, {
@@ -3845,7 +4048,7 @@ server <- function(input, output, session) {
             geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
         }
     })
-
+    
     
     rods_list <- reactiveValues()
     
@@ -3890,7 +4093,7 @@ server <- function(input, output, session) {
                           }else{
                               linked_vector <- c("a", "b")
                           }
-
+                          
                           ############# MAKE THE RODS #############
                           left_rods_connectors_list <- build_unilateral_rods_list_function(accessory_rod_vector = accessory_vector,
                                                                                            satellite_rods_vector = satellite_vector,
@@ -3913,7 +4116,7 @@ server <- function(input, output, session) {
                           if(nrow(left_rod_implants_df_reactive()) == 0){
                               rods_list$left_connector_list_sf_geom <- NULL
                               rods_list$left_rod_list_sf_geom <- NULL
-                              }
+                          }
                       })
     
     observeEvent(list(input$plot_click, 
@@ -3967,12 +4170,12 @@ server <- function(input, output, session) {
                           
                           ############# MAKE THE RODS #############
                           right_rods_connectors_list <- build_unilateral_rods_list_function(accessory_rod_vector = accessory_vector,
-                                                                                           satellite_rods_vector = satellite_vector,
-                                                                                           intercalary_rods_vector = intercalary_vector,
-                                                                                           intercalary_junction = junction,
-                                                                                           linked_rods_vector = linked_vector,
-                                                                                           revision_rods_retained_df = right_revision_implants_reactive_list()$retained_df, # retained_rod_df, 
-                                                                                           unilateral_full_implant_df = right_rod_implants_df_reactive())
+                                                                                            satellite_rods_vector = satellite_vector,
+                                                                                            intercalary_rods_vector = intercalary_vector,
+                                                                                            intercalary_junction = junction,
+                                                                                            linked_rods_vector = linked_vector,
+                                                                                            revision_rods_retained_df = right_revision_implants_reactive_list()$retained_df, # retained_rod_df, 
+                                                                                            unilateral_full_implant_df = right_rod_implants_df_reactive())
                           if(length(right_rods_connectors_list$rod_list) > 0){
                               rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.75)
                           }else{
@@ -3989,15 +4192,15 @@ server <- function(input, output, session) {
                               rods_list$right_rod_list_sf_geom <- NULL
                           }
                       })
-
+    
     
     observeEvent(input$crosslink_connectors, ignoreNULL = TRUE, ignoreInit = TRUE, {
         rods_list$crosslinks <- geom_sf(data = st_multipolygon((all_objects_to_add_list$objects_df %>% filter(object == "crosslink"))$object_constructed), alpha = 0.75, fill = "gold") 
     })
-
+    
     ######### ~~~~~~~~~~~~~~  ############# ANTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
     ######### ~~~~~~~~~~~~~~  ############# ANTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
-
+    
     geoms_list_anterior_diskectomy <- reactiveValues()
     geoms_list_anterior_interbody <- reactiveValues()
     geoms_list_anterior_instrumentation <- reactiveValues()
@@ -4021,7 +4224,7 @@ server <- function(input, output, session) {
                               
                               geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_posterior_df, plot_with_patterns = input$plot_with_patterns_true)
                           }
-                          })
+                      })
     
     
     ######### ~~~~~~~~~~~~~~  ############# MAKE REACTIVE PLOT    ######### ~~~~~~~~~~~~~~  ############# 
@@ -4048,53 +4251,53 @@ server <- function(input, output, session) {
         }else{
             l6_statement <- " "
         }
-
+        
         labels_anterior_cropped_df <- labels_anterior_df %>%
-                filter(between(y, input$crop_y[1], y_start_with_text)) %>% 
-                mutate(x_left = x_left_limit + 0.05) %>%
-                mutate(x_right = x_right_limit - 0.05) %>%
-                select(level, x_left, x_right, y)
-            
-            labels_anterior_cropped_df <- labels_anterior_cropped_df %>%
-                union_all(tibble(level = " ", 
-                                 x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
-                                 x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
-                                 y = min(labels_anterior_cropped_df$y) - 0.075)) %>%
-                union_all(tibble(level = " ", 
-                                 x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
-                                 x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
-                                 y = max(labels_anterior_cropped_df$y) + 0.05))
-            
-            ggdraw() +
-                draw_image(
-                    anterior_spine_jpg,
-                    scale = 1,
-                    y = 0,
-                    valign = 0,
-                    x = 0,
-                    height = 1
-                    # width = 1
-                )  +
-                draw_text(
-                    text = labels_anterior_cropped_df$level,
-                    x = labels_anterior_cropped_df$x_left,
-                    y = labels_anterior_cropped_df$y,
-                    size = input$label_text_size,
-                    fontface = "bold"
-                ) +
-                draw_text(
-                    text = labels_anterior_cropped_df$level,
-                    x = labels_anterior_cropped_df$x_right,
-                    y = labels_anterior_cropped_df$y,
-                    size = input$label_text_size,
-                    fontface = "bold"
-                ) +
-                reactiveValuesToList(geoms_list_anterior_diskectomy) +
-                reactiveValuesToList(geoms_list_anterior_interbody) +
-                reactiveValuesToList(geoms_list_anterior_instrumentation) +
-                geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
-                plan_table_geom 
-            
+            filter(between(y, input$crop_y[1], y_start_with_text)) %>% 
+            mutate(x_left = x_left_limit + 0.05) %>%
+            mutate(x_right = x_right_limit - 0.05) %>%
+            select(level, x_left, x_right, y)
+        
+        labels_anterior_cropped_df <- labels_anterior_cropped_df %>%
+            union_all(tibble(level = " ", 
+                             x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
+                             x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
+                             y = min(labels_anterior_cropped_df$y) - 0.075)) %>%
+            union_all(tibble(level = " ", 
+                             x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
+                             x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
+                             y = max(labels_anterior_cropped_df$y) + 0.05))
+        
+        ggdraw() +
+            draw_image(
+                anterior_spine_jpg,
+                scale = 1,
+                y = 0,
+                valign = 0,
+                x = 0,
+                height = 1
+                # width = 1
+            )  +
+            draw_text(
+                text = labels_anterior_cropped_df$level,
+                x = labels_anterior_cropped_df$x_left,
+                y = labels_anterior_cropped_df$y,
+                size = input$label_text_size,
+                fontface = "bold"
+            ) +
+            draw_text(
+                text = labels_anterior_cropped_df$level,
+                x = labels_anterior_cropped_df$x_right,
+                y = labels_anterior_cropped_df$y,
+                size = input$label_text_size,
+                fontface = "bold"
+            ) +
+            reactiveValuesToList(geoms_list_anterior_diskectomy) +
+            reactiveValuesToList(geoms_list_anterior_interbody) +
+            reactiveValuesToList(geoms_list_anterior_instrumentation) +
+            geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
+            plan_table_geom 
+        
     })
     
     spine_plan_plot_posterior <- reactive({
@@ -4120,53 +4323,53 @@ server <- function(input, output, session) {
             l6_statement <- " "
         }
         ### POSTERIOR
-            labels_posterior_df <- labels_df %>%
-                filter(between(y, input$crop_y[1], y_start_with_text)) %>%
-                mutate(x_left = x_left_limit + 0.05) %>%
-                mutate(x_right = x_right_limit - 0.05) %>%
-                select(-vertebral_number)
-            
-            labels_posterior_df <- labels_posterior_df %>%
-                union_all(tibble(level = " ", 
-                                 x_left = min(labels_posterior_df$x_left) - 0.03,
-                                 x_right = max(labels_posterior_df$x_right) + 0.03, 
-                                 y = min(labels_posterior_df$y) - 0.03)) %>%
-                union_all(tibble(level = " ", 
-                                 x_left = min(labels_posterior_df$x_left) - 0.03,
-                                 x_right = max(labels_posterior_df$x_right) + 0.03, 
-                                 y = max(labels_posterior_df$y) + 0.03))
-            
-            ggdraw() +
-                draw_image(
-                    spine_png,
-                    scale = 1,
-                    y = 0,
-                    valign = 0,
-                    x = 0,
-                    height = 1
-                    # width = 1
-                ) +
-                reactiveValuesToList(geoms_list_revision_posterior) +
-                reactiveValuesToList(geoms_list_posterior) +
-                reactiveValuesToList(rods_list) +
-                draw_text(
-                    text = labels_posterior_df$level,
-                    x = labels_posterior_df$x_left,
-                    y = labels_posterior_df$y,
-                    size = input$label_text_size,
-                    fontface = "bold"
-                ) +
-                draw_text(
-                    text = labels_posterior_df$level,
-                    x = labels_posterior_df$x_right,
-                    y = labels_posterior_df$y,
-                    size = input$label_text_size,
-                    fontface = "bold"
-                ) +
-                plan_table_geom +
-                annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement) 
-            # ylim(input$crop_y[1], y_start_with_text)  +
-            # xlim(x_left_limit, x_right_limit)
+        labels_posterior_df <- labels_df %>%
+            filter(between(y, input$crop_y[1], y_start_with_text)) %>%
+            mutate(x_left = x_left_limit + 0.05) %>%
+            mutate(x_right = x_right_limit - 0.05) %>%
+            select(-vertebral_number)
+        
+        labels_posterior_df <- labels_posterior_df %>%
+            union_all(tibble(level = " ", 
+                             x_left = min(labels_posterior_df$x_left) - 0.03,
+                             x_right = max(labels_posterior_df$x_right) + 0.03, 
+                             y = min(labels_posterior_df$y) - 0.03)) %>%
+            union_all(tibble(level = " ", 
+                             x_left = min(labels_posterior_df$x_left) - 0.03,
+                             x_right = max(labels_posterior_df$x_right) + 0.03, 
+                             y = max(labels_posterior_df$y) + 0.03))
+        
+        ggdraw() +
+            draw_image(
+                spine_png,
+                scale = 1,
+                y = 0,
+                valign = 0,
+                x = 0,
+                height = 1
+                # width = 1
+            ) +
+            reactiveValuesToList(geoms_list_revision_posterior) +
+            reactiveValuesToList(geoms_list_posterior) +
+            reactiveValuesToList(rods_list) +
+            draw_text(
+                text = labels_posterior_df$level,
+                x = labels_posterior_df$x_left,
+                y = labels_posterior_df$y,
+                size = input$label_text_size,
+                fontface = "bold"
+            ) +
+            draw_text(
+                text = labels_posterior_df$level,
+                x = labels_posterior_df$x_right,
+                y = labels_posterior_df$y,
+                size = input$label_text_size,
+                fontface = "bold"
+            ) +
+            plan_table_geom +
+            annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement) 
+        # ylim(input$crop_y[1], y_start_with_text)  +
+        # xlim(x_left_limit, x_right_limit)
     })
     
     # spine_plan_plot <- reactive({
@@ -4290,7 +4493,7 @@ server <- function(input, output, session) {
     #             # xlim(x_left_limit, x_right_limit)
     #     }
     # })
-
+    
     ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
     ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
     ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
@@ -4314,7 +4517,7 @@ server <- function(input, output, session) {
         #     spine_plan_plot()
         # })
     })
-
+    
     output$spine_plot_for_implants_tab <- renderPlot({
         if(input$multiple_approach == TRUE){
             plot_grid(spine_plan_plot_anterior(), NULL, spine_plan_plot_posterior(), nrow = 1, rel_widths = c(1, -.1, 1))
@@ -4325,14 +4528,14 @@ server <- function(input, output, session) {
                 spine_plan_plot_posterior() 
             }
         }
-         
+        
     })
     
     
     ########################################################  OPERATIVE NOTE GENERATOR    ########################################################  
     ########################################################  OPERATIVE NOTE GENERATOR    ########################################################  
     ########################################################  OPERATIVE NOTE GENERATOR    ########################################################  
-
+    
     ########################################################  OPERATIVE NOTE GENERATOR    ########################################################  
     ########################################################  OPERATIVE NOTE GENERATOR    ########################################################  
     ########################################################  OPERATIVE NOTE GENERATOR    ########################################################  
@@ -4349,7 +4552,7 @@ server <- function(input, output, session) {
                                        selected = revision_implants_removed_vector)
         }
     })
-
+    
     observeEvent(input$fusion_procedure_performed, {
         if(input$fusion_procedure_performed == TRUE){
             updateAwesomeCheckboxGroup(session = session,
@@ -4358,8 +4561,8 @@ server <- function(input, output, session) {
         }
     })
     
-    observeEvent(input$diagnosis_subgroup, {
-        if(any(str_detect(string = input$diagnosis_subgroup, pattern = "Fracture"))){
+    observeEvent(input$primary_diagnosis, {
+        if(any(str_detect(string = str_to_lower(input$primary_diagnosis), pattern = "fracture"))){
             updateCheckboxGroupButtons(session = session, 
                                        inputId = "additional_procedures", 
                                        selected = append(input$additional_procedures, "Open treatment of vertebral fracture"))
@@ -4408,8 +4611,8 @@ server <- function(input, output, session) {
         added_rods_statement
     })
     
-
-
+    
+    
     
     op_note_text_reactive <- reactive({
         ################# COMPLICATIONS ################3
@@ -4452,7 +4655,7 @@ server <- function(input, output, session) {
             procedure_results_list <- list()
             revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
                 union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
-
+            
             procedure_results_list <- no_implants_op_note_posterior_function(head_position = input$head_positioning,
                                                                              revision_implants_df = revision_implants_df,
                                                                              additional_procedures_vector = additional_procedures_vector_reactive(), 
@@ -4465,12 +4668,15 @@ server <- function(input, output, session) {
             
             op_note_list <- list()
             
+            # unlist(str_split(input$postoperative_diagnosis, pattern = ";"))
+            
             op_note_list$"\nPatient:" <- paste(input$patient_first_name, input$patient_last_name)
             op_note_list$"\nDate of Surgery:" <- as.character(input$date_of_surgery)
             op_note_list$"\nPrimary Surgeon:" <- if_else(!is.null(input$primary_surgeon), as.character(input$primary_surgeon), " ")
             op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
-            op_note_list$"\nPre-operative Diagnosis:" <- if_else(!is.null(input$preoperative_diagnosis), as.character(input$preoperative_diagnosis), " ")
-            op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), as.character(input$postoperative_diagnosis), " ")
+            op_note_list$"\nPre-operative Diagnosis:" <- if_else(!is.null(input$preoperative_diagnosis), paste0("-", as.character(input$preoperative_diagnosis)), " ")
+            op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), glue_collapse(x = unlist(str_split(input$postoperative_diagnosis, pattern = "; ")), sep = "\n"), " ")
+            # op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), as.character(input$postoperative_diagnosis), " ")
             op_note_list$"\nIndications:" <- if_else(!is.null(input$indications), as.character(input$indications), " ") 
             op_note_list$"\nProcedures Performed:" <- if_else(!is.null(procedure_results_list$procedures_numbered_paragraph), as.character(procedure_results_list$procedures_numbered_paragraph), " ")
             op_note_list$"\nSurgical Findings:" <- if_else(!is.na(input$surgical_finding), as.character(input$surgical_finding), " ") 
@@ -4479,7 +4685,7 @@ server <- function(input, output, session) {
             op_note_list$"\nFluids/Transfusions:" <- if_else(!is.na(fluids_transfusions_statement), as.character(fluids_transfusions_statement), " ")
             op_note_list$"\nIntraoperative Complications:" <- if_else(!is.na(complication_statement), as.character(complication_statement), " ")
             op_note_list$"\nSurgery Description:" <- if_else(!is.null(procedure_results_list$procedure_details_paragraph), as.character(procedure_results_list$procedure_details_paragraph), " ") 
-
+            
             secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
                 unnest() %>%
                 mutate(row = row_number()) %>%
@@ -4622,8 +4828,8 @@ server <- function(input, output, session) {
                                                    as.character(input$date_of_surgery),
                                                    input$primary_surgeon,
                                                    input$surgical_assistants,
-                                                   input$preoperative_diagnosis,
-                                                   input$postoperative_diagnosis,
+                                                   glue_collapse(unlist(str_split(paste0("  -", input$preoperative_diagnosis), pattern = "; ")), sep = "\n  -"),
+                                                   glue_collapse(unlist(str_split(paste0("  -", input$postoperative_diagnosis), pattern = "; ")), sep = "\n  -"),
                                                    input$indications,
                                                    procedure_results_list$procedures_numbered_paragraph,
                                                    if_else(input$surgical_findings == "", "none", input$surgical_findings),
@@ -4680,10 +4886,10 @@ server <- function(input, output, session) {
     
     patient_details_redcap_df_reactive <- reactive({
         patient_details_df <- tibble(last_name = input$patient_last_name,
-               first_name = input$patient_first_name,
-               date_of_birth = paste(paste(input$date_of_birth)),
-               # date_of_birth = if_else(paste(input$date_of_birth) == "1900-01-01", "--", paste(input$date_of_birth)),
-               sex = input$sex)
+                                     first_name = input$patient_first_name,
+                                     date_of_birth = paste(paste(input$date_of_birth)),
+                                     # date_of_birth = if_else(paste(input$date_of_birth) == "1900-01-01", "--", paste(input$date_of_birth)),
+                                     sex = input$sex)
         
         patient_details_df
     })
@@ -4696,7 +4902,7 @@ server <- function(input, output, session) {
         
         tibble(Variable = names(patient_details_redcap_df_reactive()), 
                Result = row_1) 
-
+        
     })
     
     
@@ -4707,6 +4913,9 @@ server <- function(input, output, session) {
         
         ##########   date_of_surgery #############
         surgery_details_list$date_of_surgery <- as.character(input$date_of_surgery)
+        
+        ##########   Hospital #############
+        surgery_details_list$hospital <- as.character(input$hospital)
         
         ##########   age #############
         surgery_details_list$age <- if_else(paste(input$date_of_birth) == "1900-01-01", "--", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0)))
@@ -4719,17 +4928,31 @@ server <- function(input, output, session) {
         
         ##########   symptoms #############
         if(length(input$symptoms)>0){
-           surgery_details_list$symptoms <- glue_collapse(str_to_lower(input$symptoms), sep = "; ") 
+            surgery_details_list$symptoms <- glue_collapse(str_to_lower(input$symptoms), sep = "; ") 
         }
-
+        
         ##########   diagnosis_category #############
-        surgery_details_list$diagnosis_category <- input$primary_diagnosis_group
+        surgery_details_list$diagnosis_category <- glue_collapse(str_to_lower((tibble(diagnosis = input$primary_diagnosis) %>%
+                                        left_join(spine_icd10_codes_df %>% select(spine_category, diagnosis)) %>%
+                                        select(spine_category) %>%
+                                        distinct())$spine_category), sep = "; ")
+        
+        # surgery_details_list$diagnosis_category <- glue_collapse(str_to_lower(input$diagnosis_category), sep = "; ") 
         
         ##########   diagnosis #############
-        if(length(input$diagnosis_subgroup) >0){
-            surgery_details_list$diagnosis <- glue_collapse(str_to_lower(input$diagnosis_subgroup), sep = "; ")
+        if(length(input$primary_diagnosis) >0){
+            surgery_details_list$diagnosis <- glue_collapse(str_to_lower(input$primary_diagnosis), sep = "; ")
         }
         
+        ##########   diagnosis ICD10 Codes#############
+        if(length(input$primary_diagnosis) >0){
+            
+            icd_code_vector <- (tibble(diagnosis = input$primary_diagnosis) %>%
+                 left_join(spine_icd10_codes_df %>%
+                               select(icd10_code, diagnosis)))$icd10_code
+            
+            surgery_details_list$diagnosis_icd10_code <- glue_collapse(icd_code_vector, sep = "; ")
+        }
         
         ##########   prior_fusion_levels #############
         if(length(input$prior_fusion_levels)>0){
@@ -4743,11 +4966,11 @@ server <- function(input, output, session) {
                 distinct() %>%
                 mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = levels_removed)) %>%
                 arrange(vertebral_number)
-
+            
             surgery_details_list$levels_instrumentation_removed <- glue_collapse(removal_df$levels_removed, sep = ",")
-
+            
         }
-
+        
         ##########   staged_procedure #############
         surgery_details_list$staged_procedure <- if_else(input$staged_procedure == TRUE, "Yes", "No")
         
@@ -4767,14 +4990,14 @@ server <- function(input, output, session) {
         }else{
             surgery_details_list$main_approach <- str_to_lower(input$spine_approach)
         }
-
+        
         if(str_detect(surgery_details_list$main_approach, "anterior")){
             surgery_details_list$anterior_approach <- input$approach_specified_anterior
         }
         if(str_detect(surgery_details_list$main_approach, "posterior")){
             surgery_details_list$posterior_approach <- input$approach_specified_posterior
         }
-
+        
         ##########   fusion performed #############
         surgery_details_list$fusion <- if_else(length(input$fusion_levels_confirmed) > 0, "yes", "no")
         
@@ -4785,7 +5008,7 @@ server <- function(input, output, session) {
         if(length(input$fusion_levels_confirmed) >0){
             surgery_details_list$interspaces_fused <- glue_collapse(input$fusion_levels_confirmed, sep = "; ")
         }
-
+        
         ##########   interbody_fusion #############
         if(any(all_objects_to_add_list$objects_df$interbody_fusion == "yes")){
             surgery_details_list$interbody_fusion <- "yes"
@@ -4830,7 +5053,7 @@ server <- function(input, output, session) {
             
             if(any(decompressions_df$body_interspace == "body")){
                 interspaces_decompressed <- unique(jh_reorder_levels_function(level_vector = append(interspaces_decompressed,
-                                                                                                                         jh_convert_body_levels_to_interspace_vector_function(vertebral_bodies_vector = (decompressions_df %>% filter(body_interspace == "body"))$level))))
+                                                                                                    jh_convert_body_levels_to_interspace_vector_function(vertebral_bodies_vector = (decompressions_df %>% filter(body_interspace == "body"))$level))))
             }
             ##########   number_of_levels_decompressed #############
             surgery_details_list$number_of_levels_decompressed <- length(interspaces_decompressed)
@@ -4839,7 +5062,7 @@ server <- function(input, output, session) {
         }else{
             surgery_details_list$number_of_levels_decompressed <- "0"
         }
-
+        
         ##########   UIV  #############
         all_vertebrae_fixation_df <- all_objects_to_add_list$objects_df %>%
             filter(level != "S2AI") %>%
@@ -4862,59 +5085,59 @@ server <- function(input, output, session) {
                 surgery_details_list$uiv <- "not instrumented"
             }    
         }
-
+        
         ##########   LIV  #############
         if(nrow(all_vertebrae_fixation_df) > 0){
             surgery_details_list$liv <- (all_vertebrae_fixation_df %>% filter(vertebral_number == max(vertebral_number)) %>% select(level) %>% distinct())$level
-
+            
             if(jh_check_body_or_interspace_function(surgery_details_list$liv) == "interspace"){
                 surgery_details_list$uiv <- jh_get_cranial_caudal_interspace_body_list_function(level = surgery_details_list$liv)$caudal_level
             }
         }else{
             surgery_details_list$liv <- "not instrumented"
         }
-
+        
         ##########   UPPER & LOWER TREATED  #############
-
+        
         spine_treated_df <- all_objects_to_add_list$objects_df %>%
             filter(level != "S2AI") %>%
             filter(level != "Iliac") %>%
             filter(level != "Occiput")
-
+        
         spine_treated <- if_else(nrow(spine_treated_df) > 0, TRUE, FALSE)
-
+        
         if(nrow(spine_treated_df) > 0){
             ##### UPPER TREATED #####
             surgery_details_list$upper_treated_vertebrae <- (spine_treated_df %>% filter(vertebral_number == min(vertebral_number)) %>% select(level) %>% distinct())$level[[1]]
-
+            
             if(jh_check_body_or_interspace_function(surgery_details_list$upper_treated_vertebrae) == "interspace"){
                 surgery_details_list$upper_treated_vertebrae <- jh_get_cranial_caudal_interspace_body_list_function(level = surgery_details_list$upper_treated_vertebrae)$cranial_level
             }
-
+            
             ######### LOWER TREATED ######
             surgery_details_list$lower_treated_vertebrae <- (spine_treated_df %>% filter(vertebral_number == max(vertebral_number)) %>% select(level) %>% distinct())$level[[1]]
-
+            
             if(jh_check_body_or_interspace_function(surgery_details_list$lower_treated_vertebrae) == "interspace"){
                 surgery_details_list$lower_treated_vertebrae <- jh_get_cranial_caudal_interspace_body_list_function(level = surgery_details_list$lower_treated_vertebrae)$caudal_level
             }
-
+            
         }else{
             surgery_details_list$upper_treated_vertebrae <- "none"
             surgery_details_list$lower_treated_vertebrae <- "none"
         }
-
+        
         ##########   PELVIC FIXATION  #############
         surgery_details_list$pelvic_fixation <- if_else(any(str_detect(string = all_objects_to_add_list$objects_df$object, pattern = "pelvic_screw")), "yes", "no")
         
         if(surgery_details_list$pelvic_fixation == "yes"){
             surgery_details_list$pelvic_fixation_screws <- glue_collapse((all_objects_to_add_list$objects_df %>% filter(object == "pelvic_screw"))$level, sep = "; ")
         }
-
+        
         ##########   THREE COLUMN OSTEOTOMY #############
         surgery_details_list$three_column_osteotomy <- if_else(any(all_objects_to_add_list$objects_df$object == "grade_3") |
-                                                  any(all_objects_to_add_list$objects_df$object == "grade_4") |
-                                                  any(all_objects_to_add_list$objects_df$object == "grade_5") |
-                                                  any(all_objects_to_add_list$objects_df$object == "grade_6"), "yes", "no")
+                                                                   any(all_objects_to_add_list$objects_df$object == "grade_4") |
+                                                                   any(all_objects_to_add_list$objects_df$object == "grade_5") |
+                                                                   any(all_objects_to_add_list$objects_df$object == "grade_6"), "yes", "no")
         if(surgery_details_list$three_column_osteotomy == "yes"){
             surgery_details_list$three_column_osteotomy_level <- glue_collapse(x = (all_objects_to_add_list$objects_df %>%
                                                                                         filter(object == "grade_3" | object == "grade_4" | object == "grade_5") %>%
@@ -4988,7 +5211,7 @@ server <- function(input, output, session) {
                 }
             }
         }
-
+        
         #################### BMP & ALLOGRAFT  #######################
         if(str_detect(surgery_details_list$main_approach, "anterior") & surgery_details_list$fusion == "yes"){
             surgery_details_list$anterior_bmp_mg_dose <-  anterior_bmp_dose_reactive()
@@ -4999,7 +5222,7 @@ server <- function(input, output, session) {
                     surgery_details_list$anterior_allograft_amount <- paste(input$anterior_allograft_amount)
                 }
             }
-
+            
             if(length(input$anterior_biologics)>0){
                 anterior_bma <- if_else("Bone Marrow Aspirate" %in% input$anterior_biologics, glue("Bone Marrow Aspirate ({input$anterior_bone_marrow_aspirate_volume})cc"), glue("xx"))
                 anterior_cell_based <- if_else("Cell Based Allograft" %in% input$anterior_biologics, glue("Cell Based Allograft ({input$anterior_cell_based_allograft_volume})cc"), glue("xx"))
@@ -5017,7 +5240,7 @@ server <- function(input, output, session) {
         
         if(str_detect(surgery_details_list$main_approach, "posterior") & surgery_details_list$fusion == "yes"){
             surgery_details_list$posterior_bmp_mg_dose <-  posterior_bmp_dose_reactive()
-
+            
             if(length(input$posterior_bone_graft) > 0){
                 surgery_details_list$posterior_bone_graft <- glue_collapse(input$posterior_bone_graft, sep = "; ")
                 
@@ -5025,7 +5248,7 @@ server <- function(input, output, session) {
                     surgery_details_list$anterior_allograft_amount <- paste(input$posterior_allograft_amount)
                 }
             }
- 
+            
             if(length(input$posterior_biologics)>0){
                 posterior_bma <- if_else("Bone Marrow Aspirate" %in% input$posterior_biologics, glue("Bone Marrow Aspirate ({input$posterior_bone_marrow_aspirate_volume})cc"), glue("xx"))
                 posterior_cell_based <- if_else("Cell Based Allograft" %in% input$posterior_biologics, glue("Cell Based Allograft ({input$posterior_cell_based_allograft_volume})cc"), glue("xx"))
@@ -5040,13 +5263,13 @@ server <- function(input, output, session) {
                 }
             }
         }
-
+        
         ####### complications  #####
         complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
             filter(complication != "") %>%
             filter(complication != " ") %>%
             remove_empty()
-
+        
         if(nrow(complication_df) > 0){
             surgery_details_list$complications <- glue_collapse(complication_df$complication, sep = '; ')
         }else{
@@ -5084,12 +5307,12 @@ server <- function(input, output, session) {
         if(length(input$anti_fibrinolytic) > 0){
             antifibrinolytics_vector <- str_to_lower(as.character(glue_collapse(input$anti_fibrinolytic, sep = "; ")))
             intraop_details_list$anti_fibrinolytic <- str_replace_all(string = antifibrinolytics_vector,
-                                                          pattern = "tranexamic acid \\(txa\\)",
-                                                          replacement = glue("tranexamic acid (txa) Loading: {input$txa_loading}mg/kg, Maint: {input$txa_maintenance}mg/kg/hr"))
+                                                                      pattern = "tranexamic acid \\(txa\\)",
+                                                                      replacement = glue("tranexamic acid (txa) Loading: {input$txa_loading}mg/kg, Maint: {input$txa_maintenance}mg/kg/hr"))
         }else{
             intraop_details_list$anti_fibrinolytic <- "none"
         }
-
+        
         ####### surgical findings #####
         intraop_details_list$surgical_findings <- if_else(input$surgical_findings == "", "none", input$surgical_findings)
         
@@ -5239,18 +5462,18 @@ server <- function(input, output, session) {
                 mutate(redcap_repeat_instance = row_number()) %>%
                 mutate(redcap_repeat_instrument = "interbody_implant_repeating") %>%
                 select(redcap_repeat_instrument, redcap_repeat_instance, everything()) 
-
+            
         }else{
             interbody_df <-tibble(redcap_repeat_instance = character(), redcap_repeat_instrument = character(),
-                   interbody_level = character(), 
-                   interbody_approach = character(),
-                   composition = character(),
-                   device_name = character(), 
-                   height = character(), 
-                   integrated_fixation = character(),
-                   expandable = character(),
-                   other = character(),
-                   implant_statement = character())
+                                  interbody_level = character(), 
+                                  interbody_approach = character(),
+                                  composition = character(),
+                                  device_name = character(), 
+                                  height = character(), 
+                                  integrated_fixation = character(),
+                                  expandable = character(),
+                                  other = character(),
+                                  implant_statement = character())
         }
         interbody_df
     })
@@ -5292,8 +5515,8 @@ server <- function(input, output, session) {
         all_objects_df
         
     })
-
-
+    
+    
     
     #############~~~~~~~~~~~~~~~~~~~ ##################### REDCAP UPLOAD  #############~~~~~~~~~~~~~~~~~~~ ##################### 
     #############~~~~~~~~~~~~~~~~~~~ ##################### REDCAP UPLOAD  #############~~~~~~~~~~~~~~~~~~~ ##################### 
@@ -5353,7 +5576,7 @@ server <- function(input, output, session) {
     redcap_value$screw_details_repeating_instance_add <- 0
     redcap_value$interbody_implant_repeating_instance_add <- 0
     redcap_value$upload_progress <- 0
-
+    
     observeEvent(input$confirm_upload_1, ignoreInit = TRUE, ignoreNULL = TRUE, {
         
         if(redcapAPI::exportNextRecordName(rcon = rcon)>1){
@@ -5372,12 +5595,13 @@ server <- function(input, output, session) {
                 mutate(last_name = str_to_lower(last_name),
                        first_name = str_to_lower(first_name)) %>%
                 left_join(all_patient_ids_df)
-
+            
             match_found <- if_else(!is.na(joined_df$record_id[[1]]), TRUE, FALSE)
-
+            
             if(match_found == TRUE){
                 redcap_value$record_id <- joined_df$record_id[[1]]
-
+                record_number <- joined_df$record_id[[1]]
+                
                 max_repeat_instances_df <- exportRecords(rcon = rcon, records = record_number) %>%
                     as_tibble() %>%
                     select(redcap_repeat_instrument, redcap_repeat_instance) %>%
@@ -5385,9 +5609,9 @@ server <- function(input, output, session) {
                     group_by(redcap_repeat_instrument) %>%
                     filter(redcap_repeat_instance == max(redcap_repeat_instance)) %>%
                     ungroup()
-
+                
                 repeat_list <- as.list(deframe(max_repeat_instances_df))
-
+                
                 if("surgical_details" %in% max_repeat_instances_df$redcap_repeat_instrument){
                     redcap_value$surgical_details_instance_add <- repeat_list$surgical_details
                 }else{
@@ -5408,11 +5632,11 @@ server <- function(input, output, session) {
                 }else{
                     redcap_value$interbody_implant_repeating_instance_add <- 0
                 }
-
+                
                 redcap_value$surgical_details_instance_start <- repeat_list$surgical_details + 1
                 max_procedures_by_level_repeating <- repeat_list$procedures_by_level_repeating
                 max_screw_details_repeating <- repeat_list$screw_details_repeating
-
+                
             }else{
                 redcap_value$record_id <- exportNextRecordName(rcon = rcon)
                 redcap_value$surgical_details_instance_add <- 0
@@ -5428,10 +5652,10 @@ server <- function(input, output, session) {
             redcap_value$interbody_implant_repeating_instance_add <- 0
         }
     })
-
+    
     
     observeEvent(input$confirm_upload_1, {
-
+        
         if(redcapAPI::exportNextRecordName(rcon = rcon)>1){
             all_patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
                 type.convert() %>%
@@ -5441,19 +5665,19 @@ server <- function(input, output, session) {
         }else{
             all_patient_ids_df <- tibble()
         }
-
+        
         if(nrow(all_patient_ids_df)>0){
             joined_df <- patient_details_redcap_df_reactive() %>%
                 select(last_name, first_name, date_of_birth) %>%
                 mutate(last_name = str_to_lower(last_name),
                        first_name = str_to_lower(first_name)) %>%
                 left_join(all_patient_ids_df)
-
+            
             match_found <- if_else(!is.na(joined_df$record_id[[1]]), TRUE, FALSE)
-
+            
             if(match_found == TRUE){
                 record_number <- joined_df$record_id[[1]]
-
+                
                 max_repeat_instances_df <- exportRecords(rcon = rcon, records = record_number) %>%
                     as_tibble() %>%
                     select(redcap_repeat_instrument, redcap_repeat_instance) %>%
@@ -5461,9 +5685,9 @@ server <- function(input, output, session) {
                     group_by(redcap_repeat_instrument) %>%
                     filter(redcap_repeat_instance == max(redcap_repeat_instance)) %>%
                     ungroup()
-
+                
                 repeat_list <- as.list(deframe(max_repeat_instances_df))
-
+                
                 if("surgical_details" %in% max_repeat_instances_df$redcap_repeat_instrument){
                     surgical_details_instance_add <- repeat_list$surgical_details
                 }else{
@@ -5484,11 +5708,11 @@ server <- function(input, output, session) {
                 }else{
                     interbody_implant_repeating_instance_add <- 0
                 }
-
+                
                 surgical_details_instance_start <- repeat_list$surgical_details + 1
                 max_procedures_by_level_repeating <- repeat_list$procedures_by_level_repeating
                 max_screw_details_repeating <- repeat_list$screw_details_repeating
-
+                
             }else{
                 record_number <- exportNextRecordName(rcon = rcon)
                 surgical_details_instance_add <- 0
@@ -5503,69 +5727,69 @@ server <- function(input, output, session) {
             screw_details_repeating_instance_add <- 0
             interbody_implant_repeating_instance_add <- 0
         }
-
-            ##### uploaded patient details #######
-            patient_df_for_upload <- patient_details_redcap_df_reactive() %>%
-                mutate(record_id = record_number) %>%
-                mutate(patient_details_complete = "Complete") %>%
-                select(record_id, everything())
-
-            importRecords(rcon = rcon, data = patient_df_for_upload, returnContent = "count")
-
-            ##### uploaded surgical details #######
-            surgical_details_instrument <- summary_table_for_redcap_reactive() %>%
-                pivot_wider(names_from = name, values_from = value) %>%
+        
+        ##### uploaded patient details #######
+        patient_df_for_upload <- patient_details_redcap_df_reactive() %>%
+            mutate(record_id = record_number) %>%
+            mutate(patient_details_complete = "Complete") %>%
+            select(record_id, everything())
+        
+        importRecords(rcon = rcon, data = patient_df_for_upload, returnContent = "count")
+        
+        ##### uploaded surgical details #######
+        surgical_details_instrument <- summary_table_for_redcap_reactive() %>%
+            pivot_wider(names_from = name, values_from = value) %>%
+            mutate(record_id = record_number) %>%
+            mutate(redcap_event_name = "surgery_arm_1") %>%
+            mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
+            mutate(redcap_repeat_instrument = "surgical_details") %>%
+            mutate(surgical_details_complete = "Complete") %>%
+            select(record_id, redcap_event_name, everything())
+        
+        importRecords(rcon = rcon, data = surgical_details_instrument, returnContent = "count")
+        
+        
+        ###### Upload repeating objects for all levels ####
+        procedures_by_level_repeating_instrument <- procedures_by_level_repeating_df_reactive() %>%
+            mutate(record_id = record_number) %>%
+            mutate(redcap_event_name = "surgery_arm_1") %>%
+            mutate(redcap_repeat_instance = row_number() + procedures_by_level_repeating_instance_add) %>%
+            mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
+            mutate(procedures_by_level_repeating_complete = "Complete") %>%
+            select(record_id, redcap_event_name, everything())
+        
+        importRecords(rcon = rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
+        
+        
+        ##### uploaded screw details #######
+        if(nrow(pedicle_screw_details_table_redcap_reactive())>0){
+            screw_details_repeating <- pedicle_screw_details_table_redcap_reactive() %>%
                 mutate(record_id = record_number) %>%
                 mutate(redcap_event_name = "surgery_arm_1") %>%
-                mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
-                mutate(redcap_repeat_instrument = "surgical_details") %>%
-                mutate(surgical_details_complete = "Complete") %>%
+                mutate(redcap_repeat_instance = row_number() +screw_details_repeating_instance_add) %>%
+                mutate(redcap_repeat_instrument = "screw_details_repeating") %>%
+                mutate(screw_details_repeating_complete = "Complete") %>%
                 select(record_id, redcap_event_name, everything())
-
-            importRecords(rcon = rcon, data = surgical_details_instrument, returnContent = "count")
-
-
-            ###### Upload repeating objects for all levels ####
-            procedures_by_level_repeating_instrument <- procedures_by_level_repeating_df_reactive() %>%
+            
+            importRecords(rcon = rcon, data = screw_details_repeating, returnContent = "count")
+        }
+        
+        
+        ##### uploaded interbody details #######
+        if(nrow(interbody_details_table_redcap_reactive())>0){
+            interbody_implant_repeating <- interbody_details_table_redcap_reactive() %>%
                 mutate(record_id = record_number) %>%
+                select(record_id, everything()) %>%
                 mutate(redcap_event_name = "surgery_arm_1") %>%
-                mutate(redcap_repeat_instance = row_number() + procedures_by_level_repeating_instance_add) %>%
-                mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-                mutate(procedures_by_level_repeating_complete = "Complete") %>%
+                mutate(redcap_repeat_instance = row_number() + interbody_implant_repeating_instance_add) %>%
+                mutate(redcap_repeat_instrument = "interbody_implant_repeating") %>%
+                mutate(interbody_implant_repeating_complete = "Complete") %>%
+                mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
                 select(record_id, redcap_event_name, everything())
-
-            importRecords(rcon = rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
-
-
-            ##### uploaded screw details #######
-            if(nrow(pedicle_screw_details_table_redcap_reactive())>0){
-                screw_details_repeating <- pedicle_screw_details_table_redcap_reactive() %>%
-                    mutate(record_id = record_number) %>%
-                    mutate(redcap_event_name = "surgery_arm_1") %>%
-                    mutate(redcap_repeat_instance = row_number() +screw_details_repeating_instance_add) %>%
-                    mutate(redcap_repeat_instrument = "screw_details_repeating") %>%
-                    mutate(screw_details_repeating_complete = "Complete") %>%
-                    select(record_id, redcap_event_name, everything())
-
-                importRecords(rcon = rcon, data = screw_details_repeating, returnContent = "count")
-            }
-
-
-            ##### uploaded interbody details #######
-            if(nrow(interbody_details_table_redcap_reactive())>0){
-                interbody_implant_repeating <- interbody_details_table_redcap_reactive() %>%
-                    mutate(record_id = record_number) %>%
-                    select(record_id, everything()) %>%
-                    mutate(redcap_event_name = "surgery_arm_1") %>%
-                    mutate(redcap_repeat_instance = row_number() + interbody_implant_repeating_instance_add) %>%
-                    mutate(redcap_repeat_instrument = "interbody_implant_repeating") %>%
-                    mutate(interbody_implant_repeating_complete = "Complete") %>%
-                    mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
-                    select(record_id, redcap_event_name, everything())
-
-                importRecords(rcon = rcon, data = interbody_implant_repeating, returnContent = "count")
-            }
-
+            
+            importRecords(rcon = rcon, data = interbody_implant_repeating, returnContent = "count")
+        }
+        
         sendSweetAlert(
             session = session,
             title = "Success !!",

@@ -1,0 +1,471 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(shiny)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+library(shinyWidgets)
+library(shinyBS)
+library(cowplot)
+library(magick)
+library(ggpattern)
+library(glue)
+library(rlist)
+library(janitor)
+library(lubridate)
+library(redcapAPI)
+# library(ggpmisc)
+library(rclipboard)
+library(nngeo)
+library(shinydashboard)
+
+library(janitor)
+# 
+# library(shinyauthr)
+# library(sodium)
+
+# rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "58C0BC0A6CA8B8DFB21A054C2F5A3C49")
+rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = "2A930AE845C92CBF95467E59ADBA0D20")
+
+# wd <- "D:/Google Drive/Shiny/shiny_spine_logging_op_note/"
+
+# source(paste0(wd, "short_shiny_functions.R"), local = FALSE)
+# source(paste0(wd, "make_geoms_functions.R"), local = TRUE)
+# source(paste0(wd, "build_spine_objects_functions.R"), local = TRUE)
+# source(paste0(wd, "load_coordinates_build_objects.R"), local = TRUE)
+# source(paste0(wd, "anterior_posterior_operative_note_generator_functions.R"), local = TRUE)
+# source(paste0(wd, "load_coordinates_build_objects_6_lumbar.R"), local = TRUE)
+
+
+library(tictoc)
+
+library(icd.data)
+
+```
+
+
+```{r}
+
+exclusion_by_site <- "limb|shoulder|ankle|elbow|wrist|hand|foot|hip|knee|ank|arm|leg|finger|toe|shldr|thigh|humer|femr|femur|ulna|radius|tibia|fibula|jaw|ear|skull|head|extremity|facial|unspecified site|unspecified joint|site unspecified|sequela|thoracic cavity|subsequent|nose|panniculitis|refrigerator|vertigo"
+
+
+inclusion_description_spine <- "spin|vert|atlant|cervic|thoracic|lumbar|thoracolumbar|lumbosacral|spond|myelo|fluid leak|dura|usion of spine|conu|cauda|scoli|stenosis|parkinson|cerebral palsy|hemiplegia|paraplegia|quadriplegia|brown-sequard syndrome|cord|acc pnctr & lac of nervous sys org during a nervous sys proc|other intraoperative complications of nervous system|kyphosis|lordosis|flatback|disc|laminectomy|radiculopathy|sciatica|low back|dorsalgia|radiculopathy|sacrococcygeal disorders|dorsopath|sacroiliitis|ankylosing|deform|occipito|atlanto|pseudarthrosis|secondary malignant neoplasm of bone"
+
+
+spine_subchapters <- c(
+  'Tuberculosis',
+  'Other Bacterial Diseases',
+  'Malignant Neoplasms Of Bone And Articular Cartilage',
+  'Malignant Neoplasms Of Eye, Brain And Other Parts Of Central Nervous System',
+  'Malignant Neoplasms Of Ill-Defined, Other Secondary And Unspecified Sites',
+  'Benign Neoplasms, Except Benign Neuroendocrine Tumors',
+  'Neoplasms Of Uncertain Behavior, Polycythemia Vera And Myelodysplastic Syndromes',
+  'Inflammatory Diseases Of The Central Nervous System', 
+  'Systemic Atrophies Primarily Affecting The Central Nervous System', 
+  'Extrapyramidal And Movement Disorders', 
+  'Other Degenerative Diseases Of The Nervous System', 
+  'Nerve, Nerve Root And Plexus Disorders', 
+  'Cerebral Palsy And Other Paralytic Syndromes',
+  'Other Disorders Of The Nervous System',
+  'Infectious Arthropathies',
+  'Inflammatory Polyarthropathies',
+  'Osteoarthritis', 
+  'Other Joint Disorders', 
+  'Deforming Dorsopathies',
+  'Spondylopathies',
+  'Other Dorsopathies',
+  'Disorders Of Bone Density And Structure',
+  'Other Osteopathies', 
+  'Other Disorders Of The Musculoskeletal System And Connective Tissue', 
+  'Intraoperative And Postprocedural Complications And Disorders Of Musculoskeletal System, Not Elsewhere Classified',
+  'Biomechanical Lesions, Not Elsewhere Classified', 
+  'Congenital Malformations Of The Nervous System', 
+  'Congenital Malformations And Deformations Of The Musculoskeletal System',
+  'Injuries To The Neck',
+  'Injuries To The Thorax', 
+  'Injuries To The Abdomen, Lower Back, Lumbar Spine, Pelvis And External Genitals',
+  'Other And Unspecified Effects Of External Causes',
+  'Complications Of Surgical And Medical Care, Not Elsewhere Classified')
+
+
+# Displacement of infusion catheter, sequela
+nrow(icd10cm2016)
+```
+
+
+```{r}
+possible_spine_codes_1 <- icd10cm2016 %>%
+  mutate(major = as.character(major), sub_chapter = as.character(sub_chapter), chapter = as.character(chapter)) %>%
+  filter(billable == TRUE) %>%
+  distinct() %>%
+  mutate(short_desc = str_to_lower(short_desc)) %>%
+  mutate(long_desc_lower = str_to_lower(long_desc)) %>%
+  filter(str_detect(string = long_desc_lower, pattern = paste(exclusion_by_site), negate = TRUE)) %>%
+  filter(str_detect(string = long_desc_lower, pattern = paste(inclusion_description_spine)) | str_detect(string = short_desc, pattern = paste(inclusion_description_spine)))  %>%
+  filter(chapter %in% c("Certain infectious and parasitic diseases", 
+                        "Congenital malformations, deformations and chromosomal abnormalities", 
+                        "Diseases of the musculoskeletal system and connective tissue",
+                        "Diseases of the nervous system", 
+                        "Injury, poisoning and certain other consequences of external causes",
+                        "Neoplasms")) %>%
+  select(long_desc_lower, everything())
+
+
+possible_spine_codes_2_df <- possible_spine_codes_1 %>%
+  filter(sub_chapter %in% spine_subchapters) %>%
+  group_by(major) %>%
+  add_tally(name = "major_count") %>%
+  select(major_count, everything()) %>%
+  ungroup() %>%
+  arrange(desc(major_count)) %>%
+  select(-major_count) %>%
+  select(code, long_desc, three_digit, major, sub_chapter, chapter) %>%
+  mutate(code = as.character(code), three_digit = as.character(three_digit)) %>%
+    mutate(icd_code = map2(.x = code, .y = three_digit, .f = ~ str_remove(string = .x, pattern = .y))) %>%
+  unnest() %>% 
+  select(icd_code, everything()) %>%
+  mutate(icd10_code = paste0(three_digit, ".", icd_code)) %>%
+  select(icd10_code, three_digit, long_desc, major, sub_chapter, chapter) %>%
+  filter(str_detect(major, "carpometacarpal|hip|brain|limbs|genitourinary|feet", negate = TRUE))
+
+
+possible_spine_codes_2_df
+```
+
+### group by major
+```{r}
+major_count_df <- possible_spine_codes_2_df %>%
+  group_by(major) %>%
+  add_tally(name = "major_count") %>%
+  ungroup() %>%
+  select(major_count, major, everything()) %>%
+  arrange(desc(major_count)) %>%
+  select(major_count, major) %>%
+  distinct() 
+  
+formula_df <- major_count_df %>%
+  mutate(code_for_categorizing = paste0("major == '", major, "' ~ 'xxxx',"))
+
+glue_collapse(x = formula_df$code_for_categorizing, sep = "\n")
+
+
+# possible_spine_codes_2_df %>%
+#   filter(str_detect(major, "carpometacarpal "))
+
+```
+
+
+```{r}
+spine_categories <- c("Degenerative", "Deformity", "Trauma", "Infection", "Tumor", "Congenital", "Complication", "Other")
+
+spine_major_grouped_df <- possible_spine_codes_2_df %>%
+  mutate(spine_category = case_when(
+    major == "Fracture of cervical vertebra and other parts of neck" ~ "Trauma",
+    major == "Fracture of rib(s), sternum and thoracic spine" ~ "Trauma",
+    major == "Other inflammatory spondylopathies" ~ "Infection",
+    major == "Fracture of lumbar spine and pelvis" ~ "Trauma",
+    major == "Injury of nerves and spinal cord at neck level" ~ "Trauma",
+    major == "Biomechanical lesions, not elsewhere classified" ~ "Degenerative",
+    major == "Other spondylopathies" ~ "Degenerative",
+    major == "Scoliosis" ~ "Deformity",
+    major == "Other deforming dorsopathies" ~ "Deformity",
+    major == "Spondylosis" ~ "Degenerative",
+    major == "Inj lower spinl cord and nrv at abd, low back and pelv level" ~ "Trauma",
+    major == "Dislocation and sprain of joints and ligaments of thorax" ~ "Trauma",
+    major == "Injury of nerves and spinal cord at thorax level" ~ "Trauma",
+    major == "Dorsalgia" ~ "Degenerative",
+    major == "Kyphosis and lordosis" ~ "Deformity",
+    major == "Cervical disc disorders" ~ "Degenerative",
+    major == "Thoracic, thoracolum, and lumbosacral intvrt disc disorders" ~ "Degenerative",
+    major == "Other and unspecified dorsopathies, not elsewhere classified" ~ "Deformity",
+    major == "Dislocation and sprain of joints and ligaments at neck level" ~ "Trauma",
+    major == "Spinal osteochondrosis" ~ "Other",
+    major == "Congenital malformations of spine and bony thorax" ~ "Congenital",
+    major == "Disloc & sprain of joints & ligaments of lumbar spin & pelv" ~ "Trauma",
+    major == "Injury of other and unspecified intrathoracic organs" ~ "Trauma",
+    major == "Open wound of neck" ~ "Trauma",
+    major == "Injury of blood vessels at neck level" ~ "Complication",
+    major == "Opn wnd abdomen, lower back, pelvis and external genitals" ~ "Trauma",
+    major == "Spina bifida" ~ "Congenital",
+    major == "Spondylopathies in diseases classified elsewhere" ~ "Degenerative",
+    major == "Intraop and postproc comp and disorders of ms sys, NEC" ~ "Complication",
+    major == "Intraop and postproc comp and disorders of nervous sys, NEC" ~ "Complication",
+    major == "Complications of internal prosth dev/grft" ~ "Complication",
+    major == "Secondary parkinsonism" ~ "Other",
+    major == "Other and unspecified diseases of spinal cord" ~ "Trauma",
+    major == "Other and unspecified arthropathy" ~ "Other",
+    major == "Oth acquired deformities of ms sys and connective tissue" ~ "Deformity",
+    major == "Inj blood vessels at abdomen, low back and pelvis level" ~ "Trauma",
+    major == "Postinfective and reactive arthropathies" ~ "Infection",
+    major == "Complications of procedures, not elsewhere classified" ~ "Complication",
+    major == "Complications of internal orthopedic prosth dev/grft" ~ "Complication",
+    major == "Spinal muscular atrophy and related syndromes" ~ "Congenital",
+    major == "Nerve root and plexus disorders" ~ "Degenerative",
+    major == "Cerebral palsy" ~ "Congenital",
+    major == "Other paralytic syndromes" ~ "Trauma",
+    major == "Pyogenic arthritis" ~ "Infection",
+    major == "Other rheumatoid arthritis" ~ "Other",
+    major == "Juvenile arthritis" ~ "Congenital",
+    major == "Gout" ~ "Other",
+    major == "Osteitis deformans [Paget's disease of bone]" ~ "Tumor",
+    major == "Other congenital malformations of spinal cord" ~ "Congenital",
+    major == "Injury of blood vessels of thorax" ~ "Complication",
+    major == "Myelodysplastic syndromes" ~ "Tumor",
+    major == "Other congenital malformations of nervous system" ~ "Congenital",
+    major == "Other congenital musculoskeletal deformities" ~ "Congenital",
+    major == "Osteochndrdys w defects of growth of tubular bones and spine" ~ "Congenital",
+    major == "Other specified and unspecified injuries of neck" ~ "Complication",
+    major == "Asphyxiation" ~ "xxxx",
+    major == "Malig neoplm of spinal cord, cranial nerves and oth prt cnsl" ~ "Tumor",
+    major == "Benign neoplasm of other and unsp intrathoracic organs" ~ "Tumor",
+    major == "Benign lipomatous neoplasm" ~ "Tumor",
+    major == "Oth neoplm of uncrt behav of lymphoid, hematpoetc & rel tiss" ~ "Tumor",
+    major == "Intracranial and intraspinal abscess and granuloma" ~ "Infection",
+    major == "Pain, not elsewhere classified" ~ "Complication",
+    major == "Other disorders of central nervous system" ~ "Complication",
+    major == "Other crystal arthropathies" ~ "Other",
+    major == "Other arthritis" ~ "Other",
+    major == "Arthropathies in other diseases classified elsewhere" ~ "Other",
+    major == "Chronic gout" ~ "Other",
+    major == "Osteoporosis with current pathological fracture" ~ "Trauma",
+    major == "Osteopathies in diseases classified elsewhere" ~ "Tumor",
+    major == "Congenital ms deformities of head, face, spine and chest" ~ "Congenital",
+    major == "Complications of cardiac and vascular prosth dev/grft" ~ "Complication",
+    major == "Respiratory tuberculosis" ~ "Infection",
+    major == "Tuberculosis of nervous system" ~ "Infection",
+    major == "Tuberculosis of other organs" ~ "Infection",
+    major == "Malignant neoplasm of bone/artic cartl of and unsp sites" ~ "Tumor",
+    major == "Malignant neoplasm of meninges" ~ "Tumor",
+    major == "Secondary malignant neoplasm of other and unspecified sites" ~ "Tumor",
+    major == "Benign neoplasm of bone and articular cartilage" ~ "Tumor",
+    major == "Benign neoplasm of meninges" ~ "Tumor",
+    major == "Benign neoplasm of brain and oth prt central nervous system" ~ "Tumor",
+    major == "Neoplasm of uncertain behavior of meninges" ~ "Tumor",
+    major == "Neoplasm of uncertain behavior of brain and cnsl" ~ "Tumor",
+    major == "Intcrn & intraspinal abscs & granuloma in dis classd elswhr" ~ "Infection",
+    major == "Intracranial and intraspinal phlebitis and thrombophlebitis" ~ "Infection",
+    major == "Parkinson's disease" ~ "Other",
+    major == "Oth degeneratv disord of nervous sys in dis classd elswhr" ~ "Degenerative",
+    major == "Oth disorders of nervous system in diseases classd elswhr" ~ "Degenerative",
+    major == "Direct infect of joint in infec/parastc dis classd elswhr" ~ "Infection",
+    major == "Enteropathic arthropathies" ~ "Infection",
+    major == "Other and unspecified osteoarthritis" ~ "Other",
+    major == "Other specific joint derangements" ~ "Other",
+    major == "Other joint disorder, not elsewhere classified" ~ "Degenerative"
+  )
+  ) %>%
+  select(spine_category, major, long_desc, everything()) %>%
+  mutate(spine_category = if_else(str_detect(str_to_lower(long_desc), pattern = "traumatic|fracture|collapsed"), "Trauma", spine_category))
+  
+
+spine_category_df_list <- map(.x = unique(spine_major_grouped_df$spine_category), .f = ~ spine_major_grouped_df %>% filter(spine_category == .x))
+
+names(spine_category_df_list) <- unique(spine_major_grouped_df$spine_category)
+
+```
+
+```{r}
+spine_category_df_list$Degenerative %>%
+  select(long_desc, everything())
+
+spine_icd10_codes_df$spine_category
+
+
+max_repeat_instances_df <- exportRecords(rcon = rcon, records = 1) %>%
+                    as_tibble()
+
+max_repeat_instances_df
+```
+
+
+
+```{r}
+spine_codes_grouped_df <- spine_major_grouped_df %>%
+  group_by(sub_chapter) %>%
+  add_tally(name = "subchapter_count") %>%
+  ungroup() %>%
+  mutate(spine_category = fct_relevel(fct_inorder(spine_category), spine_categories)) %>%
+  arrange(spine_category, desc(subchapter_count)) %>%
+  select(-subchapter_count) %>%
+  select(spine_category, diagnosis = long_desc, icd10_code, three_digit, chapter, sub_chapter, major) %>% 
+  mutate(dx_lower = str_to_lower(diagnosis)) %>%
+  mutate(site = case_when(
+    str_detect(dx_lower, "occipit") | 
+      str_detect(dx_lower, "atlant") | 
+      str_detect(dx_lower, "axial") | 
+      str_detect(dx_lower, "cervicocra") |
+      str_detect(dx_lower, "cervical") ~ "cervical",
+    str_detect(dx_lower, "cervicothoracic ") ~ "cervicothoracic", 
+    str_detect(dx_lower, "thoracic") |
+      str_detect(dx_lower, "-t") |
+      str_detect(dx_lower, "rib") ~ "thoracic", 
+    str_detect(dx_lower, "thoracolumbar") |
+      str_detect(dx_lower, "abdomen")~ "thoracolumbar", 
+    str_detect(dx_lower, " lumbar") ~ "lumbar", 
+    str_detect(dx_lower, "lumbo") | 
+      str_detect(dx_lower, "sacr") | 
+      str_detect(dx_lower, "lumba") | 
+      str_detect(dx_lower, "low back") |
+      str_detect(dx_lower, "pelv") |
+      str_detect(dx_lower, "lumba") |
+      str_detect(dx_lower, "sciat") ~ "lumbar" 
+  )) %>%
+  select(spine_category, site, everything()) %>%
+  mutate(site = if_else(is.na(site), "all", site)) %>%
+  mutate(site_cervical = if_else(
+    str_detect(dx_lower, "occipit") | 
+      str_detect(dx_lower, "atlant") | 
+      str_detect(dx_lower, "axial") | 
+      str_detect(dx_lower, "cervico") |
+      str_detect(dx_lower, "cervical") | site == "all", TRUE, FALSE)) %>%
+  mutate(site_thoracic = if_else(
+    str_detect(dx_lower, "cervicothoracic") | 
+      str_detect(dx_lower, "thoracic") | 
+      str_detect(dx_lower, "-t") | 
+      str_detect(dx_lower, "rib") |
+      str_detect(dx_lower, "abdomen") |
+      str_detect(dx_lower, "thoracolumbar") | site == "all", TRUE, FALSE)) %>%
+  mutate(site_lumbar = if_else(
+    str_detect(dx_lower, "abdomen") | 
+      str_detect(dx_lower, "lumb") | 
+      str_detect(dx_lower, "sacr") | 
+      str_detect(dx_lower, "low back") |
+      str_detect(dx_lower, "sciat") |
+      str_detect(dx_lower, "pelv") | site == "all", TRUE, FALSE)) %>%
+  # mutate(site_cervical = if_else(site == "cervical" | site == "cervicothoracic" | site == "all", TRUE, FALSE)) %>%
+  # mutate(site_thoracic = if_else(site == "cervicothoracic" | site == "thoracic" | site == "thoracolumbar" | site == "all", TRUE, FALSE)) %>%
+  # mutate(site_lumbar = if_else(site == "thoracolumbar" | site == "lumbar" | site == "all", TRUE, FALSE)) %>%
+  select(spine_category, contains("site"), everything())
+
+spine_codes_grouped_df %>%
+  select(site) %>%
+  distinct()
+
+spine_codes_grouped_df %>%
+  filter(site_cervical == TRUE) %>%
+  filter(site_thoracic == TRUE) %>%
+  filter(site_lumbar == TRUE)
+
+
+spine_codes_grouped_df
+
+spine_codes_grouped_numbered_df <- spine_codes_grouped_df %>%
+  select(spine_category) %>%
+  distinct() %>%
+  mutate(category_number = row_number()) %>%
+  left_join(spine_codes_grouped_df) %>%
+  mutate(site_number = case_when(
+    # site == "lumbar" ~1,
+    # site == "thoracolumbar" ~ 2,
+    # site == "thoracic" ~ 3,
+    # site == "cervicothoracic" ~ 4,
+    # site == "cervical" ~ 5,
+    # site == "all" ~ 6
+  )) %>%
+    arrange(category_number, site_number) 
+
+spine_codes_grouped_numbered_df
+
+spine_icd10_codes_df %>%
+  select(icd10_code, diagnosis)
+
+spine_icd10_codes_df %>%
+  filter(str_detect(diagnosis, "dura"))
+  
+
+paste("This is one", "This is two", sep = "\n")
+
+glue_collapse(c("This is one", "This is two"), sep = "\n")
+
+test_text <- "This is a ; test"
+
+unlist(str_split(test_text, pattern = ";"))
+
+length(unlist(str_split(test_text, pattern = ";")))
+
+glue_collapse(unlist(str_split(test_text, pattern = "; ")), sep = "\n")
+
+```
+
+
+```{r}
+write_csv(x = spine_codes_grouped_numbered_df, file = "spine_icd_codes.csv", na = "")
+
+```
+
+
+```{r}
+spine_icd10_codes_df
+
+test_cats <- c("Degenerative", "Deformity", "Trauma")
+
+spine_icd10_codes_df %>%
+  filter(spine_category %in% test_cats)
+
+spine_icd10_codes_df %>%
+  select(spine_category, diagnosis) %>%
+  filter(spine_category == "Degenerative")
+
+if(any(spine_icd10_codes_df$spine_category == "Trdauma")){
+  print("True")
+}
+
+test_list <- list()
+
+
+
+
+test_list$Degenerative <- (spine_icd10_codes_df %>%
+  filter(spine_category == "Degenerative"))$diagnosis
+
+test_list$Deformity <- (spine_icd10_codes_df %>%
+  filter(spine_category == "Deformity"))$diagnosis
+
+        # if(!is.null(input$date_of_birth) && !is.null(input$date_of_surgery)){
+        #     age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+        #     
+        #     if(age < 16){
+        #         final_diagnosis_choices_df <- final_diagnosis_choices_df %>%
+        #             filter(str_detect(diagnosis, "Infantile|Juvenile", negate = TRUE))
+        #     }
+        #     if(age < 30){
+        #         final_diagnosis_choices_df <- final_diagnosis_choices_df %>%
+        #             filter(str_detect(diagnosis, "Adolescent|Juvenile", negate = TRUE))
+        #     }
+        # }
+
+age <- 20
+
+if(age < 30){
+  test_list_2 <- map(.x = test_list, ~discard(.x = .x[1:length(.x)], .p = ~ str_detect(string = .x, pattern = "Infantile ")))
+}
+
+test_list2$Deformity
+
+test_func <- function(list_number, listed_options, discard_pattern){
+  listed_options[list_number] 
+  
+  map(.x = listed_options[list_number] , .f = ~ discard(.x = .x, .p = ~ str_detect(string = .x, pattern = discard_pattern)))
+}
+
+
+test_func(list_number = 1, listed_options = test_list, discard_pattern = "Infantile")
+
+test_list$adfds
+
+as_vector(map(.x = test_list$Deformity, .f = ~ discard(.x = .x, .p = ~ str_detect(string = .x, pattern = "Infant"))))
+
+test_list2 <- map(.x = test_list, .f = ~ if(age < 30){discard(.x = .x, .p = ~ str_detect(string = .x, pattern = "Spinal"))})
+
+test_list2$Deformity
+
+```
+
+
+
+
+
