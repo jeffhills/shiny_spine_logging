@@ -90,6 +90,37 @@ anterior_test_df <- all_implants_constructed_df %>%
 
 
 ```{r}
+
+ui <- shinyUI(basicPage(
+  dateInput(inputId = "input_date", label = "Date:", value = ""),
+  textOutput(outputId = "date_text_output")
+))
+
+
+server <- function(input, output) {
+  
+ date_reactive_text <- reactive({
+
+   if(length(input$input_date) == 0){
+     paste("Zero length is true")
+   }else{
+     paste(input$input_date)
+   }
+
+  })
+  
+ output$date_text_output <- renderText({
+   date_reactive_text()
+ })
+}
+
+
+shinyApp(ui = ui, server = server)
+```
+
+
+
+```{r}
 adult_choices_test <- c("Adult Idiopathic Scoliosis",
                            "Degenerative Scoliosis",
                            "Adolescent Idiopathic Scoliosis",

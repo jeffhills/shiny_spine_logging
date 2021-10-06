@@ -5,10 +5,10 @@ account: hills-apps
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3825489
-bundleId: 5107937
+bundleId: 5110014
 url: https://hills-apps.shinyapps.io/spine_templating_logging/
-when: 1633473678.90846
-lastSyncTime: 1633473678.90846
+when: 1633521880.14376
+lastSyncTime: 1633521880.14376
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: 2020 Depuy Spine Coding Guide.pdf|cpt_code_testing.nb.html|cpt_code_testing.Rmd|icd_codes/icd_codes_exploration.nb.html|icd_codes/icd_codes_exploration.Rmd|icd_codes/icd_major_categories_df.csv|icd_codes/non_spine_icd_descriptions.csv|icd_codes/spine_related_icd10_codes.csv|old_app_versions/10_4_2021_prior_to_icd_codes_dx.R|shiny_testing.nb.html|shiny_testing.Rmd|spine_figures|testing_docs

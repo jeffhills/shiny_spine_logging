@@ -10,14 +10,11 @@
 
 
 #############-----------------------   LOAD DATA  ----------------------###############
+spine_icd10_codes_df <- read_csv(file = "spine_icd_codes.csv")%>%
+  mutate(spine_category = if_else(spine_category == "Deformity" & str_detect(diagnosis, pattern = "Infant|Juveni|Adolescent"), "Pediatric Deformity", spine_category))
 
-spine_png <- image_read(path = "posterior_spine_figure.png")
+spine_png <- image_read(path = "spine_posterior.png")
 
-# spine_png <- image_read(path = "posterior_spine_3d_model_with_ribs_correct_size.png")
-# posterior_spine_3d_model_with_ribs_correct_size
-
-# spine_png <- image_read(path = "posterior_spine_6_lumbar_vert.png")
-# posterior_spine_6_lumbar_vert
 anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
 
 implant_starts_df <- read_csv(file = "full_coordinates_df.csv") %>%

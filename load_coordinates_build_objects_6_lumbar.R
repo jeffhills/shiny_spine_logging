@@ -141,12 +141,9 @@ l6_jh_get_vertebral_level_function <- function(number) {
 
 #############-----------------------   LOAD DATA  ----------------------###############
 
-# spine_png <- image_read(path = "posterior_spine_figure.png")
-l6_spine_png <- image_read(path = "posterior_spine_6_lumbar_vert.png")
+l6_spine_png <- image_read(path = "spine_posterior_6_lumbar_vert.png")
 
-# spine_png <- image_read(path = "posterior_spine_6_lumbar_vert.png")
-# posterior_spine_6_lumbar_vert
-l6_anterior_spine_png <- image_read(path = "anterior_spine_6_lumbar_vert.png")
+l6_anterior_spine_png <- image_read(path = "spine_anterior_6_lumbar_vert.png")
 
 l6_implant_starts_lower_only_df <- read_csv(file = "full_coordinates_df.csv") %>%
   filter(!is.na(x)) %>%

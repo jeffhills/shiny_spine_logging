@@ -14,7 +14,7 @@ library(rlist)
 library(janitor)
 library(lubridate)
 library(redcapAPI)
-# library(ggpmisc)
+library(ggpmisc)
 library(rclipboard)
 library(nngeo)
 library(shinydashboard)
@@ -30,8 +30,8 @@ source("make_geoms_functions.R", local = TRUE)
 source("build_spine_objects_functions.R", local = TRUE)
 source("load_coordinates_build_objects.R", local = TRUE)
 source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
-source("no_implants_added_op_note.R", local = TRUE)
 source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
+source("no_implants_added_op_note.R", local = TRUE)
 
 #Dashboards:
 rclipboardSetup()
@@ -473,27 +473,6 @@ ui <- dashboardPage(skin = "black",
                                                           )
                                            )
                                     ),
-                                    # column(width = 4, 
-                                    #        conditionalPanel(condition = "input.fusion_procedure_performed == true",
-                                    #                         dropdown(icon = icon("link"),
-                                    #                                  # size = "lg",
-                                    #                                  width = "100%",
-                                    #                                  label = "Confirm Fusion Levels",
-                                    #                                  style = "unite",
-                                    #                                  checkboxGroupButtons(inputId = "fusion_levels_confirmed",
-                                    #                                                       label = "Select/Confirm Fusion Levels:",
-                                    #                                                       choices = interbody_levels_df$level,
-                                    #                                                       size = "sm",
-                                    #                                                       direction = "vertical",
-                                    #                                                       checkIcon = list(
-                                    #                                                           yes = tags$i(class = "fa fa-check-square",
-                                    #                                                                        style = "color: steelblue"),
-                                    #                                                           no = tags$i(class = "fa fa-square-o",
-                                    #                                                                       style = "color: steelblue"))
-                                    #                                  )
-                                    #                         )
-                                    #        )
-                                    # )
                                 ),
                                 conditionalPanel(condition = "input.posterior_fusion_performed == true",
                                                  box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "POSTERIOR Bone Graft & Biologics:"),
@@ -879,25 +858,26 @@ server <- function(input, output, session) {
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     
     
-    startup_modal_box <- function(starting_first_name = "",
-                          starting_last_name = "", 
-                          starting_dob = "",
-                          starting_dos = "", 
-                          starting_sex = "",
-                          primary_or_revision = "Primary", 
-                          # indication_for_revision = "", 
-                          levels_with_prior_decompression = "",
-                          prior_fusion_levels = "",
-                          prior_instrumentation = FALSE,
-                          left_prior_implants = "",
-                          left_prior_implants_removed = "",
-                          right_prior_implants = "",
-                          right_prior_implants_removed = "",
-                          left_rod_status = "retained_connected",
-                          left_implants_still_connected = "",
-                          right_rod_status = "retained_connected",
-                          right_implants_still_connected = "",
-                          button_proceed = "proceed_to_details"
+    startup_modal_box <- function(header_text = "Enter Details to Proceed", header_text_color = "black",
+                                  starting_first_name = "",
+                                  starting_last_name = "", 
+                                  starting_dob = "",
+                                  starting_dos = "", 
+                                  starting_sex = "",
+                                  primary_or_revision = "Primary", 
+                                  # indication_for_revision = "", 
+                                  levels_with_prior_decompression = "",
+                                  prior_fusion_levels = "",
+                                  prior_instrumentation = FALSE,
+                                  left_prior_implants = "",
+                                  left_prior_implants_removed = "",
+                                  right_prior_implants = "",
+                                  right_prior_implants_removed = "",
+                                  left_rod_status = "retained_connected",
+                                  left_implants_still_connected = "",
+                                  right_rod_status = "retained_connected",
+                                  right_implants_still_connected = "",
+                                  button_proceed = "proceed_to_details"
     ){
         if(button_proceed == "proceed_to_details"){
             footer_button <- actionBttn(
@@ -917,7 +897,7 @@ server <- function(input, output, session) {
                     column(12, 
                            fluidRow(
                                column(8, 
-                                      tags$div(style = "font-size:22px; font-weight:bold", "Enter Required Details to Proceed"),
+                                      tags$div(style = glue("font-size:22px; font-weight:bold; color:{header_text_color}"), header_text),
                                ),
                                column(4, 
                                       actionBttn(inputId = "test_patient_button", label = "Use Test Patient", size = "sm")),
@@ -943,10 +923,10 @@ server <- function(input, output, session) {
                                           inline = TRUE
                                       )),
                                column(4, 
-                                      dateInput(inputId = "date_of_birth", label = "Date of Birth:", value = starting_dob,format = "mm-dd-yyyy", max = Sys.Date())
+                                      dateInput(inputId = "date_of_birth", label = "Date of Birth (mm-dd-yyyy):", value = starting_dob,format = "mm-dd-yyyy", max = Sys.Date())
                                ),
                                column(4, 
-                                      dateInput(inputId = "date_of_surgery", label = "Date of Surgery:", value = starting_dos,format = "mm-dd-yyyy", max = Sys.Date())
+                                      dateInput(inputId = "date_of_surgery", label = "Date of Surgery (mm-dd-yyyy):", value = starting_dos,format = "mm-dd-yyyy", max = Sys.Date())
                                )
                            ),
                            fluidRow(
@@ -1284,7 +1264,7 @@ server <- function(input, output, session) {
                                        label = NULL,
                                        justified = TRUE,
                                        choices = c("Degenerative", "Deformity", "Trauma", "Infection", "Tumor", "Congenital", "Complication", "Other"),
-                                       status = "primary", 
+                                       # status = "primary", 
                                        selected = diagnosis_category_value,
                                        checkIcon = list(
                                            yes = icon("ok", 
@@ -1292,7 +1272,7 @@ server <- function(input, output, session) {
                                    )
                                ),
                                br(),
-                               # tableOutput(outputId = "diagnosis_options"),
+                               conditionalPanel(condition = "input.diagnosis_category.length > 0",
                                fluidRow(
                                    column(width = 5,
                                           tags$div(style = "font-size:18px; font-weight:bold", "Diagnosis:"),
@@ -1315,7 +1295,6 @@ server <- function(input, output, session) {
                                fluidRow(
                                    column(width = 5,
                                           tags$div(style = "font-size:18px; font-weight:bold", "Symptoms:")
-                                          # tags$div(style = "font-size:14px; font-weight:bold", "Select Appropriate Spine Regions"),
                                    ),
                                    column(width = 7,
                                           pickerInput(
@@ -1374,33 +1353,60 @@ server <- function(input, output, session) {
                                                                 switch_input_off_label = "No",
                                                                 initial_value_selected = multiple_approach_initial_value)
                                )
+                        )
                     )
         )
     }
     
     observeEvent(input$close_startup_modal, {
-        removeModal()
         
-        if(input$patient_last_name == "TestLAST"){
-            spine_region <- "Thoracolumbar"
-            diagnosis_category <- c("Deformity")
-            dx <- c("Flatback syndrome, thoracolumbar region")
-            symptoms <- "Low Back Pain"
+        if(length(input$date_of_birth) == 0 | length(input$date_of_surgery) == 0 | is.null(input$sex)){
+            # header_text_color
+            showModal(startup_modal_box(header_text = "Please Enter Value for Each Field", header_text_color = "red",
+                                        starting_first_name = input$patient_first_name, 
+                                        starting_last_name = input$patient_last_name, 
+                                        starting_dob = input$date_of_birth,
+                                        starting_dos = input$date_of_surgery, 
+                                        starting_sex = input$sex,
+                                        primary_or_revision = input$primary_revision,
+                                        # indication_for_revision = input$revision_indication,
+                                        levels_with_prior_decompression = input$open_canal, 
+                                        prior_fusion_levels = input$prior_fusion_levels, 
+                                        prior_instrumentation = input$prior_instrumentation, 
+                                        left_prior_implants = input$left_revision_implants, 
+                                        left_prior_implants_removed = input$left_revision_implants_removed, 
+                                        right_prior_implants = input$right_revision_implants, 
+                                        right_prior_implants_removed = input$right_revision_implants_removed, 
+                                        left_rod_status = input$left_revision_rod_status,
+                                        left_implants_still_connected = input$left_revision_implants_connected_to_prior_rod,
+                                        right_rod_status = input$right_revision_rod_status,
+                                        right_implants_still_connected = input$right_revision_implants_connected_to_prior_rod,
+                                        button_proceed = "proceed_to_details"
+            ))
         }else{
-            spine_region <- input$spinal_regions
-            diagnosis_category <- input$diagnosis_category
-            dx <- input$primary_diagnosis
-            symptoms <- input$symptoms
+            removeModal()
+            if(str_detect(str_to_lower(input$patient_last_name), pattern = "test")){
+                spine_region <- "Thoracolumbar"
+                diagnosis_category <- c("Deformity")
+                dx <- c("Flatback syndrome, thoracolumbar region")
+                symptoms <- c("Low Back Pain", "Left Leg Pain")
+            }else{
+                spine_region <- NULL
+                diagnosis_category <- NULL
+                # dx <- input$primary_diagnosis
+                dx <- NULL
+                symptoms <- NULL # input$symptoms
+            }
+            
+            showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = diagnosis_category,
+                                                           primary_diagnosis_value = dx, 
+                                                           symptoms_initial_value = symptoms,
+                                                           stage_number_value = input$stage_number,
+                                                           staged_procedure_initial_value = FALSE,
+                                                           multiple_approach_initial_value = FALSE,
+                                                           spinal_regions_selected = spine_region
+            ))
         }
-        
-        showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = diagnosis_category,
-                                                       primary_diagnosis_value = dx, 
-                                                       symptoms_initial_value = symptoms,
-                                                       stage_number_value = input$stage_number,
-                                                       staged_procedure_initial_value = input$staged_procedure,
-                                                       multiple_approach_initial_value = input$multiple_approach,
-                                                       spinal_regions_selected = spine_region
-                                                       ))
     })
     
     observeEvent(input$edit_diagnosis_symptoms, {
@@ -1416,6 +1422,8 @@ server <- function(input, output, session) {
     
     ############ UPDATE DIAGNOSIS & SYMPTOMS OPTIONS ##############
     diagnosis_choices_reactive_list <- reactive({
+        
+        ## first filter by region ##
         spine_regions <- str_to_lower(paste(input$spinal_regions, collapse = ", "))
 
         building_diagnosis_choices_df <- spine_icd10_codes_df %>%
@@ -1445,66 +1453,33 @@ server <- function(input, output, session) {
                 union_all(building_diagnosis_choices_df)
         }
         
-        final_diagnosis_choices_df <- building_diagnosis_choices_df %>%
-            distinct() %>%
-            filter(spine_category %in% input$diagnosis_category) %>%
-            arrange(category_number, site_number) 
+        if(any(input$diagnosis_category == "Deformity")){
+            diagnosis_categories_vector <- append(input$diagnosis_category, "Pediatric Deformity")
+        }else{
+            diagnosis_categories_vector <- input$diagnosis_category
+        }
         
+        diagnosis_choices_by_region_and_category_df <- building_diagnosis_choices_df %>%
+            distinct() %>%
+            filter(spine_category %in% diagnosis_categories_vector) %>%
+            arrange(category_number, site_number) 
+   
+        
+        # this is to remove cervicothoracic from thoracolumbar dx
         if(str_detect(string = spine_regions, pattern = "cerv") == FALSE){
-            final_diagnosis_choices_df <- final_diagnosis_choices_df %>%
+            diagnosis_choices_by_region_and_category_df <- diagnosis_choices_by_region_and_category_df %>%
                 filter(str_detect(diagnosis, "cerv", negate = TRUE))
         }
+
         
+        spine_diagnosis_choices_list <- map(.x = diagnosis_categories_vector, .f = ~ (diagnosis_choices_by_region_and_category_df %>% 
+                                                     filter(spine_category == .x) %>%
+                                                     select(spine_category, diagnosis) %>% 
+                                                     pivot_wider(names_from = spine_category, values_from = diagnosis) %>% 
+                                                     unnest())[[1]])
         
+        names(spine_diagnosis_choices_list) <- diagnosis_categories_vector
         
-        spine_diagnosis_choices_list <- list()
-        
-        if(any(final_diagnosis_choices_df$spine_category == "Degenerative")){
-            spine_diagnosis_choices_list$Degenerative <- (final_diagnosis_choices_df %>%
-                                                              select(spine_category, diagnosis) %>%
-                                                              filter(spine_category == "Degenerative"))$diagnosis
-        }
-        if(any(final_diagnosis_choices_df$spine_category == "Deformity")){
-            spine_diagnosis_choices_list$Deformity <- (final_diagnosis_choices_df %>%
-                                                              select(spine_category, diagnosis) %>%
-                                                              filter(spine_category == "Deformity") %>%
-                                                           filter(str_detect(string = diagnosis, pattern = "Infant|Juveni|Adolescent", negate = TRUE)))$diagnosis
-            
-            spine_diagnosis_choices_list$'Pediatric Deformity' <- (final_diagnosis_choices_df %>%
-                                                           select(spine_category, diagnosis) %>%
-                                                           filter(spine_category == "Deformity") %>%
-                                                           filter(str_detect(string = diagnosis, pattern = "Infant|Juveni|Adolescent")))$diagnosis
-        }
-        if(any(final_diagnosis_choices_df$spine_category == "Trauma")){
-            spine_diagnosis_choices_list$Trauma <- (final_diagnosis_choices_df %>%
-                                                              select(spine_category, diagnosis) %>%
-                                                              filter(spine_category == "Trauma"))$diagnosis
-        }
-        if(any(final_diagnosis_choices_df$spine_category == "Infection")){
-            spine_diagnosis_choices_list$Infection <- (final_diagnosis_choices_df %>%
-                                                              select(spine_category, diagnosis) %>%
-                                                              filter(spine_category == "Infection"))$diagnosis
-        }
-        if(any(final_diagnosis_choices_df$spine_category == "Tumor")){
-            spine_diagnosis_choices_list$Tumor <- (final_diagnosis_choices_df %>%
-                                                              select(spine_category, diagnosis) %>%
-                                                              filter(spine_category == "Tumor"))$diagnosis
-        }
-        if(any(final_diagnosis_choices_df$spine_category == "Congenital")){
-            spine_diagnosis_choices_list$Congenital <- (final_diagnosis_choices_df %>%
-                                                              select(spine_category, diagnosis) %>%
-                                                              filter(spine_category == "Congenital"))$diagnosis
-        }
-        if(any(final_diagnosis_choices_df$spine_category == "Complication")){
-            spine_diagnosis_choices_list$Complication <- (final_diagnosis_choices_df %>%
-                                                       select(spine_category, diagnosis) %>%
-                                                       filter(spine_category == "Complication"))$diagnosis
-        }
-        if(any(final_diagnosis_choices_df$spine_category == "Other")){
-            spine_diagnosis_choices_list$Other <- (final_diagnosis_choices_df %>%
-                                                            select(spine_category, diagnosis) %>%
-                                                            filter(spine_category == "Other"))$diagnosis
-        }
         spine_diagnosis_choices_list
     })
     
@@ -1549,17 +1524,19 @@ server <- function(input, output, session) {
         updatePickerInput(session = session, 
                           inputId = "symptoms",
                           label = NULL,
-                          choices = symptom_option_list)
+                          choices = symptom_option_list, 
+                          selected = input$symptoms)
         
         
         diagnosis_options_list <- diagnosis_choices_reactive_list()
         
-        age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-        
-        if(age > 30){
-            diagnosis_options_list$'Pediatric Deformity' <- NULL
+        if(length(input$date_of_birth) >0 & length(input$date_of_surgery)>0){
+            age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+            
+            if(age > 30){
+                diagnosis_options_list$'Pediatric Deformity' <- NULL
+            }
         }
-
         
         updatePickerInput(session = session,
                           inputId = "primary_diagnosis",
@@ -1583,7 +1560,7 @@ server <- function(input, output, session) {
     })
     
     output$diagnosis_symptoms_ui <- renderUI({
-        if(!is.null(input$date_of_surgery)){
+        if(length(input$date_of_surgery)>0){
           dos <- glue("Date of Surgery: {month(input$date_of_surgery, label = TRUE)} {day(input$date_of_surgery)}, {year(input$date_of_surgery)}")  
         }else{
             dos <- "Date of Surgery:"
@@ -1601,13 +1578,13 @@ server <- function(input, output, session) {
             staged_procedure_text <- " "
         }
         
-        if(!is.null(input$primary_diagnosis)){
+        if(length(input$primary_diagnosis)>0){
             diagnosis <- glue("Diagnosis: {glue_collapse(x = input$primary_diagnosis, sep = ', ', last = ' and ')}")
         }else{
             diagnosis <- "Diagnosis:"
         }
         
-        if(!is.null(input$symptoms)){
+        if(length(input$symptoms)>0){
             symptoms <- glue("Symptoms: {glue_collapse(x = input$symptoms, sep = ', ', last = ' and ')}")
         }else{
             symptoms <- "Symptoms:"
@@ -1646,6 +1623,7 @@ server <- function(input, output, session) {
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     addition_surgical_details_modal_box_function <- function(required_options_missing = FALSE,
+                                                             row_label_font_size = 16,
                                                              fade_appearance = TRUE,
                                                              primary_surgeon = "", 
                                                              surgical_assistants = "",
@@ -1685,14 +1663,14 @@ server <- function(input, output, session) {
                                                     if(required_options_missing == TRUE){
                                                         div(style = "font-size:22px; font-weight:bold; font-style:italic; text-align:center; color:red", "*** Please Make Selections for Required Fields***")
                                                     },
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Primary Surgeon:", input_type = "text", input_id = "primary_surgeon", initial_value_selected = primary_surgeon),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Assistants:", input_type = "text", input_id = "surgical_assistants", initial_value_selected = surgical_assistants),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Preoperative Diagnosis:", input_type = "text", input_id = "preoperative_diagnosis", initial_value_selected = preoperative_diagnosis),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Postoperative Diagnosis:", input_type = "text", input_id = "postoperative_diagnosis", initial_value_selected = postoperative_diagnosis),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Surgical Indications:", input_type = "text", input_id = "indications", initial_value_selected = indications),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Primary Surgeon:", font_size = row_label_font_size, input_type = "text", input_id = "primary_surgeon", initial_value_selected = primary_surgeon),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Assistants:", font_size = row_label_font_size,  input_type = "text", input_id = "surgical_assistants", initial_value_selected = surgical_assistants),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Preoperative Diagnosis:", font_size = row_label_font_size, input_type = "text", input_id = "preoperative_diagnosis", initial_value_selected = preoperative_diagnosis),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Postoperative Diagnosis:", font_size = row_label_font_size, input_type = "text", input_id = "postoperative_diagnosis", initial_value_selected = postoperative_diagnosis),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Surgical Indications:", font_size = row_label_font_size, input_type = "text", input_id = "indications", initial_value_selected = indications),
                                                     hr(),
                                                     jh_make_shiny_table_row_function(left_column_percent_width = 30,
-                                                                                     left_column_label = "Neuromonitoring used:",
+                                                                                     left_column_label = "Neuromonitoring used:", font_size = row_label_font_size,
                                                                                      input_type = "checkbox",
                                                                                      input_id = "neuromonitoring", choices_vector = c("EMG", "SSEP", "tc MEP", "DNEP (Cord Stimulation)", "H reflex"),
                                                                                      checkboxes_inline = TRUE,
@@ -1701,14 +1679,14 @@ server <- function(input, output, session) {
                                                                                      input_type = "picker",
                                                                                      input_id = "preop_antibiotics",
                                                                                      left_column_percent_width = 30,
-                                                                                     font_size = 14,
+                                                                                     font_size = row_label_font_size,
                                                                                      choices_vector = c("None (Antibiotics were held)", "Cefazolin (Ancef)", "Vancomycin", "Ceftriaxone", "Gentamycin", "Clindamycin", "Aztreonam", "Unknown", "Other"),
                                                                                      initial_value_selected = preop_antibiotics),
                                                     jh_make_shiny_table_row_function(left_column_label = "Antifibrinolytic:",
                                                                                      input_type = "picker",
                                                                                      input_id = "anti_fibrinolytic",
                                                                                      left_column_percent_width = 30,
-                                                                                     font_size = 14,
+                                                                                     font_size = row_label_font_size,
                                                                                      choices_vector = c("None", "Tranexamic Acid (TXA)", "Amicar", "Desmopressin (DDAVP)", "Other"),
                                                                                      initial_value_selected = anti_fibrinolytic,
                                                     ),
@@ -1717,53 +1695,53 @@ server <- function(input, output, session) {
                                                                                                       input_type = "numeric",
                                                                                                       input_id = "txa_loading",
                                                                                                       left_column_percent_width = 50,
-                                                                                                      font_size = 13, min = 0, max = 200, 
+                                                                                                      font_size = row_label_font_size-1, min = 0, max = 200, 
                                                                                                       initial_value_selected = txa_loading, 
                                                                                                       step = 5,
                                                                                                       text_align = "right",
                                                                      ),
-                                                                     jh_make_shiny_table_row_function(left_column_label = "TXA Maintenance (mg/kg/hr):    ",
+                                                                     jh_make_shiny_table_row_function(left_column_label = "TXA Maintenance (mg/kg/hr):    ", 
                                                                                                       input_type = "numeric",
                                                                                                       input_id = "txa_maintenance",
                                                                                                       left_column_percent_width = 50,
-                                                                                                      font_size = 13, min = 0, max = 50, 
+                                                                                                      font_size = row_label_font_size-1, min = 0, max = 50, 
                                                                                                       initial_value_selected = txa_maintenance, 
                                                                                                       step = 5, 
                                                                                                       text_align = "right",
                                                                      ),
                                                     ),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Findings:", input_type = "text", input_id = "surgical_findings", initial_value_selected = surgical_findings),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Specimens:", input_type = "text", input_id = "specimens_removed", initial_value_selected = specimens_removed),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Findings:",font_size = row_label_font_size, input_type = "text", input_id = "surgical_findings", initial_value_selected = surgical_findings),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Specimens:",font_size = row_label_font_size, input_type = "text", input_id = "specimens_removed", initial_value_selected = specimens_removed),
                                                     hr(),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Estimated Blood Loss:", input_type = "numeric", input_id = "ebl", initial_value_selected = ebl, min = 0, max = 50000, step = 100),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Urine Output:", input_type = "numeric", input_id = "urine_output", initial_value_selected = urine_output, min = 0, max = 50000, step = 100),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Crystalloids:", input_type = "numeric", input_id = "crystalloids_administered", initial_value_selected = crystalloids_administered, min = 0, max = 100000, step = 100),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Colloids:", input_type = "numeric", input_id = "colloids_administered", min = 0, initial_value_selected = colloids_administered, max = 100000, step = 100),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Transfusions/Cell Saver", input_type = "switch", input_id = "transfusion", switch_input_on_label = "Yes", switch_input_off_label = "No", initial_value_selected = transfusion),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Estimated Blood Loss:",font_size = row_label_font_size, input_type = "numeric", input_id = "ebl", initial_value_selected = ebl, min = 0, max = 50000, step = 100),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Urine Output:",font_size = row_label_font_size, input_type = "numeric", input_id = "urine_output", initial_value_selected = urine_output, min = 0, max = 50000, step = 100),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Crystalloids:", font_size = row_label_font_size, input_type = "numeric", input_id = "crystalloids_administered", initial_value_selected = crystalloids_administered, min = 0, max = 100000, step = 100),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Colloids:", font_size = row_label_font_size, input_type = "numeric", input_id = "colloids_administered", min = 0, initial_value_selected = colloids_administered, max = 100000, step = 100),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Transfusions/Cell Saver",font_size = row_label_font_size,  input_type = "switch", input_id = "transfusion", switch_input_on_label = "Yes", switch_input_off_label = "No", initial_value_selected = transfusion),
                                                     conditionalPanel(condition = "input.transfusion == true",
                                                                      box(width = 12,
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cell Saver Transfused (cc):", input_type = "numeric", input_id = "cell_saver_transfused",initial_value_selected = cell_saver_transfused, min = 0, max = 10000, step = 100),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "pRBC units transfused:", input_type = "numeric", input_id = "prbc_transfused", initial_value_selected = prbc_transfused, min = 0, max = 100, step = 1),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "FFP units transfused:", input_type = "numeric", input_id = "ffp_transfused", initial_value_selected = ffp_transfused, min = 0, max = 100, step = 1),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cryoprecipitate units transfused:", input_type = "numeric", input_id = "cryoprecipitate_transfused", initial_value_selected = cryoprecipitate_transfused, min = 0, max = 100, step = 1),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Platelet units transfused:", input_type = "numeric", input_id = "platelets_transfused", initial_value_selected = platelets_transfused, min = 0, max = 100, step = 1),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cell Saver Transfused (cc):",font_size = row_label_font_size,  input_type = "numeric", input_id = "cell_saver_transfused",initial_value_selected = cell_saver_transfused, min = 0, max = 10000, step = 100),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "pRBC units transfused:",font_size = row_label_font_size,  input_type = "numeric", input_id = "prbc_transfused", initial_value_selected = prbc_transfused, min = 0, max = 100, step = 1),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "FFP units transfused:",font_size = row_label_font_size,  input_type = "numeric", input_id = "ffp_transfused", initial_value_selected = ffp_transfused, min = 0, max = 100, step = 1),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cryoprecipitate units transfused:",font_size = row_label_font_size,  input_type = "numeric", input_id = "cryoprecipitate_transfused", initial_value_selected = cryoprecipitate_transfused, min = 0, max = 100, step = 1),
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Platelet units transfused:",font_size = row_label_font_size,  input_type = "numeric", input_id = "platelets_transfused", initial_value_selected = platelets_transfused, min = 0, max = 100, step = 1),
                                                                      )
                                                     ),
                                                     hr(),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Intraoperative Complications (including durotomy)?", input_type = "switch", input_id = "intraoperative_complications_true_false", initial_value_selected = intraoperative_complications_true_false),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Intraoperative Complications (including durotomy)?",font_size = row_label_font_size,  input_type = "switch", input_id = "intraoperative_complications_true_false", initial_value_selected = intraoperative_complications_true_false),
                                                     conditionalPanel(condition = "input.intraoperative_complications_true_false == true",
                                                                      box(width = 12,
                                                                          br(),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Select any:",
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Select any:", font_size = row_label_font_size, 
                                                                                                           input_type = "checkbox", input_id = "intraoperative_complications_vector", 
                                                                                                           choices_vector = c("Durotomy", "Nerve Root Injury", "Loss of Neuromonitoring Data with Return", "Loss of Neuromonitoring Data without Return"), 
                                                                                                           initial_value_selected = intraoperative_complications_vector),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Other Intraoperative Complications:", input_type = "text", input_id = "other_intraoperative_complications", initial_value_selected = other_intraoperative_complications)
+                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Other Intraoperative Complications:", font_size = row_label_font_size, input_type = "text", input_id = "other_intraoperative_complications", initial_value_selected = other_intraoperative_complications)
                                                                      )
                                                     ),
                                                     br(),
                                                     jh_make_shiny_table_row_function(left_column_percent_width = 20,
-                                                                                     left_column_label = "Head Positioning:",
+                                                                                     left_column_label = "Head Positioning:", font_size = row_label_font_size,
                                                                                      input_type = "radioGroupButtons",
                                                                                      input_id = "head_positioning",
                                                                                      required_option = TRUE,
@@ -1772,7 +1750,7 @@ server <- function(input, output, session) {
                                                                                      choices_vector = c("Supine/Lateral", "Proneview Faceplate", "Cranial Tongs", "Halo", "Mayfield"),
                                                                                      initial_value_selected = head_positioning),
                                                     br(),
-                                                    jh_make_shiny_table_row_function(left_column_label = "Additional Procedures:",
+                                                    jh_make_shiny_table_row_function(left_column_label = "Additional Procedures:", font_size = row_label_font_size,
                                                                                      input_id = "additional_procedures",
                                                                                      left_column_percent_width = 20,
                                                                                      checkboxes_inline = FALSE,
@@ -1781,19 +1759,19 @@ server <- function(input, output, session) {
                                                                                      initial_value_selected = additional_procedures),
                                                     conditionalPanel(condition = "input.additional_procedures.indexOf('Other') > -1",
                                                                      tags$table(width = "90%" ,
-                                                                                jh_make_shiny_table_row_function(left_column_label = "Other Procedures:", input_type = "text", input_id = "additional_procedures_other", left_column_percent_width = 30, font_size = 12, initial_value_selected = additional_procedures_other,)
+                                                                                jh_make_shiny_table_row_function(left_column_label = "Other Procedures:",font_size = row_label_font_size-1, input_type = "text", input_id = "additional_procedures_other", left_column_percent_width = 30, initial_value_selected = additional_procedures_other,)
                                                                      )
                                                     ),
                                                     br(),
                                                     hr(),
-                                                    div(style = "font-size:18px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
+                                                    div(style = "font-size:20px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
                                                     uiOutput(outputId = "drains_ui"),
                                                     hr(),
                                                     jh_make_shiny_table_row_function(left_column_label = "Select any used during closure:",
                                                                                      input_type = "checkbox",
                                                                                      input_id = "additional_end_procedure_details",
                                                                                      left_column_percent_width = 45,
-                                                                                     font_size = 14,
+                                                                                     font_size = row_label_font_size,
                                                                                      choices_vector = c("Vancomycin Powder",
                                                                                                         "Antibiotic Beads"),
                                                                                      initial_value_selected = additional_end_procedure_details,
@@ -1803,7 +1781,7 @@ server <- function(input, output, session) {
                                                                                      input_type = "checkbox",
                                                                                      input_id = "closure_details",
                                                                                      left_column_percent_width = 45,
-                                                                                     font_size = 14,
+                                                                                     font_size = row_label_font_size,
                                                                                      required_option = TRUE,
                                                                                      choices_vector = c("Subcutaneous suture",
                                                                                                         "Nylon",
@@ -1816,7 +1794,7 @@ server <- function(input, output, session) {
                                                                                      input_id = "dressing_details",
                                                                                      required_option = TRUE,
                                                                                      left_column_percent_width = 45,
-                                                                                     font_size = 14,
+                                                                                     font_size = row_label_font_size,
                                                                                      choices_vector = c(
                                                                                          "Steristrips",
                                                                                          "Dermabond",
@@ -1832,9 +1810,69 @@ server <- function(input, output, session) {
         return(additional_details_modal)
     }
     
+    ### DRAIN INPUT UI ###
+    output$drains_ui <- renderUI({
+        anterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
+                                                          input_type = "awesomeRadio",
+                                                          input_id = "deep_drains_anterior", 
+                                                          left_column_percent_width = 45, 
+                                                          font_size = 16, 
+                                                          initial_value_selected = 0, 
+                                                          choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                          checkboxes_inline = TRUE, return_as_full_table = TRUE)
+        anterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
+                                                                 input_type = "awesomeRadio",
+                                                                 input_id = "superficial_drains_anterior", 
+                                                                 left_column_percent_width = 45, 
+                                                                 font_size = 16, 
+                                                                 initial_value_selected = 0, 
+                                                                 choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                                 checkboxes_inline = TRUE, return_as_full_table = TRUE)
+        
+        posterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
+                                                           input_type = "awesomeRadio",
+                                                           input_id = "deep_drains_posterior", 
+                                                           left_column_percent_width = 45, 
+                                                           font_size = 16, 
+                                                           initial_value_selected = 1, 
+                                                           choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                           checkboxes_inline = TRUE, return_as_full_table = TRUE)
+        posterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Posterior Superficial drains:", 
+                                                                  input_type = "awesomeRadio",
+                                                                  input_id = "superficial_drains_posterior", 
+                                                                  left_column_percent_width = 45, 
+                                                                  font_size = 16, 
+                                                                  initial_value_selected = 1, 
+                                                                  choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                                  checkboxes_inline = TRUE, return_as_full_table = TRUE)
+        
+        drains_list <- list()
+        if(nrow(all_objects_to_add_list$objects_df)>0){
+            if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
+                drains_list$anterior_deep <- anterior_deep
+                drains_list$anterior_superficial <- anterior_superficial
+            }
+            if(any(all_objects_to_add_list$objects_df$approach == "posterior")){
+                drains_list$posterior_deep <- posterior_deep
+                drains_list$posterior_superficial <- posterior_superficial
+                
+            }
+        }else{
+            if(input$spine_approach == "Posterior"){
+                drains_list$posterior_deep <- posterior_deep
+                drains_list$posterior_superficial <- posterior_superficial
+            }else{
+                drains_list$anterior_deep <- anterior_deep
+                drains_list$anterior_superficial <- anterior_superficial
+            }
+        }
+        drains_list
+    })
+    
+    
     observeEvent(input$intraoperative_complications_vector, {
         if(any(input$intraoperative_complications_vector == "Durotomy")){
-         updateTextInput(session = session, inputId = "postoperative_diagnosis", value = paste(input$postoperative_diagnosis, "Accidental puncture or laceration of dura during a procedure", sep = "; "))
+         updateTextInput(session = session, inputId = "postoperative_diagnosis", value = paste(input$postoperative_diagnosis, "Accidental puncture or laceration of dura during a procedure (G97.41)", sep = "; "))
                              
         }
     }
@@ -1924,6 +1962,8 @@ server <- function(input, output, session) {
                                                      selected = unlist(additional_procedures_list, use.names = FALSE))
                       })
     
+
+    
     additional_procedures_vector_reactive <- reactive({
         additional_procedures_list <- as.list(input$additional_procedures)
         
@@ -1938,9 +1978,18 @@ server <- function(input, output, session) {
     
     observeEvent(input$implant_details_complete, ignoreInit = TRUE, once = TRUE, {
         if(!is.null(input$primary_diagnosis)){
-            preop_dx <- glue_collapse(x = input$primary_diagnosis, sep = "; ")
             
-            postop_dx <- glue_collapse(x = input$primary_diagnosis, sep = "; ")
+            diagnosis_code_df <- tibble(diagnosis = input$primary_diagnosis) %>%
+                left_join(spine_icd10_codes_df %>% select(diagnosis, icd10_code)) %>%
+                mutate(diagnosis_code = paste(diagnosis, " (", icd10_code, ")", sep = ""))
+            
+            preop_dx <- glue_collapse(x = diagnosis_code_df$diagnosis_code, sep = "; ")
+            
+            postop_dx <- glue_collapse(x = diagnosis_code_df$diagnosis_code, sep = "; ")
+            
+            # preop_dx <- glue_collapse(x = input$primary_diagnosis, sep = "; ")
+            # 
+            # postop_dx <- glue_collapse(x = input$primary_diagnosis, sep = "; ")
 
         }else{
             preop_dx <- " "
@@ -2089,222 +2138,222 @@ server <- function(input, output, session) {
         column(12,
                tags$table(
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Primary Surgeon:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Primary Surgeon:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", input$primary_surgeon)),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$primary_surgeon)),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Assistants:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Assistants:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", input$surgical_assistants)),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$surgical_assistants)),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Preoperative Diagnosis:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Preoperative Diagnosis:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", input$preoperative_diagnosis)),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$preoperative_diagnosis)),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Postoperative Diagnosis:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Postoperative Diagnosis:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", input$postoperative_diagnosis)),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$postoperative_diagnosis)),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", "-")),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Surgical Indications:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Surgical Indications:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", input$indications)),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$indications)),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "---")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", "---")),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Neuromonitoring used:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Neuromonitoring used:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", toString(input$neuromonitoring))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$neuromonitoring))),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", " ")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", " ")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", " ")),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", " ")),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Preoperative Antibiotics:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Preoperative Antibiotics:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", toString(input$preop_antibiotics))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$preop_antibiotics))),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Antifibrinolytic:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Antifibrinolytic:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", toString(input$anti_fibrinolytic))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$anti_fibrinolytic))),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Findings:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Findings:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", input$surgical_findings)),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$surgical_findings)),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Specimens:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Specimens:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", input$specimens_removed)),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$specimens_removed)),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "---")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", " ")),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", " ")),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Estimated Blood Loss:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Estimated Blood Loss:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$ebl))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$ebl))),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Urine Output:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Urine Output:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$urine_output))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$urine_output))),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Crystalloids:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Crystalloids:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$crystalloids_administered))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$crystalloids_administered))),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Colloids:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Colloids:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$colloids_administered))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$colloids_administered))),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "---")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", " ")),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", " ")),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Transfusions/Cell Saver:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Transfusions/Cell Saver:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", if_else(input$transfusion == TRUE, "Yes", "No"))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", if_else(input$transfusion == TRUE, "Yes", "No"))),
                    ),
                    if(input$cell_saver_transfused > 0){
                        tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Cell Saver Transfused (cc):")),
+                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Cell Saver Transfused (cc):")),
                            tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$cell_saver_transfused)))
+                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$cell_saver_transfused)))
                        )
                    },
                    if(input$prbc_transfused > 0){
                        tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "pRBC units transfused:")),
+                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "pRBC units transfused:")),
                            tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$prbc_transfused)))
+                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$prbc_transfused)))
                        )
                    },
                    if(input$ffp_transfused > 0){
                        tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "FFP units transfused:")),
+                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "FFP units transfused:")),
                            tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$ffp_transfused)))
+                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$ffp_transfused)))
                        )
                    },
                    if(input$cryoprecipitate_transfused > 0){
                        tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Cryoprecipitate units transfused:")),
+                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Cryoprecipitate units transfused:")),
                            tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$cryoprecipitate_transfused)))
+                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$cryoprecipitate_transfused)))
                        )
                    },
                    if(input$platelets_transfused > 0){
                        tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Platelet units transfused:")),
+                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Platelet units transfused:")),
                            tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$platelets_transfused)))
+                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$platelets_transfused)))
                        )
                    },
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "---")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", " ")),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", " ")),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Intraoperative Complications:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Intraoperative Complications:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", if_else(input$intraoperative_complications_true_false == TRUE, "Yes", "No"))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", if_else(input$intraoperative_complications_true_false == TRUE, "Yes", "No"))),
                    )
                ),
                hr(),
                tags$table(
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Head Position:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Head Position:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$head_positioning))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$head_positioning))),
                    )
                ),
                hr(),
                tags$table(
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Additional Procedures:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Additional Procedures:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", as.character(glue_collapse(x = additional_procedures_vector_reactive(), sep = "\n")))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", as.character(glue_collapse(x = additional_procedures_vector_reactive(), sep = "\n")))),
                    )
                ),
                hr(),
-               div(style = "font-size:18px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
+               div(style = "font-size:20px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
                tags$table(
                    if(!is.null(input$deep_drains_anterior) && input$deep_drains_anterior > 0){
                        tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Anterior Deep Drains:")),
+                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Anterior Deep Drains:")),
                            tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$deep_drains_anterior))),
+                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$deep_drains_anterior))),
                        )
                    },
                    if(!is.null(input$superficial_drains_anterior) && input$superficial_drains_anterior > 0){
                        tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Anterior Superficial Drains:")),
+                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Anterior Superficial Drains:")),
                            tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$superficial_drains_anterior))),
+                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$superficial_drains_anterior))),
                        )
                    },
                    if(!is.null(input$deep_drains_posterior) && input$deep_drains_posterior > 0){
                        tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Posterior Deep Drains:")),
+                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Posterior Deep Drains:")),
                            tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$deep_drains_posterior))),
+                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$deep_drains_posterior))),
                        )
                    },
                    if(!is.null(input$superficial_drains_posterior) && input$superficial_drains_posterior > 0){
                        tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Posterior Superficial Drains:")),
+                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Posterior Superficial Drains:")),
                            tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", paste(input$superficial_drains_posterior))),
+                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$superficial_drains_posterior))),
                        )
                    },
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Used During Closure:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Used During Closure:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", toString(input$additional_end_procedure_details))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$additional_end_procedure_details))),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Skin Closure:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Skin Closure:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", toString(input$closure_details))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$closure_details))),
                    ),
                    tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:16px; font-weight:bold; text-align:left", "Skin/Dressing:")),
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Skin/Dressing:")),
                        tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:16px; font-weight:bold; text-align:left", toString(input$dressing_details))),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$dressing_details))),
                    )
                )
         )
@@ -2473,64 +2522,7 @@ server <- function(input, output, session) {
         }
     })
     
-    
-    output$drains_ui <- renderUI({
-        anterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
-                                                          input_type = "awesomeRadio",
-                                                          input_id = "deep_drains_anterior", 
-                                                          left_column_percent_width = 45, 
-                                                          font_size = 14, 
-                                                          initial_value_selected = 0, 
-                                                          choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                          checkboxes_inline = TRUE, return_as_full_table = TRUE)
-        anterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
-                                                                 input_type = "awesomeRadio",
-                                                                 input_id = "superficial_drains_anterior", 
-                                                                 left_column_percent_width = 45, 
-                                                                 font_size = 14, 
-                                                                 initial_value_selected = 0, 
-                                                                 choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                                 checkboxes_inline = TRUE, return_as_full_table = TRUE)
-        
-        posterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
-                                                           input_type = "awesomeRadio",
-                                                           input_id = "deep_drains_posterior", 
-                                                           left_column_percent_width = 45, 
-                                                           font_size = 14, 
-                                                           initial_value_selected = 1, 
-                                                           choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                           checkboxes_inline = TRUE, return_as_full_table = TRUE)
-        posterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Posterior Superficial drains:", 
-                                                                  input_type = "awesomeRadio",
-                                                                  input_id = "superficial_drains_posterior", 
-                                                                  left_column_percent_width = 45, 
-                                                                  font_size = 14, 
-                                                                  initial_value_selected = 1, 
-                                                                  choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                                  checkboxes_inline = TRUE, return_as_full_table = TRUE)
-        
-        drains_list <- list()
-        if(nrow(all_objects_to_add_list$objects_df)>0){
-            if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
-                drains_list$anterior_deep <- anterior_deep
-                drains_list$anterior_superficial <- anterior_superficial
-            }
-            if(any(all_objects_to_add_list$objects_df$approach == "posterior")){
-                drains_list$posterior_deep <- posterior_deep
-                drains_list$posterior_superficial <- posterior_superficial
-                
-            }
-        }else{
-            if(input$spine_approach == "Posterior"){
-                drains_list$posterior_deep <- posterior_deep
-                drains_list$posterior_superficial <- posterior_superficial
-            }else{
-                drains_list$anterior_deep <- anterior_deep
-                drains_list$anterior_superficial <- anterior_superficial
-            }
-        }
-        drains_list
-    })
+
     
     
     ################----------  UPDATE CHOICES   ------------######################  
@@ -3699,10 +3691,7 @@ server <- function(input, output, session) {
     })
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE REVISION IMPLANTS DF   #############~~~~~~~~~~~~~~~~~~~ ##################### 
     #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE REVISION IMPLANTS DF   #############~~~~~~~~~~~~~~~~~~~ ##################### 
-    
-    # left_revision_implants_reactive_list()$retained_df
-    # c("retained", "retained_connected", "partially_retained_connected", "removed")
-    # prior_rod_connected
+
     
     left_revision_implants_reactive_list <- reactive({
         if(length(input$left_revision_implants_removed)>0){
@@ -4230,269 +4219,150 @@ server <- function(input, output, session) {
     ######### ~~~~~~~~~~~~~~  ############# MAKE REACTIVE PLOT    ######### ~~~~~~~~~~~~~~  ############# 
     ######### ~~~~~~~~~~~~~~  ############# MAKE REACTIVE PLOT    ######### ~~~~~~~~~~~~~~  ############# 
     spine_plan_plot_anterior <- reactive({
-        x_left_limit <- 0.3 - input$label_text_offset/100
-        x_right_limit <- 1-x_left_limit
-        plot_top_y <- input$crop_y[2]
-        y_spacing <- 0.025*input$crop_y[2]
-        
-        if(input$plot_summary_table == TRUE){
-            y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
-            plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+        if(input$spine_approach == "Anterior"){
+            x_left_limit <- 0.3 - input$label_text_offset/100
+            x_right_limit <- 1-x_left_limit
+            plot_top_y <- input$crop_y[2]
+            y_spacing <- 0.025*input$crop_y[2]
             
-            plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
-        }else{
-            y_start_with_text <- plot_top_y
-            # plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
-            plan_table_geom <- geom_sf(data = NULL)
+            if(input$plot_summary_table == TRUE){
+                y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
+                plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+                
+                plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
+            }else{
+                y_start_with_text <- plot_top_y
+                # plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+                plan_table_geom <- geom_sf(data = NULL)
+            }
+            
+            if(input$lumbar_vertebrae_count == "6"){
+                l6_statement <- "Note: 6 Lumbar Vertebrae"
+            }else{
+                l6_statement <- " "
+            }
+            
+            labels_anterior_cropped_df <- labels_anterior_df %>%
+                filter(between(y, input$crop_y[1], y_start_with_text)) %>% 
+                mutate(x_left = x_left_limit + 0.05) %>%
+                mutate(x_right = x_right_limit - 0.05) %>%
+                select(level, x_left, x_right, y)
+            
+            labels_anterior_cropped_df <- labels_anterior_cropped_df %>%
+                union_all(tibble(level = " ", 
+                                 x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
+                                 x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
+                                 y = min(labels_anterior_cropped_df$y) - 0.075)) %>%
+                union_all(tibble(level = " ", 
+                                 x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
+                                 x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
+                                 y = max(labels_anterior_cropped_df$y) + 0.05))
+            
+            ggdraw() +
+                draw_image(
+                    anterior_spine_jpg,
+                    scale = 1,
+                    y = 0,
+                    valign = 0,
+                    x = 0,
+                    height = 1
+                    # width = 1
+                )  +
+                draw_text(
+                    text = labels_anterior_cropped_df$level,
+                    x = labels_anterior_cropped_df$x_left,
+                    y = labels_anterior_cropped_df$y,
+                    size = input$label_text_size,
+                    fontface = "bold"
+                ) +
+                draw_text(
+                    text = labels_anterior_cropped_df$level,
+                    x = labels_anterior_cropped_df$x_right,
+                    y = labels_anterior_cropped_df$y,
+                    size = input$label_text_size,
+                    fontface = "bold"
+                ) +
+                reactiveValuesToList(geoms_list_anterior_diskectomy) +
+                reactiveValuesToList(geoms_list_anterior_interbody) +
+                reactiveValuesToList(geoms_list_anterior_instrumentation) +
+                geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
+                plan_table_geom   
         }
-        
-        if(input$lumbar_vertebrae_count == "6"){
-            l6_statement <- "Note: 6 Lumbar Vertebrae"
-        }else{
-            l6_statement <- " "
-        }
-        
-        labels_anterior_cropped_df <- labels_anterior_df %>%
-            filter(between(y, input$crop_y[1], y_start_with_text)) %>% 
-            mutate(x_left = x_left_limit + 0.05) %>%
-            mutate(x_right = x_right_limit - 0.05) %>%
-            select(level, x_left, x_right, y)
-        
-        labels_anterior_cropped_df <- labels_anterior_cropped_df %>%
-            union_all(tibble(level = " ", 
-                             x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
-                             x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
-                             y = min(labels_anterior_cropped_df$y) - 0.075)) %>%
-            union_all(tibble(level = " ", 
-                             x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
-                             x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
-                             y = max(labels_anterior_cropped_df$y) + 0.05))
-        
-        ggdraw() +
-            draw_image(
-                anterior_spine_jpg,
-                scale = 1,
-                y = 0,
-                valign = 0,
-                x = 0,
-                height = 1
-                # width = 1
-            )  +
-            draw_text(
-                text = labels_anterior_cropped_df$level,
-                x = labels_anterior_cropped_df$x_left,
-                y = labels_anterior_cropped_df$y,
-                size = input$label_text_size,
-                fontface = "bold"
-            ) +
-            draw_text(
-                text = labels_anterior_cropped_df$level,
-                x = labels_anterior_cropped_df$x_right,
-                y = labels_anterior_cropped_df$y,
-                size = input$label_text_size,
-                fontface = "bold"
-            ) +
-            reactiveValuesToList(geoms_list_anterior_diskectomy) +
-            reactiveValuesToList(geoms_list_anterior_interbody) +
-            reactiveValuesToList(geoms_list_anterior_instrumentation) +
-            geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
-            plan_table_geom 
-        
     })
     
     spine_plan_plot_posterior <- reactive({
-        x_left_limit <- 0.3 - input$label_text_offset/100
-        x_right_limit <- 1-x_left_limit
-        plot_top_y <- input$crop_y[2]
-        y_spacing <- 0.025*input$crop_y[2]
-        
-        if(input$plot_summary_table == TRUE){
-            y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
-            plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+        if(input$spine_approach == "Posterior"){
+            x_left_limit <- 0.3 - input$label_text_offset/100
+            x_right_limit <- 1-x_left_limit
+            plot_top_y <- input$crop_y[2]
+            y_spacing <- 0.025*input$crop_y[2]
             
-            plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
-        }else{
-            y_start_with_text <- plot_top_y
-            # plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
-            plan_table_geom <- geom_sf(data = NULL)
+            if(input$plot_summary_table == TRUE){
+                y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
+                plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+                
+                plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
+            }else{
+                y_start_with_text <- plot_top_y
+                # plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+                plan_table_geom <- geom_sf(data = NULL)
+            }
+            
+            if(input$lumbar_vertebrae_count == "6"){
+                l6_statement <- "Note: 6 Lumbar Vertebrae"
+            }else{
+                l6_statement <- " "
+            }
+            ### POSTERIOR
+            labels_posterior_df <- labels_df %>%
+                filter(between(y, input$crop_y[1], y_start_with_text)) %>%
+                mutate(x_left = x_left_limit + 0.05) %>%
+                mutate(x_right = x_right_limit - 0.05) %>%
+                select(-vertebral_number)
+            
+            labels_posterior_df <- labels_posterior_df %>%
+                union_all(tibble(level = " ", 
+                                 x_left = min(labels_posterior_df$x_left) - 0.03,
+                                 x_right = max(labels_posterior_df$x_right) + 0.03, 
+                                 y = min(labels_posterior_df$y) - 0.03)) %>%
+                union_all(tibble(level = " ", 
+                                 x_left = min(labels_posterior_df$x_left) - 0.03,
+                                 x_right = max(labels_posterior_df$x_right) + 0.03, 
+                                 y = max(labels_posterior_df$y) + 0.03))
+            
+            ggdraw() +
+                draw_image(
+                    spine_png,
+                    scale = 1,
+                    y = 0,
+                    valign = 0,
+                    x = 0,
+                    height = 1
+                    # width = 1
+                ) +
+                reactiveValuesToList(geoms_list_revision_posterior) +
+                reactiveValuesToList(geoms_list_posterior) +
+                reactiveValuesToList(rods_list) +
+                draw_text(
+                    text = labels_posterior_df$level,
+                    x = labels_posterior_df$x_left,
+                    y = labels_posterior_df$y,
+                    size = input$label_text_size,
+                    fontface = "bold"
+                ) +
+                draw_text(
+                    text = labels_posterior_df$level,
+                    x = labels_posterior_df$x_right,
+                    y = labels_posterior_df$y,
+                    size = input$label_text_size,
+                    fontface = "bold"
+                ) +
+                plan_table_geom +
+                annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement)    
         }
-        
-        if(input$lumbar_vertebrae_count == "6"){
-            l6_statement <- "Note: 6 Lumbar Vertebrae"
-        }else{
-            l6_statement <- " "
-        }
-        ### POSTERIOR
-        labels_posterior_df <- labels_df %>%
-            filter(between(y, input$crop_y[1], y_start_with_text)) %>%
-            mutate(x_left = x_left_limit + 0.05) %>%
-            mutate(x_right = x_right_limit - 0.05) %>%
-            select(-vertebral_number)
-        
-        labels_posterior_df <- labels_posterior_df %>%
-            union_all(tibble(level = " ", 
-                             x_left = min(labels_posterior_df$x_left) - 0.03,
-                             x_right = max(labels_posterior_df$x_right) + 0.03, 
-                             y = min(labels_posterior_df$y) - 0.03)) %>%
-            union_all(tibble(level = " ", 
-                             x_left = min(labels_posterior_df$x_left) - 0.03,
-                             x_right = max(labels_posterior_df$x_right) + 0.03, 
-                             y = max(labels_posterior_df$y) + 0.03))
-        
-        ggdraw() +
-            draw_image(
-                spine_png,
-                scale = 1,
-                y = 0,
-                valign = 0,
-                x = 0,
-                height = 1
-                # width = 1
-            ) +
-            reactiveValuesToList(geoms_list_revision_posterior) +
-            reactiveValuesToList(geoms_list_posterior) +
-            reactiveValuesToList(rods_list) +
-            draw_text(
-                text = labels_posterior_df$level,
-                x = labels_posterior_df$x_left,
-                y = labels_posterior_df$y,
-                size = input$label_text_size,
-                fontface = "bold"
-            ) +
-            draw_text(
-                text = labels_posterior_df$level,
-                x = labels_posterior_df$x_right,
-                y = labels_posterior_df$y,
-                size = input$label_text_size,
-                fontface = "bold"
-            ) +
-            plan_table_geom +
-            annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement) 
-        # ylim(input$crop_y[1], y_start_with_text)  +
-        # xlim(x_left_limit, x_right_limit)
+
     })
     
-    # spine_plan_plot <- reactive({
-    #     x_left_limit <- 0.3 - input$label_text_offset/100
-    #     x_right_limit <- 1-x_left_limit
-    #     plot_top_y <- input$crop_y[2]
-    #     y_spacing <- 0.025*input$crop_y[2]
-    #     
-    #     if(input$plot_summary_table == TRUE){
-    #         y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
-    #         plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
-    #         
-    #         plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
-    #     }else{
-    #         y_start_with_text <- plot_top_y
-    #         # plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
-    #         plan_table_geom <- geom_sf(data = NULL)
-    #     }
-    #     
-    #     if(input$lumbar_vertebrae_6 == TRUE){
-    #         l6_statement <- "Note: 6 Lumbar Vertebrae"
-    #     }else{
-    #         l6_statement <- " "
-    #     }
-    # 
-    #     if(input$spine_approach == "Anterior"){
-    #         labels_anterior_cropped_df <- labels_anterior_df %>%
-    #             filter(between(y, input$crop_y[1], y_start_with_text)) %>% 
-    #             mutate(x_left = x_left_limit + 0.05) %>%
-    #             mutate(x_right = x_right_limit - 0.05) %>%
-    #             select(level, x_left, x_right, y)
-    #         
-    #         labels_anterior_cropped_df <- labels_anterior_cropped_df %>%
-    #             union_all(tibble(level = " ", 
-    #                              x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
-    #                              x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
-    #                              y = min(labels_anterior_cropped_df$y) - 0.075)) %>%
-    #             union_all(tibble(level = " ", 
-    #                              x_left = min(labels_anterior_cropped_df$x_left) - 0.03,
-    #                              x_right = max(labels_anterior_cropped_df$x_right) + 0.03, 
-    #                              y = max(labels_anterior_cropped_df$y) + 0.05))
-    #         
-    #         ggdraw() +
-    #             draw_image(
-    #                 anterior_spine_jpg,
-    #                 scale = 1,
-    #                 y = 0,
-    #                 valign = 0,
-    #                 x = 0,
-    #                 height = 1
-    #                 # width = 1
-    #             )  +
-    #             draw_text(
-    #                 text = labels_anterior_cropped_df$level,
-    #                 x = labels_anterior_cropped_df$x_left,
-    #                 y = labels_anterior_cropped_df$y,
-    #                 size = input$label_text_size,
-    #                 fontface = "bold"
-    #             ) +
-    #             draw_text(
-    #                 text = labels_anterior_cropped_df$level,
-    #                 x = labels_anterior_cropped_df$x_right,
-    #                 y = labels_anterior_cropped_df$y,
-    #                 size = input$label_text_size,
-    #                 fontface = "bold"
-    #             ) +
-    #             reactiveValuesToList(geoms_list_anterior_diskectomy) +
-    #             reactiveValuesToList(geoms_list_anterior_interbody) +
-    #             reactiveValuesToList(geoms_list_anterior_instrumentation) +
-    #             geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
-    #             plan_table_geom 
-    # 
-    #     }else{
-    #         ### POSTERIOR
-    #         labels_posterior_df <- labels_df %>%
-    #             filter(between(y, input$crop_y[1], y_start_with_text)) %>%
-    #             mutate(x_left = x_left_limit + 0.05) %>%
-    #             mutate(x_right = x_right_limit - 0.05) %>%
-    #             select(-vertebral_number)
-    #         
-    #         labels_posterior_df <- labels_posterior_df %>%
-    #             union_all(tibble(level = " ", 
-    #                              x_left = min(labels_posterior_df$x_left) - 0.03,
-    #                              x_right = max(labels_posterior_df$x_right) + 0.03, 
-    #                              y = min(labels_posterior_df$y) - 0.03)) %>%
-    #             union_all(tibble(level = " ", 
-    #                              x_left = min(labels_posterior_df$x_left) - 0.03,
-    #                              x_right = max(labels_posterior_df$x_right) + 0.03, 
-    #                              y = max(labels_posterior_df$y) + 0.03))
-    # 
-    #         ggdraw() +
-    #             draw_image(
-    #                 spine_png,
-    #                 scale = 1,
-    #                 y = 0,
-    #                 valign = 0,
-    #                 x = 0,
-    #                 height = 1
-    #                 # width = 1
-    #             ) +
-    #             reactiveValuesToList(geoms_list_revision_posterior) +
-    #             reactiveValuesToList(geoms_list_posterior) +
-    #             reactiveValuesToList(rods_list) +
-    #             draw_text(
-    #                 text = labels_posterior_df$level,
-    #                 x = labels_posterior_df$x_left,
-    #                 y = labels_posterior_df$y,
-    #                 size = input$label_text_size,
-    #                 fontface = "bold"
-    #             ) +
-    #             draw_text(
-    #                 text = labels_posterior_df$level,
-    #                 x = labels_posterior_df$x_right,
-    #                 y = labels_posterior_df$y,
-    #                 size = input$label_text_size,
-    #                 fontface = "bold"
-    #             ) +
-    #             plan_table_geom +
-    #             annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement) 
-    #             # ylim(input$crop_y[1], y_start_with_text)  +
-    #             # xlim(x_left_limit, x_right_limit)
-    #     }
-    # })
     
     ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
     ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
@@ -4513,9 +4383,6 @@ server <- function(input, output, session) {
             spine_plan_plot_posterior() 
         }
         
-        # output$spine_plan <- renderPlot({
-        #     spine_plan_plot()
-        # })
     })
     
     output$spine_plot_for_implants_tab <- renderPlot({
