@@ -1,5 +1,4 @@
 ####################### SURGICAL PLANNING V2 ###########################
-
 library(shiny)
 library(shinyWidgets)
 library(sf)
@@ -105,15 +104,15 @@ ui <- dashboardPage(skin = "black",
                 border-color: burlywood;
                         }"),
                 tags$style(
-                    "#surgery_summary_table_tab {
+                    "#surgical_details_redcap_df_modal_tab {
                         overflow-x: auto;
                 }"),
                 tags$style(
-                    "#redcap_details_wide_df_tab {
+                    "#procedures_by_level_redcap_df_modal_tab {
                         overflow-x: auto;
                 }"),
                 tags$style(
-                    "#interbody_details_table_tab {
+                    "#interbody_details_redcap_df_modal_tab {
                         overflow-x: auto;
                 }"),
                 tags$style(
@@ -121,11 +120,11 @@ ui <- dashboardPage(skin = "black",
                         overflow-x: auto;
                 }"),
                 tags$style(
-                    "#redcap_details_wide_df {
+                    "#procedures_by_level_redcap_df_sidetab {
                         overflow-x: auto;
                 }"),
                 tags$style(
-                    "#pedicle_screw_details_table_tab {
+                    "#screw_details_redcap_df_modal_tab {
                         overflow-x: auto;
                 }"),
                         ),
@@ -801,22 +800,22 @@ ui <- dashboardPage(skin = "black",
                     tabItem(tabName = "tables",
                             ###########################################
                             box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Patient Details Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                                tableOutput(outputId = "patient_details_redcap_df")
+                                tableOutput(outputId = "patient_details_redcap_df_sidetab")
                             ),
                             box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Summary Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                                tableOutput(outputId = "summary_table")
+                                tableOutput(outputId = "surgical_details_redcap_df_sidetab")
                             ),
                             box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Intraoperative Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                                tableOutput(outputId = "intraoperative_details_table")
+                                tableOutput(outputId = "intraoperative_details_redcap_df_sidetab")
                             ),
                             box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Specifics"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                                tableOutput(outputId = "redcap_details_wide_df")
+                                tableOutput(outputId = "procedures_by_level_redcap_df_sidetab")
                             ),
                             box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                                tableOutput("pedicle_screw_details_table")
+                                tableOutput("screw_details_redcap_df_sidetab")
                             ),
                             box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody implants:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                                tableOutput(outputId = "interbody_details_table")
+                                tableOutput(outputId = "interbody_details_redcap_df_sidetab")
                             ),
                             box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All objects table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                                 tableOutput(outputId = "all_objects_table")
@@ -1221,8 +1220,10 @@ server <- function(input, output, session) {
     
     ############ STARTUP MODAL BOX 2: #################
     startup_modal_box_diagnosis_symptoms <- function(diagnosis_category_value = NULL,
+                                                     # diagnosis_choices = list("Degen" = c("1", "2"), "Deformity" = c("1", "2")),
                                                      primary_diagnosis_value = NULL, 
                                                      other_diagnosis = NULL,
+                                                     # symptoms_choices = list("Upper" = c("1", "2"), "Lower" = c("1", "2")),
                                                      symptoms_initial_value = NULL,
                                                      stage_number_value = 1,
                                                      staged_procedure_initial_value = FALSE,
@@ -1256,20 +1257,22 @@ server <- function(input, output, session) {
                                ),
                                hr(),
                                br(),
-                               tags$div(style = "font-size:20px; font-weight:bold", "Select Diagnostic Categories:"),
-                               tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply)"),
-                               fluidRow(
-                                   checkboxGroupButtons(
-                                       inputId = "diagnosis_category",
-                                       label = NULL,
-                                       justified = TRUE,
-                                       choices = c("Degenerative", "Deformity", "Trauma", "Infection", "Tumor", "Congenital", "Complication", "Other"),
-                                       # status = "primary", 
-                                       selected = diagnosis_category_value,
-                                       checkIcon = list(
-                                           yes = icon("ok", 
-                                                      lib = "glyphicon"))
-                                   )
+                               conditionalPanel(condition = "input.spinal_regions.length > 0",
+                                                tags$div(style = "font-size:20px; font-weight:bold", "Select Diagnostic Categories:"),
+                                                tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply)"),
+                                                fluidRow(
+                                                    checkboxGroupButtons(
+                                                        inputId = "diagnosis_category",
+                                                        label = NULL,
+                                                        justified = TRUE,
+                                                        choices = c("Degenerative", "Deformity", "Trauma", "Infection", "Tumor", "Congenital", "Complication", "Other"),
+                                                        # status = "primary", 
+                                                        selected = diagnosis_category_value,
+                                                        checkIcon = list(
+                                                            yes = icon("ok", 
+                                                                       lib = "glyphicon"))
+                                                    )
+                                                )
                                ),
                                br(),
                                conditionalPanel(condition = "input.diagnosis_category.length > 0",
@@ -1281,14 +1284,15 @@ server <- function(input, output, session) {
                                           conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
                                                            tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply, including primary diagnosis and indication for revision)"))
                                    ),
-                                   column(width = 7,
-                                          pickerInput(inputId = "primary_diagnosis",
-                                                      label = "Diagnosis Search:",
-                                                      choices = spine_icd10_codes_df$diagnosis,
-                                                      options = list('live-search' = TRUE),
-                                                      multiple = TRUE,
-                                                      selected = primary_diagnosis_value)
-                                   )
+                                   uiOutput(outputId = "diagnosis_input_ui"),
+                                   # column(width = 7,
+                                   #        pickerInput(inputId = "primary_diagnosis",
+                                   #                    label = "Diagnosis Search:",
+                                   #                    choices = all_spine_diagnosis_choices_list,
+                                   #                    options = list('live-search' = TRUE),
+                                   #                    multiple = TRUE,
+                                   #                    selected = primary_diagnosis_value)
+                                   # )
                                ),
                                hr(), 
                                br(),
@@ -1296,29 +1300,29 @@ server <- function(input, output, session) {
                                    column(width = 5,
                                           tags$div(style = "font-size:18px; font-weight:bold", "Symptoms:")
                                    ),
-                                   column(width = 7,
-                                          pickerInput(
-                                              inputId = "symptoms",
-                                              label = NULL,
-                                              choices = list('Neck & Uppers:' = c("Neck Pain", "Left Arm Pain", "Right Arm Pain", "Left Arm Weakness", "Right Arm Weakness"),
-                                                             'Thoracic:' = c("Mid Back Pain", "Kyphosis"),
-                                                             "Lower & Legs:" = c("Low Back Pain", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness"),
-                                                             "Functional:" = c("Myelopathy: Nurick 1 (Root Symptomts)",
-                                                                               "Myelopathy: Nurick 2 (Normal gait but symptoms of cord compression)",
-                                                                               "Myelopathy: Nurick 3 (Gait Abnormalities)",
-                                                                               "Myelopathy: Nurick 4 (Significant Gait Abnormalities, preventing employment)",
-                                                                               "Myelopathy: Nurick 5 (Depended on Assistive Device for Ambulating)",
-                                                                               "Myelopathy: Nurick 6 (Wheelchair bound)"),
-                                                             "Deformity" = c("Coronal deformity", "Sagittal Imbalance", "Chin on chest deformity", "Flatback Syndrome"),
-                                                             'Other' = c("Quadriplegia", "Paraplegia", "Loss of bladder control", "Bowel Incontinence", "Other")
-                                              ),
-                                              multiple = TRUE,
-                                              selected = symptoms_initial_value,
-                                              width = "100%"
-                                          ),
-                                          conditionalPanel(condition = "input.symptoms.indexOf('Other') > -1",
-                                                           textInput(inputId = "symptoms_other", label = "Other:"))
-                                   )
+                                   uiOutput(outputId = "symptoms_input_ui"),
+                                   # column(width = 7,
+                                   #        pickerInput(
+                                   #            inputId = "symptoms",
+                                   #            label = NULL,
+                                   #            choices = list('Neck & Uppers:' = c("Neck Pain", "Left Arm Pain", "Right Arm Pain", "Left Arm Weakness", "Right Arm Weakness"),
+                                   #                           'Thoracic:' = c("Mid Back Pain", "Kyphosis"),
+                                   #                           'Lower & Legs:' = c("Low Back Pain", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness"),
+                                   #                           'Functional:' = c("Myelopathy: Nurick 1 (Root Symptomts)",
+                                   #                                             "Myelopathy: Nurick 2 (Normal gait but symptoms of cord compression)",
+                                   #                                             "Myelopathy: Nurick 3 (Gait Abnormalities)",
+                                   #                                             "Myelopathy: Nurick 4 (Significant Gait Abnormalities, preventing employment)",
+                                   #                                             "Myelopathy: Nurick 5 (Depended on Assistive Device for Ambulating)",
+                                   #                                             "Myelopathy: Nurick 6 (Wheelchair bound)"),
+                                   #                           'Deformity' = c("Coronal deformity", "Sagittal Imbalance", "Chin on chest deformity", "Flatback Syndrome"),
+                                   #                           'Other' = c("Quadriplegia", "Paraplegia", "Loss of bladder control", "Bowel Incontinence", "Other")),
+                                   #            multiple = TRUE,
+                                   #            selected = symptoms_initial_value,
+                                   #            width = "100%"
+                                   #        ),
+                                   #        conditionalPanel(condition = "input.symptoms.indexOf('Other') > -1",
+                                   #                         textInput(inputId = "symptoms_other", label = "Other:"))
+                                   # )
                                ),
                                fluidRow(
                                    textInput(inputId = "relevant_history", label = "Other Comments/History:")
@@ -1359,7 +1363,7 @@ server <- function(input, output, session) {
     }
     
     observeEvent(input$close_startup_modal, {
-        
+
         if(length(input$date_of_birth) == 0 | length(input$date_of_surgery) == 0 | is.null(input$sex)){
             # header_text_color
             showModal(startup_modal_box(header_text = "Please Enter Value for Each Field", header_text_color = "red",
@@ -1385,6 +1389,7 @@ server <- function(input, output, session) {
             ))
         }else{
             removeModal()
+            
             if(str_detect(str_to_lower(input$patient_last_name), pattern = "test")){
                 spine_region <- "Thoracolumbar"
                 diagnosis_category <- c("Deformity")
@@ -1393,13 +1398,14 @@ server <- function(input, output, session) {
             }else{
                 spine_region <- NULL
                 diagnosis_category <- NULL
-                # dx <- input$primary_diagnosis
                 dx <- NULL
                 symptoms <- NULL # input$symptoms
             }
             
-            showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = diagnosis_category,
+            showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = diagnosis_category, 
                                                            primary_diagnosis_value = dx, 
+                                                           # diagnosis_choices = all_spine_diagnosis_choices_list,
+                                                           # symptoms_choices = symptoms_choices_list,
                                                            symptoms_initial_value = symptoms,
                                                            stage_number_value = input$stage_number,
                                                            staged_procedure_initial_value = FALSE,
@@ -1421,14 +1427,15 @@ server <- function(input, output, session) {
     
     
     ############ UPDATE DIAGNOSIS & SYMPTOMS OPTIONS ##############
-    diagnosis_choices_reactive_list <- reactive({
-        
+
+    #### UPDATE DIAGNOSIS OPTIONS
+    output$diagnosis_input_ui <- renderUI({
         ## first filter by region ##
         spine_regions <- str_to_lower(paste(input$spinal_regions, collapse = ", "))
-
+        
         building_diagnosis_choices_df <- spine_icd10_codes_df %>%
             filter(site == "all")
-            
+        
         if(str_detect(spine_regions, "cervic")){
             building_diagnosis_choices_df <- spine_icd10_codes_df %>%
                 filter(site_number == 4 | site_number == 5) %>%
@@ -1463,28 +1470,127 @@ server <- function(input, output, session) {
             distinct() %>%
             filter(spine_category %in% diagnosis_categories_vector) %>%
             arrange(category_number, site_number) 
-   
+        
         
         # this is to remove cervicothoracic from thoracolumbar dx
         if(str_detect(string = spine_regions, pattern = "cerv") == FALSE){
             diagnosis_choices_by_region_and_category_df <- diagnosis_choices_by_region_and_category_df %>%
                 filter(str_detect(diagnosis, "cerv", negate = TRUE))
         }
-
+        
         
         spine_diagnosis_choices_list <- map(.x = diagnosis_categories_vector, .f = ~ (diagnosis_choices_by_region_and_category_df %>% 
-                                                     filter(spine_category == .x) %>%
-                                                     select(spine_category, diagnosis) %>% 
-                                                     pivot_wider(names_from = spine_category, values_from = diagnosis) %>% 
-                                                     unnest())[[1]])
+                                                                                          filter(spine_category == .x) %>%
+                                                                                          select(spine_category, diagnosis) %>% 
+                                                                                          pivot_wider(names_from = spine_category, values_from = diagnosis) %>% 
+                                                                                          unnest())[[1]])
         
         names(spine_diagnosis_choices_list) <- diagnosis_categories_vector
         
-        spine_diagnosis_choices_list
+        
+        if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
+            age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+            
+            if(age > 30){
+                spine_diagnosis_choices_list$'Pediatric Deformity' <- NULL
+            }
+        }
+        
+        column(width = 7,
+               pickerInput(inputId = "primary_diagnosis",
+                           label = "Diagnosis Search:",
+                           choices = spine_diagnosis_choices_list,
+                           options = list('live-search' = TRUE),
+                           multiple = TRUE,
+                           selected = input$primary_diagnosis)
+        )
+        
+        # updatePickerInput(session = session,
+        #                   inputId = "primary_diagnosis",
+        #                   # label = "Diagnosis Search:",
+        #                   # options = list('live-search' = TRUE),
+        #                   selected = input$primary_diagnosis,
+        #                   choices = spine_diagnosis_choices_list) 
     })
     
-
-    observeEvent(list(input$diagnosis_category, input$spinal_regions, diagnosis_choices_reactive_list()),ignoreNULL = TRUE, ignoreInit = TRUE, {
+    # observeEvent(list(input$diagnosis_category, input$spinal_regions, input$close_startup_modal, input$edit_diagnosis_symptoms),ignoreNULL = TRUE, {
+    #     ## first filter by region ##
+    #     spine_regions <- str_to_lower(paste(input$spinal_regions, collapse = ", "))
+    #     
+    #     building_diagnosis_choices_df <- spine_icd10_codes_df %>%
+    #         filter(site == "all")
+    #     
+    #     if(str_detect(spine_regions, "cervic")){
+    #         building_diagnosis_choices_df <- spine_icd10_codes_df %>%
+    #             filter(site_number == 4 | site_number == 5) %>%
+    #             union_all(building_diagnosis_choices_df)
+    #     }
+    #     
+    #     if(str_detect(spine_regions, "thoracic")){
+    #         if(str_detect(spine_regions, "cervic")){
+    #             building_diagnosis_choices_df <- spine_icd10_codes_df %>%
+    #                 filter(site_number > 2) %>%
+    #                 union_all(building_diagnosis_choices_df)
+    #         }else{
+    #             building_diagnosis_choices_df <- spine_icd10_codes_df %>%
+    #                 filter(site_number == 2 | site_number == 3) %>%
+    #                 union_all(building_diagnosis_choices_df)
+    #         }
+    #     }
+    #     
+    #     if(str_detect(spine_regions, "lumb")){
+    #         building_diagnosis_choices_df <- spine_icd10_codes_df %>%
+    #             filter(site_number <3) %>%
+    #             union_all(building_diagnosis_choices_df)
+    #     }
+    #     
+    #     if(any(input$diagnosis_category == "Deformity")){
+    #         diagnosis_categories_vector <- append(input$diagnosis_category, "Pediatric Deformity")
+    #     }else{
+    #         diagnosis_categories_vector <- input$diagnosis_category
+    #     }
+    #     
+    #     diagnosis_choices_by_region_and_category_df <- building_diagnosis_choices_df %>%
+    #         distinct() %>%
+    #         filter(spine_category %in% diagnosis_categories_vector) %>%
+    #         arrange(category_number, site_number) 
+    #     
+    #     
+    #     # this is to remove cervicothoracic from thoracolumbar dx
+    #     if(str_detect(string = spine_regions, pattern = "cerv") == FALSE){
+    #         diagnosis_choices_by_region_and_category_df <- diagnosis_choices_by_region_and_category_df %>%
+    #             filter(str_detect(diagnosis, "cerv", negate = TRUE))
+    #     }
+    #     
+    #     
+    #     spine_diagnosis_choices_list <- map(.x = diagnosis_categories_vector, .f = ~ (diagnosis_choices_by_region_and_category_df %>% 
+    #                                                                                       filter(spine_category == .x) %>%
+    #                                                                                       select(spine_category, diagnosis) %>% 
+    #                                                                                       pivot_wider(names_from = spine_category, values_from = diagnosis) %>% 
+    #                                                                                       unnest())[[1]])
+    #     
+    #     names(spine_diagnosis_choices_list) <- diagnosis_categories_vector
+    #     
+    #     
+    #     if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
+    #         age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+    #         
+    #         if(age > 30){
+    #             spine_diagnosis_choices_list$'Pediatric Deformity' <- NULL
+    #         }
+    #     }
+    #     
+    #     updatePickerInput(session = session,
+    #                       inputId = "primary_diagnosis",
+    #                       # label = "Diagnosis Search:",
+    #                       # options = list('live-search' = TRUE),
+    #                       selected = input$primary_diagnosis,
+    #                       choices = spine_diagnosis_choices_list) 
+    # })
+    
+    ### UPDATE SYMPTOMS OPTIONS
+    
+    output$symptoms_input_ui <- renderUI({
         spine_regions_text <- str_to_lower(paste(input$spinal_regions, collapse = ", "))
         symptom_option_list <- list()
         
@@ -1521,35 +1627,21 @@ server <- function(input, output, session) {
                                         "Complete Loss of Motor & Sensory Function (Spinal Cord Injury)", 
                                         "Incomplete Loss of Motor & Sensory Function (Spinal Cord Injury)")
         
-        updatePickerInput(session = session, 
-                          inputId = "symptoms",
-                          label = NULL,
-                          choices = symptom_option_list, 
-                          selected = input$symptoms)
+        column(width = 7,
+               pickerInput(
+                   inputId = "symptoms",
+                   label = NULL,
+                   choices = symptom_option_list,
+                   multiple = TRUE,
+                   selected = input$symptoms,
+                   width = "100%"
+               ),
+               conditionalPanel(condition = "input.symptoms.indexOf('Other') > -1",
+                                textInput(inputId = "symptoms_other", label = "Other:"))
+        )
         
-        
-        diagnosis_options_list <- diagnosis_choices_reactive_list()
-        
-        if(length(input$date_of_birth) >0 & length(input$date_of_surgery)>0){
-            age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-            
-            if(age > 30){
-                diagnosis_options_list$'Pediatric Deformity' <- NULL
-            }
-        }
-        
-        updatePickerInput(session = session,
-                          inputId = "primary_diagnosis",
-                          label = "Diagnosis Search:",
-                          options = list('live-search' = TRUE),
-                          selected = input$primary_diagnosis,
-                          choices = diagnosis_options_list) 
     })
-    
-    
- 
-    
-    
+
     
     ####     ####     #### TEXT UI  ###    ####     ####     #### 
     output$patient_details_ui <- renderUI({
@@ -1630,6 +1722,8 @@ server <- function(input, output, session) {
                                                              preoperative_diagnosis = " ",
                                                              postoperative_diagnosis = " ",
                                                              indications = "",
+                                                             asa_class = "",
+                                                             anesthesia = "",
                                                              neuromonitoring = c("SSEP", "tc MEP"),
                                                              preop_antibiotics = c("Cefazolin (Ancef)", "Vancomycin"),
                                                              anti_fibrinolytic = "",
@@ -1669,21 +1763,26 @@ server <- function(input, output, session) {
                                                     jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Postoperative Diagnosis:", font_size = row_label_font_size, input_type = "text", input_id = "postoperative_diagnosis", initial_value_selected = postoperative_diagnosis),
                                                     jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Surgical Indications:", font_size = row_label_font_size, input_type = "text", input_id = "indications", initial_value_selected = indications),
                                                     hr(),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Preprocedure ASA Classification", font_size = row_label_font_size, input_type = "awesomeRadio", choices_vector = c("ASA I", "ASA II", "ASA III", "ASA IV", "ASA V", "ASA VI"), input_id = "asa_class", checkboxes_inline = TRUE, initial_value_selected = asa_class),
+                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Anethesia Type:", font_size = row_label_font_size, input_type = "awesomeRadio", choices_vector = c("General Endotracheal Anesthseia", "Total Intravenous Anesthesia"), input_id = "anesthesia", checkboxes_inline = TRUE, initial_value_selected = anesthesia),
+                                                    hr(),
                                                     jh_make_shiny_table_row_function(left_column_percent_width = 30,
                                                                                      left_column_label = "Neuromonitoring used:", font_size = row_label_font_size,
                                                                                      input_type = "checkbox",
                                                                                      input_id = "neuromonitoring", choices_vector = c("EMG", "SSEP", "tc MEP", "DNEP (Cord Stimulation)", "H reflex"),
                                                                                      checkboxes_inline = TRUE,
                                                                                      initial_value_selected = neuromonitoring),
+                                                    hr(),
                                                     jh_make_shiny_table_row_function(left_column_label = "Preop Antibiotics:",
-                                                                                     input_type = "picker",
-                                                                                     input_id = "preop_antibiotics",
+                                                                                     input_type = "checkbox", 
+                                                                                     input_id = "preop_antibiotics", 
                                                                                      left_column_percent_width = 30,
                                                                                      font_size = row_label_font_size,
                                                                                      choices_vector = c("None (Antibiotics were held)", "Cefazolin (Ancef)", "Vancomycin", "Ceftriaxone", "Gentamycin", "Clindamycin", "Aztreonam", "Unknown", "Other"),
                                                                                      initial_value_selected = preop_antibiotics),
+                                                    hr(),
                                                     jh_make_shiny_table_row_function(left_column_label = "Antifibrinolytic:",
-                                                                                     input_type = "picker",
+                                                                                     input_type = "checkbox",
                                                                                      input_id = "anti_fibrinolytic",
                                                                                      left_column_percent_width = 30,
                                                                                      font_size = row_label_font_size,
@@ -1754,7 +1853,7 @@ server <- function(input, output, session) {
                                                                                      input_id = "additional_procedures",
                                                                                      left_column_percent_width = 20,
                                                                                      checkboxes_inline = FALSE,
-                                                                                     input_type = "checkboxGroupButtons",
+                                                                                     input_type = "checkbox",
                                                                                      choices_vector = additional_procedures_choices,
                                                                                      initial_value_selected = additional_procedures),
                                                     conditionalPanel(condition = "input.additional_procedures.indexOf('Other') > -1",
@@ -1809,6 +1908,8 @@ server <- function(input, output, session) {
         
         return(additional_details_modal)
     }
+    
+
     
     ### DRAIN INPUT UI ###
     output$drains_ui <- renderUI({
@@ -1956,7 +2057,7 @@ server <- function(input, output, session) {
                               }
                           }
                           
-                          updateCheckboxGroupButtons(session = session, 
+                          updateAwesomeCheckboxGroup(session = session, 
                                                      inputId = "additional_procedures", 
                                                      choices = additional_procedures_options_reactive_vector(),
                                                      selected = unlist(additional_procedures_list, use.names = FALSE))
@@ -2051,7 +2152,9 @@ server <- function(input, output, session) {
             addition_surgical_details_modal_box_function(primary_surgeon = input$primary_surgeon,
                                                          surgical_assistants = input$surgical_assistants,
                                                          preoperative_diagnosis = input$preoperative_diagnosis,
-                                                         postoperative_diagnosis = input$postoperative_diagnosis,
+                                                         postoperative_diagnosis = input$postoperative_diagnosis, 
+                                                         asa_class = input$asa_class,
+                                                         anesthesia = input$anesthesia,
                                                          indications = input$indications,
                                                          neuromonitoring = input$neuromonitoring,
                                                          preop_antibiotics = input$preop_antibiotics,
@@ -2176,6 +2279,16 @@ server <- function(input, output, session) {
                        tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Surgical Indications:")),
                        tags$td(width = "5%"),
                        tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$indications)),
+                   ),
+                   tags$tr(
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "ASA Class:")),
+                       tags$td(width = "5%"),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$asa_class)),
+                   ),
+                   tags$tr(
+                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Anesthesia Type:")),
+                       tags$td(width = "5%"),
+                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$anesethesia)),
                    ),
                    tags$tr(
                        tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
@@ -3318,6 +3431,54 @@ server <- function(input, output, session) {
     })
     
     
+    screw_size_df_reactive_results <- reactive({
+
+        all_implants <- all_objects_to_add_list$objects_df %>%
+            select(level, vertebral_number, object, side) %>%
+            distinct() %>%
+            filter(str_detect(object, "screw")) %>%
+            arrange(vertebral_number)
+
+        if(nrow(all_implants) > 0){
+            implants_wide_df <- all_implants %>%
+                mutate(level_side = str_to_lower(paste(level, side, object, sep = "_"))) %>%
+                select(level, level_side, side) %>%
+                pivot_wider(names_from = side, values_from = level_side) %>%
+                mutate(across(everything(), ~ replace_na(.x, "no_screw")))
+
+            ## the data frame can't have any missing values, otherwise the vectors will be of different lengths when you run map()
+
+            if(any(names(implants_wide_df) == "left") == FALSE){
+                implants_wide_df <-  implants_wide_df %>%
+                    mutate(left = "no_screw")
+            }
+
+
+            if(any(names(implants_wide_df) == "right") == FALSE){
+                implants_wide_df <-  implants_wide_df %>%
+                    mutate(left = "no_screw")
+            }
+
+            implants_wide_df %>%
+                mutate(left_diameter_label = if_else(left == "no_screw", glue("null"), glue("left_{str_to_lower(level)}_screw_diameter"))) %>%
+                mutate(left_length_label = if_else(left == "no_screw", glue("null"), glue("left_{str_to_lower(level)}_screw_length"))) %>%
+                mutate(right_diameter_label = if_else(left == "no_screw", glue("null"), glue("right_{str_to_lower(level)}_screw_diameter"))) %>%
+                mutate(right_length_label = if_else(left == "no_screw", glue("null"), glue("right_{str_to_lower(level)}_screw_length"))) %>%
+                mutate(left_screw_diameter = map(.x = left_diameter_label, .f = ~input[[.x]])) %>%
+                unnest() %>%
+                mutate(left_screw_length = map(.x = left_length_label, .f = ~input[[.x]])) %>%
+                unnest() %>%
+                mutate(right_screw_diameter = map(.x = right_diameter_label, .f = ~input[[.x]])) %>%
+                unnest() %>%
+                mutate(right_screw_length = map(.x = right_length_label, .f = ~input[[.x]])) %>%
+                unnest()
+
+        }else{
+            tibble(level = character(), left_screw_diameter = double(), left_screw_length = double(), right_screw_diameter = double(), right_screw_length = double())
+        }
+
+    })
+    
     ################------------------  Screw Size Details UI  ----------------------######################  
     ################------------------  Screw Size Details UI  ----------------------######################  
     output$screw_details_ui <- renderUI({
@@ -3338,23 +3499,45 @@ server <- function(input, output, session) {
             
             ## the data frame can't have any missing values, otherwise the vectors will be of different lengths when you run map()
             
-            if(any(names(implants_wide_df) == "left")){
-                left_vector <- implants_wide_df$left
-                
-            }else{
-                left_vector <-(implants_wide_df %>% mutate(left = "no_screw"))$left
+            if(any(names(implants_wide_df) == "left") == FALSE){
+                implants_wide_df <-  implants_wide_df %>%
+                    mutate(left = "no_screw")
+                # left_vector <- implants_wide_df$left
             }
-            if(any(names(implants_wide_df) == "right")){
-                right_vector <- implants_wide_df$right
-            }else{
-                right_vector <-(implants_wide_df %>% mutate(right = "no_screw"))$right
+            # }else{
+                # left_vector <-(implants_wide_df %>% mutate(left = "no_screw"))$left
+            # }
+            
+            if(any(names(implants_wide_df) == "right") == FALSE){
+                implants_wide_df <-  implants_wide_df %>%
+                    mutate(left = "no_screw")
+                
+            #     right_vector <- implants_wide_df$right
+            # }else{
+            #     right_vector <-(implants_wide_df %>% mutate(right = "no_screw"))$right
             }
             
             max_levels <- nrow(implants_wide_df)     
             levels_count <- seq(from = 1, to = max_levels, by = 1)
             
+            # _screw_diameter
+            # 
+            # if(nrow(screw_size_df_reactive_results())>0){
+            #     
+            # }
+            
+            # results <- implants_wide_df %>%
+            #     left_join(screw_size_df_reactive_results()) %>%
+            #     mutate(across(everything(), ~ replace_na(.x, as.double(0))))
+
+            # #values. 
+            # left_diameters_vector <- unlist(map(.x = left_vector, .f = ~ glue("{.x}_diameter")))
+            # left_length_vector <- unlist(map(.x = left_vector, .f = ~ glue("{.x}_length")))
+            # right_diameters_vector <- unlist(map(.x = right_vector, .f = ~ glue("{.x}_diameter")))
+            # right_length_vector <- unlist(map(.x = right_vector, .f = ~ glue("{.x}_length")))
+            # # input[[left_vector[..4]]] 
+            
             column(width = 12,
-                   # div(style = "font-size:20px; font-weight:bold; text-align:center", "Screw Details:")
                    h4("Screw Sizes:"),
                    tags$table(
                        tags$tr(width = "100%",
@@ -3365,21 +3548,128 @@ server <- function(input, output, session) {
                                tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Length"))
                        ),
                        pmap(.l = list(..1 = level_vector,
-                                      ..2 = left_vector,
-                                      ..3 = right_vector, 
-                                      ..4 = levels_count),
+                                      ..2 = implants_wide_df$left,
+                                      ..3 = implants_wide_df$right 
+                                      # ..4 = levels_count,
+                                      # ..5 = results$left_diameter,
+                                      # ..6 = results$left_length,
+                                      # ..7 = results$right_diameter,
+                                      # ..8 = results$right_length
+                                      ),
                             .f = ~make_screw_sizes_ui_function(level = ..1, 
-                                                               left_screw_level = ..2, 
-                                                               right_screw_level = ..3 
+                                                               left_screw = ..2, 
+                                                               right_screw = ..3
+                                                               # left_diameter = ..5,
+                                                               # left_length = ..6,
+                                                               # right_diameter = ..7,
+                                                               # right_length = ..8
                                                                # left_selected = input[[left_vector[..4]]],   ## using this subsetting
                                                                # right_selected = input[[right_vector[..4]]]
                             ))
+                       # pmap(.l = list(..1 = level_vector,
+                       #                ..2 = left_vector,
+                       #                ..3 = right_vector, 
+                       #                ..4 = levels_count, 
+                       #                ..5 = left_diameters_vector,
+                       #                ..6 = left_length_vector,
+                       #                ..7 = right_diameters_vector,
+                       #                ..8 = right_length_vector),
+                       #      .f = ~make_screw_sizes_ui_function(level = ..1, 
+                       #                                         left_screw_level = ..2, 
+                       #                                         right_screw_level = ..3,
+                       #                                         left_diameter = input[[..5]], 
+                       #                                         left_length = input[[..6]], 
+                       #                                         right_diameter = input[[..7]],
+                       #                                         right_length = input[[..8]]
+                       #                                         # left_selected = input[[left_vector[..4]]],   ## using this subsetting
+                       #                                         # right_selected = input[[right_vector[..4]]]
+                       #      ))
                    )
             )
         }else{
             NULL
         }
     })
+    
+    
+    # ################------------------  Screw Size Details UI  ----------------------######################  
+    # ################------------------  Screw Size Details UI  ----------------------######################  
+    # output$screw_details_ui <- renderUI({
+    #     all_implants <- all_objects_to_add_list$objects_df %>%
+    #         select(level, vertebral_number, object, side) %>%
+    #         distinct() %>%
+    #         filter(str_detect(object, "screw")) %>%
+    #         arrange(vertebral_number)
+    #     
+    #     if(nrow(all_implants) > 0){
+    #         implants_wide_df <- all_implants %>%
+    #             mutate(level_side = str_to_lower(paste(level, side, object, sep = "_"))) %>%
+    #             select(level, level_side, side) %>%
+    #             pivot_wider(names_from = side, values_from = level_side) %>%
+    #             mutate(across(everything(), ~ replace_na(.x, "no_screw"))) 
+    #         
+    #         level_vector <- implants_wide_df$level
+    #         
+    #         ## the data frame can't have any missing values, otherwise the vectors will be of different lengths when you run map()
+    #         
+    #         if(any(names(implants_wide_df) == "left")){
+    #             left_vector <- implants_wide_df$left
+    #         }else{
+    #             left_vector <-(implants_wide_df %>% mutate(left = "no_screw"))$left
+    #         }
+    #         
+    #         if(any(names(implants_wide_df) == "right")){
+    #             right_vector <- implants_wide_df$right
+    #         }else{
+    #             right_vector <-(implants_wide_df %>% mutate(right = "no_screw"))$right
+    #         }
+    #         
+    #         max_levels <- nrow(implants_wide_df)     
+    #         levels_count <- seq(from = 1, to = max_levels, by = 1)
+    #         
+    #         # _screw_diameter
+    #         
+    #         #values. 
+    #         left_diameters_vector <- unlist(map(.x = left_vector, .f = ~ glue("{.x}_screw_diameter")))
+    #         left_length_vector <- unlist(map(.x = left_vector, .f = ~ glue("{.x}_screw_length")))
+    #         right_diameters_vector <- unlist(map(.x = right_vector, .f = ~ glue("{.x}_screw_diameter")))
+    #         right_length_vector <- unlist(map(.x = right_vector, .f = ~ glue("{.x}_screw_length")))
+    #             # input[[left_vector[..4]]] 
+    #         
+    #         column(width = 12,
+    #                h4("Screw Sizes:"),
+    #                tags$table(
+    #                    tags$tr(width = "100%",
+    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Level")),
+    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Diameter")),
+    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Length")),
+    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Diameter")),
+    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Length"))
+    #                    ),
+    #                    pmap(.l = list(..1 = level_vector,
+    #                                   ..2 = left_vector,
+    #                                   ..3 = right_vector, 
+    #                                   ..4 = levels_count, 
+    #                                   ..5 = left_diameters_vector,
+    #                                   ..6 = left_length_vector,
+    #                                   ..7 = right_diameters_vector,
+    #                                   ..8 = right_length_vector),
+    #                         .f = ~make_screw_sizes_ui_function(level = ..1, 
+    #                                                            left_screw_level = ..2, 
+    #                                                            right_screw_level = ..3,
+    #                                                            left_diameter = input[[..5]], 
+    #                                                            left_length = input[[..6]], 
+    #                                                            right_diameter = input[[..7]],
+    #                                                            right_length = input[[..8]]
+    #                                                            # left_selected = input[[left_vector[..4]]],   ## using this subsetting
+    #                                                            # right_selected = input[[right_vector[..4]]]
+    #                         ))
+    #                )
+    #         )
+    #     }else{
+    #         NULL
+    #     }
+    # })
     
     output$screw_types_ui <- renderUI({
         all_implants <- all_objects_to_add_list$objects_df %>%
@@ -4430,7 +4720,7 @@ server <- function(input, output, session) {
     
     observeEvent(input$primary_diagnosis, {
         if(any(str_detect(string = str_to_lower(input$primary_diagnosis), pattern = "fracture"))){
-            updateCheckboxGroupButtons(session = session, 
+            updateAwesomeCheckboxGroup(session = session, 
                                        inputId = "additional_procedures", 
                                        selected = append(input$additional_procedures, "Open treatment of vertebral fracture"))
         }
@@ -4482,6 +4772,7 @@ server <- function(input, output, session) {
     
     
     op_note_text_reactive <- reactive({
+        
         ################# COMPLICATIONS ################3
         complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
             filter(complication != "") %>%
@@ -4534,9 +4825,7 @@ server <- function(input, output, session) {
                                                                              dressing = input$dressing_details)
             
             op_note_list <- list()
-            
-            # unlist(str_split(input$postoperative_diagnosis, pattern = ";"))
-            
+
             op_note_list$"\nPatient:" <- paste(input$patient_first_name, input$patient_last_name)
             op_note_list$"\nDate of Surgery:" <- as.character(input$date_of_surgery)
             op_note_list$"\nPrimary Surgeon:" <- if_else(!is.null(input$primary_surgeon), as.character(input$primary_surgeon), " ")
@@ -4676,41 +4965,76 @@ server <- function(input, output, session) {
                 }
             }
             
-            ### Compile full op note:
-            secion_headers_df <- tibble(section = c("\nPatient:",
-                                                    "\nDate of Surgery:",
-                                                    "\nPrimary Surgeon:",
-                                                    "\nSurgical Assistants:",
-                                                    "\nPre-operative Diagnosis:",
-                                                    "\nPost-operative Diagnosis:",
-                                                    "\nIndications:",
-                                                    "\nProcedures Performed:",
-                                                    "\nSurgical Findings:",
-                                                    "\nSpecimens Removed:",
-                                                    "\nEstimated Blood Loss:",
-                                                    "\nFluids/Transfusions:",
-                                                    "\nIntraoperative Complications:",
-                                                    "\nSurgery Description:"),
-                                        result = c(paste(input$patient_first_name, input$patient_last_name),
-                                                   as.character(input$date_of_surgery),
-                                                   input$primary_surgeon,
-                                                   input$surgical_assistants,
-                                                   glue_collapse(unlist(str_split(paste0("  -", input$preoperative_diagnosis), pattern = "; ")), sep = "\n  -"),
-                                                   glue_collapse(unlist(str_split(paste0("  -", input$postoperative_diagnosis), pattern = "; ")), sep = "\n  -"),
-                                                   input$indications,
-                                                   procedure_results_list$procedures_numbered_paragraph,
-                                                   if_else(input$surgical_findings == "", "none", input$surgical_findings),
-                                                   if_else(input$specimens_removed == "", "none", input$specimens_removed),
-                                                   if_else(is.na(input$ebl), "See anesthesia records", paste(input$ebl)),
-                                                   fluids_transfusions_statement,
-                                                   complication_statement,
-                                                   procedure_results_list$procedure_details_paragraph # glue_collapse(x = procedure_results$procedure_details_list, sep = '\n\n'),
-                                        )) %>%
+            
+            op_note_list <- list()
+
+            op_note_list$"\n*Patient:" <- paste(input$patient_first_name, input$patient_last_name)
+            op_note_list$"\n*Date of Surgery:" <- as.character(input$date_of_surgery)
+            op_note_list$"\n*Primary Surgeon:" <- input$primary_surgeon
+            op_note_list$"\n*Surgical Assistants:" <- input$surgical_assistants
+            op_note_list$"\n*Preprocedure ASA Class:" <- input$asa_class
+            op_note_list$"\n*Anesthesia:" <- input$anesthesia
+            op_note_list$"\n*Intraoperative Complications:" <- complication_statement
+            op_note_list$"\n*Pre-operative Diagnosis:" <- glue_collapse(unlist(str_split(paste0("  -", input$preoperative_diagnosis), pattern = "; ")), sep = "\n  -")
+            op_note_list$"\n*Indications:" <- input$indications
+            op_note_list$"\n*Estimated Blood Loss:" <- if_else(is.na(input$ebl), "See anesthesia records", paste(input$ebl))
+            op_note_list$"\n*Surgical Findings:" <- if_else(input$surgical_findings == "", "none", input$surgical_findings)
+            op_note_list$"\n*Specimens Taken:" <- if_else(input$specimens_removed == "", "none", input$specimens_removed)
+            op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
+            op_note_list$"\n*Procedure  Description:" <- procedure_results_list$procedure_details_paragraph
+            op_note_list$"\n*Post-operative Diagnosis:" <- glue_collapse(unlist(str_split(paste0("  -", input$postoperative_diagnosis), pattern = "; ")), sep = "\n  -")
+            op_note_list$"\n*Fluids/Transfusions:" <- fluids_transfusions_statement
+            
+  
+            secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
+                unnest() %>%
                 mutate(row = row_number()) %>%
                 pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
                 select(row, full_text_vector)
             
+            
+            
+            # ### Compile full op note:
+            # secion_headers_df <- tibble(section = c("\n*Patient:",
+            #                                         "\n*Date of Surgery:",
+            #                                         "\n*Primary Surgeon:",
+            #                                         "\n*Surgical Assistants:",
+            #                                         "\n*Preprocedure ASA Class:",
+            #                                         "\n*Anesthesia:",
+            #                                         "\n*Intraoperative Complications:",
+            #                                         "\n*Pre-operative Diagnosis:",
+            #                                         "\n*Indications:",
+            #                                         "\n*Estimated Blood Loss:",
+            #                                         "\n*Surgical Findings:",
+            #                                         "\n*Specimens Taken:",
+            #                                         "\n*Procedures Performed:",
+            #                                         "\n*Procedure  Description:",
+            #                                         "\n*Post-operative Diagnosis:",
+            #                                         "\n*Fluids/Transfusions:"),
+            #                             result = c(paste(input$patient_first_name, input$patient_last_name),
+            #                                        as.character(input$date_of_surgery),
+            #                                        input$primary_surgeon,
+            #                                        input$surgical_assistants,
+            #                                        input$asa_class,
+            #                                        input$anesthesia,
+            #                                        complication_statement,
+            #                                        glue_collapse(unlist(str_split(paste0("  -", input$preoperative_diagnosis), pattern = "; ")), sep = "\n  -"),
+            #                                        input$indications,
+            #                                        if_else(is.na(input$ebl), "See anesthesia records", paste(input$ebl)),
+            #                                        if_else(input$surgical_findings == "", "none", input$surgical_findings),
+            #                                        if_else(input$specimens_removed == "", "none", input$specimens_removed),
+            #                                        procedure_results_list$procedures_numbered_paragraph,
+            #                                        procedure_results_list$procedure_details_paragraph,
+            #                                        glue_collapse(unlist(str_split(paste0("  -", input$postoperative_diagnosis), pattern = "; ")), sep = "\n  -"),
+            #                                        fluids_transfusions_statement
+            #                                         # glue_collapse(x = procedure_results$procedure_details_list, sep = '\n\n'),
+            #                             )) %>%
+            #     mutate(row = row_number()) %>%
+            #     pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
+            #     select(row, full_text_vector)
+            
         }
+        
         op_note_text <- glue_collapse(secion_headers_df$full_text_vector, sep = "\n")
         
         op_note_text  
@@ -4741,15 +5065,25 @@ server <- function(input, output, session) {
     }
     )
     
-    #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### 
-    #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### 
-    #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### 
+    ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
+    ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
+    ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
     
-    #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### 
-    #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### 
-    #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ #####################
+    ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
+    ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
+    ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
     
-    ############# ~~~~~~~~~~~~~ Patient Details TABLE ('patient_details' instrument in redcap) ~~~~~~~~~~~~~~~~~~~ ######################
+    ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
+    ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
+    ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
+    
+    
+    ############### ############### FIRST, COMPILE EACH OF THE TABLES THAT WILL BE USED FOR UPLOADING TO REDCAP:    ###############     ############### 
+    ############### ############### FIRST, COMPILE EACH OF THE TABLES THAT WILL BE USED FOR UPLOADING TO REDCAP:    ###############     ############### 
+    ############### ############### FIRST, COMPILE EACH OF THE TABLES THAT WILL BE USED FOR UPLOADING TO REDCAP:    ###############     ############### 
+    
+    
+    ###### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Patient Details TABLE ('patient_details' instrument in redcap)  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ######## 
     
     patient_details_redcap_df_reactive <- reactive({
         patient_details_df <- tibble(last_name = input$patient_last_name,
@@ -4757,25 +5091,14 @@ server <- function(input, output, session) {
                                      date_of_birth = paste(paste(input$date_of_birth)),
                                      # date_of_birth = if_else(paste(input$date_of_birth) == "1900-01-01", "--", paste(input$date_of_birth)),
                                      sex = input$sex)
-        
         patient_details_df
     })
     
-    ######## Render "Patient Details Table:"    ######## 
-    output$patient_details_redcap_df <- renderTable({
-        row_1 <- patient_details_redcap_df_reactive() %>%
-            slice(1) %>%
-            as.character()
-        
-        tibble(Variable = names(patient_details_redcap_df_reactive()), 
-               Result = row_1) 
-        
-    })
     
     
-    ############# ~~~~~~~~~~~~~ PROCEDURE SUMMARY TABLE ~~~~~~~~~~~~~~~~~~~ ######################
+    ###### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PROCEDURE SUMMARY TABLE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ########
     
-    summary_table_for_redcap_reactive <- reactive({
+    surgical_details_redcap_df_reactive <- reactive({
         surgery_details_list <- list()
         
         ##########   date_of_surgery #############
@@ -4800,9 +5123,9 @@ server <- function(input, output, session) {
         
         ##########   diagnosis_category #############
         surgery_details_list$diagnosis_category <- glue_collapse(str_to_lower((tibble(diagnosis = input$primary_diagnosis) %>%
-                                        left_join(spine_icd10_codes_df %>% select(spine_category, diagnosis)) %>%
-                                        select(spine_category) %>%
-                                        distinct())$spine_category), sep = "; ")
+                                                                                   left_join(spine_icd10_codes_df %>% select(spine_category, diagnosis)) %>%
+                                                                                   select(spine_category) %>%
+                                                                                   distinct())$spine_category), sep = "; ")
         
         # surgery_details_list$diagnosis_category <- glue_collapse(str_to_lower(input$diagnosis_category), sep = "; ") 
         
@@ -4815,11 +5138,27 @@ server <- function(input, output, session) {
         if(length(input$primary_diagnosis) >0){
             
             icd_code_vector <- (tibble(diagnosis = input$primary_diagnosis) %>%
-                 left_join(spine_icd10_codes_df %>%
-                               select(icd10_code, diagnosis)))$icd10_code
+                                    left_join(spine_icd10_codes_df %>%
+                                                  select(icd10_code, diagnosis)))$icd10_code
             
             surgery_details_list$diagnosis_icd10_code <- glue_collapse(icd_code_vector, sep = "; ")
         }
+        
+        ##########   indications #############
+        if(input$indications != ""){
+            surgery_details_list$indications <- glue_collapse(str_to_lower(input$primary_diagnosis), sep = "; ")
+        }
+        
+        ##########   asa_class #############
+        if(length(input$asa_class) >0){
+            surgery_details_list$asa_class <- input$asa_class
+        }
+        
+        ##########   anesthesia  #############
+        if(length(input$anesthesia) >0){
+            surgery_details_list$anesthesia <- input$anesthesia
+        }
+        
         
         ##########   prior_fusion_levels #############
         if(length(input$prior_fusion_levels)>0){
@@ -4993,6 +5332,14 @@ server <- function(input, output, session) {
             surgery_details_list$lower_treated_vertebrae <- "none"
         }
         
+        ###### SPINE CERVICAL VS LUMBAR FOR PRO CAPTURE #####
+        if(surgery_details_list$upper_treated_vertebrae %in% c("Occiput", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "T1", "T2", "T3", "T4", "T5", "T6")){
+            surgery_details_list$spine_region <- "cervical"
+        }else{
+            surgery_details_list$spine_region <- "lumbar"
+        }
+        
+        
         ##########   PELVIC FIXATION  #############
         surgery_details_list$pelvic_fixation <- if_else(any(str_detect(string = all_objects_to_add_list$objects_df$object, pattern = "pelvic_screw")), "yes", "no")
         
@@ -5153,13 +5500,11 @@ server <- function(input, output, session) {
         surgery_details_df
     })
     
-    ######## Render "Procedure Summary Table:"    ######## 
-    output$summary_table <- renderTable({
-        summary_table_for_redcap_reactive()
-    })
+    
+    
     
     ################## GENERATE INTRAOPERATIVE DETAILS TABLE #############
-    intraoperative_details_table_reactive <- reactive({
+    intraoperative_details_redcap_df_reactive <- reactive({
         intraop_details_list <- list()
         
         ##########   date_of_surgery #############
@@ -5258,13 +5603,8 @@ server <- function(input, output, session) {
     })
     
     
-    ######## Render "Intraoperative Details Table:"    ######## 
-    output$intraoperative_details_table <- renderTable({
-        intraoperative_details_table_reactive() 
-    })
-    
-    ################# MAKE THE WIDE PROCEDURE SPECIFICS DATAFRAME ##################
-    procedures_by_level_repeating_df_reactive <- reactive({
+    ################# MAKE THE procedures by level DATAFRAME ##################
+    procedures_by_level_redcap_df_reactive <- reactive({
         fusion_df <- jh_fusion_category_function(fusion_vector = input$fusion_levels_confirmed, 
                                                  all_objects_df = all_objects_to_add_list$objects_df)
         
@@ -5289,13 +5629,10 @@ server <- function(input, output, session) {
         
         data_wide
     })
-    output$redcap_details_wide_df <- renderTable({
-        procedures_by_level_repeating_df_reactive()
-    })
     
     
     ################# PEDICLE SCREW DETAILS TABLE ##################
-    pedicle_screw_details_table_redcap_reactive <- reactive({
+    screw_details_redcap_df_reactive <- reactive({
         if(nrow(screw_details_results_reactive_df())>0){
             screw_details_df <- screw_details_results_reactive_df() %>%
                 mutate(dos_screws_repeating = as.character(input$date_of_surgery)) %>%
@@ -5310,18 +5647,10 @@ server <- function(input, output, session) {
         screw_details_df
     })
     
-    output$pedicle_screw_details_table <- renderTable({
-        if(nrow(screw_details_results_reactive_df())>0){
-            pedicle_screw_details_table_redcap_reactive()
-        }else{
-            tibble(redcap_repeat_instance = character(), redcap_repeat_instrument = character(), screw_level = character(), screw_side = character(), screw_type = character(), screw_size = character(), screw_size_type = character())
-        }
-    })  
-    
     
     ################# INTERBODY  DETAILS TABLE ##################
     
-    interbody_details_table_redcap_reactive <- reactive({
+    interbody_details_redcap_df_reactive <- reactive({
         if(nrow(interbody_details_df_reactive())>0){
             interbody_df <- interbody_details_df_reactive() %>%
                 mutate(dos_interbody_repeating = as.character(input$date_of_surgery)) %>%
@@ -5345,9 +5674,7 @@ server <- function(input, output, session) {
         interbody_df
     })
     
-    output$interbody_details_table <- renderTable({
-        interbody_details_table_redcap_reactive()
-    })
+    
     
     #################  ALL OBJECTS TABLE ##################
     output$all_objects_table <- renderTable({
@@ -5385,6 +5712,104 @@ server <- function(input, output, session) {
     
     
     
+    
+    ############### ############### NOW RENDER EACH OF THE TABLES FOR THE SIDE TABULAR VIEW:    ###############     ############### 
+    ############### ############### NOW RENDER EACH OF THE TABLES FOR THE SIDE TABULAR VIEW:    ###############     ############### 
+    ############### ############### NOW RENDER EACH OF THE TABLES FOR THE SIDE TABULAR VIEW:    ###############     ############### 
+    
+    ########################
+    
+    ######## Render "Patient Details Table for side tab:"    ######## 
+    output$patient_details_redcap_df_sidetab <- renderTable({
+        row_1 <- patient_details_redcap_df_reactive() %>%
+            slice(1) %>%
+            as.character()
+        
+        tibble(Variable = names(patient_details_redcap_df_reactive()), 
+               Result = row_1) 
+        
+    })
+    
+    
+    ######## Render "Procedure Summary Table for side tab:"    ######## 
+    output$surgical_details_redcap_df_sidetab <- renderTable({
+        surgical_details_redcap_df_reactive()
+    })
+
+    
+    ######## Render "Intraoperative Details Table for side tab:"    ######## 
+    output$intraoperative_details_redcap_df_sidetab <- renderTable({
+        intraoperative_details_redcap_df_reactive() 
+    })
+    
+    
+    ######## Render "Procedures By Level Table for side tab:"    ######## 
+    output$procedures_by_level_redcap_df_sidetab <- renderTable({
+        procedures_by_level_redcap_df_reactive()
+    })
+    
+    ######## Render "Screw Details Table for side tab:"    ######## 
+    output$screw_details_redcap_df_sidetab <- renderTable({
+        if(nrow(screw_details_results_reactive_df())>0){
+            screw_details_redcap_df_reactive()
+        }else{
+            tibble(redcap_repeat_instance = character(), redcap_repeat_instrument = character(), screw_level = character(), screw_side = character(), screw_type = character(), screw_size = character(), screw_size_type = character())
+        }
+    })  
+    
+    
+    ######## Render "Interbody Details Table for side tab:"    ######## 
+    output$interbody_details_redcap_df_sidetab <- renderTable({
+        interbody_details_redcap_df_reactive()
+    })
+    
+    
+    ############### ############### NOW RENDER EACH OF THE TABLES FOR THE FINAL REVIEW IN THE MODAL:    ###############     ############### 
+    ############### ############### NOW RENDER EACH OF THE TABLES FOR THE FINAL REVIEW IN THE MODAL:    ###############     ############### 
+    ############### ############### NOW RENDER EACH OF THE TABLES FOR THE FINAL REVIEW IN THE MODAL:    ###############     ############### 
+    
+    output$patient_details_redcap_df_modal_tab <- renderTable({
+        row_1 <- patient_details_redcap_df_reactive() %>%
+            slice(1) %>%
+            as.character()
+        
+        tibble(Variable = names(patient_details_redcap_df_reactive()), 
+               Result = row_1) 
+        
+    })
+    
+    output$surgical_details_redcap_df_modal_tab <- renderTable({
+        surgical_details_redcap_df_reactive()
+    })
+    
+    output$intraoperative_details_redcap_df_modal_tab <- renderTable({
+        intraoperative_details_redcap_df_reactive() 
+    })
+    
+    
+    output$procedures_by_level_redcap_df_modal_tab <- renderTable({
+        procedures_by_level_redcap_df_reactive()
+    })
+    
+    output$interbody_details_redcap_df_modal_tab <- renderTable({
+        interbody_details_redcap_df_reactive()
+    })
+    
+    output$screw_details_redcap_df_modal_tab <- renderTable({
+        if(nrow(screw_details_results_reactive_df())>0){
+            screw_details_redcap_df_reactive()
+        }else{
+            tibble(redcap_repeat_instance = character(),
+                   redcap_repeat_instrument = character(), 
+                   screw_level = character(), 
+                   screw_side = character(), 
+                   screw_type = character(),
+                   screw_size = character(), 
+                   screw_size_type = character())
+        }
+    })  
+    
+
     #############~~~~~~~~~~~~~~~~~~~ ##################### REDCAP UPLOAD  #############~~~~~~~~~~~~~~~~~~~ ##################### 
     #############~~~~~~~~~~~~~~~~~~~ ##################### REDCAP UPLOAD  #############~~~~~~~~~~~~~~~~~~~ ##################### 
     #############~~~~~~~~~~~~~~~~~~~ ##################### REDCAP UPLOAD  #############~~~~~~~~~~~~~~~~~~~ ##################### 
@@ -5400,7 +5825,7 @@ server <- function(input, output, session) {
             modalDialog(footer = "Redcap Upload", easyClose = TRUE, size = "l",  
                         box(width = 12, title = "Upload Data to Redcap", footer = NULL, 
                             fluidRow(
-                                actionBttn(inputId = "confirm_upload_1",
+                                actionBttn(inputId = "confirm_upload_final",
                                            label = "Confirmed, Upload to Redcap",
                                            style = "simple", color = "primary")
                             ),
@@ -5409,19 +5834,22 @@ server <- function(input, output, session) {
                             fluidRow(
                                 tabBox(width = 12,
                                        tabPanel(title = "Patient Demographics",
-                                                tableOutput(outputId = "patient_details_redcap_df_tab")
+                                                tableOutput(outputId = "patient_details_redcap_df_modal_tab")
                                        ),
                                        tabPanel(title = "Surgical Summary",
-                                                tableOutput(outputId = "surgery_summary_table_tab")
+                                                tableOutput(outputId = "surgical_details_redcap_df_modal_tab")
                                        ),
+                                       tabPanel(title = "Intraoperative Details", 
+                                                tableOutput(outputId = "intraoperative_details_redcap_df_modal_tab")
+                                                ),
                                        tabPanel(title = "Procedures by Level",
-                                                tableOutput(outputId = "redcap_details_wide_df_tab")
+                                                tableOutput(outputId = "procedures_by_level_redcap_df_modal_tab")
                                        ),
                                        tabPanel(title = "Interbodies",
-                                                tableOutput(outputId = "interbody_details_table_tab")
+                                                tableOutput(outputId = "interbody_details_redcap_df_modal_tab")
                                        ),
                                        tabPanel(title = "Screw Details",
-                                                tableOutput(outputId = "pedicle_screw_details_table_tab")
+                                                tableOutput(outputId = "screw_details_redcap_df_modal_tab")
                                        )
                                 )
                             )
@@ -5432,96 +5860,104 @@ server <- function(input, output, session) {
     })
     
     
+    # redcap_value <- reactiveValues()
+    # redcap_value$record_id <- "xx"
+    # redcap_value$surgical_details_instance_add <- 0
+    # redcap_value$procedures_by_level_repeating_instance_add <- 0
+    # redcap_value$screw_details_repeating_instance_add <- 0
+    # redcap_value$interbody_implant_repeating_instance_add <- 0
+    # redcap_value$upload_progress <- 0
+    # 
+    # observeEvent(input$confirm_upload_final, ignoreInit = TRUE, ignoreNULL = TRUE, once = TRUE, {
+    #     
+    #     withProgress(message = 'Uploading Data', value = 0, {
+    #         number_of_steps <- 2
+    #         
+    #         incProgress(1/number_of_steps, detail = paste("Preparing Data"))
+    #         
+    #         if(redcapAPI::exportNextRecordName(rcon = rcon)>1){
+    #             all_patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
+    #                 type.convert() %>%
+    #                 select(record_id, last_name, first_name, date_of_birth) %>%
+    #                 mutate(last_name = str_to_lower(last_name),
+    #                        first_name = str_to_lower(first_name))   
+    #         }else{
+    #             all_patient_ids_df <- tibble()
+    #         }
+    #         
+    #         incProgress(1/number_of_steps, detail = paste("Preparing Data..."))
+    #         
+    #         ## search for a match
+    #         if(nrow(all_patient_ids_df)>0){
+    #             joined_df <- patient_details_redcap_df_reactive() %>%
+    #                 select(last_name, first_name, date_of_birth) %>%
+    #                 mutate(last_name = str_to_lower(last_name),
+    #                        first_name = str_to_lower(first_name)) %>%
+    #                 left_join(all_patient_ids_df)
+    #             
+    #             match_found <- if_else(!is.na(joined_df$record_id[[1]]), TRUE, FALSE)
+    #             
+    #             if(match_found == TRUE){
+    #                 redcap_value$record_id <- joined_df$record_id[[1]]
+    #                 record_number <- joined_df$record_id[[1]]
+    #                 
+    #                 max_repeat_instances_df <- exportRecords(rcon = rcon, records = record_number) %>%
+    #                     as_tibble() %>%
+    #                     select(redcap_repeat_instrument, redcap_repeat_instance) %>%
+    #                     remove_missing() %>%
+    #                     group_by(redcap_repeat_instrument) %>%
+    #                     filter(redcap_repeat_instance == max(redcap_repeat_instance)) %>%
+    #                     ungroup()
+    #                 
+    #                 repeat_list <- as.list(deframe(max_repeat_instances_df))
+    #                 
+    #                 if("surgical_details" %in% max_repeat_instances_df$redcap_repeat_instrument){
+    #                     redcap_value$surgical_details_instance_add <- repeat_list$surgical_details
+    #                 }else{
+    #                     redcap_value$surgical_details_instance_add <- 0
+    #                 }
+    #                 if("procedures_by_level_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+    #                     redcap_value$procedures_by_level_repeating_instance_add <- repeat_list$procedures_by_level_repeating
+    #                 }else{
+    #                     redcap_value$procedures_by_level_repeating_instance_add <- 0
+    #                 }
+    #                 if("screw_details_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+    #                     redcap_value$screw_details_repeating_instance_add <- repeat_list$screw_details_repeating
+    #                 }else{
+    #                     redcap_value$screw_details_repeating_instance_add <- 0
+    #                 }
+    #                 if("interbody_implant_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+    #                     redcap_value$interbody_implant_repeating_instance_add <- repeat_list$interbody_implant_repeating
+    #                 }else{
+    #                     redcap_value$interbody_implant_repeating_instance_add <- 0
+    #                 }
+    #                 
+    #                 redcap_value$surgical_details_instance_start <- repeat_list$surgical_details + 1
+    #                 max_procedures_by_level_repeating <- repeat_list$procedures_by_level_repeating
+    #                 max_screw_details_repeating <- repeat_list$screw_details_repeating
+    #                 
+    #             }else{
+    #                 redcap_value$record_id <- exportNextRecordName(rcon = rcon)
+    #                 redcap_value$surgical_details_instance_add <- 0
+    #                 redcap_value$procedures_by_level_repeating_instance_add <- 0
+    #                 redcap_value$screw_details_repeating_instance_add <- 0
+    #                 redcap_value$interbody_implant_repeating_instance_add <- 0
+    #             }
+    #         }else{
+    #             redcap_value$record_id <- exportNextRecordName(rcon = rcon)
+    #             redcap_value$surgical_details_instance_add <- 0
+    #             redcap_value$procedures_by_level_repeating_instance_add <- 0
+    #             redcap_value$screw_details_repeating_instance_add <- 0
+    #             redcap_value$interbody_implant_repeating_instance_add <- 0
+    #         }
+    #         incProgress(1/number_of_steps, detail = paste("Preparing Data Complete"))
+    #     }
+    #     )
+    #     
+    # })
     
     
-    
-    
-    redcap_value <- reactiveValues()
-    redcap_value$record_id <- "xx"
-    redcap_value$surgical_details_instance_add <- 0
-    redcap_value$procedures_by_level_repeating_instance_add <- 0
-    redcap_value$screw_details_repeating_instance_add <- 0
-    redcap_value$interbody_implant_repeating_instance_add <- 0
-    redcap_value$upload_progress <- 0
-    
-    observeEvent(input$confirm_upload_1, ignoreInit = TRUE, ignoreNULL = TRUE, {
-        
-        if(redcapAPI::exportNextRecordName(rcon = rcon)>1){
-            all_patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
-                type.convert() %>%
-                select(record_id, last_name, first_name, date_of_birth) %>%
-                mutate(last_name = str_to_lower(last_name),
-                       first_name = str_to_lower(first_name))   
-        }else{
-            all_patient_ids_df <- tibble()
-        }
-        ## search for a match
-        if(nrow(all_patient_ids_df)>0){
-            joined_df <- patient_details_redcap_df_reactive() %>%
-                select(last_name, first_name, date_of_birth) %>%
-                mutate(last_name = str_to_lower(last_name),
-                       first_name = str_to_lower(first_name)) %>%
-                left_join(all_patient_ids_df)
-            
-            match_found <- if_else(!is.na(joined_df$record_id[[1]]), TRUE, FALSE)
-            
-            if(match_found == TRUE){
-                redcap_value$record_id <- joined_df$record_id[[1]]
-                record_number <- joined_df$record_id[[1]]
-                
-                max_repeat_instances_df <- exportRecords(rcon = rcon, records = record_number) %>%
-                    as_tibble() %>%
-                    select(redcap_repeat_instrument, redcap_repeat_instance) %>%
-                    remove_missing() %>%
-                    group_by(redcap_repeat_instrument) %>%
-                    filter(redcap_repeat_instance == max(redcap_repeat_instance)) %>%
-                    ungroup()
-                
-                repeat_list <- as.list(deframe(max_repeat_instances_df))
-                
-                if("surgical_details" %in% max_repeat_instances_df$redcap_repeat_instrument){
-                    redcap_value$surgical_details_instance_add <- repeat_list$surgical_details
-                }else{
-                    redcap_value$surgical_details_instance_add <- 0
-                }
-                if("procedures_by_level_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
-                    redcap_value$procedures_by_level_repeating_instance_add <- repeat_list$procedures_by_level_repeating
-                }else{
-                    redcap_value$procedures_by_level_repeating_instance_add <- 0
-                }
-                if("screw_details_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
-                    redcap_value$screw_details_repeating_instance_add <- repeat_list$screw_details_repeating
-                }else{
-                    redcap_value$screw_details_repeating_instance_add <- 0
-                }
-                if("interbody_implant_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
-                    redcap_value$interbody_implant_repeating_instance_add <- repeat_list$interbody_implant_repeating
-                }else{
-                    redcap_value$interbody_implant_repeating_instance_add <- 0
-                }
-                
-                redcap_value$surgical_details_instance_start <- repeat_list$surgical_details + 1
-                max_procedures_by_level_repeating <- repeat_list$procedures_by_level_repeating
-                max_screw_details_repeating <- repeat_list$screw_details_repeating
-                
-            }else{
-                redcap_value$record_id <- exportNextRecordName(rcon = rcon)
-                redcap_value$surgical_details_instance_add <- 0
-                redcap_value$procedures_by_level_repeating_instance_add <- 0
-                redcap_value$screw_details_repeating_instance_add <- 0
-                redcap_value$interbody_implant_repeating_instance_add <- 0
-            }
-        }else{
-            redcap_value$record_id <- exportNextRecordName(rcon = rcon)
-            redcap_value$surgical_details_instance_add <- 0
-            redcap_value$procedures_by_level_repeating_instance_add <- 0
-            redcap_value$screw_details_repeating_instance_add <- 0
-            redcap_value$interbody_implant_repeating_instance_add <- 0
-        }
-    })
-    
-    
-    observeEvent(input$confirm_upload_1, {
+    observeEvent(input$confirm_upload_final, once = TRUE, {
         
         if(redcapAPI::exportNextRecordName(rcon = rcon)>1){
             all_patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
@@ -5596,67 +6032,97 @@ server <- function(input, output, session) {
         }
         
         ##### uploaded patient details #######
-        patient_df_for_upload <- patient_details_redcap_df_reactive() %>%
-            mutate(record_id = record_number) %>%
-            mutate(patient_details_complete = "Complete") %>%
-            select(record_id, everything())
         
-        importRecords(rcon = rcon, data = patient_df_for_upload, returnContent = "count")
-        
-        ##### uploaded surgical details #######
-        surgical_details_instrument <- summary_table_for_redcap_reactive() %>%
-            pivot_wider(names_from = name, values_from = value) %>%
-            mutate(record_id = record_number) %>%
-            mutate(redcap_event_name = "surgery_arm_1") %>%
-            mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
-            mutate(redcap_repeat_instrument = "surgical_details") %>%
-            mutate(surgical_details_complete = "Complete") %>%
-            select(record_id, redcap_event_name, everything())
-        
-        importRecords(rcon = rcon, data = surgical_details_instrument, returnContent = "count")
-        
-        
-        ###### Upload repeating objects for all levels ####
-        procedures_by_level_repeating_instrument <- procedures_by_level_repeating_df_reactive() %>%
-            mutate(record_id = record_number) %>%
-            mutate(redcap_event_name = "surgery_arm_1") %>%
-            mutate(redcap_repeat_instance = row_number() + procedures_by_level_repeating_instance_add) %>%
-            mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-            mutate(procedures_by_level_repeating_complete = "Complete") %>%
-            select(record_id, redcap_event_name, everything())
-        
-        importRecords(rcon = rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
-        
-        
-        ##### uploaded screw details #######
-        if(nrow(pedicle_screw_details_table_redcap_reactive())>0){
-            screw_details_repeating <- pedicle_screw_details_table_redcap_reactive() %>%
+        withProgress(message = 'Uploading Data', value = 0, {
+            number_of_steps <- 7
+            
+            incProgress(1/number_of_steps, detail = paste("Uploading Patient Details"))
+            
+            ##### uploaded patient details #######
+            patient_df_for_upload <- patient_details_redcap_df_reactive() %>%
+                mutate(record_id = record_number) %>%
+                mutate(patient_details_complete = "Complete") %>%
+                select(record_id, everything())
+            
+            importRecords(rcon = rcon, data = patient_df_for_upload, returnContent = "count")
+            
+            incProgress(1/number_of_steps, detail = paste("Uploading Surgical Details"))
+            
+            ##### uploaded surgical details #######
+            surgical_details_instrument <- surgical_details_redcap_df_reactive() %>%
+                pivot_wider(names_from = name, values_from = value) %>%
                 mutate(record_id = record_number) %>%
                 mutate(redcap_event_name = "surgery_arm_1") %>%
-                mutate(redcap_repeat_instance = row_number() +screw_details_repeating_instance_add) %>%
-                mutate(redcap_repeat_instrument = "screw_details_repeating") %>%
-                mutate(screw_details_repeating_complete = "Complete") %>%
+                mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
+                mutate(redcap_repeat_instrument = "surgical_details") %>%
+                mutate(surgical_details_complete = "Complete") %>%
                 select(record_id, redcap_event_name, everything())
             
-            importRecords(rcon = rcon, data = screw_details_repeating, returnContent = "count")
-        }
-        
-        
-        ##### uploaded interbody details #######
-        if(nrow(interbody_details_table_redcap_reactive())>0){
-            interbody_implant_repeating <- interbody_details_table_redcap_reactive() %>%
+            importRecords(rcon = rcon, data = surgical_details_instrument, returnContent = "count")
+            
+            incProgress(1/number_of_steps, detail = paste("Uploading Intraoperative Details"))
+            
+            ###### Upload Intraoperative Details ####
+            intraoperative_details_redcap_upload_df <- intraoperative_details_redcap_df_reactive() %>%
+                pivot_wider(names_from = name, values_from = value) %>%
                 mutate(record_id = record_number) %>%
-                select(record_id, everything()) %>%
                 mutate(redcap_event_name = "surgery_arm_1") %>%
-                mutate(redcap_repeat_instance = row_number() + interbody_implant_repeating_instance_add) %>%
-                mutate(redcap_repeat_instrument = "interbody_implant_repeating") %>%
-                mutate(interbody_implant_repeating_complete = "Complete") %>%
-                mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+                mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
+                mutate(redcap_repeat_instrument = "intraoperative_details") %>%
+                mutate(intraoperative_details_complete = "Complete") %>%
                 select(record_id, redcap_event_name, everything())
             
-            importRecords(rcon = rcon, data = interbody_implant_repeating, returnContent = "count")
-        }
-        
+            importRecords(rcon = rcon, data = intraoperative_details_redcap_upload_df, returnContent = "count")
+            
+            incProgress(1/number_of_steps, detail = paste("Uploading Data per Level"))
+            
+            ###### Upload repeating objects for all levels ####
+            procedures_by_level_repeating_instrument <- procedures_by_level_redcap_df_reactive() %>%
+                mutate(record_id = record_number) %>%
+                mutate(redcap_event_name = "surgery_arm_1") %>%
+                mutate(redcap_repeat_instance = row_number() + procedures_by_level_repeating_instance_add) %>%
+                mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
+                mutate(procedures_by_level_repeating_complete = "Complete") %>%
+                select(record_id, redcap_event_name, everything())
+            
+            importRecords(rcon = rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
+            
+            incProgress(1/number_of_steps, detail = paste("Uploading Implant Data"))
+            
+            ##### uploaded screw details #######
+            if(nrow(screw_details_redcap_df_reactive())>0){
+                screw_details_repeating <- screw_details_redcap_df_reactive() %>%
+                    mutate(record_id = record_number) %>%
+                    mutate(redcap_event_name = "surgery_arm_1") %>%
+                    mutate(redcap_repeat_instance = row_number() +screw_details_repeating_instance_add) %>%
+                    mutate(redcap_repeat_instrument = "screw_details_repeating") %>%
+                    mutate(screw_details_repeating_complete = "Complete") %>%
+                    select(record_id, redcap_event_name, everything())
+                
+                importRecords(rcon = rcon, data = screw_details_repeating, returnContent = "count")
+            }
+            
+            incProgress(1/number_of_steps, detail = paste("Uploading Implant Data"))
+            
+            ##### uploaded interbody details #######
+            if(nrow(interbody_details_redcap_df_reactive())>0){
+                interbody_implant_repeating <- interbody_details_redcap_df_reactive() %>%
+                    mutate(record_id = record_number) %>%
+                    select(record_id, everything()) %>%
+                    mutate(redcap_event_name = "surgery_arm_1") %>%
+                    mutate(redcap_repeat_instance = row_number() + interbody_implant_repeating_instance_add) %>%
+                    mutate(redcap_repeat_instrument = "interbody_implant_repeating") %>%
+                    mutate(interbody_implant_repeating_complete = "Complete") %>%
+                    mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+                    select(record_id, redcap_event_name, everything())
+                
+                importRecords(rcon = rcon, data = interbody_implant_repeating, returnContent = "count")
+            }
+            
+            incProgress(1/number_of_steps, detail = paste("Complete"))
+            
+        })
+
         sendSweetAlert(
             session = session,
             title = "Success !!",
@@ -5665,35 +6131,7 @@ server <- function(input, output, session) {
         )
     })
     
-    
-    # #########    #################################################### Try using Tabs #############    ############################################    ############################################
-    output$patient_details_redcap_df_tab <- renderTable({
-        row_1 <- patient_details_redcap_df_reactive() %>%
-            slice(1) %>%
-            as.character()
-        
-        tibble(Variable = names(patient_details_redcap_df_reactive()), 
-               Result = row_1) 
-        
-    })
-    output$surgery_summary_table_tab <- renderTable({
-        summary_table_for_redcap_reactive()
-    })
-    
-    output$redcap_details_wide_df_tab <- renderTable({
-        procedures_by_level_repeating_df_reactive()
-    })
-    output$interbody_details_table_tab <- renderTable({
-        interbody_details_table_redcap_reactive()
-    })
-    
-    output$pedicle_screw_details_table_tab <- renderTable({
-        if(nrow(screw_details_results_reactive_df())>0){
-            pedicle_screw_details_table_redcap_reactive()
-        }else{
-            tibble(redcap_repeat_instance = character(), redcap_repeat_instrument = character(), screw_level = character(), screw_side = character(), screw_type = character(), screw_size = character(), screw_size_type = character())
-        }
-    })  
+
     
     
     ############################################    ##    ############################################    ############################################    ############################################    ############################################
@@ -5702,7 +6140,7 @@ server <- function(input, output, session) {
     
     task_items_reactive_list$upload_to_redcap <- 0
     
-    observeEvent(input$confirm_upload_1, {
+    observeEvent(input$confirm_upload_final, {
         task_items_reactive_list$upload_to_redcap <- 100
     })
     

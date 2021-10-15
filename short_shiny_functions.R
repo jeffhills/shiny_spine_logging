@@ -23,6 +23,40 @@ jh_reorder_levels_function <- function(level_vector){
     as_vector()
   return(levels)
 }
+
+# ## for screw sizes
+# screw_levels_vector <- c('Occiput', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'S1', 'Iliac', 'S2AI')
+# 
+# screw_input_labels_df <- tibble(level = str_to_lower(screw_levels_vector), diameter_text = "_screw_diameter", length_text = "_screw_length") %>%
+#   mutate(screw_diameter_label = str_to_lower(paste0(level, diameter_text))) %>%
+#   mutate(screw_length_label = str_to_lower(paste0(level, length_text))) %>%
+#   select(level, screw_diameter_label, screw_length_label)
+screw_label_vector <- c('occiput_left_occipital_screw', 'occiput_right_occipital_screw', 'c1_left_lateral_mass_screw', 'c1_right_lateral_mass_screw', 'c1_left_translaminar_screw', 'c1_right_translaminar_screw', 'c2_left_pars_screw', 'c2_right_pars_screw', 'c2_left_pedicle_screw', 'c2_right_pedicle_screw', 'c2_left_transarticular_screw', 'c2_right_transarticular_screw', 'c2_left_translaminar_screw', 'c2_right_translaminar_screw', 'c2_central_screw_washer', 'c3_left_lateral_mass_screw', 'c3_right_lateral_mass_screw', 'c3_left_pedicle_screw', 'c3_right_pedicle_screw', 'c3_left_translaminar_screw', 'c3_right_translaminar_screw', 'c3_central_screw_washer', 'c4_left_lateral_mass_screw', 'c4_right_lateral_mass_screw', 'c4_left_pedicle_screw', 'c4_right_pedicle_screw', 'c4_left_translaminar_screw', 'c4_right_translaminar_screw', 'c4_central_screw_washer', 'c5_left_lateral_mass_screw', 'c5_right_lateral_mass_screw', 'c5_left_pedicle_screw', 'c5_right_pedicle_screw', 'c5_left_translaminar_screw', 'c5_right_translaminar_screw', 'c5_central_screw_washer', 'c6_left_lateral_mass_screw', 'c6_right_lateral_mass_screw', 'c6_left_pedicle_screw', 'c6_right_pedicle_screw', 'c6_left_translaminar_screw', 'c6_right_translaminar_screw', 'c6_central_screw_washer', 'c7_left_lateral_mass_screw', 'c7_right_lateral_mass_screw', 'c7_left_pedicle_screw', 'c7_right_pedicle_screw', 'c7_left_translaminar_screw', 'c7_right_translaminar_screw', 'c7_central_screw_washer', 't1_left_pedicle_screw', 't1_right_pedicle_screw', 't1_left_translaminar_screw', 't1_right_translaminar_screw', 't1_central_screw_washer', 't2_left_pedicle_screw', 't2_right_pedicle_screw', 't2_left_translaminar_screw', 't2_right_translaminar_screw', 't2_central_screw_washer', 't3_left_pedicle_screw', 't3_right_pedicle_screw', 't3_left_translaminar_screw', 't3_right_translaminar_screw', 't3_central_screw_washer', 't4_left_pedicle_screw', 't4_right_pedicle_screw', 't4_left_translaminar_screw', 't4_right_translaminar_screw', 't4_central_screw_washer', 't5_left_pedicle_screw', 't5_right_pedicle_screw', 't5_left_translaminar_screw', 't5_right_translaminar_screw', 't5_central_screw_washer', 't6_left_pedicle_screw', 't6_right_pedicle_screw', 't6_left_translaminar_screw', 't6_right_translaminar_screw', 't6_central_screw_washer', 't7_left_pedicle_screw', 't7_right_pedicle_screw', 't7_left_translaminar_screw', 't7_right_translaminar_screw', 't7_central_screw_washer', 't8_left_pedicle_screw', 't8_right_pedicle_screw', 't8_left_translaminar_screw', 't8_right_translaminar_screw', 't8_central_screw_washer', 't9_left_pedicle_screw', 't9_right_pedicle_screw', 't9_left_translaminar_screw', 't9_right_translaminar_screw', 't9_central_screw_washer', 't10_left_pedicle_screw', 't10_right_pedicle_screw', 't10_left_translaminar_screw', 't10_right_translaminar_screw', 't10_central_screw_washer', 't11_left_pedicle_screw', 't11_right_pedicle_screw', 't11_left_translaminar_screw', 't11_right_translaminar_screw', 't11_central_screw_washer', 't12_left_pedicle_screw', 't12_right_pedicle_screw', 't12_left_translaminar_screw', 't12_right_translaminar_screw', 't12_central_screw_washer', 'l1_left_pedicle_screw', 'l1_right_pedicle_screw', 'l1_left_translaminar_screw', 'l1_right_translaminar_screw', 'l1_central_screw_washer', 'l2_left_pedicle_screw', 'l2_right_pedicle_screw', 'l2_left_translaminar_screw', 'l2_right_translaminar_screw', 'l2_central_screw_washer', 'l3_left_pedicle_screw', 'l3_right_pedicle_screw', 'l3_left_translaminar_screw', 'l3_right_translaminar_screw', 'l3_central_screw_washer', 'l4_left_pedicle_screw', 'l4_right_pedicle_screw', 'l4_left_translaminar_screw', 'l4_right_translaminar_screw', 'l4_central_screw_washer', 'l5_left_pedicle_screw', 'l5_right_pedicle_screw', 'l5_left_translaminar_screw', 'l5_right_translaminar_screw', 'l5_central_screw_washer', 's1_left_pedicle_screw', 's1_right_pedicle_screw', 's1_central_screw_washer', 'iliac_left_pelvic_screw', 'iliac_right_pelvic_screw', 's2ai_left_pelvic_screw', 's2ai_right_pelvic_screw')
+
+screw_label_level_vector <- c('Occiput', 'Occiput', 'C1', 'C1', 'C1', 'C1', 'C2', 'C2', 'C2', 'C2', 'C2', 'C2', 'C2', 'C2', 'C2', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C5', 'C5', 'C5', 'C5', 'C5', 'C5', 'C5', 'C6', 'C6', 'C6', 'C6', 'C6', 'C6', 'C6', 'C7', 'C7', 'C7', 'C7', 'C7', 'C7', 'C7', 'T1', 'T1', 'T1', 'T1', 'T1', 'T2', 'T2', 'T2', 'T2', 'T2', 'T3', 'T3', 'T3', 'T3', 'T3', 'T4', 'T4', 'T4', 'T4', 'T4', 'T5', 'T5', 'T5', 'T5', 'T5', 'T6', 'T6', 'T6', 'T6', 'T6', 'T7', 'T7', 'T7', 'T7', 'T7', 'T8', 'T8', 'T8', 'T8', 'T8', 'T9', 'T9', 'T9', 'T9', 'T9', 'T10', 'T10', 'T10', 'T10', 'T10', 'T11', 'T11', 'T11', 'T11', 'T11', 'T12', 'T12', 'T12', 'T12', 'T12', 'L1', 'L1', 'L1', 'L1', 'L1', 'L2', 'L2', 'L2', 'L2', 'L2', 'L3', 'L3', 'L3', 'L3', 'L3', 'L4', 'L4', 'L4', 'L4', 'L4', 'L5', 'L5', 'L5', 'L5', 'L5', 'S1', 'S1', 'S1', 'Iliac', 'Iliac', 'S2AI', 'S2AI')
+
+
+screw_label_object <- c('occipital_screw', 'occipital_screw', 'lateral_mass_screw', 'lateral_mass_screw', 'translaminar_screw', 'translaminar_screw', 'pars_screw', 'pars_screw', 'pedicle_screw', 'pedicle_screw', 'transarticular_screw', 'transarticular_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'lateral_mass_screw', 'lateral_mass_screw', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'lateral_mass_screw', 'lateral_mass_screw', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'lateral_mass_screw', 'lateral_mass_screw', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'lateral_mass_screw', 'lateral_mass_screw', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'lateral_mass_screw', 'lateral_mass_screw', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'translaminar_screw', 'translaminar_screw', 'screw_washer', 'pedicle_screw', 'pedicle_screw', 'screw_washer', 'pelvic_screw', 'pelvic_screw', 'pelvic_screw', 'pelvic_screw')
+
+# screw_size_labels_df <- tibble(level = screw_label_level_vector, screw_label = screw_label_vector, object = screw_label_object) %>%
+#   filter(str_detect(screw_label, "central", negate = TRUE)) %>%
+#   mutate(side = if_else(str_detect(screw_label, "left"), "left", "right")) %>%
+#   mutate(screw_diameter_label = paste(screw_label, "diameter", sep = "_")) %>%
+#   mutate(screw_length_label = paste(screw_label, "length", sep = "_"))  %>%
+#   mutate(value = 0)
+
+# screw_label_level_long_df <- tibble(level = screw_label_level_vector, screw_label = screw_label_vector) %>%
+#   filter(str_detect(screw_label, "central", negate = TRUE)) %>%
+#   mutate(side = if_else(str_detect(screw_label, "left"), "left", "right")) %>%
+#   mutate(screw_diameter_label = paste(screw_label, "diameter", sep = "_")) %>%
+#   mutate(screw_length_label = paste(screw_label, "length", sep = "_")) 
+
+
+screw_size_labels_df <- tibble(level = screw_label_level_vector, screw_label = screw_label_vector) %>%
+  mutate(screw_diameter_label = paste(screw_label, "diameter", sep = "_")) %>%
+  mutate(screw_length_label = paste(screw_label, "length", sep = "_"))
+
+
 #################################
 jh_convert_body_levels_to_interspace_vector_function <- function(vertebral_bodies_vector){
   levels_vector <- unique(
@@ -1154,20 +1188,21 @@ make_interbody_ui_function <-  function(level = NULL){
 
 ##########################################  MAKE UI's FOR screw ##################### ##################### 
 ##########################################  MAKE UI's FOR screw ##################### ##################### 
-make_screw_sizes_ui_function <-  function(level = NULL, left_screw_level = "no_screw", right_screw_level = "no_screw", left_selected = "Unknown", right_selected = "Unknown"){
-  if(left_screw_level != "no_screw"){
-    left_diameter <- numericInput(inputId = glue("left_{str_to_lower(level)}_screw_diameter"), label = NULL, value = NULL, min = 1, max = 12, step = 0.5
+make_screw_sizes_ui_function <-  function(level = NULL, left_screw = "no_screw", right_screw = "no_screw", left_diameter = " ", left_length = " ", right_diameter = " ", right_length = " "){
+  if(left_screw != "no_screw"){
+    left_diameter <- numericInput(inputId = glue("left_{str_to_lower(level)}_screw_diameter"), label = NULL, value = left_diameter, min = 1, max = 12, step = 0.5
     ) 
-    left_length <- numericInput(inputId = glue("left_{str_to_lower(level)}_screw_length"), label = NULL, value = NULL, min = 1, max = 140, step = 5
+    left_length <- numericInput(inputId = glue("left_{str_to_lower(level)}_screw_length"), label = NULL, value = left_length, min = 1, max = 140, step = 5
     ) 
   }else{
     left_diameter <- NULL
     left_length <- NULL
   }
-  if(right_screw_level != "no_screw"){
-    right_diameter <- numericInput(inputId = glue("right_{str_to_lower(level)}_screw_diameter"), label = NULL, value = NULL, min = 1, max = 12, step = 0.5
+  
+  if(right_screw != "no_screw"){
+    right_diameter <- numericInput(inputId = glue("right_{str_to_lower(level)}_screw_diameter"), label = NULL, value = right_diameter, min = 1, max = 12, step = 0.5
     ) 
-    right_length <- numericInput(inputId = glue("right_{str_to_lower(level)}_screw_length"), label = NULL, value = NULL, min = 1, max = 140, step = 5
+    right_length <- numericInput(inputId = glue("right_{str_to_lower(level)}_screw_length"), label = NULL, value = right_length, min = 1, max = 140, step = 5
     ) 
   }else{
     right_diameter <- NULL
