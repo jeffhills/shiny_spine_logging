@@ -7,9 +7,6 @@ vertebral_numbers_vector <- c(0,0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 
 
 levels_numbered_df <- tibble(level = levels_vector, vertebral_number = vertebral_numbers_vector)
 
-# levels_numbered_df %>%
-#   mutate(body_interspace = jh_check_body_or_interspace_function(level = level)) %>%
-#   filter(body_interspace == "body")
 
 vertebral_bodies_vector <- c('C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'S1')
 

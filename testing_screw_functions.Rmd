@@ -227,11 +227,22 @@ t3 %>%
 
 
 ```{r}
+implants_for_testing_df <- all_implants_constructed_df %>%
+  select(level, object, side, vertebral_number) %>%
+  filter(object == "pedicle_screw") %>%
+  mutate(level_side_object = paste(level, side, object, sep = "_"))
+
+implants_for_testing_df
+
+```
+
+
+```{r}
 ui <- shinyUI(basicPage(
   
   column(12, 
          fluidRow(
-    pickerInput(inputId = "screws", label = "choose", choices = (screw_size_labels_df %>% filter(object == "pedicle_screw"))$screw_label, multiple = TRUE)
+    pickerInput(inputId = "screws", label = "choose", choices = implants_for_testing_df$level_side_object, multiple = TRUE)
   ),
   br(),
   fluidRow(
@@ -239,7 +250,7 @@ ui <- shinyUI(basicPage(
   ), 
   br(), 
   fluidRow(
-    uiOutput(outputId = "screws_input_ui")
+    uiOutput(outputId = "screw_details_ui")
   ), 
   br(), 
   fluidRow(
@@ -252,113 +263,93 @@ ui <- shinyUI(basicPage(
 server <- function(input, output) {
 
     
-  reactive_options_df <- reactive({
-    
-    trimmed_df <- tibble(screw_label = input$screws) %>%
-      left_join(screw_size_labels_df)
-      tibble(screw_label = input$screws) %>%
-      left_join(screw_size_labels_df) 
-  
-      wide_df <- trimmed_df %>% 
-        left_join(screw_size_labels_df) %>%
-        filter(side == "left") %>%
-        select(level, left_diameter = screw_diameter_label, left_length = screw_length_label, value) %>%
-        full_join(trimmed_df %>% 
-                    left_join(screw_size_labels_df) %>%
-                    filter(side == "right") %>%
-                    select(level, right_diameter = screw_diameter_label, right_length = screw_length_label, value))
 
-  # full_df <- trimmed_df %>%
-  #   filter(side == "left") %>%
-  #   mutate(left_diameter = screw_diameter_label) %>%
-  #   mutate(left_length = screw_length_label) %>%
-  #   select(level, left_diameter, left_length) %>%
-  #   full_join(trimmed_df %>%
-  #               filter(side == "right") %>%
-  #               mutate(right_diameter = screw_diameter_label) %>%
-  #               mutate(right_length = screw_length_label)%>%
-  #               select(level, right_diameter, right_length)) %>%
-  #   replace_na(list(left_diameter = "xx", left_length = "xx", right_diameter = "xx", right_length = "xx")) %>%
-  #   distinct()
-  
-      # if(any(names(wide_df) == "left") == FALSE){
-      #   wide_df <- wide_df %>%
-      #     mutate(left = "no_screw")
-      # }
-      # 
-      # if(any(names(wide_df) == "right") == FALSE){
-      #   wide_df <- wide_df %>%
-      #     mutate(right = "no_screw")
-      # }
-      wide_df$left_diameter <- replace_na(data = wide_df$left_diameter, replace = "no_screw")
-      wide_df$left_length <- replace_na(data = wide_df$left_length, replace = "no_screw")
-      wide_df$right_diameter <- replace_na(data = wide_df$right_diameter, replace = "no_screw")
-      wide_df$right_length <- replace_na(data = wide_df$right_length, replace = "no_screw")
-  wide_df
+
+  wide_active_implants_df_reactive <- reactive({
+          if(length(input$screws)>0){
+        implants_wide_df <- tibble(level_side_object = input$screws) %>%
+          left_join(implants_for_testing_df) %>%
+          select(level, vertebral_number, object, side, level_side_object) %>%
+          distinct() %>%
+          filter(str_detect(object, "screw")) %>%
+          arrange(vertebral_number) %>%
+          mutate(level_side = str_to_lower(paste(level, side, object, sep = "_"))) %>%
+          select(level, level_side, side) %>%
+          pivot_wider(names_from = side, values_from = level_side) %>%
+          mutate(across(everything(), ~ replace_na(.x, "no_screw")))
+        if(any(names(implants_wide_df) == "left") == FALSE){
+          implants_wide_df <-  implants_wide_df %>%
+            mutate(left = "no_screw")
+        }
+        
+        if(any(names(implants_wide_df) == "right") == FALSE){
+          implants_wide_df <-  implants_wide_df %>%
+            mutate(left = "no_screw")
+        }
+        
+         implants_wide_df <-  implants_wide_df %>%
+          mutate(left_diameter_label = paste0(left, "_diameter")) %>%
+          mutate(left_length_label = paste0(left, "_length")) %>%
+          mutate(right_diameter_label = paste0(right, "_diameter")) %>%
+          mutate(right_length_label = paste0(right, "_length")) 
+        
+          }else{
+            implants_wide_df <- tibble(level = character(), left = character(), right = character(), 
+                                       left_diameter_label = character(), left_length_label = character(),
+                                       right_diameter_label = character(), right_length_label = character())
+          }
+    implants_wide_df
   })
-
   
-  output$full_table <- renderTable({reactive_options_df()})
+  output$full_table <- renderTable({wide_active_implants_df_reactive()})
   
-  output$screws_input_ui <- renderUI({
+  
+        ################------------------  Screw Size Details UI  ----------------------######################  
+    output$screw_details_ui <- renderUI({
+      if(length(input$screws)>0){
+        implants_wide_df <- wide_active_implants_df_reactive()
+      column(width = 12,
+                   h4("Screw Sizes:"),
+                   tags$table(
+                       tags$tr(width = "100%",
+                               tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Level")),
+                               tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Diameter")),
+                               tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Length")),
+                               tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Diameter")),
+                               tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Length"))
+                       ),
+                       pmap(.l = list(..1 = implants_wide_df$level,
+                                      ..2 = implants_wide_df$left,
+                                      ..3 = implants_wide_df$right 
+                                      # ..4 = levels_count,
+                                      # ..5 = results$left_diameter,
+                                      # ..6 = results$left_length,
+                                      # ..7 = results$right_diameter,
+                                      # ..8 = results$right_length
+                                      ),
+                            .f = ~make_screw_sizes_ui_function(level = ..1, 
+                                                               left_screw = ..2, 
+                                                               right_screw = ..3
+                                                               # left_diameter = ..5,
+                                                               # left_length = ..6,
+                                                               # right_diameter = ..7,
+                                                               # right_length = ..8
+                                                               # left_selected = input[[left_vector[..4]]],   ## using this subsetting
+                                                               # right_selected = input[[right_vector[..4]]]
+                            ))
+                   )
+      )
+    }else{
+      NULL
+    }
       
-    full_df <- reactive_options_df() %>%
-      left_join(results())
-    
-  
-  tags$table(
-    pmap(.l = list(..1 = full_df$level, 
-                   ..2 = full_df$left_diameter,
-                   ..3 = full_df$left_length,
-                   ..4 = full_df$right_diameter,
-                   ..5 = full_df$right_length, 
-                   ..6 = full_df$left_diameter_value),
-         .f = ~
-           tags$tr(width = "100%", 
-                   tags$td(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center; padding-bottom:10px", paste(..1))),
-                   tags$td(width = "10%", div(
-                     if(..2 == "no_screw"){
-                       NULL
-                     }else{
-                       numericInput(inputId = ..2, label = NULL, value = ..6, min = 1, max = 12, step = 0.5)
-                     }
-                   )
-                   ),
-                   tags$td(width = "10%", div(
-                     if(..3 == "no_screw"){
-                       NULL
-                     }else{
-                       numericInput(inputId = ..3, label = NULL, value = NULL, min = 1, max = 12, step = 0.5)
-                     }
-                   )
-                   ),
-                   tags$td(width = "10%", div( 
-                     if(..4 == "no_screw"){
-                       NULL
-                     }else{
-                       numericInput(inputId = ..4, label = NULL, value = NULL, min = 1, max = 12, step = 0.5)
-                     }
-                   )
-                   ),
-                   tags$td(width = "10%", div(
-                     if(..5 == "no_screw"){
-                       NULL
-                     }else{
-                       numericInput(inputId = ..5, label = NULL, value = NULL, min = 1, max = 12, step = 0.5)
-                     }
-                   )
-                   )
-           )
-    )
-  )
-  
   })
   
-  
+
   results <- reactive({
       if(nrow(reactive_options_df()) > 0){
     
-    full_df <- reactive_options_df() %>% 
+    full_df <- wide_active_implants_df_reactive() %>% 
       select(level, left_diameter, left_length, right_diameter, right_length) %>%
       pivot_longer(cols = -level, names_to = "label", values_to = "value") %>%
       filter(value != "no_screw") %>%
@@ -516,5 +507,486 @@ tags$table(
 
 ```
 
+
+
+```{r}
+
+jh_generate_test_screw_df <- function(full_df, levels_vector){
+  full_df %>%
+    filter(str_detect(object, "pedicle_screw")) %>%
+  filter(level %in% levels_vector) %>%
+    select(level, vertebral_number, side, object)
+    
+}
+```
+
+
+```{r}
+possible_objects_long_df <- all_implants_constructed_df %>%
+  filter(str_detect(object, "screw")) %>%
+  select(level, vertebral_number, side, object) %>%
+  mutate(level_side_object = paste(level, side, object,sep = "_")) %>%
+  mutate(level_side_object = str_to_lower(level_side_object)) %>%
+  mutate(object_diameter_label = paste(level_side_object, "diameter", sep = "_")) %>%
+  mutate(object_length_label = paste(level_side_object, "length", sep = "_")) %>%
+  arrange(vertebral_number)
+
+
+left_possible_objects_df_long <- possible_objects_long_df %>%
+  filter(side == "left")
+
+right_possible_objects_df_long <- possible_objects_long_df %>%
+  filter(side == "right")
+
+# left_diameter <- numericInput(inputId = glue("left_{str_to_lower(level)}_screw_diameter"), label = NULL, value = left_diameter, min = 1, max = 12, step = 0.5) 
+
+
+screw_diameter_left_input_list <- map(.x = left_possible_objects_df_long$object_diameter_label, .f = ~ numericInput(inputId = .x, label = NULL, value = 0, min = 1, max = 12, step = 0.5))
+
+names(screw_diameter_left_input_list) <- left_possible_objects_df_long$object_diameter_label
+
+screw_length_left_input_list <- map(.x = left_possible_objects_df_long$object_length_label, .f = ~ numericInput(inputId = .x, label = NULL, value = 0, min = 1, max = 12, step = 0.5))
+
+screw_length_left_input_list$c2_left_translaminar_screw_length
+
+names(screw_length_left_input_list) <- left_possible_objects_df_long$object_length_label
+
+
+left_length_shiny_object_df <- enframe(screw_length_left_input_list) %>%
+  rename(left_length = value) %>%
+  mutate(level_side_object = str_remove_all(string = name, pattern = "_length")) %>%
+  select(level_side_object, object_label_length = name, left_length_shiny = left_length)
+
+left_diameter_shiny_object_df <- enframe(screw_diameter_left_input_list) %>%
+  rename(left_diameter = value) %>%
+  mutate(level_side_object = str_remove_all(string = name, pattern = "_diameter")) %>%
+  select(level_side_object, object_label_diameter = name, left_diameter_shiny = left_diameter)
+
+
+
+screw_diameter_right_input_list <- map(.x = right_possible_objects_df_long$object_diameter_label, .f = ~ numericInput(inputId = .x, label = NULL, value = 0, min = 1, max = 12, step = 0.5))
+
+names(screw_diameter_right_input_list) <- right_possible_objects_df_long$object_diameter_label
+
+screw_length_right_input_list <- map(.x = right_possible_objects_df_long$object_length_label, .f = ~ numericInput(inputId = .x, label = NULL, value = 0, min = 1, max = 12, step = 0.5))
+
+names(screw_length_right_input_list) <- right_possible_objects_df_long$object_length_label
+
+right_length_shiny_object_df
+right_length_shiny_object_df <- enframe(screw_length_right_input_list) %>%
+  rename(right_length = value) %>%
+  mutate(level_side_object = str_remove_all(string = name, pattern = "_length")) %>%
+  select(level_side_object, object_label_length = name, right_length_shiny = right_length)
+
+right_diameter_shiny_object_df <- enframe(screw_diameter_right_input_list) %>%
+  rename(right_diameter = value) %>%
+  mutate(level_side_object = str_remove_all(string = name, pattern = "_diameter")) %>%
+  select(level_side_object, object_label_diameter = name, right_diameter_shiny = right_diameter)
+right_diameter_shiny_object_df
+
+all_left_screws_input_df <- left_diameter_shiny_object_df %>%
+  left_join(left_length_shiny_object_df)%>%
+  mutate(level_lower = level_side_object) %>%
+  separate(col = level_lower, into = c("level_lower", "othero"), sep = "_left_") %>%
+  left_join((levels_numbered_df %>%
+  filter(str_detect(level, "-", negate = TRUE)) %>%
+  mutate(level_lower = str_to_lower(level)))) %>%
+  select(level, left_level_object = level_side_object, left_label_diameter = object_label_diameter, left_label_length = object_label_length, left_diameter_shiny, left_length_shiny)
+
+all_right_screws_input_df <- right_diameter_shiny_object_df %>%
+  right_join(right_length_shiny_object_df)%>%
+  mutate(level_lower = level_side_object) %>%
+  separate(col = level_lower, into = c("level_lower", "othero"), sep = "_right_") %>%
+  left_join((levels_numbered_df %>%
+  filter(str_detect(level, "-", negate = TRUE)) %>%
+  mutate(level_lower = str_to_lower(level)))) %>%
+  select(level, right_level_object = level_side_object, right_label_diameter = object_label_diameter, right_label_length = object_label_length, right_diameter_shiny, right_length_shiny)
+
+
+all_screws_input_df <- all_left_screws_input_df %>%
+  left_join(all_right_screws_input_df)
+
+all_screws_input_df
+
+
+```
+
+
+```{r}
+left_test_objects_chosen_vector <- c("l3_left_pedicle_screw", "l4_left_pedicle_screw")
+
+right_test_objects_chosen_vector <- c("l3_right_pedicle_screw", "l4_right_pedicle_screw")
+
+tibble(left_level_object = left_test_objects_chosen_vector)
+
+```
+
+
+
+
+```{r}
+# test_df <- jh_generate_test_screw_df(full_df = all_implants_constructed_df, levels_vector = c("L3", "L4", "L5")) %>%
+#   left_join(all_shiny_screw_options_long_df)
+
+possible_objects_long_df <- all_implants_constructed_df %>%
+  filter(str_detect(object, "screw")) %>%
+  select(level, vertebral_number, side, object) %>%
+  mutate(level_side_object = paste(level, side, object,sep = "_")) %>%
+  mutate(level_side_object = str_to_lower(level_side_object)) %>%
+  mutate(object_diameter_label = paste(level_side_object, "diameter", sep = "_")) %>%
+  mutate(object_length_label = paste(level_side_object, "length", sep = "_")) %>%
+  arrange(vertebral_number) %>%
+  select(level, vertebral_number, object, side, level_side_object)
+
+
+all_shiny_screw_options_long_df <- possible_objects_long_df %>%
+  mutate(diameter_label = paste(level_side_object, "_diameter", sep = "")) %>%
+  mutate(length_label = paste(level_side_object, "_length", sep = "")) %>%
+  mutate(diameter_input = map(.x = diameter_label, .f = ~numericInput(inputId = .x, label = NULL, value = 0))) %>%
+  mutate(length_input = map(.x = length_label, .f = ~numericInput(inputId = .x, label = NULL, value = 0)))
+
+left_input_options_df <- all_shiny_screw_options_long_df %>%
+  filter(side == "left") %>%
+  select(level, left_diameter_label = diameter_label, left_diameter_input = diameter_input, left_length_label = length_label, left_length_input = length_input) %>%
+  mutate(count = row_number())
+
+
+right_input_options_df <- all_shiny_screw_options_long_df %>%
+  filter(side == "right") %>%
+  select(level, right_diameter_label = diameter_label, right_diameter_input = diameter_input, right_length_label = length_label, right_length_input = length_input)%>%
+  mutate(count = row_number())
+
+
+wide_options <- left_input_options_df %>%
+  left_join(right_input_options_df) %>%
+  mutate(left_object = str_remove_all(left_diameter_label, "_diameter")) %>%
+  mutate(right_object = str_remove_all(right_diameter_label, "_diameter")) %>%
+  mutate(object = str_remove_all(right_object, "right_"))%>%
+  mutate(object_label = str_to_title(str_replace_all(object, "_", " ")))
+
+wide_options
+
+left_input_diameter_list <- wide_options$left_diameter_input
+names(left_input_diameter_list) <- wide_options$left_diameter_label
+
+left_input_length_list <- wide_options$left_length_input
+names(left_input_length_list) <- wide_options$left_length_label
+
+right_input_diameter_list <- wide_options$right_diameter_input
+names(right_input_diameter_list) <- wide_options$right_diameter_label
+
+right_input_length_list <- wide_options$right_length_input
+names(right_input_length_list) <- wide_options$right_length_label
+
+wide_options
+```
+
+
+```{r}
+table_row_list <- pmap(.l = 
+                         list(
+                           ..1 = wide_options$level, 
+                           ..2 = wide_options$object_label,
+                           ..3 = left_input_diameter_list,
+                           ..4 = left_input_length_list,
+                           ..5 = right_input_diameter_list,
+                           ..6 = right_input_length_list
+                           ), 
+                       .f = ~ tags$tr(width = "100%", 
+                                      tags$td(width = "10%", div(style = "font-size:12px; font-weight:bold; text-align:center; padding-bottom:10px", paste(..2))),
+                                      tags$td(width = "10%", div(
+                                        ..3
+                                      )
+                                      ),
+                                      tags$td(width = "10%", div(
+                                        ..4
+                                      )
+                                      ),
+                                      tags$td(width = "10%", div( 
+                                        ..5
+                                      )
+                                      ),
+                                      tags$td(width = "10%", div(
+                                        ..6
+                                      )
+                                      )
+                       )
+)
+
+names(table_row_list) <- wide_options$object
+
+test_vector_objects <- c("l3_pedicle_screw", "l4_pedicle_screw")
+```
+
+
+```{r}
+jh_filtering_screw_options_function <- function(every_option_df){
+  
+}
+
+
+
+table_row_list <- pmap(.l = 
+                         list(
+                           ..1 = wide_options$level, 
+                           ..2 = wide_options$object_label,
+                           ..3 = left_input_diameter_list,
+                           ..4 = left_input_length_list,
+                           ..5 = right_input_diameter_list,
+                           ..6 = right_input_length_list
+                           ), 
+                       .f = ~ tags$tr(width = "100%", 
+                                      tags$td(width = "10%", div(style = "font-size:12px; font-weight:bold; text-align:center; padding-bottom:10px", paste(..2))),
+                                      tags$td(width = "10%", div(
+                                        ..3
+                                      )
+                                      ),
+                                      tags$td(width = "10%", div(
+                                        ..4
+                                      )
+                                      ),
+                                      tags$td(width = "10%", div( 
+                                        ..5
+                                      )
+                                      ),
+                                      tags$td(width = "10%", div(
+                                        ..6
+                                      )
+                                      )
+                       )
+)
+
+names(table_row_list) <- wide_options$object
+
+test_vector_objects <- c("l3_pedicle_screw", "l4_pedicle_screw")
+
+
+```
+
+
+```{r}
+
+tags$table(
+  map(.x = test_vector_objects, .f = ~ table_row_list[[.x]])
+  
+)
+
+# condition = 'input.control && input.control.indexOf("a") > -1'
+function()
+
+names(table_row_list)
+```
+
+```{r}
+
+ui <- shinyUI(basicPage(
+  
+  column(width = 12,
+         pickerInput(inputId = "screw_options", label = "Select Screws", choices = names(table_row_list), multiple = TRUE), 
+         br(), 
+         uiOutput(outputId = "screw_choices_ui")
+         )
+  
+
+
+  
+))
+
+server <- function(input, output) {
+  
+  # selected_df_reactive <- reactive({
+  #   
+  # })
+  
+  output$screw_choices_ui <- renderUI({
+    
+    tags$table(
+  map(.x = input$screw_options, .f = ~ table_row_list[[.x]])
+  
+)
+    
+  })
+  
+  # output$selected_screws_table <- renderTable({selected_df_reactive()})
+}
+
+
+shinyApp(ui = ui, server = server)
+
+```
+
+
+
+```{r}
+left_possible_objects_df_long <- possible_objects_long_df %>%
+  filter(side == "left")
+
+right_possible_objects_df_long <- possible_objects_long_df %>%
+  filter(side == "right")
+
+
+
+
+screw_diameter_left_input_list <- map(.x = left_possible_objects_df_long$object_diameter_label, .f = ~ numericInput(inputId = .x, label = NULL, value = 0, min = 1, max = 12, step = 0.5))
+
+names(screw_diameter_left_input_list) <- left_possible_objects_df_long$object_diameter_label
+
+screw_length_left_input_list <- map(.x = left_possible_objects_df_long$object_length_label, .f = ~ numericInput(inputId = .x, label = NULL, value = 0, min = 1, max = 12, step = 0.5))
+
+screw_length_left_input_list$c2_left_translaminar_screw_length
+
+names(screw_length_left_input_list) <- left_possible_objects_df_long$object_length_label
+
+
+left_length_shiny_object_df <- enframe(screw_length_left_input_list) %>%
+  rename(left_length = value) %>%
+  mutate(level_side_object = str_remove_all(string = name, pattern = "_length")) %>%
+  select(level_side_object, object_label_length = name, left_length_shiny = left_length)
+
+left_diameter_shiny_object_df <- enframe(screw_diameter_left_input_list) %>%
+  rename(left_diameter = value) %>%
+  mutate(level_side_object = str_remove_all(string = name, pattern = "_diameter")) %>%
+  select(level_side_object, object_label_diameter = name, left_diameter_shiny = left_diameter)
+
+
+
+screw_diameter_right_input_list <- map(.x = right_possible_objects_df_long$object_diameter_label, .f = ~ numericInput(inputId = .x, label = NULL, value = 0, min = 1, max = 12, step = 0.5))
+
+names(screw_diameter_right_input_list) <- right_possible_objects_df_long$object_diameter_label
+
+screw_length_right_input_list <- map(.x = right_possible_objects_df_long$object_length_label, .f = ~ numericInput(inputId = .x, label = NULL, value = 0, min = 1, max = 12, step = 0.5))
+
+names(screw_length_right_input_list) <- right_possible_objects_df_long$object_length_label
+
+right_length_shiny_object_df
+right_length_shiny_object_df <- enframe(screw_length_right_input_list) %>%
+  rename(right_length = value) %>%
+  mutate(level_side_object = str_remove_all(string = name, pattern = "_length")) %>%
+  select(level_side_object, object_label_length = name, right_length_shiny = right_length)
+
+right_diameter_shiny_object_df <- enframe(screw_diameter_right_input_list) %>%
+  rename(right_diameter = value) %>%
+  mutate(level_side_object = str_remove_all(string = name, pattern = "_diameter")) %>%
+  select(level_side_object, object_label_diameter = name, right_diameter_shiny = right_diameter)
+right_diameter_shiny_object_df
+
+```
+
+
+```{r}
+all_implants_constructed_df %>%
+  filter(level %in% c("L4", "L5"))
+
+left_objects_chosen <- jh_generate_test_screw_df(full_df = all_implants_constructed_df, c("L3", "L4", "L5")) %>%
+  mutate(left_level_object = str_to_lower(paste(level, object, sep = "_"))) %>%
+  filter(side == "left") %>%
+  select(level, left_level_side_object = left_level_object)
+
+right_objects_chosen <- jh_generate_test_screw_df(full_df = all_implants_constructed_df, c("L3", "L4", "L5")) %>%
+  mutate(level_side_object = str_to_lower(paste(level, object, sep = "_"))) %>%
+    filter(side == "right") %>%
+  select(level, right_level_side_object = level_side_object)
+
+right_objects_chosen
+
+
+all_screws_input_df
+left_objects_chosen
+left_objects_chosen %>%
+  left_join(right_objects_chosen) %>% 
+  left_join(all_screws_input_df)
+
+all_screws_input_df
+```
+
+condition = 'input.control && input.control.indexOf("a") > -1'
+
+```{r}
+
+ui <- shinyUI(basicPage(
+  
+  column(12, 
+         fluidRow(
+    pickerInput(inputId = "screws", label = "choose", choices = all_left_screws_input_df$level_side_object, multiple = TRUE)
+  ),
+  br(),
+  fluidRow(
+    tableOutput(outputId = "full_table")
+  ),
+  br(), 
+  fluidRow(
+    column(3, all_left_screws_input_df$left_diameter_shiny),
+    column(3, all_left_screws_input_df$left_length_shiny)
+    # uiOutput(outputId = "screw_details_ui")
+  ), 
+  br(), 
+  # fluidRow(
+  #   tableOutput(outputId = "results")
+  # )
+  )
+  
+))
+
+
+server <- function(input, output) {
+
+  wide_active_implants_df_reactive <- reactive({
+    
+     tibble(level_side_object = input$screws) %>%
+      left_join(all_left_screws_input_df)
+  })
+  
+  output$full_table <- renderTable({wide_active_implants_df_reactive()})
+  
+  
+  #       ################------------------  Screw Size Details UI  ----------------------######################  
+  #   output$screw_details_ui <- renderUI({
+  #     if(length(input$screws)>0){
+  #       implants_wide_df <- wide_active_implants_df_reactive()
+  #     column(width = 12,
+  #                  h4("Screw Sizes:"),
+  #                  tags$table(
+  #                      tags$tr(width = "100%",
+  #                              tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Level")),
+  #                              tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Diameter")),
+  #                              tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Length")),
+  #                              tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Diameter")),
+  #                              tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Length"))
+  #                      ),
+  #                      pmap(.l = list(..1 = implants_wide_df$level,
+  #                                     ..2 = implants_wide_df$left,
+  #                                     ..3 = implants_wide_df$right 
+  #                                     # ..4 = levels_count,
+  #                                     # ..5 = results$left_diameter,
+  #                                     # ..6 = results$left_length,
+  #                                     # ..7 = results$right_diameter,
+  #                                     # ..8 = results$right_length
+  #                                     ),
+  #                           .f = ~make_screw_sizes_ui_function(level = ..1, 
+  #                                                              left_screw = ..2, 
+  #                                                              right_screw = ..3
+  #                                                              # left_diameter = ..5,
+  #                                                              # left_length = ..6,
+  #                                                              # right_diameter = ..7,
+  #                                                              # right_length = ..8
+  #                                                              # left_selected = input[[left_vector[..4]]],   ## using this subsetting
+  #                                                              # right_selected = input[[right_vector[..4]]]
+  #                           ))
+  #                  )
+  #     )
+  #   }else{
+  #     NULL
+  #   }
+  #     
+  # })
+  
+  
+
+}
+
+
+shinyApp(ui = ui, server = server)
+
+```
 
 
