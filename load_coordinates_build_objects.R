@@ -12,19 +12,20 @@
 #############-----------------------   LOAD DATA  ----------------------###############
 spine_icd10_codes_df <- read_csv(file = "spine_icd_codes.csv")%>%
   mutate(spine_category = if_else(spine_category == "Deformity" & str_detect(diagnosis, pattern = "Infant|Juveni|Adolescent"), "Pediatric Deformity", spine_category)) %>%
-  mutate(category_number = if_else(spine_category == "Pediatric Deformity", 1.5, category_number))
+  mutate(category_number = if_else(spine_category == "Pediatric Deformity", 1.5, category_number)) %>% 
+  select(spine_category, category_number, site, diagnosis, icd10_code, site_number)
 
 diagnosis_categories_vector <- unique(spine_icd10_codes_df$spine_category)
 
-all_spine_diagnosis_choices_list <- list()
-
-all_spine_diagnosis_choices_list <- map(.x = diagnosis_categories_vector, .f = ~ (spine_icd10_codes_df %>% 
-                                                                                filter(spine_category == .x) %>%
-                                                                                select(spine_category, diagnosis) %>% 
-                                                                                pivot_wider(names_from = spine_category, values_from = diagnosis) %>% 
-                                                                                unnest())[[1]])
-
-names(all_spine_diagnosis_choices_list) <- diagnosis_categories_vector
+# all_spine_diagnosis_choices_list <- list()
+# 
+# all_spine_diagnosis_choices_list <- map(.x = diagnosis_categories_vector, .f = ~ (spine_icd10_codes_df %>% 
+#                                                                                 filter(spine_category == .x) %>%
+#                                                                                 select(spine_category, diagnosis) %>% 
+#                                                                                 pivot_wider(names_from = spine_category, values_from = diagnosis) %>% 
+#                                                                                 unnest())[[1]])
+# 
+# names(all_spine_diagnosis_choices_list) <- diagnosis_categories_vector
 
 spine_png <- image_read(path = "spine_posterior.png")
 

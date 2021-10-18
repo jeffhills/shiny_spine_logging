@@ -1376,7 +1376,15 @@ server <- function(input, output, session) {
                                           conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
                                                            tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply, including primary diagnosis and indication for revision)"))
                                    ),
-                                   uiOutput(outputId = "diagnosis_input_ui"),
+                                   column(width = 7,
+                                          pickerInput(inputId = "primary_diagnosis",
+                                                      label = "Diagnosis Search:",
+                                                      choices = (spine_icd10_codes_df %>% filter(spine_category == "Degenerative"))$diagnosis,
+                                                      options = pickerOptions(liveSearch = TRUE, virtualScroll = 200, liveSearchNormalize = TRUE),
+                                                      multiple = TRUE,
+                                                      selected = "")
+                                   ),
+                                   # uiOutput(outputId = "diagnosis_input_ui"),
                                ),
                                hr(), 
                                br(),
@@ -1465,9 +1473,7 @@ server <- function(input, output, session) {
             }
             
             showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = diagnosis_category, 
-                                                           primary_diagnosis_value = dx, 
-                                                           # diagnosis_choices = all_spine_diagnosis_choices_list,
-                                                           # symptoms_choices = symptoms_choices_list,
+                                                           primary_diagnosis_value = dx,
                                                            symptoms_initial_value = symptoms,
                                                            stage_number_value = input$stage_number,
                                                            staged_procedure_initial_value = FALSE,
@@ -1491,83 +1497,51 @@ server <- function(input, output, session) {
     ############ UPDATE DIAGNOSIS & SYMPTOMS OPTIONS ##############
 
     #### UPDATE DIAGNOSIS OPTIONS
-    output$diagnosis_input_ui <- renderUI({
-        ## first filter by region ##
-        spine_regions <- str_to_lower(paste(input$spinal_regions, collapse = ", "))
-        
-        building_diagnosis_choices_df <- spine_icd10_codes_df %>%
-            filter(site == "all")
-        
-        if(str_detect(spine_regions, "cervic")){
-            building_diagnosis_choices_df <- spine_icd10_codes_df %>%
-                filter(site_number == 4 | site_number == 5) %>%
-                union_all(building_diagnosis_choices_df)
-        }
-        
-        if(str_detect(spine_regions, "thoracic")){
-            if(str_detect(spine_regions, "cervic")){
-                building_diagnosis_choices_df <- spine_icd10_codes_df %>%
-                    filter(site_number > 2) %>%
-                    union_all(building_diagnosis_choices_df)
-            }else{
-                building_diagnosis_choices_df <- spine_icd10_codes_df %>%
-                    filter(site_number == 2 | site_number == 3) %>%
-                    union_all(building_diagnosis_choices_df)
+    
+    observeEvent(list(input$spinal_regions, input$diagnosis_category), ignoreInit = TRUE, {
+            spine_diagnosis_choices_list <-jh_generate_spine_diagnoses_choices_function(spine_regions_input_vector = input$spinal_regions,
+                                                         diagnosis_category_input_vector = input$diagnosis_category)
+
+            if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
+                age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+
+                if(age > 30){
+                    spine_diagnosis_choices_list$'Pediatric Deformity' <- NULL
+                }
             }
-        }
-        
-        if(str_detect(spine_regions, "lumb")){
-            building_diagnosis_choices_df <- spine_icd10_codes_df %>%
-                filter(site_number <3) %>%
-                union_all(building_diagnosis_choices_df)
-        }
-        
-        if(any(input$diagnosis_category == "Deformity")){
-            diagnosis_categories_vector <- append(input$diagnosis_category, "Pediatric Deformity")
-        }else{
-            diagnosis_categories_vector <- input$diagnosis_category
-        }
-        
-        diagnosis_choices_by_region_and_category_df <- building_diagnosis_choices_df %>%
-            distinct() %>%
-            filter(spine_category %in% diagnosis_categories_vector) %>%
-            arrange(category_number, site_number) 
-        
-        
-        # this is to remove cervicothoracic from thoracolumbar dx
-        if(str_detect(string = spine_regions, pattern = "cerv") == FALSE){
-            diagnosis_choices_by_region_and_category_df <- diagnosis_choices_by_region_and_category_df %>%
-                filter(str_detect(diagnosis, "cerv", negate = TRUE))
-        }
-        
-        
-        spine_diagnosis_choices_list <- map(.x = diagnosis_categories_vector, .f = ~ (diagnosis_choices_by_region_and_category_df %>% 
-                                                                                          filter(spine_category == .x) %>%
-                                                                                          select(spine_category, diagnosis) %>% 
-                                                                                          pivot_wider(names_from = spine_category, values_from = diagnosis) %>% 
-                                                                                          unnest())[[1]])
-        
-        names(spine_diagnosis_choices_list) <- diagnosis_categories_vector
-        
-        
-        if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
-            age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
             
-            if(age > 30){
-                spine_diagnosis_choices_list$'Pediatric Deformity' <- NULL
-            }
-        }
-        
-        column(width = 7,
-               pickerInput(inputId = "primary_diagnosis",
-                           label = "Diagnosis Search:",
-                           choices = spine_diagnosis_choices_list,
-                           options = list('live-search' = TRUE),
-                           multiple = TRUE,
-                           selected = input$primary_diagnosis)
-        )
+            updatePickerInput(session = session,
+                              inputId = "primary_diagnosis",
+                              label = "Diagnosis Search:", 
+                              choices = spine_diagnosis_choices_list, options = pickerOptions(liveSearch = TRUE, 
+                                                                                              liveSearchNormalize = TRUE, 
+                                                                                              virtualScroll = 200))
         
     })
+    
+    # output$diagnosis_input_ui <- renderUI({
+    #     
+    #     spine_diagnosis_choices_list <-jh_generate_spine_diagnoses_choices_function(spine_regions_input_vector = input$spinal_regions, 
+    #                                                  diagnosis_category_input_vector = input$diagnosis_category)
+    #     
+    #     if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
+    #         age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+    # 
+    #         if(age > 30){
+    #             spine_diagnosis_choices_list$'Pediatric Deformity' <- NULL
+    #         }
+    #     }
+    # 
+    #     column(width = 7,
+    #            pickerInput(inputId = "primary_diagnosis",
+    #                        label = "Diagnosis Search:",
+    #                        choices = spine_diagnosis_choices_list,
+    #                        options = list('live-search' = TRUE),
+    #                        multiple = TRUE,
+    #                        selected = input$primary_diagnosis)
+    #     )
+    #     
+    # })
     
 
     
@@ -5185,18 +5159,19 @@ server <- function(input, output, session) {
         if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw")))>0){
             
             implants_added_df <- jh_generate_df_for_screening_screw_inputs_function(all_objects_to_add_list$objects_df) %>%
-                left_join(all_screw_size_type_inputs_df %>% select(-left_object, -right_object)) %>%
+                left_join(all_screw_size_type_inputs_df %>% select(implant_row_id, level_object_label)) %>%
                 arrange(implant_row_id) %>%
                 select(implant_row_id, level, level_object_label, left_object, right_object)
             
         }else{
-            implants_added_df <- tibble(level_object_label = character(),level = character(), left_object = character(), right_object =  character(), implant_row_id = integer())
+            implants_added_df <- tibble(level_object_label = character(), level = character(), left_object = character(), right_object =  character(), implant_row_id = integer())
         }
         implants_added_df
         
     })
-    ### NOW UPDATE THE INPUT TO HAVE THE Correct levels FOR EACH IMPLANT 
-    observeEvent(screws_selected_df_reactive(), {
+    ### NOW UPDATE THE INPUT TO HAVE THE Correct levels FOR EACH IMPLANT  implants_complete
+    # observeEvent(screws_selected_df_reactive(), {
+    observeEvent(list(input$implants_complete, input$return_to_add_implant_details_tab, input$implant_details), ignoreInit = TRUE, {
         if(nrow(screws_selected_df_reactive())>0){
             updateCheckboxGroupInput(session = session, 
                                      inputId = "level_object_for_screw_details",
@@ -5205,7 +5180,7 @@ server <- function(input, output, session) {
         }
     })
     
-    observeEvent(screws_selected_df_reactive(), {
+    observeEvent(list(input$implants_complete, input$return_to_add_implant_details_tab, input$implant_details), ignoreInit = TRUE, {
         if(nrow(screws_selected_df_reactive())>0){
             updateCheckboxGroupInput(session = session, 
                                      inputId = "left_level_object_for_screw_details",
@@ -5215,7 +5190,7 @@ server <- function(input, output, session) {
     })
     
     ### NOW UPDATE THE INPUT TO HAVE THE Correct levels FOR EACH IMPLANT 
-    observeEvent(screws_selected_df_reactive(), {
+    observeEvent(list(input$implants_complete, input$return_to_add_implant_details_tab, input$implant_details), ignoreInit = TRUE, {
         if(nrow(screws_selected_df_reactive())>0){
             updateCheckboxGroupInput(session = session, 
                                      inputId = "right_level_object_for_screw_details",
