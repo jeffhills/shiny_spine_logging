@@ -132,6 +132,7 @@ ui <- dashboardPage(skin = "black",
                     "#screw_details_redcap_df_modal_tab {
                         overflow-x: auto;
                 }"),
+                tags$style(".nav-tabs-custom>.nav-tabs { width: max-content}"),
                         ),
                 tabItems(
                     tabItem(tabName = "patient_details_procedures",
@@ -720,47 +721,96 @@ ui <- dashboardPage(skin = "black",
                                                  )
                                                  ##################### NEW
                                 ),
-                                conditionalPanel(condition = "input.fusion_procedure_performed == false",
-                                                 pickerInput(inputId = "screw_options_to_show", 
-                                                             selected = NULL, 
-                                                             multiple = TRUE, 
-                                                             choices = names(screw_size_input_tables_list))
-                                ),
+                                #### this input gets updated based on the laterality of screws to be used in the next conditional panel steps
+                                conditionalPanel(condition = "input.spine_approach.indexOf('Never True') > -1", 
+                                                 checkboxGroupInput(inputId = "level_object_for_screw_details",
+                                                                    label = "Screw Levels:",
+                                                                    choices = all_screw_size_type_inputs_df$level_object_label, 
+                                                                    selected = ""),
+                                                 checkboxGroupInput(inputId = "left_level_object_for_screw_details",
+                                                                    label = "Screw Levels:",
+                                                                    choices = all_screw_size_type_inputs_df$left_object,
+                                                                    selected = ""),
+                                                 checkboxGroupInput(inputId = "right_level_object_for_screw_details",
+                                                                    label = "Screw Levels:",
+                                                                    choices = all_screw_size_type_inputs_df$right_object,
+                                                                    selected = "")),
                                 conditionalPanel(condition = "input.fusion_procedure_performed == true",
                                                  box(width = 12, 
                                                      title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
-                                                     tags$table(
-                                                         tags$tr(width = "100%", 
-                                                                 tags$td(width = "30%", 
-                                                                         div(style = "font-size:12px; font-weight:bold; text-align:center; padding-bottom:10px", "Level")),
-                                                                 tags$td(width = "15%",
-                                                                         div(style = "font-size:12px; font-weight:bold; text-align:center; padding-bottom:10px", "Left Diameter")
-                                                                 ),
-                                                                 tags$td(width = "15%", 
-                                                                         div(style = "font-size:12px; font-weight:bold; text-align:center; padding-bottom:10px", "Left Length")
-                                                                 ),
-                                                                 tags$td(width = "15%",
-                                                                         div(style = "font-size:12px; font-weight:bold; text-align:center; padding-bottom:10px", "Right Diameter")
-                                                                 ),
-                                                                 tags$td(width = "15%",
-                                                                         div(style = "font-size:12px; font-weight:bold; text-align:center; padding-bottom:10px", "Right Length")
-                                                                 )
-                                                         )
+                                                     h4("Screw Sizes:"),
+                                                     fluidRow(
+                                                         column(4, 
+                                                                "Implant"), 
+                                                         column(2, 
+                                                                "Left Diameter"), 
+                                                         column(2, 
+                                                                "Left Length"), 
+                                                         column(2, 
+                                                                "Right Diameter"), 
+                                                         column(2, 
+                                                                "Right Length")
                                                      ),
-                                                     map(.x = c(1:length(screw_size_input_tables_list)),
-                                                         .f = ~ conditionalPanel(
-                                                             condition = glue("input.screw_options_to_show.indexOf('{names(screw_size_input_tables_list[.x])}') > -1"),
-                                                             screw_size_input_tables_list[[.x]]
-                                                         )
+                                                     map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
+                                                         .f = ~ 
+                                                             conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$level_object_label[[.x]]}') >-1"),
+                                                                              fluidRow(
+                                                                                  column(4, 
+                                                                                         all_screw_size_type_inputs_df$level_object_label[[.x]]
+                                                                                         ), 
+                                                                                  column(2,
+                                                                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+                                                                                                          all_screw_size_type_inputs_df$left_diameter_input[[.x]]
+                                                                                                          )
+                                                                                         ), 
+                                                                                  column(2, 
+                                                                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+                                                                                         all_screw_size_type_inputs_df$left_length_input[[.x]]
+                                                                                         )
+                                                                                         ), 
+                                                                                  column(2, 
+                                                                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+                                                                                         all_screw_size_type_inputs_df$right_diameter_input[[.x]]
+                                                                                         )
+                                                                                         ), 
+                                                                                  column(2, 
+                                                                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+                                                                                         all_screw_size_type_inputs_df$right_length_input[[.x]]
+                                                                                         )
+                                                                                         )
+                                                                              )
+                                                             )
                                                      ),
-                                                     map(.x = c(1:length(screw_type_input_tables_list)),
-                                                         .f = ~ conditionalPanel(
-                                                             condition = glue("input.screw_options_to_show.indexOf('{names(screw_size_input_tables_list[.x])}') > -1"),
-                                                             screw_type_input_tables_list[[.x]]
-                                                         )
+                                                     hr(),
+                                                     h4("Screw Types:"),
+                                                     fluidRow(
+                                                         column(4, 
+                                                                "Implant"), 
+                                                         column(4, 
+                                                                "Left Screw Type"), 
+                                                         column(4, 
+                                                                "Right Screw Type"), 
                                                      ),
-                                                     # uiOutput(outputId = "screw_details_ui"),
-                                                     # uiOutput(outputId = "screw_types_ui")
+                                                     map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
+                                                         .f = ~ 
+                                                             conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$level_object_label[.x]}') >-1"),
+                                                                              fluidRow(
+                                                                                  column(4, 
+                                                                                         all_screw_size_type_inputs_df$level_object_label[[.x]]
+                                                                                         ), 
+                                                                                  column(4, 
+                                                                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+                                                                                         all_screw_size_type_inputs_df$left_type_input[[.x]]
+                                                                                         )
+                                                                                         ), 
+                                                                                  column(4,
+                                                                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+                                                                                         all_screw_size_type_inputs_df$right_type_input[[.x]]
+                                                                                         )
+                                                                                         ), 
+                                                                              )
+                                                             )
+                                                     )
                                                  )
                                 )
                             ),
@@ -1327,14 +1377,6 @@ server <- function(input, output, session) {
                                                            tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply, including primary diagnosis and indication for revision)"))
                                    ),
                                    uiOutput(outputId = "diagnosis_input_ui"),
-                                   # column(width = 7,
-                                   #        pickerInput(inputId = "primary_diagnosis",
-                                   #                    label = "Diagnosis Search:",
-                                   #                    choices = all_spine_diagnosis_choices_list,
-                                   #                    options = list('live-search' = TRUE),
-                                   #                    multiple = TRUE,
-                                   #                    selected = primary_diagnosis_value)
-                                   # )
                                ),
                                hr(), 
                                br(),
@@ -1343,28 +1385,6 @@ server <- function(input, output, session) {
                                           tags$div(style = "font-size:18px; font-weight:bold", "Symptoms:")
                                    ),
                                    uiOutput(outputId = "symptoms_input_ui"),
-                                   # column(width = 7,
-                                   #        pickerInput(
-                                   #            inputId = "symptoms",
-                                   #            label = NULL,
-                                   #            choices = list('Neck & Uppers:' = c("Neck Pain", "Left Arm Pain", "Right Arm Pain", "Left Arm Weakness", "Right Arm Weakness"),
-                                   #                           'Thoracic:' = c("Mid Back Pain", "Kyphosis"),
-                                   #                           'Lower & Legs:' = c("Low Back Pain", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness"),
-                                   #                           'Functional:' = c("Myelopathy: Nurick 1 (Root Symptomts)",
-                                   #                                             "Myelopathy: Nurick 2 (Normal gait but symptoms of cord compression)",
-                                   #                                             "Myelopathy: Nurick 3 (Gait Abnormalities)",
-                                   #                                             "Myelopathy: Nurick 4 (Significant Gait Abnormalities, preventing employment)",
-                                   #                                             "Myelopathy: Nurick 5 (Depended on Assistive Device for Ambulating)",
-                                   #                                             "Myelopathy: Nurick 6 (Wheelchair bound)"),
-                                   #                           'Deformity' = c("Coronal deformity", "Sagittal Imbalance", "Chin on chest deformity", "Flatback Syndrome"),
-                                   #                           'Other' = c("Quadriplegia", "Paraplegia", "Loss of bladder control", "Bowel Incontinence", "Other")),
-                                   #            multiple = TRUE,
-                                   #            selected = symptoms_initial_value,
-                                   #            width = "100%"
-                                   #        ),
-                                   #        conditionalPanel(condition = "input.symptoms.indexOf('Other') > -1",
-                                   #                         textInput(inputId = "symptoms_other", label = "Other:"))
-                                   # )
                                ),
                                fluidRow(
                                    textInput(inputId = "relevant_history", label = "Other Comments/History:")
@@ -1547,88 +1567,9 @@ server <- function(input, output, session) {
                            selected = input$primary_diagnosis)
         )
         
-        # updatePickerInput(session = session,
-        #                   inputId = "primary_diagnosis",
-        #                   # label = "Diagnosis Search:",
-        #                   # options = list('live-search' = TRUE),
-        #                   selected = input$primary_diagnosis,
-        #                   choices = spine_diagnosis_choices_list) 
     })
     
-    # observeEvent(list(input$diagnosis_category, input$spinal_regions, input$close_startup_modal, input$edit_diagnosis_symptoms),ignoreNULL = TRUE, {
-    #     ## first filter by region ##
-    #     spine_regions <- str_to_lower(paste(input$spinal_regions, collapse = ", "))
-    #     
-    #     building_diagnosis_choices_df <- spine_icd10_codes_df %>%
-    #         filter(site == "all")
-    #     
-    #     if(str_detect(spine_regions, "cervic")){
-    #         building_diagnosis_choices_df <- spine_icd10_codes_df %>%
-    #             filter(site_number == 4 | site_number == 5) %>%
-    #             union_all(building_diagnosis_choices_df)
-    #     }
-    #     
-    #     if(str_detect(spine_regions, "thoracic")){
-    #         if(str_detect(spine_regions, "cervic")){
-    #             building_diagnosis_choices_df <- spine_icd10_codes_df %>%
-    #                 filter(site_number > 2) %>%
-    #                 union_all(building_diagnosis_choices_df)
-    #         }else{
-    #             building_diagnosis_choices_df <- spine_icd10_codes_df %>%
-    #                 filter(site_number == 2 | site_number == 3) %>%
-    #                 union_all(building_diagnosis_choices_df)
-    #         }
-    #     }
-    #     
-    #     if(str_detect(spine_regions, "lumb")){
-    #         building_diagnosis_choices_df <- spine_icd10_codes_df %>%
-    #             filter(site_number <3) %>%
-    #             union_all(building_diagnosis_choices_df)
-    #     }
-    #     
-    #     if(any(input$diagnosis_category == "Deformity")){
-    #         diagnosis_categories_vector <- append(input$diagnosis_category, "Pediatric Deformity")
-    #     }else{
-    #         diagnosis_categories_vector <- input$diagnosis_category
-    #     }
-    #     
-    #     diagnosis_choices_by_region_and_category_df <- building_diagnosis_choices_df %>%
-    #         distinct() %>%
-    #         filter(spine_category %in% diagnosis_categories_vector) %>%
-    #         arrange(category_number, site_number) 
-    #     
-    #     
-    #     # this is to remove cervicothoracic from thoracolumbar dx
-    #     if(str_detect(string = spine_regions, pattern = "cerv") == FALSE){
-    #         diagnosis_choices_by_region_and_category_df <- diagnosis_choices_by_region_and_category_df %>%
-    #             filter(str_detect(diagnosis, "cerv", negate = TRUE))
-    #     }
-    #     
-    #     
-    #     spine_diagnosis_choices_list <- map(.x = diagnosis_categories_vector, .f = ~ (diagnosis_choices_by_region_and_category_df %>% 
-    #                                                                                       filter(spine_category == .x) %>%
-    #                                                                                       select(spine_category, diagnosis) %>% 
-    #                                                                                       pivot_wider(names_from = spine_category, values_from = diagnosis) %>% 
-    #                                                                                       unnest())[[1]])
-    #     
-    #     names(spine_diagnosis_choices_list) <- diagnosis_categories_vector
-    #     
-    #     
-    #     if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
-    #         age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-    #         
-    #         if(age > 30){
-    #             spine_diagnosis_choices_list$'Pediatric Deformity' <- NULL
-    #         }
-    #     }
-    #     
-    #     updatePickerInput(session = session,
-    #                       inputId = "primary_diagnosis",
-    #                       # label = "Diagnosis Search:",
-    #                       # options = list('live-search' = TRUE),
-    #                       selected = input$primary_diagnosis,
-    #                       choices = spine_diagnosis_choices_list) 
-    # })
+
     
     ### UPDATE SYMPTOMS OPTIONS
     
@@ -2872,9 +2813,7 @@ server <- function(input, output, session) {
         )
     })
     
-    # output$currently_adding <- renderText(paste("Currently Adding: ", str_to_title(string = str_replace_all(string = input$object_to_add, pattern = "_", replacement = " "))), sep = "")
-    
-    
+
     observeEvent(input$add_tumor_resection,ignoreNULL = TRUE, ignoreInit = TRUE, {
         updateRadioGroupButtons(session = session, 
                                 inputId = "object_to_add",
@@ -3214,13 +3153,7 @@ server <- function(input, output, session) {
     
     ################------------------  Fusion Levels   ----------------------######################  
     
-    # observeEvent(fusion_levels_computed_reactive_df(),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    #     updateCheckboxGroupButtons(session = session, 
-    #                                inputId = "fusion_levels_confirmed", 
-    #                                selected = fusion_levels_computed_reactive_df()$level)
-    # })
-    
-    # observeEvent(list(all_objects_to_add_list$objects_df, fusion_levels_computed_reactive_df(), input$plot_click, input$plot_double_click, input$reset_all), ignoreNULL = TRUE, ignoreInit = TRUE, {
+
     observeEvent(input$implants_complete, ignoreInit = TRUE, ignoreNULL = TRUE, {
         if(nrow(fusion_levels_computed_reactive_df()) > 0){
             updateSwitchInput(session = session, 
@@ -3472,324 +3405,7 @@ server <- function(input, output, session) {
         interbody_details_df
     })
     
-    
-    screw_size_df_reactive_results <- reactive({
 
-        all_implants <- all_objects_to_add_list$objects_df %>%
-            select(level, vertebral_number, object, side) %>%
-            distinct() %>%
-            filter(str_detect(object, "screw")) %>%
-            arrange(vertebral_number)
-
-        if(nrow(all_implants) > 0){
-            implants_wide_df <- all_implants %>%
-                mutate(level_side = str_to_lower(paste(level, side, object, sep = "_"))) %>%
-                select(level, level_side, side) %>%
-                pivot_wider(names_from = side, values_from = level_side) %>%
-                mutate(across(everything(), ~ replace_na(.x, "no_screw")))
-
-            ## the data frame can't have any missing values, otherwise the vectors will be of different lengths when you run map()
-
-            if(any(names(implants_wide_df) == "left") == FALSE){
-                implants_wide_df <-  implants_wide_df %>%
-                    mutate(left = "no_screw")
-            }
-
-
-            if(any(names(implants_wide_df) == "right") == FALSE){
-                implants_wide_df <-  implants_wide_df %>%
-                    mutate(left = "no_screw")
-            }
-
-            implants_wide_df %>%
-                mutate(left_diameter_label = if_else(left == "no_screw", glue("null"), glue("left_{str_to_lower(level)}_screw_diameter"))) %>%
-                mutate(left_length_label = if_else(left == "no_screw", glue("null"), glue("left_{str_to_lower(level)}_screw_length"))) %>%
-                mutate(right_diameter_label = if_else(left == "no_screw", glue("null"), glue("right_{str_to_lower(level)}_screw_diameter"))) %>%
-                mutate(right_length_label = if_else(left == "no_screw", glue("null"), glue("right_{str_to_lower(level)}_screw_length"))) %>%
-                mutate(left_screw_diameter = map(.x = left_diameter_label, .f = ~input[[.x]])) %>%
-                unnest() %>%
-                mutate(left_screw_length = map(.x = left_length_label, .f = ~input[[.x]])) %>%
-                unnest() %>%
-                mutate(right_screw_diameter = map(.x = right_diameter_label, .f = ~input[[.x]])) %>%
-                unnest() %>%
-                mutate(right_screw_length = map(.x = right_length_label, .f = ~input[[.x]])) %>%
-                unnest()
-
-        }else{
-            tibble(level = character(), left_screw_diameter = double(), left_screw_length = double(), right_screw_diameter = double(), right_screw_length = double())
-        }
-
-    })
-    
-    ################------------------  Screw Size Details UI  ----------------------######################  
-    ################------------------  Screw Size Details UI  ----------------------###################### 
-    ## screw options to show:
-    # screw_options_to_show
-    
-    observeEvent(all_objects_to_add_list$objects_df, {
-        
-        all_implants <- all_objects_to_add_list$objects_df %>%
-            select(level, vertebral_number, object, side) %>%
-            distinct() %>%
-            filter(str_detect(object, "screw")) %>%
-            arrange(vertebral_number) %>%
-            mutate(level_object = str_to_lower(paste(level, object, sep = "_")))
-        
-        if(length(all_implants$level_object)>0){
-            updatePickerInput(session = session, 
-                          inputId = "screw_options_to_show", 
-                          selected = all_implants$level_object)
-        }
-        
-        
-    })
-    
-    
-    # output$screw_details_ui <- renderUI({
-    #     all_implants <- all_objects_to_add_list$objects_df %>%
-    #         select(level, vertebral_number, object, side) %>%
-    #         distinct() %>%
-    #         filter(str_detect(object, "screw")) %>%
-    #         arrange(vertebral_number)
-    #     
-    #     if(nrow(all_implants) > 0){
-    #         implants_wide_df <- all_implants %>%
-    #             mutate(level_side = str_to_lower(paste(level, side, object, sep = "_"))) %>%
-    #             select(level, level_side, side) %>%
-    #             pivot_wider(names_from = side, values_from = level_side) %>%
-    #             mutate(across(everything(), ~ replace_na(.x, "no_screw"))) 
-    #         
-    #         level_vector <- implants_wide_df$level
-    #         
-    #         ## the data frame can't have any missing values, otherwise the vectors will be of different lengths when you run map()
-    #         
-    #         if(any(names(implants_wide_df) == "left") == FALSE){
-    #             implants_wide_df <-  implants_wide_df %>%
-    #                 mutate(left = "no_screw")
-    #         }
-    # 
-    #         if(any(names(implants_wide_df) == "right") == FALSE){
-    #             implants_wide_df <-  implants_wide_df %>%
-    #                 mutate(left = "no_screw")
-    #         }
-    #         
-    #         max_levels <- nrow(implants_wide_df)     
-    #         levels_count <- seq(from = 1, to = max_levels, by = 1)
-            
-            # _screw_diameter
-            # 
-            # if(nrow(screw_size_df_reactive_results())>0){
-            #     
-            # }
-            
-            # results <- implants_wide_df %>%
-            #     left_join(screw_size_df_reactive_results()) %>%
-            #     mutate(across(everything(), ~ replace_na(.x, as.double(0))))
-
-            # #values. 
-            # left_diameters_vector <- unlist(map(.x = left_vector, .f = ~ glue("{.x}_diameter")))
-            # left_length_vector <- unlist(map(.x = left_vector, .f = ~ glue("{.x}_length")))
-            # right_diameters_vector <- unlist(map(.x = right_vector, .f = ~ glue("{.x}_diameter")))
-            # right_length_vector <- unlist(map(.x = right_vector, .f = ~ glue("{.x}_length")))
-            # # input[[left_vector[..4]]] 
-            
-            # column(width = 12,
-            #        h4("Screw Sizes:"),
-            #        tags$table(
-            #            tags$tr(width = "100%",
-            #                    tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Level")),
-            #                    tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Diameter")),
-            #                    tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Length")),
-            #                    tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Diameter")),
-            #                    tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Length"))
-            #            ),
-            #            pmap(.l = list(..1 = level_vector,
-            #                           ..2 = implants_wide_df$left,
-            #                           ..3 = implants_wide_df$right 
-            #                           # ..4 = levels_count,
-            #                           # ..5 = results$left_diameter,
-            #                           # ..6 = results$left_length,
-            #                           # ..7 = results$right_diameter,
-            #                           # ..8 = results$right_length
-            #                           ),
-            #                 .f = ~make_screw_sizes_ui_function(level = ..1, 
-            #                                                    left_screw = ..2, 
-            #                                                    right_screw = ..3
-            #                                                    # left_diameter = ..5,
-            #                                                    # left_length = ..6,
-            #                                                    # right_diameter = ..7,
-            #                                                    # right_length = ..8
-            #                                                    # left_selected = input[[left_vector[..4]]],   ## using this subsetting
-            #                                                    # right_selected = input[[right_vector[..4]]]
-            #                 ))
-                       # pmap(.l = list(..1 = level_vector,
-                       #                ..2 = left_vector,
-                       #                ..3 = right_vector, 
-                       #                ..4 = levels_count, 
-                       #                ..5 = left_diameters_vector,
-                       #                ..6 = left_length_vector,
-                       #                ..7 = right_diameters_vector,
-                       #                ..8 = right_length_vector),
-                       #      .f = ~make_screw_sizes_ui_function(level = ..1, 
-                       #                                         left_screw_level = ..2, 
-                       #                                         right_screw_level = ..3,
-                       #                                         left_diameter = input[[..5]], 
-                       #                                         left_length = input[[..6]], 
-                       #                                         right_diameter = input[[..7]],
-                       #                                         right_length = input[[..8]]
-                       #                                         # left_selected = input[[left_vector[..4]]],   ## using this subsetting
-                       #                                         # right_selected = input[[right_vector[..4]]]
-                       #      ))
-    #                )
-    #         )
-    #     }else{
-    #         NULL
-    #     }
-    # })
-    
-    
-    # ################------------------  Screw Size Details UI  ----------------------######################  
-    # ################------------------  Screw Size Details UI  ----------------------######################  
-    # output$screw_details_ui <- renderUI({
-    #     all_implants <- all_objects_to_add_list$objects_df %>%
-    #         select(level, vertebral_number, object, side) %>%
-    #         distinct() %>%
-    #         filter(str_detect(object, "screw")) %>%
-    #         arrange(vertebral_number)
-    #     
-    #     if(nrow(all_implants) > 0){
-    #         implants_wide_df <- all_implants %>%
-    #             mutate(level_side = str_to_lower(paste(level, side, object, sep = "_"))) %>%
-    #             select(level, level_side, side) %>%
-    #             pivot_wider(names_from = side, values_from = level_side) %>%
-    #             mutate(across(everything(), ~ replace_na(.x, "no_screw"))) 
-    #         
-    #         level_vector <- implants_wide_df$level
-    #         
-    #         ## the data frame can't have any missing values, otherwise the vectors will be of different lengths when you run map()
-    #         
-    #         if(any(names(implants_wide_df) == "left")){
-    #             left_vector <- implants_wide_df$left
-    #         }else{
-    #             left_vector <-(implants_wide_df %>% mutate(left = "no_screw"))$left
-    #         }
-    #         
-    #         if(any(names(implants_wide_df) == "right")){
-    #             right_vector <- implants_wide_df$right
-    #         }else{
-    #             right_vector <-(implants_wide_df %>% mutate(right = "no_screw"))$right
-    #         }
-    #         
-    #         max_levels <- nrow(implants_wide_df)     
-    #         levels_count <- seq(from = 1, to = max_levels, by = 1)
-    #         
-    #         # _screw_diameter
-    #         
-    #         #values. 
-    #         left_diameters_vector <- unlist(map(.x = left_vector, .f = ~ glue("{.x}_screw_diameter")))
-    #         left_length_vector <- unlist(map(.x = left_vector, .f = ~ glue("{.x}_screw_length")))
-    #         right_diameters_vector <- unlist(map(.x = right_vector, .f = ~ glue("{.x}_screw_diameter")))
-    #         right_length_vector <- unlist(map(.x = right_vector, .f = ~ glue("{.x}_screw_length")))
-    #             # input[[left_vector[..4]]] 
-    #         
-    #         column(width = 12,
-    #                h4("Screw Sizes:"),
-    #                tags$table(
-    #                    tags$tr(width = "100%",
-    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Level")),
-    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Diameter")),
-    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Length")),
-    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Diameter")),
-    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Length"))
-    #                    ),
-    #                    pmap(.l = list(..1 = level_vector,
-    #                                   ..2 = left_vector,
-    #                                   ..3 = right_vector, 
-    #                                   ..4 = levels_count, 
-    #                                   ..5 = left_diameters_vector,
-    #                                   ..6 = left_length_vector,
-    #                                   ..7 = right_diameters_vector,
-    #                                   ..8 = right_length_vector),
-    #                         .f = ~make_screw_sizes_ui_function(level = ..1, 
-    #                                                            left_screw_level = ..2, 
-    #                                                            right_screw_level = ..3,
-    #                                                            left_diameter = input[[..5]], 
-    #                                                            left_length = input[[..6]], 
-    #                                                            right_diameter = input[[..7]],
-    #                                                            right_length = input[[..8]]
-    #                                                            # left_selected = input[[left_vector[..4]]],   ## using this subsetting
-    #                                                            # right_selected = input[[right_vector[..4]]]
-    #                         ))
-    #                )
-    #         )
-    #     }else{
-    #         NULL
-    #     }
-    # })
-    # 
-    # output$screw_types_ui <- renderUI({
-    #     all_implants <- all_objects_to_add_list$objects_df %>%
-    #         filter(approach == "posterior") %>%
-    #         select(level, vertebral_number, object, side) %>%
-    #         distinct() %>%
-    #         filter(str_detect(object, "screw")) %>%
-    #         arrange(vertebral_number)
-    #     
-    #     if(nrow(all_implants) > 0){
-    #         implants_wide_df <- all_implants %>%
-    #             mutate(level_side = paste(level, side, object, sep = "_")) %>%
-    #             select(level, level_side, side) %>%
-    #             pivot_wider(names_from = side, values_from = level_side) %>%
-    #             mutate(across(everything(), ~ replace_na(.x, "no_screw"))) 
-    #         
-    #         df_names <- glue_collapse(names(implants_wide_df), sep = " ")
-    #         
-    #         level_vector <- implants_wide_df$level
-    #         
-    #         ## the data frame can't have any missing values, otherwise the vectors will be of different lengths when you run map()
-    #         
-    #         if(any(names(implants_wide_df) == "left")){
-    #             left_vector <- implants_wide_df$left
-    #             
-    #         }else{
-    #             left_vector <-(implants_wide_df %>% mutate(left = "no_screw"))$left
-    #         }
-    #         if(any(names(implants_wide_df) == "right")){
-    #             right_vector <- implants_wide_df$right
-    #         }else{
-    #             right_vector <-(implants_wide_df %>% mutate(right = "no_screw"))$right
-    #         }
-    #         
-    #         max_levels <- nrow(implants_wide_df)     
-    #         levels_count <- seq(from = 1, to = max_levels, by = 1)
-    #         
-    #         column(width = 12,
-    #                tags$hr(),
-    #                h4("Screw Types:"),
-    #                tags$table(
-    #                    tags$tr(width = "100%",
-    #                            tags$th(width = "10%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Level")),
-    #                            tags$th(width = "45%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Left Screw Type")),
-    #                            tags$th(width = "45%", div(style = "font-size:14px; font-weight:bold; text-align:center",  "Right Screw Type"))
-    #                    ),
-    #                    pmap(.l = list(..1 = level_vector,
-    #                                   ..2 = left_vector,
-    #                                   ..3 = right_vector, 
-    #                                   ..4 = levels_count),
-    #                         .f = ~make_screw_types_function(level = ..1, 
-    #                                                         left_screw_level = ..2, 
-    #                                                         right_screw_level = ..3 
-    #                                                         # left_selected = input[[left_vector[..4]]],   ## using this subsetting
-    #                                                         # right_selected = input[[right_vector[..4]]]
-    #                         )), 
-    #                    tags$tr(width = "100%", div(style = "font-size:12px; text-align:right",  "M = Monoaxial, U= Uniplanar, P = Polyaxial, Red = Reduction")),
-    #                )
-    #         )
-    #     }else{
-    #         NULL
-    #     }
-    # })
-    
     
     
     ################## ------------- POSTERIOR BMP UI AND RESULTS ---------------#######################
@@ -4850,6 +4466,7 @@ server <- function(input, output, session) {
                     posterior_screws_df <- posterior_approach_objects_df %>%
                         filter(approach == "posterior") %>%
                         filter(str_detect(object, "screw")) %>%
+                        mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
                         left_join(screw_details_redcap_df_reactive()) %>%
                         select(level, approach, side, object, screw_size_type) %>%
                         replace_na(list(screw_size_type = " "))
@@ -4959,47 +4576,6 @@ server <- function(input, output, session) {
                 mutate(row = row_number()) %>%
                 pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
                 select(row, full_text_vector)
-            
-            
-            
-            # ### Compile full op note:
-            # secion_headers_df <- tibble(section = c("\n*Patient:",
-            #                                         "\n*Date of Surgery:",
-            #                                         "\n*Primary Surgeon:",
-            #                                         "\n*Surgical Assistants:",
-            #                                         "\n*Preprocedure ASA Class:",
-            #                                         "\n*Anesthesia:",
-            #                                         "\n*Intraoperative Complications:",
-            #                                         "\n*Pre-operative Diagnosis:",
-            #                                         "\n*Indications:",
-            #                                         "\n*Estimated Blood Loss:",
-            #                                         "\n*Surgical Findings:",
-            #                                         "\n*Specimens Taken:",
-            #                                         "\n*Procedures Performed:",
-            #                                         "\n*Procedure  Description:",
-            #                                         "\n*Post-operative Diagnosis:",
-            #                                         "\n*Fluids/Transfusions:"),
-            #                             result = c(paste(input$patient_first_name, input$patient_last_name),
-            #                                        as.character(input$date_of_surgery),
-            #                                        input$primary_surgeon,
-            #                                        input$surgical_assistants,
-            #                                        input$asa_class,
-            #                                        input$anesthesia,
-            #                                        complication_statement,
-            #                                        glue_collapse(unlist(str_split(paste0("  -", input$preoperative_diagnosis), pattern = "; ")), sep = "\n  -"),
-            #                                        input$indications,
-            #                                        if_else(is.na(input$ebl), "See anesthesia records", paste(input$ebl)),
-            #                                        if_else(input$surgical_findings == "", "none", input$surgical_findings),
-            #                                        if_else(input$specimens_removed == "", "none", input$specimens_removed),
-            #                                        procedure_results_list$procedures_numbered_paragraph,
-            #                                        procedure_results_list$procedure_details_paragraph,
-            #                                        glue_collapse(unlist(str_split(paste0("  -", input$postoperative_diagnosis), pattern = "; ")), sep = "\n  -"),
-            #                                        fluids_transfusions_statement
-            #                                         # glue_collapse(x = procedure_results$procedure_details_list, sep = '\n\n'),
-            #                             )) %>%
-            #     mutate(row = row_number()) %>%
-            #     pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
-            #     select(row, full_text_vector)
             
         }
         
@@ -5604,132 +5180,120 @@ server <- function(input, output, session) {
     ################------------------  Screw Size RESULTS  ----------------------######################  
     ################------------------  Screw Size RESULTS  ----------------------######################  
     
-    # screw_labels_reactive_df <- reactive({
-    #     if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw"))) > 0){
-    #         screws_df <-  all_objects_to_add_list$objects_df %>%
-    #             mutate(level_side = paste(level, side, object, sep = "_")) %>%
-    #             select(vertebral_number, level, side, level_side, object) %>%
-    #             filter(str_detect(object, "screw")) %>%
-    #             mutate(screw_size_label = str_to_lower(paste(side, level, "screw_diameter", sep = "_"))) %>%
-    #             mutate(screw_length_label = str_to_lower(paste(side, level, "screw_length", sep = "_"))) %>%
-    #             mutate(screw_type_label = str_to_lower(paste(side, level, "screw_type", sep = "_"))) %>%
-    #             distinct() %>%
-    #             arrange(vertebral_number)
-    #     }else{
-    #         screws_df <-  tibble(level = character(), side = character(), object = character(), vertebral_number = double(), screw_size_label = character(), screw_length_label = character(), screw_type_label = character())
-    #     }
-    #     screws_df
-    # })
+    ### first update the bilaterality input for the conditional panel
+    screws_selected_df_reactive <- reactive({
+        if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw")))>0){
+            
+            implants_added_df <- jh_generate_df_for_screening_screw_inputs_function(all_objects_to_add_list$objects_df) %>%
+                left_join(all_screw_size_type_inputs_df %>% select(-left_object, -right_object)) %>%
+                arrange(implant_row_id) %>%
+                select(implant_row_id, level, level_object_label, left_object, right_object)
+            
+        }else{
+            implants_added_df <- tibble(level_object_label = character(),level = character(), left_object = character(), right_object =  character(), implant_row_id = integer())
+        }
+        implants_added_df
+        
+    })
+    ### NOW UPDATE THE INPUT TO HAVE THE Correct levels FOR EACH IMPLANT 
+    observeEvent(screws_selected_df_reactive(), {
+        if(nrow(screws_selected_df_reactive())>0){
+            updateCheckboxGroupInput(session = session, 
+                                     inputId = "level_object_for_screw_details",
+                                     choices = screws_selected_df_reactive()$level_object_label,
+                                     selected = screws_selected_df_reactive()$level_object_label) 
+        }
+    })
     
+    observeEvent(screws_selected_df_reactive(), {
+        if(nrow(screws_selected_df_reactive())>0){
+            updateCheckboxGroupInput(session = session, 
+                                     inputId = "left_level_object_for_screw_details",
+                                     choices = screws_selected_df_reactive()$left_object,
+                                     selected = screws_selected_df_reactive()$left_object) 
+        }
+    })
     
-    # screw_details_results_reactive_df <- reactive({
-    #     if(nrow(screw_labels_reactive_df() > 1)){
-    #         max_levels <- nrow(screw_labels_reactive_df())
-    #         levels_count <- seq(from = 1, to = max_levels, by = 1)
-    #         
-    #         screw_levels_labels_df <- screw_labels_reactive_df() %>%
-    #             mutate(levels_count = row_number())
-    #         
-    #         screw_diameter_df <- screw_levels_labels_df %>%
-    #             select(level, vertebral_number, level_side, screw_size_label) %>%
-    #             mutate(screw_diameter = map(.x = levels_count, .f = ~input[[screw_labels_reactive_df()$screw_size_label[.x]]])) %>%
-    #             select(level, vertebral_number, level_side, screw_diameter, screw_size_label) %>%
-    #             unnest()
-    #         
-    #         screw_length_df <- screw_levels_labels_df %>%
-    #             select(level, vertebral_number, level_side, screw_length_label) %>%
-    #             mutate(screw_length = map(.x = levels_count, .f = ~input[[screw_labels_reactive_df()$screw_length_label[.x]]])) %>%
-    #             select(level, vertebral_number, level_side, screw_length_label, screw_length) %>%
-    #             unnest(screw_length)
-    #         
-    #         screw_type_df <- screw_levels_labels_df %>%
-    #             select(level, vertebral_number, level_side, screw_type_label) %>%
-    #             mutate(screw_type = map(.x = levels_count, .f = ~input[[screw_labels_reactive_df()$screw_type_label[.x]]])) %>%
-    #             select(level, vertebral_number, level_side, screw_type_label, screw_type) %>%
-    #             unnest(screw_type)
-    #         
-    #         screw_size_type_df <- screw_diameter_df %>%
-    #             left_join(screw_length_df) %>%
-    #             left_join(screw_type_df) 
-    #         
-    #         if("screw_diameter" %in% names(screw_size_type_df)){
-    #             screw_size_type_df <- screw_size_type_df
-    #         }else{
-    #             screw_size_type_df$screw_diameter <- ""
-    #         }
-    #         if("screw_length" %in% names(screw_size_type_df)){
-    #             screw_size_type_df <- screw_size_type_df
-    #         }else{
-    #             screw_size_type_df$screw_length <- ""
-    #         }
-    #         
-    #         if("screw_type" %in% names(screw_size_type_df)){
-    #             screw_size_type_df <- screw_size_type_df
-    #         }else{
-    #             screw_size_type_df$screw_type <- "P"
-    #         }
-    #         
-    #         screw_details_df <- screw_size_type_df %>%
-    #             replace_na(list(screw_diameter = "")) %>%
-    #             replace_na(list(screw_length = "")) %>%
-    #             mutate(screw_size = glue("{screw_diameter}x{screw_length}mm")) %>%
-    #             mutate(side = if_else(str_detect(screw_type_label, "left"), "left", "right")) %>%
-    #             select(level, side, screw_type, screw_diameter, screw_size) %>%
-    #             mutate(screw_type = case_when(
-    #                 screw_type == "U" ~ "Uniaxial",
-    #                 screw_type == "M" ~ "Monoaxial",
-    #                 screw_type == "P" ~ "Polyaxial", 
-    #                 screw_type == "Red" ~ "Reduction", 
-    #                 screw_type == "Offset" ~ "Offset"
-    #             )) %>%
-    #             mutate(screw_size_type = if_else(screw_size == "xNAmm", paste(screw_type), paste(screw_size, screw_type))) %>%
-    #             mutate(screw_size_type = str_remove_all(string = screw_size_type, pattern = "xmm "))
-    #     }else{
-    #         screw_details_df <- tibble(level = character(), side = character(), screw_diameter = character(), screw_length = character(), screw_type = character(), screw_size = character(), screw_size_type = character())
-    #     }
-    #     screw_details_df
-    # })
-    ## OLD METHOD DONE
+    ### NOW UPDATE THE INPUT TO HAVE THE Correct levels FOR EACH IMPLANT 
+    observeEvent(screws_selected_df_reactive(), {
+        if(nrow(screws_selected_df_reactive())>0){
+            updateCheckboxGroupInput(session = session, 
+                                     inputId = "right_level_object_for_screw_details",
+                                     choices = screws_selected_df_reactive()$right_object,
+                                     selected = screws_selected_df_reactive()$right_object) 
+        }
+    })
+    
     ## NEW
     screw_details_redcap_df_reactive <- reactive({
         
-        #colum titles: redcap_repeat_instrument, redcap_repeat_instance, dos_screws_repeating, screw_level, screw_side, screw_type, screw_diameter, screw_size, screw_size_type, 
-        
-        screw_details_df <- all_shiny_screw_options_long_df %>%
-            select(level, side, diameter_label, length_label, type_label) %>%
-            mutate(screw_diameter = map(.x = diameter_label, .f = ~ input[[.x]])) %>%
-            mutate(screw_length = map(.x = length_label, .f = ~ input[[.x]]))  %>%
-            mutate(screw_type = map(.x = type_label, .f = ~ input[[.x]]))  %>%
-            unnest() %>%
-            mutate(screw_diameter = as.double(screw_diameter), screw_diameter = as.double(screw_diameter)) %>%
-            filter(screw_diameter > 0)%>%
-            mutate(screw_type = case_when(
-                screw_type == "U" ~ "Uniaxial",
-                screw_type == "M" ~ "Monoaxial",
-                screw_type == "P" ~ "Polyaxial", 
-                screw_type == "Red" ~ "Reduction", 
-                screw_type == "Offset" ~ "Offset"
-            )) %>%
-            mutate(screw_size = paste0(screw_diameter, "x", screw_length, "mm")) %>%
-            mutate(screw_size_type = paste(screw_size, screw_type)) %>%
-            select(screw_level = level, screw_side = side, screw_type, screw_diameter, screw_length, screw_size, screw_size_type) 
-        
-        
-        if(nrow(screw_details_df)>0){
-            screw_details_final_df <- screw_details_df %>%
-                mutate(dos_screws_repeating = as.character(input$date_of_surgery)) %>%
-                select(dos_screws_repeating, screw_level, screw_side, screw_type, screw_diameter, screw_size, screw_size_type) %>%
-                mutate(redcap_repeat_instance = row_number()) %>%
+        if(nrow(screws_selected_df_reactive())>0){
+            screw_details_full_df <- screws_selected_df_reactive() %>%
+                select(implant_row_id, level, left_object, right_object) %>%
+                pivot_longer(cols = c(left_object, right_object), names_to = "side", values_to = "level_side_object") %>%
+                mutate(side = str_remove_all(side, "_object")) %>%
+                filter(level_side_object != "no_screw") %>%
+                mutate(diameter_input_name = paste(level_side_object, "diameter", sep = "_")) %>%
+                mutate(length_input_name = paste(level_side_object, "length", sep = "_")) %>%
+                mutate(type_input_name = paste(level_side_object, "type", sep = "_")) %>%
+                mutate(screw_diameter = map(.x = diameter_input_name, .f = ~ input[[.x]])) %>%
+                unnest(screw_diameter) %>%
+                mutate(screw_length = map(.x = length_input_name, .f = ~ input[[.x]])) %>%
+                unnest(screw_length) %>%
+                mutate(screw_type = map(.x = type_input_name, .f = ~ input[[.x]])) %>%
+                unnest(screw_type) %>%
+                mutate(screw_type = case_when(
+                                screw_type == "U" ~ "Uniaxial",
+                                screw_type == "M" ~ "Monoaxial",
+                                screw_type == "P" ~ "Polyaxial",
+                                screw_type == "Red" ~ "Reduction",
+                                screw_type == "Offset" ~ "Offset"
+                            )) %>%
+                replace_na(list(screw_diameter = "na", screw_length = "na")) %>%
+                mutate(screw_size = case_when(
+                    screw_diameter == "na" & screw_length == "na" ~ "",
+                    screw_diameter != "na" & screw_length == "na" ~ paste0(screw_diameter, "mm"),
+                    screw_diameter == "na" & screw_length != "na" ~ paste0(screw_length, "mm"),
+                    screw_diameter != "na" & screw_length != "na" ~ paste0(screw_diameter, "x", screw_length, "mm"))
+                    )  %>%
+                mutate(screw_size_type = paste(screw_size, screw_type)) %>%
+                mutate(implant = str_remove_all(str_remove_all(level_side_object, "right_"), "left_")) %>%
+                arrange(implant_row_id) %>%
                 mutate(redcap_repeat_instrument = "screw_details_repeating") %>%
-                select(redcap_repeat_instrument, redcap_repeat_instance, everything()) 
+                mutate(redcap_repeat_instance = row_number()) %>%
+                mutate(dos_screws_repeating = as.character(input$date_of_surgery)) %>%
+                select(redcap_repeat_instrument, 
+                       redcap_repeat_instance, 
+                       dos_screws_repeating,
+                       screw_level = level,
+                       screw_implant = implant,
+                       screw_side = side,
+                       screw_diameter, 
+                       screw_length, 
+                       screw_type,
+                       screw_size,
+                       screw_size_type) 
+                
+  
             
         }else{
-            screw_details_final_df <- tibble(redcap_repeat_instance = character(), redcap_repeat_instrument = character(), screw_level = character(), screw_side = character(), screw_type = character(), screw_size = character(), screw_size_type = character())
+            screw_details_full_df <- tibble(redcap_repeat_instrument = character(), 
+                                            redcap_repeat_instance = character(), 
+                                            dos_screws_repeating = character(),
+                                            screw_level = character(),
+                                            screw_implant = character(),
+                                            screw_side = character(),
+                                            screw_diameter = character(),
+                                            screw_length = character(),
+                                            screw_type = character(), 
+                                            screw_size = character(), 
+                                            screw_size_type = character())
         }
-        screw_details_final_df
+        screw_details_full_df
+        
     })
     
-    
+
     ################# INTERBODY  DETAILS TABLE ##################
     
     interbody_details_redcap_df_reactive <- reactive({
@@ -5776,11 +5340,14 @@ server <- function(input, output, session) {
                 mutate(implant_statement = "")
         }
         
-        if(nrow(screw_details_results_reactive_df()) > 0){
+        
+        
+        if(nrow(screw_details_redcap_df_reactive()) > 0){
             posterior_screws_df <- all_objects_df %>%
                 filter(approach == "posterior") %>%
                 filter(str_detect(object, "screw")) %>%
-                left_join(screw_details_results_reactive_df()) %>%
+                mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
+                left_join(screw_details_redcap_df_reactive()) %>%
                 select(level, approach, side, object, screw_size_type) 
             
             all_objects_df <- all_objects_df%>%
@@ -5834,18 +5401,7 @@ server <- function(input, output, session) {
     output$screw_details_redcap_df_sidetab <- renderTable({
         
         screw_details_redcap_df_reactive()
-        # all_possible_screw_input_labels_wide_df %>%
-        #     select(level, contains("label")) %>%
-        #     mutate(left_diameter_value = input[[left_diameter_label]]) %>%
-        #     mutate(left_length_value = input[[left_length_label]]) %>%
-        #     mutate(right_diameter_value = input[[right_diameter_label]]) %>%
-        #     mutate(right_length_value = input[[right_length_label]])
-        # 
-        # if(nrow(screw_details_results_reactive_df())>0){
-        #     screw_details_redcap_df_reactive()
-        # }else{
-        #     tibble(redcap_repeat_instance = character(), redcap_repeat_instrument = character(), screw_level = character(), screw_side = character(), screw_type = character(), screw_size = character(), screw_size_type = character())
-        # }
+        
     })  
     
     
@@ -5887,17 +5443,7 @@ server <- function(input, output, session) {
     })
     
     output$screw_details_redcap_df_modal_tab <- renderTable({
-        if(nrow(screw_details_redcap_df_reactive())>0){
-            screw_details_redcap_df_reactive()
-        }else{
-            tibble(redcap_repeat_instance = character(),
-                   redcap_repeat_instrument = character(), 
-                   screw_level = character(), 
-                   screw_side = character(), 
-                   screw_type = character(),
-                   screw_size = character(), 
-                   screw_size_type = character())
-        }
+        screw_details_redcap_df_reactive()
     })  
     
 
