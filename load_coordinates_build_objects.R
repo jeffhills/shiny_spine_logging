@@ -15,7 +15,94 @@ spine_icd10_codes_df <- read_csv(file = "spine_icd_codes.csv")%>%
   mutate(category_number = if_else(spine_category == "Pediatric Deformity", 1.5, category_number)) %>% 
   select(spine_category, category_number, site, diagnosis, icd10_code, site_number)
 
-diagnosis_categories_vector <- unique(spine_icd10_codes_df$spine_category)
+spine_categories_vector <- unique(spine_icd10_codes_df$spine_category)
+
+create_spine_icd_list_by_site_list_by_category_function <- function(spine_region, category){
+  dx_df <- spine_icd10_codes_df %>%
+    filter(site == spine_region) %>%
+    filter(spine_category == category)  %>%
+    select(diagnosis) 
+  
+  dx_df$diagnosis
+}
+
+lumbar_list <- map(.x = spine_categories_vector, .f = ~create_spine_icd_list_by_site_list_by_category_function(spine_region = "lumbar", category = .x))
+names(lumbar_list) <- spine_categories_vector
+
+####
+thoracolumbar_list <- map(.x = spine_categories_vector, .f = ~create_spine_icd_list_by_site_list_by_category_function(spine_region = "thoracolumbar", category = .x))
+names(thoracolumbar_list) <- spine_categories_vector
+
+####
+thoracic_list <- map(.x = spine_categories_vector, .f = ~create_spine_icd_list_by_site_list_by_category_function(spine_region = "thoracic", category = .x))
+names(thoracic_list) <- spine_categories_vector
+
+####
+cervicothoracic_list <- map(.x = spine_categories_vector, .f = ~create_spine_icd_list_by_site_list_by_category_function(spine_region = "cervicothoracic", category = .x))
+names(cervicothoracic_list) <- spine_categories_vector
+
+####
+cervical_list <- map(.x = spine_categories_vector, .f = ~create_spine_icd_list_by_site_list_by_category_function(spine_region = "cervical", category = .x))
+names(cervical_list) <- spine_categories_vector
+
+####
+all_list <- map(.x = spine_categories_vector, .f = ~create_spine_icd_list_by_site_list_by_category_function(spine_region = "all", category = .x))
+names(all_list) <- spine_categories_vector
+
+
+spine_icd_list_by_region <- list(all_list, lumbar_list, thoracolumbar_list, thoracic_list, cervicothoracic_list, cervical_list)
+
+names(spine_icd_list_by_region) <- c("all_regions", "Lumbar", "Thoracolumbar", "Thoracic", "Cervicothoracic", "Cervical")
+
+jh_create_diagnosis_list_vector_function <- function(category_input, site_input){
+  spine_options_list <- list()
+  
+  sites_to_include_vector <- append(site_input, "all")
+  
+  if(any(category_input == "Degenerative")){
+    spine_options_list$Degenerative <- unlist(map(.x = sites_to_include_vector ,.f = ~ spine_icd_list_by_region[[.x]]$Degenerative))
+  }
+  
+  if(any(category_input == "Pediatric Deformity")){
+    spine_options_list$`Pediatric Deformity` <- unlist(map(.x = sites_to_include_vector ,.f = ~ spine_icd_list_by_region[[.x]]$`Pediatric Deformity`))
+  }
+  
+  if(any(category_input == "Deformity")){
+    spine_options_list$Deformity <- unlist(map(.x = sites_to_include_vector ,.f = ~ spine_icd_list_by_region[[.x]]$Deformity))
+  }
+  
+  
+  if(any(category_input == "Trauma")){
+    spine_options_list$Trauma <- unlist(map(.x = sites_to_include_vector ,.f = ~ spine_icd_list_by_region[[.x]]$Trauma))
+  }
+  
+  if(any(category_input == "Infection")){
+    spine_options_list$Infection <- unlist(map(.x = sites_to_include_vector ,.f = ~ spine_icd_list_by_region[[.x]]$Infection))
+  }
+  
+  if(any(category_input == "Tumor")){
+    spine_options_list$Tumor <- unlist(map(.x = sites_to_include_vector ,.f = ~ spine_icd_list_by_region[[.x]]$Tumor))
+  }
+  
+  if(any(category_input == "Congenital")){
+    spine_options_list$Congenital <- unlist(map(.x = sites_to_include_vector ,.f = ~ spine_icd_list_by_region[[.x]]$Congenital))
+  }
+  
+  
+  if(any(category_input == "Complication")){
+    spine_options_list$Complication <- unlist(map(.x = sites_to_include_vector ,.f = ~ spine_icd_list_by_region[[.x]]$Complication))
+  }
+  
+  if(any(category_input == "Other")){
+    spine_options_list$Other <- unlist(map(.x = sites_to_include_vector ,.f = ~ spine_icd_list_by_region[[.x]]$Other))
+  }
+  
+  if(any(category_input == "Tumor")){
+    spine_options_list$Tumor <- unlist(map(.x = sites_to_include_vector ,.f = ~ spine_icd_list_by_region[[.x]]$Tumor))
+  }
+  
+  return(spine_options_list)
+}
 
 # all_spine_diagnosis_choices_list <- list()
 # 

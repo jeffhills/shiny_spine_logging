@@ -35,6 +35,19 @@ jh_convert_body_levels_to_interspace_vector_function <- function(vertebral_bodie
   
   return(jh_reorder_levels_function(level_vector = discard(levels_vector, .p = ~ is.na(.x) | .x == "Sacro-iliac")))
 }
+
+
+jh_convert_interspace_to_body_vector_function <- function(interspaces_vector){
+  levels_vector <- unique(
+    append(
+      map(.x = interspaces_vector, 
+          .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level), 
+      map(.x = interspaces_vector, 
+          .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level)))
+  
+  return(jh_reorder_levels_function(level_vector = levels_vector))
+}
+
 #################################
 jh_check_body_or_interspace_function <- function(level){
   result <- case_when(level %in% vertebral_bodies_vector ~ "body",
@@ -471,6 +484,7 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                                              input_type,
                                              input_id,
                                              initial_value_selected = 0,
+                                             text_placeholder = NULL,
                                              min = 0,
                                              max = 50000,
                                              step = 100, 
@@ -517,7 +531,7 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                      tags$td(width = "3%", tags$div(style = required_label_style, "***"))
                    },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
-                   tags$td(width = paste0(right_column_percent_width, "%"), textInput(inputId = input_id, label = NULL, value = initial_value_selected))
+                   tags$td(width = paste0(right_column_percent_width, "%"), textInput(inputId = input_id, label = NULL, value = initial_value_selected, placeholder = text_placeholder))
     )  
   }
   if(input_type == "picker"){

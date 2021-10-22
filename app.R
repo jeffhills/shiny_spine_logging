@@ -22,7 +22,7 @@ library(shinydashboard)
 # library(sodium)
 
 # rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "58C0BC0A6CA8B8DFB21A054C2F5A3C49")
-rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = "2A930AE845C92CBF95467E59ADBA0D20")
+# rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = "2A930AE845C92CBF95467E59ADBA0D20")
 
 source("short_shiny_functions.R", local = TRUE)
 source("make_geoms_functions.R", local = TRUE)
@@ -32,6 +32,7 @@ source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
 source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 source("no_implants_added_op_note.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
+source("modal_functions.R", local = TRUE)
 
 #Dashboards:
 rclipboardSetup()
@@ -140,13 +141,13 @@ ui <- dashboardPage(skin = "black",
                                    box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Patient Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE,
                                        uiOutput(outputId = "patient_details_ui"),
                                        br(),
-                                       actionBttn(inputId = "edit_patient", label = "Edit Patient Details", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
+                                       actionBttn(inputId = "open_patient_details_modal", label = "Edit Patient Details", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
                                    ),
                                    br(),
                                    box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Diagnosis, Symptoms, Procedure Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE,
                                        uiOutput(outputId = "diagnosis_symptoms_ui"),
                                        br(),
-                                       actionBttn(inputId = "edit_diagnosis_symptoms", label = "Edit", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
+                                       actionBttn(inputId = "open_diagnosis_symptoms_procedure_modal", label = "Edit", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
                                    )
                             ),
                             column(width = 9, 
@@ -273,7 +274,11 @@ ui <- dashboardPage(skin = "black",
                                                                                label = NULL, 
                                                                                inline = TRUE,
                                                                                choices = c("Open",
-                                                                                           "Minimally Invasive"),
+                                                                                           "Tubular", 
+                                                                                           "Endoscopic", 
+                                                                                           "Mini Open",
+                                                                                           "Percutaneous Screw"
+                                                                                           ),
                                                                                selected = "Open",
                                                                                icon = icon("check"), 
                                                                                bigger = TRUE,
@@ -285,8 +290,9 @@ ui <- dashboardPage(skin = "black",
                                                                                inputId = "approach_robot_navigation",
                                                                                label = NULL, 
                                                                                inline = TRUE,
-                                                                               choices = c("Robotic Assistance",
-                                                                                           "Navigation Assistance"),
+                                                                               choices = c("Microscopic", 
+                                                                                           "Navigated", 
+                                                                                           "Robotic"),
                                                                                icon = icon("check"), 
                                                                                bigger = TRUE,
                                                                                status = "success"
@@ -738,6 +744,13 @@ ui <- dashboardPage(skin = "black",
                                 conditionalPanel(condition = "input.fusion_procedure_performed == true",
                                                  box(width = 12, 
                                                      title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
+                                                     jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
+                                                                                      left_column_percent_width = 30,
+                                                                                      input_type = "checkbox",
+                                                                                      font_size = 16, 
+                                                                                      checkboxes_inline = TRUE,
+                                                                                      input_id = "implant_manufacturer", choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
+                                                                                      ),
                                                      h4("Screw Sizes:"),
                                                      fluidRow(
                                                          column(4, 
@@ -867,7 +880,7 @@ ui <- dashboardPage(skin = "black",
                                     color = "royal", 
                                     icon = icon("fas fa-user-edit"),
                                 ),
-                                uiOutput(outputId = "additional_surgical_details_ui")
+                                tableOutput(outputId = "additional_surgical_details_table"),
                             ),
                             box(width = 8, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Data Upload:"),status = "success", solidHeader = TRUE,
                                 actionBttn(inputId = "preview_redcap_upload", label = "Upload to Redcap Project", icon = icon("upload"), style = "jelly", color = "primary", size = "md"),
@@ -941,261 +954,28 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
-
-
 server <- function(input, output, session) {
-    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
-    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
-    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
+
+    rcon_reactive <- reactiveValues()
     
-    
-    startup_modal_box <- function(header_text = "Enter Details to Proceed", header_text_color = "black",
-                                  starting_first_name = "",
-                                  starting_last_name = "", 
-                                  starting_dob = "",
-                                  starting_dos = "", 
-                                  starting_sex = "",
-                                  primary_or_revision = "Primary", 
-                                  # indication_for_revision = "", 
-                                  levels_with_prior_decompression = "",
-                                  prior_fusion_levels = "",
-                                  prior_instrumentation = FALSE,
-                                  left_prior_implants = "",
-                                  left_prior_implants_removed = "",
-                                  right_prior_implants = "",
-                                  right_prior_implants_removed = "",
-                                  left_rod_status = "retained_connected",
-                                  left_implants_still_connected = "",
-                                  right_rod_status = "retained_connected",
-                                  right_implants_still_connected = "",
-                                  button_proceed = "proceed_to_details"
-    ){
-        if(button_proceed == "proceed_to_details"){
-            footer_button <- actionBttn(
-                        inputId = "close_startup_modal",
-                        label = "Proceed",
-                        style = "simple", 
-                        color = "primary",
-                        icon = icon("arrow-right")
-                    )
-        }else{
-            footer_button <- modalButton("Proceed")
-        }
+    observeEvent(input$redcap_token_last_8, {
+        redcap_token <- paste0("2A930AE845C92CBF95467E59", input$redcap_token_last_8)
         
-        modalDialog(size = "l", 
-                    easyClose = FALSE, 
-                    footer = footer_button,
-                    column(12, 
-                           fluidRow(
-                               column(8, 
-                                      tags$div(style = glue("font-size:22px; font-weight:bold; color:{header_text_color}"), header_text),
-                               ),
-                               column(4, 
-                                      actionBttn(inputId = "test_patient_button", label = "Use Test Patient", size = "sm")),
-                           ),
-                           fluidRow(
-                               column(4, 
-                                      textInput(inputId = "patient_last_name", label = "Patient Last Name", value = starting_last_name),
-                               ),
-                               column(4, 
-                                      textInput(inputId = "patient_first_name", label = "Patient First Name", value = starting_first_name),
-                               ),
-                               column(4, 
-                                      textInput(inputId = "hospital", label = "Hospital/Institution:"),
-                               )
-                           ),
-                           fluidRow(
-                               column(4, 
-                                      awesomeRadio(
-                                          inputId = "sex",
-                                          label = "Sex:", 
-                                          choices = c("Male", "Female"),
-                                          selected = starting_sex, 
-                                          inline = TRUE
-                                      )),
-                               column(4, 
-                                      dateInput(inputId = "date_of_birth", label = "Date of Birth (mm-dd-yyyy):", value = starting_dob,format = "mm-dd-yyyy", max = Sys.Date())
-                               ),
-                               column(4, 
-                                      dateInput(inputId = "date_of_surgery", label = "Date of Surgery (mm-dd-yyyy):", value = starting_dos,format = "mm-dd-yyyy", max = Sys.Date())
-                               )
-                           ),
-                           fluidRow(
-                               column(6, 
-                                      actionBttn(inputId = "search_for_prior_patient", label = "Retrieve this Patient", style = "simple",icon = icon("search"), color = "royal", size = "sm")
-                               ),
-                           ),
-                           fluidRow(
-                               column(12, 
-                                      jh_make_shiny_table_row_function(left_column_label = "Primary or Revision:", 
-                                                                       input_type = "radioGroupButtons", 
-                                                                       input_id = "primary_revision",
-                                                                       left_column_percent_width = 50,
-                                                                       font_size = 16,
-                                                                       choices_vector = c("Primary", "Revision"),
-                                                                       initial_value_selected = primary_or_revision,
-                                                                       checkboxes_inline = TRUE, 
-                                                                       individual_buttons = TRUE),
-                                      conditionalPanel("input.primary_revision.indexOf('Revision') > -1",
-                                                       jh_make_shiny_table_row_function(left_column_label = "Select Levels with Prior Decompression:",
-                                                                                        input_type = "picker", 
-                                                                                        input_id = "open_canal",  
-                                                                                        initial_value_selected = levels_with_prior_decompression,
-                                                                                        left_column_percent_width = 60, 
-                                                                                        font_size = 14, 
-                                                                                        choices_vector = open_canal_df$level
-                                                       ),
-                                                       jh_make_shiny_table_row_function(left_column_label = "Select Prior Fusion Levels:",
-                                                                                        input_type = "picker", 
-                                                                                        input_id = "prior_fusion_levels", 
-                                                                                        initial_value_selected = prior_fusion_levels,
-                                                                                        left_column_percent_width = 60, 
-                                                                                        font_size = 14, 
-                                                                                        choices_vector = unique(interbody_levels_df$level)
-                                                       ),
-                                                       fluidRow(
-                                                           jh_make_shiny_table_row_function(left_column_label = "Prior Instrumentation?", 
-                                                                                            left_column_percent_width = 60,
-                                                                                            font_size = 14, 
-                                                                                            input_type = "switch", 
-                                                                                            input_id = "prior_instrumentation",
-                                                                                            initial_value_selected = prior_instrumentation)
-                                                       ),
-                                                       conditionalPanel(condition = "input.prior_instrumentation == true",
-                                                                        box(title = tags$div(style = "font-size:22px; font-weight:bold; text-align:center", "Prior Instrumentation"), width = 12, collapsible = TRUE, 
-                                                                            fluidRow(
-                                                                                column(6,
-                                                                                       tags$div(style = "font-size:18px; font-weight:bold; text-align:center", "LEFT")
-                                                                                ), 
-                                                                                column(6, 
-                                                                                       tags$div(style = "font-size:18px; font-weight:bold; text-align:center", "RIGHT")
-                                                                                )
-                                                                            ),
-                                                                            fluidRow(
-                                                                                column(5, 
-                                                                                       column(6, 
-                                                                                              awesomeCheckboxGroup(inputId = "left_revision_implants",
-                                                                                                                   label = "Implants Present:",
-                                                                                                                   selected = left_prior_implants,
-                                                                                                                   choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
-                                                                                              )
-                                                                                       ),
-                                                                                       column(6, 
-                                                                                              awesomeCheckboxGroup(inputId = "left_revision_implants_removed",
-                                                                                                                   label = "Implants Removed:",status = "danger",
-                                                                                                                   selected = left_prior_implants_removed,
-                                                                                                                   choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
-                                                                                              )
-                                                                                       )
-                                                                                ),
-                                                                                column(1, 
-                                                                                ),
-                                                                                column(5,
-                                                                                       column(6, 
-                                                                                              awesomeCheckboxGroup(inputId = "right_revision_implants",
-                                                                                                                   label = "Implants Present:",
-                                                                                                                   selected = right_prior_implants,
-                                                                                                                   choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
-                                                                                              )
-                                                                                       ),
-                                                                                       column(6, 
-                                                                                              awesomeCheckboxGroup(inputId = "right_revision_implants_removed",
-                                                                                                                   label = "Implants Removed:",status = "danger",
-                                                                                                                   selected = right_prior_implants_removed,
-                                                                                                                   choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
-                                                                                              )
-                                                                                       )
-                                                                                )
-                                                                            )
-                                                                        ),
-                                                                        fluidRow(
-                                                                            column(4, 
-                                                                                   conditionalPanel(condition = "input.left_revision_implants.length > 1", 
-                                                                                                    awesomeRadio(
-                                                                                                        inputId = "left_revision_rod_status",
-                                                                                                        label = "Prior Left Rod was:", 
-                                                                                                        choices = c("Removed" = "removed",
-                                                                                                                    "Retained" = "retained",
-                                                                                                                    "Retained & Connected" = "retained_connected", 
-                                                                                                                    "Partially Retained & Connected" = "partially_retained_connected"),
-                                                                                                        selected = left_rod_status,
-                                                                                                        inline = FALSE, 
-                                                                                                        status = "success"
-                                                                                                    ))
-                                                                            ),
-                                                                            column(2,
-                                                                                   conditionalPanel(condition = "input.left_revision_rod_status.indexOf('partially_retained_connected') > -1",
-                                                                                                    pickerInput(inputId = "left_revision_implants_connected_to_prior_rod", 
-                                                                                                                label = "Select screws connected to the old rod:", 
-                                                                                                                choices = c(""), 
-                                                                                                                selected = left_implants_still_connected,
-                                                                                                                multiple = TRUE
-                                                                                                    )
-                                                                                   )
-                                                                            ),
-                                                                            column(4, 
-                                                                                   conditionalPanel(condition = "input.right_revision_implants.length > 1", 
-                                                                                                    awesomeRadio(
-                                                                                                        inputId = "right_revision_rod_status",
-                                                                                                        label = "Prior Right Rod was:", 
-                                                                                                        choices = c("Removed" = "removed",
-                                                                                                                    "Retained" = "retained",
-                                                                                                                    "Retained & Connected" = "retained_connected", 
-                                                                                                                    "Partially Retained & Connected" = "partially_retained_connected"),
-                                                                                                        selected = right_rod_status,
-                                                                                                        inline = FALSE, 
-                                                                                                        status = "success"
-                                                                                                    ))
-                                                                            ),
-                                                                            column(2, 
-                                                                                   conditionalPanel(condition = "input.right_revision_rod_status.indexOf('partially_retained_connected') > -1",
-                                                                                                    pickerInput(inputId = "right_revision_implants_connected_to_prior_rod", 
-                                                                                                                label = "Select screws connected to the old rod:", 
-                                                                                                                choices = c(""), 
-                                                                                                                selected = right_implants_still_connected,
-                                                                                                                multiple = TRUE
-                                                                                                    )
-                                                                                   )
-                                                                            )
-                                                                        )
-                                                       )
-                                      )
-                               )
-                           ),
-                           fluidRow(column(12, 
-                                           uiOutput(outputId = "prior_patient_match"))),
-                    )
-        )
-    }
+    rcon_reactive$rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = redcap_token)    
     
+    })
     
+    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
+    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
+    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
+    
+    ################################################    INITIAL STARTUP MODAL ######################################
+    ################################################    INITIAL STARTUP MODAL ######################################
+    ################################################    INITIAL STARTUP MODAL ######################################
     
     showModal(startup_modal_box(starting_first_name = "", starting_last_name = "", starting_dob = "", starting_dos = ""))
     
-    observeEvent(input$edit_patient, {
-        showModal(startup_modal_box(starting_first_name = input$patient_first_name, 
-                            starting_last_name = input$patient_last_name, 
-                            starting_dob = input$date_of_birth,
-                            starting_dos = input$date_of_surgery, 
-                            starting_sex = input$sex,
-                            primary_or_revision = input$primary_revision,
-                            # indication_for_revision = input$revision_indication,
-                            levels_with_prior_decompression = input$open_canal, 
-                            prior_fusion_levels = input$prior_fusion_levels, 
-                            prior_instrumentation = input$prior_instrumentation, 
-                            left_prior_implants = input$left_revision_implants, 
-                            left_prior_implants_removed = input$left_revision_implants_removed, 
-                            right_prior_implants = input$right_revision_implants, 
-                            right_prior_implants_removed = input$right_revision_implants_removed, 
-                            left_rod_status = input$left_revision_rod_status,
-                            left_implants_still_connected = input$left_revision_implants_connected_to_prior_rod,
-                            right_rod_status = input$right_revision_rod_status,
-                            right_implants_still_connected = input$right_revision_implants_connected_to_prior_rod,
-                            button_proceed = "exit"
-        ))
-    })
     
-
     observeEvent(input$test_patient_button, {
         updateTextInput(session = session, inputId = "patient_last_name", value = "TestLAST")
         updateTextInput(session = session, inputId = "patient_first_name", value = "TestFIRST")
@@ -1205,13 +985,31 @@ server <- function(input, output, session) {
     })
     
     
+    ## now make a reactive modal for editing and if not all required info is entered:
+    modal_box_patient_details_reactive <- reactive({
+        startup_modal_box(starting_first_name = input$patient_first_name, 
+                                    starting_last_name = input$patient_last_name, 
+                                    starting_dob = input$date_of_birth,
+                                    starting_dos = input$date_of_surgery, 
+                                    starting_sex = input$sex, 
+                                    hospital_input = input$hospital, redcap_token_last_8_input = input$redcap_token_last_8,
+                                    button_proceed = "exit"
+        )
+    })
+    
+    observeEvent(input$open_patient_details_modal, {
+        showModal(modal_box_patient_details_reactive())
+    })
+    
+
     ############### RETRIEVE EXISTING PATIENT #########################
     existing_patient_data <- reactiveValues()
     existing_patient_data$match_found <- FALSE
     existing_patient_data$patient_df <- tibble(level = character())
 
+    
     observeEvent(input$search_for_prior_patient, ignoreInit = TRUE, {
-        all_patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
+        all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
             type.convert() %>%
             select(record_id, last_name, first_name, date_of_birth) %>%
             mutate(last_name = str_to_lower(last_name),
@@ -1229,16 +1027,15 @@ server <- function(input, output, session) {
             if(match_found == TRUE){
                 record_number <- joined_df$record_id[[1]]
                 
-                existing_patient_data$patient_df <- exportRecords(rcon = rcon, records = record_number) %>%
-                    as_tibble()  %>%
+                existing_patient_data$patient_df <- exportRecords(rcon = rcon_reactive$rcon, records = record_number, fields = append(c("record_id", "dos_surg_repeating", "approach_repeating", "side", "object"), str_to_lower(str_replace_all(levels_vector, pattern = "-", replacement = "_")))) %>%                    as_tibble()  %>%
                     filter(redcap_repeat_instrument == "procedures_by_level_repeating")  %>%
                     type.convert() %>%
                     select(record_id, dos_surg_repeating, approach_repeating, side, str_replace_all(string = str_to_lower(levels_numbered_df$level), pattern = "-", replacement = "_")) %>%
                     pivot_longer(cols = str_replace_all(string = str_to_lower(levels_numbered_df$level), pattern = "-", replacement = "_"), names_to = "level", values_to = "object") %>%
                     filter(!is.na(object)) %>%
-                    mutate(dos_surg_repeating = date(dos_surg_repeating)) %>%
                     rename(approach = approach_repeating) %>%
-                    mutate(level = str_to_title(str_replace_all(string = level, pattern = "_", replacement = "-"))) 
+                    mutate(level = str_to_title(str_replace_all(string = level, pattern = "_", replacement = "-"))) %>%
+                    rename(date_of_surgery = dos_surg_repeating)
                 
                 existing_patient_data$match_found <- match_found
                 
@@ -1262,7 +1059,79 @@ server <- function(input, output, session) {
         }
     })
     
-    observeEvent(existing_patient_data$patient_df, {
+    
+    ################################################    MODAL BOX 2 ######################################
+    ################################################    MODAL BOX 2 ######################################
+    ################################################    MODAL BOX 2 ######################################
+    
+    observeEvent(input$close_startup_modal, {
+        if(length(input$date_of_birth) == 0 | length(input$date_of_surgery) == 0 | is.null(input$sex)){
+            
+            showModal(modal_box_patient_details_reactive())
+            
+        }else{
+            removeModal()
+            
+            spine_region <- NULL
+            diagnosis_category <- NULL
+            dx <- NULL
+            symptoms <- NULL 
+            
+            showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = diagnosis_category,
+                                                           primary_diagnosis_value = dx,
+                                                           symptoms_initial_value = symptoms,
+                                                           stage_number_value = input$stage_number,
+                                                           staged_procedure_initial_value = FALSE,
+                                                           multiple_approach_initial_value = FALSE,
+                                                           spinal_regions_selected = spine_region,
+                                                           ##
+                                                           primary_or_revision = input$primary_revision,
+                                                           levels_with_prior_decompression = input$open_canal,
+                                                           prior_fusion_levels = input$prior_fusion_levels,
+                                                           prior_instrumentation = input$prior_instrumentation,
+                                                           left_prior_implants = input$left_revision_implants,
+                                                           left_prior_implants_removed = input$left_revision_implants_removed,
+                                                           right_prior_implants = input$right_revision_implants,
+                                                           right_prior_implants_removed = input$right_revision_implants_removed,
+                                                           left_rod_status = input$left_revision_rod_status,
+                                                           left_implants_still_connected = input$left_revision_implants_connected_to_prior_rod,
+                                                           right_rod_status = input$right_revision_rod_status,
+                                                           right_implants_still_connected = input$right_revision_implants_connected_to_prior_rod
+            ))
+        }
+    })
+    
+    modal_box_diagnosis_symptoms_procedure_reactive <- reactive({
+        startup_modal_box_diagnosis_symptoms(diagnosis_category_value = input$diagnosis_category,
+                                             primary_diagnosis_value = input$primary_diagnosis,
+                                             symptoms_initial_value = input$symptoms,
+                                             stage_number_value = input$stage_number,
+                                             staged_procedure_initial_value = input$staged_procedure,
+                                             multiple_approach_initial_value = input$multiple_approach,
+                                             spinal_regions_selected = input$spinal_regions,
+                                             ##
+                                             primary_or_revision = input$primary_revision,
+                                             levels_with_prior_decompression = input$open_canal,
+                                             prior_fusion_levels = input$prior_fusion_levels,
+                                             prior_instrumentation = input$prior_instrumentation,
+                                             left_prior_implants = input$left_revision_implants,
+                                             left_prior_implants_removed = input$left_revision_implants_removed,
+                                             right_prior_implants = input$right_revision_implants,
+                                             right_prior_implants_removed = input$right_revision_implants_removed,
+                                             left_rod_status = input$left_revision_rod_status,
+                                             left_implants_still_connected = input$left_revision_implants_connected_to_prior_rod,
+                                             right_rod_status = input$right_revision_rod_status,
+                                             right_implants_still_connected = input$right_revision_implants_connected_to_prior_rod
+        )
+    })
+    
+    observeEvent(input$open_diagnosis_symptoms_procedure_modal, {
+        showModal(modal_box_diagnosis_symptoms_procedure_reactive())
+    })
+    
+    
+    #################~~~~~~~~ UPDATE FIELDS BASED ON PRIOR PATIENT FOUND #############
+    observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), {
         if(existing_patient_data$match_found == TRUE){
             updateRadioGroupButtons(session = session, 
                                     inputId = "primary_revision", 
@@ -1275,7 +1144,7 @@ server <- function(input, output, session) {
         }
     } )
     
-    observeEvent(existing_patient_data$patient_df, {
+    observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), {
         if(existing_patient_data$match_found == TRUE){
             if(nrow(existing_patient_data$patient_df %>% filter(str_detect(object, "screw") | str_detect(object, "hook"))) > 0){
                 updateSwitchInput(session = session, inputId = "prior_instrumentation", value = TRUE)
@@ -1283,224 +1152,78 @@ server <- function(input, output, session) {
         }
     } )
     
-    observeEvent(existing_patient_data$patient_df, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), ignoreNULL = TRUE, ignoreInit = TRUE, {
         if(existing_patient_data$match_found == TRUE){
             left_prior_implants_df <- existing_patient_data$patient_df %>%
                 filter(str_detect(object, "screw") | str_detect(object, "hook")) %>%
                 filter(side == "left") %>%
-                distinct()
+                distinct()%>%
+                mutate(level = if_else(level == "S2ai", "S2AI", level))
+            
             if(nrow(left_prior_implants_df)>0){
                 updateAwesomeCheckboxGroup(session = session, inputId = "left_revision_implants", selected = left_prior_implants_df$level)
             }
         }
     })
     
-    observeEvent(existing_patient_data$patient_df, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), ignoreNULL = TRUE, ignoreInit = TRUE, {
         if(existing_patient_data$match_found == TRUE){
             right_prior_implants_df <- existing_patient_data$patient_df %>%
                 filter(str_detect(object, "screw") | str_detect(object, "hook")) %>%
                 filter(side == "right") %>%
-                distinct()
+                distinct() %>%
+                mutate(level = if_else(level == "S2ai", "S2AI", level))
             
             if(nrow(right_prior_implants_df)>0){
                 updateAwesomeCheckboxGroup(session = session, inputId = "right_revision_implants", selected = right_prior_implants_df$level)
             }
         }
     })
-    ############### RETRIEVE EXISTING PATIENT COMPLETE #########################
-
     
-    ############ STARTUP MODAL BOX 2: #################
-    startup_modal_box_diagnosis_symptoms <- function(diagnosis_category_value = NULL,
-                                                     # diagnosis_choices = list("Degen" = c("1", "2"), "Deformity" = c("1", "2")),
-                                                     primary_diagnosis_value = NULL, 
-                                                     other_diagnosis = NULL,
-                                                     # symptoms_choices = list("Upper" = c("1", "2"), "Lower" = c("1", "2")),
-                                                     symptoms_initial_value = NULL,
-                                                     stage_number_value = 1,
-                                                     staged_procedure_initial_value = FALSE,
-                                                     multiple_approach_initial_value = FALSE,
-                                                     spinal_regions_selected = c("Lumbar")
-                                                     ){
-        modalDialog(size = "l", easyClose = FALSE, footer = modalButton("Proceed"),
-                    box(width = 12, title = "Diagnosis, Symptoms, Procedure", solidHeader = TRUE, status = "info",
-                        column(12,
-                               tags$div(style = "font-size:20px; font-weight:bold", "Select All Relevant Spinal Regions:"),
-                               fluidRow(
-                                   checkboxGroupButtons(
-                                       inputId = "spinal_regions",
-                                       label = NULL,
-                                       choices = c("Lumbosacral",
-                                                   "Lumbar", 
-                                                   "Thoracolumbar",
-                                                   "Thoracic",
-                                                   "Cervicothoracic",
-                                                   "Cervical"),
-                                       individual = TRUE,
-                                       size = "normal", 
-                                       justified = TRUE,
-                                       selected = spinal_regions_selected,
-                                       checkIcon = list(
-                                           yes = tags$i(class = "fa fa-circle", 
-                                                        style = "color: steelblue"),
-                                           no = tags$i(class = "fa fa-circle-o", 
-                                                       style = "color: steelblue"))
-                                   )
-                               ),
-                               hr(),
-                               br(),
-                               conditionalPanel(condition = "input.spinal_regions.length > 0",
-                                                tags$div(style = "font-size:20px; font-weight:bold", "Select Diagnostic Categories:"),
-                                                tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply)"),
-                                                fluidRow(
-                                                    checkboxGroupButtons(
-                                                        inputId = "diagnosis_category",
-                                                        label = NULL,
-                                                        justified = TRUE,
-                                                        choices = c("Degenerative", "Deformity", "Trauma", "Infection", "Tumor", "Congenital", "Complication", "Other"),
-                                                        # status = "primary", 
-                                                        selected = diagnosis_category_value,
-                                                        checkIcon = list(
-                                                            yes = icon("ok", 
-                                                                       lib = "glyphicon"))
-                                                    )
-                                                )
-                               ),
-                               br(),
-                               conditionalPanel(condition = "input.diagnosis_category.length > 0",
-                               fluidRow(
-                                   column(width = 5,
-                                          tags$div(style = "font-size:18px; font-weight:bold", "Diagnosis:"),
-                                          conditionalPanel(condition = "input.primary_revision.indexOf('Primary') > -1",
-                                                           tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply)")),
-                                          conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
-                                                           tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply, including primary diagnosis and indication for revision)"))
-                                   ),
-                                   column(width = 7,
-                                          pickerInput(inputId = "primary_diagnosis",
-                                                      label = "Diagnosis Search:",
-                                                      choices = (spine_icd10_codes_df %>% filter(spine_category == "Degenerative"))$diagnosis,
-                                                      options = pickerOptions(liveSearch = TRUE, virtualScroll = 200, liveSearchNormalize = TRUE),
-                                                      multiple = TRUE,
-                                                      selected = "")
-                                   ),
-                                   # uiOutput(outputId = "diagnosis_input_ui"),
-                               ),
-                               hr(), 
-                               br(),
-                               fluidRow(
-                                   column(width = 5,
-                                          tags$div(style = "font-size:18px; font-weight:bold", "Symptoms:")
-                                   ),
-                                   uiOutput(outputId = "symptoms_input_ui"),
-                               ),
-                               fluidRow(
-                                   textInput(inputId = "relevant_history", label = "Other Comments/History:")
-                               ),
-                               hr(), 
-                               br(), 
-                               tags$div(style = "font-size:20px; font-weight:bold", "Procedure: Stage & Approach:"),
-                               fluidRow(
-                                   uiOutput(outputId = "surgical_details_ui")
-                               ),
-                               jh_make_shiny_table_row_function(left_column_label = "Staged Procedure?", 
-                                                                input_type = "switch", 
-                                                                input_id = "staged_procedure", 
-                                                                left_column_percent_width = 50,
-                                                                font_size = 16, 
-                                                                switch_input_on_label = "Yes", 
-                                                                switch_input_off_label = "No",
-                                                                initial_value_selected = staged_procedure_initial_value,),
-                               conditionalPanel(condition = "input.staged_procedure == true",
-                                                jh_make_shiny_table_row_function(left_column_label = "Stage Number:",
-                                                                                 input_type = "awesomeRadio",
-                                                                                 input_id = "stage_number",
-                                                                                 left_column_percent_width = 50, font_size = 14, choices_vector = c(1,2,3,4,5), checkboxes_inline = TRUE,
-                                                                                 initial_value_selected = stage_number_value)
-                               ),
-                               jh_make_shiny_table_row_function(left_column_label = "Multiple Approach, single stage?", 
-                                                                input_type = "switch", 
-                                                                input_id = "multiple_approach",
-                                                                left_column_percent_width = 50, 
-                                                                font_size = 16, 
-                                                                switch_input_on_label = "Yes", 
-                                                                switch_input_off_label = "No",
-                                                                initial_value_selected = multiple_approach_initial_value)
-                               )
-                        )
-                    )
-        )
-    }
-    
-    observeEvent(input$close_startup_modal, {
-
-        if(length(input$date_of_birth) == 0 | length(input$date_of_surgery) == 0 | is.null(input$sex)){
-            # header_text_color
-            showModal(startup_modal_box(header_text = "Please Enter Value for Each Field", header_text_color = "red",
-                                        starting_first_name = input$patient_first_name, 
-                                        starting_last_name = input$patient_last_name, 
-                                        starting_dob = input$date_of_birth,
-                                        starting_dos = input$date_of_surgery, 
-                                        starting_sex = input$sex,
-                                        primary_or_revision = input$primary_revision,
-                                        # indication_for_revision = input$revision_indication,
-                                        levels_with_prior_decompression = input$open_canal, 
-                                        prior_fusion_levels = input$prior_fusion_levels, 
-                                        prior_instrumentation = input$prior_instrumentation, 
-                                        left_prior_implants = input$left_revision_implants, 
-                                        left_prior_implants_removed = input$left_revision_implants_removed, 
-                                        right_prior_implants = input$right_revision_implants, 
-                                        right_prior_implants_removed = input$right_revision_implants_removed, 
-                                        left_rod_status = input$left_revision_rod_status,
-                                        left_implants_still_connected = input$left_revision_implants_connected_to_prior_rod,
-                                        right_rod_status = input$right_revision_rod_status,
-                                        right_implants_still_connected = input$right_revision_implants_connected_to_prior_rod,
-                                        button_proceed = "proceed_to_details"
-            ))
-        }else{
-            removeModal()
-            
-            if(str_detect(str_to_lower(input$patient_last_name), pattern = "test")){
-                spine_region <- "Thoracolumbar"
-                diagnosis_category <- c("Deformity")
-                dx <- c("Flatback syndrome, thoracolumbar region")
-                symptoms <- c("Low Back Pain", "Left Leg Pain")
-            }else{
-                spine_region <- NULL
-                diagnosis_category <- NULL
-                dx <- NULL
-                symptoms <- NULL # input$symptoms
+    observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), ignoreNULL = TRUE, ignoreInit = TRUE, {
+        if(existing_patient_data$match_found == TRUE){
+            prior_fusion_df <- existing_patient_data$patient_df %>%
+                filter(str_detect(object, "fusion")) %>%
+                distinct()
+            if(nrow(prior_fusion_df)>0){
+                updatePickerInput(session = session, inputId = "prior_fusion_levels", selected =  prior_fusion_df$level)
             }
-            
-            showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = diagnosis_category, 
-                                                           primary_diagnosis_value = dx,
-                                                           symptoms_initial_value = symptoms,
-                                                           stage_number_value = input$stage_number,
-                                                           staged_procedure_initial_value = FALSE,
-                                                           multiple_approach_initial_value = FALSE,
-                                                           spinal_regions_selected = spine_region
-            ))
         }
     })
-    
-    observeEvent(input$edit_diagnosis_symptoms, {
-        showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = input$diagnosis_category,
-                                                       primary_diagnosis_value = input$primary_diagnosis,  
-                                                       symptoms_initial_value = input$symptoms,
-                                                       stage_number_value = input$stage_number,
-                                                       staged_procedure_initial_value = input$staged_procedure,
-                                                       multiple_approach_initial_value = input$multiple_approach,
-                                                       spinal_regions_selected = input$spinal_regions))
+    observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), ignoreNULL = TRUE, ignoreInit = TRUE, {
+        if(existing_patient_data$match_found == TRUE){
+            prior_decompression_df <- existing_patient_data$patient_df %>%
+                filter(str_detect(object, "decompression")) %>%
+                distinct()
+            if(nrow(prior_decompression_df)>0){
+                updatePickerInput(session = session, inputId = "open_canal", selected = jh_convert_interspace_to_body_vector_function(prior_decompression_df$level))
+            }
+        }
     })
-    
+  
     
     ############ UPDATE DIAGNOSIS & SYMPTOMS OPTIONS ##############
 
     #### UPDATE DIAGNOSIS OPTIONS
+     observeEvent(list(input$open_patient_details_modal, input$open_diagnosis_symptoms_procedure_modal, input$spinal_regions), ignoreInit = TRUE, {
+        
+        if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
+            age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+            if(age > 30){
+                updateCheckboxGroupButtons(session = session,
+                                           inputId = "diagnosis_category", 
+                                           choices = discard(.x = names(spine_icd_list_by_region$all_regions), .p = ~ .x == "Pediatric Deformity"),   
+                                           checkIcon = list(
+                                               yes = icon("ok", 
+                                                          lib = "glyphicon")))
+            }
+        }
+
+    })
     
     observeEvent(list(input$spinal_regions, input$diagnosis_category), ignoreInit = TRUE, {
-            spine_diagnosis_choices_list <-jh_generate_spine_diagnoses_choices_function(spine_regions_input_vector = input$spinal_regions,
-                                                         diagnosis_category_input_vector = input$diagnosis_category)
+         
+            spine_diagnosis_choices_list <- jh_create_diagnosis_list_vector_function(category_input = input$diagnosis_category, site_input = input$spinal_regions)
 
             if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
                 age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
@@ -1513,49 +1236,28 @@ server <- function(input, output, session) {
             updatePickerInput(session = session,
                               inputId = "primary_diagnosis",
                               label = "Diagnosis Search:", 
-                              choices = spine_diagnosis_choices_list, options = pickerOptions(liveSearch = TRUE, 
-                                                                                              liveSearchNormalize = TRUE, 
-                                                                                              virtualScroll = 200))
-        
+                              choices = spine_diagnosis_choices_list, 
+                              options = pickerOptions(liveSearch = TRUE, 
+                                                      liveSearchNormalize = TRUE, 
+                                                      virtualScroll = 200))
     })
     
-    # output$diagnosis_input_ui <- renderUI({
-    #     
-    #     spine_diagnosis_choices_list <-jh_generate_spine_diagnoses_choices_function(spine_regions_input_vector = input$spinal_regions, 
-    #                                                  diagnosis_category_input_vector = input$diagnosis_category)
-    #     
-    #     if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
-    #         age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-    # 
-    #         if(age > 30){
-    #             spine_diagnosis_choices_list$'Pediatric Deformity' <- NULL
-    #         }
-    #     }
-    # 
-    #     column(width = 7,
-    #            pickerInput(inputId = "primary_diagnosis",
-    #                        label = "Diagnosis Search:",
-    #                        choices = spine_diagnosis_choices_list,
-    #                        options = list('live-search' = TRUE),
-    #                        multiple = TRUE,
-    #                        selected = input$primary_diagnosis)
-    #     )
-    #     
-    # })
+   
     
-
-    
+  
     ### UPDATE SYMPTOMS OPTIONS
     
-    output$symptoms_input_ui <- renderUI({
+    observeEvent(list(input$spinal_regions, input$diagnosis_category), ignoreInit = TRUE, {
         spine_regions_text <- str_to_lower(paste(input$spinal_regions, collapse = ", "))
-        symptom_option_list <- list()
         
+        spine_dx_categories <- str_to_lower(paste(input$diagnosis_category, collapse = ", "))
+        
+        symptom_option_list <- list()
         if(str_detect(string = spine_regions_text, pattern = "cerv")){
             symptom_option_list$'Neck & Arms:' <- c("Neck Pain", "Left Arm Pain", "Right Arm Pain", "Left Arm Weakness", "Right Arm Weakness")
         }
         
-        if(str_detect(string = spine_regions_text, pattern = "cerv")){
+        if(str_detect(string = spine_regions_text, pattern = "cerv") | str_detect(string = spine_regions_text, pattern = "thoracic")){
             symptom_option_list$'Myelopathy:' <- c("Myelopathy: Nurick 1 (Root Symptomts)",
                                                    "Myelopathy: Nurick 2 (Normal gait but symptoms of cord compression)",
                                                    "Myelopathy: Nurick 3 (Gait Abnormalities)",
@@ -1570,32 +1272,28 @@ server <- function(input, output, session) {
         }
         
         if(str_detect(string = spine_regions_text, pattern = "lumb")){
-            symptom_option_list$'Low Back & Legs:' = c("Low Back Pain", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness")
+            symptom_option_list$'Low Back & Legs:' = c("Low Back Pain", "Neurogenic Claudication", "Left Leg Pain", "Right Leg Pain", "Left Leg Weakness", "Right Leg Weakness")
         }
         
-        symptom_option_list$'Deformity' <- c("Coronal Imbalance", "Sagittal Imbalance (Inability to stand up, debilitating fatigue, difficulty maintaining horizontal gaze)")
-        
-        if(str_detect(string = spine_regions_text, pattern = "cerv")){
-            symptom_option_list$'Deformity' <- append(symptom_option_list$'Deformity', "Chin on chest with inability to maintain horizontal gaze")
+        if(str_detect(string = spine_dx_categories, pattern = "Deformity")){
+            symptom_option_list$'Deformity' <- c("Coronal Imbalance", 
+                                                 "Sagittal Imbalance (Inability to stand up, debilitating fatigue, difficulty maintaining horizontal gaze)", 
+                                                 "Poor Self Image",
+                                                 "Chin on chest with inability to maintain horizontal gaze")
         }
-        
-        symptom_option_list$'Other' = c("Loss of bladder control", 
+     
+        symptom_option_list$'Urgent' = c("Loss of bladder control", 
                                         "Bowel Incontinence", 
                                         "Complete Loss of Motor & Sensory Function (Spinal Cord Injury)", 
                                         "Incomplete Loss of Motor & Sensory Function (Spinal Cord Injury)")
         
-        column(width = 7,
-               pickerInput(
-                   inputId = "symptoms",
-                   label = NULL,
-                   choices = symptom_option_list,
-                   multiple = TRUE,
-                   selected = input$symptoms,
-                   width = "100%"
-               ),
-               conditionalPanel(condition = "input.symptoms.indexOf('Other') > -1",
-                                textInput(inputId = "symptoms_other", label = "Other:"))
-        )
+        symptom_option_list$'Other' = c("Other")
+        
+        updatePickerInput(session = session, 
+                          inputId = "symptoms", 
+                          label = NULL, 
+                          choices = symptom_option_list, 
+                          selected = input$symptoms)
         
     })
 
@@ -1668,206 +1366,10 @@ server <- function(input, output, session) {
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup COMPLETE  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup COMPLETE  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     
-    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL   #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
-    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
-    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
-    addition_surgical_details_modal_box_function <- function(required_options_missing = FALSE,
-                                                             row_label_font_size = 16,
-                                                             fade_appearance = TRUE,
-                                                             primary_surgeon = "", 
-                                                             surgical_assistants = "",
-                                                             preoperative_diagnosis = " ",
-                                                             postoperative_diagnosis = " ",
-                                                             indications = "",
-                                                             asa_class = "",
-                                                             anesthesia = "",
-                                                             neuromonitoring = c("SSEP", "tc MEP"),
-                                                             preop_antibiotics = c("Cefazolin (Ancef)", "Vancomycin"),
-                                                             anti_fibrinolytic = "",
-                                                             txa_loading = 20,
-                                                             txa_maintenance = 5,
-                                                             surgical_findings = "",
-                                                             specimens_removed = "",
-                                                             ebl = NULL,
-                                                             urine_output = NULL,
-                                                             crystalloids_administered = NULL,
-                                                             colloids_administered = NULL,
-                                                             transfusion = FALSE,
-                                                             cell_saver_transfused = 0,
-                                                             prbc_transfused = 0,
-                                                             ffp_transfused = 0,
-                                                             cryoprecipitate_transfused = 0,
-                                                             platelets_transfused = 0,
-                                                             intraoperative_complications_true_false =FALSE,
-                                                             intraoperative_complications_vector = NULL,
-                                                             other_intraoperative_complications = NULL,
-                                                             head_positioning = "",
-                                                             additional_procedures_choices = c(" "),
-                                                             additional_procedures = NULL,
-                                                             additional_procedures_other = "",
-                                                             additional_end_procedure_details = NULL,
-                                                             closure_details = NULL,
-                                                             dressing_details = NULL){
-        additional_details_modal <- modalDialog(size = "l", easyClose = FALSE, fade = fade_appearance,
-                                                footer = actionBttn(inputId = "additional_surgical_details_complete", label = "Continue", icon = icon("fas fa-check-square"), style = "simple", color = "success"),
-                                                box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Additional Surgical Details:"),status = "info", solidHeader = TRUE,
-                                                    if(required_options_missing == TRUE){
-                                                        div(style = "font-size:22px; font-weight:bold; font-style:italic; text-align:center; color:red", "*** Please Make Selections for Required Fields***")
-                                                    },
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Primary Surgeon:", font_size = row_label_font_size, input_type = "text", input_id = "primary_surgeon", initial_value_selected = primary_surgeon),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Assistants:", font_size = row_label_font_size,  input_type = "text", input_id = "surgical_assistants", initial_value_selected = surgical_assistants),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Preoperative Diagnosis:", font_size = row_label_font_size, input_type = "text", input_id = "preoperative_diagnosis", initial_value_selected = preoperative_diagnosis),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Postoperative Diagnosis:", font_size = row_label_font_size, input_type = "text", input_id = "postoperative_diagnosis", initial_value_selected = postoperative_diagnosis),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Surgical Indications:", font_size = row_label_font_size, input_type = "text", input_id = "indications", initial_value_selected = indications),
-                                                    hr(),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Preprocedure ASA Classification", font_size = row_label_font_size, input_type = "awesomeRadio", choices_vector = c("ASA I", "ASA II", "ASA III", "ASA IV", "ASA V", "ASA VI"), input_id = "asa_class", checkboxes_inline = TRUE, initial_value_selected = asa_class),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Anethesia Type:", font_size = row_label_font_size, input_type = "awesomeRadio", choices_vector = c("General Endotracheal Anesthseia", "Total Intravenous Anesthesia"), input_id = "anesthesia", checkboxes_inline = TRUE, initial_value_selected = anesthesia),
-                                                    hr(),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30,
-                                                                                     left_column_label = "Neuromonitoring used:", font_size = row_label_font_size,
-                                                                                     input_type = "checkbox",
-                                                                                     input_id = "neuromonitoring", choices_vector = c("EMG", "SSEP", "tc MEP", "DNEP (Cord Stimulation)", "H reflex"),
-                                                                                     checkboxes_inline = TRUE,
-                                                                                     initial_value_selected = neuromonitoring),
-                                                    hr(),
-                                                    jh_make_shiny_table_row_function(left_column_label = "Preop Antibiotics:",
-                                                                                     input_type = "checkbox", 
-                                                                                     input_id = "preop_antibiotics", 
-                                                                                     left_column_percent_width = 30,
-                                                                                     font_size = row_label_font_size,
-                                                                                     choices_vector = c("None (Antibiotics were held)", "Cefazolin (Ancef)", "Vancomycin", "Ceftriaxone", "Gentamycin", "Clindamycin", "Aztreonam", "Unknown", "Other"),
-                                                                                     initial_value_selected = preop_antibiotics),
-                                                    hr(),
-                                                    jh_make_shiny_table_row_function(left_column_label = "Antifibrinolytic:",
-                                                                                     input_type = "checkbox",
-                                                                                     input_id = "anti_fibrinolytic",
-                                                                                     left_column_percent_width = 30,
-                                                                                     font_size = row_label_font_size,
-                                                                                     choices_vector = c("None", "Tranexamic Acid (TXA)", "Amicar", "Desmopressin (DDAVP)", "Other"),
-                                                                                     initial_value_selected = anti_fibrinolytic,
-                                                    ),
-                                                    conditionalPanel(condition = "input.anti_fibrinolytic.indexOf('Tranexamic Acid (TXA)') > -1",
-                                                                     jh_make_shiny_table_row_function(left_column_label = "TXA Loading (mg/kg):    ",
-                                                                                                      input_type = "numeric",
-                                                                                                      input_id = "txa_loading",
-                                                                                                      left_column_percent_width = 50,
-                                                                                                      font_size = row_label_font_size-1, min = 0, max = 200, 
-                                                                                                      initial_value_selected = txa_loading, 
-                                                                                                      step = 5,
-                                                                                                      text_align = "right",
-                                                                     ),
-                                                                     jh_make_shiny_table_row_function(left_column_label = "TXA Maintenance (mg/kg/hr):    ", 
-                                                                                                      input_type = "numeric",
-                                                                                                      input_id = "txa_maintenance",
-                                                                                                      left_column_percent_width = 50,
-                                                                                                      font_size = row_label_font_size-1, min = 0, max = 50, 
-                                                                                                      initial_value_selected = txa_maintenance, 
-                                                                                                      step = 5, 
-                                                                                                      text_align = "right",
-                                                                     ),
-                                                    ),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Findings:",font_size = row_label_font_size, input_type = "text", input_id = "surgical_findings", initial_value_selected = surgical_findings),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Specimens:",font_size = row_label_font_size, input_type = "text", input_id = "specimens_removed", initial_value_selected = specimens_removed),
-                                                    hr(),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Estimated Blood Loss:",font_size = row_label_font_size, input_type = "numeric", input_id = "ebl", initial_value_selected = ebl, min = 0, max = 50000, step = 100),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Urine Output:",font_size = row_label_font_size, input_type = "numeric", input_id = "urine_output", initial_value_selected = urine_output, min = 0, max = 50000, step = 100),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Crystalloids:", font_size = row_label_font_size, input_type = "numeric", input_id = "crystalloids_administered", initial_value_selected = crystalloids_administered, min = 0, max = 100000, step = 100),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 30, left_column_label = "Colloids:", font_size = row_label_font_size, input_type = "numeric", input_id = "colloids_administered", min = 0, initial_value_selected = colloids_administered, max = 100000, step = 100),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Transfusions/Cell Saver",font_size = row_label_font_size,  input_type = "switch", input_id = "transfusion", switch_input_on_label = "Yes", switch_input_off_label = "No", initial_value_selected = transfusion),
-                                                    conditionalPanel(condition = "input.transfusion == true",
-                                                                     box(width = 12,
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cell Saver Transfused (cc):",font_size = row_label_font_size,  input_type = "numeric", input_id = "cell_saver_transfused",initial_value_selected = cell_saver_transfused, min = 0, max = 10000, step = 100),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "pRBC units transfused:",font_size = row_label_font_size,  input_type = "numeric", input_id = "prbc_transfused", initial_value_selected = prbc_transfused, min = 0, max = 100, step = 1),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "FFP units transfused:",font_size = row_label_font_size,  input_type = "numeric", input_id = "ffp_transfused", initial_value_selected = ffp_transfused, min = 0, max = 100, step = 1),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Cryoprecipitate units transfused:",font_size = row_label_font_size,  input_type = "numeric", input_id = "cryoprecipitate_transfused", initial_value_selected = cryoprecipitate_transfused, min = 0, max = 100, step = 1),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Platelet units transfused:",font_size = row_label_font_size,  input_type = "numeric", input_id = "platelets_transfused", initial_value_selected = platelets_transfused, min = 0, max = 100, step = 1),
-                                                                     )
-                                                    ),
-                                                    hr(),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 60, left_column_label = "Intraoperative Complications (including durotomy)?",font_size = row_label_font_size,  input_type = "switch", input_id = "intraoperative_complications_true_false", initial_value_selected = intraoperative_complications_true_false),
-                                                    conditionalPanel(condition = "input.intraoperative_complications_true_false == true",
-                                                                     box(width = 12,
-                                                                         br(),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Select any:", font_size = row_label_font_size, 
-                                                                                                          input_type = "checkbox", input_id = "intraoperative_complications_vector", 
-                                                                                                          choices_vector = c("Durotomy", "Nerve Root Injury", "Loss of Neuromonitoring Data with Return", "Loss of Neuromonitoring Data without Return"), 
-                                                                                                          initial_value_selected = intraoperative_complications_vector),
-                                                                         jh_make_shiny_table_row_function(left_column_percent_width = 40, left_column_label = "Other Intraoperative Complications:", font_size = row_label_font_size, input_type = "text", input_id = "other_intraoperative_complications", initial_value_selected = other_intraoperative_complications)
-                                                                     )
-                                                    ),
-                                                    br(),
-                                                    jh_make_shiny_table_row_function(left_column_percent_width = 20,
-                                                                                     left_column_label = "Head Positioning:", font_size = row_label_font_size,
-                                                                                     input_type = "radioGroupButtons",
-                                                                                     input_id = "head_positioning",
-                                                                                     required_option = TRUE,
-                                                                                     button_size = "xs",
-                                                                                     checkboxes_inline = TRUE,
-                                                                                     choices_vector = c("Supine/Lateral", "Proneview Faceplate", "Cranial Tongs", "Halo", "Mayfield"),
-                                                                                     initial_value_selected = head_positioning),
-                                                    br(),
-                                                    jh_make_shiny_table_row_function(left_column_label = "Additional Procedures:", font_size = row_label_font_size,
-                                                                                     input_id = "additional_procedures",
-                                                                                     left_column_percent_width = 20,
-                                                                                     checkboxes_inline = FALSE,
-                                                                                     input_type = "checkbox",
-                                                                                     choices_vector = additional_procedures_choices,
-                                                                                     initial_value_selected = additional_procedures),
-                                                    conditionalPanel(condition = "input.additional_procedures.indexOf('Other') > -1",
-                                                                     tags$table(width = "90%" ,
-                                                                                jh_make_shiny_table_row_function(left_column_label = "Other Procedures:",font_size = row_label_font_size-1, input_type = "text", input_id = "additional_procedures_other", left_column_percent_width = 30, initial_value_selected = additional_procedures_other,)
-                                                                     )
-                                                    ),
-                                                    br(),
-                                                    hr(),
-                                                    div(style = "font-size:20px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
-                                                    uiOutput(outputId = "drains_ui"),
-                                                    hr(),
-                                                    jh_make_shiny_table_row_function(left_column_label = "Select any used during closure:",
-                                                                                     input_type = "checkbox",
-                                                                                     input_id = "additional_end_procedure_details",
-                                                                                     left_column_percent_width = 45,
-                                                                                     font_size = row_label_font_size,
-                                                                                     choices_vector = c("Vancomycin Powder",
-                                                                                                        "Antibiotic Beads"),
-                                                                                     initial_value_selected = additional_end_procedure_details,
-                                                                                     return_as_full_table = TRUE),
-                                                    hr(),
-                                                    jh_make_shiny_table_row_function(left_column_label = "Skin Closure:",
-                                                                                     input_type = "checkbox",
-                                                                                     input_id = "closure_details",
-                                                                                     left_column_percent_width = 45,
-                                                                                     font_size = row_label_font_size,
-                                                                                     required_option = TRUE,
-                                                                                     choices_vector = c("Subcutaneous suture",
-                                                                                                        "Nylon",
-                                                                                                        "Staples"),
-                                                                                     initial_value_selected = closure_details,
-                                                                                     return_as_full_table = TRUE),
-                                                    hr(),
-                                                    jh_make_shiny_table_row_function(left_column_label = "Skin/Dressing:",
-                                                                                     input_type = "checkbox",
-                                                                                     input_id = "dressing_details",
-                                                                                     required_option = TRUE,
-                                                                                     left_column_percent_width = 45,
-                                                                                     font_size = row_label_font_size,
-                                                                                     choices_vector = c(
-                                                                                         "Steristrips",
-                                                                                         "Dermabond",
-                                                                                         "Prineo",
-                                                                                         "an Incisional Wound Vac",
-                                                                                         "a water tight dressing"),
-                                                                                     initial_value_selected = dressing_details,
-                                                                                     return_as_full_table = TRUE),
-                                                    br()
-                                                )
-        )
-        
-        return(additional_details_modal)
-    }
-    
+    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
+    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
+    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
 
-    
     ### DRAIN INPUT UI ###
     output$drains_ui <- renderUI({
         anterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
@@ -1929,8 +1431,11 @@ server <- function(input, output, session) {
     
     
     observeEvent(input$intraoperative_complications_vector, {
-        if(any(input$intraoperative_complications_vector == "Durotomy")){
-         updateTextInput(session = session, inputId = "postoperative_diagnosis", value = paste(input$postoperative_diagnosis, "Accidental puncture or laceration of dura during a procedure (G97.41)", sep = "; "))
+        if(any(str_detect(string = str_to_lower(input$intraoperative_complications_vector), pattern = "dur"))){
+         updateTextInput(session = session, 
+                         inputId = "postoperative_diagnosis", 
+                         value = paste(input$postoperative_diagnosis,
+                                       "Accidental puncture or laceration of dura during a procedure (G97.41)", sep = "; "))
                              
         }
     }
@@ -1981,7 +1486,8 @@ server <- function(input, output, session) {
                       input$right_revision_implants_removed, 
                       input$prior_fusion_levels, 
                       input$head_positioning, 
-                      input$approach_robot_navigation), ignoreInit = TRUE, {
+                      input$approach_robot_navigation,
+                      input$durotomy_repair_method), ignoreInit = TRUE, {
                           additional_procedures_list <- as.list(input$additional_procedures)
                           
                           if("Robotic Assistance" %in% input$approach_robot_navigation){
@@ -2011,6 +1517,12 @@ server <- function(input, output, session) {
                                   additional_procedures_list$head_positioning <- "Application of Halo for thin skull osteology (pediatric)"
                               }else{
                                   additional_procedures_list$head_positioning <- "Application of Halo"
+                              }
+                          }
+                          
+                          if(length(input$durotomy_repair_method)>0){
+                              if(str_detect(string = toString(input$durotomy_repair_method), pattern = "No Repair") == FALSE){
+                                  additional_procedures_list$dural_repair <- "Repair of dural/CSF leak"
                               }
                           }
                           
@@ -2044,10 +1556,6 @@ server <- function(input, output, session) {
             preop_dx <- glue_collapse(x = diagnosis_code_df$diagnosis_code, sep = "; ")
             
             postop_dx <- glue_collapse(x = diagnosis_code_df$diagnosis_code, sep = "; ")
-            
-            # preop_dx <- glue_collapse(x = input$primary_diagnosis, sep = "; ")
-            # 
-            # postop_dx <- glue_collapse(x = input$primary_diagnosis, sep = "; ")
 
         }else{
             preop_dx <- " "
@@ -2103,43 +1611,49 @@ server <- function(input, output, session) {
     })
     
     
+    modal_box_surgical_details_reactive <- reactive({
+        addition_surgical_details_modal_box_function(primary_surgeon_first_name_input = input$primary_surgeon_first_name,
+                                                     primary_surgeon_last_name_input = input$primary_surgeon_last_name,
+                                                     surgical_assistants = input$surgical_assistants,
+                                                     preoperative_diagnosis = input$preoperative_diagnosis,
+                                                     postoperative_diagnosis = input$postoperative_diagnosis, 
+                                                     asa_class = input$asa_class,
+                                                     anesthesia = input$anesthesia,
+                                                     indications = input$indications,
+                                                     neuromonitoring = input$neuromonitoring,
+                                                     preop_antibiotics = input$preop_antibiotics,
+                                                     anti_fibrinolytic = input$anti_fibrinolytic,
+                                                     txa_loading = input$txa_loading,
+                                                     txa_maintenance = input$txa_maintenance,
+                                                     surgical_findings = input$surgical_findings,
+                                                     specimens_removed = input$specimens_removed,
+                                                     ebl = input$ebl,
+                                                     urine_output = input$urine_output,
+                                                     crystalloids_administered = input$crystalloids_administered,
+                                                     colloids_administered = input$colloids_administered,
+                                                     transfusion = input$transfusion,
+                                                     cell_saver_transfused = input$cell_saver_transfused,
+                                                     prbc_transfused = input$prbc_transfused,
+                                                     ffp_transfused = input$ffp_transfused,
+                                                     cryoprecipitate_transfused = input$cryoprecipitate_transfused,
+                                                     platelets_transfused = input$platelets_transfused,
+                                                     intraoperative_complications_true_false = input$intraoperative_complications_true_false,
+                                                     intraoperative_complications_vector = input$intraoperative_complications_vector,
+                                                     other_intraoperative_complications = input$other_intraoperative_complications,
+                                                     durotomy_timing_input = input$durotomy_timing, 
+                                                     durotomy_instrument_input = input$durotomy_instrument,
+                                                     durotomy_repair_method_input = input$durotomy_repair_method,
+                                                     head_positioning = input$head_positioning,
+                                                     additional_procedures_choices = additional_procedures_options_reactive_vector(),
+                                                     additional_procedures = input$additional_procedures,
+                                                     additional_procedures_other = input$additional_procedures_other,
+                                                     additional_end_procedure_details = input$additional_end_procedure_details,
+                                                     closure_details = input$closure_details,
+                                                     dressing_details = input$dressing_details)
+    })
     
     observeEvent(input$edit_additional_surgical_details, ignoreInit = TRUE, {
-        showModal(
-            addition_surgical_details_modal_box_function(primary_surgeon = input$primary_surgeon,
-                                                         surgical_assistants = input$surgical_assistants,
-                                                         preoperative_diagnosis = input$preoperative_diagnosis,
-                                                         postoperative_diagnosis = input$postoperative_diagnosis, 
-                                                         asa_class = input$asa_class,
-                                                         anesthesia = input$anesthesia,
-                                                         indications = input$indications,
-                                                         neuromonitoring = input$neuromonitoring,
-                                                         preop_antibiotics = input$preop_antibiotics,
-                                                         anti_fibrinolytic = input$anti_fibrinolytic,
-                                                         txa_loading = input$txa_loading,
-                                                         txa_maintenance = input$txa_maintenance,
-                                                         surgical_findings = input$surgical_findings,
-                                                         specimens_removed = input$specimens_removed,
-                                                         ebl = input$ebl,
-                                                         urine_output = input$urine_output,
-                                                         crystalloids_administered = input$crystalloids_administered,
-                                                         colloids_administered = input$colloids_administered,
-                                                         transfusion = input$transfusion,
-                                                         cell_saver_transfused = input$cell_saver_transfused,
-                                                         prbc_transfused = input$prbc_transfused,
-                                                         ffp_transfused = input$ffp_transfused,
-                                                         cryoprecipitate_transfused = input$cryoprecipitate_transfused,
-                                                         platelets_transfused = input$platelets_transfused,
-                                                         intraoperative_complications_true_false = input$intraoperative_complications_true_false,
-                                                         intraoperative_complications_vector = input$intraoperative_complications_vector,
-                                                         other_intraoperative_complications = input$other_intraoperative_complications,
-                                                         head_positioning = input$head_positioning,
-                                                         additional_procedures_choices = additional_procedures_options_reactive_vector(),
-                                                         additional_procedures = input$additional_procedures,
-                                                         additional_procedures_other = input$additional_procedures_other,
-                                                         additional_end_procedure_details = input$additional_end_procedure_details,
-                                                         closure_details = input$closure_details,
-                                                         dressing_details = input$dressing_details)
+        showModal(modal_box_surgical_details_reactive()
         )
     })
     
@@ -2153,40 +1667,7 @@ server <- function(input, output, session) {
            is.null(required_options$closure_details) |
            is.null(required_options$dressing_details)){
             showModal(
-                addition_surgical_details_modal_box_function(required_options_missing = TRUE,
-                                                             fade_appearance = FALSE,
-                                                             primary_surgeon = input$primary_surgeon,
-                                                             surgical_assistants = input$surgical_assistants,
-                                                             preoperative_diagnosis = input$preoperative_diagnosis,
-                                                             postoperative_diagnosis = input$postoperative_diagnosis,
-                                                             indications = input$indications,
-                                                             neuromonitoring = input$neuromonitoring,
-                                                             preop_antibiotics = input$preop_antibiotics,
-                                                             anti_fibrinolytic = input$anti_fibrinolytic,
-                                                             txa_loading = input$txa_loading,
-                                                             txa_maintenance = input$txa_maintenance,
-                                                             surgical_findings = input$surgical_findings,
-                                                             specimens_removed = input$specimens_removed,
-                                                             ebl = input$ebl,
-                                                             urine_output = input$urine_output,
-                                                             crystalloids_administered = input$crystalloids_administered,
-                                                             colloids_administered = input$colloids_administered,
-                                                             transfusion = input$transfusion,
-                                                             cell_saver_transfused = input$cell_saver_transfused,
-                                                             prbc_transfused = input$prbc_transfused,
-                                                             ffp_transfused = input$ffp_transfused,
-                                                             cryoprecipitate_transfused = input$cryoprecipitate_transfused,
-                                                             platelets_transfused = input$platelets_transfused,
-                                                             intraoperative_complications_true_false = input$intraoperative_complications_true_false,
-                                                             intraoperative_complications_vector = input$intraoperative_complications_vector,
-                                                             other_intraoperative_complications = input$other_intraoperative_complications,
-                                                             head_positioning = if_else(is.null(required_options$head_position), "", required_options$head_position),
-                                                             additional_procedures_choices = additional_procedures_options_reactive_vector(),
-                                                             additional_procedures = input$additional_procedures,
-                                                             additional_procedures_other = input$additional_procedures_other,
-                                                             additional_end_procedure_details = input$additional_end_procedure_details,
-                                                             closure_details = required_options$closure_details,
-                                                             dressing_details = required_options$dressing_details)
+                modal_box_surgical_details_reactive()
             )
         }else{
             removeModal()
@@ -2194,241 +1675,71 @@ server <- function(input, output, session) {
     })
     
     
-    output$additional_surgical_details_ui <- renderUI({
-        column(12,
-               tags$table(
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Primary Surgeon:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$primary_surgeon)),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Assistants:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$surgical_assistants)),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Preoperative Diagnosis:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$preoperative_diagnosis)),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Postoperative Diagnosis:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$postoperative_diagnosis)),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", "-")),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Surgical Indications:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$indications)),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "ASA Class:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$asa_class)),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Anesthesia Type:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$anesethesia)),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Neuromonitoring used:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$neuromonitoring))),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", " ")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", " ")),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Preoperative Antibiotics:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$preop_antibiotics))),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Antifibrinolytic:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$anti_fibrinolytic))),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Findings:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$surgical_findings)),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Specimens:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", input$specimens_removed)),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", " ")),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Estimated Blood Loss:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$ebl))),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Urine Output:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$urine_output))),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Crystalloids:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$crystalloids_administered))),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Colloids:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$colloids_administered))),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", " ")),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Transfusions/Cell Saver:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", if_else(input$transfusion == TRUE, "Yes", "No"))),
-                   ),
-                   if(input$cell_saver_transfused > 0){
-                       tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Cell Saver Transfused (cc):")),
-                           tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$cell_saver_transfused)))
-                       )
-                   },
-                   if(input$prbc_transfused > 0){
-                       tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "pRBC units transfused:")),
-                           tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$prbc_transfused)))
-                       )
-                   },
-                   if(input$ffp_transfused > 0){
-                       tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "FFP units transfused:")),
-                           tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$ffp_transfused)))
-                       )
-                   },
-                   if(input$cryoprecipitate_transfused > 0){
-                       tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Cryoprecipitate units transfused:")),
-                           tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$cryoprecipitate_transfused)))
-                       )
-                   },
-                   if(input$platelets_transfused > 0){
-                       tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Platelet units transfused:")),
-                           tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$platelets_transfused)))
-                       )
-                   },
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "---")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", " ")),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Intraoperative Complications:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", if_else(input$intraoperative_complications_true_false == TRUE, "Yes", "No"))),
-                   )
-               ),
-               hr(),
-               tags$table(
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Head Position:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$head_positioning))),
-                   )
-               ),
-               hr(),
-               tags$table(
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Additional Procedures:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", as.character(glue_collapse(x = additional_procedures_vector_reactive(), sep = "\n")))),
-                   )
-               ),
-               hr(),
-               div(style = "font-size:20px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
-               tags$table(
-                   if(!is.null(input$deep_drains_anterior) && input$deep_drains_anterior > 0){
-                       tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Anterior Deep Drains:")),
-                           tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$deep_drains_anterior))),
-                       )
-                   },
-                   if(!is.null(input$superficial_drains_anterior) && input$superficial_drains_anterior > 0){
-                       tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Anterior Superficial Drains:")),
-                           tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$superficial_drains_anterior))),
-                       )
-                   },
-                   if(!is.null(input$deep_drains_posterior) && input$deep_drains_posterior > 0){
-                       tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Posterior Deep Drains:")),
-                           tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$deep_drains_posterior))),
-                       )
-                   },
-                   if(!is.null(input$superficial_drains_posterior) && input$superficial_drains_posterior > 0){
-                       tags$tr(
-                           tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Posterior Superficial Drains:")),
-                           tags$td(width = "5%"),
-                           tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", paste(input$superficial_drains_posterior))),
-                       )
-                   },
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Used During Closure:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$additional_end_procedure_details))),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Skin Closure:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$closure_details))),
-                   ),
-                   tags$tr(
-                       tags$td(width = "45%", div(style = "font-size:18px; font-weight:bold; text-align:left", "Skin/Dressing:")),
-                       tags$td(width = "5%"),
-                       tags$td(width = "50%", div(style = "font-size:18px; font-weight:bold; text-align:left", toString(input$dressing_details))),
-                   )
-               )
-        )
-    })
+    ##### TEXT ON LEFT COLUM #####
     
+    output$additional_surgical_details_table <- renderTable({
+        details_list <- list()
+        
+        details_list$'Primary Surgeon' <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
+        details_list$'Assistants' <- input$surgical_assistants
+        details_list$'Preoperative Diagnosis:' <- input$preoperative_diagnosis
+        details_list$'Postoperative Diagnosis:' <- input$postoperative_diagnosis
+        details_list$'Surgical Indications:' <- input$indications
+        details_list$'--' <- "--"
+        details_list$'ASA Class:' <- input$asa_class
+        details_list$'Anesthesia Type:' <- input$anesethesia
+        details_list$'Neuromonitoring used:' <- toString(input$neuromonitoring)
+        details_list$'Preoperative Antibiotics:' <- toString(input$preop_antibiotics)
+        details_list$'Antifibrinolytic:' <- toString(input$anti_fibrinolytic)
+        details_list$'Findings:' <- input$surgical_findings
+        details_list$'Specimens:' <- input$specimens_removed
+        details_list$'--' <- "--"
+        details_list$'Estimated Blood Loss:' <- paste(input$ebl)     
+        details_list$'Urine Output:' <- paste(input$urine_output)
+        details_list$'Crystalloids:' <- paste(input$crystalloids_administered)
+        details_list$'Colloids:' <- paste(input$colloids_administered)
+        details_list$'Transfusions/Cell Saver:' <- if_else(input$transfusion == TRUE, "Yes", "No")
+        if(input$cell_saver_transfused > 0){
+            details_list$'Cell Saver Transfused (cc):' <- paste(input$cell_saver_transfused)
+        }
+        if(input$prbc_transfused > 0){
+            details_list$'FFP units transfused:' <- paste(input$ffp_transfused)
+        }
+        if(input$cryoprecipitate_transfused > 0){
+            details_list$'Cryoprecipitate units transfused:' <- paste(input$cryoprecipitate_transfused) 
+        }
+        if(input$platelets_transfused > 0){
+            details_list$'Platelet units transfused:' <- paste(input$platelets_transfused) 
+        }
+        details_list$'- -' <- "- -"
+        details_list$'Intraoperative Complications:' <- if_else(input$intraoperative_complications_true_false == TRUE, "Yes", "No")
+        details_list$'Head Position:' <- paste(input$head_positioning)
+        details_list$'Additional Procedures:' <- as.character(glue_collapse(x = additional_procedures_vector_reactive(), sep = "; "))
+        details_list$'End of Procedure & Closure Details:' <- "---"
+        if(!is.null(input$deep_drains_anterior) && input$deep_drains_anterior > 0){
+            details_list$'Anterior Deep Drains:' <- paste(input$deep_drains_anterior)
+        }
+        if(!is.null(input$superficial_drains_anterior) && input$superficial_drains_anterior > 0){
+            details_list$'Anterior Superficial Drains:' <- paste(input$superficial_drains_anterior)
+        }
+        
+        if(!is.null(input$deep_drains_posterior) && input$deep_drains_posterior > 0){
+            details_list$'Posterior Deep Drains:' <- paste(input$deep_drains_posterior)
+        }
+        if(!is.null(input$superficial_drains_posterior) && input$superficial_drains_posterior > 0){
+            details_list$'Posterior Superficial Drains:' <- paste(input$superficial_drains_posterior)
+        }
+            
+        details_list$'Used During Closure:' <- toString(input$additional_end_procedure_details)
+        details_list$'Skin Closure:' <- toString(input$closure_details)
+        details_list$'Skin/Dressing:' <- toString(input$dressing_details)
+
+        enframe(details_list, name = "Variable", value = "Input") %>%
+            replace_na(list(Input = "No Value Entered"))
+
+        })
+    
+
     
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL COMPLETE  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL COMPLETE  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
@@ -4386,7 +3697,7 @@ server <- function(input, output, session) {
 
             op_note_list$"\nPatient:" <- paste(input$patient_first_name, input$patient_last_name)
             op_note_list$"\nDate of Surgery:" <- as.character(input$date_of_surgery)
-            op_note_list$"\nPrimary Surgeon:" <- if_else(!is.null(input$primary_surgeon), as.character(input$primary_surgeon), " ")
+            op_note_list$"\nPrimary Surgeon:" <- if_else(!is.null(input$primary_surgeon_last_name), as.character(paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)), " ")
             op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
             op_note_list$"\nPre-operative Diagnosis:" <- if_else(!is.null(input$preoperative_diagnosis), paste0("-", as.character(input$preoperative_diagnosis)), " ")
             op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), glue_collapse(x = unlist(str_split(input$postoperative_diagnosis, pattern = "; ")), sep = "\n"), " ")
@@ -4441,7 +3752,7 @@ server <- function(input, output, session) {
                         filter(approach == "posterior") %>%
                         filter(str_detect(object, "screw")) %>%
                         mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
-                        left_join(screw_details_redcap_df_reactive()) %>%
+                        left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
                         select(level, approach, side, object, screw_size_type) %>%
                         replace_na(list(screw_size_type = " "))
                     
@@ -4529,7 +3840,7 @@ server <- function(input, output, session) {
 
             op_note_list$"\n*Patient:" <- paste(input$patient_first_name, input$patient_last_name)
             op_note_list$"\n*Date of Surgery:" <- as.character(input$date_of_surgery)
-            op_note_list$"\n*Primary Surgeon:" <- input$primary_surgeon
+            op_note_list$"\n*Primary Surgeon:" <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
             op_note_list$"\n*Surgical Assistants:" <- input$surgical_assistants
             op_note_list$"\n*Preprocedure ASA Class:" <- input$asa_class
             op_note_list$"\n*Anesthesia:" <- input$anesthesia
@@ -4629,7 +3940,7 @@ server <- function(input, output, session) {
         surgery_details_list$age <- if_else(paste(input$date_of_birth) == "1900-01-01", "--", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0)))
         
         ##########   attending #############
-        surgery_details_list$attending <- input$primary_surgeon
+        surgery_details_list$attending <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
         
         ##########   assisting #############
         surgery_details_list$assisting <- input$surgical_assistants
@@ -5006,6 +4317,10 @@ server <- function(input, output, session) {
             surgery_details_list$complications <- glue_collapse(complication_df$complication, sep = '; ')
         }else{
             surgery_details_list$complications <- "none"
+        }
+        
+        if(length(input$implant_manufacturer)>0){
+            surgery_details_list$implant_manufacturer <- glue_collapse(input$implant_manufacturer, sep = ", ")
         }
         
         surgery_details_list$operative_note <- paste(input$operative_note_text)
@@ -5474,8 +4789,8 @@ server <- function(input, output, session) {
     
     observeEvent(input$confirm_upload_final, once = TRUE, {
         
-        if(redcapAPI::exportNextRecordName(rcon = rcon)>1){
-            all_patient_ids_df <- exportRecords(rcon = rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
+        if(redcapAPI::exportNextRecordName(rcon = rcon_reactive$rcon)>1){
+            all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
                 type.convert() %>%
                 select(record_id, last_name, first_name, date_of_birth) %>%
                 mutate(last_name = str_to_lower(last_name),
@@ -5496,7 +4811,7 @@ server <- function(input, output, session) {
             if(match_found == TRUE){
                 record_number <- joined_df$record_id[[1]]
                 
-                max_repeat_instances_df <- exportRecords(rcon = rcon, records = record_number) %>%
+                max_repeat_instances_df <- exportRecords(rcon = rcon_reactive$rcon, records = record_number) %>%
                     as_tibble() %>%
                     select(redcap_repeat_instrument, redcap_repeat_instance) %>%
                     remove_missing() %>%
@@ -5532,14 +4847,14 @@ server <- function(input, output, session) {
                 max_screw_details_repeating <- repeat_list$screw_details_repeating
                 
             }else{
-                record_number <- exportNextRecordName(rcon = rcon)
+                record_number <- exportNextRecordName(rcon = rcon_reactive$rcon)
                 surgical_details_instance_add <- 0
                 procedures_by_level_repeating_instance_add <- 0
                 screw_details_repeating_instance_add <- 0
                 interbody_implant_repeating_instance_add <- 0
             }
         }else{
-            record_number <- exportNextRecordName(rcon = rcon)
+            record_number <- exportNextRecordName(rcon = rcon_reactive$rcon)
             surgical_details_instance_add <- 0
             procedures_by_level_repeating_instance_add <- 0
             screw_details_repeating_instance_add <- 0
@@ -5559,7 +4874,7 @@ server <- function(input, output, session) {
                 mutate(patient_details_complete = "Complete") %>%
                 select(record_id, everything())
             
-            importRecords(rcon = rcon, data = patient_df_for_upload, returnContent = "count")
+            importRecords(rcon = rcon_reactive$rcon, data = patient_df_for_upload, returnContent = "count")
             
             incProgress(1/number_of_steps, detail = paste("Uploading Surgical Details"))
             
@@ -5573,7 +4888,7 @@ server <- function(input, output, session) {
                 mutate(surgical_details_complete = "Complete") %>%
                 select(record_id, redcap_event_name, everything())
             
-            importRecords(rcon = rcon, data = surgical_details_instrument, returnContent = "count")
+            importRecords(rcon = rcon_reactive$rcon, data = surgical_details_instrument, returnContent = "count")
             
             incProgress(1/number_of_steps, detail = paste("Uploading Intraoperative Details"))
             
@@ -5587,7 +4902,7 @@ server <- function(input, output, session) {
                 mutate(intraoperative_details_complete = "Complete") %>%
                 select(record_id, redcap_event_name, everything())
             
-            importRecords(rcon = rcon, data = intraoperative_details_redcap_upload_df, returnContent = "count")
+            importRecords(rcon = rcon_reactive$rcon, data = intraoperative_details_redcap_upload_df, returnContent = "count")
             
             incProgress(1/number_of_steps, detail = paste("Uploading Data per Level"))
             
@@ -5600,7 +4915,7 @@ server <- function(input, output, session) {
                 mutate(procedures_by_level_repeating_complete = "Complete") %>%
                 select(record_id, redcap_event_name, everything())
             
-            importRecords(rcon = rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
+            importRecords(rcon = rcon_reactive$rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
             
             incProgress(1/number_of_steps, detail = paste("Uploading Implant Data"))
             
@@ -5614,7 +4929,7 @@ server <- function(input, output, session) {
                     mutate(screw_details_repeating_complete = "Complete") %>%
                     select(record_id, redcap_event_name, everything())
                 
-                importRecords(rcon = rcon, data = screw_details_repeating, returnContent = "count")
+                importRecords(rcon = rcon_reactive$rcon, data = screw_details_repeating, returnContent = "count")
             }
             
             incProgress(1/number_of_steps, detail = paste("Uploading Implant Data"))
@@ -5631,7 +4946,7 @@ server <- function(input, output, session) {
                     mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
                     select(record_id, redcap_event_name, everything())
                 
-                importRecords(rcon = rcon, data = interbody_implant_repeating, returnContent = "count")
+                importRecords(rcon = rcon_reactive$rcon, data = interbody_implant_repeating, returnContent = "count")
             }
             
             incProgress(1/number_of_steps, detail = paste("Complete"))
