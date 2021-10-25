@@ -194,23 +194,13 @@ startup_modal_box_diagnosis_symptoms <-
             checkboxGroupButtons(
               inputId = "spinal_regions",
               label = NULL,
-              choices = c(
-                "Lumbar",
-                "Thoracolumbar",
-                "Thoracic",
-                "Cervicothoracic",
-                "Cervical"
-              ),
+              choices = spine_region_labels,
               individual = TRUE,
               size = "normal",
-              justified = TRUE,
+              justified = FALSE,
               selected = spinal_regions_selected,
-              checkIcon = list(
-                yes = tags$i(class = "fa fa-circle",
-                             style = "color: steelblue"),
-                no = tags$i(class = "fa fa-circle-o",
-                            style = "color: steelblue")
-              )
+              checkIcon = list(yes = icon("ok",
+                                          lib = "glyphicon"))
             )
           ),
           hr(),
@@ -222,9 +212,7 @@ startup_modal_box_diagnosis_symptoms <-
               checkboxGroupButtons(
                 inputId = "diagnosis_category",
                 label = NULL,
-                # justified = TRUE,
-                choices = names(spine_icd_list_by_region$Lumbar),
-                # status = "primary",
+                choices = spine_category_labels,
                 selected = diagnosis_category_value,
                 checkIcon = list(yes = icon("ok",
                                             lib = "glyphicon"))
@@ -245,7 +233,7 @@ startup_modal_box_diagnosis_symptoms <-
                 pickerInput(
                   inputId = "primary_diagnosis",
                   label = "Diagnosis Search:",
-                  choices = spine_icd_list_by_region$Lumbar$Degenerative,
+                  choices = jh_filter_icd_codes_generate_vector_function(section_input = "msk", spine_region_input = "lumbar"), #spine_icd_list_by_region$Lumbar$Degenerative,
                   options = pickerOptions(
                     liveSearch = TRUE,
                     virtualScroll = 50,
@@ -529,7 +517,7 @@ addition_surgical_details_modal_box_function <-
            asa_class = "",
            anesthesia = "",
            neuromonitoring = c("SSEP", "tc MEP"),
-           preop_antibiotics = c("Cefazolin (Ancef)", "Vancomycin"),
+           preop_antibiotics = c("Cefazolin (Ancef)"),
            anti_fibrinolytic = "",
            txa_loading = 20,
            txa_maintenance = 5,

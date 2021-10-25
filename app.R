@@ -1204,39 +1204,22 @@ server <- function(input, output, session) {
     
     ############ UPDATE DIAGNOSIS & SYMPTOMS OPTIONS ##############
 
-    #### UPDATE DIAGNOSIS OPTIONS
-     observeEvent(list(input$open_patient_details_modal, input$open_diagnosis_symptoms_procedure_modal, input$spinal_regions), ignoreInit = TRUE, {
-        
-        if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
-            age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-            if(age > 30){
-                updateCheckboxGroupButtons(session = session,
-                                           inputId = "diagnosis_category", 
-                                           choices = discard(.x = names(spine_icd_list_by_region$all_regions), .p = ~ .x == "Pediatric Deformity"),   
-                                           checkIcon = list(
-                                               yes = icon("ok", 
-                                                          lib = "glyphicon")))
-            }
-        }
-
-    })
     
     observeEvent(list(input$spinal_regions, input$diagnosis_category), ignoreInit = TRUE, {
-         
-            spine_diagnosis_choices_list <- jh_create_diagnosis_list_vector_function(category_input = input$diagnosis_category, site_input = input$spinal_regions)
 
-            if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
-                age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-
-                if(age > 30){
-                    spine_diagnosis_choices_list$'Pediatric Deformity' <- NULL
-                }
+        if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
+            age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+        }else{
+                age <- 999
             }
-            
+        
+        spine_diagnosis_choices_list <- jh_filter_icd_codes_generate_vector_function(section_input = input$diagnosis_category, spine_region_input = input$spinal_regions, age = age)
+        
+        
             updatePickerInput(session = session,
                               inputId = "primary_diagnosis",
                               label = "Diagnosis Search:", 
-                              choices = spine_diagnosis_choices_list, 
+                              choices = spine_diagnosis_choices_list,
                               options = pickerOptions(liveSearch = TRUE, 
                                                       liveSearchNormalize = TRUE, 
                                                       virtualScroll = 200))
@@ -1443,11 +1426,32 @@ server <- function(input, output, session) {
 
     additional_procedures_options_reactive_vector <- reactive({
         additional_procedures_choices <- list()
-        additional_procedures_choices$neuromonitoring <- "Spinal Cord Monitoring"
+        if(length(input$prior_fusion_levels)>0){
+            additional_procedures_choices$exploration_prior_fusion <- "Exploration of prior spinal fusion"
+        }
+    
+        additional_procedures_choices$irrigation_debridement <- "Incision and Drainage"
+        
+        additional_procedures_choices$open_biopsy_body <- "Open Biopsy of vertebral body"
+        
+        additional_procedures_choices$open_biopsy <- "Open Biopsy of extradural spinal lesion"
+        
+        additional_procedures_choices$dural_repair <- "Repair of dural/CSF leak"
+        
+        additional_procedures_choices$dural_graft <- "Dural Graft"
+        
+        if(nrow(left_revision_implants_reactive_list()$revision_implants_status_df)>0 || nrow(right_revision_implants_reactive_list()$revision_implants_status_df)>0){
+            additional_procedures_choices$removal_instrumentation <- "Removal of spinal instrumentation"
+        }
+
+        additional_procedures_choices$vertebral_fx_open_tx <- "Open treatment of vertebral fracture"
+        
         additional_procedures_choices$microscope <- "Intraoperative use of microscope for microdissection"
         if(nrow(all_objects_to_add_list$objects_df)>0){
             additional_procedures_choices$navigation <- "Use of stereotactic navigation system for screw placement"
         }
+        
+        ##nonsense
         if(any(str_detect(string = input$head_positioning, pattern = "Tongs"))){
             additional_procedures_choices$head_positioning <- "Application of Cranial Tongs"
         }
@@ -1465,18 +1469,7 @@ server <- function(input, output, session) {
         }
         
         additional_procedures_choices$halo_removal <- "Removal of tongs or Halo applied by another inidividual"
-        additional_procedures_choices$irrigation_debridement <- "Irrigation and Debridement"
-        additional_procedures_choices$open_biopsy <- "Open Biopsy of vertebral body"
-        additional_procedures_choices$dural_repair <- "Repair of dural/CSF leak"
-        additional_procedures_choices$dural_graft <- "Dural Graft"
-        
-        if(nrow(left_revision_implants_reactive_list()$revision_implants_status_df)>0 || nrow(right_revision_implants_reactive_list()$revision_implants_status_df)>0){
-            additional_procedures_choices$removal_instrumentation <- "Removal of spinal instrumentation"
-        }
-        if(length(input$prior_fusion_levels)>0){
-            additional_procedures_choices$exploration_prior_fusion <- "Exploration of prior spinal fusion"
-        }
-        additional_procedures_choices$vertebral_fx_open_tx <- "Open treatment of vertebral fracture"
+        additional_procedures_choices$neuromonitoring <- "Spinal Cord Monitoring"
         additional_procedures_choices$other <- "Other"
         
         unlist(additional_procedures_choices, use.names = FALSE)
@@ -1487,14 +1480,19 @@ server <- function(input, output, session) {
                       input$prior_fusion_levels, 
                       input$head_positioning, 
                       input$approach_robot_navigation,
-                      input$durotomy_repair_method), ignoreInit = TRUE, {
+                      input$durotomy_repair_method,
+                      input$primary_diganosis), ignoreInit = TRUE, {
                           additional_procedures_list <- as.list(input$additional_procedures)
                           
-                          if("Robotic Assistance" %in% input$approach_robot_navigation){
-                              additional_procedures_list$robot <- "Use of stereotactic navigation system for screw placement"
+                          if("Robotic" %in% input$approach_robot_navigation){
+                              additional_procedures_list$robot <- "Robotic Assisted Spine Surgery"
                           }
-                          if("Navigation Assistance" %in% input$approach_robot_navigation){
+                          if("Navigated" %in% input$approach_robot_navigation){
                               additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
+                          }
+                          
+                          if("Microscopic" %in% input$approach_robot_navigation){
+                              additional_procedures_list$microscope <- "Intraoperative use of microscope for microdissection"
                           }
                           
                           if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0){
@@ -1526,6 +1524,18 @@ server <- function(input, output, session) {
                               }
                           }
                           
+                          if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
+                              additional_procedures_list$fracture <- "Open treatment of vertebral fracture"
+                          }
+                          if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
+                              additional_procedures_list$incision_drainage <- "Incision and Drainage"
+                          }
+                          if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
+                              additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
+                          }
+                          
+                          
+                          
                           updateAwesomeCheckboxGroup(session = session, 
                                                      inputId = "additional_procedures", 
                                                      choices = additional_procedures_options_reactive_vector(),
@@ -1545,17 +1555,16 @@ server <- function(input, output, session) {
         unlist(additional_procedures_list, use.names = FALSE)
     })
     
+    ########### RUN ADDITIONAL SURGICAL DETAILS MODAL ############
+    
     
     observeEvent(input$implant_details_complete, ignoreInit = TRUE, once = TRUE, {
-        if(!is.null(input$primary_diagnosis)){
+        if(length(input$primary_diagnosis)>0){
             
-            diagnosis_code_df <- tibble(diagnosis = input$primary_diagnosis) %>%
-                left_join(spine_icd10_codes_df %>% select(diagnosis, icd10_code)) %>%
-                mutate(diagnosis_code = paste(diagnosis, " (", icd10_code, ")", sep = ""))
+            preop_dx <- glue_collapse(x = jh_add_codes_to_diagnosis_function(input$primary_diagnosis), sep = "; ")
             
-            preop_dx <- glue_collapse(x = diagnosis_code_df$diagnosis_code, sep = "; ")
-            
-            postop_dx <- glue_collapse(x = diagnosis_code_df$diagnosis_code, sep = "; ")
+            postop_dx <- glue_collapse(x = jh_add_codes_to_diagnosis_function(input$primary_diagnosis), sep = "; ")
+
 
         }else{
             preop_dx <- " "
@@ -1597,7 +1606,8 @@ server <- function(input, output, session) {
         if(length(input$prior_fusion_levels)>0){
             add_procedures_list$exploration_of_fusion <- "Exploration of prior spinal fusion"
         }
-        if(str_detect(string = str_to_lower(toString(input$primary_diagnosis)), pattern = "infection")){
+        if(str_detect(string = str_to_lower(toString(input$primary_diagnosis)), pattern = "myelitis|infecti|bacteria|coccal|meningitis")){
+            
             add_procedures_list$irrigation_debridement <- "Irrigation and Debridement"
         }
         
@@ -1788,21 +1798,21 @@ server <- function(input, output, session) {
     ###### ######  -----------   ######### UPDATE TABS ###### ######  -----------   ######### 
     
     observeEvent(input$spinal_regions, {
-        spine_regions_text <- paste(input$spinal_regions, collapse = ", ")
+        spine_regions_text <- str_to_lower(paste(input$spinal_regions, collapse = ", "))
         
-        upper_y <- if_else(str_detect(spine_regions_text, "Cervical"), 0.94,
-                           if_else(str_detect(spine_regions_text, "Cervicothoracic"), 0.94,
-                           if_else(str_detect(spine_regions_text, "Thoracic"), 0.77, 
-                                   if_else(str_detect(spine_regions_text, "Thoracolumbar"), 0.55, 
-                                           if_else(str_detect(spine_regions_text, "Lumbar"), 0.4, 
-                                                   if_else(str_detect(spine_regions_text, "Lumbosacral"), 0.32, 0.4))))))
+        upper_y <- if_else(str_detect(spine_regions_text, "cervical|occi"), 0.94,
+                           if_else(str_detect(spine_regions_text, "cervicothoracic"), 0.94,
+                           if_else(str_detect(spine_regions_text, "thoracic"), 0.77, 
+                                   if_else(str_detect(spine_regions_text, "thoracolumbar"), 0.55, 
+                                           if_else(str_detect(spine_regions_text, "lumbar"), 0.4, 
+                                                   if_else(str_detect(spine_regions_text, "sacral"), 0.32, 0.4))))))
         
-        lower_y <- if_else(str_detect(spine_regions_text, "Lumbosacral"), 0.1,
-                           if_else(str_detect(spine_regions_text, "Lumbar"), 0.1, 
-                                   if_else(str_detect(spine_regions_text, "Thoracolumbar"), 0.1, 
-                                           if_else(str_detect(spine_regions_text, "Thoracic"), 0.35, 
-                                                   if_else(str_detect(spine_regions_text, "Cervicothoracic"), 0.6,
-                                                   if_else(str_detect(spine_regions_text, "Cervical"), 0.71, 0.1))))))
+        lower_y <- if_else(str_detect(spine_regions_text, "lumbosacral"), 0.1,
+                           if_else(str_detect(spine_regions_text, "lumbar"), 0.1, 
+                                   if_else(str_detect(spine_regions_text, "thoracolumbar"), 0.1, 
+                                           if_else(str_detect(spine_regions_text, "cervicothoracic"), 0.6, 
+                                                   if_else(str_detect(spine_regions_text, "thoracic"), 0.35,
+                                                   if_else(str_detect(spine_regions_text, "cervical|occ"), 0.71, 0.1))))))
         
         updateNoUiSliderInput(session = session, inputId = "crop_y", value = c(lower_y, upper_y))
     }
@@ -1890,16 +1900,15 @@ server <- function(input, output, session) {
     ################----------  Diagnoses    ------------######################  
     
     output$tumor_resection_ui <- renderUI({
-        if(str_detect(str_to_lower(string = paste(input$primary_diagnosis, collapse = ", ")), pattern = "neoplasm")){
+        
+        if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
             actionBttn(
                 inputId = "add_tumor_resection",
                 size = "sm", block = TRUE,
-                label = "Add Tumor Resection",
+                label = "Add Resection & Decompression for TUMOR",
                 style = "simple",
                 color = "primary"
             )
-        }else{
-            NULL
         }
     })
     
@@ -2103,9 +2112,9 @@ server <- function(input, output, session) {
         updateRadioGroupButtons(session = session, 
                                 inputId = "object_to_add",
                                 choices = c(
-                                    "Partial Excision of Posterior Elements" = "excision_posterior_elements",
-                                    "Partial Excision of Vertebral Body (w/o decompression)" = "excision_body_no_decompression",
-                                    "Complete Vertebral Corpectomy" = "excision_complete"
+                                    "Laminectomy for biopsy & excision of extradural tumor" = "laminectomy_for_tumor",
+                                    # "Partial Excision of Vertebral Body (w/o decompression)" = "excision_body_no_decompression",
+                                    "Partial Vertebral Corpectomy via Lateral Extracavitary Aproach" = "corpectomy_extracavitary_tumor"
                                 ),
                                 checkIcon = list(
                                     yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
@@ -2113,6 +2122,15 @@ server <- function(input, output, session) {
                                 selected = "excision_posterior_elements"
         )
     })
+    
+    
+    ################----------  UPDATE ROD OPTIONS   ------------######################  
+    ################----------  UPDATE ROD OPTIONS   ------------######################  
+    ################----------  UPDATE ROD OPTIONS   ------------######################  
+    
+    ################----------  UPDATE ROD OPTIONS   ------------######################  
+    ################----------  UPDATE ROD OPTIONS   ------------######################  
+    ################----------  UPDATE ROD OPTIONS   ------------######################  
     
     ######### ######### CROSSLINKS ################# #########
     
@@ -2310,7 +2328,6 @@ server <- function(input, output, session) {
     })
     
     # ################------------------  Right RODS    ----------------------######################  
-    # 
     observeEvent(input$reset_all,ignoreNULL = TRUE, ignoreInit = TRUE, {
         updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = FALSE)
     })
@@ -2319,12 +2336,7 @@ server <- function(input, output, session) {
         all_added_objects_df <- all_objects_to_add_list$objects_df %>%
             select(level, vertebral_number, object, x, y, side) %>%
             filter(side == "right")
-        
-        # if(nrow(right_revision_implants_reactive_list()$retained_df) > 0){
-        #     all_added_objects_df <- all_added_objects_df %>%
-        #         union_all(right_revision_implants_reactive_list()$retained_df %>% select(level, vertebral_number, object, x, y, side))
-        # }
-        
+
         jh_cranial_and_caudal_list_for_supplementary_rods_function(all_added_objects_df, osteotomy_site = osteotomy_level_reactive())
     })
     
@@ -2435,6 +2447,9 @@ server <- function(input, output, session) {
             NULL
         }
     })
+    ################----------  UPDATE ROD OPTIONS END  ------------######################  
+    ################----------  UPDATE ROD OPTIONS END  ------------######################  
+    ################----------  UPDATE ROD OPTIONS END  ------------######################  
     
     ################------------------  Fusion Levels   ----------------------######################  
     
@@ -2447,7 +2462,6 @@ server <- function(input, output, session) {
         }
     })
     
-    # observeEvent(list(all_objects_to_add_list$objects_df, input$plot_click, input$plot_double_click, input$reset_all), ignoreNULL = TRUE, ignoreInit = TRUE, {
     observeEvent(input$implants_complete, ignoreInit = TRUE, ignoreNULL = TRUE, {
         if(any((all_objects_to_add_list$objects_df %>% filter(approach == "anterior"))$fusion == "yes")){
             updateSwitchInput(session = session,
@@ -2504,7 +2518,7 @@ server <- function(input, output, session) {
             xvar = "x",
             yvar = "y",
             maxpoints = 1,
-            threshold = 25
+            threshold = 45
         )
         
         if(input$object_to_add == "decompression_diskectomy_fusion" | input$object_to_add == "diskectomy_fusion"){
@@ -2542,7 +2556,7 @@ server <- function(input, output, session) {
             xvar = "x",
             yvar = "y",
             maxpoints = 1,
-            threshold = 20
+            threshold = 50
         )
         all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df %>%
             anti_join(implant_to_remove_df)
@@ -3463,7 +3477,6 @@ server <- function(input, output, session) {
                 plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
             }else{
                 y_start_with_text <- plot_top_y
-                # plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
                 plan_table_geom <- geom_sf(data = NULL)
             }
             
@@ -3587,13 +3600,14 @@ server <- function(input, output, session) {
         }
     })
     
-    observeEvent(input$primary_diagnosis, {
-        if(any(str_detect(string = str_to_lower(input$primary_diagnosis), pattern = "fracture"))){
-            updateAwesomeCheckboxGroup(session = session, 
-                                       inputId = "additional_procedures", 
-                                       selected = append(input$additional_procedures, "Open treatment of vertebral fracture"))
-        }
-    })
+    # observeEvent(input$primary_diagnosis, {
+    #     if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
+    # 
+    #         updateAwesomeCheckboxGroup(session = session, 
+    #                                    inputId = "additional_procedures", 
+    #                                    selected = append(input$additional_procedures, "Open treatment of vertebral fracture"))
+    #     }
+    # })
     
     
     added_rods_statement_reactive <- reactive({
@@ -3950,28 +3964,43 @@ server <- function(input, output, session) {
             surgery_details_list$symptoms <- glue_collapse(str_to_lower(input$symptoms), sep = "; ") 
         }
         
-        ##########   diagnosis_category #############
+        ##########   DIAGNOSIS #############
         
         if(length(input$primary_diagnosis) >0){
-            surgery_details_list$diagnosis_category <- glue_collapse(str_to_lower((tibble(diagnosis = input$primary_diagnosis) %>%
-                                                                                       left_join(spine_icd10_codes_df %>% select(spine_category, diagnosis)) %>%
-                                                                                       select(spine_category) %>%
-                                                                                       distinct())$spine_category), sep = "; ")        }
+            
+            surgery_details_list$diagnosis_category <- glue_collapse((tibble(diagnosis = input$primary_diagnosis) %>%
+                left_join(spine_codes_df) %>%
+                select(section) %>%
+                mutate(str_to_title(section)))$section, sep = "; ")
+            
+            surgery_details_list$diagnosis <- glue_collapse(str_to_lower(input$primary_diagnosis), sep = "; ")
+            
+            
+            surgery_details_list$diagnosis_icd10_code <- glue_collapse((tibble(diagnosis = input$primary_diagnosis) %>%
+                                                                            left_join(spine_codes_df) %>%
+                                                                            select(icd_10_code))$icd_10_code, sep = "; ")
+            
+            
+            # surgery_details_list$diagnosis_category <- glue_collapse(str_to_lower((tibble(diagnosis = input$primary_diagnosis) %>%
+            #                                                                            left_join(spine_icd10_codes_df %>% select(spine_category, diagnosis)) %>%
+            #                                                                            select(spine_category) %>%
+            #                                                                            distinct())$spine_category), sep = "; ")   
+            }
 
         ##########   diagnosis #############
-        if(length(input$primary_diagnosis) >0){
-            surgery_details_list$diagnosis <- glue_collapse(str_to_lower(input$primary_diagnosis), sep = "; ")
-        }
-        
-        ##########   diagnosis ICD10 Codes#############
-        if(length(input$primary_diagnosis) >0){
-            
-            icd_code_vector <- (tibble(diagnosis = input$primary_diagnosis) %>%
-                                    left_join(spine_icd10_codes_df %>%
-                                                  select(icd10_code, diagnosis)))$icd10_code
-            
-            surgery_details_list$diagnosis_icd10_code <- glue_collapse(icd_code_vector, sep = "; ")
-        }
+        # if(length(input$primary_diagnosis) >0){
+        #     surgery_details_list$diagnosis <- glue_collapse(str_to_lower(input$primary_diagnosis), sep = "; ")
+        # }
+        # 
+        # ##########   diagnosis ICD10 Codes#############
+        # if(length(input$primary_diagnosis) >0){
+        #     
+        #     icd_code_vector <- (tibble(diagnosis = input$primary_diagnosis) %>%
+        #                             left_join(spine_icd10_codes_df %>%
+        #                                           select(icd10_code, diagnosis)))$icd10_code
+        #     
+        #     surgery_details_list$diagnosis_icd10_code <- glue_collapse(icd_code_vector, sep = "; ")
+        # }
         
         ##########   indications #############
         if(input$indications != " "){

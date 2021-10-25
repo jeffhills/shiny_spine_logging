@@ -567,6 +567,25 @@ build_decompression_function <- function(left_x,
     decompression_sf <- st_buffer(x = st_polygon(list(decompression)), dist = 0.008, endCapStyle = "ROUND")  
   }
   
+  if(object == "corpectomy_extracavitary_tumor"){
+    if(side == "right"){
+      medial_edge <- x_lateral_pars + 0.006
+      point_1 <- c(1-medial_edge, inferior_facet_superior_border_y)
+      point_2 <- c(1-medial_edge + 0.012, inferior_facet_superior_border_y)
+      point_3 <- c(1-medial_edge + 0.012, inferior_facet_superior_border_y-0.007)
+      point_4 <- c(1-medial_edge, inferior_facet_superior_border_y - 0.007)
+    }else{
+      medial_edge <- x_lateral_pars +0.006
+      point_1 <- c(medial_edge, inferior_facet_superior_border_y)
+      point_2 <- c(medial_edge - 0.012, inferior_facet_superior_border_y)
+      point_3 <- c(medial_edge - 0.012, inferior_facet_superior_border_y-0.007)
+      point_4 <- c(medial_edge, inferior_facet_superior_border_y - 0.007)
+    }
+    decompression <- st_linestring(rbind(point_1, point_2, point_3, point_4, point_1))
+    decompression_sf <- st_buffer(x = st_polygon(list(decompression)), dist = 0.008, endCapStyle = "ROUND")  
+  }
+  
+  
   if(object == "transpedicular_approach"){
     if(side == "right"){
       object_center <- c(1-x_lateral_pars, y_inferior_tp)
@@ -588,7 +607,7 @@ build_decompression_function <- function(left_x,
     decompression_sf <- st_buffer(decompression, dist = 0.013, endCapStyle = "ROUND")
   }
   
-  if(object == "laminectomy" | object == "sublaminar_decompression" | object == "laminotomy" | object == "diskectomy"){
+  if(object == "laminectomy" | object == "laminectomy_for_tumor" | object == "sublaminar_decompression" | object == "laminotomy" | object == "diskectomy"){
     bottom_width <- right_x - left_x
     
     top_width_difference = bottom_width - top_width

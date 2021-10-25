@@ -167,7 +167,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }else{
     geoms_list_posterior$lateral_extracavitary_approach_sf_geom <- NULL
   }
-  
+
   if(any(all_posterior_objects_df$object == "diskectomy")){
     geoms_list_posterior$diskectomy_sf_geom <- ggpattern::geom_sf_pattern(
       data = st_multipolygon((all_posterior_objects_df %>% filter(object == "diskectomy"))$object_constructed),
@@ -193,6 +193,32 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
     geoms_list_posterior$laminoplasty_cut_df_sf_geom <- NULL
   }
   
+  
+  #### TUMOR
+  
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "corpectomy_extracavitary_tumor"))){
+    geoms_list_posterior$corpectomy_extracavitary_tumor_sf_geom <- ggpattern::geom_sf_pattern(
+      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "corpectomy_extracavitary_tumor"))$object_constructed),
+      pattern = "stripe",
+      pattern_colour = "darkred",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }else{
+    geoms_list_posterior$corpectomy_extracavitary_tumor_sf_geom <- NULL
+  }
+  
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "laminectomy_for_tumor"))){
+    geoms_list_posterior$laminectomy_for_tumor_sf_geom <- ggpattern::geom_sf_pattern(
+      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy_for_tumor"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+      pattern = "stripe",
+      pattern_colour = "darkred",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }else{
+    geoms_list_posterior$laminectomy_for_tumor_sf_geom <- NULL
+  }
   
   ## INTERBODY
   if(any(all_posterior_objects_df$object == "tlif") || any(all_posterior_objects_df$object == "llif") ||any(all_posterior_objects_df$object == "plif")){

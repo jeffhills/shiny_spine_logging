@@ -1,0 +1,649 @@
+section,diagnosis,icd_10_code
+other_neuro_conditions,Hemophilus meningitis,G00.0
+other_neuro_conditions,Pneumococcal meningitis,G00.1
+other_neuro_conditions,Streptococcal meningitis,G00.2
+other_neuro_conditions,Staphylococcal meningitis,G00.3
+other_neuro_conditions,Other bacterial meningitis,G00.8
+other_neuro_conditions,"Bacterial meningitis, unspecified",G00.9
+other_neuro_conditions,Meningitis in bacterial diseases classified elsewhere,G01
+other_neuro_conditions,Meningitis in other infectious and parasitic diseases classified elsewhere,G02
+other_neuro_conditions,Nonpyogenic meningitis,G03.0
+other_neuro_conditions,Chronic meningitis,G03.1
+other_neuro_conditions,Benign recurrent meningitis [Mollaret],G03.2
+other_neuro_conditions,Meningitis due to other specified causes,G03.8
+other_neuro_conditions,"Meningitis, unspecified",G03.9
+other_neuro_conditions,"Acute disseminated encephalitis and encephalomyelitis, unspecified",G04.00
+other_neuro_conditions,Postinfectious acute disseminated encephalitis and encephalomyelitis (postinfectious ADEM),G04.01
+other_neuro_conditions,"Postimmunization acute disseminated encephalitis, myelitis and encephalomyelitis",G04.02
+other_neuro_conditions,Tropical spastic paraplegia,G04.1
+other_neuro_conditions,"Bacterial meningoencephalitis and meningomyelitis, not elsewhere classified",G04.2
+other_neuro_conditions,"Acute necrotizing hemorrhagic encephalopathy, unspecified",G04.30
+other_neuro_conditions,Postinfectious acute necrotizing hemorrhagic encephalopathy,G04.31
+other_neuro_conditions,Postimmunization acute necrotizing hemorrhagic encephalopathy,G04.32
+other_neuro_conditions,Other acute necrotizing hemorrhagic encephalopathy,G04.39
+other_neuro_conditions,Other encephalitis and encephalomyelitis,G04.81
+other_neuro_conditions,Acute flaccid myelitis,G04.82
+other_neuro_conditions,Other myelitis,G04.89
+other_neuro_conditions,"Encephalitis and encephalomyelitis, unspecified",G04.90
+other_neuro_conditions,"Myelitis, unspecified",G04.91
+other_neuro_conditions,Encephalitis and encephalomyelitis in diseases classified elsewhere,G05.3
+other_neuro_conditions,Myelitis in diseases classified elsewhere,G05.4
+other_neuro_conditions,Intracranial abscess and granuloma,G06.0
+other_neuro_conditions,Intraspinal abscess and granuloma,G06.1
+other_neuro_conditions,"Extradural and subdural abscess, unspecified",G06.2
+other_neuro_conditions,Intracranial and intraspinal abscess and granuloma in diseases classified elsewhere,G07
+other_neuro_conditions,Intracranial and intraspinal phlebitis and thrombophlebitis,G08
+other_neuro_conditions,Sequelae of inflammatory diseases of central nervous system,G09
+other_neuro_conditions,Huntington's disease,G10
+other_neuro_conditions,Congenital nonprogressive ataxia,G11.0
+other_neuro_conditions,"Early-onset cerebellar ataxia, unspecified",G11.10
+other_neuro_conditions,Friedreich ataxia,G11.11
+other_neuro_conditions,Other early-onset cerebellar ataxia,G11.19
+other_neuro_conditions,Late-onset cerebellar ataxia,G11.2
+other_neuro_conditions,Cerebellar ataxia with defective DNA repair,G11.3
+other_neuro_conditions,Hereditary spastic paraplegia,G11.4
+other_neuro_conditions,Other hereditary ataxias,G11.8
+other_neuro_conditions,"Hereditary ataxia, unspecified",G11.9
+other_neuro_conditions,"Infantile spinal muscular atrophy, type I [Werdnig-Hoffman]",G12.0
+other_neuro_conditions,Other inherited spinal muscular atrophy,G12.1
+other_neuro_conditions,"Motor neuron disease, unspecified",G12.20
+other_neuro_conditions,Amyotrophic lateral sclerosis,G12.21
+other_neuro_conditions,Progressive bulbar palsy,G12.22
+other_neuro_conditions,Primary lateral sclerosis,G12.23
+other_neuro_conditions,Familial motor neuron disease,G12.24
+other_neuro_conditions,Progressive spinal muscle atrophy,G12.25
+other_neuro_conditions,Other motor neuron disease,G12.29
+other_neuro_conditions,Other spinal muscular atrophies and related syndromes,G12.8
+other_neuro_conditions,"Spinal muscular atrophy, unspecified",G12.9
+other_neuro_conditions,Paraneoplastic neuromyopathy and neuropathy,G13.0
+other_neuro_conditions,Other systemic atrophy primarily affecting central nervous system in neoplastic disease,G13.1
+other_neuro_conditions,Systemic atrophy primarily affecting the central nervous system in myxedema,G13.2
+other_neuro_conditions,Systemic atrophy primarily affecting central nervous system in other diseases classified elsewhere,G13.8
+other_neuro_conditions,Postpolio syndrome,G14
+other_neuro_conditions,Parkinson's disease,G20
+other_neuro_conditions,Malignant neuroleptic syndrome,G21.0
+other_neuro_conditions,Neuroleptic induced parkinsonism,G21.11
+other_neuro_conditions,Other drug induced secondary parkinsonism,G21.19
+other_neuro_conditions,Secondary parkinsonism due to other external agents,G21.2
+other_neuro_conditions,Postencephalitic parkinsonism,G21.3
+other_neuro_conditions,Vascular parkinsonism,G21.4
+other_neuro_conditions,Other secondary parkinsonism,G21.8
+other_neuro_conditions,"Secondary parkinsonism, unspecified",G21.9
+other_neuro_conditions,Hallervorden-Spatz disease,G23.0
+other_neuro_conditions,Progressive supranuclear ophthalmoplegia [Steele-Richardson-Olszewski],G23.1
+other_neuro_conditions,Striatonigral degeneration,G23.2
+other_neuro_conditions,Other specified degenerative diseases of basal ganglia,G23.8
+other_neuro_conditions,"Degenerative disease of basal ganglia, unspecified",G23.9
+other_neuro_conditions,Drug induced subacute dyskinesia,G24.01
+other_neuro_conditions,Drug induced acute dystonia,G24.02
+other_neuro_conditions,Other drug induced dystonia,G24.09
+other_neuro_conditions,Genetic torsion dystonia,G24.1
+other_neuro_conditions,Idiopathic nonfamilial dystonia,G24.2
+other_neuro_conditions,Spasmodic torticollis,G24.3
+other_neuro_conditions,Idiopathic orofacial dystonia,G24.4
+other_neuro_conditions,Blepharospasm,G24.5
+other_neuro_conditions,Other dystonia,G24.8
+other_neuro_conditions,"Dystonia, unspecified",G24.9
+other_neuro_conditions,Essential tremor,G25.0
+other_neuro_conditions,Drug-induced tremor,G25.1
+other_neuro_conditions,Other specified forms of tremor,G25.2
+other_neuro_conditions,Myoclonus,G25.3
+other_neuro_conditions,Drug-induced chorea,G25.4
+other_neuro_conditions,Other chorea,G25.5
+other_neuro_conditions,Drug induced tics,G25.61
+other_neuro_conditions,Other tics of organic origin,G25.69
+other_neuro_conditions,"Drug induced movement disorder, unspecified",G25.70
+other_neuro_conditions,Drug induced akathisia,G25.71
+other_neuro_conditions,Other drug induced movement disorders,G25.79
+other_neuro_conditions,Restless legs syndrome,G25.81
+other_neuro_conditions,Stiff-man syndrome,G25.82
+other_neuro_conditions,Benign shuddering attacks,G25.83
+other_neuro_conditions,Other specified extrapyramidal and movement disorders,G25.89
+other_neuro_conditions,"Extrapyramidal and movement disorder, unspecified",G25.9
+other_neuro_conditions,Extrapyramidal and movement disorders in diseases classified elsewhere,G26
+other_neuro_conditions,Alzheimer's disease with early onset,G30.0
+other_neuro_conditions,Alzheimer's disease with late onset,G30.1
+other_neuro_conditions,Other Alzheimer's disease,G30.8
+other_neuro_conditions,"Alzheimer's disease, unspecified",G30.9
+other_neuro_conditions,Pick's disease,G31.01
+other_neuro_conditions,Other frontotemporal dementia,G31.09
+other_neuro_conditions,"Senile degeneration of brain, not elsewhere classified",G31.1
+other_neuro_conditions,Degeneration of nervous system due to alcohol,G31.2
+other_neuro_conditions,Alpers disease,G31.81
+other_neuro_conditions,Leigh's disease,G31.82
+other_neuro_conditions,Dementia with Lewy bodies,G31.83
+other_neuro_conditions,"Mild cognitive impairment, so stated",G31.84
+other_neuro_conditions,Corticobasal degeneration,G31.85
+other_neuro_conditions,Other specified degenerative diseases of nervous system,G31.89
+other_neuro_conditions,"Degenerative disease of nervous system, unspecified",G31.9
+other_neuro_conditions,Subacute combined degeneration of spinal cord in diseases classified elsewhere,G32.0
+other_neuro_conditions,Cerebellar ataxia in diseases classified elsewhere,G32.81
+other_neuro_conditions,Other specified degenerative disorders of nervous system in diseases classified elsewhere,G32.89
+other_neuro_conditions,Multiple sclerosis,G35
+other_neuro_conditions,Neuromyelitis optica [Devic],G36.0
+other_neuro_conditions,Acute and subacute hemorrhagic leukoencephalitis [Hurst],G36.1
+other_neuro_conditions,Other specified acute disseminated demyelination,G36.8
+other_neuro_conditions,"Acute disseminated demyelination, unspecified",G36.9
+other_neuro_conditions,Diffuse sclerosis of central nervous system,G37.0
+other_neuro_conditions,Central demyelination of corpus callosum,G37.1
+other_neuro_conditions,Central pontine myelinolysis,G37.2
+other_neuro_conditions,Acute transverse myelitis in demyelinating disease of central nervous system,G37.3
+other_neuro_conditions,Subacute necrotizing myelitis of central nervous system,G37.4
+other_neuro_conditions,Concentric sclerosis [Balo] of central nervous system,G37.5
+other_neuro_conditions,Other specified demyelinating diseases of central nervous system,G37.8
+other_neuro_conditions,"Demyelinating disease of central nervous system, unspecified",G37.9
+other_neuro_conditions,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, not intractable, with status epilepticus",G40.001
+other_neuro_conditions,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, not intractable, without status epilepticus",G40.009
+other_neuro_conditions,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, intractable, with status epilepticus",G40.011
+other_neuro_conditions,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, intractable, without status epilepticus",G40.019
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with simple partial seizures, not intractable, with status epilepticus",G40.101
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with simple partial seizures, not intractable, without status epilepticus",G40.109
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with simple partial seizures, intractable, with status epilepticus",G40.111
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with simple partial seizures, intractable, without status epilepticus",G40.119
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, not intractable, with status epilepticus",G40.201
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, not intractable, without status epilepticus",G40.209
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, intractable, with status epilepticus",G40.211
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, intractable, without status epilepticus",G40.219
+other_neuro_conditions,"Generalized idiopathic epilepsy and epileptic syndromes, not intractable, with status epilepticus",G40.301
+other_neuro_conditions,"Generalized idiopathic epilepsy and epileptic syndromes, not intractable, without status epilepticus",G40.309
+other_neuro_conditions,"Generalized idiopathic epilepsy and epileptic syndromes, intractable, with status epilepticus",G40.311
+other_neuro_conditions,"Generalized idiopathic epilepsy and epileptic syndromes, intractable, without status epilepticus",G40.319
+other_neuro_conditions,"Absence epileptic syndrome, not intractable, with status epilepticus",G40.A01
+other_neuro_conditions,"Absence epileptic syndrome, not intractable, without status epilepticus",G40.A09
+other_neuro_conditions,"Absence epileptic syndrome, intractable, with status epilepticus",G40.A11
+other_neuro_conditions,"Absence epileptic syndrome, intractable, without status epilepticus",G40.A19
+other_neuro_conditions,"Juvenile myoclonic epilepsy, not intractable, with status epilepticus",G40.B01
+other_neuro_conditions,"Juvenile myoclonic epilepsy, not intractable, without status epilepticus",G40.B09
+other_neuro_conditions,"Juvenile myoclonic epilepsy, intractable, with status epilepticus",G40.B11
+other_neuro_conditions,"Juvenile myoclonic epilepsy, intractable, without status epilepticus",G40.B19
+other_neuro_conditions,"Other generalized epilepsy and epileptic syndromes, not intractable, with status epilepticus",G40.401
+other_neuro_conditions,"Other generalized epilepsy and epileptic syndromes, not intractable, without status epilepticus",G40.409
+other_neuro_conditions,"Other generalized epilepsy and epileptic syndromes, intractable, with status epilepticus",G40.411
+other_neuro_conditions,"Other generalized epilepsy and epileptic syndromes, intractable, without status epilepticus",G40.419
+other_neuro_conditions,Cyclin-Dependent Kinase-Like 5 Deficiency Disorder,G40.42
+other_neuro_conditions,"Epileptic seizures related to external causes, not intractable, with status epilepticus",G40.501
+other_neuro_conditions,"Epileptic seizures related to external causes, not intractable, without status epilepticus",G40.509
+other_neuro_conditions,"Other epilepsy, not intractable, with status epilepticus",G40.801
+other_neuro_conditions,"Other epilepsy, not intractable, without status epilepticus",G40.802
+other_neuro_conditions,"Other epilepsy, intractable, with status epilepticus",G40.803
+other_neuro_conditions,"Other epilepsy, intractable, without status epilepticus",G40.804
+other_neuro_conditions,"Lennox-Gastaut syndrome, not intractable, with status epilepticus",G40.811
+other_neuro_conditions,"Lennox-Gastaut syndrome, not intractable, without status epilepticus",G40.812
+other_neuro_conditions,"Lennox-Gastaut syndrome, intractable, with status epilepticus",G40.813
+other_neuro_conditions,"Lennox-Gastaut syndrome, intractable, without status epilepticus",G40.814
+other_neuro_conditions,"Epileptic spasms, not intractable, with status epilepticus",G40.821
+other_neuro_conditions,"Epileptic spasms, not intractable, without status epilepticus",G40.822
+other_neuro_conditions,"Epileptic spasms, intractable, with status epilepticus",G40.823
+other_neuro_conditions,"Epileptic spasms, intractable, without status epilepticus",G40.824
+other_neuro_conditions,"Dravet syndrome, intractable, with status epilepticus",G40.833
+other_neuro_conditions,"Dravet syndrome, intractable, without status epilepticus",G40.834
+other_neuro_conditions,Other seizures,G40.89
+other_neuro_conditions,"Epilepsy, unspecified, not intractable, with status epilepticus",G40.901
+other_neuro_conditions,"Epilepsy, unspecified, not intractable, without status epilepticus",G40.909
+other_neuro_conditions,"Epilepsy, unspecified, intractable, with status epilepticus",G40.911
+other_neuro_conditions,"Epilepsy, unspecified, intractable, without status epilepticus",G40.919
+other_neuro_conditions,"Migraine without aura, not intractable, with status migrainosus",G43.001
+other_neuro_conditions,"Migraine without aura, not intractable, without status migrainosus",G43.009
+other_neuro_conditions,"Migraine without aura, intractable, with status migrainosus",G43.011
+other_neuro_conditions,"Migraine without aura, intractable, without status migrainosus",G43.019
+other_neuro_conditions,"Migraine with aura, not intractable, with status migrainosus",G43.101
+other_neuro_conditions,"Migraine with aura, not intractable, without status migrainosus",G43.109
+other_neuro_conditions,"Migraine with aura, intractable, with status migrainosus",G43.111
+other_neuro_conditions,"Migraine with aura, intractable, without status migrainosus",G43.119
+other_neuro_conditions,"Hemiplegic migraine, not intractable, with status migrainosus",G43.401
+other_neuro_conditions,"Hemiplegic migraine, not intractable, without status migrainosus",G43.409
+other_neuro_conditions,"Hemiplegic migraine, intractable, with status migrainosus",G43.411
+other_neuro_conditions,"Hemiplegic migraine, intractable, without status migrainosus",G43.419
+other_neuro_conditions,"Persistent migraine aura without cerebral infarction, not intractable, with status migrainosus",G43.501
+other_neuro_conditions,"Persistent migraine aura without cerebral infarction, not intractable, without status migrainosus",G43.509
+other_neuro_conditions,"Persistent migraine aura without cerebral infarction, intractable, with status migrainosus",G43.511
+other_neuro_conditions,"Persistent migraine aura without cerebral infarction, intractable, without status migrainosus",G43.519
+other_neuro_conditions,"Persistent migraine aura with cerebral infarction, not intractable, with status migrainosus",G43.601
+other_neuro_conditions,"Persistent migraine aura with cerebral infarction, not intractable, without status migrainosus",G43.609
+other_neuro_conditions,"Persistent migraine aura with cerebral infarction, intractable, with status migrainosus",G43.611
+other_neuro_conditions,"Persistent migraine aura with cerebral infarction, intractable, without status migrainosus",G43.619
+other_neuro_conditions,"Chronic migraine without aura, not intractable, with status migrainosus",G43.701
+other_neuro_conditions,"Chronic migraine without aura, not intractable, without status migrainosus",G43.709
+other_neuro_conditions,"Chronic migraine without aura, intractable, with status migrainosus",G43.711
+other_neuro_conditions,"Chronic migraine without aura, intractable, without status migrainosus",G43.719
+other_neuro_conditions,"Cyclical vomiting, in migraine, not intractable",G43.A0
+other_neuro_conditions,"Cyclical vomiting, in migraine, intractable",G43.A1
+other_neuro_conditions,"Ophthalmoplegic migraine, not intractable",G43.B0
+other_neuro_conditions,"Ophthalmoplegic migraine, intractable",G43.B1
+other_neuro_conditions,"Periodic headache syndromes in child or adult, not intractable",G43.C0
+other_neuro_conditions,"Periodic headache syndromes in child or adult, intractable",G43.C1
+other_neuro_conditions,"Other migraine, not intractable, with status migrainosus",G43.801
+other_neuro_conditions,"Other migraine, not intractable, without status migrainosus",G43.809
+other_neuro_conditions,"Other migraine, intractable, with status migrainosus",G43.811
+other_neuro_conditions,"Other migraine, intractable, without status migrainosus",G43.819
+other_neuro_conditions,"Menstrual migraine, not intractable, with status migrainosus",G43.821
+other_neuro_conditions,"Menstrual migraine, not intractable, without status migrainosus",G43.829
+other_neuro_conditions,"Menstrual migraine, intractable, with status migrainosus",G43.831
+other_neuro_conditions,"Menstrual migraine, intractable, without status migrainosus",G43.839
+other_neuro_conditions,"Migraine, unspecified, not intractable, with status migrainosus",G43.901
+other_neuro_conditions,"Migraine, unspecified, not intractable, without status migrainosus",G43.909
+other_neuro_conditions,"Migraine, unspecified, intractable, with status migrainosus",G43.911
+other_neuro_conditions,"Migraine, unspecified, intractable, without status migrainosus",G43.919
+other_neuro_conditions,"Cluster headache syndrome, unspecified, intractable",G44.001
+other_neuro_conditions,"Cluster headache syndrome, unspecified, not intractable",G44.009
+other_neuro_conditions,"Episodic cluster headache, intractable",G44.011
+other_neuro_conditions,"Episodic cluster headache, not intractable",G44.019
+other_neuro_conditions,"Chronic cluster headache, intractable",G44.021
+other_neuro_conditions,"Chronic cluster headache, not intractable",G44.029
+other_neuro_conditions,"Episodic paroxysmal hemicrania, intractable",G44.031
+other_neuro_conditions,"Episodic paroxysmal hemicrania, not intractable",G44.039
+other_neuro_conditions,"Chronic paroxysmal hemicrania, intractable",G44.041
+other_neuro_conditions,"Chronic paroxysmal hemicrania, not intractable",G44.049
+other_neuro_conditions,"Short lasting unilateral neuralgiform headache with conjunctival injection and tearing (SUNCT), intractable",G44.051
+other_neuro_conditions,"Short lasting unilateral neuralgiform headache with conjunctival injection and tearing (SUNCT), not intractable",G44.059
+other_neuro_conditions,"Other trigeminal autonomic cephalgias (TAC), intractable",G44.091
+other_neuro_conditions,"Other trigeminal autonomic cephalgias (TAC), not intractable",G44.099
+other_neuro_conditions,"Vascular headache, not elsewhere classified",G44.1
+other_neuro_conditions,"Tension-type headache, unspecified, intractable",G44.201
+other_neuro_conditions,"Tension-type headache, unspecified, not intractable",G44.209
+other_neuro_conditions,"Episodic tension-type headache, intractable",G44.211
+other_neuro_conditions,"Episodic tension-type headache, not intractable",G44.219
+other_neuro_conditions,"Chronic tension-type headache, intractable",G44.221
+other_neuro_conditions,"Chronic tension-type headache, not intractable",G44.229
+other_neuro_conditions,"Post-traumatic headache, unspecified, intractable",G44.301
+other_neuro_conditions,"Post-traumatic headache, unspecified, not intractable",G44.309
+other_neuro_conditions,"Acute post-traumatic headache, intractable",G44.311
+other_neuro_conditions,"Acute post-traumatic headache, not intractable",G44.319
+other_neuro_conditions,"Chronic post-traumatic headache, intractable",G44.321
+other_neuro_conditions,"Chronic post-traumatic headache, not intractable",G44.329
+other_neuro_conditions,"Drug-induced headache, not elsewhere classified, not intractable",G44.40
+other_neuro_conditions,"Drug-induced headache, not elsewhere classified, intractable",G44.41
+other_neuro_conditions,Hemicrania continua,G44.51
+other_neuro_conditions,New daily persistent headache (NDPH),G44.52
+other_neuro_conditions,Primary thunderclap headache,G44.53
+other_neuro_conditions,Other complicated headache syndrome,G44.59
+other_neuro_conditions,Hypnic headache,G44.81
+other_neuro_conditions,Headache associated with sexual activity,G44.82
+other_neuro_conditions,Primary cough headache,G44.83
+other_neuro_conditions,Primary exertional headache,G44.84
+other_neuro_conditions,Primary stabbing headache,G44.85
+other_neuro_conditions,Cervicogenic headache,G44.86
+other_neuro_conditions,Other headache syndrome,G44.89
+other_neuro_conditions,Vertebro-basilar artery syndrome,G45.0
+other_neuro_conditions,Carotid artery syndrome (hemispheric),G45.1
+other_neuro_conditions,Multiple and bilateral precerebral artery syndromes,G45.2
+other_neuro_conditions,Amaurosis fugax,G45.3
+other_neuro_conditions,Transient global amnesia,G45.4
+other_neuro_conditions,Other transient cerebral ischemic attacks and related syndromes,G45.8
+other_neuro_conditions,"Transient cerebral ischemic attack, unspecified",G45.9
+other_neuro_conditions,Middle cerebral artery syndrome,G46.0
+other_neuro_conditions,Anterior cerebral artery syndrome,G46.1
+other_neuro_conditions,Posterior cerebral artery syndrome,G46.2
+other_neuro_conditions,Brain stem stroke syndrome,G46.3
+other_neuro_conditions,Cerebellar stroke syndrome,G46.4
+other_neuro_conditions,Pure motor lacunar syndrome,G46.5
+other_neuro_conditions,Pure sensory lacunar syndrome,G46.6
+other_neuro_conditions,Other lacunar syndromes,G46.7
+other_neuro_conditions,Other vascular syndromes of brain in cerebrovascular diseases,G46.8
+other_neuro_conditions,"Insomnia, unspecified",G47.00
+other_neuro_conditions,Insomnia due to medical condition,G47.01
+other_neuro_conditions,Other insomnia,G47.09
+other_neuro_conditions,"Hypersomnia, unspecified",G47.10
+other_neuro_conditions,Idiopathic hypersomnia with long sleep time,G47.11
+other_neuro_conditions,Idiopathic hypersomnia without long sleep time,G47.12
+other_neuro_conditions,Recurrent hypersomnia,G47.13
+other_neuro_conditions,Hypersomnia due to medical condition,G47.14
+other_neuro_conditions,Other hypersomnia,G47.19
+other_neuro_conditions,"Circadian rhythm sleep disorder, unspecified type",G47.20
+other_neuro_conditions,"Circadian rhythm sleep disorder, delayed sleep phase type",G47.21
+other_neuro_conditions,"Circadian rhythm sleep disorder, advanced sleep phase type",G47.22
+other_neuro_conditions,"Circadian rhythm sleep disorder, irregular sleep wake type",G47.23
+other_neuro_conditions,"Circadian rhythm sleep disorder, free running type",G47.24
+other_neuro_conditions,"Circadian rhythm sleep disorder, jet lag type",G47.25
+other_neuro_conditions,"Circadian rhythm sleep disorder, shift work type",G47.26
+other_neuro_conditions,Circadian rhythm sleep disorder in conditions classified elsewhere,G47.27
+other_neuro_conditions,Other circadian rhythm sleep disorder,G47.29
+other_neuro_conditions,"Sleep apnea, unspecified",G47.30
+other_neuro_conditions,Primary central sleep apnea,G47.31
+other_neuro_conditions,High altitude periodic breathing,G47.32
+other_neuro_conditions,Obstructive sleep apnea (adult) (pediatric),G47.33
+other_neuro_conditions,Idiopathic sleep related nonobstructive alveolar hypoventilation,G47.34
+other_neuro_conditions,Congenital central alveolar hypoventilation syndrome,G47.35
+other_neuro_conditions,Sleep related hypoventilation in conditions classified elsewhere,G47.36
+other_neuro_conditions,Central sleep apnea in conditions classified elsewhere,G47.37
+other_neuro_conditions,Other sleep apnea,G47.39
+other_neuro_conditions,Narcolepsy with cataplexy,G47.411
+other_neuro_conditions,Narcolepsy without cataplexy,G47.419
+other_neuro_conditions,Narcolepsy in conditions classified elsewhere with cataplexy,G47.421
+other_neuro_conditions,Narcolepsy in conditions classified elsewhere without cataplexy,G47.429
+other_neuro_conditions,"Parasomnia, unspecified",G47.50
+other_neuro_conditions,Confusional arousals,G47.51
+other_neuro_conditions,REM sleep behavior disorder,G47.52
+other_neuro_conditions,Recurrent isolated sleep paralysis,G47.53
+other_neuro_conditions,Parasomnia in conditions classified elsewhere,G47.54
+other_neuro_conditions,Other parasomnia,G47.59
+other_neuro_conditions,Periodic limb movement disorder,G47.61
+other_neuro_conditions,Sleep related leg cramps,G47.62
+other_neuro_conditions,Sleep related bruxism,G47.63
+other_neuro_conditions,Other sleep related movement disorders,G47.69
+other_neuro_conditions,Other sleep disorders,G47.8
+other_neuro_conditions,"Sleep disorder, unspecified",G47.9
+other_neuro_conditions,Trigeminal neuralgia,G50.0
+other_neuro_conditions,Atypical facial pain,G50.1
+other_neuro_conditions,Other disorders of trigeminal nerve,G50.8
+other_neuro_conditions,"Disorder of trigeminal nerve, unspecified",G50.9
+other_neuro_conditions,Bell's palsy,G51.0
+other_neuro_conditions,Geniculate ganglionitis,G51.1
+other_neuro_conditions,Melkersson's syndrome,G51.2
+other_neuro_conditions,"Clonic hemifacial spasm, right",G51.31
+other_neuro_conditions,"Clonic hemifacial spasm, left",G51.32
+other_neuro_conditions,"Clonic hemifacial spasm, bilateral",G51.33
+other_neuro_conditions,"Clonic hemifacial spasm, unspecified",G51.39
+other_neuro_conditions,Facial myokymia,G51.4
+other_neuro_conditions,Other disorders of facial nerve,G51.8
+other_neuro_conditions,"Disorder of facial nerve, unspecified",G51.9
+other_neuro_conditions,Disorders of olfactory nerve,G52.0
+other_neuro_conditions,Disorders of glossopharyngeal nerve,G52.1
+other_neuro_conditions,Disorders of vagus nerve,G52.2
+other_neuro_conditions,Disorders of hypoglossal nerve,G52.3
+other_neuro_conditions,Disorders of multiple cranial nerves,G52.7
+other_neuro_conditions,Disorders of other specified cranial nerves,G52.8
+other_neuro_conditions,"Cranial nerve disorder, unspecified",G52.9
+other_neuro_conditions,Cranial nerve disorders in diseases classified elsewhere,G53
+other_neuro_conditions,Brachial plexus disorders,G54.0
+other_neuro_conditions,Lumbosacral plexus disorders,G54.1
+other_neuro_conditions,"Cervical root disorders, not elsewhere classified",G54.2
+other_neuro_conditions,"Thoracic root disorders, not elsewhere classified",G54.3
+other_neuro_conditions,"Lumbosacral root disorders, not elsewhere classified",G54.4
+other_neuro_conditions,Neuralgic amyotrophy,G54.5
+other_neuro_conditions,Phantom limb syndrome with pain,G54.6
+other_neuro_conditions,Phantom limb syndrome without pain,G54.7
+other_neuro_conditions,Other nerve root and plexus disorders,G54.8
+other_neuro_conditions,"Nerve root and plexus disorder, unspecified",G54.9
+other_neuro_conditions,Nerve root and plexus compressions in diseases classified elsewhere,G55
+other_neuro_conditions,"Carpal tunnel syndrome, unspecified upper limb",G56.00
+other_neuro_conditions,"Carpal tunnel syndrome, right upper limb",G56.01
+other_neuro_conditions,"Carpal tunnel syndrome, left upper limb",G56.02
+other_neuro_conditions,"Carpal tunnel syndrome, bilateral upper limbs",G56.03
+other_neuro_conditions,"Other lesions of median nerve, unspecified upper limb",G56.10
+other_neuro_conditions,"Other lesions of median nerve, right upper limb",G56.11
+other_neuro_conditions,"Other lesions of median nerve, left upper limb",G56.12
+other_neuro_conditions,"Other lesions of median nerve, bilateral upper limbs",G56.13
+other_neuro_conditions,"Lesion of ulnar nerve, unspecified upper limb",G56.20
+other_neuro_conditions,"Lesion of ulnar nerve, right upper limb",G56.21
+other_neuro_conditions,"Lesion of ulnar nerve, left upper limb",G56.22
+other_neuro_conditions,"Lesion of ulnar nerve, bilateral upper limbs",G56.23
+other_neuro_conditions,"Lesion of radial nerve, unspecified upper limb",G56.30
+other_neuro_conditions,"Lesion of radial nerve, right upper limb",G56.31
+other_neuro_conditions,"Lesion of radial nerve, left upper limb",G56.32
+other_neuro_conditions,"Lesion of radial nerve, bilateral upper limbs",G56.33
+other_neuro_conditions,Causalgia of unspecified upper limb,G56.40
+other_neuro_conditions,Causalgia of right upper limb,G56.41
+other_neuro_conditions,Causalgia of left upper limb,G56.42
+other_neuro_conditions,Causalgia of bilateral upper limbs,G56.43
+other_neuro_conditions,Other specified mononeuropathies of unspecified upper limb,G56.80
+other_neuro_conditions,Other specified mononeuropathies of right upper limb,G56.81
+other_neuro_conditions,Other specified mononeuropathies of left upper limb,G56.82
+other_neuro_conditions,Other specified mononeuropathies of bilateral upper limbs,G56.83
+other_neuro_conditions,Unspecified mononeuropathy of unspecified upper limb,G56.90
+other_neuro_conditions,Unspecified mononeuropathy of right upper limb,G56.91
+other_neuro_conditions,Unspecified mononeuropathy of left upper limb,G56.92
+other_neuro_conditions,Unspecified mononeuropathy of bilateral upper limbs,G56.93
+other_neuro_conditions,"Lesion of sciatic nerve, unspecified lower limb",G57.00
+other_neuro_conditions,"Lesion of sciatic nerve, right lower limb",G57.01
+other_neuro_conditions,"Lesion of sciatic nerve, left lower limb",G57.02
+other_neuro_conditions,"Lesion of sciatic nerve, bilateral lower limbs",G57.03
+other_neuro_conditions,"Meralgia paresthetica, unspecified lower limb",G57.10
+other_neuro_conditions,"Meralgia paresthetica, right lower limb",G57.11
+other_neuro_conditions,"Meralgia paresthetica, left lower limb",G57.12
+other_neuro_conditions,"Meralgia paresthetica, bilateral lower limbs",G57.13
+other_neuro_conditions,"Lesion of femoral nerve, unspecified lower limb",G57.20
+other_neuro_conditions,"Lesion of femoral nerve, right lower limb",G57.21
+other_neuro_conditions,"Lesion of femoral nerve, left lower limb",G57.22
+other_neuro_conditions,"Lesion of femoral nerve, bilateral lower limbs",G57.23
+other_neuro_conditions,"Lesion of lateral popliteal nerve, unspecified lower limb",G57.30
+other_neuro_conditions,"Lesion of lateral popliteal nerve, right lower limb",G57.31
+other_neuro_conditions,"Lesion of lateral popliteal nerve, left lower limb",G57.32
+other_neuro_conditions,"Lesion of lateral popliteal nerve, bilateral lower limbs",G57.33
+other_neuro_conditions,"Lesion of medial popliteal nerve, unspecified lower limb",G57.40
+other_neuro_conditions,"Lesion of medial popliteal nerve, right lower limb",G57.41
+other_neuro_conditions,"Lesion of medial popliteal nerve, left lower limb",G57.42
+other_neuro_conditions,"Lesion of medial popliteal nerve, bilateral lower limbs",G57.43
+other_neuro_conditions,"Tarsal tunnel syndrome, unspecified lower limb",G57.50
+other_neuro_conditions,"Tarsal tunnel syndrome, right lower limb",G57.51
+other_neuro_conditions,"Tarsal tunnel syndrome, left lower limb",G57.52
+other_neuro_conditions,"Tarsal tunnel syndrome, bilateral lower limbs",G57.53
+other_neuro_conditions,"Lesion of plantar nerve, unspecified lower limb",G57.60
+other_neuro_conditions,"Lesion of plantar nerve, right lower limb",G57.61
+other_neuro_conditions,"Lesion of plantar nerve, left lower limb",G57.62
+other_neuro_conditions,"Lesion of plantar nerve, bilateral lower limbs",G57.63
+other_neuro_conditions,Causalgia of unspecified lower limb,G57.70
+other_neuro_conditions,Causalgia of right lower limb,G57.71
+other_neuro_conditions,Causalgia of left lower limb,G57.72
+other_neuro_conditions,Causalgia of bilateral lower limbs,G57.73
+other_neuro_conditions,Other specified mononeuropathies of unspecified lower limb,G57.80
+other_neuro_conditions,Other specified mononeuropathies of right lower limb,G57.81
+other_neuro_conditions,Other specified mononeuropathies of left lower limb,G57.82
+other_neuro_conditions,Other specified mononeuropathies of bilateral lower limbs,G57.83
+other_neuro_conditions,Unspecified mononeuropathy of unspecified lower limb,G57.90
+other_neuro_conditions,Unspecified mononeuropathy of right lower limb,G57.91
+other_neuro_conditions,Unspecified mononeuropathy of left lower limb,G57.92
+other_neuro_conditions,Unspecified mononeuropathy of bilateral lower limbs,G57.93
+other_neuro_conditions,Intercostal neuropathy,G58.0
+other_neuro_conditions,Mononeuritis multiplex,G58.7
+other_neuro_conditions,Other specified mononeuropathies,G58.8
+other_neuro_conditions,"Mononeuropathy, unspecified",G58.9
+other_neuro_conditions,Mononeuropathy in diseases classified elsewhere,G59
+other_neuro_conditions,Hereditary motor and sensory neuropathy,G60.0
+other_neuro_conditions,Refsum's disease,G60.1
+other_neuro_conditions,Neuropathy in association with hereditary ataxia,G60.2
+other_neuro_conditions,Idiopathic progressive neuropathy,G60.3
+other_neuro_conditions,Other hereditary and idiopathic neuropathies,G60.8
+other_neuro_conditions,"Hereditary and idiopathic neuropathy, unspecified",G60.9
+other_neuro_conditions,Guillain-Barre syndrome,G61.0
+other_neuro_conditions,Serum neuropathy,G61.1
+other_neuro_conditions,Chronic inflammatory demyelinating polyneuritis,G61.81
+other_neuro_conditions,Multifocal motor neuropathy,G61.82
+other_neuro_conditions,Other inflammatory polyneuropathies,G61.89
+other_neuro_conditions,"Inflammatory polyneuropathy, unspecified",G61.9
+other_neuro_conditions,Drug-induced polyneuropathy,G62.0
+other_neuro_conditions,Alcoholic polyneuropathy,G62.1
+other_neuro_conditions,Polyneuropathy due to other toxic agents,G62.2
+other_neuro_conditions,Critical illness polyneuropathy,G62.81
+other_neuro_conditions,Radiation-induced polyneuropathy,G62.82
+other_neuro_conditions,Other specified polyneuropathies,G62.89
+other_neuro_conditions,"Polyneuropathy, unspecified",G62.9
+other_neuro_conditions,Polyneuropathy in diseases classified elsewhere,G63
+other_neuro_conditions,Other disorders of peripheral nervous system,G64
+other_neuro_conditions,Sequelae of Guillain-Barre syndrome,G65.0
+other_neuro_conditions,Sequelae of other inflammatory polyneuropathy,G65.1
+other_neuro_conditions,Sequelae of toxic polyneuropathy,G65.2
+other_neuro_conditions,Myasthenia gravis without (acute) exacerbation,G70.00
+other_neuro_conditions,Myasthenia gravis with (acute) exacerbation,G70.01
+other_neuro_conditions,Toxic myoneural disorders,G70.1
+other_neuro_conditions,Congenital and developmental myasthenia,G70.2
+other_neuro_conditions,"Lambert-Eaton syndrome, unspecified",G70.80
+other_neuro_conditions,Lambert-Eaton syndrome in disease classified elsewhere,G70.81
+other_neuro_conditions,Other specified myoneural disorders,G70.89
+other_neuro_conditions,"Myoneural disorder, unspecified",G70.9
+other_neuro_conditions,"Muscular dystrophy, unspecified",G71.00
+other_neuro_conditions,Duchenne or Becker muscular dystrophy,G71.01
+other_neuro_conditions,Facioscapulohumeral muscular dystrophy,G71.02
+other_neuro_conditions,Other specified muscular dystrophies,G71.09
+other_neuro_conditions,Myotonic muscular dystrophy,G71.11
+other_neuro_conditions,Myotonia congenita,G71.12
+other_neuro_conditions,Myotonic chondrodystrophy,G71.13
+other_neuro_conditions,Drug induced myotonia,G71.14
+other_neuro_conditions,Other specified myotonic disorders,G71.19
+other_neuro_conditions,"Congenital myopathy, unspecified",G71.20
+other_neuro_conditions,Nemaline myopathy,G71.21
+other_neuro_conditions,X-linked myotubular myopathy,G71.220
+other_neuro_conditions,Other centronuclear myopathy,G71.228
+other_neuro_conditions,Other congenital myopathy,G71.29
+other_neuro_conditions,"Mitochondrial myopathy, not elsewhere classified",G71.3
+other_neuro_conditions,Other primary disorders of muscles,G71.8
+other_neuro_conditions,"Primary disorder of muscle, unspecified",G71.9
+other_neuro_conditions,Drug-induced myopathy,G72.0
+other_neuro_conditions,Alcoholic myopathy,G72.1
+other_neuro_conditions,Myopathy due to other toxic agents,G72.2
+other_neuro_conditions,Periodic paralysis,G72.3
+other_neuro_conditions,Inclusion body myositis [IBM],G72.41
+other_neuro_conditions,"Other inflammatory and immune myopathies, not elsewhere classified",G72.49
+other_neuro_conditions,Critical illness myopathy,G72.81
+other_neuro_conditions,Other specified myopathies,G72.89
+other_neuro_conditions,"Myopathy, unspecified",G72.9
+other_neuro_conditions,Lambert-Eaton syndrome in neoplastic disease,G73.1
+other_neuro_conditions,Myasthenic syndromes in other diseases classified elsewhere,G73.3
+other_neuro_conditions,Myopathy in diseases classified elsewhere,G73.7
+other_neuro_conditions,Spastic quadriplegic cerebral palsy,G80.0
+other_neuro_conditions,Spastic diplegic cerebral palsy,G80.1
+other_neuro_conditions,Spastic hemiplegic cerebral palsy,G80.2
+other_neuro_conditions,Athetoid cerebral palsy,G80.3
+other_neuro_conditions,Ataxic cerebral palsy,G80.4
+other_neuro_conditions,Other cerebral palsy,G80.8
+other_neuro_conditions,"Cerebral palsy, unspecified",G80.9
+other_neuro_conditions,Flaccid hemiplegia affecting unspecified side,G81.00
+other_neuro_conditions,Flaccid hemiplegia affecting right dominant side,G81.01
+other_neuro_conditions,Flaccid hemiplegia affecting left dominant side,G81.02
+other_neuro_conditions,Flaccid hemiplegia affecting right nondominant side,G81.03
+other_neuro_conditions,Flaccid hemiplegia affecting left nondominant side,G81.04
+other_neuro_conditions,Spastic hemiplegia affecting unspecified side,G81.10
+other_neuro_conditions,Spastic hemiplegia affecting right dominant side,G81.11
+other_neuro_conditions,Spastic hemiplegia affecting left dominant side,G81.12
+other_neuro_conditions,Spastic hemiplegia affecting right nondominant side,G81.13
+other_neuro_conditions,Spastic hemiplegia affecting left nondominant side,G81.14
+other_neuro_conditions,"Hemiplegia, unspecified affecting unspecified side",G81.90
+other_neuro_conditions,"Hemiplegia, unspecified affecting right dominant side",G81.91
+other_neuro_conditions,"Hemiplegia, unspecified affecting left dominant side",G81.92
+other_neuro_conditions,"Hemiplegia, unspecified affecting right nondominant side",G81.93
+other_neuro_conditions,"Hemiplegia, unspecified affecting left nondominant side",G81.94
+other_neuro_conditions,"Paraplegia, unspecified",G82.20
+other_neuro_conditions,"Paraplegia, complete",G82.21
+other_neuro_conditions,"Paraplegia, incomplete",G82.22
+other_neuro_conditions,"Quadriplegia, unspecified",G82.50
+other_neuro_conditions,"Quadriplegia, C1-C4 complete",G82.51
+other_neuro_conditions,"Quadriplegia, C1-C4 incomplete",G82.52
+other_neuro_conditions,"Quadriplegia, C5-C7 complete",G82.53
+other_neuro_conditions,"Quadriplegia, C5-C7 incomplete",G82.54
+other_neuro_conditions,Diplegia of upper limbs,G83.0
+other_neuro_conditions,Monoplegia of lower limb affecting unspecified side,G83.10
+other_neuro_conditions,Monoplegia of lower limb affecting right dominant side,G83.11
+other_neuro_conditions,Monoplegia of lower limb affecting left dominant side,G83.12
+other_neuro_conditions,Monoplegia of lower limb affecting right nondominant side,G83.13
+other_neuro_conditions,Monoplegia of lower limb affecting left nondominant side,G83.14
+other_neuro_conditions,Monoplegia of upper limb affecting unspecified side,G83.20
+other_neuro_conditions,Monoplegia of upper limb affecting right dominant side,G83.21
+other_neuro_conditions,Monoplegia of upper limb affecting left dominant side,G83.22
+other_neuro_conditions,Monoplegia of upper limb affecting right nondominant side,G83.23
+other_neuro_conditions,Monoplegia of upper limb affecting left nondominant side,G83.24
+other_neuro_conditions,"Monoplegia, unspecified affecting unspecified side",G83.30
+other_neuro_conditions,"Monoplegia, unspecified affecting right dominant side",G83.31
+other_neuro_conditions,"Monoplegia, unspecified affecting left dominant side",G83.32
+other_neuro_conditions,"Monoplegia, unspecified affecting right nondominant side",G83.33
+other_neuro_conditions,"Monoplegia, unspecified affecting left nondominant side",G83.34
+other_neuro_conditions,Cauda equina syndrome,G83.4
+other_neuro_conditions,Locked-in state,G83.5
+other_neuro_conditions,Brown-Sequard syndrome,G83.81
+other_neuro_conditions,Anterior cord syndrome,G83.82
+other_neuro_conditions,Posterior cord syndrome,G83.83
+other_neuro_conditions,Todd's paralysis (postepileptic),G83.84
+other_neuro_conditions,Other specified paralytic syndromes,G83.89
+other_neuro_conditions,"Paralytic syndrome, unspecified",G83.9
+other_neuro_conditions,Central pain syndrome,G89.0
+other_neuro_conditions,Acute pain due to trauma,G89.11
+other_neuro_conditions,Acute post-thoracotomy pain,G89.12
+other_neuro_conditions,Other acute postprocedural pain,G89.18
+other_neuro_conditions,Chronic pain due to trauma,G89.21
+other_neuro_conditions,Chronic post-thoracotomy pain,G89.22
+other_neuro_conditions,Other chronic postprocedural pain,G89.28
+other_neuro_conditions,Other chronic pain,G89.29
+other_neuro_conditions,Neoplasm related pain (acute) (chronic),G89.3
+other_neuro_conditions,Chronic pain syndrome,G89.4
+other_neuro_conditions,Carotid sinus syncope,G90.01
+other_neuro_conditions,Other idiopathic peripheral autonomic neuropathy,G90.09
+other_neuro_conditions,Familial dysautonomia [Riley-Day],G90.1
+other_neuro_conditions,Horner's syndrome,G90.2
+other_neuro_conditions,Multi-system degeneration of the autonomic nervous system,G90.3
+other_neuro_conditions,Autonomic dysreflexia,G90.4
+other_neuro_conditions,"Complex regional pain syndrome I, unspecified",G90.50
+other_neuro_conditions,Complex regional pain syndrome I of right upper limb,G90.511
+other_neuro_conditions,Complex regional pain syndrome I of left upper limb,G90.512
+other_neuro_conditions,"Complex regional pain syndrome I of upper limb, bilateral",G90.513
+other_neuro_conditions,Complex regional pain syndrome I of unspecified upper limb,G90.519
+other_neuro_conditions,Complex regional pain syndrome I of right lower limb,G90.521
+other_neuro_conditions,Complex regional pain syndrome I of left lower limb,G90.522
+other_neuro_conditions,"Complex regional pain syndrome I of lower limb, bilateral",G90.523
+other_neuro_conditions,Complex regional pain syndrome I of unspecified lower limb,G90.529
+other_neuro_conditions,Complex regional pain syndrome I of other specified site,G90.59
+other_neuro_conditions,Other disorders of autonomic nervous system,G90.8
+other_neuro_conditions,"Disorder of the autonomic nervous system, unspecified",G90.9
+other_neuro_conditions,Communicating hydrocephalus,G91.0
+other_neuro_conditions,Obstructive hydrocephalus,G91.1
+other_neuro_conditions,(Idiopathic) normal pressure hydrocephalus,G91.2
+other_neuro_conditions,"Post-traumatic hydrocephalus, unspecified",G91.3
+other_neuro_conditions,Hydrocephalus in diseases classified elsewhere,G91.4
+other_neuro_conditions,Other hydrocephalus,G91.8
+other_neuro_conditions,"Hydrocephalus, unspecified",G91.9
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade unspecified",G92.00
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade 1",G92.01
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade 2",G92.02
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade 3",G92.03
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade 4",G92.04
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade 5",G92.05
+other_neuro_conditions,Other toxic encephalopathy,G92.8
+other_neuro_conditions,Unspecified toxic encephalopathy,G92.9
+other_neuro_conditions,Cerebral cysts,G93.0
+other_neuro_conditions,"Anoxic brain damage, not elsewhere classified",G93.1
+other_neuro_conditions,Benign intracranial hypertension,G93.2
+other_neuro_conditions,Postviral fatigue syndrome,G93.3
+other_neuro_conditions,"Encephalopathy, unspecified",G93.40
+other_neuro_conditions,Metabolic encephalopathy,G93.41
+other_neuro_conditions,Other encephalopathy,G93.49
+other_neuro_conditions,Compression of brain,G93.5
+other_neuro_conditions,Cerebral edema,G93.6
+other_neuro_conditions,Reye's syndrome,G93.7
+other_neuro_conditions,Temporal sclerosis,G93.81
+other_neuro_conditions,Brain death,G93.82
+other_neuro_conditions,Other specified disorders of brain,G93.89
+other_neuro_conditions,"Disorder of brain, unspecified",G93.9
+other_neuro_conditions,Other disorders of brain in diseases classified elsewhere,G94
+other_neuro_conditions,Syringomyelia and syringobulbia,G95.0
+other_neuro_conditions,Acute infarction of spinal cord (embolic) (nonembolic),G95.11
+other_neuro_conditions,Other vascular myelopathies,G95.19
+other_neuro_conditions,Unspecified cord compression,G95.20
+other_neuro_conditions,Other cord compression,G95.29
+other_neuro_conditions,Conus medullaris syndrome,G95.81
+other_neuro_conditions,Other specified diseases of spinal cord,G95.89
+other_neuro_conditions,"Disease of spinal cord, unspecified",G95.9
+other_neuro_conditions,"Cerebrospinal fluid leak, unspecified",G96.00
+other_neuro_conditions,"Cranial cerebrospinal fluid leak, spontaneous",G96.01
+other_neuro_conditions,"Spinal cerebrospinal fluid leak, spontaneous",G96.02
+other_neuro_conditions,Other cranial cerebrospinal fluid leak,G96.08
+other_neuro_conditions,Other spinal cerebrospinal fluid leak,G96.09
+other_neuro_conditions,Dural tear,G96.11
+other_neuro_conditions,Meningeal adhesions (cerebral) (spinal),G96.12
+other_neuro_conditions,Perineural cyst,G96.191
+other_neuro_conditions,"Other disorders of meninges, not elsewhere classified",G96.198
+other_neuro_conditions,"Intracranial hypotension, unspecified",G96.810
+other_neuro_conditions,"Intracranial hypotension, spontaneous",G96.811
+other_neuro_conditions,Other intracranial hypotension,G96.819
+other_neuro_conditions,Other specified disorders of central nervous system,G96.89
+other_neuro_conditions,"Disorder of central nervous system, unspecified",G96.9
+other_neuro_conditions,Cerebrospinal fluid leak from spinal puncture,G97.0
+other_neuro_conditions,Other reaction to spinal and lumbar puncture,G97.1
+other_neuro_conditions,Intracranial hypotension following ventricular shunting,G97.2
+other_neuro_conditions,Intraoperative hemorrhage and hematoma of a nervous system organ or structure complicating a nervous system procedure,G97.31
+other_neuro_conditions,Intraoperative hemorrhage and hematoma of a nervous system organ or structure complicating other procedure,G97.32
+other_neuro_conditions,Accidental puncture or laceration of dura during a procedure,G97.41
+other_neuro_conditions,Accidental puncture and laceration of other nervous system organ or structure during a nervous system procedure,G97.48
+other_neuro_conditions,Accidental puncture and laceration of other nervous system organ or structure during other procedure,G97.49
+other_neuro_conditions,Postprocedural hemorrhage of a nervous system organ or structure following a nervous system procedure,G97.51
+other_neuro_conditions,Postprocedural hemorrhage of a nervous system organ or structure following other procedure,G97.52
+other_neuro_conditions,Postprocedural hematoma of a nervous system organ or structure following a nervous system procedure,G97.61
+other_neuro_conditions,Postprocedural hematoma of a nervous system organ or structure following other procedure,G97.62
+other_neuro_conditions,Postprocedural seroma of a nervous system organ or structure following a nervous system procedure,G97.63
+other_neuro_conditions,Postprocedural seroma of a nervous system organ or structure following other procedure,G97.64
+other_neuro_conditions,Other intraoperative complications of nervous system,G97.81
+other_neuro_conditions,Other postprocedural complications and disorders of nervous system,G97.82
+other_neuro_conditions,Intracranial hypotension following lumbar cerebrospinal fluid shunting,G97.83
+other_neuro_conditions,Intracranial hypotension following other procedure,G97.84
+other_neuro_conditions,"Neurogenic arthritis, not elsewhere classified",G98.0
+other_neuro_conditions,Other disorders of nervous system,G98.8
+other_neuro_conditions,Autonomic neuropathy in diseases classified elsewhere,G99.0
+other_neuro_conditions,Myelopathy in diseases classified elsewhere,G99.2
+other_neuro_conditions,Other specified disorders of nervous system in diseases classified elsewhere,G99.8
