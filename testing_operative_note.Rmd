@@ -1,0 +1,627 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(shiny)
+library(shinyWidgets)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+library(shinyBS)
+library(cowplot)
+library(magick)
+library(ggpattern)
+library(glue)
+library(rlist)
+library(janitor)
+library(lubridate)
+library(redcapAPI)
+library(ggpmisc)
+library(rclipboard)
+library(nngeo)
+library(shinydashboard)
+# 
+# library(shinyauthr)
+# library(sodium)
+
+# rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "58C0BC0A6CA8B8DFB21A054C2F5A3C49")
+rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = "2A930AE845C92CBF95467E59ADBA0D20")
+
+source("short_shiny_functions.R", local = TRUE)
+source("make_geoms_functions.R", local = TRUE)
+source("build_spine_objects_functions.R", local = TRUE)
+source("load_coordinates_build_objects.R", local = TRUE)
+source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
+source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
+source("no_implants_added_op_note.R", local = TRUE)
+source("screw_size_type_inputs.R", local = TRUE)
+source("modal_functions.R", local = TRUE)
+
+
+# all_implants_constructed_df
+# 
+# 
+# jh_generate_test_implant_df <- function(levels = c("L4", "L5", "S2AI"), objects_to_return = c("pedicle_screw", "pelvic_screw_1"),  return_constructed_objects = FALSE){
+#   if(return_constructed_objects == TRUE){
+#     test_df <- all_implants_constructed_df %>%
+#       filter(level %in% levels) %>%
+#       filter(object %in% objects_to_return)
+#   }else{
+#         test_df <- all_implants_constructed_df %>%
+#       filter(level %in% levels) %>%
+#       filter(object %in% objects_to_return) %>%
+#           select(-object_constructed)
+#   }
+#   return(test_df)
+# }
+
+# jh_generate_test_implant_df(levels = c("L4", "L5", "S2AI"), objects_to_return = c("pedicle_screw", "pelvic_screw_1"))
+
+test_df <- jh_generate_test_implant_df() %>%
+  mutate(implant_statement = " ") %>%
+  mutate(screw_size_type = " ")
+
+
+test_df
+
+op_note_procedure_paragraphs_function(objects_added_df = test_df)
+
+    test_df_for_paragraphs <- test_df %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
+      mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+      group_by(procedure_category, procedures_combine, object) %>%
+      nest() %>%
+      ungroup() %>%
+      group_by(procedure_category, procedures_combine) %>%
+      nest() %>%
+      mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
+      select(-data)
+    
+    test_df_for_paragraphs
+    test_df_for_paragraphs$nested_data[[2]]
+    
+create_full_paragraph_statement_function(procedure_paragraph_intro = "pelvic instrumentation", 
+                                         df_with_levels_object_nested = test_df_for_paragraphs$nested_data[[2]], paragraphs_combined_or_distinct = "combine")
+    
+  procedures_op_full_df <- df_for_paragraphs %>%
+    # replace_na(list(procedures_combine = "distinct", procedure_category = "insertion of intervertebral biomechanical implant")) %>%
+    mutate(procedure_statement = pmap(list(..1 = procedure_category,
+                                           ..2 = nested_data, 
+                                           ..3 = procedures_combine),
+                                      .f = ~create_full_paragraph_statement_function(procedure_paragraph_intro = ..1,
+                                                                                     df_with_levels_object_nested = ..2, 
+                                                                                     paragraphs_combined_or_distinct = ..3))) %>%
+    select(procedure_category, procedures_combine, procedure_statement) %>%
+    unnest(procedure_statement)
+```
+
+```{r}
+
+shinyApp(
+  ui = basicPage(
+    column(6,
+           tableOutput(outputId = "table"))
+  ),
+
+  server = function(input, output, session) {
+
+    showModal(
+            addition_surgical_details_modal_box_2_function(additional_procedures_choices = c("a", "b", "x"),
+                                                         additional_procedures = c("a"))
+        )
+
+  }
+)
+```
+
+
+
+```{r}
+    testdf_with_statement <- test_df_for_paragraphs$nested_data[[2]] %>%
+      mutate(object = if_else(str_detect(object, "pelvic_screw"), "pelvic_screw", object)) %>%
+      group_by(object) %>%
+      nest() %>% 
+      mutate(object_levels_side_df = data) %>%  ### this creates a dataframe with only two columns: 'object' and 'object_levels_side_df'. #The nested dataframe has columns: level, vertebral_number, side, implant_statement, screw_size_type
+      select(-data) 
+      mutate(tech_statement = map2(.x = object, .y = object_levels_side_df, .f = ~ op_note_technique_combine_statement(object = .x, levels_side_df = .y))) %>%
+      select(object, tech_statement) %>%
+      unnest(tech_statement) %>%
+      distinct()
+  
+      
+      
+test_statement <- op_note_technique_combine_statement(object = "pelvic_screw", levels_side_df = testdf_with_statement$object_levels_side_df[[1]])
+    
+test_statement
+
+levels_numbered_df
+
+```
+
+
+
+```{r}
+all_implants_constructed_df %>%
+  filter(category == "tumor")
+
+length(all_implants_constructed_df$level)*2
+
+spine_codes_df %>%
+  mutate(section = if_else(str_detect(str_to_lower(diagnosis), "fracture|trauma"), "trauma", section)) %>%
+  mutate(section = if_else(str_detect(str_to_lower(diagnosis), "kyphosis|lordosis|scoliosis|kissing|flat|deforming ") & section == "msk", "deformity", section))
+
+all_screw_size_type_inputs_df%>%
+  mutate(left_length_input = map(implant_row_id, .f = ~ if_else(str_detect(left_object[[.x]], pattern = "hook"), " ", left_length_input[.x]))) %>%
+  unnest(left_length_input)
+  mutate(left_length_input = if_else(str_detect(left_object, "hook"), " ", left_length_input))
+```
+
+
+```{r}
+all_implants_constructed_df %>%
+  filter(vertebral_number < 23.9) %>%
+  union_all(l6_all_implants_constructed_df) %>%
+  select(level, vertebral_number, side, object) %>%
+  filter(str_detect(object, "screw|hook")) %>%
+  filter(side == "left" | side == "right") %>%
+  arrange(vertebral_number) %>%
+  select(-vertebral_number) %>%
+  group_by(level, side, object) %>%
+  mutate(count = row_number()) %>%
+  ungroup() %>%
+  mutate(level_object = str_to_lower(paste(level, object, sep = "_"))) %>%
+  mutate(level_object_label = str_to_title(paste(str_replace_all(level_object, "_", " ")))) %>%
+  mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI")) %>%
+  mutate(level_object_label = str_replace_all(level_object_label, "Occiput Occ", "Occ")) %>%
+  select(-side) %>%
+  distinct() %>%
+  mutate(left_object = paste("left", level_object, sep = "_"))%>%
+  mutate(right_object = paste("right", level_object, sep = "_")) %>%
+  mutate(implant_row_id = row_number()) %>%
+  select(implant_row_id, everything()) %>%
+  select(implant_row_id, level_object_label, left_object, right_object) %>%
+  mutate(left_diameter_input = map(.x = left_object, 
+                                   .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                      label = NULL, 
+                                                      value = "",
+                                                      width = '85%'))) %>%
+  mutate(left_length_input = map(.x = left_object, 
+                                 .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                    label = NULL, 
+                                                    value = "",
+                                                    width = '85%'))) %>%
+  mutate(right_diameter_input = map(.x = right_object, 
+                                    .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                       label = NULL, 
+                                                       value = "",
+                                                       width = '85%'))) %>%
+  mutate(right_length_input = map(.x = right_object, 
+                                  .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                     label = NULL, 
+                                                     value = "",
+                                                     width = '85%'))) %>%
+  mutate(left_type_input = map(.x = left_object, 
+                               .f = ~radioGroupButtons( #"option2",  
+                                 inputId = paste0(.x, "_type"),
+                                 label = NULL, 
+                                 choices = c("M", "U", "P", "Red", "Offset"),
+                                 selected = "P",
+                                 checkIcon = list(yes = icon("wrench")),
+                                 size = "xs", direction = "horizontal",
+                                 justified = TRUE,
+                                 width = "95%"
+                               ))) %>%
+  mutate(right_type_input = map(.x = right_object, 
+                                .f = ~radioGroupButtons( #"option2",  
+                                  inputId = paste0(.x, "_type"),
+                                  label = NULL, 
+                                  choices = c("M", "U", "P", "Red", "Offset"),
+                                  selected = "P",
+                                  checkIcon = list(yes = icon("wrench")),
+                                  size = "xs", direction = "horizontal",
+                                  justified = TRUE,
+                                  width = "95%"
+                                )))
+```
+
+
+```{r}
+
+all_hook_size_type_inputs_df <-  all_implants_constructed_df %>%
+  filter(vertebral_number < 23.9) %>%
+  union_all(l6_all_implants_constructed_df) %>%
+  select(level, vertebral_number, side, object) %>%
+  filter(str_detect(object, "hook")) %>%
+  filter(side == "left" | side == "right") %>%
+  arrange(vertebral_number) %>%
+  select(-vertebral_number) %>%
+  group_by(level, side, object) %>%
+  mutate(count = row_number()) %>%
+  ungroup() %>%
+  mutate(level_object = str_to_lower(paste(level, object, sep = "_"))) %>%
+  mutate(level_object_label = str_to_title(paste(str_replace_all(level_object, "_", " ")))) %>%
+  mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI")) %>%
+  mutate(level_object_label = str_replace_all(level_object_label, "Occiput Occ", "Occ")) %>%
+  select(-side) %>%
+  distinct() %>%
+  mutate(left_object = paste("left", level_object, sep = "_"))%>%
+  mutate(right_object = paste("right", level_object, sep = "_")) %>%
+  mutate(implant_row_id = row_number()) %>%
+  select(implant_row_id, everything()) %>%
+  select(implant_row_id, level_object_label, left_object, right_object) %>%
+  mutate(left_hook_size_input = map(.x = left_object, 
+                                   .f = ~numericInput(inputId = paste0(.x, "_size"),
+                                                      label = NULL, 
+                                                      value = "",
+                                                      width = '85%'))) %>%
+  mutate(right_hook_size_input = map(.x = right_object, 
+                                    .f = ~numericInput(inputId = paste0(.x, "_size"),
+                                                       label = NULL, 
+                                                       value = "",
+                                                       width = '85%')))
+
+  
+```
+
+
+```{r}
+all_screw_size_type_inputs_df
+
+posterior_implants_y_range_df <- all_implants_constructed_df %>%
+  filter(implant == "yes") %>%
+  filter(approach == "posterior") %>%
+  select(object, y) %>%
+  group_by(object) %>%
+  filter(y == min(y) | y == max(y)) %>%
+  ungroup() %>%
+  distinct() %>%
+  mutate(object_label = str_to_title(str_replace_all(str_remove_all(object, "_1|_2"), "_", " "))) 
+
+all_objects_y_range_df %>%
+    filter(between(y, 0.2, 0.5))
+
+            implants_vector <- c(
+                "Pedicle Screws" = "pedicle_screw",
+                "Pelvic Screws" = "pelvic_screw",
+                "Occipital Screws" = "occipital_screw",
+                "Transarticular Screw" = "transarticular_screw",
+                "Pars Screws" = "pars_screw",
+                "Translaminar Screws" = "translaminar_screw",
+                "Lateral Mass Screws" = "lateral_mass_screw",
+                "TP Hook" = "tp_hook",
+                "Laminar Hook (Downgoing)" = "laminar_downgoing_hook",
+                "Laminar Hook (Upgoing)" = "laminar_upgoing_hook",
+                "Pedicle Hook" = "pedicle_hook",
+                "Tether (Spinous Process)" = "tether",
+                "Sublaminar Wire" = "sublaminar_wire")
+            
+            glue_collapse(posterior_implants_y_range_df$object, sep = "', '")
+            
+glue_collapse(unique((posterior_implants_y_range_df %>%
+  mutate(vector = paste("'", object_label, "' =  '", object, "'", sep = "")))$vector), sep = ", ")
+            
+implants_vector <-
+  c('Pedicle Screw' =  'pedicle_screw', 
+    'Pelvic Screw' =  'pelvic_screw',
+    'Occipital Screw' =  'occipital_screw',
+    'Pars Screw' =  'pars_screw',
+    'Transarticular Screw' =  'transarticular_screw',
+    'Lateral Mass Screw' =  'lateral_mass_screw',
+    'Translaminar Screw' =  'translaminar_screw',
+    'Laminar Downgoing Hook' =  'laminar_downgoing_hook',
+    'Laminar Upgoing Hook' =  'laminar_upgoing_hook',
+    'Pedicle Hook' =  'pedicle_hook',
+    'Tp Hook' =  'tp_hook',
+    'Sublaminar Wire' =  'sublaminar_wire',
+    'Tether' =  'tether'
+  )
+
+                     
+all_implants_constructed_df %>%
+  filter(object %in% implants_vector)
+
+keep(.x = implants_vector, .p = ~ any(str_detect(.x, (all_objects_y_range_df %>%
+  filter(y < 0.5))$object)))
+
+all_objects_y_range_df %>%
+  filter(y < 0.5)
+
+
+all_implants_constructed_df %>%
+  filter(str_detect(object, "pelvic"))
+```
+
+
+```{r}
+implants_vector <-  c(
+                'Pedicle Screw' =  'pedicle_screw', 
+                'Pelvic Screw' =  'pelvic_screw',
+                'Occipital Screw' =  'occipital_screw',
+                'Pars Screw' =  'pars_screw',
+                'Transarticular Screw' =  'transarticular_screw',
+                'Lateral Mass Screw' =  'lateral_mass_screw',
+                'Translaminar Screw' =  'translaminar_screw', 
+                'Laminar Downgoing Hook' =  'laminar_downgoing_hook',
+                'Laminar Upgoing Hook' =  'laminar_upgoing_hook',
+                'Pedicle Hook' =  'pedicle_hook',
+                'Tp Hook' =  'tp_hook',
+                'Sublaminar Wire' =  'sublaminar_wire',
+                'Tether (Spinous Process)' =  'tether'
+                )
+            
+            # posterior_implants_y_range_df
+            # 
+            # filtered_df <- posterior_implants_y_range_df %>%
+            #     filter(between(y, input$crop_y[1], input$crop_y[2]))
+            
+            implant_options <- keep(.x = implants_vector, .p = ~ any(str_detect((all_objects_y_range_df %>%
+                                                                                         filter(between(y, 0.01, 0.6)))$object, .x)))
+
+
+all_implants_constructed_df %>%
+  filter(str_detect(object, "pelvic_screw"))
+
+all_screw_size_type_inputs_df
+
+test_df <- all_implants_constructed_df %>%
+  filter(level %in% c("L4", "L5", "S2AI")) %>%
+  filter(str_detect(object, "pedicle_screw|pelvic_screw_1"))
+
+test_df
+
+jh_generate_df_for_screening_screw_inputs_function(test_df) %>%
+                left_join(all_screw_size_type_inputs_df %>% select(implant_row_id, level_object_label)) %>%
+                arrange(implant_row_id) %>%
+                select(implant_row_id, level, level_object_label, left_object, right_object)
+```
+
+
+```{r}
+        test_all_objects_df <- test_df %>%
+            as_tibble() %>%
+            select(-object_constructed) %>%
+            distinct() %>%
+            mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
+            unnest()
+
+test_all_objects_df%>%
+  mutate(implant_statement = "")
+        
+        if(nrow(interbody_details_df_reactive()) > 0){
+            all_objects_df <- all_objects_df %>%
+                left_join(interbody_details_df_reactive() %>% select(level, approach, object, implant_statement)) %>%
+                mutate(across(everything(), ~ replace_na(.x, " "))) 
+        }else{
+            all_objects_df <- all_objects_df %>%
+                mutate(implant_statement = "")
+        }
+        
+        
+        
+        if(nrow(screw_details_redcap_df_reactive()) > 0){
+            posterior_screws_df <- all_objects_df %>%
+                filter(approach == "posterior") %>%
+                filter(str_detect(object, "screw")) %>%
+                mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
+                left_join(screw_details_redcap_df_reactive()) %>%
+                select(level, approach, side, object, screw_size_type) 
+            
+            all_objects_df <- all_objects_df%>%
+                left_join(posterior_screws_df) %>%
+                mutate(across(everything(), ~ replace_na(.x, " "))) 
+        }
+        
+        all_objects_df
+        
+        
+            testposterior_screws_df <- test_all_objects_df %>%
+                filter(approach == "posterior") %>%
+                filter(str_detect(object, "screw")) %>%
+                mutate(screw_implant = str_to_lower(paste(level, object, sep = "_")))
+                # left_join(screw_details_redcap_df_reactive()) %>%
+                select(level, approach, side, object, screw_size_type) 
+                
+  testposterior_screws_df %>%
+    left_join(testposterior_screws_df)
+  
+            all_objects_df <- all_objects_df%>%
+                left_join(posterior_screws_df) %>%
+                mutate(across(everything(), ~ replace_na(.x, " "))) 
+
+            
+all_implants_constructed_df %>%
+  select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv)
+  names()
+
+  
+  op_
+
+```
+
+
+
+
+```{r}
+# all_screw_size_type_inputs_df <-  
+all_implants_constructed_df %>%
+  filter(vertebral_number < 23.9) %>%
+  union_all(l6_all_implants_constructed_df) %>%
+  select(level, vertebral_number, side, object) %>%
+  filter(str_detect(object, "screw|hook")) %>%
+  filter(side == "left" | side == "right") %>%
+  arrange(vertebral_number) %>%
+  select(-vertebral_number) %>%
+  group_by(level, side, object) %>%
+  mutate(count = row_number()) %>%
+  ungroup() %>%
+  mutate(level_object = str_to_lower(paste(level, object, sep = "_"))) %>%
+  mutate(level_object_label = str_to_title(paste(str_replace_all(level_object, "_", " ")))) %>%
+  mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI")) %>%
+  mutate(level_object_label = str_replace_all(level_object_label, "Occiput Occ", "Occ")) %>%
+  select(-side) %>%
+  distinct() %>%
+  mutate(left_object = paste("left", level_object, sep = "_"))%>%
+  mutate(right_object = paste("right", level_object, sep = "_")) %>%
+  mutate(implant_row_id = row_number()) %>%
+  select(implant_row_id, everything()) %>%
+  select(implant_row_id, level_object_label, left_object, right_object) %>%
+  mutate(left_diameter_input = map(.x = left_object, 
+                                   .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                      label = NULL, 
+                                                      value = "",
+                                                      width = '85%'))) %>%
+  mutate(left_length_input = map(.x = left_object, 
+                                 .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                    label = NULL, 
+                                                    value = "",
+                                                    width = '85%'))) %>%
+  mutate(right_diameter_input = map(.x = right_object, 
+                                    .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                       label = NULL, 
+                                                       value = "",
+                                                       width = '85%'))) %>%
+  mutate(right_length_input = map(.x = right_object, 
+                                  .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                     label = NULL, 
+                                                     value = "",
+                                                     width = '85%'))) %>%
+  mutate(left_type_input = map(.x = left_object, 
+                               .f = ~radioGroupButtons( #"option2",  
+                                 inputId = paste0(.x, "_type"),
+                                 label = NULL, 
+                                 choices = c("M", "U", "P", "Red", "Offset"),
+                                 selected = "P",
+                                 checkIcon = list(yes = icon("wrench")),
+                                 size = "xs", direction = "horizontal",
+                                 justified = TRUE,
+                                 width = "95%"
+                               ))) %>%
+  mutate(right_type_input = map(.x = right_object, 
+                                .f = ~radioGroupButtons( #"option2",  
+                                  inputId = paste0(.x, "_type"),
+                                  label = NULL, 
+                                  choices = c("M", "U", "P", "Red", "Offset"),
+                                  selected = "P",
+                                  checkIcon = list(yes = icon("wrench")),
+                                  size = "xs", direction = "horizontal",
+                                  justified = TRUE,
+                                  width = "95%"
+                                ))) 
+
+
+```
+
+
+```{r}
+select(implant_row_id, level_object_label, left_object, right_object) %>%
+  mutate(left_diameter_input = map(.x = left_object, 
+                                   .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                      label = NULL, 
+                                                      value = "",
+                                                      width = '85%'))) %>%
+  mutate(left_length_input = map(.x = left_object, 
+                                 .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                    label = NULL, 
+                                                    value = "",
+                                                    width = '85%'))) %>%
+  mutate(right_diameter_input = map(.x = right_object, 
+                                    .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                       label = NULL, 
+                                                       value = "",
+                                                       width = '85%'))) %>%
+  mutate(right_length_input = map(.x = right_object, 
+                                  .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                     label = NULL, 
+                                                     value = "",
+                                                     width = '85%'))) %>%
+  mutate(left_type_input = map(.x = left_object, 
+                               .f = ~radioGroupButtons( #"option2",  
+                                 inputId = paste0(.x, "_type"),
+                                 label = NULL, 
+                                 choices = c("M", "U", "P", "Red", "Offset"),
+                                 selected = "P",
+                                 checkIcon = list(yes = icon("wrench")),
+                                 size = "xs", direction = "horizontal",
+                                 justified = TRUE,
+                                 width = "95%"
+                               ))) %>%
+  mutate(right_type_input = map(.x = right_object, 
+                                .f = ~radioGroupButtons( #"option2",  
+                                  inputId = paste0(.x, "_type"),
+                                  label = NULL, 
+                                  choices = c("M", "U", "P", "Red", "Offset"),
+                                  selected = "P",
+                                  checkIcon = list(yes = icon("wrench")),
+                                  size = "xs", direction = "horizontal",
+                                  justified = TRUE,
+                                  width = "95%"
+                                ))) 
+
+```
+
+
+
+
+```{r}
+op_note_procedure_performed_summary_classifier_function("corpectomy_extracavitary_tumor")
+
+
+test_df <- all_implants_constructed_df %>%
+  filter(object == "corpectomy_extracavitary_tumor") %>%
+  filter(level == "L4", side == "left") %>%
+  select(level, vertebral_number, body_interspace, approach, category, object, side) %>%
+  mutate(implant_statement = "none")
+
+test_df
+
+test_nested_df <- test_df %>%
+      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      # select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
+      mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+      group_by(procedure_category, procedures_combine, object) %>%
+      nest() %>%
+      ungroup() %>%
+      group_by(procedure_category, procedures_combine) %>%
+      nest() %>%
+      mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
+      select(-data)  
+
+
+op_note_distinct_technique_statement(object = "corpectomy_extracavitary_approach", level = "L4", side = "left", interbody_statement = "none")
+
+test_nested_df$nested_data 
+      mutate(tech_statement_detail = pmap(.l = list(..1 = object, 
+                                                    ..2 = level, 
+                                                    ..3 = side, 
+                                                    ..4 = implant_statement),
+                                          .f = ~op_note_distinct_technique_statement(object = ..1, level = ..2, side = ..3, interbody_statement = ..4))) 
+      select(object, level, object, tech_statement_detail) %>%
+      unnest(tech_statement_detail) 
+
+
+test_nested_df %>%
+    mutate(procedure_statement = pmap(list(..1 = procedure_category,
+                                           ..2 = nested_data, 
+                                           ..3 = procedures_combine),
+                                      .f = ~create_full_paragraph_statement_function(procedure_paragraph_intro = ..1,
+                                                                                     df_with_levels_object_nested = ..2, 
+                                                                                     paragraphs_combined_or_distinct = ..3))) %>%
+    select(procedure_category, procedures_combine, procedure_statement) %>%
+    unnest(procedure_statement)
+  
+  glue_collapse(x = procedures_op_full_df$procedure_statement, sep = "\n\n")
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

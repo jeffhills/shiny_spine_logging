@@ -22,6 +22,20 @@ jh_reorder_levels_function <- function(level_vector){
 }
 
 
+jh_generate_test_implant_df <- function(levels = c("L4", "L5", "S2AI"), objects_to_return = c("pedicle_screw", "pelvic_screw_1"),  return_constructed_objects = FALSE){
+  if(return_constructed_objects == TRUE){
+    test_df <- all_implants_constructed_df %>%
+      filter(level %in% levels) %>%
+      filter(object %in% objects_to_return)
+  }else{
+    test_df <- all_implants_constructed_df %>%
+      filter(level %in% levels) %>%
+      filter(object %in% objects_to_return) %>%
+      select(-object_constructed)
+  }
+  return(test_df)
+}
+
 
 #################################
 jh_convert_body_levels_to_interspace_vector_function <- function(vertebral_bodies_vector){
@@ -494,6 +508,7 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                                              switch_input_off_label = "No",
                                              checkboxes_inline = FALSE,
                                              button_size = "sm",
+                                             justified_radio_buttons = FALSE,
                                              return_as_full_table = TRUE,
                                              text_align = "left", 
                                              top_margin = "auto",
@@ -587,7 +602,17 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                      tags$td(width = "3%", tags$div(style = required_label_style, "***"))
                    },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
-                   tags$td(width = paste0(right_column_percent_width, "%"), radioGroupButtons(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical"), checkIcon = check_icon_for_radiogroupbuttons, individual = individual_buttons))
+                   tags$td(width = paste0(right_column_percent_width, "%"), radioGroupButtons(inputId = input_id, label = NULL, 
+                                                                                              choices = choices_vector, 
+                                                                                              justified = justified_radio_buttons,
+                                                                                              selected = initial_value_selected, 
+                                                                                              direction = if_else(checkboxes_inline == TRUE, 
+                                                                                                                  "horizontal", "vertical"), 
+                                                                                              checkIcon = list(
+                                                                                                yes = tags$i(class = "fas fa-check"
+                                                                                                             # style = "color: steelblue"
+                                                                                                             )), 
+                                                                                              individual = individual_buttons))
     )  
   }
   if(input_type == "awesomeRadio"){

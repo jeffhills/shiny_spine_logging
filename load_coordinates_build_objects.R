@@ -18,11 +18,16 @@ other_neuro_icd_codes_2022_df <- read_csv("other_neuro_icd_codes_2022_df.csv") %
 spine_codes_df <- read_csv("icd10_codes_2022_updated_spine_onlyv2.csv") %>%
   union_all(other_neuro_icd_codes_2022_df) %>%
   mutate(spine_region = if_else(str_detect(diagnosis, "atlant"), "occipito-atlanto-axial", spine_region)) %>%
-  mutate(section = if_else(str_detect(str_to_lower(diagnosis), "myelitis|infecti|bacteria|coccal|meningitis") & section == "msk", "infection", section)) 
+  mutate(section = if_else(str_detect(str_to_lower(diagnosis), "myelitis|infecti|bacteria|coccal|meningitis") & section == "msk", "infection", section)) %>%
+  mutate(section = if_else(str_detect(str_to_lower(diagnosis), "fracture|trauma"), "trauma", section)) %>%
+  mutate(section = if_else(str_detect(str_to_lower(diagnosis), "kyphosis|lordosis|scoliosis|kissing|flat|deforming ") & section == "msk", "deformity", section))
 
-spine_sections <- c("msk", "tumor", "congenital", "trauma")
+# spine_sections <- c("msk", "tumor", "congenital", "trauma")
 
-spine_category_labels <- c("Degen/Deformity" = "msk",
+spine_sections <- c(unique(spine_codes_df$section))
+
+spine_category_labels <- c("Degen/Inflammatory" = "msk",
+                           "Deformity" = "deformity",
                            "Trauma" = "trauma", 
                            "Tumor" = "tumor", 
                            "Infection" = "infection",
@@ -60,17 +65,18 @@ jh_filter_icd_codes_generate_vector_function <- function(section_input, spine_re
       filter(spine_region %in% spine_region_input | spine_region == "unspecified") 
   }
   
-  diagnosis_list <- purrr::discard(list("Degen/Deformity" = (filtered_df %>% filter(section == "msk"))$diagnosis,
-                      "Trauma" = (filtered_df %>% filter(section == "trauma"))$diagnosis, 
-                      "Tumor" = (filtered_df %>% filter(section == "tumor"))$diagnosis, 
-                      "Infection" = (filtered_df %>% filter(section == "infection"))$diagnosis,
-                      "Congenital" = (filtered_df %>% filter(section == "congenital"))$diagnosis, 
-                      "Other Neurological Diseases" = (filtered_df %>% filter(section == "other_neuro_conditions"))$diagnosis),
-                 .p = ~ length(.x) <1)
+  diagnosis_list <- purrr::discard(list("Degen/Inflammatory" = (filtered_df %>% filter(section == "msk"))$diagnosis,
+                                        "Deformity" = (filtered_df %>% filter(section == "deformity"))$diagnosis, 
+                                        "Trauma" = (filtered_df %>% filter(section == "trauma"))$diagnosis, 
+                                        "Tumor" = (filtered_df %>% filter(section == "tumor"))$diagnosis, 
+                                        "Infection" = (filtered_df %>% filter(section == "infection"))$diagnosis,
+                                        "Congenital" = (filtered_df %>% filter(section == "congenital"))$diagnosis, 
+                                        "Other Neurological Diseases" = (filtered_df %>% filter(section == "other_neuro_conditions"))$diagnosis),
+                                   .p = ~ length(.x) <1)
   
   return(diagnosis_list)
-
 }
+
 
 jh_determine_if_section_dx_function <- function(diagnosis_vector, section_to_determine){
   if(length(diagnosis_vector)>0){
@@ -313,7 +319,7 @@ all_points_all_implants_constructed_df <- implants_constructed_df %>%
   select(level, vertebral_number, everything()) 
 
 revision_implants_df <- all_points_all_implants_constructed_df %>%
-  filter(object == "pedicle_screw" | object == "pelvic_screw" | object == "occipital_screw") %>%
+  filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw") %>%
   filter(approach == "posterior") %>%
   arrange(vertebral_number) %>%
   distinct() %>%
@@ -333,6 +339,8 @@ all_objects_y_range_df <- all_implants_constructed_df %>%
   filter(y == min(y) | y == max(y)) %>%
   ungroup() %>%
   distinct()
+
+
 
 rm(osteotomy_df, decompression_df, all_interbody_df)
 
