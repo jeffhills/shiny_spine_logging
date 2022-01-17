@@ -119,7 +119,7 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
     procedure_cat == "anterior diskectomy and fusion with decompression of the central canal and nerve roots" ~ "distinct",
     procedure_cat == "anterior diskectomy and fusion" ~ "distinct",
     procedure_cat == "insertion of interbody biomechanical implant" ~ "distinct",
-    procedure_cat == "anterior vertebral corpectomy" ~ "distinct",
+    procedure_cat == "anterior vertebral corpectomy" ~ "combine",
     procedure_cat == "anterior insertion of intervertebral biomechanical implant" ~ "combine",
     procedure_cat == "anterior spinal instrumentation (distinct from an interbody implant)" ~ "combine"
   )
@@ -176,6 +176,34 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
     
     statement <- glue_collapse(statement_df$statements, sep = " ")
   }
+
+  if(object == "corpectomy"){
+
+    levels_df <- levels_nested_df %>%
+      select(level) %>%
+      distinct()
+    
+    cranial_level_df <- levels_nested_df %>%
+      filter(vertebral_number == min(vertebral_number)) %>%
+      mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level) %>%
+      select(level) %>%
+      distinct()
+    
+    caudal_level_df <- levels_nested_df %>%
+      filter(vertebral_number == max(vertebral_number)) %>%
+      mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
+      select(level) %>%
+      distinct()
+
+    
+    statement_df <- levels_nested_df %>%
+      mutate(paragraph = glue("I confirmed that the exposure had been carried cranially to visualze the entire {jh_get_cranial_caudal_interspace_body_list_function(level = cranial_level_df$level[[1]])$caudal_interspace} disk, the anterior body of {glue_collapse(levels_df$level, sep = ', ', last = ' and ')}, and caudally to the {jh_get_cranial_caudal_interspace_body_list_function(level = caudal_level_df$level[[1]])$cranial_interspace} disk space. I then started with the diskectomies. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} to {jh_get_cranial_caudal_interspace_body_list_function(level = caudal_level_df$level[[1]])$caudal_interspace} disc's were completely excised. Once I was satisfied with the diskectomies, I used a combination of a burr and rongeur's to excise roughly 80% of the {glue_collapse(levels_df$level, sep = ', ', last = ' and ')} vertebral body. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
+      select(paragraph) %>%
+      distinct()
+    
+    statement <- paste(statement_df$paragraph[[1]])
+    
+  }
   
   if(object == "corpectomy_cage"){
     cranial_level_df <- levels_nested_df %>%
@@ -191,7 +219,7 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
       distinct()
     
     statement_df <- levels_nested_df %>%
-      mutate(paragraph = glue("I confirmed satisfactory decompression and end plate preparation. I then measured the distance from the inferior endplate of {cranial_level_df$level[[1]]} to the superior endplate of {caudal_level_df$level[[1]]} and selected an appropriately sized implant and inserted the implant into the corpectomy defect. The implant had a good press fit between the endplates. This completed the insertion of the biomechanical implant at the {glue_collapse(levels_nested_df$level, sep = ', ', last = ' and ')}.")) %>%
+      mutate(paragraph = glue("I confirmed satisfactory decompression and end plate preparation. I then measured the distance from the inferior endplate of {cranial_level_df$level[[1]]} to the superior endplate of {caudal_level_df$level[[1]]} and selected an appropriately sized implant and inserted the implant into the corpectomy defect. The implant had a good press fit between the endplates.")) %>%
       select(paragraph) %>%
       distinct()
     
@@ -419,7 +447,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     microscope_statement <- if_else(microscope_statement == "none", "", microscope_statement)
     
     first_paragraph_list$surgical_approach <- paste(glue("A standard {anterior_approach_laterality} Smith Robinson approach was utilized to get to the anterior cervical spine. The skin, subcutaneous tissue were incised, the platysma was transected, and then blunt dissection was carried out between the sternocleidomastoid and carotid sheath laterally, and trachea and esophogus medially, down to the prevertebral fascia. Once the anterior spine was palpated, fluoroscopy was used to localize and confirm levels. "), 
-                                                    glue("The longus coli was elevated bilaterally from {proximal_exposure_level$level[[1]]} proximally and to {distal_exposure_level$level[[1]]} distally."),
+                                                    glue("The longus coli was elevated bilaterally from {proximal_exposure_level$level[[1]]} proximally and to {distal_exposure_level$level[[1]]} distally. Once exposure was adequate, the deep retractors were placed into the anterior spine. "),
                                                     microscope_statement)
   }else{
     first_paragraph_list$surgical_approach <- glue("The anterior approach to the spine was carried out with assistance from the vascular surgeon. A {anterior_approach_laterality} incision was made and the approach was carried out down toward the spine. Once the approach was complete, retractors were placed and the surgical levels were confirmed using fluoroscopy. ")

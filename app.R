@@ -1465,6 +1465,7 @@ server <- function(input, output, session) {
         additional_procedures_choices$vertebral_fx_open_tx <- "Open treatment of vertebral fracture"
         
         additional_procedures_choices$microscope <- "Intraoperative use of microscope for microdissection"
+        
         if(nrow(all_objects_to_add_list$objects_df)>0){
             additional_procedures_choices$navigation <- "Use of stereotactic navigation system for screw placement"
         }
@@ -4016,9 +4017,15 @@ server <- function(input, output, session) {
                         mutate(implant_statement = " ")
                 }
                 
+                if(any(str_detect(str_to_lower(input$additional_procedures), "microscop"))){
+                    microscope_use <- "The microscope was then draped and brought into the field for the microscopic portion of the procedure."
+                }else{
+                    microscope_use <- "none"
+                }
+                
                 procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_approach_objects_df,
                                                                              anterior_approach_laterality = input$approach_specified_anterior,
-                                                                             microscope_statement = "none", 
+                                                                             microscope_statement = microscope_use, 
                                                                              antibiotics = input$preop_antibiotics, 
                                                                              additional_procedures_vector = input$additional_procedures, 
                                                                              bmp = anterior_bmp_dose_reactive(),
