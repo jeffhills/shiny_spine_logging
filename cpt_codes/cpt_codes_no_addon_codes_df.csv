@@ -1,0 +1,212 @@
+cpt_code,section,spine_region,procedure,work_rvus
+21920,Back and Flank Excision,unspecified,"biopsy, soft tissue of back or flank; superficial",2.11
+21925,Back and Flank Excision,unspecified,"biopsy, soft tissue of back or flank; deep",4.63
+21930,Back and Flank Excision,unspecified,"excision, tumor, soft tissue of back or flank, subcutaneous; less than 3 cm",4.94
+21931,Back and Flank Excision,unspecified,"excision, tumor, soft tissue of back or flank, subcutaneous; 3 cm or greater",6.88
+21932,Back and Flank Excision,unspecified,"excision, tumor, soft tissue of back or flank, subfascial (eg, intramuscular); less than 5 cm",9.82
+21933,Back and Flank Excision,unspecified,"excision, tumor, soft tissue of back or flank, subfascial (eg, intramuscular); 5 cm or greater",11.13
+21935,Back and Flank Excision,unspecified,"radical resection of tumor (eg, sarcoma), soft tissue of back or flank; less than 5 cm",15.72
+21936,Back and Flank Excision,unspecified,"radical resection of tumor (eg, sarcoma), soft tissue of back or flank; 5 cm or greatergreater",22.55
+22010,Spine Incision,Cervical,"incision and drainage, open, of deep abscess (subfascial), posterior spine; cervical, thoracic, or cervicothoracic",12.75
+22015,Spine Incision,Lumbar,"incision and drainage, open, of deep abscess (subfascial), posterior spine; lumbar, sacral, or lumbosacral",12.64
+22100,Spine Excision,Cervical,"partial excision of posterior vertebral component (eg, spinous process, lamina or facet) for intrinsic bony lesion, single vertebral segment; cervical",11
+22101,Spine Excision,Thoracic,"partial excision of posterior vertebral component (eg, spinous process, lamina or facet) for intrinsic bony lesion, single vertebral segment; thoracic",11.08
+22102,Spine Excision,Lumbar,"partial excision of posterior vertebral component (eg, spinous process, lamina or facet) for intrinsic bony lesion, single vertebral segment; lumbar",11.08
+22110,Spine Excision,Cervical,"partial excision of vertebral body, for intrinsic bony lesion, without decompression of spinal cord or nerve root(s), single vertebral segment; cervical",14
+22112,Spine Excision,Thoracic,"partial excision of vertebral body, for intrinsic bony lesion, without decompression of spinal cord or nerve root(s), single vertebral segment; thoracic",14.07
+22114,Spine Excision,Lumbar,"partial excision of vertebral body, for intrinsic bony lesion, without decompression of spinal cord or nerve root(s), single vertebral segment; lumbar",14.07
+22206,Osteotomy,Thoracic,"osteotomy of spine, posterior or posterolateral approach, 3 columns, 1 vertebral segment (eg, pedicle/vertebral body subtraction); thoracic",37.18
+22207,Osteotomy,Lumbar,"osteotomy of spine, posterior or posterolateral approach, 3 columns, 1 vertebral segment (eg, pedicle/vertebral body subtraction); lumbar",36.68
+22210,Osteotomy,Cervical,"osteotomy of spine, posterior or posterolateral approach, 1 vertebral segment; cervical",25.38
+22212,Osteotomy,Thoracic,"osteotomy of spine, posterior or posterolateral approach, 1 vertebral segment; thoracic",20.99
+22214,Osteotomy,Lumbar,"osteotomy of spine, posterior or posterolateral approach, 1 vertebral segment; lumbar",21.02
+22220,Osteotomy,Cervical,"osteotomy of spine, including discectomy, anterior approach, single vertebral segment; cervical",22.94
+22222,Osteotomy,Thoracic,"osteotomy of spine, including discectomy, anterior approach, single vertebral segment; thoracic",23.09
+22224,Osteotomy,Lumbar,"osteotomy of spine, including discectomy, anterior approach, single vertebral segment; lumbar",23.09
+22310,Fracture and/or Dislocation,unspecified,"closed treatment of vertebral body fracture(s), without manipulation, requiring and including casting or bracing",3.45
+22315,Fracture and/or Dislocation,unspecified,"closed treatment of vertebral fracture(s) and/ or dislocation(s) requiring casting or bracing, with and including casting and/or bracing by manipulation or traction",10.11
+22318,Fracture and/or Dislocation,Odontoid,"open treatment and/or reduction of odontoid fracture(s) and or dislocation(s) (including os odontoideum), anterior approach, including placement of internal fixation; without grafting",22.72
+22319,Fracture and/or Dislocation,Odontoid,"open treatment and/or reduction of odontoid fracture(s) and or dislocation(s) (including os odontoideum), anterior approach, including placement of internal fixation; with grafting",25.33
+22325,Fracture and/or Dislocation,Lumbar,"open treatment and/or reduction of vertebral fracture(s) and/or dislocation(s), posterior approach, 1 fractured vertebra or dislocated segment; lumbar",19.87
+22326,Fracture and/or Dislocation,Cervical,"open treatment and/or reduction of vertebral fracture(s) and/or dislocation(s), posterior approach, 1 fractured vertebra or dislocated segment; cervical",20.84
+22327,Fracture and/or Dislocation,Thoracic,"open treatment and/or reduction of vertebral fracture(s) and/or dislocation(s), posterior approach, 1 fractured vertebra or dislocated segment; thoracic",20.77
+22505,Manipulation,unspecified,"manipulation of spine requiring anesthesia, any region",1.87
+22510,Percutaneous Vertebroplasty and Vertebral Augmentation,Thoracic,"percutaneous vertebroplasty (bone biopsy included when performed), 1 vertebral body, unilateral or bilateral injection, inclusive of all imaging guidance; cervicothoracic",7.9
+22511,Percutaneous Vertebroplasty and Vertebral Augmentation,Sacral,"percutaneous vertebroplasty (bone biopsy included when performed), 1 vertebral body, unilateral or bilateral injection, inclusive of all imaging guidance; lumbosacral",7.33
+22513,Percutaneous Vertebroplasty and Vertebral Augmentation,Thoracic,"percutaneous vertebral augmentation, including cavity creation (fracture reduction and bone biopsy included when performed) using mechanical device (eg, kyphoplasty), 1 vertebral body, unilateral or bilateral cannulation, inclusive of all imaging guidance; thoracic",8.65
+22514,Percutaneous Vertebroplasty and Vertebral Augmentation,Lumbar,"percutaneous vertebral augmentation, including cavity creation (fracture reduction and bone biopsy included when performed) using mechanical device (eg, kyphoplasty), 1 vertebral body, unilateral or bilateral cannulation, inclusive of all imaging guidance; lumbar",7.99
+22526,Percutaneous Augmentation and Annuloplasty,unspecified,"percutaneous intradiscal electrothermal annuloplasty, unilateral or bilateral including fluoroscopic guidance; single level",4
+22532,Arthrodesis Lateral Extracavitary Approach Technique,Thoracic,"arthrodesis, lateral extracavitary technique, including minimal discectomy to prepare interspace (other than for decompression); thoracic",25.99
+22533,Arthrodesis Lateral Extracavitary Approach Technique,Lumbar,"arthrodesis, lateral extracavitary technique, including minimal discectomy to prepare interspace (other than for decompression); lumbar",24.79
+22548,Anterior or Anterolateral Approach Technique,C1-C2,"arthrodesis, anterior transoral or extraoral technique, clivus-c1-c2 (atlas-axis), with or without excision of odontoid process",27.06
+22551,Anterior or Anterolateral Approach Technique,Cervical,"arthrodesis, anterior interbody, including disc space preparation, discectomy, osteophytectomy and decompression of spinal cord and/or nerve roots; cervical below c2",25
+22554,Anterior or Anterolateral Approach Technique,Cervical,"arthrodesis, anterior interbody technique, including minimal discectomy to prepare interspace (other than for decompression); cervical below c2",17.69
+22556,Anterior or Anterolateral Approach Technique,Thoracic,"arthrodesis, anterior interbody technique including minimal discectomy to prepare interspace (other than for decompression); thoracic",24.7
+22558,Anterior or Anterolateral Approach Technique,Lumbar,"arthrodesis, anterior interbody technique including minimal discectomy to prepare interspace (other than for decompression); lumbar",23.53
+22586,Anterior or Anterolateral Approach Technique,L5-S1,"arthrodesis, pre-sacral interbody technique, including disc space preparation, discectomy, with posterior instrumentation, with image guidance, includes bone graft when performed, l5-s1 interspace",28.12
+22590,"Posterior, Posterolateral or Lateral Transverse Process Technique",Cervical,"arthrodesis, posterior technique, craniocervical (occiput-c2)",21.76
+22595,"Posterior, Posterolateral or Lateral Transverse Process Technique",C1-C2,"arthrodesis, posterior technique, atlas-axis (c1-c2)",20.64
+22600,"Posterior, Posterolateral or Lateral Transverse Process Technique",Cervical,"arthrodesis, posterior or posterolateral technique, single level; cervical below c2 segment",17.4
+22610,"Posterior, Posterolateral or Lateral Transverse Process Technique",Thoracic,"arthrodesis, posterior or posterolateral technique, single level; thoracic (with lateral transverse technique, when performed)",17.28
+22612,"Posterior, Posterolateral or Lateral Transverse Process Technique",Lumbar,"arthrodesis, posterior or posterolateral technique, single level; lumbar (with lateral transverse technique, when performed)",23.53
+22630,"Posterior, Posterolateral or Lateral Transverse Process Technique",Lumbar,"arthrodesis, posterior interbody technique, including laminectomy and/or discectomy to prepare interspace (other than for decompression), single interspace; lumbar",22.09
+22633,"Posterior, Posterolateral or Lateral Transverse Process Technique",Lumbar,"arthrodesis, combined posterior or posterolateral technique with posterior interbody technique including laminectomy and/or discectomy sufficient to prepare interspace (other than for decompression), single interspace and segment; lumbar",27.75
+22800,"Spine Deformity (eg, Scoliosis, Kyphosis)",unspecified,"arthrodesis, posterior, for spinal deformity, with or without cast; up to 6 vertebral segments",19.5
+22802,"Spine Deformity (eg, Scoliosis, Kyphosis)",unspecified,"arthrodesis, posterior, for spinal deformity, with or without cast; 7 to 12 vertebral segments",32.11
+22804,"Spine Deformity (eg, Scoliosis, Kyphosis)",unspecified,"arthrodesis, posterior, for spinal deformity, with or without cast; 13 or more vertebral segments",37.5
+22808,"Spine Deformity (eg, Scoliosis, Kyphosis)",unspecified,"arthrodesis, anterior, for spinal deformity, with or without cast; 2 to 3 vertebral segments",27.51
+22810,"Spine Deformity (eg, Scoliosis, Kyphosis)",unspecified,"arthrodesis, anterior, for spinal deformity, with or without cast; 4 to 7 vertebral segments",31.5
+22812,"Spine Deformity (eg, Scoliosis, Kyphosis)",unspecified,"arthrodesis, anterior, for spinal deformity, with or without cast; 8 or more vertebral segments",34.25
+22818,"Spine Deformity (eg, Scoliosis, Kyphosis)",unspecified,"kyphectomy, circumferential exposure of spine and resection of vertebral segment(s) (including body and posterior elements); single or 2 segments",34.33
+22819,"Spine Deformity (eg, Scoliosis, Kyphosis)",unspecified,"kyphectomy, circumferential exposure of spine and resection of vertebral segment(s) (including body and posterior elements); 3 or more segments",39.38
+22830,Exploration,unspecified,exploration of spinal fusion,11.22
+22849,Spinal Instrumentation,unspecified,reinsertion of spinal fixation device,19.17
+22850,Spinal Instrumentation,unspecified,"removal of posterior nonsegmental instrumentation (eg, harrington rod)",9.82
+22852,Spinal Instrumentation,unspecified,removal of posterior segmental instrumentation,9.37
+22855,Spinal Instrumentation,unspecified,removal of anterior instrumentation,15.86
+22856,Spinal Instrumentation,Cervical,"total disc arthroplasty (artificial disc), anterior approach, including discectomy with end plate preparation (includes osteophytectomy for nerve root or spinal cord decompression and microdissection); single interspace, cervical",24.05
+22857,Spinal Instrumentation,Lumbar,"total disc arthroplasty (artificial disc), anterior approach, including discectomy to prepare interspace (other than for decompression), single interspace, lumbar",27.13
+22861,Spinal Instrumentation,Cervical,"revision including replacement of total disc arthroplasty (artificial disc), anterior approach, single interspace; cervical",33.36
+22862,Spinal Instrumentation,Lumbar,"revision including replacement of total disc arthroplasty (artificial disc), anterior approach, single interspace; lumbar",32.63
+22864,Spinal Instrumentation,Cervical,"removal of total disc arthroplasty (artificial disc), anterior approach, single interspace; cervical",29.4
+22865,Spinal Instrumentation,Lumbar,"removal of total disc arthroplasty (artificial disc), anterior approach, single interspace; lumbar",31.75
+22867,Spinal Instrumentation,Lumbar,"insertion of interlaminar/interspinous process stabilization/distraction device, without fusion, including image guidance when performed, with open decompression, lumbar; single level",13.5
+22869,Spinal Instrumentation,Lumbar,"insertion of interlaminar/interspinous process stabilization/distraction device, without open decompression or fusion, including image guidance when performed, lumbar; single level",7.03
+22899,Other Procedures,unspecified,"unlisted procedure, spine",0
+62263,"Injection, Drainage, or Aspiration",unspecified,"percutaneous lysis of epidural adhesions using solution injection (eg, hypertonic saline, enzyme) or mechanical means (eg, catheter) including radiologic localization (includes contrast when administered), multiple adhesiolysis sessions; 2 or more days",5
+62264,"Injection, Drainage, or Aspiration",unspecified,"percutaneous lysis of epidural adhesions using solution injection (eg, hypertonic saline, enzyme) or mechanical means (eg, catheter) including radiologic localization (includes contrast when administered), multiple adhesiolysis sessions; 1 day",4.42
+62267,"Injection, Drainage, or Aspiration",unspecified,"percutaneous aspiration within the nucleus pulposus, intervertebral disc, or paravertebral tissue for diagnostic purposes",3
+62268,"Injection, Drainage, or Aspiration",unspecified,"percutaneous aspiration, spinal cord cyst or syrinx",4.73
+62269,"Injection, Drainage, or Aspiration",unspecified,"biopsy of spinal cord, percutaneous needle",5.01
+62270,"Injection, Drainage, or Aspiration",Lumbar,"spinal puncture, lumbar, diagnostic",1.22
+62272,"Injection, Drainage, or Aspiration",unspecified,"spinal puncture, therapeutic, for drainage of cerebrospinal fluid (by needle or catheter)",1.58
+62273,"Injection, Drainage, or Aspiration",unspecified,"injection, epidural, of blood or clot patch",2.15
+62280,"Injection, Drainage, or Aspiration",unspecified,"injection/infusion of neurolytic substance (eg, alcohol, phenol, iced saline solutions), with or without other therapeutic substance; subarachnoid",2.63
+62281,"Injection, Drainage, or Aspiration",Cervical,"injection/infusion of neurolytic substance (eg, alcohol, phenol, iced saline solutions), with or without other therapeutic substance; epidural, cervical or thoracic",2.66
+62282,"Injection, Drainage, or Aspiration",Lumbar,"injection/infusion of neurolytic substance (eg, alcohol, phenol, iced saline solutions), with or without other therapeutic substance; epidural, lumbar, sacral (caudal)",2.33
+62284,"Injection, Drainage, or Aspiration",Lumbar,"injection procedure for myelography and/or computed tomography, lumbar (other than c1c2 and posterior fossa)",1.54
+62287,"Injection, Drainage, or Aspiration",Lumbar,"decompression procedure, percutaneous, of nucleus pulposus of intervertebral disc, any method utilizing needle based technique to remove disc material under fluoroscopic imaging or other form of indirect visualization, with discography and/or epidural injection(s) at the treated level(s), when performed, single or multiple levels, lumbar",9.03
+62290,"Injection, Drainage, or Aspiration",Lumbar,"injection procedure for discography, each level; lumbar",3
+62291,"Injection, Drainage, or Aspiration",Cervical,"injection procedure for discography, each level; cervical or thoracic",2.91
+62292,"Injection, Drainage, or Aspiration",Lumbar,"injection procedure for chemonucleolysis, including discography, intervertebral disc, single or multiple levels, lumbar",9.24
+62294,"Injection, Drainage, or Aspiration",unspecified,"injection procedure, arterial, for occlusion of arteriovenous malformation, spinal",12.87
+62302,"Injection, Drainage, or Aspiration",Cervical,"myelography via lumbar injection, including radiological supervision and interpretation; cervical",2.29
+62303,"Injection, Drainage, or Aspiration",Thoracic,"myelography via lumbar injection, including radiological supervision and interpretation; thoracic",2.29
+62304,"Injection, Drainage, or Aspiration",Lumbar,"myelography via lumbar injection, including radiological supervision and interpretation; lumbosacral",2.25
+62305,"Injection, Drainage, or Aspiration",Cervical,"myelography via lumbar injection, including radiological supervision and interpretation; 2 or more regions (eg, lumbar/thoracic, cervical/ thoracic, lumbar/cervical, lumbar/thoracic/ cervical)",2.35
+62320,"Injection, Drainage, or Aspiration",Cervical,"injection(s), of diagnostic or therapeutic substance(s) (eg, anesthetic, antispasmodic, opioid, steroid, other solution), not including neurolytic substances, including needle or catheter placement, interlaminar epidural or subarachnoid, cervical or thoracic; without imaging guidance",1.8
+62321,"Injection, Drainage, or Aspiration",Cervical,"injection(s), of diagnostic or therapeutic substance(s) (eg, anesthetic, antispasmodic, opioid, steroid, other solution), not including neurolytic substances, including needle or catheter placement, interlaminar epidural or subarachnoid, cervical or thoracic; with imaging guidance (ie, fluoroscopy or ct)",1.95
+62322,"Injection, Drainage, or Aspiration",Lumbar,"injection(s), of diagnostic or therapeutic substance(s) (eg, anesthetic, antispasmodic, opioid, steroid, other solution), not including neurolytic substances, including needle or catheter placement, interlaminar epidural or subarachnoid, lumbar or sacral (caudal); without imaging guidance",1.55
+62323,"Injection, Drainage, or Aspiration",Lumbar,"injection(s), of diagnostic or therapeutic substance(s) (eg, anesthetic, antispasmodic, opioid, steroid, other solution), not including neurolytic substances, including needle or catheter placement, interlaminar epidural or subarachnoid, lumbar or sacral (caudal); with imaging guidance (ie, fluoroscopy or ct)",1.8
+62324,"Injection, Drainage, or Aspiration",Cervical,"injection(s), including indwelling catheter placement, continuous infusion or intermittent bolus, of diagnostic or therapeutic substance(s) (eg, anesthetic, antispasmodic, opioid, steroid, other solution), not including neurolytic substances, interlaminar epidural or subarachnoid, cervical or thoracic; without imaging guidance",1.89
+62325,"Injection, Drainage, or Aspiration",Cervical,"injection(s), including indwelling catheter placement, continuous infusion or intermittent bolus, of diagnostic or therapeutic substance(s) (eg, anesthetic, antispasmodic, opioid, steroid, other solution), not including neurolytic substances, interlaminar epidural or subarachnoid, cervical or thoracic; with imaging guidance (ie, fluoroscopy or ct)",2.2
+62326,"Injection, Drainage, or Aspiration",Lumbar,"injection(s), including indwelling catheter placement, continuous infusion or intermittent bolus, of diagnostic or therapeutic substance(s) (eg, anesthetic, antispasmodic, opioid, steroid, other solution), not including neurolytic substances, interlaminar epidural or subarachnoid, lumbar or sacral (caudal); without imaging guidance",1.78
+62327,"Injection, Drainage, or Aspiration",Lumbar,"injection(s), including indwelling catheter placement, continuous infusion or intermittent bolus, of diagnostic or therapeutic substance(s) (eg, anesthetic, antispasmodic, opioid, steroid, other solution), not including neurolytic substances, interlaminar epidural or subarachnoid, lumbar or sacral (caudal); with imaging guidance (ie, fluoroscopy or ct)",1.9
+62328,"Injection, Drainage, or Aspiration",Lumbar,"spinal puncture, lumbar, diagnostic; with fluoroscopic or ct guidance",1.73
+62329,"Injection, Drainage, or Aspiration",unspecified,"spinal puncture, therapeutic, for drainage of cerebrospinal fluid (by needle or catheter); with fluoroscopic or ct guidance",2.03
+62350,Catheter Implantation,unspecified,"implantation, revision or repositioning of tunneled intrathecal or epidural catheter, for longterm medication administration via an external pump or implantable reservoir/infusion pump; without laminectomy",6.05
+62351,Catheter Implantation,unspecified,"implantation, revision or repositioning of tunneled intrathecal or epidural catheter, for longterm medication administration via an external pump or implantable reservoir/infusion pump; with laminectomy",11.66
+62355,Catheter Implantation,unspecified,removal of previously implanted intrathecal or epidural catheter,3.55
+62360,Reservoir/Pump Implantation,unspecified,implantation or replacement of device for intrathecal or epidural drug infusion; subcutaneous reservoir,4.33
+62361,Reservoir/Pump Implantation,unspecified,implantation or replacement of device for intrathecal or epidural drug infusion; nonprogrammable pump,5
+62362,Reservoir/Pump Implantation,unspecified,"implantation or replacement of device for intrathecal or epidural drug infusion; programmable pump, including preparation of pump, with or without programming",5.6
+62365,Reservoir/Pump Implantation,unspecified,"removal of subcutaneous reservoir or pump, previously implanted for intrathecal or epidural infusion",3.93
+62367,Reservoir/Pump Implantation,unspecified,"electronic analysis of programmable, implanted pump for intrathecal or epidural drug infusion (includes evaluation of reservoir status, alarm status, drug prescription status); without reprogramming or refill",0.48
+62368,Reservoir/Pump Implantation,unspecified,"electronic analysis of programmable, implanted pump for intrathecal or epidural drug infusion (includes evaluation of reservoir status, alarm status, drug prescription status); with reprogramming",0.67
+62369,Reservoir/Pump Implantation,unspecified,"electronic analysis of programmable, implanted pump for intrathecal or epidural drug infusion (includes evaluation of reservoir status, alarm status, drug prescription status); with reprogramming and refill",0.67
+62370,Reservoir/Pump Implantation,unspecified,"electronic analysis of programmable, implanted pump for intrathecal or epidural drug infusion (includes evaluation of reservoir status, alarm status, drug prescription status); with reprogramming and refill (requiring skill of a physician or other qualified health care professional)",0.9
+62380,Reservoir/Pump Implantation,Lumbar,"endoscopic decompression of spinal cord, nerve root(s), including laminotomy, partial facetectomy, foraminotomy, discectomy and/ or excision of herniated intervertebral disc, 1 interspace, lumbar",0
+63001,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Cervical,"laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), 1 or 2 vertebral segments; cervical",17.61
+63003,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Thoracic,"laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), 1 or 2 vertebral segments; thoracic",17.74
+63005,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Lumbar,"laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), 1 or 2 vertebral segments; lumbar, except for spondylolisthesis",16.43
+63011,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Sacral,"laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), 1 or 2 vertebral segments; sacral",15.91
+63012,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Lumbar,"laminectomy with removal of abnormal facets and/or pars inter-articularis with decompression of cauda equina and nerve roots for spondylolisthesis, lumbar ( ill type procedure)",16.85
+63015,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Cervical,"laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), more than 2 vertebral segments; cervical",20.85
+63016,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Thoracic,"laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), more than 2 vertebral segments; thoracic",22.03
+63017,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Lumbar,"laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), more than 2 vertebral segments; lumbar",17.33
+63020,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Cervical,"laminotomy (hemilaminectomy), with decompression of nerve root(s), including partial facetectomy, foraminotomy and/or excision of herniated intervertebral disc; 1 interspace, cervical",16.2
+63030,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Lumbar,"laminotomy (hemilaminectomy), with decompression of nerve root(s), including partial facetectomy, foraminotomy and/or excision of herniated intervertebral disc; 1 interspace, lumbar",13.18
+63040,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Cervical,"laminotomy (hemilaminectomy), with decompression of nerve root(s), including partial facetectomy, foraminotomy and/or excision of herniated intervertebral disc, reexploration, single interspace; cervical",20.31
+63042,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Lumbar,"laminotomy (hemilaminectomy), with decompression of nerve root(s), including partial facetectomy, foraminotomy and/or excision of herniated intervertebral disc, reexploration, single interspace; lumbar",18.76
+63045,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Cervical,"laminectomy, facetectomy and foraminotomy (unilateral or bilateral with decompression of spinal cord, cauda equina and/or nerve root s , eg, spinal or lateral recess stenosis ), single vertebral segment; cervical",17.95
+63046,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Thoracic,"laminectomy, facetectomy and foraminotomy (unilateral or bilateral with decompression of spinal cord, cauda equina and/or nerve root s , eg, spinal or lateral recess stenosis ), single vertebral segment; thoracic",17.25
+63047,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Lumbar,"laminectomy, facetectomy and foraminotomy (unilateral or bilateral with decompression of spinal cord, cauda equina and/or nerve root s , eg, spinal or lateral recess stenosis ), single vertebral segment; lumbar",15.37
+63050,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Cervical,"laminoplasty, cervical, with decompression of the spinal cord, two or more vertebral segments;",22.01
+63051,Posterior Extradural Laminotomy or Laminectomy for Exploration/ Decompression of Neural Elements or Excision of Herniated Intervertebral Discs,Cervical,"laminoplasty, cervical, with decompression of the spinal cord, two or more vertebral segments; with reconstruction of the posterior bony elements (including the application of bridging bone graft and non-segmental fixation devices (eg, wire, suture, mini-plates), when performed)",25.51
+63055,Transpedicular or CostoVertebral Approach for Posterolateral Extradural Exploration/Decompression,Thoracic,"transpedicular approach with decompression of spinal cord, equina and/or nerve root(s) (eg, herniated intervertebral disc), single segment; thoracic",23.55
+63056,Transpedicular or CostoVertebral Approach for Posterolateral Extradural Exploration/Decompression,Lumbar,"transpedicular approach with decompression of spinal cord, equina and/or nerve root(s) (eg, herniated intervertebral disc), single segment; lumbar (including transfacet, or lateral extraforaminal approach) (eg, far lateral herniated intervertebral disc)",21.86
+63064,Transpedicular or CostoVertebral Approach for Posterolateral Extradural Exploration/Decompression,Thoracic,"costovertebral approach with decompression of spinal cord or nerve root(s) (eg, herniated intervertebral disc), thoracic; single segment",26.22
+63075,Anterior or Anterolateral Approach for Extradural Exploration/Decompression,Cervical,"discectomy, anterior, with decompression of spinal cord and/or nerve root(s), including osteophytectomy; cervical, single interspace",19.6
+63077,Anterior or Anterolateral Approach for Extradural Exploration/Decompression,Thoracic,"discectomy, anterior, with decompression of spinal cord and/or nerve root(s), including osteophytectomy; thoracic, single interspace",22.88
+63081,Anterior or Anterolateral Approach for Extradural Exploration/Decompression,Cervical,"vertebral corpectomy (vertebral body resection), partial or complete, anterior approach with decompression of spinal cord and/or nerve root(s); cervical, single segment",26.1
+63085,Anterior or Anterolateral Approach for Extradural Exploration/Decompression,Thoracic,"vertebral corpectomy (vertebral body resection), partial or complete, transthoracic approach with decompression of spinal cord and/ or nerve root(s); thoracic, single segment",29.47
+63087,Anterior or Anterolateral Approach for Extradural Exploration/Decompression,Thoracic,"vertebral corpectomy (vertebral body resection), partial or complete, combined thoracolumbar approach with decompression of spinal cord, cauda equina or nerve root(s), lower thoracic or lumbar; single segment",37.53
+63090,Anterior or Anterolateral Approach for Extradural Exploration/Decompression,Thoracic,"vertebral corpectomy (vertebral body resection), partial or complete, transperitoneal or retroperitoneal approach with decompression of spinal cord, cauda equina or nerve root(s), lower thoracic, lumbar, or sacral; single segment",30.93
+63101,Lateral Extracavitary Approach for Extradural Exploration/Decompression,Thoracic,"vertebral corpectomy (vertebral body resection), partial or complete, lateral extracavitary approach with decompression of spinal cord and/or nerve root(s) (eg, for tumor or retropulsed bone fragments); thoracic, single segment",34.1
+63102,Lateral Extracavitary Approach for Extradural Exploration/Decompression,Lumbar,"vertebral corpectomy (vertebral body resec-tion), partial or complete, lateral extracavitary approach with decompression of spinal cord and/or nerve root(s) (eg, for tumor or retropulsed bone fragments); lumbar, single segment",34.1
+63170,Incision,Cervical,"laminectomy with myelotomy (eg, ischof or rez type), cervical, thoracic, or thoracolumbar",22.21
+63172,Incision,unspecified,laminectomy with drainage of intramedullary cyst/syrinx; to subarachnoid space,19.76
+63173,Incision,unspecified,laminectomy with drainage of intramedullary cyst/syrinx; to peritoneal or pleural space,24.31
+63185,Incision,unspecified,laminectomy with rhizotomy; 1 or 2 segments,16.49
+63190,Incision,unspecified,laminectomy with rhizotomy; more than 2 segments,18.89
+63191,Incision,unspecified,laminectomy with section of spinal accessory nerve,18.92
+63194,Incision,Cervical,"laminectomy with cordotomy, with section of 1 spinothalamic tract, 1 stage; cervical",22.1
+63195,Incision,Thoracic,"laminectomy with cordotomy, with section of 1 spinothalamic tract, 1 stage; thoracic",21.64
+63196,Incision,Cervical,"laminectomy with cordotomy, with section of both spinothalamic tracts, 1 stage; cervical",25.27
+63197,Incision,Thoracic,"laminectomy with cordotomy, with section of both spinothalamic tracts, 1 stage; thoracic",24.08
+63198,Incision,Cervical,"laminectomy with cordotomy with section of both spinothalamic tracts, 2 stages within 14 days; cervical",29.9
+63199,Incision,Thoracic,"laminectomy with cordotomy with section of both spinothalamic tracts, 2 stages within 14 days; thoracic",31.47
+63200,Incision,Lumbar,"laminectomy, with release of tethered spinal cord, lumbar",21.44
+63250,Incision,Cervical,laminectomy for excision or occlusion of arteriovenous malformation of spinal cord; cervical,43.86
+63251,Incision,Thoracic,laminectomy for excision or occlusion of arteriovenous malformation of spinal cord; thoracic,44.64
+63252,Incision,Lumbar,laminectomy for excision or occlusion of arteriovenous malformation of spinal cord; thoracolumbar,44.63
+63265,Incision,Cervical,"laminectomy for excision or evacuation of intraspinal lesion other than neoplasm, extradural; cervical",23.82
+63266,Incision,Thoracic,"laminectomy for excision or evacuation of intraspinal lesion other than neoplasm, extradural; thoracic",24.68
+63267,Incision,Lumbar,"laminectomy for excision or evacuation of intraspinal lesion other than neoplasm, extradural; lumbar",19.45
+63268,Incision,Sacral,"laminectomy for excision or evacuation of intraspinal lesion other than neoplasm, extradural; sacral",20.02
+63270,Incision,Cervical,"laminectomy for excision of intraspinal lesion other than neoplasm, intradural; cervical",29.8
+63271,Incision,Thoracic,"laminectomy for excision of intraspinal lesion other than neoplasm, intradural; thoracic",29.92
+63272,Incision,Lumbar,"laminectomy for excision of intraspinal lesion other than neoplasm, intradural; lumbar",27.5
+63273,Incision,Sacral,"laminectomy for excision of intraspinal lesion other than neoplasm, intradural; sacral",26.47
+63275,Incision,Cervical,"laminectomy for biopsy/excision of intraspinal neoplasm; extradural, cervical",25.86
+63276,Incision,Thoracic,"laminectomy for biopsy/excision of intraspinal neoplasm; extradural, thoracic",25.69
+63277,Incision,Lumbar,"laminectomy for biopsy/excision of intraspinal neoplasm; extradural, lumbar",22.39
+63278,Incision,Sacral,"laminectomy for biopsy/excision of intraspinal neoplasm; extradural, sacral",22.12
+63280,Incision,Cervical,"laminectomy for biopsy/excision of intra-spinal neoplasm; intradural, extramedullary, cervical",30.29
+63281,Incision,Thoracic,"laminectomy for biopsy/excision of intra-spinal neoplasm; intradural, extramedullary, thoracic",29.99
+63282,Incision,Lumbar,"laminectomy for biopsy/excision of intra-spinal neoplasm; intradural, extramedullary, lumbar",28.15
+63283,Incision,Sacral,"laminectomy for biopsy/excision of intraspi-spinal oplasm; intradural, sacral",26.76
+63285,Incision,Cervical,"laminectomy for biopsy/excision of intra-spinal neoplasm; intradural, intramedullary, cervical",38.05
+63286,Incision,Thoracic,"laminectomy for biopsy/excision of intra-spinal neoplasm; intradural, intramedullary, thoracic",37.62
+63287,Incision,Lumbar,"laminectomy for biopsy/excision of intra-spinal neoplasm; intradural, intramedullary, thoracolumbar",40.08
+63290,Incision,unspecified,"laminectomy for biopsy/excision of intraspi-spinal neoplasm; combined extradural-intradural lesion, any level",40.82
+63300,"Excision, Anterior or Anterolateral Approach, Intraspinal Lesion",Cervical,"vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single segment; extradural, cervical",26.8
+63301,"Excision, Anterior or Anterolateral Approach, Intraspinal Lesion",Thoracic,"vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single segment; extradural, thoracic by transthoracic approach",31.57
+63302,"Excision, Anterior or Anterolateral Approach, Intraspinal Lesion",Thoracic,"vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single segment; extradural, thoracic by thoracolumbar approach",31.15
+63303,"Excision, Anterior or Anterolateral Approach, Intraspinal Lesion",Lumbar,"vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single segment; extradural, lumbar or sacral by transperitoneal or retroperitoneal approach",33.55
+63304,"Excision, Anterior or Anterolateral Approach, Intraspinal Lesion",Cervical,"vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single segment; intradural, cervical",33.85
+63305,"Excision, Anterior or Anterolateral Approach, Intraspinal Lesion",Thoracic,"vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single segment; intradural, thoracic by transthoracic approach",36.24
+63306,"Excision, Anterior or Anterolateral Approach, Intraspinal Lesion",Thoracic,"vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single segment; intradural, thoracic by thoracolumbar approach",35.55
+63307,"Excision, Anterior or Anterolateral Approach, Intraspinal Lesion",Lumbar,"vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single segment; intradural, lumbar or sacral by transperitoneal or retroperitoneal approach",34.96
+63600,Stereotaxis,unspecified,"creation of lesion of spinal cord by stereotactic method, percutaneous, any modality (including stimulation and/or recording)",15.12
+63610,Stereotaxis,unspecified,"stereotactic stimulation of spinal cord, percutaneous, separate procedure not followed by other surgery",8.72
+63620,Stereotactic Radiosurgery (Spinal),unspecified,"stereotactic radiosurgery (particle beam, gamma ray, or linear accelerator); 1 spinal lesion",15.6
+63650,Stereotactic Radiosurgery (Spinal),unspecified,"percutaneous implantation of neurostimulator electrode array, epidural",7.15
+63655,Stereotactic Radiosurgery (Spinal),unspecified,"laminectomy for implantation of neurostimulator electrodes, plate/paddle, epidural",10.92
+63661,Stereotactic Radiosurgery (Spinal),unspecified,"removal of spinal neurostimulator electrode percutaneous array(s), including fluoroscopy, when performed",5.08
+63662,Stereotactic Radiosurgery (Spinal),unspecified,"removal of spinal neurostimulator electrode plate/paddle(s) placed via laminotomy or laminectomy, including fluoroscopy, when performed",11
+63663,Stereotactic Radiosurgery (Spinal),unspecified,"revision including replacement, when performed, of spinal neurostimulator electrode percutaneous array(s), including fluoroscopy, when performed",7.75
+63664,Stereotactic Radiosurgery (Spinal),unspecified,"revision including replacement, when performed, of spinal neurostimulator electrode plate/paddle(s) placed via laminotomy or laminectomy, including fluoroscopy, when performed",11.52
+63685,Stereotactic Radiosurgery (Spinal),unspecified,"insertion or replacement of spinal neurostimulator pulse generator or receiver, direct or inductive coupling",5.19
+63688,Stereotactic Radiosurgery (Spinal),unspecified,revision or removal of implanted spinal neurostimulator pulse generator or receiver,5.3
+63700,Repair,unspecified,repair of meningocele; less than 5 cm diameter,17.47
+63702,Repair,unspecified,repair of meningocele; larger than 5 cm diameter,19.41
+63704,Repair,unspecified,repair of myelomeningocele; less than 5 cm diameter,22.43
+63706,Repair,unspecified,repair of myelomeningocele; larger than 5 cm diameter,25.35
+63707,Repair,unspecified,"repair of dural/cerebrospinal fluid leak, not requiring laminectomy",12.65
+63709,Repair,unspecified,"repair of dural/cerebrospinal fluid leak or pseudomeningocele, with laminectomy",15.65
+63710,Repair,unspecified,"dural graft, spinal",15.4
+63740,Repair,Lumbar,"creation of shunt, lumbar, subarachnoid-peritoneal, -pleural, or other; including laminectomy",12.63
+63741,Repair,Lumbar,"creation of shunt, lumbar, subarachnoid-peritoneal, -pleural, or other; percutaneous, not requiring laminectomy",9.12
+63744,Repair,unspecified,"replacement, irrigation or revision of lumbosubarachnoid shunt",8.94
+63746,Repair,unspecified,removal of entire lumbosubarachnoid shunt system without replacement,7.33

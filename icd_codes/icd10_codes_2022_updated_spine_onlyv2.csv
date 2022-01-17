@@ -729,6 +729,182 @@ trauma,"Injury of nerve root of cervical spine, initial encounter",S14.2XXA,cerv
 trauma,"Injury of cervical sympathetic nerves, initial encounter",S14.5XXA,cervical
 trauma,"Other specified injuries of cervical trachea, initial encounter",S19.82XA,cervical
 trauma,"Unspecified injury of neck, initial encounter",S19.9XXA,cervical
+trauma,"Wedge compression fracture of unspecified thoracic vertebra, initial encounter for closed fracture",S22.000A,thoracic
+trauma,"Wedge compression fracture of unspecified thoracic vertebra, initial encounter for open fracture",S22.000B,thoracic
+trauma,"Stable burst fracture of unspecified thoracic vertebra, initial encounter for closed fracture",S22.001A,thoracic
+trauma,"Stable burst fracture of unspecified thoracic vertebra, initial encounter for open fracture",S22.001B,thoracic
+trauma,"Unstable burst fracture of unspecified thoracic vertebra, initial encounter for closed fracture",S22.002A,thoracic
+trauma,"Unstable burst fracture of unspecified thoracic vertebra, initial encounter for open fracture",S22.002B,thoracic
+trauma,"Other fracture of unspecified thoracic vertebra, initial encounter for closed fracture",S22.008A,thoracic
+trauma,"Other fracture of unspecified thoracic vertebra, initial encounter for open fracture",S22.008B,thoracic
+trauma,"Unspecified fracture of unspecified thoracic vertebra, initial encounter for closed fracture",S22.009A,thoracic
+trauma,"Unspecified fracture of unspecified thoracic vertebra, initial encounter for open fracture",S22.009B,thoracic
+trauma,"Wedge compression fracture of first thoracic vertebra, initial encounter for closed fracture",S22.010A,thoracic
+trauma,"Wedge compression fracture of first thoracic vertebra, initial encounter for open fracture",S22.010B,thoracic
+trauma,"Stable burst fracture of first thoracic vertebra, initial encounter for closed fracture",S22.011A,thoracic
+trauma,"Stable burst fracture of first thoracic vertebra, initial encounter for open fracture",S22.011B,thoracic
+trauma,"Unstable burst fracture of first thoracic vertebra, initial encounter for closed fracture",S22.012A,thoracic
+trauma,"Unstable burst fracture of first thoracic vertebra, initial encounter for open fracture",S22.012B,thoracic
+trauma,"Other fracture of first thoracic vertebra, initial encounter for closed fracture",S22.018A,thoracic
+trauma,"Other fracture of first thoracic vertebra, initial encounter for open fracture",S22.018B,thoracic
+trauma,"Unspecified fracture of first thoracic vertebra, initial encounter for closed fracture",S22.019A,thoracic
+trauma,"Unspecified fracture of first thoracic vertebra, initial encounter for open fracture",S22.019B,thoracic
+trauma,"Wedge compression fracture of second thoracic vertebra, initial encounter for closed fracture",S22.020A,thoracic
+trauma,"Wedge compression fracture of second thoracic vertebra, initial encounter for open fracture",S22.020B,thoracic
+trauma,"Stable burst fracture of second thoracic vertebra, initial encounter for closed fracture",S22.021A,thoracic
+trauma,"Stable burst fracture of second thoracic vertebra, initial encounter for open fracture",S22.021B,thoracic
+trauma,"Unstable burst fracture of second thoracic vertebra, initial encounter for closed fracture",S22.022A,thoracic
+trauma,"Unstable burst fracture of second thoracic vertebra, initial encounter for open fracture",S22.022B,thoracic
+trauma,"Other fracture of second thoracic vertebra, initial encounter for closed fracture",S22.028A,thoracic
+trauma,"Other fracture of second thoracic vertebra, initial encounter for open fracture",S22.028B,thoracic
+trauma,"Unspecified fracture of second thoracic vertebra, initial encounter for closed fracture",S22.029A,thoracic
+trauma,"Unspecified fracture of second thoracic vertebra, initial encounter for open fracture",S22.029B,thoracic
+trauma,"Wedge compression fracture of third thoracic vertebra, initial encounter for closed fracture",S22.030A,thoracic
+trauma,"Wedge compression fracture of third thoracic vertebra, initial encounter for open fracture",S22.030B,thoracic
+trauma,"Stable burst fracture of third thoracic vertebra, initial encounter for closed fracture",S22.031A,thoracic
+trauma,"Stable burst fracture of third thoracic vertebra, initial encounter for open fracture",S22.031B,thoracic
+trauma,"Unstable burst fracture of third thoracic vertebra, initial encounter for closed fracture",S22.032A,thoracic
+trauma,"Unstable burst fracture of third thoracic vertebra, initial encounter for open fracture",S22.032B,thoracic
+trauma,"Other fracture of third thoracic vertebra, initial encounter for closed fracture",S22.038A,thoracic
+trauma,"Other fracture of third thoracic vertebra, initial encounter for open fracture",S22.038B,thoracic
+trauma,"Unspecified fracture of third thoracic vertebra, initial encounter for closed fracture",S22.039A,thoracic
+trauma,"Unspecified fracture of third thoracic vertebra, initial encounter for open fracture",S22.039B,thoracic
+trauma,"Wedge compression fracture of fourth thoracic vertebra, initial encounter for closed fracture",S22.040A,thoracic
+trauma,"Wedge compression fracture of fourth thoracic vertebra, initial encounter for open fracture",S22.040B,thoracic
+trauma,"Stable burst fracture of fourth thoracic vertebra, initial encounter for closed fracture",S22.041A,thoracic
+trauma,"Stable burst fracture of fourth thoracic vertebra, initial encounter for open fracture",S22.041B,thoracic
+trauma,"Unstable burst fracture of fourth thoracic vertebra, initial encounter for closed fracture",S22.042A,thoracic
+trauma,"Unstable burst fracture of fourth thoracic vertebra, initial encounter for open fracture",S22.042B,thoracic
+trauma,"Other fracture of fourth thoracic vertebra, initial encounter for closed fracture",S22.048A,thoracic
+trauma,"Other fracture of fourth thoracic vertebra, initial encounter for open fracture",S22.048B,thoracic
+trauma,"Unspecified fracture of fourth thoracic vertebra, initial encounter for closed fracture",S22.049A,thoracic
+trauma,"Unspecified fracture of fourth thoracic vertebra, initial encounter for open fracture",S22.049B,thoracic
+trauma,"Wedge compression fracture of T5-T6 vertebra, initial encounter for closed fracture",S22.050A,unspecified
+trauma,"Wedge compression fracture of T5-T6 vertebra, initial encounter for open fracture",S22.050B,unspecified
+trauma,"Stable burst fracture of T5-T6 vertebra, initial encounter for closed fracture",S22.051A,unspecified
+trauma,"Stable burst fracture of T5-T6 vertebra, initial encounter for open fracture",S22.051B,unspecified
+trauma,"Unstable burst fracture of T5-T6 vertebra, initial encounter for closed fracture",S22.052A,unspecified
+trauma,"Unstable burst fracture of T5-T6 vertebra, initial encounter for open fracture",S22.052B,unspecified
+trauma,"Other fracture of T5-T6 vertebra, initial encounter for closed fracture",S22.058A,unspecified
+trauma,"Other fracture of T5-T6 vertebra, initial encounter for open fracture",S22.058B,unspecified
+trauma,"Unspecified fracture of T5-T6 vertebra, initial encounter for closed fracture",S22.059A,unspecified
+trauma,"Unspecified fracture of T5-T6 vertebra, initial encounter for open fracture",S22.059B,unspecified
+trauma,"Wedge compression fracture of T7-T8 vertebra, initial encounter for closed fracture",S22.060A,unspecified
+trauma,"Wedge compression fracture of T7-T8 vertebra, initial encounter for open fracture",S22.060B,unspecified
+trauma,"Stable burst fracture of T7-T8 vertebra, initial encounter for closed fracture",S22.061A,unspecified
+trauma,"Stable burst fracture of T7-T8 vertebra, initial encounter for open fracture",S22.061B,unspecified
+trauma,"Unstable burst fracture of T7-T8 vertebra, initial encounter for closed fracture",S22.062A,unspecified
+trauma,"Unstable burst fracture of T7-T8 vertebra, initial encounter for open fracture",S22.062B,unspecified
+trauma,"Other fracture of T7-T8 thoracic vertebra, initial encounter for closed fracture",S22.068A,thoracic
+trauma,"Other fracture of T7-T8 thoracic vertebra, initial encounter for open fracture",S22.068B,thoracic
+trauma,"Unspecified fracture of T7-T8 vertebra, initial encounter for closed fracture",S22.069A,unspecified
+trauma,"Unspecified fracture of T7-T8 vertebra, initial encounter for open fracture",S22.069B,unspecified
+trauma,"Wedge compression fracture of T9-T10 vertebra, initial encounter for closed fracture",S22.070A,unspecified
+trauma,"Wedge compression fracture of T9-T10 vertebra, initial encounter for open fracture",S22.070B,unspecified
+trauma,"Stable burst fracture of T9-T10 vertebra, initial encounter for closed fracture",S22.071A,unspecified
+trauma,"Stable burst fracture of T9-T10 vertebra, initial encounter for open fracture",S22.071B,unspecified
+trauma,"Unstable burst fracture of T9-T10 vertebra, initial encounter for closed fracture",S22.072A,unspecified
+trauma,"Unstable burst fracture of T9-T10 vertebra, initial encounter for open fracture",S22.072B,unspecified
+trauma,"Other fracture of T9-T10 vertebra, initial encounter for closed fracture",S22.078A,unspecified
+trauma,"Other fracture of T9-T10 vertebra, initial encounter for open fracture",S22.078B,unspecified
+trauma,"Unspecified fracture of T9-T10 vertebra, initial encounter for closed fracture",S22.079A,unspecified
+trauma,"Unspecified fracture of T9-T10 vertebra, initial encounter for open fracture",S22.079B,unspecified
+trauma,"Wedge compression fracture of T11-T12 vertebra, initial encounter for closed fracture",S22.080A,unspecified
+trauma,"Wedge compression fracture of T11-T12 vertebra, initial encounter for open fracture",S22.080B,unspecified
+trauma,"Stable burst fracture of T11-T12 vertebra, initial encounter for closed fracture",S22.081A,unspecified
+trauma,"Stable burst fracture of T11-T12 vertebra, initial encounter for open fracture",S22.081B,unspecified
+trauma,"Unstable burst fracture of T11-T12 vertebra, initial encounter for closed fracture",S22.082A,unspecified
+trauma,"Unstable burst fracture of T11-T12 vertebra, initial encounter for open fracture",S22.082B,unspecified
+trauma,"Other fracture of T11-T12 vertebra, initial encounter for closed fracture",S22.088A,unspecified
+trauma,"Other fracture of T11-T12 vertebra, initial encounter for open fracture",S22.088B,unspecified
+trauma,"Unspecified fracture of T11-T12 vertebra, initial encounter for closed fracture",S22.089A,unspecified
+trauma,"Unspecified fracture of T11-T12 vertebra, initial encounter for open fracture",S22.089B,unspecified
+trauma,"Unspecified fracture of sternum, initial encounter for closed fracture",S22.20XA,unspecified
+trauma,"Unspecified fracture of sternum, initial encounter for open fracture",S22.20XB,unspecified
+trauma,"Fracture of manubrium, initial encounter for closed fracture",S22.21XA,unspecified
+trauma,"Fracture of manubrium, initial encounter for open fracture",S22.21XB,unspecified
+trauma,"Fracture of body of sternum, initial encounter for closed fracture",S22.22XA,unspecified
+trauma,"Fracture of body of sternum, initial encounter for open fracture",S22.22XB,unspecified
+trauma,"Sternal manubrial dissociation, initial encounter for closed fracture",S22.23XA,unspecified
+trauma,"Sternal manubrial dissociation, initial encounter for open fracture",S22.23XB,unspecified
+trauma,"Fracture of xiphoid process, initial encounter for closed fracture",S22.24XA,unspecified
+trauma,"Fracture of xiphoid process, initial encounter for open fracture",S22.24XB,unspecified
+trauma,"Fracture of one rib, right side, initial encounter for closed fracture",S22.31XA,unspecified
+trauma,"Fracture of one rib, right side, initial encounter for open fracture",S22.31XB,unspecified
+trauma,"Fracture of one rib, left side, initial encounter for closed fracture",S22.32XA,unspecified
+trauma,"Fracture of one rib, left side, initial encounter for open fracture",S22.32XB,unspecified
+trauma,"Fracture of one rib, unspecified side, initial encounter for closed fracture",S22.39XA,unspecified
+trauma,"Fracture of one rib, unspecified side, initial encounter for open fracture",S22.39XB,unspecified
+trauma,"Multiple fractures of ribs, right side, initial encounter for closed fracture",S22.41XA,unspecified
+trauma,"Multiple fractures of ribs, right side, initial encounter for open fracture",S22.41XB,unspecified
+trauma,"Multiple fractures of ribs, left side, initial encounter for closed fracture",S22.42XA,unspecified
+trauma,"Multiple fractures of ribs, left side, initial encounter for open fracture",S22.42XB,unspecified
+trauma,"Multiple fractures of ribs, bilateral, initial encounter for closed fracture",S22.43XA,unspecified
+trauma,"Multiple fractures of ribs, bilateral, initial encounter for open fracture",S22.43XB,unspecified
+trauma,"Multiple fractures of ribs, unspecified side, initial encounter for closed fracture",S22.49XA,unspecified
+trauma,"Multiple fractures of ribs, unspecified side, initial encounter for open fracture",S22.49XB,unspecified
+trauma,"Flail chest, initial encounter for closed fracture",S22.5XXA,unspecified
+trauma,"Flail chest, initial encounter for open fracture",S22.5XXB,unspecified
+trauma,"Fracture of bony thorax, part unspecified, initial encounter for closed fracture",S22.9XXA,unspecified
+trauma,"Fracture of bony thorax, part unspecified, initial encounter for open fracture",S22.9XXB,unspecified
+trauma,"Traumatic rupture of thoracic intervertebral disc, initial encounter",S23.0XXA,thoracic
+trauma,"Subluxation of unspecified thoracic vertebra, initial encounter",S23.100A,thoracic
+trauma,"Dislocation of unspecified thoracic vertebra, initial encounter",S23.101A,thoracic
+trauma,"Subluxation of T1/T2 thoracic vertebra, initial encounter",S23.110A,thoracic
+trauma,"Dislocation of T1/T2 thoracic vertebra, initial encounter",S23.111A,thoracic
+trauma,"Subluxation of T2/T3 thoracic vertebra, initial encounter",S23.120A,thoracic
+trauma,"Dislocation of T2/T3 thoracic vertebra, initial encounter",S23.121A,thoracic
+trauma,"Subluxation of T3/T4 thoracic vertebra, initial encounter",S23.122A,thoracic
+trauma,"Dislocation of T3/T4 thoracic vertebra, initial encounter",S23.123A,thoracic
+trauma,"Subluxation of T4/T5 thoracic vertebra, initial encounter",S23.130A,thoracic
+trauma,"Dislocation of T4/T5 thoracic vertebra, initial encounter",S23.131A,thoracic
+trauma,"Subluxation of T5/T6 thoracic vertebra, initial encounter",S23.132A,thoracic
+trauma,"Dislocation of T5/T6 thoracic vertebra, initial encounter",S23.133A,thoracic
+trauma,"Subluxation of T6/T7 thoracic vertebra, initial encounter",S23.140A,thoracic
+trauma,"Dislocation of T6/T7 thoracic vertebra, initial encounter",S23.141A,thoracic
+trauma,"Subluxation of T7/T8 thoracic vertebra, initial encounter",S23.142A,thoracic
+trauma,"Dislocation of T7/T8 thoracic vertebra, initial encounter",S23.143A,thoracic
+trauma,"Subluxation of T8/T9 thoracic vertebra, initial encounter",S23.150A,thoracic
+trauma,"Dislocation of T8/T9 thoracic vertebra, initial encounter",S23.151A,thoracic
+trauma,"Subluxation of T9/T10 thoracic vertebra, initial encounter",S23.152A,thoracic
+trauma,"Dislocation of T9/T10 thoracic vertebra, initial encounter",S23.153A,thoracic
+trauma,"Subluxation of T10/T11 thoracic vertebra, initial encounter",S23.160A,thoracic
+trauma,"Dislocation of T10/T11 thoracic vertebra, initial encounter",S23.161A,thoracic
+trauma,"Subluxation of T11/T12 thoracic vertebra, initial encounter",S23.162A,thoracic
+trauma,"Dislocation of T11/T12 thoracic vertebra, initial encounter",S23.163A,thoracic
+trauma,"Subluxation of T12/L1 thoracic vertebra, initial encounter",S23.170A,thoracic
+trauma,"Dislocation of T12/L1 thoracic vertebra, initial encounter",S23.171A,thoracic
+trauma,"Dislocation of unspecified part of thorax, initial encounter",S23.20XA,unspecified
+trauma,"Dislocation of other parts of thorax, initial encounter",S23.29XA,unspecified
+trauma,"Sprain of ligaments of thoracic spine, initial encounter",S23.3XXA,thoracic
+trauma,"Concussion and edema of thoracic spinal cord, initial encounter",S24.0XXA,thoracic
+trauma,"Unspecified injury at T1 level of thoracic spinal cord, initial encounter",S24.101A,thoracic
+trauma,"Unspecified injury at T2-T6 level of thoracic spinal cord, initial encounter",S24.102A,thoracic
+trauma,"Unspecified injury at T7-T10 level of thoracic spinal cord, initial encounter",S24.103A,thoracic
+trauma,"Unspecified injury at T11-T12 level of thoracic spinal cord, initial encounter",S24.104A,thoracic
+trauma,"Unspecified injury at unspecified level of thoracic spinal cord, initial encounter",S24.109A,thoracic
+trauma,"Complete lesion at T1 level of thoracic spinal cord, initial encounter",S24.111A,thoracic
+trauma,"Complete lesion at T2-T6 level of thoracic spinal cord, initial encounter",S24.112A,thoracic
+trauma,"Complete lesion at T7-T10 level of thoracic spinal cord, initial encounter",S24.113A,thoracic
+trauma,"Complete lesion at T11-T12 level of thoracic spinal cord, initial encounter",S24.114A,thoracic
+trauma,"Complete lesion at unspecified level of thoracic spinal cord, initial encounter",S24.119A,thoracic
+trauma,"Anterior cord syndrome at T1 level of thoracic spinal cord, initial encounter",S24.131A,thoracic
+trauma,"Anterior cord syndrome at T2-T6 level of thoracic spinal cord, initial encounter",S24.132A,thoracic
+trauma,"Anterior cord syndrome at T7-T10 level of thoracic spinal cord, initial encounter",S24.133A,thoracic
+trauma,"Anterior cord syndrome at T11-T12 level of thoracic spinal cord, initial encounter",S24.134A,thoracic
+trauma,"Anterior cord syndrome at unspecified level of thoracic spinal cord, initial encounter",S24.139A,thoracic
+trauma,"Brown-Sequard syndrome at T1 level of thoracic spinal cord, initial encounter",S24.141A,thoracic
+trauma,"Brown-Sequard syndrome at T2-T6 level of thoracic spinal cord, initial encounter",S24.142A,thoracic
+trauma,"Brown-Sequard syndrome at T7-T10 level of thoracic spinal cord, initial encounter",S24.143A,thoracic
+trauma,"Brown-Sequard syndrome at T11-T12 level of thoracic spinal cord, initial encounter",S24.144A,thoracic
+trauma,"Brown-Sequard syndrome at unspecified level of thoracic spinal cord, initial encounter",S24.149A,thoracic
+trauma,"Other incomplete lesion at T1 level of thoracic spinal cord, initial encounter",S24.151A,thoracic
+trauma,"Other incomplete lesion at T2-T6 level of thoracic spinal cord, initial encounter",S24.152A,thoracic
+trauma,"Other incomplete lesion at T7-T10 level of thoracic spinal cord, initial encounter",S24.153A,thoracic
+trauma,"Other incomplete lesion at T11-T12 level of thoracic spinal cord, initial encounter",S24.154A,thoracic
+trauma,"Other incomplete lesion at unspecified level of thoracic spinal cord, initial encounter",S24.159A,thoracic
+trauma,"Injury of nerve root of thoracic spine, initial encounter",S24.2XXA,thoracic
+trauma,"Injury of thoracic sympathetic nervous system, initial encounter",S24.4XXA,thoracic
 trauma,"Wedge compression fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.000A,lumbar
 trauma,"Wedge compression fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.000B,lumbar
 trauma,"Stable burst fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.001A,lumbar

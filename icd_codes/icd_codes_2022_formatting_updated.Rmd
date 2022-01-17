@@ -35,9 +35,9 @@ library(icd.data)
 source("short_shiny_functions.R", local = TRUE)
 source("make_geoms_functions.R", local = TRUE)
 source("build_spine_objects_functions.R", local = TRUE)
-source("load_coordinates_build_objects.R", local = TRUE)
-source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
-source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
+# source("load_coordinates_build_objects.R", local = TRUE)
+# source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
+# source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 # source("no_implants_added_op_note.R", local = TRUE)
 # source("screw_size_type_inputs.R", local = TRUE)
 # source("modal_functions.R", local = TRUE)
@@ -127,7 +127,15 @@ icd10cm_codes_2022_df <- read_delim("icd_codes/icd10cm_codes_2022_text.txt",
   mutate(dx_number = row_number())
 
 
-icd10cm_codes_2022_df
+complications_df <- icd10cm_codes_2022_df %>%
+  filter(str_detect(code, "T84|T81")) %>%
+  filter(str_detect(diagnosis, "vert|spin|Infection following a procedure")) %>%
+  filter(str_detect(diagnosis, "subsequent|sequela", negate = TRUE)) %>%
+  mutate(icd_10_code = str_replace_all(code, "T81", "T81.")) %>%
+  mutate(icd_10_code = str_replace_all(icd_10_code, "T84", "T84."))
+
+complications_df
+
 ```
 
 
@@ -317,9 +325,9 @@ final_spine_icd_codes_df_list$msk <- icd_msk_chapter_final_df
 ```{r}
 icd_codes_chapters_of_interest_initial_only_df 
 
-icd_codes_chapters_of_interest_initial_only_df %>%
-  select()(chapter_number, chapter) %>%
-  distinct
+# icd_codes_chapters_of_interest_initial_only_df %>%
+#   select()(chapter_number, chapter) %>%
+#   distinct
 
 key_spine_words_to_keep_string <- "vertebra|other specified site|site unspecified|thoracic region|spine|thoracolumbar region|cervical region|lumbar region|lumbosacral region|sacral and sacrococcygeal region|occipito-atlanto-axial region|multiple sites in spine|not elsewhere classified|level|intervertebral disc disorder|neck and back|atlantoaxial|cervicalgia|vertebrogenic|low back|dorsalgia|pseudarthrosis|kyphosis|lordosis|scoliosis|deformity of neck|sacral region"
   
@@ -439,7 +447,7 @@ icd_codes_chapters_of_interest_initial_only_df %>%
 icd_codes_chapters_of_interest_initial_only_df %>%
   filter(chapter_number == 19) 
 
-subchapters_to_examine <- "S10|S11|S12|S13|S14|S15|S16|S17|S18|S19|S30|S31|S32|S33|S34|S35|S36|S37|S38|S39"
+subchapters_to_examine <- "S10|S11|S12|S13|S14|S15|S16|S17|S18|S19|S22|S23|S24|S30|S31|S32|S33|S34|S35|S36|S37|S38|S39"
 
 key_words_to_keep <- "cervical|lumbar|thoracic|sacral|spina|cauda equina|scoliosis|lordosis|fracture|dislocation|unspecified injury of neck"
 
@@ -455,7 +463,13 @@ icd_trauma_chapter_final_df <- icd_codes_chapters_of_interest_initial_only_df %>
 
 final_spine_icd_codes_df_list$icd_trauma_chapter_final_df <- icd_trauma_chapter_final_df
 
+icd_trauma_chapter_final_df
 ```
+
+```{r}
+complications_df
+```
+
 
 ```{r}
 
@@ -506,8 +520,12 @@ spine_dx_codes_and_region_only_df
 
 write_csv(x = spine_dx_codes_and_region_only_df, file = "icd10_codes_2022_updated_spine_onlyv2.csv", na = "")
 
-spine_dx_codes_and_region_only_df 
-getwd()
+
+spine_dx_codes_and_region_only_df %>%
+  filter(section == "trauma") %>%
+  filter(spine_region == "thoracic")
+
+
 
 ```
 
@@ -679,4 +697,35 @@ spine_codes_df %>%
 
 
 ```
+
+
+```{r}
+spine_icd_ordered_df <- spine_codes_df %>%
+  filter(str_detect(string = str_to_lower(diagnosis), pattern = "abdominal wall|breast|unspecified eye|hair|nails|aortic dilation|ocular|fractures of rib|fracture of one rib|sternum|manubrium|xiphoid|sternal manubrial", negate = TRUE)) %>%
+  mutate(spine_region = if_else(str_detect(diagnosis, "T1|T2|T3|T4|T5|T6|T7|T8|T9|T10|T11|T12"), "thoracic", spine_region)) %>%
+  mutate(spine_region = if_else(str_detect(diagnosis, "C7/T1"), "cervicothoracic", spine_region)) 
+
+spine_icd_ordered_df %>%
+  filter(section != "other_neuro_conditions") %>%
+  filter(spine_region == "unspecified")
+
+spine_icd_ordered_df %>%
+  select(spine_region) %>%
+  distinct()
+
+# write_csv(x = spine_icd_ordered_df, file = "icd10_codes_2022_updated_dec_21.csv", na = "")
+
+```
+
+```{r}
+complications_df %>%
+  mutate(icd_10_code = str_replace_all(code, "T84", "T84.")) %>%
+  filter(str_detect(diagnosis, "subsequent", negate = TRUE))
+```
+
+
+```{r}
+spine_codes_df
+```
+
 

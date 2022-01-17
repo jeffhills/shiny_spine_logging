@@ -1,6 +1,3 @@
-# spine_icd10_codes_df <- read_csv(file = "spine_icd_codes.csv")%>%
-#   mutate(spine_category = if_else(spine_category == "Deformity" & str_detect(diagnosis, pattern = "Infant|Juveni|Adolescent"), "Pediatric Deformity", spine_category))
-
 levels_vector <- c('Occiput', 'O-C1', 'C1', 'C1-C2', 'C2', 'C2-C3', 'C3', 'C3-C4', 'C4', 'C4-C5', 'C5', 'C5-C6', 'C6', 'C6-C7', 'C7', 'C7-T1', 'T1', 'T1-T2', 'T2', 'T2-T3', 'T3', 'T3-T4', 'T4', 'T4-T5', 'T5', 'T5-T6', 'T6', 'T6-T7', 'T7', 'T7-T8', 'T8', 'T8-T9', 'T9', 'T9-T10', 'T10', 'T10-T11', 'T11', 'T11-T12', 'T12', 'T12-L1', 'L1', 'L1-L2', 'L2', 'L2-L3', 'L3', 'L3-L4', 'L4', 'L4-L5', 'L5', 'L5-S1', 'S1', 'Sacro-iliac', 'Iliac', 'S2AI')
 
 vertebral_numbers_vector <- c(0,0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25, 25.5, 26, 27)
@@ -508,6 +505,7 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                                              switch_input_off_label = "No",
                                              checkboxes_inline = FALSE,
                                              button_size = "sm",
+                                             status_color = "success",
                                              justified_radio_buttons = FALSE,
                                              return_as_full_table = TRUE,
                                              text_align = "left", 
@@ -549,6 +547,18 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                    tags$td(width = paste0(right_column_percent_width, "%"), textInput(inputId = input_id, label = NULL, value = initial_value_selected, placeholder = text_placeholder))
     )  
   }
+  
+  if(input_type == "textAreaInput"){
+    row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   tags$td(width = paste0(right_column_percent_width, "%"), textAreaInput(inputId = input_id, label = NULL, value = initial_value_selected, placeholder = text_placeholder)) #textInput(inputId = input_id, label = NULL, value = initial_value_selected, placeholder = text_placeholder))
+    )  
+  }
+  
+
   if(input_type == "picker"){
     row <- tags$tr(width = "100%",
                    if(required_option == TRUE){
@@ -621,7 +631,7 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                      tags$td(width = "3%", tags$div(style = required_label_style, "***"))
                    },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
-                   tags$td(width = paste0(right_column_percent_width, "%"), awesomeRadio(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, inline = checkboxes_inline, status = "success"))
+                   tags$td(width = paste0(right_column_percent_width, "%"), awesomeRadio(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, inline = checkboxes_inline, status = status_color))
     )  
   }
   if(input_type == "date"){
