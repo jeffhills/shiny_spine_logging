@@ -1,21 +1,3 @@
-# ### TO TEST MODALS:
-# shinyApp(
-#   ui = basicPage(
-#     column(6,
-#            tableOutput(outputId = "table"))
-#   ),
-#   
-#   server = function(input, output) {
-#     
-#     showModal(
-#       addition_surgical_details_modal_box_function()
-#     )
-#     
-#     
-#   }
-# )
-
-
 ################################################    INITIAL STARTUP MODAL ######################################
 ################################################    INITIAL STARTUP MODAL ######################################
 ################################################    INITIAL STARTUP MODAL ######################################
@@ -588,7 +570,7 @@ addition_surgical_details_modal_box_function <-
             left_column_percent_width = 30,
             left_column_label = "Surgical Indications:",
             font_size = row_label_font_size,
-            input_type = "text",
+            input_type = "textAreaInput",
             input_id = "indications",
             initial_value_selected = indications
           ),
@@ -625,7 +607,7 @@ addition_surgical_details_modal_box_function <-
             font_size = row_label_font_size,
             input_type = "checkbox",
             input_id = "neuromonitoring",
-            choices_vector = c("EMG", "SSEP", "tc MEP", "DNEP (Cord Stimulation)", "H reflex"),
+            choices_vector = c("EMG", "SSEP", "tc MEP", "DNEP (Cord Stimulation)", "H reflex", "None"),
             checkboxes_inline = TRUE,
             initial_value_selected = neuromonitoring
           ),
@@ -704,6 +686,7 @@ addition_surgical_details_modal_box_function <-
 ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
 addition_surgical_details_modal_box_2_function <-
   function(required_options_missing = FALSE,
+           procedure_approach = "",
            row_label_font_size = 16,
            fade_appearance = TRUE,
            surgical_findings = "",
@@ -730,7 +713,17 @@ addition_surgical_details_modal_box_2_function <-
            additional_procedures_other = "",
            additional_end_procedure_details = NULL,
            closure_details = NULL,
-           dressing_details = NULL) {
+           dressing_details = NULL, 
+           postop_dispo = c(""),
+           postop_abx = c(""),
+           postop_imaging = c(""),
+           postop_pain = c(""),
+           postop_activity = c(""),
+           postop_brace = c(""),
+           postop_diet = c(""),
+           postop_dvt_ppx = c(""),
+           postop_drains_dressing = c(""),
+           postop_followup = c("")) {
     additional_details_modal <-
       modalDialog(
         size = "l",
@@ -751,24 +744,64 @@ addition_surgical_details_modal_box_2_function <-
           if (required_options_missing == TRUE) {
             div(style = "font-size:22px; font-weight:bold; font-style:italic; text-align:center; color:red", "*** Please Make/Confirm Selections for Required Fields***")
           },
-          jh_make_shiny_table_row_function(
-            left_column_percent_width = 20,
-            left_column_label = "Head Positioning:",
-            font_size = row_label_font_size,
-            input_type = "radioGroupButtons",
-            input_id = "head_positioning",
-            required_option = TRUE,
-            button_size = "xs",
-            checkboxes_inline = TRUE,
-            choices_vector = c(
-              "Supine/Lateral",
-              "Proneview Faceplate",
-              "Cranial Tongs",
-              "Halo",
-              "Mayfield"
-            ),
-            initial_value_selected = head_positioning
-          ),
+          if(procedure_approach == "anterior"){
+            jh_make_shiny_table_row_function(
+              left_column_percent_width = 20,
+              left_column_label = "Head Positioning:",
+              font_size = row_label_font_size,
+              input_type = "radioGroupButtons",
+              input_id = "head_positioning",
+              required_option = TRUE,
+              button_size = "xs",
+              checkboxes_inline = TRUE,
+              choices_vector = c(
+                "Supine/Lateral",
+                "Cranial Tongs",
+                "Halo",
+                "Mayfield"
+              ),
+              initial_value_selected = head_positioning
+            )
+          },
+          if(procedure_approach == "posterior"){
+            jh_make_shiny_table_row_function(
+              left_column_percent_width = 20,
+              left_column_label = "Head Positioning:",
+              font_size = row_label_font_size,
+              input_type = "radioGroupButtons",
+              input_id = "head_positioning",
+              required_option = TRUE,
+              button_size = "xs",
+              checkboxes_inline = TRUE,
+              choices_vector = c(
+                "Proneview Faceplate",
+                "Cranial Tongs",
+                "Halo",
+                "Mayfield"
+              ),
+              initial_value_selected = head_positioning
+            )
+            },
+          if(procedure_approach == "combined"){
+            jh_make_shiny_table_row_function(
+              left_column_percent_width = 20,
+              left_column_label = "Head Positioning:",
+              font_size = row_label_font_size,
+              input_type = "radioGroupButtons",
+              input_id = "head_positioning",
+              required_option = TRUE,
+              button_size = "xs",
+              checkboxes_inline = TRUE,
+              choices_vector = c(
+                "Supine/Lateral",
+                "Proneview Faceplate",
+                "Cranial Tongs",
+                "Halo",
+                "Mayfield"
+              ),
+              initial_value_selected = head_positioning
+            )
+          },
           hr(),
           jh_make_shiny_table_row_function(
             left_column_percent_width = 30,
@@ -907,10 +940,12 @@ addition_surgical_details_modal_box_2_function <-
                                            left_column_label = "Complications?", 
                                            left_column_percent_width = 40,
                                            font_size = row_label_font_size, 
-                                           input_type = "radioGroupButtons", 
+                                           input_type = "awesomeRadio", 
+                                           # input_type = "radioGroupButtons", 
                                            input_id = "intraoperative_complications_yes_no", 
                                            initial_value_selected = intraoperative_complications_yes_no, 
                                            choices_vector = c("No", "Yes"), 
+                                           status_color = "danger",
                                            justified_radio_buttons = TRUE, 
                                            checkboxes_inline = TRUE, 
                                            individual_buttons = TRUE),
@@ -1000,18 +1035,50 @@ addition_surgical_details_modal_box_2_function <-
                    
             )
           ),
-          # jh_make_shiny_table_row_function(
-          #   left_column_percent_width = 60,
-          #   left_column_label = "Intraoperative Complications (including durotomy)?",
-          #   font_size = row_label_font_size,
-          #   input_type = "switch",
-          #   input_id = "intraoperative_complications_true_false",
-          #   initial_value_selected = intraoperative_complications_true_false
-          # ),
           br(),
           hr(),
           div(style = "font-size:20px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
-          uiOutput(outputId = "drains_ui"),
+          if(procedure_approach == "anterior" | procedure_approach == "combined"){
+            jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
+                                                              input_type = "awesomeRadio",
+                                                              input_id = "deep_drains_anterior", 
+                                                              left_column_percent_width = 45, 
+                                                              font_size = 16, 
+                                                              initial_value_selected = 0, 
+                                                              choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                              checkboxes_inline = TRUE, return_as_full_table = TRUE)
+            },
+          if(procedure_approach == "anterior" | procedure_approach == "combined"){
+            jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
+                                                                     input_type = "awesomeRadio",
+                                                                     input_id = "superficial_drains_anterior", 
+                                                                     left_column_percent_width = 45, 
+                                                                     font_size = 16, 
+                                                                     initial_value_selected = 0, 
+                                                                     choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                                     checkboxes_inline = TRUE, return_as_full_table = TRUE)
+          },
+          if(procedure_approach == "posterior" | procedure_approach == "combined"){
+            jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
+                                                               input_type = "awesomeRadio",
+                                                               input_id = "deep_drains_posterior", 
+                                                               left_column_percent_width = 45, 
+                                                               font_size = 16, 
+                                                               initial_value_selected = 1, 
+                                                               choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                               checkboxes_inline = TRUE, return_as_full_table = TRUE)
+            },
+          if(procedure_approach == "posterior" | procedure_approach == "combined"){
+            jh_make_shiny_table_row_function(left_column_label = "Posterior Superficial drains:", 
+                                                                      input_type = "awesomeRadio",
+                                                                      input_id = "superficial_drains_posterior", 
+                                                                      left_column_percent_width = 45, 
+                                                                      font_size = 16, 
+                                                                      initial_value_selected = 1, 
+                                                                      choices_vector = c("0", "1", "2", "3", "4", "5"), 
+                                                                      checkboxes_inline = TRUE, return_as_full_table = TRUE)
+            },
+          # uiOutput(outputId = "drains_ui"),
           hr(),
           jh_make_shiny_table_row_function(
             left_column_label = "Select any used during closure:",
@@ -1034,7 +1101,8 @@ addition_surgical_details_modal_box_2_function <-
             required_option = TRUE,
             choices_vector = c("Subcutaneous suture",
                                "Nylon",
-                               "Staples"),
+                               "Staples", 
+                               "left open"),
             initial_value_selected = closure_details,
             return_as_full_table = TRUE
           ),
@@ -1051,6 +1119,7 @@ addition_surgical_details_modal_box_2_function <-
               "Dermabond",
               "Prineo",
               "an Incisional Wound Vac",
+              "Wound Vac",
               "a water tight dressing"
             ),
             initial_value_selected = dressing_details,
@@ -1081,6 +1150,162 @@ addition_surgical_details_modal_box_2_function <-
                 initial_value_selected = additional_procedures_other,
               )
             )
+          ),
+          h2("Postop Plan:"),
+          jh_make_shiny_table_row_function(
+            left_column_label = "Dispo:",
+            font_size = row_label_font_size,
+            input_id = "postop_dispo",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "awesomeRadio",
+            choices_vector = c("discharge to home. Monitor in recovery for 4hrs for difficulty swallowing, breathing, other issues.", 
+                               "admit to floor.", 
+                               "admit to ICU.",
+                               "***"),
+            initial_value_selected = postop_dispo
+          ),
+          br(),
+          jh_make_shiny_table_row_function(
+            left_column_label = "Antibiotics:",
+            font_size = row_label_font_size,
+            input_id = "postop_abx",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "checkbox",
+            choices_vector = c("Ancef x 24hrs",
+                               "Ancef x 48hrs",
+                               "Vancomycin x 48hrs",
+                               "Ancef until drains removed",
+                               "***"),
+            initial_value_selected = postop_abx
+          ),
+          br(),
+          jh_make_shiny_table_row_function(
+            left_column_label = "Postop Imaging:",
+            font_size = row_label_font_size,
+            input_id = "postop_abx",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "checkbox",
+            choices_vector = c("please obtain upright AP/Lateral C-spine xrays prior to discharge when able to stand & after drains out",
+                               "please obtain upright AP/Lateral T-spine xrays prior to discharge when able to stand & after drains out",
+                               "please obtain upright AP/Lateral L-spine xrays prior to discharge when able to stand & after drains out",
+                               "please obtain upright AP/Lateral standing scoliosis xrays prior to discharge when able to stand & after drains out",
+                               "no postop imaging needed.",
+                               "***"),
+            initial_value_selected = postop_imaging
+          ),
+          br(),
+          jh_make_shiny_table_row_function(
+            left_column_label = "Pain Control:",
+            font_size = row_label_font_size,
+            input_id = "postop_pain",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "checkbox",
+            choices_vector = c("PCA with plan to dc on POD 1 (in addition to all other pain medication orders)", 
+                               "Oxycodone 5mg q4h, ok to give additional dose if needed", 
+                               "Oxycodone 10mg q4h, ok to give additional dose if needed",
+                               "Tylenol 1000mg q8h scheduled.", 
+                               "Tylenol 650mg q8h scheduled",
+                               "Gabapentin 100mg q8h scheduled",
+                               "Gabapentin 300mg q8h scheduled",
+                               "Toradol 15mg q8h for 48-72hrs",
+                               "Meloxicam 15mg daily",
+                               "Tizanidine 4mg q6h prn for muscle spasms (avoid in geriatric males/males w/ urinary retention)",
+                               "Cyclobenzabrine 5mg q8h prn for muscle spasms (strong anticholinergic, minimize in geriatric)",
+                               "Baclofen 10mg TID prn for muscle spasms",
+                               "Diazepam 2.5mg q8h prn for muscle spasms",
+                               "Pain team consult",
+                               "***"
+                               ),
+            initial_value_selected = postop_pain
+          ),
+          br(),
+          jh_make_shiny_table_row_function(
+            left_column_label = "Activity:",
+            font_size = row_label_font_size,
+            input_id = "postop_activity",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "checkbox",
+            choices_vector = c("PT/OT",
+                               "please mobilize out of bed minimum 3x daily", 
+                               "No bending, twisting, lifting > 10lbs",
+                               "***"),
+            initial_value_selected = c("PT/OT",
+                                       "please mobilize out of bed minimum 3x daily", 
+                                       "No bending, twisting, lifting > 10lbs")
+          ),
+          br(),
+          jh_make_shiny_table_row_function(
+            left_column_label = "Bracing:",
+            font_size = row_label_font_size,
+            input_id = "postop_brace",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "checkbox",
+            choices_vector = c("C collar at all times", 
+                               "TLSO brace while ambulating (OK to remove while in bed, sitting, or bathing",
+                               "No brace needed"),
+            initial_value_selected = postop_brace
+          ),
+          br(),
+          jh_make_shiny_table_row_function(
+            left_column_label = "Diet:",
+            font_size = row_label_font_size,
+            input_id = "postop_diet",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "checkbox",
+            choices_vector = c("OK to resume normal diet", 
+                               "Start with clear liquid diet and advance as tolerated", 
+                               "NPO until return of bowel sounds",
+                               "Senokit-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
+            initial_value_selected = postop_diet
+          ),
+          br(),
+          jh_make_shiny_table_row_function(
+            left_column_label = "DVT ppx & anticoag/antiplatelet:",
+            font_size = row_label_font_size,
+            input_id = "postop_dvt_ppx",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "checkbox",
+            choices_vector = c("SCD's while in bed",
+                               "Hold any chemical dvt ppx for minimum 72hrs",
+                               "Please do not start any chemical dvt ppx without discussion with spine team",
+                               "Please hold any anti-platelet/anti-coag for minimum 7days after surgery",
+                               "***"),
+            initial_value_selected = c("SCD's while in bed", "Hold any chemical dvt ppx for minimum 72hrs")
+          ),
+          br(),
+          jh_make_shiny_table_row_function(
+            left_column_label = "Drains & Dressing:",
+            font_size = row_label_font_size,
+            input_id = "postop_drains_dressing",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "checkbox",
+            choices_vector = c("Monitor and record drain output q12h", 
+                               "Incisional wound vac continuous therapy",
+                               "Please keep a watertight dressing in place over wound and reinforce as needed with tegaderms",
+                               "Please change surgical dressing prior to discharge from hospital",
+                               "***"),
+            initial_value_selected = postop_drains_dressing
+          ),
+          br(),
+          jh_make_shiny_table_row_function(
+            left_column_label = "Follow-up:",
+            font_size = row_label_font_size,
+            input_id = "postop_followup",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "awesomeRadio",
+            choices_vector = c("Follow-up in spine clinic in 2wks.", 
+                               "Follow-up in spine clinic in 6wks."),
+            initial_value_selected = postop_followup
           ),
         )
       )

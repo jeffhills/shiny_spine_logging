@@ -4,6 +4,7 @@
 
 op_note_procedure_performed_summary_classifier_function <- function(object){
   procedure_category <- case_when(
+    object == "incision_drainage" ~ "Incision and drainage",
     object == "vertebroplasty" ~ "Vertebroplasty",
     object == "vertebral_cement_augmentation" ~ "Vertebral body augmentation",
     object == "laminar_downgoing_hook" ~ "Posterior spinal instrumentation",
@@ -25,9 +26,11 @@ op_note_procedure_performed_summary_classifier_function <- function(object){
     object == "costovertebral_approach" ~ "Decompression using a costovertebral approach",
     object == "revision_costovertebral_approach" ~ "Reexploration and revision decompression using a costovertebral approach",
     object == "transpedicular_approach" ~ "Decompression using a transpedicular approach",
-    object == "lateral_extracavitary_approach" ~ "Decompression using a modified lateral extracavitary approach",
+    object == "lateral_extraforaminal_approach" ~ "Decompression using a lateral extraforaminal approach",
+    object == "lateral_extracavitary_approach" ~ "Arthrodesis using a modified lateral extracavitary approach",
     object == "corpectomy_extracavitary_tumor" ~ "Partial Corpectomy with decompression using a modified lateral extracavitary approach for tumor",
     object == "laminectomy_for_tumor" ~ "Laminectomy for biopsy and excision of extradural spinal tumor",
+    object == "laminectomy_for_facet_cyst" ~ "Laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)",
     object == "revision_transpedicular_approach" ~ "Reexploration and revision decompression using a transpedicular approach",
     object == "diskectomy" ~ "Decompression with diskectomy and laminotomy",
     object == "sublaminar_decompression" ~ "Decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies",
@@ -71,6 +74,7 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
   procedure_cat <- str_to_lower(procedure_cat)
   
   paragraph_type <- case_when(
+    procedure_cat == "incision and drainage" ~ "combine",
     procedure_cat == "vertebroplasty" ~ "combine",
     procedure_cat == "vertebral body augmentation" ~ "combine",
     procedure_cat == "posterior spinal instrumentation" ~ "combine",
@@ -80,10 +84,12 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
     procedure_cat == "decompression using a costovertebral approach" ~ "distinct",
     procedure_cat == "reexploration with revision decompression using a costovertebral approach" ~ "distinct",
     procedure_cat == "decompression using a transpedicular approach" ~ "distinct",
+    procedure_cat == "decompression using a lateral extraforaminal approach" ~ "distinct",
     procedure_cat == "reexploration with revision decompression using a transpedicular approach" ~ "distinct",
-    procedure_cat == "decompression using a modified lateral extracavitary approach" ~ "distinct",
+    procedure_cat == "arthrodesis using a modified lateral extracavitary approach" ~ "distinct",
     procedure_cat == "partial corpectomy with decompression using a modified lateral extracavitary approach for tumor" ~ "distinct",
     procedure_cat == "laminectomy for biopsy and excision of extradural spinal tumor" ~ "combine",
+    procedure_cat == "laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)" ~ "combine",
     procedure_cat == "decompression" ~ "combine",
     procedure_cat == "reexploration with revision decompression" ~ "combine",
     procedure_cat == 'decompression with diskectomy and laminotomy' ~ 'combine',
@@ -834,6 +840,7 @@ op_note_technique_combine_statement <- function(object, levels_side_df){
   
   
   technique_statement <- case_when(
+    object == "incision_drainage" ~ glue("The wound was inspected thoroughly and any necrotic appearing tissue was excised. Tissue samples from deep and superficial wound bed were sent for cultures. The wound bed was thoroughly irrigated and then Working layer by layer from deep to superficial, the wound was meticulously debrided. Once I felt the wound was clean and an adequate debridement had been completed, I again copiously irrigated the wound."), 
     object == "vertebroplasty" ~ glue("For vertebral body cement augmentation, a cannula was inserted into the vertebral body through the pedicle. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebroplasty was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
     object == "vertebral_cement_augmentation" ~ glue("For vertebral body cement augmentation, I first created a cavity within the vertebral body. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebral augmentation was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
     object == "laminar_downgoing_hook" ~ glue("For downgoing laminar hooks, the ligamentum flavum was removed at the site of the hook insertion. A hook was then inserted securely under the lamina {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
@@ -856,6 +863,7 @@ op_note_technique_combine_statement <- function(object, levels_side_df){
     object == 'diskectomy' ~ glue("For a diskectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. I performed a diskectomy with partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Using a high-speed burr and Kerrison rongeurs, I first performed a foraminotomy and excised the ligamentum flavum. The dural sac was identified and traversing root was protected. The annulus was then incised and the diseased disk materal was removed. Following the decompression, the canal and foramen and lateral recess were palpated to confirm an appropriate decompression had been completed."),
     object == 'laminotomy' ~ glue("For the laminotomy, the cranial and caudal laminar edges, pars, and facet joints were used as landmarks. Once I had determined the laminotomy site, I used a combination of a high-speed burr and Kerrison rongeurs to resect the bone dorsal to the nerve root. I performed a laminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Following the decompression, the foramen was palpated to confirm an adequate decompression had been completed."),
     object == 'laminectomy' ~ glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}. First, using a combination of a high-speed burr and Kerrison rongeurs, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. Following the decompression, the canal was palpated to confirm an adequate decompression had been completed."),
+    object == 'laminectomy' ~ glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} in order to excise the underlying facet cyst. First, using a combination of a high-speed burr and Kerrison rongeurs, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. This allowed exposure to the underlying facet cyst, which was fully excised. Following the decompression, the canal was palpated to confirm an adequate decompression had been completed."),
     object == 'laminectomy_for_tumor' ~ glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} in order to perform an open biopsy and excise the intraspinal extradural tumor. First, using a combination of a high-speed burr and Kerrison rongeurs, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. At this point, I encountered the extradural lesion which measured roughly {length(levels_side_df$level)*3.5}cm long by ~2-3cm wide. I obtained a biopsy of the tissue and then proceeded to excise any visible tumor in order to adequately create separation between visible tumor and the dura. Following the laminectomy and excision of the lesion, the canal was palpated to confirm an adequate decompression had been completed."),
     object == 'sublaminar_decompression' ~ glue("Using a combination of a high-speed burr and Kerrison rongeurs, I performed a partial laminectomy bilaterally at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace. First, I resected the dorsal lamina and then excised the ligamentum flavum, exposing the dura. To fully decompress the exiting and traversing nerve roots within the neural foramen and lateral recess, the medial facet was partially excised and a foraminotomy performed on the left and right at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace. Following the decompression, the canal and foramen were palpated to confirm an adequate decompression had been completed."),
     object == 'revision_diskectomy' ~ glue("For the revision diskectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. I performed a revision and reexploration with diskectomy and partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. Using a high-speed burr and Kerrison rongeurs, I performed a foraminotomy and excised the scar and ligamentum. The dural sac was identified and traversing root was protected. The annulus and disk space were identified and the diseased disk material was excised. Following the revision decompression, the canal and foramen and lateral recess were palpated to confirm an adequate decompression had been completed."),
@@ -890,7 +898,8 @@ op_note_distinct_technique_statement <- function(object, level, side, interbody_
   technique_statement <- case_when(
     object == 'transpedicular_approach' ~ glue("I then proceeded with a transpedicular approach for decompression from the {side} at {level}. Using a combination of a high-speed burr and Kerrison rongeurs, the posterior elements were resected and the {side} {level} pedicle was skeletonized and resected, to allow full decompression of the {if_else(str_starts(level, 'L'), 'cauda equina and nerve roots', 'spinal cord')} at the {level} level. Following the decompression, the canal was palpated to confirm an adequate decompression had been completed."),
     object == 'costovertebral_approach' ~ glue("I then proceeded with a costovertebral approach for decompression from the {side} at {level}. The {side} {level} rib was identified, skeletonized, and 5-6cm of the rib was resected to allow access to the dorsal vertebral body. Using a combination of a high-speed burr and Kerrison rongeurs, the posterior elements were resected and the {side} {level} pedicle was skeletonized and resected, to allow full decompression of the spinal cord at the {level} level. Following the decompression, the canal was palpated to confirm an adequate decompression had been completed."),
-    object == 'lateral_extracavitary_approach' ~ glue("I then proceeded with a modified lateral extracavitary approach from the {side} at {level}. The pedicle of {level} was identified. Using a combination of a high-speed burr and Kerrison rongeurs and osteotome, the {side} {level} inferior and {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level} superior facets were fully resected, allowing access to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} interspace. The lateral border of the disk space was identified and the dissection was carried out laterally anteriorly around the entire anterior portion of the vertebral body. This allowed safe access to the ALL and most anterior portion of the vertbral body."),
+    object == 'lateral_extraforaminal_approach' ~ glue("I then proceeded with a lateral extraforaminal approach from the {side} at {level}. The pedicle of {level} was identified. The {side} {level} inferior and {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level} superior facets were identified and the {level} pars was used as reference points. Using a combination of a high-speed burr and rongeurs, the lateral {level} pars was partially resected, and the {level} nerve root was identified and protected. This allowed access to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} interspace. The lateral border of the disk space was identified and the dissection was carried out laterally and medially until adequate exposure was obtained. The retropulsed disc fragment was identified causing the neural compression. I then proceed with excision of the disc until an adeqate decompression was completed.."),
+    object == 'lateral_extracavitary_approach' ~ glue("I then proceeded with a modified lateral extracavitary approach from the {side} at {level}. The pedicle of {level} was identified. Using a combination of a high-speed burr and Kerrison rongeurs and osteotome, the {side} {level} inferior and {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level} superior facets were fully resected, allowing access to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} interspace. The lateral border of the disk space was identified and the dissection was carried out laterally anteriorly around the entire anterior portion of the vertebral body. This allowed safe access to the ALL and most anterior portion of the vertbral body. The disc was excised and superior and inferior endplates of the interspace were prepared in order to acheive arthrodesis of the {level} interspace."),
     object == 'revision_transpedicular_approach' ~ glue("I then proceeded with a transpedicular approach for a reexploration and revision decompression from the {side} at {level}. Using a combination of a high-speed burr, currettes, and Kerrison rongeurs, the scar and posterior elements were carefully resected until I found the plane between scar and dura. The {side} {level} pedicle was skeletonized and resected, to allow full decompression of the {if_else(str_starts(level, 'L'), 'cauda equina and nerve roots', 'spinal cord')} at the {level} level. Following the revision decompression, the canal was palpated to confirm an adequate decompression had been completed."),
     object == 'revision_costovertebral_approach' ~ glue("I then proceeded with a costovertebral approach for a reexploration and revision decompression from the {side} at {level}. The {side} {level} rib was identified, skeletonized, and 5-6cm of the rib was resected to allow access to the dorsal vertebral body. Using a combination of a high-speed burr, currettes, and Kerrison rongeurs, the scar and posterior elements were carefully resected until I found the plane between scar and dura. The {side} {level} pedicle was skeletonized and resected, to allow full decompression of the spinal cord at the {level} level. Following the revision decompression, the canal was palpated to confirm an adequate decompression had been completed."),
     object == 'corpectomy_extracavitary_tumor' ~ glue("I then proceeded with a partial vertebral corpectomy using a modified lateral extracavitary approach from the {side} at {level}. The pedicle of {level} was identified. Using a combination of a high-speed burr and Kerrison rongeurs and osteotome, the {side} {level} inferior and {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level} superior facets were resected and the {level} superior and {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level} inferior facets were resected as needed to skeletonize the {level} pedicle, allowing access to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} interspace and {level} vertebral body. The lateral border of the disk space was identified and the dissection was carried out laterally and slightly anteriorly over the vertebral body. Once the posterior elements were resected and I had gained adequate exposure to the vertebral body via the extracavitary approach and the {level} nerve root could be visualized and protected, I used a combination of a burr, ronguers, osteotomes and currettes to resect any visible tumor and vertebral bone, creating a cavity in the vertebral body. Once an adequate cavity had been created, the remaining shell of the posterior vertebral body along with the PLL was impacted into the cavity, completing the decompression of the {if_else(str_detect(level, 'L'),'cauda equina and nerve roots', 'spinal cord')} and separation of visible tumor by at least 10mm. "),
@@ -1494,18 +1503,31 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   }
   
   if(length(closure > 0)){
-    closure_statements_list$superficial_closure <- paste("The subdermal layer was closed and",
-                                                         str_to_lower(glue_collapse(closure, sep = ', ', last = ' and ')),
-                                                         if_else(length(closure) == 1, "was", "were"),
-                                                         "used to close the skin layer."
-    )
+    
+    if(any(closure == "left open")){
+      closure_statements_list$superficial_closure <- paste("After the fascial layer was closed, the subdermal and skin layers were left open.")
+      
+    }else{
+      closure_statements_list$superficial_closure <- paste("The subdermal layer was closed and",
+                                                           str_to_lower(glue_collapse(closure, sep = ', ', last = ' and ')),
+                                                           if_else(length(closure) == 1, "was", "were"),
+                                                           "used to close the skin layer."
+      )
+      
+    }
+    
   }else{
     closure_statements_list$superficial_closure <- "The subdermal layers and skin layers were then closed."
     
   }
   
-  # closure_statements_list$dressing <- str_to_sentence(glue("Lastly, {glue_collapse(dressing, sep = ', ', last = ', and ')} was applied to the surgical site."))
-  closure_statements_list$dressing <- str_replace_all(str_to_sentence(glue("Lastly, {glue_collapse(dressing, sep = ', ', last = ', and ')} was applied to the surgical site.")), pattern = "steristrips was", replacement = "steristrips were")
+  if(any(dressing == "Wound Vac")){
+    closure_statements_list$dressing <- "A wound vac was then applied to the open wound, measuring roughly *** in length by *** in width."
+    
+  }else{
+    closure_statements_list$dressing <- str_replace_all(str_to_sentence(glue("Lastly, {glue_collapse(dressing, sep = ', ', last = ', and ')} was applied to the surgical site.")), pattern = "steristrips was", replacement = "steristrips were")
+    
+  }
   
   procedure_details_list$closure <- glue_collapse(closure_statements_list, sep = " ")
   
@@ -1528,6 +1550,8 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   
   
   procedure_paragraphs <- glue_collapse(x = procedure_details_list, sep = "\n\n")
+  
+  procedure_paragraphs <- str_replace_all(procedure_paragraphs, "a  ", "a ")
   
   
   return(list(procedure_details_paragraph = procedure_paragraphs, 

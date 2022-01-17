@@ -1,5 +1,4 @@
 jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with_patterns = FALSE){
-  ## vertebroplasty
   geoms_list_posterior <- list()
   if(any(str_detect(all_posterior_objects_df$object, pattern = "vertebroplasty"))){
     geoms_list_posterior$vertebroplasty_sf_geom <- geom_sf_pattern(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "vertebroplasty")))$object_constructed),
@@ -99,6 +98,18 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }
   
   ## Decompresions ##
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "laminectomy_for_facet_cyst"))){
+    geoms_list_posterior$laminectomy_for_facet_cyst_sf_geom <- ggpattern::geom_sf_pattern(
+      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy_for_facet_cyst"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+      pattern = "stripe",
+      pattern_colour = "orange",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }else{
+    geoms_list_posterior$laminectomy_for_facet_cyst_sf_geom <- NULL
+  }
+  
   if(any(str_detect(all_posterior_objects_df$object, pattern = "laminectomy"))){
     geoms_list_posterior$laminectomy_sf_geom <- ggpattern::geom_sf_pattern(
       data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
@@ -166,6 +177,18 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
     )
   }else{
     geoms_list_posterior$lateral_extracavitary_approach_sf_geom <- NULL
+  }
+  
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "lateral_extraforaminal_approach"))){
+    geoms_list_posterior$lateral_extraforaminal_approach_sf_geom <- ggpattern::geom_sf_pattern(
+      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "lateral_extraforaminal_approach"))$object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }else{
+    geoms_list_posterior$lateral_extraforaminal_approach_sf_geom <- NULL
   }
 
   if(any(all_posterior_objects_df$object == "diskectomy")){
@@ -319,9 +342,23 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }
   
   
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "incision_drainage"))){
+    geoms_list_posterior$incision_drainage_sf_geom <- ggpattern::geom_sf_pattern(
+      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "incision_drainage"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.1,
+      pattern_spacing = 0.03
+    )
+  }else{
+    geoms_list_posterior$incision_drainage_sf_geom <- NULL
+  }
+  
+  
   return(geoms_list_posterior = geoms_list_posterior)
   
 }
+
 
 
 

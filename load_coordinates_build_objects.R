@@ -1,6 +1,5 @@
 #############-----------------------   xxxxxxxxxxxx  ----------------------###############
 
-# rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "4B2AA28A4D6EFBC6CA1F49EC0FB385F7")
 
 #############-----------------------   POSTERIOR  ----------------------###############
 #############-----------------------   POSTERIOR  ----------------------###############
@@ -8,90 +7,6 @@
 #############-----------------------   POSTERIOR  ----------------------###############
 #############-----------------------   POSTERIOR  ----------------------###############
 
-
-## new icd codes
-
-other_neuro_icd_codes_2022_df <- read_csv("other_neuro_icd_codes_2022_df.csv") %>%
-  mutate(spine_region = "unspecified")
-
-
-spine_codes_df <- read_csv("icd10_codes_2022_updated_spine_onlyv2.csv") %>%
-  union_all(other_neuro_icd_codes_2022_df) %>%
-  mutate(spine_region = if_else(str_detect(diagnosis, "atlant"), "occipito-atlanto-axial", spine_region)) %>%
-  mutate(section = if_else(str_detect(str_to_lower(diagnosis), "myelitis|infecti|bacteria|coccal|meningitis") & section == "msk", "infection", section)) %>%
-  mutate(section = if_else(str_detect(str_to_lower(diagnosis), "fracture|trauma"), "trauma", section)) %>%
-  mutate(section = if_else(str_detect(str_to_lower(diagnosis), "kyphosis|lordosis|scoliosis|kissing|flat|deforming ") & section == "msk", "deformity", section))
-
-# spine_sections <- c("msk", "tumor", "congenital", "trauma")
-
-spine_sections <- c(unique(spine_codes_df$section))
-
-spine_category_labels <- c("Degen/Inflammatory" = "msk",
-                           "Deformity" = "deformity",
-                           "Trauma" = "trauma", 
-                           "Tumor" = "tumor", 
-                           "Infection" = "infection",
-                           "Congenital" = "congenital", 
-                           "Other Neurological Diseases" = "other_neuro_conditions")
-
-# spine_regions <- c('occipito-atlanto-axial', 'cervicothoracic', 'thoracic', 'thoracolumbar', 'cervical', 'lumbar', 'lumbosacral', 'sacral')
-
-spine_region_labels <- c("Sacral" =  'sacral',
-                         "Lumbosacral" ='lumbosacral',
-                         "Lumbar" = 'lumbar', 
-                         "Thoracolumbar" = 'thoracolumbar',
-                         "Thoracic" = 'thoracic',
-                         "Cervicothoraic" = 'cervicothoracic', 
-                         "Cervical" ='cervical',
-                         "O-C2" = 'occipito-atlanto-axial'
-                        )
-
-jh_filter_icd_codes_generate_vector_function <- function(section_input, spine_region_input, age = 999){
-  
-  if(age != 999){
-    if(age >25){
-      filtered_df <- spine_codes_df %>%
-        filter(section %in% section_input) %>%
-        filter(spine_region %in% spine_region_input | spine_region == "unspecified") %>%
-        filter(str_detect(str_to_lower(diagnosis), "juvenile|infantile|adolescent", negate = TRUE))
-    }else{
-      filtered_df <- spine_codes_df %>%
-        filter(section %in% section_input) %>%
-        filter(spine_region %in% spine_region_input | spine_region == "unspecified")  
-    }
-  }else{
-    filtered_df <- spine_codes_df %>%
-      filter(section %in% section_input) %>%
-      filter(spine_region %in% spine_region_input | spine_region == "unspecified") 
-  }
-  
-  diagnosis_list <- purrr::discard(list("Degen/Inflammatory" = (filtered_df %>% filter(section == "msk"))$diagnosis,
-                                        "Deformity" = (filtered_df %>% filter(section == "deformity"))$diagnosis, 
-                                        "Trauma" = (filtered_df %>% filter(section == "trauma"))$diagnosis, 
-                                        "Tumor" = (filtered_df %>% filter(section == "tumor"))$diagnosis, 
-                                        "Infection" = (filtered_df %>% filter(section == "infection"))$diagnosis,
-                                        "Congenital" = (filtered_df %>% filter(section == "congenital"))$diagnosis, 
-                                        "Other Neurological Diseases" = (filtered_df %>% filter(section == "other_neuro_conditions"))$diagnosis),
-                                   .p = ~ length(.x) <1)
-  
-  return(diagnosis_list)
-}
-
-
-jh_determine_if_section_dx_function <- function(diagnosis_vector, section_to_determine){
-  if(length(diagnosis_vector)>0){
-    any(diagnosis_vector %in% (spine_codes_df %>% filter(section == section_to_determine))$diagnosis)
-  }else{
-    FALSE
-  }
-}
-jh_add_codes_to_diagnosis_function <- function(diagnosis_vector){
-  codes_df <- tibble(diagnosis = diagnosis_vector) %>%
-    left_join(spine_codes_df) %>%
-    mutate(diagnosis_codes = paste(diagnosis, " (", icd_10_code, ")", sep = ""))
-  
-  return(codes_df$diagnosis_codes)
-}
 
 #############-----------------------   LOAD DATA  ----------------------###############
 
@@ -233,6 +148,35 @@ decompression_df <- implant_starts_df %>%
                                                                        inferior_pedicle_y = ..10,
                                                                        inferior_facet_superior_border_y = ..11)))
 
+
+
+incision_drainage_df <- implant_starts_df %>%
+  filter(approach == "posterior") %>%
+  filter(category == "incision_drainage") %>%
+  mutate(object_constructed = pmap(list(..1 = left_x,
+                                        ..2 = superior_y,
+                                        ..3 = right_x,
+                                        ..4 = inferior_y,
+                                        ..5 = width, 
+                                        ..6 = object,
+                                        ..7 = lateral_pars_x,
+                                        ..8 = superior_tp_y,
+                                        ..9 = side, 
+                                        ..10 = inferior_pedicle_y,
+                                        ..11 = inferior_facet_superior_border_y), 
+                                   .f = ~ build_incision_drainage_function(left_x = ..1,
+                                                                       superior_y = ..2,
+                                                                       right_x = ..3, 
+                                                                       inferior_y = ..4, 
+                                                                       top_width = ..5, 
+                                                                       object = ..6, 
+                                                                       x_lateral_pars = ..7, 
+                                                                       y_inferior_tp = ..8,
+                                                                       side = ..9, 
+                                                                       inferior_pedicle_y = ..10,
+                                                                       inferior_facet_superior_border_y = ..11)))
+
+
 #############-----------------------   Build Open Canal df  ----------------------###############
 
 open_canal_df <- decompression_df %>%
@@ -314,6 +258,7 @@ anterior_objects_df <- anterior_df %>%
 all_points_all_implants_constructed_df <- implants_constructed_df %>%
   union_all(osteotomy_df) %>%
   union_all(decompression_df) %>%
+  union_all(incision_drainage_df) %>%
   union_all(anterior_objects_df) %>% 
   union_all(all_interbody_df) %>%
   select(level, vertebral_number, everything()) 
@@ -335,9 +280,9 @@ all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
 
 all_objects_y_range_df <- all_implants_constructed_df %>%
   select(object, y) %>%
-  group_by(object) %>%
-  filter(y == min(y) | y == max(y)) %>%
-  ungroup() %>%
+  # group_by(object) %>%
+  # filter(y == min(y) | y == max(y)) %>%
+  # ungroup() %>%
   distinct()
 
 

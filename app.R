@@ -17,9 +17,7 @@ library(ggpmisc)
 library(rclipboard)
 library(nngeo)
 library(shinydashboard)
-# 
-# library(shinyauthr)
-# library(sodium)
+
 
 # rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "58C0BC0A6CA8B8DFB21A054C2F5A3C49")
 # rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = "2A930AE845C92CBF95467E59ADBA0D20")
@@ -30,8 +28,9 @@ source("build_spine_objects_functions.R", local = TRUE)
 source("load_coordinates_build_objects.R", local = TRUE)
 source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
 source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
-source("no_implants_added_op_note.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
+source("load_icd_codes.R", local = TRUE)
+source("no_implants_added_op_note.R", local = TRUE)
 source("modal_functions.R", local = TRUE)
 
 #Dashboards:
@@ -371,7 +370,7 @@ ui <- dashboardPage(skin = "black",
                                                             actionBttn(
                                                                 inputId = "add_other",
                                                                 size = "sm", block = TRUE,
-                                                                label = "Add Other (cement, structural allograft, etc)",
+                                                                label = "Add Other (cement, structural allograft, I&D, etc)",
                                                                 style = "simple",
                                                                 color = "primary"
                                                             ),
@@ -914,7 +913,7 @@ ui <- dashboardPage(skin = "black",
                                 ),
                                 br(),
                                 textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 750),
-                                br(),
+                                br(), 
                                 br(),
                                 uiOutput("clipboard_ui")
                             )
@@ -1371,64 +1370,65 @@ server <- function(input, output, session) {
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
 
-    ### DRAIN INPUT UI ###
-    output$drains_ui <- renderUI({
-        anterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
-                                                          input_type = "awesomeRadio",
-                                                          input_id = "deep_drains_anterior", 
-                                                          left_column_percent_width = 45, 
-                                                          font_size = 16, 
-                                                          initial_value_selected = 0, 
-                                                          choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                          checkboxes_inline = TRUE, return_as_full_table = TRUE)
-        anterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
-                                                                 input_type = "awesomeRadio",
-                                                                 input_id = "superficial_drains_anterior", 
-                                                                 left_column_percent_width = 45, 
-                                                                 font_size = 16, 
-                                                                 initial_value_selected = 0, 
-                                                                 choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                                 checkboxes_inline = TRUE, return_as_full_table = TRUE)
-        
-        posterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
-                                                           input_type = "awesomeRadio",
-                                                           input_id = "deep_drains_posterior", 
-                                                           left_column_percent_width = 45, 
-                                                           font_size = 16, 
-                                                           initial_value_selected = 1, 
-                                                           choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                           checkboxes_inline = TRUE, return_as_full_table = TRUE)
-        posterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Posterior Superficial drains:", 
-                                                                  input_type = "awesomeRadio",
-                                                                  input_id = "superficial_drains_posterior", 
-                                                                  left_column_percent_width = 45, 
-                                                                  font_size = 16, 
-                                                                  initial_value_selected = 1, 
-                                                                  choices_vector = c("0", "1", "2", "3", "4", "5"), 
-                                                                  checkboxes_inline = TRUE, return_as_full_table = TRUE)
-        
-        drains_list <- list()
-        if(nrow(all_objects_to_add_list$objects_df)>0){
-            if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
-                drains_list$anterior_deep <- anterior_deep
-                drains_list$anterior_superficial <- anterior_superficial
-            }
-            if(any(all_objects_to_add_list$objects_df$approach == "posterior")){
-                drains_list$posterior_deep <- posterior_deep
-                drains_list$posterior_superficial <- posterior_superficial
-                
-            }
-        }else{
-            if(input$spine_approach == "Posterior"){
-                drains_list$posterior_deep <- posterior_deep
-                drains_list$posterior_superficial <- posterior_superficial
-            }else{
-                drains_list$anterior_deep <- anterior_deep
-                drains_list$anterior_superficial <- anterior_superficial
-            }
-        }
-        drains_list
-    })
+    # ### DRAIN INPUT UI ###
+    # output$drains_ui <- renderUI({
+    #     # all_objects_to_add_list$objects_df
+    #     anterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
+    #                                                       input_type = "awesomeRadio",
+    #                                                       input_id = "deep_drains_anterior", 
+    #                                                       left_column_percent_width = 45, 
+    #                                                       font_size = 16, 
+    #                                                       initial_value_selected = 0, 
+    #                                                       choices_vector = c("0", "1", "2", "3", "4", "5"), 
+    #                                                       checkboxes_inline = TRUE, return_as_full_table = TRUE)
+    #     anterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
+    #                                                              input_type = "awesomeRadio",
+    #                                                              input_id = "superficial_drains_anterior", 
+    #                                                              left_column_percent_width = 45, 
+    #                                                              font_size = 16, 
+    #                                                              initial_value_selected = 0, 
+    #                                                              choices_vector = c("0", "1", "2", "3", "4", "5"), 
+    #                                                              checkboxes_inline = TRUE, return_as_full_table = TRUE)
+    #     
+    #     posterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
+    #                                                        input_type = "awesomeRadio",
+    #                                                        input_id = "deep_drains_posterior", 
+    #                                                        left_column_percent_width = 45, 
+    #                                                        font_size = 16, 
+    #                                                        initial_value_selected = 1, 
+    #                                                        choices_vector = c("0", "1", "2", "3", "4", "5"), 
+    #                                                        checkboxes_inline = TRUE, return_as_full_table = TRUE)
+    #     posterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Posterior Superficial drains:", 
+    #                                                               input_type = "awesomeRadio",
+    #                                                               input_id = "superficial_drains_posterior", 
+    #                                                               left_column_percent_width = 45, 
+    #                                                               font_size = 16, 
+    #                                                               initial_value_selected = 1, 
+    #                                                               choices_vector = c("0", "1", "2", "3", "4", "5"), 
+    #                                                               checkboxes_inline = TRUE, return_as_full_table = TRUE)
+    #     
+    #     drains_list <- list()
+    #     if(nrow(all_objects_to_add_list$objects_df)>0){
+    #         if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
+    #             drains_list$anterior_deep <- anterior_deep
+    #             drains_list$anterior_superficial <- anterior_superficial
+    #         }
+    #         if(any(all_objects_to_add_list$objects_df$approach == "posterior")){
+    #             drains_list$posterior_deep <- posterior_deep
+    #             drains_list$posterior_superficial <- posterior_superficial
+    #             
+    #         }
+    #     }else{
+    #         if(input$spine_approach == "Posterior"){
+    #             drains_list$posterior_deep <- posterior_deep
+    #             drains_list$posterior_superficial <- posterior_superficial
+    #         }else{
+    #             drains_list$anterior_deep <- anterior_deep
+    #             drains_list$anterior_superficial <- anterior_superficial
+    #         }
+    #     }
+    #     drains_list
+    # })
     
     
     observeEvent(input$intraoperative_complications_vector, {
@@ -1448,7 +1448,7 @@ server <- function(input, output, session) {
             additional_procedures_choices$exploration_prior_fusion <- "Exploration of prior spinal fusion"
         }
     
-        additional_procedures_choices$irrigation_debridement <- "Incision and Drainage"
+        # additional_procedures_choices$irrigation_debridement <- "Incision and Drainage"
         
         additional_procedures_choices$open_biopsy_body <- "Open Biopsy of vertebral body"
         
@@ -1569,6 +1569,10 @@ server <- function(input, output, session) {
         }
         additional_procedures_list <- discard(additional_procedures_list, .p = ~ (.x == "Other"))
         
+        if(any(input$dressing_details == "Wound Vac")){
+            additional_procedures_list$wound_vac <- "Application of Wound Vac (nevative pressure wound therapy; CPT = 97605)"    
+        }
+        
         unlist(additional_procedures_list, use.names = FALSE)
     })
     
@@ -1624,6 +1628,26 @@ server <- function(input, output, session) {
         )
     })
     
+    procedure_approach_reactive <- reactive({
+        if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
+            anterior_approach <- TRUE
+        }else{
+            anterior_approach <- FALSE
+        }
+        
+        if(any(all_objects_to_add_list$objects_df$approach == "posterior")){
+            posterior_approach <- TRUE
+        }else{
+            posterior_approach <- FALSE
+        }
+        procedure_approach <- case_when(
+            anterior_approach == TRUE & posterior_approach == TRUE ~ "combined", 
+            anterior_approach == TRUE & posterior_approach == FALSE ~ "anterior",
+            anterior_approach == FALSE & posterior_approach == TRUE ~ "posterior",
+        )
+        procedure_approach
+    })
+    
     observeEvent(input$additional_surgical_details_1_complete, ignoreInit = TRUE, {
         add_procedures_list <- list()
         
@@ -1636,9 +1660,23 @@ server <- function(input, output, session) {
         
         showModal(
             addition_surgical_details_modal_box_2_function(additional_procedures_choices = additional_procedures_options_reactive_vector(),
-                                                         additional_procedures = unlist(add_procedures_list, use.names = FALSE), )
+                                                         additional_procedures = unlist(add_procedures_list, use.names = FALSE), 
+                                                         procedure_approach = procedure_approach_reactive())
         )
     })
+    
+    observeEvent(list(input$deep_drains_anterior, input$superficial_drains_anterior, input$deep_drains_posterior, input$superficial_drains_posterior), ignoreInit = TRUE, {
+        
+        if(any((as.numeric(input$deep_drains_anterior) > 0 | 
+                as.numeric(input$superficial_drains_anterior) >0| 
+                as.numeric(input$deep_drains_posterior) >0| 
+                as.numeric(input$superficial_drains_posterior) >0))){
+         updateAwesomeCheckboxGroup(session = session, 
+                                    inputId = "postop_drains_dressing", 
+                                    selected = "Monitor and record drain output q12h")
+        }
+        }
+    )
 
     ## this is for all future runs
     modal_box_surgical_details_reactive <- reactive({
@@ -1661,6 +1699,7 @@ server <- function(input, output, session) {
     modal_box_surgical_details_2_reactive <- reactive({
         
         addition_surgical_details_modal_box_2_function(
+            procedure_approach = procedure_approach_reactive(),
             surgical_findings = input$surgical_findings,
             specimens_removed = input$specimens_removed,
             ebl = input$ebl,
@@ -1685,7 +1724,17 @@ server <- function(input, output, session) {
             additional_procedures_other = input$additional_procedures_other,
             additional_end_procedure_details = input$additional_end_procedure_details,
             closure_details = input$closure_details,
-            dressing_details = input$dressing_details
+            dressing_details = input$dressing_details, 
+            postop_dispo = input$postop_dispo,
+            postop_abx = input$postop_abx,
+            postop_imaging = input$postop_imaging,
+            postop_pain = input$postop_pain,
+            postop_activity = input$postop_activity,
+            postop_brace = input$postop_brace,
+            postop_diet = input$postop_diet,
+            postop_dvt_ppx = input$postop_dvt_ppx,
+            postop_drains_dressing = input$postop_drains_dressing,
+            postop_followup = input$postop_followup
             )
     })
     
@@ -1694,47 +1743,6 @@ server <- function(input, output, session) {
             modal_box_surgical_details_2_reactive()
         )
     })
-    
-    # modal_box_surgical_details_reactive <- reactive({
-    #     addition_surgical_details_modal_box_function(primary_surgeon_first_name_input = input$primary_surgeon_first_name,
-    #                                                  primary_surgeon_last_name_input = input$primary_surgeon_last_name,
-    #                                                  surgical_assistants = input$surgical_assistants,
-    #                                                  preoperative_diagnosis = input$preoperative_diagnosis,
-    #                                                  postoperative_diagnosis = input$postoperative_diagnosis, 
-    #                                                  asa_class = input$asa_class,
-    #                                                  anesthesia = input$anesthesia,
-    #                                                  indications = input$indications,
-    #                                                  neuromonitoring = input$neuromonitoring,
-    #                                                  preop_antibiotics = input$preop_antibiotics,
-    #                                                  anti_fibrinolytic = input$anti_fibrinolytic,
-    #                                                  txa_loading = input$txa_loading,
-    #                                                  txa_maintenance = input$txa_maintenance,
-    #                                                  surgical_findings = input$surgical_findings,
-    #                                                  specimens_removed = input$specimens_removed,
-    #                                                  ebl = input$ebl,
-    #                                                  urine_output = input$urine_output,
-    #                                                  crystalloids_administered = input$crystalloids_administered,
-    #                                                  colloids_administered = input$colloids_administered,
-    #                                                  transfusion = input$transfusion,
-    #                                                  cell_saver_transfused = input$cell_saver_transfused,
-    #                                                  prbc_transfused = input$prbc_transfused,
-    #                                                  ffp_transfused = input$ffp_transfused,
-    #                                                  cryoprecipitate_transfused = input$cryoprecipitate_transfused,
-    #                                                  platelets_transfused = input$platelets_transfused,
-    #                                                  intraoperative_complications_yes_no = input$intraoperative_complications_yes_no,
-    #                                                  intraoperative_complications_vector = input$intraoperative_complications_vector,
-    #                                                  other_intraoperative_complications = input$other_intraoperative_complications,
-    #                                                  durotomy_timing_input = input$durotomy_timing, 
-    #                                                  durotomy_instrument_input = input$durotomy_instrument,
-    #                                                  durotomy_repair_method_input = input$durotomy_repair_method,
-    #                                                  head_positioning = input$head_positioning,
-    #                                                  additional_procedures_choices = additional_procedures_options_reactive_vector(),
-    #                                                  additional_procedures = input$additional_procedures,
-    #                                                  additional_procedures_other = input$additional_procedures_other,
-    #                                                  additional_end_procedure_details = input$additional_end_procedure_details,
-    #                                                  closure_details = input$closure_details,
-    #                                                  dressing_details = input$dressing_details)
-    # })
     
 
     
@@ -1771,6 +1779,7 @@ server <- function(input, output, session) {
             showModal(
                 # modal_box_surgical_details_2_reactive()
                 addition_surgical_details_modal_box_2_function(required_options_missing = TRUE,
+                                                               procedure_approach = procedure_approach_reactive(),
                                                                head_positioning = input$head_positioning,
                                                                surgical_findings = input$surgical_findings,
                                                                specimens_removed = input$specimens_removed,
@@ -1795,7 +1804,17 @@ server <- function(input, output, session) {
                                                                additional_procedures_other = input$additional_procedures_other,
                                                                additional_end_procedure_details = input$additional_end_procedure_details,
                                                                closure_details = input$closure_details,
-                                                               dressing_details = input$dressing_details
+                                                               dressing_details = input$dressing_details,
+                                                               postop_dispo = input$postop_dispo,
+                                                               postop_abx = input$postop_abx,
+                                                               postop_imaging = input$postop_imaging,
+                                                               postop_pain = input$postop_pain,
+                                                               postop_activity = input$postop_activity,
+                                                               postop_brace = input$postop_brace,
+                                                               postop_diet = input$postop_diet,
+                                                               postop_dvt_ppx = input$postop_dvt_ppx,
+                                                               postop_drains_dressing = input$postop_drains_dressing,
+                                                               postop_followup = input$postop_followup
                 )
             )
         }else{
@@ -1843,7 +1862,6 @@ server <- function(input, output, session) {
         }
         details_list$'- -' <- "- -"
         details_list$'Intraoperative Complications:' <- if_else(length(input$intraoperative_complications_yes_no)>0, as.character(input$intraoperative_complications_yes_no), "NA")
-        # details_list$'Intraoperative Complications:' <- if_else(input$intraoperative_complications_true_false == TRUE, "Yes", "No")
         details_list$'Head Position:' <- paste(input$head_positioning)
         details_list$'Additional Procedures:' <- as.character(glue_collapse(x = additional_procedures_vector_reactive(), sep = "; "))
         details_list$'End of Procedure & Closure Details:' <- "---"
@@ -2141,10 +2159,12 @@ server <- function(input, output, session) {
             "Laminoplasty" = "laminoplasty",
             "Decompression + Foraminotomies" = "sublaminar_decompression",
             "Central Laminectomy" = "laminectomy",
+            "Laminectomy for Cyst Excision" = "laminectomy_for_facet_cyst",
             "Laminotomy (Hemilaminectomy)" = "laminotomy",
             "Complete Facetectomy (Unilateral)" = "complete_facetectomy",
             "Diskectomy" = "diskectomy",
             "Transpedicular Decompression" = "transpedicular_approach",
+            "Lateral Extraforaminal Approach for Decompression" = "lateral_extraforaminal_approach",
             "Costovertebral Decompression" = "costovertebral_approach",
             "Lateral Extracavitary Approach (modified)" = "lateral_extracavitary_approach"
         )
@@ -2200,6 +2220,7 @@ server <- function(input, output, session) {
     observeEvent(input$add_special_approach,ignoreNULL = TRUE, ignoreInit = TRUE, {
         special_approach_vector <- c(                                
             "Transpedicular Decompression" = "transpedicular_approach",
+            "Lateral Extraforaminal Approach for Decompression" = "lateral_extraforaminal_approach",
             "Costovertebral Decompression" = "costovertebral_approach",
             "Lateral Extracavitary Approach (modified)" = "lateral_extracavitary_approach", 
             "Costotransversectomy" = "costotransversectomy")
@@ -2222,7 +2243,9 @@ server <- function(input, output, session) {
                                 inputId = "object_to_add", 
                                 choices = c("Vertebroplasty" = "vertebroplasty",
                                             "Vertebral Augmentation (cavity creation, then cement)" = "vertebral_cement_augmentation",
-                                            "Structural Allograft Strut" = "structural_allograft"),
+                                            "Structural Allograft Strut" = "structural_allograft",
+                                            "Incision & Drainage" = "incision_drainage"
+                                            ),
                                 checkIcon = list(
                                     yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
                                 ),
@@ -2634,8 +2657,15 @@ server <- function(input, output, session) {
     ########################################### object DETAILS REACTIVE ###########################################
     #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
     object_added_reactive_df <- reactive({
+        
+        if(input$object_to_add == "pelvic_screw"){
+            object_currently_selected_to_add <- c("pelvic_screw_1", "pelvic_screw_2")
+        }else{
+            object_currently_selected_to_add <- input$object_to_add
+        }
+        
         object_type_filtered_df <- all_implants_constructed_df %>%
-            filter(str_detect(object, input$object_to_add))
+            filter(object %in% object_currently_selected_to_add)
             # filter(object == input$object_to_add)
         
         implant_df <- nearPoints(
@@ -2663,6 +2693,7 @@ server <- function(input, output, session) {
     #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
     
     observeEvent(input$plot_click, {
+
         
         all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
             union_all(object_added_reactive_df()) %>%
@@ -2673,6 +2704,9 @@ server <- function(input, output, session) {
                 all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
             }
         }
+        
+
+        
     })
     
     observeEvent(input$plot_double_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
@@ -3726,16 +3760,7 @@ server <- function(input, output, session) {
         }
     })
     
-    # observeEvent(input$primary_diagnosis, {
-    #     if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
-    # 
-    #         updateAwesomeCheckboxGroup(session = session, 
-    #                                    inputId = "additional_procedures", 
-    #                                    selected = append(input$additional_procedures, "Open treatment of vertebral fracture"))
-    #     }
-    # })
-    
-    
+
     added_rods_statement_reactive <- reactive({
         additional_rods_list <- list()
         
@@ -3778,6 +3803,51 @@ server <- function(input, output, session) {
     })
     
     
+    postop_plan_list_reactive <- reactive({
+        postop_plan <- list()
+        ##########   dispo  #############
+        if(length(input$postop_dispo) >0){
+            postop_plan$postop_dispo_label <- paste("  -Postop Destination: ", glue_collapse(input$postop_dispo, sep = "; ", last = "; and "))
+        }
+        ##########   postop_abx  #############
+        if(length(input$postop_abx) >0){
+            postop_plan$postop_abx_label <- paste("  -Postop Abx: ", glue_collapse(input$postop_abx, sep = "; ", last = "; and "))
+        }
+        ##########   postop_imaging  #############
+        if(length(input$postop_imaging) >0){
+            postop_plan$postop_imaging_label <- paste("  -Postop Imaging: ", glue_collapse(input$postop_imaging, sep = "; ", last = "; and "))
+            }
+        ##########   postop_pain  #############
+        if(length(input$postop_pain) >0){
+            postop_plan$postop_pain_label <- paste("  -Pain Control: ", glue_collapse(input$postop_pain, sep = "; ", last = "; and "))
+        }
+        ##########   postop_activity  #############
+        if(length(input$postop_activity) >0){
+            postop_plan$postop_activity_label <- paste("  -Activity: ", glue_collapse(input$postop_activity, sep = "; ", last = "; and "))
+        }
+        ##########   postop_brace  #############
+        if(length(input$postop_brace) >0){
+            postop_plan$postop_brace_label <- paste("  -Bracing: ", glue_collapse(input$postop_brace, sep = "; ", last = "; and "))
+            }
+        ##########   postop_diet  #############
+        if(length(input$postop_diet) >0){
+            postop_plan$postop_diet_label <- paste("  -Diet: ", glue_collapse(input$postop_diet, sep = "; ", last = "; and "))
+        }
+        ##########   postop_dvt_ppx  #############
+        if(length(input$postop_dvt_ppx) >0){
+            postop_plan$postop_dvt_label <- paste("  -DVT PPX/Anticoag/Antiplatelet: ", glue_collapse(input$postop_dvt_ppx, sep = "; ", last = "; and "))
+        }
+        ##########   postop_drains_dressing  #############
+        if(length(input$postop_drains_dressing) >0){
+            postop_plan$postop_drains_dressing_label <- paste("  -Drains & Dressing: ", glue_collapse(input$postop_drains_dressing, sep = "; ", last = "; and "))
+        }
+        ##########   postop_followup  #############
+        if(length(input$postop_followup) >0){
+            postop_plan$postop_followup_label <- paste("  -Follow-up: ", glue_collapse(input$postop_followup, sep = "; ", last = "; and "))
+        }
+        postop_plan
+        
+    })
     
     
     op_note_text_reactive <- reactive({
@@ -3850,6 +3920,7 @@ server <- function(input, output, session) {
             op_note_list$"\nFluids/Transfusions:" <- if_else(!is.na(fluids_transfusions_statement), as.character(fluids_transfusions_statement), " ")
             op_note_list$"\nIntraoperative Complications:" <- if_else(!is.na(complication_statement), as.character(complication_statement), " ")
             op_note_list$"\nSurgery Description:" <- if_else(!is.null(procedure_results_list$procedure_details_paragraph), as.character(procedure_results_list$procedure_details_paragraph), " ") 
+            op_note_list$"\nPostop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
             
             secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
                 unnest() %>%
@@ -3994,7 +4065,7 @@ server <- function(input, output, session) {
             op_note_list$"\n*Specimens Taken:" <- if_else(input$specimens_removed == "", "none", input$specimens_removed)
             op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
             op_note_list$"\n*Procedure  Description:" <- procedure_results_list$procedure_details_paragraph
-            
+            op_note_list$"\n*Postop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
   
             secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
                 unnest() %>%
