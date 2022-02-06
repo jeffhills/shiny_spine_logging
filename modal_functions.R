@@ -715,15 +715,18 @@ addition_surgical_details_modal_box_2_function <-
            closure_details = NULL,
            dressing_details = NULL, 
            postop_dispo = c(""),
-           postop_abx = c(""),
+           postop_abx = c("Ancef x 24hrs"),
            postop_imaging = c(""),
            postop_pain = c(""),
-           postop_activity = c(""),
+           postop_activity = c("PT/OT daily",
+                               "please mobilize out of bed minimum 3x daily", 
+                               "No bending, twisting, lifting > 10lbs"),
            postop_brace = c(""),
-           postop_diet = c(""),
-           postop_dvt_ppx = c(""),
+           postop_diet = c("Senokit-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
+           postop_dvt_ppx = c("SCD's while in bed", "Hold any chemical dvt ppx for minimum 72hrs"),
            postop_drains_dressing = c(""),
            postop_followup = c("")) {
+    
     additional_details_modal <-
       modalDialog(
         size = "l",
@@ -732,7 +735,7 @@ addition_surgical_details_modal_box_2_function <-
         footer = actionBttn(
           inputId = "additional_surgical_details_complete",
           label = "Continue",
-          icon = icon("fas fa-check-square"), 
+          icon = icon("fas fa-arrow-circle-right"), 
           style = "simple",
           color = "success"
         ),
@@ -1212,6 +1215,9 @@ addition_surgical_details_modal_box_2_function <-
                                "Gabapentin 100mg q8h scheduled",
                                "Gabapentin 300mg q8h scheduled",
                                "Toradol 15mg q8h for 48-72hrs",
+                               "Toradol 30mg q8h for 48-72hrs",
+                               "Celebrex 100mg BID",
+                               "Celebrex 200mg BID",
                                "Meloxicam 15mg daily",
                                "Tizanidine 4mg q6h prn for muscle spasms (avoid in geriatric males/males w/ urinary retention)",
                                "Cyclobenzabrine 5mg q8h prn for muscle spasms (strong anticholinergic, minimize in geriatric)",
@@ -1230,13 +1236,11 @@ addition_surgical_details_modal_box_2_function <-
             left_column_percent_width = 20,
             checkboxes_inline = FALSE,
             input_type = "checkbox",
-            choices_vector = c("PT/OT",
+            choices_vector = c("PT/OT daily",
                                "please mobilize out of bed minimum 3x daily", 
                                "No bending, twisting, lifting > 10lbs",
                                "***"),
-            initial_value_selected = c("PT/OT",
-                                       "please mobilize out of bed minimum 3x daily", 
-                                       "No bending, twisting, lifting > 10lbs")
+            initial_value_selected = postop_activity
           ),
           br(),
           jh_make_shiny_table_row_function(
@@ -1246,14 +1250,16 @@ addition_surgical_details_modal_box_2_function <-
             left_column_percent_width = 20,
             checkboxes_inline = FALSE,
             input_type = "checkbox",
-            choices_vector = c("C collar at all times", 
+            choices_vector = c("C collar at all times",
+                               "Soft Collar for comfort only",
                                "TLSO brace while ambulating (OK to remove while in bed, sitting, or bathing",
-                               "No brace needed"),
+                               "No brace needed",
+                               "***"),
             initial_value_selected = postop_brace
           ),
           br(),
           jh_make_shiny_table_row_function(
-            left_column_label = "Diet:",
+            left_column_label = "Diet/GI:",
             font_size = row_label_font_size,
             input_id = "postop_diet",
             left_column_percent_width = 20,
@@ -1278,7 +1284,7 @@ addition_surgical_details_modal_box_2_function <-
                                "Please do not start any chemical dvt ppx without discussion with spine team",
                                "Please hold any anti-platelet/anti-coag for minimum 7days after surgery",
                                "***"),
-            initial_value_selected = c("SCD's while in bed", "Hold any chemical dvt ppx for minimum 72hrs")
+            initial_value_selected = postop_dvt_ppx
           ),
           br(),
           jh_make_shiny_table_row_function(
@@ -1304,7 +1310,8 @@ addition_surgical_details_modal_box_2_function <-
             checkboxes_inline = FALSE,
             input_type = "awesomeRadio",
             choices_vector = c("Follow-up in spine clinic in 2wks.", 
-                               "Follow-up in spine clinic in 6wks."),
+                               "Follow-up in spine clinic in 6wks.",
+                               "Follow-up in spine trauma clinic in 2wks."),
             initial_value_selected = postop_followup
           ),
         )
@@ -1312,527 +1319,3 @@ addition_surgical_details_modal_box_2_function <-
     
     return(additional_details_modal)
   }
-
-# ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
-# addition_surgical_details_modal_box_function <-
-#   function(required_options_missing = FALSE,
-#            row_label_font_size = 16,
-#            fade_appearance = TRUE,
-#            primary_surgeon_first_name_input = "",
-#            primary_surgeon_last_name_input = "",
-#            surgical_assistants = "",
-#            preoperative_diagnosis = " ",
-#            postoperative_diagnosis = " ",
-#            indications = "",
-#            asa_class = "",
-#            anesthesia = "",
-#            neuromonitoring = c("SSEP", "tc MEP"),
-#            preop_antibiotics = c("Cefazolin (Ancef)"),
-#            anti_fibrinolytic = "",
-#            txa_loading = 20,
-#            txa_maintenance = 5,
-#            surgical_findings = "",
-#            specimens_removed = "",
-#            ebl = NULL,
-#            urine_output = NULL,
-#            crystalloids_administered = NULL,
-#            colloids_administered = NULL,
-#            transfusion = FALSE,
-#            cell_saver_transfused = 0,
-#            prbc_transfused = 0,
-#            ffp_transfused = 0,
-#            cryoprecipitate_transfused = 0,
-#            platelets_transfused = 0,
-#            intraoperative_complications_true_false =
-#              FALSE,
-#            intraoperative_complications_vector = NULL,
-#            other_intraoperative_complications = NULL,
-#            durotomy_timing_input = "",
-#            durotomy_instrument_input = "",
-#            durotomy_repair_method_input = "",
-#            head_positioning = "",
-#            additional_procedures_choices = c(" "),
-#            additional_procedures = NULL,
-#            additional_procedures_other = "",
-#            additional_end_procedure_details = NULL,
-#            closure_details = NULL,
-#            dressing_details = NULL) {
-#     additional_details_modal <-
-#       modalDialog(
-#         size = "l",
-#         easyClose = FALSE,
-#         fade = fade_appearance,
-#         footer = actionBttn(
-#           inputId = "additional_surgical_details_complete",
-#           label = "Continue",
-#           icon = icon("fas fa-check-square"), 
-#           style = "simple",
-#           color = "success"
-#         ),
-#         box(
-#           width = 12,
-#           title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Additional Surgical Details:"),
-#           status = "info",
-#           solidHeader = TRUE,
-#           if (required_options_missing == TRUE) {
-#             div(style = "font-size:22px; font-weight:bold; font-style:italic; text-align:center; color:red", "*** Please Make Selections for Required Fields***")
-#           },
-#           tags$table(width = "100%",
-#                      tags$tr(width = "100%",
-#                              tags$td(width = paste0(30, "%"), tags$div(style = "font-size:16px; font-weight:bold; text-align:left; margin-top:auto; margin-bottom:auto", "Primary Surgeon:")),
-#                              tags$td(width = paste0(70/2, "%"), textInput(inputId = "primary_surgeon_first_name", label = NULL, value = primary_surgeon_first_name_input, placeholder = "First Name", width = "80%")),
-#                              tags$td(width = paste0(70/2, "%"), textInput(inputId = "primary_surgeon_last_name", label = NULL, value = primary_surgeon_last_name_input, placeholder = "Last Name", width = "80%"))
-#                      ) 
-#                      ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Assistants:",
-#             font_size = row_label_font_size,
-#             input_type = "text",
-#             input_id = "surgical_assistants",
-#             initial_value_selected = surgical_assistants
-#           ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Preoperative Diagnosis:",
-#             font_size = row_label_font_size,
-#             input_type = "text",
-#             input_id = "preoperative_diagnosis",
-#             initial_value_selected = preoperative_diagnosis
-#           ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Postoperative Diagnosis:",
-#             font_size = row_label_font_size,
-#             input_type = "text",
-#             input_id = "postoperative_diagnosis",
-#             initial_value_selected = postoperative_diagnosis
-#           ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Surgical Indications:",
-#             font_size = row_label_font_size,
-#             input_type = "text",
-#             input_id = "indications",
-#             initial_value_selected = indications
-#           ),
-#           hr(),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Preprocedure ASA Classification",
-#             font_size = row_label_font_size,
-#             input_type = "awesomeRadio",
-#             choices_vector = c("ASA I", "ASA II", "ASA III", "ASA IV", "ASA V", "ASA VI", "Emergent Surgery"),
-#             input_id = "asa_class",
-#             checkboxes_inline = TRUE,
-#             initial_value_selected = asa_class
-#           ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Anethesia Type:",
-#             font_size = row_label_font_size,
-#             input_type = "checkbox",
-#             choices_vector = c(
-#               "General Endotracheal Anesthseia",
-#               "Spinal Anesthesia",
-#               "Epidural Anesthesia",
-#               "Monitored Anesthesia Care (MAC)"
-#             ),
-#             input_id = "anesthesia",
-#             checkboxes_inline = TRUE,
-#             initial_value_selected = anesthesia
-#           ),
-#           hr(),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Neuromonitoring used:",
-#             font_size = row_label_font_size,
-#             input_type = "checkbox",
-#             input_id = "neuromonitoring",
-#             choices_vector = c("EMG", "SSEP", "tc MEP", "DNEP (Cord Stimulation)", "H reflex"),
-#             checkboxes_inline = TRUE,
-#             initial_value_selected = neuromonitoring
-#           ),
-#           hr(),
-#           jh_make_shiny_table_row_function(
-#             left_column_label = "Preop Antibiotics:",
-#             input_type = "checkbox",
-#             input_id = "preop_antibiotics",
-#             left_column_percent_width = 30,
-#             font_size = row_label_font_size,
-#             choices_vector = c(
-#               "None (Antibiotics were held)",
-#               "Cefazolin (Ancef)",
-#               "Vancomycin",
-#               "Ceftriaxone",
-#               "Gentamycin",
-#               "Clindamycin",
-#               "Aztreonam",
-#               "Unknown",
-#               "Other"
-#             ),
-#             initial_value_selected = preop_antibiotics
-#           ),
-#           hr(),
-#           jh_make_shiny_table_row_function(
-#             left_column_label = "Antifibrinolytic:",
-#             input_type = "checkbox",
-#             input_id = "anti_fibrinolytic",
-#             left_column_percent_width = 30,
-#             font_size = row_label_font_size,
-#             choices_vector = c(
-#               "None",
-#               "Tranexamic Acid (TXA)",
-#               "Amicar",
-#               "Desmopressin (DDAVP)",
-#               "Other"
-#             ),
-#             initial_value_selected = anti_fibrinolytic,
-#           ),
-#           conditionalPanel(
-#             condition = "input.anti_fibrinolytic.indexOf('Tranexamic Acid (TXA)') > -1",
-#             jh_make_shiny_table_row_function(
-#               left_column_label = "TXA Loading (mg/kg):    ",
-#               input_type = "numeric",
-#               input_id = "txa_loading",
-#               left_column_percent_width = 50,
-#               font_size = row_label_font_size -
-#                 1,
-#               min = 0,
-#               max = 200,
-#               initial_value_selected = txa_loading,
-#               step = 5,
-#               text_align = "right",
-#             ),
-#             jh_make_shiny_table_row_function(
-#               left_column_label = "TXA Maintenance (mg/kg/hr):    ",
-#               input_type = "numeric",
-#               input_id = "txa_maintenance",
-#               left_column_percent_width = 50,
-#               font_size = row_label_font_size -
-#                 1,
-#               min = 0,
-#               max = 50,
-#               initial_value_selected = txa_maintenance,
-#               step = 5,
-#               text_align = "right",
-#             ),
-#           ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Findings:",
-#             font_size = row_label_font_size,
-#             input_type = "text",
-#             input_id = "surgical_findings",
-#             initial_value_selected = surgical_findings
-#           ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Specimens:",
-#             font_size = row_label_font_size,
-#             input_type = "text",
-#             input_id = "specimens_removed",
-#             initial_value_selected = specimens_removed
-#           ),
-#           hr(),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Estimated Blood Loss:",
-#             font_size = row_label_font_size,
-#             input_type = "numeric",
-#             input_id = "ebl",
-#             initial_value_selected = ebl,
-#             min = 0,
-#             max = 50000,
-#             step = 100
-#           ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Urine Output:",
-#             font_size = row_label_font_size,
-#             input_type = "numeric",
-#             input_id = "urine_output",
-#             initial_value_selected = urine_output,
-#             min = 0,
-#             max = 50000,
-#             step = 100
-#           ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Crystalloids:",
-#             font_size = row_label_font_size,
-#             input_type = "numeric",
-#             input_id = "crystalloids_administered",
-#             initial_value_selected = crystalloids_administered,
-#             min = 0,
-#             max = 100000,
-#             step = 100
-#           ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 30,
-#             left_column_label = "Colloids:",
-#             font_size = row_label_font_size,
-#             input_type = "numeric",
-#             input_id = "colloids_administered",
-#             min = 0,
-#             initial_value_selected = colloids_administered,
-#             max = 100000,
-#             step = 100
-#           ),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 60,
-#             left_column_label = "Transfusions/Cell Saver",
-#             font_size = row_label_font_size,
-#             input_type = "switch",
-#             input_id = "transfusion",
-#             switch_input_on_label = "Yes",
-#             switch_input_off_label = "No",
-#             initial_value_selected = transfusion
-#           ),
-#           conditionalPanel(
-#             condition = "input.transfusion == true",
-#             box(
-#               width = 12,
-#               jh_make_shiny_table_row_function(
-#                 left_column_percent_width = 60,
-#                 left_column_label = "Cell Saver Transfused (cc):",
-#                 font_size = row_label_font_size,
-#                 input_type = "numeric",
-#                 input_id = "cell_saver_transfused",
-#                 initial_value_selected = cell_saver_transfused,
-#                 min = 0,
-#                 max = 10000,
-#                 step = 100
-#               ),
-#               jh_make_shiny_table_row_function(
-#                 left_column_percent_width = 60,
-#                 left_column_label = "pRBC units transfused:",
-#                 font_size = row_label_font_size,
-#                 input_type = "numeric",
-#                 input_id = "prbc_transfused",
-#                 initial_value_selected = prbc_transfused,
-#                 min = 0,
-#                 max = 100,
-#                 step = 1
-#               ),
-#               jh_make_shiny_table_row_function(
-#                 left_column_percent_width = 60,
-#                 left_column_label = "FFP units transfused:",
-#                 font_size = row_label_font_size,
-#                 input_type = "numeric",
-#                 input_id = "ffp_transfused",
-#                 initial_value_selected = ffp_transfused,
-#                 min = 0,
-#                 max = 100,
-#                 step = 1
-#               ),
-#               jh_make_shiny_table_row_function(
-#                 left_column_percent_width = 60,
-#                 left_column_label = "Cryoprecipitate units transfused:",
-#                 font_size = row_label_font_size,
-#                 input_type = "numeric",
-#                 input_id = "cryoprecipitate_transfused",
-#                 initial_value_selected = cryoprecipitate_transfused,
-#                 min = 0,
-#                 max = 100,
-#                 step = 1
-#               ),
-#               jh_make_shiny_table_row_function(
-#                 left_column_percent_width = 60,
-#                 left_column_label = "Platelet units transfused:",
-#                 font_size = row_label_font_size,
-#                 input_type = "numeric",
-#                 input_id = "platelets_transfused",
-#                 initial_value_selected = platelets_transfused,
-#                 min = 0,
-#                 max = 100,
-#                 step = 1
-#               ),
-#             )
-#           ),
-#           hr(),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 60,
-#             left_column_label = "Intraoperative Complications (including durotomy)?",
-#             font_size = row_label_font_size,
-#             input_type = "switch",
-#             input_id = "intraoperative_complications_true_false",
-#             initial_value_selected = intraoperative_complications_true_false
-#           ),
-#           conditionalPanel(
-#             condition = "input.intraoperative_complications_true_false == true",
-#             box(
-#               width = 12,
-#               br(),
-#               jh_make_shiny_table_row_function(
-#                 left_column_percent_width = 40,
-#                 left_column_label = "Select any:",
-#                 font_size = row_label_font_size,
-#                 input_type = "checkbox",
-#                 input_id = "intraoperative_complications_vector",
-#                 choices_vector = c(
-#                   "Durotomy",
-#                   "Nerve Root Injury",
-#                   "Loss of Neuromonitoring Data with Return",
-#                   "Loss of Neuromonitoring Data without Return"
-#                 ),
-#                 initial_value_selected = intraoperative_complications_vector
-#               ),
-#               jh_make_shiny_table_row_function(
-#                 left_column_percent_width = 40,
-#                 left_column_label = "Other Intraoperative Complications:",
-#                 font_size = row_label_font_size,
-#                 input_type = "text",
-#                 input_id = "other_intraoperative_complications",
-#                 initial_value_selected = other_intraoperative_complications
-#               )
-#             ),
-#             conditionalPanel(
-#               condition = "input.intraoperative_complications_vector.indexOf('Durotomy') > -1",
-#               box(
-#                 width = 12,
-#                 title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Durotomy Details:"),
-#                 status = "info",
-#                 solidHeader = TRUE,
-#                 jh_make_shiny_table_row_function(
-#                   left_column_label = "Durotomy Occurred During:",
-#                   input_type = "awesomeRadio",
-#                   input_id = "durotomy_timing",
-#                   left_column_percent_width = 45,
-#                   font_size = 18,
-#                   choices_vector = c("Exposure", "Decompression", "Other"),
-#                   initial_value_selected = durotomy_timing_input,
-#                   checkboxes_inline = FALSE,
-#                   return_as_full_table = TRUE
-#                 ),
-#                 br(),
-#                 jh_make_shiny_table_row_function(
-#                   left_column_label = "What Instrument was Involved?",
-#                   input_type = "awesomeRadio",
-#                   input_id = "durotomy_instrument",
-#                   left_column_percent_width = 45,
-#                   font_size = 18,
-#                   choices_vector = c("Burr", "Kerrison", "Rongeur", "Electrocautery", "Other"),
-#                   initial_value_selected = durotomy_instrument_input,
-#                   checkboxes_inline = FALSE,
-#                   return_as_full_table = TRUE
-#                 ),
-#                 jh_make_shiny_table_row_function(
-#                   left_column_label = "The dura was repaired using:",
-#                   input_type = "checkbox",
-#                   input_id = "durotomy_repair_method",
-#                   left_column_percent_width = 45,
-#                   font_size = 18,
-#                   choices_vector = c(
-#                     "Primarily Repaired using Suture",
-#                     "Dural Sealant",
-#                     "Tachosil",
-#                     "Dural Graft",
-#                     "No Repair Performed",
-#                     "Other"
-#                   ),
-#                   initial_value_selected = durotomy_repair_method_input,
-#                   checkboxes_inline = FALSE,
-#                   return_as_full_table = TRUE
-#                 )
-#               )
-#             )
-#           ),
-#           br(),
-#           jh_make_shiny_table_row_function(
-#             left_column_percent_width = 20,
-#             left_column_label = "Head Positioning:",
-#             font_size = row_label_font_size,
-#             input_type = "radioGroupButtons",
-#             input_id = "head_positioning",
-#             required_option = TRUE,
-#             button_size = "xs",
-#             checkboxes_inline = TRUE,
-#             choices_vector = c(
-#               "Supine/Lateral",
-#               "Proneview Faceplate",
-#               "Cranial Tongs",
-#               "Halo",
-#               "Mayfield"
-#             ),
-#             initial_value_selected = head_positioning
-#           ),
-#           br(),
-#           jh_make_shiny_table_row_function(
-#             left_column_label = "Additional Procedures:",
-#             font_size = row_label_font_size,
-#             input_id = "additional_procedures",
-#             left_column_percent_width = 20,
-#             checkboxes_inline = FALSE,
-#             input_type = "checkbox",
-#             choices_vector = additional_procedures_choices,
-#             initial_value_selected = additional_procedures
-#           ),
-#           conditionalPanel(
-#             condition = "input.additional_procedures.indexOf('Other') > -1",
-#             tags$table(
-#               width = "90%" ,
-#               jh_make_shiny_table_row_function(
-#                 left_column_label = "Other Procedures:",
-#                 font_size = row_label_font_size - 1,
-#                 input_type = "text",
-#                 input_id = "additional_procedures_other",
-#                 left_column_percent_width = 30,
-#                 initial_value_selected = additional_procedures_other,
-#               )
-#             )
-#           ),
-#           br(),
-#           hr(),
-#           div(style = "font-size:20px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
-#           uiOutput(outputId = "drains_ui"),
-#           hr(),
-#           jh_make_shiny_table_row_function(
-#             left_column_label = "Select any used during closure:",
-#             input_type = "checkbox",
-#             input_id = "additional_end_procedure_details",
-#             left_column_percent_width = 45,
-#             font_size = row_label_font_size,
-#             choices_vector = c("Vancomycin Powder",
-#                                "Antibiotic Beads"),
-#             initial_value_selected = additional_end_procedure_details,
-#             return_as_full_table = TRUE
-#           ),
-#           hr(),
-#           jh_make_shiny_table_row_function(
-#             left_column_label = "Skin Closure:",
-#             input_type = "checkbox",
-#             input_id = "closure_details",
-#             left_column_percent_width = 45,
-#             font_size = row_label_font_size,
-#             required_option = TRUE,
-#             choices_vector = c("Subcutaneous suture",
-#                                "Nylon",
-#                                "Staples"),
-#             initial_value_selected = closure_details,
-#             return_as_full_table = TRUE
-#           ),
-#           hr(),
-#           jh_make_shiny_table_row_function(
-#             left_column_label = "Skin/Dressing:",
-#             input_type = "checkbox",
-#             input_id = "dressing_details",
-#             required_option = TRUE,
-#             left_column_percent_width = 45,
-#             font_size = row_label_font_size,
-#             choices_vector = c(
-#               "Steristrips",
-#               "Dermabond",
-#               "Prineo",
-#               "an Incisional Wound Vac",
-#               "a water tight dressing"
-#             ),
-#             initial_value_selected = dressing_details,
-#             return_as_full_table = TRUE
-#           ),
-#           br()
-#         )
-#       )
-#     
-#     return(additional_details_modal)
-#   }

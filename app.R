@@ -1368,67 +1368,7 @@ server <- function(input, output, session) {
     
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
     ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
-    ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
 
-    # ### DRAIN INPUT UI ###
-    # output$drains_ui <- renderUI({
-    #     # all_objects_to_add_list$objects_df
-    #     anterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
-    #                                                       input_type = "awesomeRadio",
-    #                                                       input_id = "deep_drains_anterior", 
-    #                                                       left_column_percent_width = 45, 
-    #                                                       font_size = 16, 
-    #                                                       initial_value_selected = 0, 
-    #                                                       choices_vector = c("0", "1", "2", "3", "4", "5"), 
-    #                                                       checkboxes_inline = TRUE, return_as_full_table = TRUE)
-    #     anterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
-    #                                                              input_type = "awesomeRadio",
-    #                                                              input_id = "superficial_drains_anterior", 
-    #                                                              left_column_percent_width = 45, 
-    #                                                              font_size = 16, 
-    #                                                              initial_value_selected = 0, 
-    #                                                              choices_vector = c("0", "1", "2", "3", "4", "5"), 
-    #                                                              checkboxes_inline = TRUE, return_as_full_table = TRUE)
-    #     
-    #     posterior_deep <- jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
-    #                                                        input_type = "awesomeRadio",
-    #                                                        input_id = "deep_drains_posterior", 
-    #                                                        left_column_percent_width = 45, 
-    #                                                        font_size = 16, 
-    #                                                        initial_value_selected = 1, 
-    #                                                        choices_vector = c("0", "1", "2", "3", "4", "5"), 
-    #                                                        checkboxes_inline = TRUE, return_as_full_table = TRUE)
-    #     posterior_superficial <- jh_make_shiny_table_row_function(left_column_label = "Posterior Superficial drains:", 
-    #                                                               input_type = "awesomeRadio",
-    #                                                               input_id = "superficial_drains_posterior", 
-    #                                                               left_column_percent_width = 45, 
-    #                                                               font_size = 16, 
-    #                                                               initial_value_selected = 1, 
-    #                                                               choices_vector = c("0", "1", "2", "3", "4", "5"), 
-    #                                                               checkboxes_inline = TRUE, return_as_full_table = TRUE)
-    #     
-    #     drains_list <- list()
-    #     if(nrow(all_objects_to_add_list$objects_df)>0){
-    #         if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
-    #             drains_list$anterior_deep <- anterior_deep
-    #             drains_list$anterior_superficial <- anterior_superficial
-    #         }
-    #         if(any(all_objects_to_add_list$objects_df$approach == "posterior")){
-    #             drains_list$posterior_deep <- posterior_deep
-    #             drains_list$posterior_superficial <- posterior_superficial
-    #             
-    #         }
-    #     }else{
-    #         if(input$spine_approach == "Posterior"){
-    #             drains_list$posterior_deep <- posterior_deep
-    #             drains_list$posterior_superficial <- posterior_superficial
-    #         }else{
-    #             drains_list$anterior_deep <- anterior_deep
-    #             drains_list$anterior_superficial <- anterior_superficial
-    #         }
-    #     }
-    #     drains_list
-    # })
     
     
     observeEvent(input$intraoperative_complications_vector, {
@@ -1577,7 +1517,10 @@ server <- function(input, output, session) {
         unlist(additional_procedures_list, use.names = FALSE)
     })
     
-    ########### RUN ADDITIONAL SURGICAL DETAILS MODAL ############
+    ######################################## RUN ADDITIONAL SURGICAL DETAILS MODAL AFTER ADVANCING TO NEXT TAB ###############################
+    ######################################## RUN ADDITIONAL SURGICAL DETAILS MODAL AFTER ADVANCING TO NEXT TAB ###############################
+    ######################################## RUN ADDITIONAL SURGICAL DETAILS MODAL AFTER ADVANCING TO NEXT TAB ###############################
+    ######################################## RUN ADDITIONAL SURGICAL DETAILS MODAL AFTER ADVANCING TO NEXT TAB ###############################
     
     
     
@@ -1629,6 +1572,7 @@ server <- function(input, output, session) {
         )
     })
     
+    ### CREATE VARIABLE FOR PROCEDURE APPROACH FOR GUIDING MODAL BOX CHOICES
     procedure_approach_reactive <- reactive({
         if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
             anterior_approach <- TRUE
@@ -1649,40 +1593,10 @@ server <- function(input, output, session) {
         procedure_approach
     })
     
-    observeEvent(input$additional_surgical_details_1_complete, ignoreInit = TRUE, {
-        add_procedures_list <- list()
-        
-        if(length(input$prior_fusion_levels)>0){
-            add_procedures_list$exploration_of_fusion <- "Exploration of prior spinal fusion"
-        }
-        if(str_detect(string = str_to_lower(toString(input$primary_diagnosis)), pattern = "myelitis|infecti|bacteria|coccal|meningitis")){
-            add_procedures_list$irrigation_debridement <- "Irrigation and Debridement"
-        }
-        
-        showModal(
-            addition_surgical_details_modal_box_2_function(additional_procedures_choices = additional_procedures_options_reactive_vector(),
-                                                         additional_procedures = unlist(add_procedures_list, use.names = FALSE), 
-                                                         procedure_approach = procedure_approach_reactive())
-        )
-    })
-    
-    observeEvent(list(input$deep_drains_anterior, input$superficial_drains_anterior, input$deep_drains_posterior, input$superficial_drains_posterior), ignoreInit = TRUE, {
-        
-        if(any((as.numeric(input$deep_drains_anterior) > 0 | 
-                as.numeric(input$superficial_drains_anterior) >0| 
-                as.numeric(input$deep_drains_posterior) >0| 
-                as.numeric(input$superficial_drains_posterior) >0))){
-         updateAwesomeCheckboxGroup(session = session, 
-                                    inputId = "postop_drains_dressing", 
-                                    selected = "Monitor and record drain output q12h")
-        }
-        }
-    )
-
-    ## this is for all future runs
+    ## NOW make a reactive modal for editing the info if needed ###
     modal_box_surgical_details_reactive <- reactive({
-        
-        addition_surgical_details_modal_box_function(primary_surgeon_first_name_input = input$primary_surgeon_first_name,
+        addition_surgical_details_modal_box_function(editing_the_details = TRUE, ## this shows a different button at the footer
+                                                     primary_surgeon_first_name_input = input$primary_surgeon_first_name,
                                                      primary_surgeon_last_name_input = input$primary_surgeon_last_name,
                                                      surgical_assistants = input$surgical_assistants,
                                                      preoperative_diagnosis = input$preoperative_diagnosis,
@@ -1697,6 +1611,42 @@ server <- function(input, output, session) {
                                                      txa_maintenance = input$txa_maintenance)
     })
     
+    ## NOW OBSERVE THE COMPLETION OF MODAL BOX 1 AND THEN SHOW MODAL BOX 2
+    
+    observeEvent(input$additional_surgical_details_1_complete, {
+        add_procedures_list <- list()
+        
+        if(length(input$prior_fusion_levels)>0){
+            add_procedures_list$exploration_of_fusion <- "Exploration of prior spinal fusion"
+        }
+        if(str_detect(string = str_to_lower(toString(input$primary_diagnosis)), pattern = "myelitis|infecti|bacteria|coccal|meningitis")){
+            add_procedures_list$irrigation_debridement <- "Irrigation and Debridement"
+        }
+        
+        showModal(
+            addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
+                                                           additional_procedures_choices = additional_procedures_options_reactive_vector(),
+                                                         additional_procedures = unlist(add_procedures_list, use.names = FALSE), 
+                                                         procedure_approach = procedure_approach_reactive())
+        )
+    })
+    
+    # observeEvent(list(input$deep_drains_anterior, input$superficial_drains_anterior, input$deep_drains_posterior, input$superficial_drains_posterior), ignoreInit = TRUE, {
+    #     
+    #     if(any((as.numeric(input$deep_drains_anterior) > 0 | 
+    #             as.numeric(input$superficial_drains_anterior) >0| 
+    #             as.numeric(input$deep_drains_posterior) >0| 
+    #             as.numeric(input$superficial_drains_posterior) >0))){
+    #      updateAwesomeCheckboxGroup(session = session, 
+    #                                 inputId = "postop_drains_dressing", 
+    #                                 selected = "Monitor and record drain output q12h")
+    #     }
+    #     }
+    # )
+
+    
+    
+    ## NOW make a reactive modal for editing the info if needed ###
     modal_box_surgical_details_2_reactive <- reactive({
         
         addition_surgical_details_modal_box_2_function(
@@ -1739,94 +1689,92 @@ server <- function(input, output, session) {
             )
     })
     
-    observeEvent(input$editing_additional_surgical_details_1_complete, ignoreInit = TRUE, {
+    ### NOW SHOW MODAL 2 IF THERE ARE INCOMPLETE VALUES ###
+    observeEvent(input$additional_surgical_details_complete, #ignoreInit = TRUE
+                 {
+                     if(length(input$head_positioning) == 0 | length(input$closure_details) == 0 | length(input$dressing_details) == 0 | length(input$intraoperative_complications_yes_no) == 0){
+                         showModal(
+                             addition_surgical_details_modal_box_2_function(required_options_missing = TRUE,
+                                                                            procedure_approach = procedure_approach_reactive(),
+                                                                            head_positioning = input$head_positioning,
+                                                                            surgical_findings = input$surgical_findings,
+                                                                            specimens_removed = input$specimens_removed,
+                                                                            ebl = input$ebl,
+                                                                            urine_output = input$urine_output,
+                                                                            crystalloids_administered = input$crystalloids_administered,
+                                                                            colloids_administered = input$colloids_administered,
+                                                                            transfusion = input$transfusion,
+                                                                            cell_saver_transfused = input$cell_saver_transfused,
+                                                                            prbc_transfused = input$prbc_transfused,
+                                                                            ffp_transfused = input$ffp_transfused,
+                                                                            cryoprecipitate_transfused = input$cryoprecipitate_transfused,
+                                                                            platelets_transfused = input$platelets_transfused,
+                                                                            intraoperative_complications_yes_no = input$intraoperative_complications_yes_no,
+                                                                            intraoperative_complications_vector = input$intraoperative_complications_vector,
+                                                                            other_intraoperative_complications = input$other_intraoperative_complications,
+                                                                            durotomy_timing_input = input$durotomy_timing,
+                                                                            durotomy_instrument_input = input$durotomy_instrument,
+                                                                            durotomy_repair_method_input = input$durotomy_repair_method,
+                                                                            additional_procedures_choices = additional_procedures_options_reactive_vector(),
+                                                                            additional_procedures = input$additional_procedures,
+                                                                            additional_procedures_other = input$additional_procedures_other,
+                                                                            additional_end_procedure_details = input$additional_end_procedure_details,
+                                                                            closure_details = input$closure_details,
+                                                                            dressing_details = input$dressing_details,
+                                                                            postop_dispo = input$postop_dispo,
+                                                                            postop_abx = input$postop_abx,
+                                                                            postop_imaging = input$postop_imaging,
+                                                                            postop_pain = input$postop_pain,
+                                                                            postop_activity = input$postop_activity,
+                                                                            postop_brace = input$postop_brace,
+                                                                            postop_diet = input$postop_diet,
+                                                                            postop_dvt_ppx = input$postop_dvt_ppx,
+                                                                            postop_drains_dressing = input$postop_drains_dressing,
+                                                                            postop_followup = input$postop_followup,
+                             )
+                         )
+                     }else{
+                         removeModal()
+                     }
+                 })
+    
+    
+    ### NOw show Modal 1 if 'edit additional surgical details' is clicked: ###
+    observeEvent(input$edit_additional_surgical_details,  {
+        showModal(modal_box_surgical_details_reactive())
+        # showModal(
+        #     addition_surgical_details_modal_box_function(editing_the_details = TRUE,
+        #                                                  primary_surgeon_first_name_input = input$primary_surgeon_first_name,
+        #                                                  primary_surgeon_last_name_input = input$primary_surgeon_last_name,
+        #                                                  surgical_assistants = input$surgical_assistants,
+        #                                                  preoperative_diagnosis = input$preoperative_diagnosis,
+        #                                                  postoperative_diagnosis = input$postoperative_diagnosis, 
+        #                                                  asa_class = input$asa_class,
+        #                                                  anesthesia = input$anesthesia,
+        #                                                  indications = input$indications,
+        #                                                  neuromonitoring = input$neuromonitoring,
+        #                                                  preop_antibiotics = input$preop_antibiotics,
+        #                                                  anti_fibrinolytic = input$anti_fibrinolytic,
+        #                                                  txa_loading = input$txa_loading, 
+        #                                                  txa_maintenance = input$txa_maintenance)
+        # )
+    })
+    
+    ### NOw show Modal 2 if 'edit additional surgical details' is clicked: ###
+    
+    observeEvent(input$editing_additional_surgical_details_1_complete, {
+        removeModal() ## removes the current modal
         showModal(
             modal_box_surgical_details_2_reactive()
         )
     })
     
-
     
-    observeEvent(input$edit_additional_surgical_details, ignoreInit = TRUE, {
-        showModal(
-            addition_surgical_details_modal_box_function(editing_the_details = TRUE,
-                                                         primary_surgeon_first_name_input = input$primary_surgeon_first_name,
-                                                         primary_surgeon_last_name_input = input$primary_surgeon_last_name,
-                                                         surgical_assistants = input$surgical_assistants,
-                                                         preoperative_diagnosis = input$preoperative_diagnosis,
-                                                         postoperative_diagnosis = input$postoperative_diagnosis, 
-                                                         asa_class = input$asa_class,
-                                                         anesthesia = input$anesthesia,
-                                                         indications = input$indications,
-                                                         neuromonitoring = input$neuromonitoring,
-                                                         preop_antibiotics = input$preop_antibiotics,
-                                                         anti_fibrinolytic = input$anti_fibrinolytic,
-                                                         txa_loading = input$txa_loading,
-                                                         txa_maintenance = input$txa_maintenance)
-        )
-    })
-    
-    observeEvent(input$additional_surgical_details_complete, ignoreInit = TRUE, ignoreNULL = TRUE, {
-        required_options <- list()
-        required_options$head_position <- input$head_positioning
-        required_options$closure_details <- input$closure_details
-        required_options$dressing_details <- input$dressing_details
-        required_options$complications_yes_no <- input$intraoperative_complications_yes_no
-        
-        if(is.null(required_options$head_position) |
-           is.null(required_options$closure_details) |
-           is.null(required_options$dressing_details) |
-           is.null(required_options$complications_yes_no) ){
-            showModal(
-                # modal_box_surgical_details_2_reactive()
-                addition_surgical_details_modal_box_2_function(required_options_missing = TRUE,
-                                                               procedure_approach = procedure_approach_reactive(),
-                                                               head_positioning = input$head_positioning,
-                                                               surgical_findings = input$surgical_findings,
-                                                               specimens_removed = input$specimens_removed,
-                                                               ebl = input$ebl,
-                                                               urine_output = input$urine_output,
-                                                               crystalloids_administered = input$crystalloids_administered,
-                                                               colloids_administered = input$colloids_administered,
-                                                               transfusion = input$transfusion,
-                                                               cell_saver_transfused = input$cell_saver_transfused,
-                                                               prbc_transfused = input$prbc_transfused,
-                                                               ffp_transfused = input$ffp_transfused,
-                                                               cryoprecipitate_transfused = input$cryoprecipitate_transfused,
-                                                               platelets_transfused = input$platelets_transfused,
-                                                               intraoperative_complications_yes_no = input$intraoperative_complications_yes_no,
-                                                               intraoperative_complications_vector = input$intraoperative_complications_vector,
-                                                               other_intraoperative_complications = input$other_intraoperative_complications,
-                                                               durotomy_timing_input = input$durotomy_timing,
-                                                               durotomy_instrument_input = input$durotomy_instrument,
-                                                               durotomy_repair_method_input = input$durotomy_repair_method,
-                                                               additional_procedures_choices = additional_procedures_options_reactive_vector(),
-                                                               additional_procedures = input$additional_procedures,
-                                                               additional_procedures_other = input$additional_procedures_other,
-                                                               additional_end_procedure_details = input$additional_end_procedure_details,
-                                                               closure_details = input$closure_details,
-                                                               dressing_details = input$dressing_details,
-                                                               postop_dispo = input$postop_dispo,
-                                                               postop_abx = input$postop_abx,
-                                                               postop_imaging = input$postop_imaging,
-                                                               postop_pain = input$postop_pain,
-                                                               postop_activity = input$postop_activity,
-                                                               postop_brace = input$postop_brace,
-                                                               postop_diet = input$postop_diet,
-                                                               postop_dvt_ppx = input$postop_dvt_ppx,
-                                                               postop_drains_dressing = input$postop_drains_dressing,
-                                                               postop_followup = input$postop_followup
-                )
-            )
-        }else{
-            removeModal()
-        }
-    })
     
     
     ##### TEXT ON LEFT COLUM #####
     
-    output$additional_surgical_details_table <- renderTable({
+    additional_surgical_details_reactive_table <- reactive({
         details_list <- list()
         
         details_list$'Primary Surgeon' <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
@@ -1849,44 +1797,55 @@ server <- function(input, output, session) {
         details_list$'Colloids:' <- paste(input$colloids_administered)
         details_list$'Transfusions/Cell Saver:' <- if_else(input$transfusion == TRUE, "Yes", "No")
         
-        if(input$cell_saver_transfused > 0){
+        if(!is.null(input$cell_saver_transfused) && input$cell_saver_transfused > 0){
             details_list$'Cell Saver Transfused (cc):' <- paste(input$cell_saver_transfused)
         }
-        if(input$prbc_transfused > 0){
+        if(!is.null(input$prbc_transfused) && input$prbc_transfused > 0){
             details_list$'FFP units transfused:' <- paste(input$ffp_transfused)
         }
-        if(input$cryoprecipitate_transfused > 0){
-            details_list$'Cryoprecipitate units transfused:' <- paste(input$cryoprecipitate_transfused) 
+        if(!is.null(input$cryoprecipitate_transfused) && input$cryoprecipitate_transfused > 0){
+            details_list$'Cryoprecipitate units transfused:' <- paste(input$cryoprecipitate_transfused)
         }
-        if(input$platelets_transfused > 0){
-            details_list$'Platelet units transfused:' <- paste(input$platelets_transfused) 
+        if(!is.null(input$platelets_transfused) && input$platelets_transfused > 0){
+            details_list$'Platelet units transfused:' <- paste(input$platelets_transfused)
         }
+        
         details_list$'- -' <- "- -"
-        details_list$'Intraoperative Complications:' <- if_else(length(input$intraoperative_complications_yes_no)>0, as.character(input$intraoperative_complications_yes_no), "NA")
+        # details_list$'Intraoperative Complications:' <- if_else(length(input$intraoperative_complications_yes_no)>0, 
+        #                                                         as.character(input$intraoperative_complications_yes_no), 
+        #                                                         "NA")
+        if(!is.null(input$intraoperative_complications_yes_no) && input$intraoperative_complications_yes_no == "Yes" && length(input$intraoperative_complications_vector) > 0){
+            details_list$'Intraoperative Complications:' <- as.character(glue_collapse(x = input$intraoperative_complications_vector, sep = "; "))
+        }
+         
         details_list$'Head Position:' <- paste(input$head_positioning)
         details_list$'Additional Procedures:' <- as.character(glue_collapse(x = additional_procedures_vector_reactive(), sep = "; "))
         details_list$'End of Procedure & Closure Details:' <- "---"
+        
         if(!is.null(input$deep_drains_anterior) && input$deep_drains_anterior > 0){
             details_list$'Anterior Deep Drains:' <- paste(input$deep_drains_anterior)
         }
         if(!is.null(input$superficial_drains_anterior) && input$superficial_drains_anterior > 0){
             details_list$'Anterior Superficial Drains:' <- paste(input$superficial_drains_anterior)
         }
-        
+
         if(!is.null(input$deep_drains_posterior) && input$deep_drains_posterior > 0){
             details_list$'Posterior Deep Drains:' <- paste(input$deep_drains_posterior)
         }
         if(!is.null(input$superficial_drains_posterior) && input$superficial_drains_posterior > 0){
             details_list$'Posterior Superficial Drains:' <- paste(input$superficial_drains_posterior)
         }
-            
+
         details_list$'Used During Closure:' <- toString(input$additional_end_procedure_details)
         details_list$'Skin Closure:' <- toString(input$closure_details)
         details_list$'Skin/Dressing:' <- toString(input$dressing_details)
-
+        
         enframe(details_list, name = "Variable", value = "Input") %>%
             replace_na(list(Input = "No Value Entered"))
-
+    })
+    
+    output$additional_surgical_details_table <- renderTable({
+        additional_surgical_details_reactive_table()
         })
     
 

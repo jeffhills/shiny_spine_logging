@@ -5,10 +5,10 @@ account: hills-apps
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3825489
-bundleId: 5457148
+bundleId: 5549304
 url: https://hills-apps.shinyapps.io/spine_templating_logging/
-when: 1641927358.08985
-lastSyncTime: 1641927358.08985
+when: 1644167069.3526
+lastSyncTime: 1644167069.3526
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: add_on_codes_wide_df.csv|cpt_code_formatting.nb.html|cpt_code_formatting.Rmd|cpt_codes/2020 Depuy Spine Coding Guide.pdf|cpt_codes/all_procedures_for_cpt_df.csv|cpt_codes/all_spine_cpt_codes.csv|cpt_codes/cpt_primary_codes_laminectomy_formatted_12_21.csv|cpt_codes/procedures_for_cpt_df.csv|cpt_codes_no_addon_codes_df.csv|cpt_codes_no_addon_codes_df_filtered.csv|cpt_codes_rvus_unformatted.csv|cpt_spine_regions_removed_from_procedure_df.csv|full_coordinates_df.csv.xlsx|icd_codes_2022_formatting_updated.nb.html|icd_codes_2022_formatting_updated.Rmd|icd10_codes_2022_updated_spine_only.csv|icd10_codes_2022_updated_spine_onlyv2.csv|old_app_versions/10_4_2021_prior_to_icd_codes_dx.R|op_note_labels_cpt_templated_df.csv|op_note_object_labels_df_hand_modified.csv|other_neuro_icd_codes_2022_df.csv|primary_procedures_no_addons_regions_removed_no_codes_df.csv|primary_procedures_no_addons_regions_removed_no_codes_df_hand_modified.csv|redcap/Caselogsshiny_2021-08-03_0856.REDCap.xml|redcap/Caselogsshiny_DataDictionary_2021-08-03.csv|shiny_testing.nb.html|shiny_testing.Rmd|spine_icd_codes.csv|testing_operative_note.nb.html|testing_operative_note.Rmd|testing_screw_functions.nb.html|testing_screw_functions.Rmd|testing_screw_inputs_v2.nb.html|testing_screw_inputs_v2.Rmd|testing_screw_inputs_v3.nb.html|testing_screw_inputs_v3.Rmd|testing_screws_v4.nb.html|testing_screws_v4.Rmd|icd_codes|testing_docs
+ignoredFiles: cpt_code_formatting.nb.html|cpt_code_formatting.Rmd|full_coordinates_df.csv.xlsx|icd_codes_2022_formatting_updated.nb.html|old_app_versions/10_4_2021_prior_to_icd_codes_dx.R|redcap/Caselogsshiny_2021-08-03_0856.REDCap.xml|redcap/Caselogsshiny_DataDictionary_2021-08-03.csv|cpt_codes|icd_codes|spine_figures|testing_docs
