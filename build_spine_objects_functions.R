@@ -1,15 +1,10 @@
-#### BUILDING OBJECTS FUNCTIONS
-
-#############-----------------------   Build: xxxxxxxxxxxx  ----------------------###############
-
-
 #############-----------------------   POSTERIOR  ----------------------###############
 #############-----------------------   POSTERIOR  ----------------------###############
 #############-----------------------   POSTERIOR  ----------------------###############
 #############-----------------------   POSTERIOR  ----------------------###############
 #############-----------------------   POSTERIOR  ----------------------###############
 
-#############-----------------------   Build: screws  ----------------------###############
+#############---------------------   Build: screws  --------------------###############
 
 screw_function <- function(screw_start_x, screw_start_y, angle, screw_length_modifier = 1, screw_width_modifier = 1){
   
@@ -440,30 +435,6 @@ build_osteotomy_function <- function(level,
     
   }
   
-  # if(osteotomy_grade == "complete_facetectomy"){
-  #   if(x_click < 0.5){
-  #     #start top left and then work in counterclockwise
-  #     point_1 <- c(inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
-  #     point_2 <- c(inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
-  #     point_3 <- c(inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
-  #     point_4 <- c(inferior_facet_medial_border_x, inferior_facet_superior_border_y)
-  #   }else{
-  #     #start top left and then work in counterclockwise
-  #     point_1 <- c(1- inferior_facet_lateral_border_x, inferior_facet_superior_border_y)
-  #     point_2 <- c(1 - inferior_facet_lateral_border_x, inferior_facet_inferior_border_y)
-  #     point_3 <- c(1 - inferior_facet_medial_border_x, inferior_facet_inferior_border_y)
-  #     point_4 <- c(1 - inferior_facet_medial_border_x, inferior_facet_superior_border_y)
-  #   }
-  # 
-  #   osteotomy_sf <- st_linestring(rbind(point_1,
-  #                                       point_2,
-  #                                       point_3,
-  #                                       point_4,
-  #                                       point_1))
-  #   
-  #   osteotomy_sf <- st_buffer(st_polygon(list(osteotomy_sf)), dist = 0.0025, endCapStyle = "ROUND")
-  # }
-  
   if(osteotomy_grade == "grade_3" | osteotomy_grade == "grade_4" | osteotomy_grade == "grade_5"){
     
     #start top left and then work in counterclockwise
@@ -567,6 +538,43 @@ build_decompression_function <- function(left_x,
     decompression_sf <- st_buffer(x = st_polygon(list(decompression)), dist = 0.008, endCapStyle = "ROUND")  
   }
   
+  if(object == "lateral_extraforaminal_approach"){
+    if(side == "right"){
+      point_1 <- c(1-x_lateral_pars, inferior_facet_superior_border_y +0.004)
+      point_2 <- c(1-x_lateral_pars + 0.012, inferior_facet_superior_border_y+0.004)
+      point_3 <- c(1-x_lateral_pars + 0.012, inferior_facet_superior_border_y)
+      point_4 <- c(1-x_lateral_pars, inferior_facet_superior_border_y)
+    }else{
+      # object_center <- c(x_lateral_pars, inferior_facet_superior_border_y)
+      point_1 <- c(x_lateral_pars, inferior_facet_superior_border_y+0.004)
+      point_2 <- c(x_lateral_pars - 0.012, inferior_facet_superior_border_y+0.004)
+      point_3 <- c(x_lateral_pars - 0.012, inferior_facet_superior_border_y)
+      point_4 <- c(x_lateral_pars, inferior_facet_superior_border_y)
+    }
+    decompression <- st_linestring(rbind(point_1, point_2, point_3, point_4, point_1))
+    decompression_sf <- st_buffer(x = st_polygon(list(decompression)), dist = 0.006, endCapStyle = "ROUND")  
+  }
+  
+  
+  if(object == "corpectomy_extracavitary_tumor"){
+    if(side == "right"){
+      medial_edge <- x_lateral_pars + 0.006
+      point_1 <- c(1-medial_edge, inferior_facet_superior_border_y)
+      point_2 <- c(1-medial_edge + 0.012, inferior_facet_superior_border_y)
+      point_3 <- c(1-medial_edge + 0.012, inferior_facet_superior_border_y-0.007)
+      point_4 <- c(1-medial_edge, inferior_facet_superior_border_y - 0.007)
+    }else{
+      medial_edge <- x_lateral_pars +0.006
+      point_1 <- c(medial_edge, inferior_facet_superior_border_y)
+      point_2 <- c(medial_edge - 0.012, inferior_facet_superior_border_y)
+      point_3 <- c(medial_edge - 0.012, inferior_facet_superior_border_y-0.007)
+      point_4 <- c(medial_edge, inferior_facet_superior_border_y - 0.007)
+    }
+    decompression <- st_linestring(rbind(point_1, point_2, point_3, point_4, point_1))
+    decompression_sf <- st_buffer(x = st_polygon(list(decompression)), dist = 0.008, endCapStyle = "ROUND")  
+  }
+  
+  
   if(object == "transpedicular_approach"){
     if(side == "right"){
       object_center <- c(1-x_lateral_pars, y_inferior_tp)
@@ -588,7 +596,7 @@ build_decompression_function <- function(left_x,
     decompression_sf <- st_buffer(decompression, dist = 0.013, endCapStyle = "ROUND")
   }
   
-  if(object == "laminectomy" | object == "sublaminar_decompression" | object == "laminotomy" | object == "diskectomy"){
+  if(object == "laminectomy" | object == "laminectomy_for_tumor" | object == "sublaminar_decompression" | object == "laminotomy" | object == "diskectomy"){
     bottom_width <- right_x - left_x
     
     top_width_difference = bottom_width - top_width
@@ -603,8 +611,70 @@ build_decompression_function <- function(left_x,
     decompression_sf <- st_buffer(x = st_polygon(list(decompression)), dist = 0.0025, endCapStyle = "ROUND")  
   }
   
+  if(object == "laminectomy_for_facet_cyst"){
+    bottom_width <- right_x - left_x
+    
+    top_width_difference = bottom_width - top_width
+  
+    
+    if(side == "right"){
+      
+      bottom_left <- c(left_x, inferior_y)
+      bottom_right <- c(right_x + 0.004, inferior_y)
+      top_left <- c(left_x + 0.5*top_width_difference, superior_y)
+      top_right <- c(right_x - 0.5*top_width_difference, superior_y)
+      
+      # bottom_right <- c(bottom_right[[1]] + 0.004, bottom_right[[2]])
+    }else{
+      
+      bottom_left <- c(left_x - 0.004, inferior_y)
+      bottom_right <- c(right_x, inferior_y)
+      top_left <- c(left_x + 0.5*top_width_difference, superior_y)
+      top_right <- c(right_x - 0.5*top_width_difference, superior_y)
+      
+      # bottom_left <- c(bottom_left[[1]] - 0.004, bottom_left[[2]])
+    }
+    
+    decompression <- st_linestring(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))
+    
+    decompression_sf <- st_buffer(x = st_polygon(list(decompression)), dist = 0.0025, endCapStyle = "ROUND")  
+  }
+  
   
   return(decompression_sf)
+}
+
+#############-----------------------   Build: DECOMPRESSIONS  ----------------------###############
+
+
+build_incision_drainage_function <- function(left_x, 
+                                         right_x, 
+                                         superior_y, 
+                                         inferior_y, 
+                                         top_width, 
+                                         object="x",
+                                         x_lateral_pars, 
+                                         y_inferior_tp, side,
+                                         inferior_pedicle_y,
+                                         inferior_facet_superior_border_y = 0.5){
+
+  if(object == "incision_drainage"){
+    bottom_width <- right_x - left_x
+    
+    top_width_difference = bottom_width - top_width
+    
+    bottom_left <- c(0.46, inferior_y)
+    bottom_right <- c(0.54, inferior_y)
+    top_left <- c(0.46, superior_y)
+    top_right <- c(0.54, superior_y)
+    
+    site <- st_linestring(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))
+    
+    incision_drainage_sf <- st_buffer(x = st_polygon(list(site)), dist = 0.0025, endCapStyle = "ROUND")  
+  }
+
+  
+  return(incision_drainage_sf)
 }
 
 

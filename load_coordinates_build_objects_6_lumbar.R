@@ -412,7 +412,8 @@ l6_all_points_all_implants_constructed_df <- l6_implants_constructed_df %>%
   union_all(l6_decompression_df) %>%
   union_all(l6_anterior_objects_df) %>% 
   union_all(l6_all_interbody_df) %>%
-  select(level, vertebral_number, everything())
+  select(level, vertebral_number, everything())%>%
+  remove_empty()
 
 l6_revision_implants_df <- l6_all_points_all_implants_constructed_df %>%
   filter(object == "pedicle_screw" | object == "pelvic_screw" | object == "occipital_screw") %>%
@@ -421,11 +422,18 @@ l6_revision_implants_df <- l6_all_points_all_implants_constructed_df %>%
   distinct() %>%
   group_by(level, object, side) %>%
   filter(y == max(y)) %>%
-  ungroup()
+  ungroup()%>%
+  remove_empty()
 
 l6_all_implants_constructed_df <- l6_all_points_all_implants_constructed_df %>%
-  select(-ends_with("_x"), -ends_with("_y"))
+  select(-ends_with("_x"), -ends_with("_y"))%>%
+  remove_empty()
   # select(level, body_interspace, vertebral_number, approach, category,implant, object, side, x, y, fusion,interbody_fusion, direction, fixation_uiv_liv, object_constructed)
 
-rm(l6_osteotomy_df, l6_decompression_df, l6_all_interbody_df)
+rm(l6_osteotomy_df, 
+   l6_decompression_df, 
+   l6_all_interbody_df, 
+   l6_anterior_objects_df,
+   l6_implants_constructed_df,
+   l6_all_points_all_implants_constructed_df)
 

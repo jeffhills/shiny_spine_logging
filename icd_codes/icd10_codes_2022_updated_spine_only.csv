@@ -1,0 +1,1015 @@
+section,diagnosis,icd_10_code,spine_region
+msk,"Staphylococcal arthritis, vertebrae",M00.08,unspecified
+msk,"Pneumococcal arthritis, vertebrae",M00.18,unspecified
+msk,"Other streptococcal arthritis, vertebrae",M00.28,unspecified
+msk,"Arthritis due to other bacteria, vertebrae",M00.88,unspecified
+msk,Direct infection of vertebrae in infectious and parasitic diseases classified elsewhere,M01.X8,unspecified
+msk,"Arthropathy following intestinal bypass, vertebrae",M02.08,unspecified
+msk,"Postdysenteric arthropathy, vertebrae",M02.18,unspecified
+msk,"Postimmunization arthropathy, vertebrae",M02.28,unspecified
+msk,"Reiter's disease, vertebrae",M02.38,unspecified
+msk,"Other reactive arthropathies, vertebrae",M02.88,unspecified
+msk,"Postural kyphosis, cervicothoracic region",M40.03,cervicothoracic
+msk,"Postural kyphosis, thoracic region",M40.04,thoracic
+msk,"Postural kyphosis, thoracolumbar region",M40.05,thoracolumbar
+msk,"Other secondary kyphosis, cervical region",M40.12,cervical
+msk,"Other secondary kyphosis, cervicothoracic region",M40.13,cervicothoracic
+msk,"Other secondary kyphosis, thoracic region",M40.14,thoracic
+msk,"Other secondary kyphosis, thoracolumbar region",M40.15,thoracolumbar
+msk,"Other kyphosis, cervical region",M40.292,cervical
+msk,"Other kyphosis, cervicothoracic region",M40.293,cervicothoracic
+msk,"Other kyphosis, thoracic region",M40.294,thoracic
+msk,"Other kyphosis, thoracolumbar region",M40.295,thoracolumbar
+msk,"Flatback syndrome, thoracolumbar region",M40.35,thoracolumbar
+msk,"Flatback syndrome, lumbar region",M40.36,lumbar
+msk,"Flatback syndrome, lumbosacral region",M40.37,lumbosacral
+msk,"Postural lordosis, thoracolumbar region",M40.45,thoracolumbar
+msk,"Postural lordosis, lumbar region",M40.46,lumbar
+msk,"Postural lordosis, lumbosacral region",M40.47,lumbosacral
+msk,"Infantile idiopathic scoliosis, cervical region",M41.02,cervical
+msk,"Infantile idiopathic scoliosis, cervicothoracic region",M41.03,cervicothoracic
+msk,"Infantile idiopathic scoliosis, thoracic region",M41.04,thoracic
+msk,"Infantile idiopathic scoliosis, thoracolumbar region",M41.05,thoracolumbar
+msk,"Infantile idiopathic scoliosis, lumbar region",M41.06,lumbar
+msk,"Infantile idiopathic scoliosis, lumbosacral region",M41.07,lumbosacral
+msk,"Infantile idiopathic scoliosis, sacral and sacrococcygeal region",M41.08,sacral
+msk,"Juvenile idiopathic scoliosis, cervical region",M41.112,cervical
+msk,"Juvenile idiopathic scoliosis, cervicothoracic region",M41.113,cervicothoracic
+msk,"Juvenile idiopathic scoliosis, thoracic region",M41.114,thoracic
+msk,"Juvenile idiopathic scoliosis, thoracolumbar region",M41.115,thoracolumbar
+msk,"Juvenile idiopathic scoliosis, lumbar region",M41.116,lumbar
+msk,"Juvenile idiopathic scoliosis, lumbosacral region",M41.117,lumbosacral
+msk,"Adolescent idiopathic scoliosis, cervical region",M41.122,cervical
+msk,"Adolescent idiopathic scoliosis, cervicothoracic region",M41.123,cervicothoracic
+msk,"Adolescent idiopathic scoliosis, thoracic region",M41.124,thoracic
+msk,"Adolescent idiopathic scoliosis, thoracolumbar region",M41.125,thoracolumbar
+msk,"Adolescent idiopathic scoliosis, lumbar region",M41.126,lumbar
+msk,"Adolescent idiopathic scoliosis, lumbosacral region",M41.127,lumbosacral
+msk,"Other idiopathic scoliosis, cervical region",M41.22,cervical
+msk,"Other idiopathic scoliosis, cervicothoracic region",M41.23,cervicothoracic
+msk,"Other idiopathic scoliosis, thoracic region",M41.24,thoracic
+msk,"Other idiopathic scoliosis, thoracolumbar region",M41.25,thoracolumbar
+msk,"Other idiopathic scoliosis, lumbar region",M41.26,lumbar
+msk,"Other idiopathic scoliosis, lumbosacral region",M41.27,lumbosacral
+msk,"Thoracogenic scoliosis, thoracic region",M41.34,thoracic
+msk,"Thoracogenic scoliosis, thoracolumbar region",M41.35,thoracolumbar
+msk,"Neuromuscular scoliosis, occipito-atlanto-axial region",M41.41,occipito-atlanto-axial
+msk,"Neuromuscular scoliosis, cervical region",M41.42,cervical
+msk,"Neuromuscular scoliosis, cervicothoracic region",M41.43,cervicothoracic
+msk,"Neuromuscular scoliosis, thoracic region",M41.44,thoracic
+msk,"Neuromuscular scoliosis, thoracolumbar region",M41.45,thoracolumbar
+msk,"Neuromuscular scoliosis, lumbar region",M41.46,lumbar
+msk,"Neuromuscular scoliosis, lumbosacral region",M41.47,lumbosacral
+msk,"Other secondary scoliosis, cervical region",M41.52,cervical
+msk,"Other secondary scoliosis, cervicothoracic region",M41.53,cervicothoracic
+msk,"Other secondary scoliosis, thoracic region",M41.54,thoracic
+msk,"Other secondary scoliosis, thoracolumbar region",M41.55,thoracolumbar
+msk,"Other secondary scoliosis, lumbar region",M41.56,lumbar
+msk,"Other secondary scoliosis, lumbosacral region",M41.57,lumbosacral
+msk,"Other forms of scoliosis, cervical region",M41.82,cervical
+msk,"Other forms of scoliosis, cervicothoracic region",M41.83,cervicothoracic
+msk,"Other forms of scoliosis, thoracic region",M41.84,thoracic
+msk,"Other forms of scoliosis, thoracolumbar region",M41.85,thoracolumbar
+msk,"Other forms of scoliosis, lumbar region",M41.86,lumbar
+msk,"Other forms of scoliosis, lumbosacral region",M41.87,lumbosacral
+msk,"Juvenile osteochondrosis of spine, occipito-atlanto-axial region",M42.01,occipito-atlanto-axial
+msk,"Juvenile osteochondrosis of spine, cervical region",M42.02,cervical
+msk,"Juvenile osteochondrosis of spine, cervicothoracic region",M42.03,cervicothoracic
+msk,"Juvenile osteochondrosis of spine, thoracic region",M42.04,thoracic
+msk,"Juvenile osteochondrosis of spine, thoracolumbar region",M42.05,thoracolumbar
+msk,"Juvenile osteochondrosis of spine, lumbar region",M42.06,lumbar
+msk,"Juvenile osteochondrosis of spine, lumbosacral region",M42.07,lumbosacral
+msk,"Juvenile osteochondrosis of spine, sacral and sacrococcygeal region",M42.08,sacral
+msk,"Adult osteochondrosis of spine, occipito-atlanto-axial region",M42.11,occipito-atlanto-axial
+msk,"Adult osteochondrosis of spine, cervical region",M42.12,cervical
+msk,"Adult osteochondrosis of spine, cervicothoracic region",M42.13,cervicothoracic
+msk,"Adult osteochondrosis of spine, thoracic region",M42.14,thoracic
+msk,"Adult osteochondrosis of spine, thoracolumbar region",M42.15,thoracolumbar
+msk,"Adult osteochondrosis of spine, lumbar region",M42.16,lumbar
+msk,"Adult osteochondrosis of spine, lumbosacral region",M42.17,lumbosacral
+msk,"Adult osteochondrosis of spine, sacral and sacrococcygeal region",M42.18,sacral
+msk,"Spondylolysis, occipito-atlanto-axial region",M43.01,occipito-atlanto-axial
+msk,"Spondylolysis, cervical region",M43.02,cervical
+msk,"Spondylolysis, cervicothoracic region",M43.03,cervicothoracic
+msk,"Spondylolysis, thoracic region",M43.04,thoracic
+msk,"Spondylolysis, thoracolumbar region",M43.05,thoracolumbar
+msk,"Spondylolysis, lumbar region",M43.06,lumbar
+msk,"Spondylolysis, lumbosacral region",M43.07,lumbosacral
+msk,"Spondylolysis, sacral and sacrococcygeal region",M43.08,sacral
+msk,"Spondylolisthesis, occipito-atlanto-axial region",M43.11,occipito-atlanto-axial
+msk,"Spondylolisthesis, cervical region",M43.12,cervical
+msk,"Spondylolisthesis, cervicothoracic region",M43.13,cervicothoracic
+msk,"Spondylolisthesis, thoracic region",M43.14,thoracic
+msk,"Spondylolisthesis, thoracolumbar region",M43.15,thoracolumbar
+msk,"Spondylolisthesis, lumbar region",M43.16,lumbar
+msk,"Spondylolisthesis, lumbosacral region",M43.17,lumbosacral
+msk,"Spondylolisthesis, sacral and sacrococcygeal region",M43.18,sacral
+msk,"Fusion of spine, occipito-atlanto-axial region",M43.21,occipito-atlanto-axial
+msk,"Fusion of spine, cervical region",M43.22,cervical
+msk,"Fusion of spine, cervicothoracic region",M43.23,cervicothoracic
+msk,"Fusion of spine, thoracic region",M43.24,thoracic
+msk,"Fusion of spine, thoracolumbar region",M43.25,thoracolumbar
+msk,"Fusion of spine, lumbar region",M43.26,lumbar
+msk,"Fusion of spine, lumbosacral region",M43.27,lumbosacral
+msk,"Fusion of spine, sacral and sacrococcygeal region",M43.28,sacral
+msk,Recurrent atlantoaxial dislocation with myelopathy,M43.3,unspecified
+msk,Other recurrent atlantoaxial dislocation,M43.4,unspecified
+msk,"Other recurrent vertebral dislocation, cervical region",M43.5X2,cervical
+msk,"Other recurrent vertebral dislocation, cervicothoracic region",M43.5X3,cervicothoracic
+msk,"Other recurrent vertebral dislocation, thoracic region",M43.5X4,thoracic
+msk,"Other recurrent vertebral dislocation, thoracolumbar region",M43.5X5,thoracolumbar
+msk,"Other recurrent vertebral dislocation, lumbar region",M43.5X6,lumbar
+msk,"Other recurrent vertebral dislocation, lumbosacral region",M43.5X7,lumbosacral
+msk,"Other recurrent vertebral dislocation, sacral and sacrococcygeal region",M43.5X8,sacral
+msk,"Other specified deforming dorsopathies, occipito-atlanto-axial region",M43.8X1,occipito-atlanto-axial
+msk,"Other specified deforming dorsopathies, cervical region",M43.8X2,cervical
+msk,"Other specified deforming dorsopathies, cervicothoracic region",M43.8X3,cervicothoracic
+msk,"Other specified deforming dorsopathies, thoracic region",M43.8X4,thoracic
+msk,"Other specified deforming dorsopathies, thoracolumbar region",M43.8X5,thoracolumbar
+msk,"Other specified deforming dorsopathies, lumbar region",M43.8X6,lumbar
+msk,"Other specified deforming dorsopathies, lumbosacral region",M43.8X7,lumbosacral
+msk,"Other specified deforming dorsopathies, sacral and sacrococcygeal region",M43.8X8,sacral
+msk,Ankylosing spondylitis of occipito-atlanto-axial region,M45.1,occipito-atlanto-axial
+msk,Ankylosing spondylitis of cervical region,M45.2,cervical
+msk,Ankylosing spondylitis of cervicothoracic region,M45.3,cervicothoracic
+msk,Ankylosing spondylitis of thoracic region,M45.4,thoracic
+msk,Ankylosing spondylitis of thoracolumbar region,M45.5,thoracolumbar
+msk,Ankylosing spondylitis lumbar region,M45.6,lumbar
+msk,Ankylosing spondylitis of lumbosacral region,M45.7,lumbosacral
+msk,Ankylosing spondylitis sacral and sacrococcygeal region,M45.8,sacral
+msk,Non-radiographic axial spondyloarthritis of occipito-atlanto-axial region,M45.A1,occipito-atlanto-axial
+msk,Non-radiographic axial spondyloarthritis of cervical region,M45.A2,cervical
+msk,Non-radiographic axial spondyloarthritis of cervicothoracic region,M45.A3,cervicothoracic
+msk,Non-radiographic axial spondyloarthritis of thoracic region,M45.A4,thoracic
+msk,Non-radiographic axial spondyloarthritis of thoracolumbar region,M45.A5,thoracolumbar
+msk,Non-radiographic axial spondyloarthritis of lumbar region,M45.A6,lumbar
+msk,Non-radiographic axial spondyloarthritis of lumbosacral region,M45.A7,lumbosacral
+msk,Non-radiographic axial spondyloarthritis of sacral and sacrococcygeal region,M45.A8,sacral
+msk,"Spinal enthesopathy, occipito-atlanto-axial region",M46.01,occipito-atlanto-axial
+msk,"Spinal enthesopathy, cervical region",M46.02,cervical
+msk,"Spinal enthesopathy, cervicothoracic region",M46.03,cervicothoracic
+msk,"Spinal enthesopathy, thoracic region",M46.04,thoracic
+msk,"Spinal enthesopathy, thoracolumbar region",M46.05,thoracolumbar
+msk,"Spinal enthesopathy, lumbar region",M46.06,lumbar
+msk,"Spinal enthesopathy, lumbosacral region",M46.07,lumbosacral
+msk,"Spinal enthesopathy, sacral and sacrococcygeal region",M46.08,sacral
+msk,"Sacroiliitis, not elsewhere classified",M46.1,sacral
+msk,"Osteomyelitis of vertebra, occipito-atlanto-axial region",M46.21,occipito-atlanto-axial
+msk,"Osteomyelitis of vertebra, cervical region",M46.22,cervical
+msk,"Osteomyelitis of vertebra, cervicothoracic region",M46.23,cervicothoracic
+msk,"Osteomyelitis of vertebra, thoracic region",M46.24,thoracic
+msk,"Osteomyelitis of vertebra, thoracolumbar region",M46.25,thoracolumbar
+msk,"Osteomyelitis of vertebra, lumbar region",M46.26,lumbar
+msk,"Osteomyelitis of vertebra, lumbosacral region",M46.27,lumbosacral
+msk,"Osteomyelitis of vertebra, sacral and sacrococcygeal region",M46.28,sacral
+msk,"Infection of intervertebral disc (pyogenic), occipito-atlanto-axial region",M46.31,occipito-atlanto-axial
+msk,"Infection of intervertebral disc (pyogenic), cervical region",M46.32,cervical
+msk,"Infection of intervertebral disc (pyogenic), cervicothoracic region",M46.33,cervicothoracic
+msk,"Infection of intervertebral disc (pyogenic), thoracic region",M46.34,thoracic
+msk,"Infection of intervertebral disc (pyogenic), thoracolumbar region",M46.35,thoracolumbar
+msk,"Infection of intervertebral disc (pyogenic), lumbar region",M46.36,lumbar
+msk,"Infection of intervertebral disc (pyogenic), lumbosacral region",M46.37,lumbosacral
+msk,"Infection of intervertebral disc (pyogenic), sacral and sacrococcygeal region",M46.38,sacral
+msk,"Other infective spondylopathies, occipito-atlanto-axial region",M46.51,occipito-atlanto-axial
+msk,"Other infective spondylopathies, cervical region",M46.52,cervical
+msk,"Other infective spondylopathies, cervicothoracic region",M46.53,cervicothoracic
+msk,"Other infective spondylopathies, thoracic region",M46.54,thoracic
+msk,"Other infective spondylopathies, thoracolumbar region",M46.55,thoracolumbar
+msk,"Other infective spondylopathies, lumbar region",M46.56,lumbar
+msk,"Other infective spondylopathies, lumbosacral region",M46.57,lumbosacral
+msk,"Other infective spondylopathies, sacral and sacrococcygeal region",M46.58,sacral
+msk,"Other specified inflammatory spondylopathies, occipito-atlanto-axial region",M46.81,occipito-atlanto-axial
+msk,"Other specified inflammatory spondylopathies, cervical region",M46.82,cervical
+msk,"Other specified inflammatory spondylopathies, cervicothoracic region",M46.83,cervicothoracic
+msk,"Other specified inflammatory spondylopathies, thoracic region",M46.84,thoracic
+msk,"Other specified inflammatory spondylopathies, thoracolumbar region",M46.85,thoracolumbar
+msk,"Other specified inflammatory spondylopathies, lumbar region",M46.86,lumbar
+msk,"Other specified inflammatory spondylopathies, lumbosacral region",M46.87,lumbosacral
+msk,"Other specified inflammatory spondylopathies, sacral and sacrococcygeal region",M46.88,sacral
+msk,"Anterior spinal artery compression syndromes, occipito-atlanto-axial region",M47.011,occipito-atlanto-axial
+msk,"Anterior spinal artery compression syndromes, cervical region",M47.012,cervical
+msk,"Anterior spinal artery compression syndromes, cervicothoracic region",M47.013,cervicothoracic
+msk,"Anterior spinal artery compression syndromes, thoracic region",M47.014,thoracic
+msk,"Anterior spinal artery compression syndromes, thoracolumbar region",M47.015,thoracolumbar
+msk,"Anterior spinal artery compression syndromes, lumbar region",M47.016,lumbar
+msk,"Vertebral artery compression syndromes, occipito-atlanto-axial region",M47.021,occipito-atlanto-axial
+msk,"Vertebral artery compression syndromes, cervical region",M47.022,cervical
+msk,"Other spondylosis with myelopathy, occipito-atlanto-axial region",M47.11,occipito-atlanto-axial
+msk,"Other spondylosis with myelopathy, cervical region",M47.12,cervical
+msk,"Other spondylosis with myelopathy, cervicothoracic region",M47.13,cervicothoracic
+msk,"Other spondylosis with myelopathy, thoracic region",M47.14,thoracic
+msk,"Other spondylosis with myelopathy, thoracolumbar region",M47.15,thoracolumbar
+msk,"Other spondylosis with myelopathy, lumbar region",M47.16,lumbar
+msk,"Other spondylosis with radiculopathy, occipito-atlanto-axial region",M47.21,occipito-atlanto-axial
+msk,"Other spondylosis with radiculopathy, cervical region",M47.22,cervical
+msk,"Other spondylosis with radiculopathy, cervicothoracic region",M47.23,cervicothoracic
+msk,"Other spondylosis with radiculopathy, thoracic region",M47.24,thoracic
+msk,"Other spondylosis with radiculopathy, thoracolumbar region",M47.25,thoracolumbar
+msk,"Other spondylosis with radiculopathy, lumbar region",M47.26,lumbar
+msk,"Other spondylosis with radiculopathy, lumbosacral region",M47.27,lumbosacral
+msk,"Other spondylosis with radiculopathy, sacral and sacrococcygeal region",M47.28,sacral
+msk,"Spondylosis without myelopathy or radiculopathy, occipito-atlanto-axial region",M47.811,occipito-atlanto-axial
+msk,"Spondylosis without myelopathy or radiculopathy, cervical region",M47.812,cervical
+msk,"Spondylosis without myelopathy or radiculopathy, cervicothoracic region",M47.813,cervicothoracic
+msk,"Spondylosis without myelopathy or radiculopathy, thoracic region",M47.814,thoracic
+msk,"Spondylosis without myelopathy or radiculopathy, thoracolumbar region",M47.815,thoracolumbar
+msk,"Spondylosis without myelopathy or radiculopathy, lumbar region",M47.816,lumbar
+msk,"Spondylosis without myelopathy or radiculopathy, lumbosacral region",M47.817,lumbosacral
+msk,"Spondylosis without myelopathy or radiculopathy, sacral and sacrococcygeal region",M47.818,sacral
+msk,"Other spondylosis, occipito-atlanto-axial region",M47.891,occipito-atlanto-axial
+msk,"Other spondylosis, cervical region",M47.892,cervical
+msk,"Other spondylosis, cervicothoracic region",M47.893,cervicothoracic
+msk,"Other spondylosis, thoracic region",M47.894,thoracic
+msk,"Other spondylosis, thoracolumbar region",M47.895,thoracolumbar
+msk,"Other spondylosis, lumbar region",M47.896,lumbar
+msk,"Other spondylosis, lumbosacral region",M47.897,lumbosacral
+msk,"Other spondylosis, sacral and sacrococcygeal region",M47.898,sacral
+msk,"Spinal stenosis, occipito-atlanto-axial region",M48.01,occipito-atlanto-axial
+msk,"Spinal stenosis, cervical region",M48.02,cervical
+msk,"Spinal stenosis, cervicothoracic region",M48.03,cervicothoracic
+msk,"Spinal stenosis, thoracic region",M48.04,thoracic
+msk,"Spinal stenosis, thoracolumbar region",M48.05,thoracolumbar
+msk,"Spinal stenosis, lumbar region without neurogenic claudication",M48.061,lumbar
+msk,"Spinal stenosis, lumbar region with neurogenic claudication",M48.062,lumbar
+msk,"Spinal stenosis, lumbosacral region",M48.07,lumbosacral
+msk,"Spinal stenosis, sacral and sacrococcygeal region",M48.08,sacral
+msk,"Ankylosing hyperostosis [Forestier], occipito-atlanto-axial region",M48.11,occipito-atlanto-axial
+msk,"Ankylosing hyperostosis [Forestier], cervical region",M48.12,cervical
+msk,"Ankylosing hyperostosis [Forestier], cervicothoracic region",M48.13,cervicothoracic
+msk,"Ankylosing hyperostosis [Forestier], thoracic region",M48.14,thoracic
+msk,"Ankylosing hyperostosis [Forestier], thoracolumbar region",M48.15,thoracolumbar
+msk,"Ankylosing hyperostosis [Forestier], lumbar region",M48.16,lumbar
+msk,"Ankylosing hyperostosis [Forestier], lumbosacral region",M48.17,lumbosacral
+msk,"Ankylosing hyperostosis [Forestier], sacral and sacrococcygeal region",M48.18,sacral
+msk,"Kissing spine, occipito-atlanto-axial region",M48.21,occipito-atlanto-axial
+msk,"Kissing spine, cervical region",M48.22,cervical
+msk,"Kissing spine, cervicothoracic region",M48.23,cervicothoracic
+msk,"Kissing spine, thoracic region",M48.24,thoracic
+msk,"Kissing spine, thoracolumbar region",M48.25,thoracolumbar
+msk,"Kissing spine, lumbar region",M48.26,lumbar
+msk,"Kissing spine, lumbosacral region",M48.27,lumbosacral
+msk,"Traumatic spondylopathy, occipito-atlanto-axial region",M48.31,occipito-atlanto-axial
+msk,"Traumatic spondylopathy, cervical region",M48.32,cervical
+msk,"Traumatic spondylopathy, cervicothoracic region",M48.33,cervicothoracic
+msk,"Traumatic spondylopathy, thoracic region",M48.34,thoracic
+msk,"Traumatic spondylopathy, thoracolumbar region",M48.35,thoracolumbar
+msk,"Traumatic spondylopathy, lumbar region",M48.36,lumbar
+msk,"Traumatic spondylopathy, lumbosacral region",M48.37,lumbosacral
+msk,"Traumatic spondylopathy, sacral and sacrococcygeal region",M48.38,sacral
+msk,"Fatigue fracture of vertebra, occipito-atlanto-axial region, initial encounter for fracture",M48.41XA,occipito-atlanto-axial
+msk,"Fatigue fracture of vertebra, cervical region, initial encounter for fracture",M48.42XA,cervical
+msk,"Fatigue fracture of vertebra, cervicothoracic region, initial encounter for fracture",M48.43XA,cervicothoracic
+msk,"Fatigue fracture of vertebra, thoracic region, initial encounter for fracture",M48.44XA,thoracic
+msk,"Fatigue fracture of vertebra, thoracolumbar region, initial encounter for fracture",M48.45XA,thoracolumbar
+msk,"Fatigue fracture of vertebra, lumbar region, initial encounter for fracture",M48.46XA,lumbar
+msk,"Fatigue fracture of vertebra, lumbosacral region, initial encounter for fracture",M48.47XA,lumbosacral
+msk,"Fatigue fracture of vertebra, sacral and sacrococcygeal region, initial encounter for fracture",M48.48XA,sacral
+msk,"Collapsed vertebra, not elsewhere classified, occipito-atlanto-axial region, initial encounter for fracture",M48.51XA,occipito-atlanto-axial
+msk,"Collapsed vertebra, not elsewhere classified, cervical region, initial encounter for fracture",M48.52XA,cervical
+msk,"Collapsed vertebra, not elsewhere classified, cervicothoracic region, initial encounter for fracture",M48.53XA,cervicothoracic
+msk,"Collapsed vertebra, not elsewhere classified, thoracic region, initial encounter for fracture",M48.54XA,thoracic
+msk,"Collapsed vertebra, not elsewhere classified, thoracolumbar region, initial encounter for fracture",M48.55XA,thoracolumbar
+msk,"Collapsed vertebra, not elsewhere classified, lumbar region, initial encounter for fracture",M48.56XA,lumbar
+msk,"Collapsed vertebra, not elsewhere classified, lumbosacral region, initial encounter for fracture",M48.57XA,lumbosacral
+msk,"Collapsed vertebra, not elsewhere classified, sacral and sacrococcygeal region, initial encounter for fracture",M48.58XA,sacral
+msk,"Other specified spondylopathies, occipito-atlanto-axial region",M48.8X1,occipito-atlanto-axial
+msk,"Other specified spondylopathies, cervical region",M48.8X2,cervical
+msk,"Other specified spondylopathies, cervicothoracic region",M48.8X3,cervicothoracic
+msk,"Other specified spondylopathies, thoracic region",M48.8X4,thoracic
+msk,"Other specified spondylopathies, thoracolumbar region",M48.8X5,thoracolumbar
+msk,"Other specified spondylopathies, lumbar region",M48.8X6,lumbar
+msk,"Other specified spondylopathies, lumbosacral region",M48.8X7,lumbosacral
+msk,"Other specified spondylopathies, sacral and sacrococcygeal region",M48.8X8,sacral
+msk,"Spondylopathy in diseases classified elsewhere, occipito-atlanto-axial region",M49.81,occipito-atlanto-axial
+msk,"Spondylopathy in diseases classified elsewhere, cervical region",M49.82,cervical
+msk,"Spondylopathy in diseases classified elsewhere, cervicothoracic region",M49.83,cervicothoracic
+msk,"Spondylopathy in diseases classified elsewhere, thoracic region",M49.84,thoracic
+msk,"Spondylopathy in diseases classified elsewhere, thoracolumbar region",M49.85,thoracolumbar
+msk,"Spondylopathy in diseases classified elsewhere, lumbar region",M49.86,lumbar
+msk,"Spondylopathy in diseases classified elsewhere, lumbosacral region",M49.87,lumbosacral
+msk,"Spondylopathy in diseases classified elsewhere, sacral and sacrococcygeal region",M49.88,sacral
+msk,"Cervical disc disorder with myelopathy, high cervical region",M50.01,cervical
+msk,Cervical disc disorder at C4-C5 level with myelopathy,M50.021,cervical
+msk,Cervical disc disorder at C5-C6 level with myelopathy,M50.022,cervical
+msk,Cervical disc disorder at C6-C7 level with myelopathy,M50.023,cervical
+msk,"Cervical disc disorder with myelopathy, cervicothoracic region",M50.03,cervical
+msk,"Cervical disc disorder with radiculopathy, high cervical region",M50.11,cervical
+msk,Cervical disc disorder at C4-C5 level with radiculopathy,M50.121,cervical
+msk,Cervical disc disorder at C5-C6 level with radiculopathy,M50.122,cervical
+msk,Cervical disc disorder at C6-C7 level with radiculopathy,M50.123,cervical
+msk,"Cervical disc disorder with radiculopathy, cervicothoracic region",M50.13,cervical
+msk,"Other cervical disc displacement, high cervical region",M50.21,cervical
+msk,Other cervical disc displacement at C4-C5 level,M50.221,cervical
+msk,Other cervical disc displacement at C5-C6 level,M50.222,cervical
+msk,Other cervical disc displacement at C6-C7 level,M50.223,cervical
+msk,"Other cervical disc displacement, cervicothoracic region",M50.23,cervical
+msk,"Other cervical disc degeneration, high cervical region",M50.31,cervical
+msk,Other cervical disc degeneration at C4-C5 level,M50.321,cervical
+msk,Other cervical disc degeneration at C5-C6 level,M50.322,cervical
+msk,Other cervical disc degeneration at C6-C7 level,M50.323,cervical
+msk,"Other cervical disc degeneration, cervicothoracic region",M50.33,cervical
+msk,"Other cervical disc disorders, high cervical region",M50.81,cervical
+msk,Other cervical disc disorders at C4-C5 level,M50.821,cervical
+msk,Other cervical disc disorders at C5-C6 level,M50.822,cervical
+msk,Other cervical disc disorders at C6-C7 level,M50.823,cervical
+msk,"Other cervical disc disorders, cervicothoracic region",M50.83,cervical
+msk,"Intervertebral disc disorders with myelopathy, thoracic region",M51.04,thoracic
+msk,"Intervertebral disc disorders with myelopathy, thoracolumbar region",M51.05,thoracolumbar
+msk,"Intervertebral disc disorders with myelopathy, lumbar region",M51.06,lumbar
+msk,"Intervertebral disc disorders with radiculopathy, thoracic region",M51.14,thoracic
+msk,"Intervertebral disc disorders with radiculopathy, thoracolumbar region",M51.15,thoracolumbar
+msk,"Intervertebral disc disorders with radiculopathy, lumbar region",M51.16,lumbar
+msk,"Intervertebral disc disorders with radiculopathy, lumbosacral region",M51.17,lumbosacral
+msk,"Other intervertebral disc displacement, thoracic region",M51.24,thoracic
+msk,"Other intervertebral disc displacement, thoracolumbar region",M51.25,thoracolumbar
+msk,"Other intervertebral disc displacement, lumbar region",M51.26,lumbar
+msk,"Other intervertebral disc displacement, lumbosacral region",M51.27,lumbosacral
+msk,"Other intervertebral disc degeneration, thoracic region",M51.34,thoracic
+msk,"Other intervertebral disc degeneration, thoracolumbar region",M51.35,thoracolumbar
+msk,"Other intervertebral disc degeneration, lumbar region",M51.36,lumbar
+msk,"Other intervertebral disc degeneration, lumbosacral region",M51.37,lumbosacral
+msk,"Schmorl's nodes, thoracic region",M51.44,thoracic
+msk,"Schmorl's nodes, thoracolumbar region",M51.45,thoracolumbar
+msk,"Schmorl's nodes, lumbar region",M51.46,lumbar
+msk,"Schmorl's nodes, lumbosacral region",M51.47,lumbosacral
+msk,"Other intervertebral disc disorders, thoracic region",M51.84,thoracic
+msk,"Other intervertebral disc disorders, thoracolumbar region",M51.85,thoracolumbar
+msk,"Other intervertebral disc disorders, lumbar region",M51.86,lumbar
+msk,"Other intervertebral disc disorders, lumbosacral region",M51.87,lumbosacral
+msk,"Spinal instabilities, occipito-atlanto-axial region",M53.2X1,occipito-atlanto-axial
+msk,"Spinal instabilities, cervical region",M53.2X2,cervical
+msk,"Spinal instabilities, cervicothoracic region",M53.2X3,cervicothoracic
+msk,"Spinal instabilities, thoracic region",M53.2X4,thoracic
+msk,"Spinal instabilities, thoracolumbar region",M53.2X5,thoracolumbar
+msk,"Spinal instabilities, lumbar region",M53.2X6,lumbar
+msk,"Spinal instabilities, lumbosacral region",M53.2X7,lumbosacral
+msk,"Spinal instabilities, sacral and sacrococcygeal region",M53.2X8,sacral
+msk,"Sacrococcygeal disorders, not elsewhere classified",M53.3,sacral
+msk,"Other specified dorsopathies, occipito-atlanto-axial region",M53.81,occipito-atlanto-axial
+msk,"Other specified dorsopathies, cervical region",M53.82,cervical
+msk,"Other specified dorsopathies, cervicothoracic region",M53.83,cervicothoracic
+msk,"Other specified dorsopathies, thoracic region",M53.84,thoracic
+msk,"Other specified dorsopathies, thoracolumbar region",M53.85,thoracolumbar
+msk,"Other specified dorsopathies, lumbar region",M53.86,lumbar
+msk,"Other specified dorsopathies, lumbosacral region",M53.87,lumbosacral
+msk,"Other specified dorsopathies, sacral and sacrococcygeal region",M53.88,sacral
+msk,"Panniculitis affecting regions of neck and back, occipito-atlanto-axial region",M54.01,occipito-atlanto-axial
+msk,"Panniculitis affecting regions of neck and back, cervical region",M54.02,cervical
+msk,"Panniculitis affecting regions of neck and back, cervicothoracic region",M54.03,cervicothoracic
+msk,"Panniculitis affecting regions of neck and back, thoracic region",M54.04,thoracic
+msk,"Panniculitis affecting regions of neck and back, thoracolumbar region",M54.05,thoracolumbar
+msk,"Panniculitis affecting regions of neck and back, lumbar region",M54.06,lumbar
+msk,"Panniculitis affecting regions of neck and back, lumbosacral region",M54.07,lumbosacral
+msk,"Panniculitis affecting regions of neck and back, sacral and sacrococcygeal region",M54.08,sacral
+msk,"Radiculopathy, occipito-atlanto-axial region",M54.11,occipito-atlanto-axial
+msk,"Radiculopathy, cervical region",M54.12,cervical
+msk,"Radiculopathy, cervicothoracic region",M54.13,cervicothoracic
+msk,"Radiculopathy, thoracic region",M54.14,thoracic
+msk,"Radiculopathy, thoracolumbar region",M54.15,thoracolumbar
+msk,"Radiculopathy, lumbar region",M54.16,lumbar
+msk,"Radiculopathy, lumbosacral region",M54.17,lumbosacral
+msk,"Radiculopathy, sacral and sacrococcygeal region",M54.18,sacral
+msk,Cervicalgia,M54.2,cervical
+msk,Vertebrogenic low back pain,M54.51,lumbar
+msk,Other low back pain,M54.59,lumbar
+msk,Pain in thoracic spine,M54.6,thoracic
+msk,Other dorsalgia,M54.89,unspecified
+msk,"Age-related osteoporosis with current pathological fracture, vertebra(e), initial encounter for fracture",M80.08XA,unspecified
+msk,"Other osteoporosis with current pathological fracture, vertebra(e), initial encounter for fracture",M80.88XA,unspecified
+msk,Osteitis deformans of vertebrae,M88.1,unspecified
+msk,Acquired deformity of neck,M95.3,cervical
+msk,Acquired deformity of neck,M95.3,cervical
+msk,Acquired deformity of neck,M95.3,cervical
+msk,Acquired deformity of neck,M95.3,cervical
+msk,Pseudarthrosis after fusion or arthrodesis,M96.0,unspecified
+msk,Pseudarthrosis after fusion or arthrodesis,M96.0,unspecified
+msk,Pseudarthrosis after fusion or arthrodesis,M96.0,unspecified
+msk,Pseudarthrosis after fusion or arthrodesis,M96.0,unspecified
+msk,"Postlaminectomy syndrome, not elsewhere classified",M96.1,unspecified
+msk,"Postlaminectomy syndrome, not elsewhere classified",M96.1,unspecified
+msk,"Postlaminectomy syndrome, not elsewhere classified",M96.1,unspecified
+msk,"Postlaminectomy syndrome, not elsewhere classified",M96.1,unspecified
+msk,Postradiation kyphosis,M96.2,unspecified
+msk,Postradiation kyphosis,M96.2,unspecified
+msk,Postradiation kyphosis,M96.2,unspecified
+msk,Postradiation kyphosis,M96.2,unspecified
+msk,Postlaminectomy kyphosis,M96.3,unspecified
+msk,Postlaminectomy kyphosis,M96.3,unspecified
+msk,Postlaminectomy kyphosis,M96.3,unspecified
+msk,Postlaminectomy kyphosis,M96.3,unspecified
+msk,Postsurgical lordosis,M96.4,unspecified
+msk,Postsurgical lordosis,M96.4,unspecified
+msk,Postsurgical lordosis,M96.4,unspecified
+msk,Postsurgical lordosis,M96.4,unspecified
+msk,Postradiation scoliosis,M96.5,unspecified
+msk,Postradiation scoliosis,M96.5,unspecified
+msk,Postradiation scoliosis,M96.5,unspecified
+msk,Postradiation scoliosis,M96.5,unspecified
+msk,Segmental and somatic dysfunction of cervical region,M99.01,cervical
+msk,Segmental and somatic dysfunction of cervical region,M99.01,cervical
+msk,Segmental and somatic dysfunction of cervical region,M99.01,cervical
+msk,Segmental and somatic dysfunction of cervical region,M99.01,cervical
+msk,Segmental and somatic dysfunction of thoracic region,M99.02,thoracic
+msk,Segmental and somatic dysfunction of thoracic region,M99.02,thoracic
+msk,Segmental and somatic dysfunction of thoracic region,M99.02,thoracic
+msk,Segmental and somatic dysfunction of thoracic region,M99.02,thoracic
+msk,Segmental and somatic dysfunction of lumbar region,M99.03,lumbar
+msk,Segmental and somatic dysfunction of lumbar region,M99.03,lumbar
+msk,Segmental and somatic dysfunction of lumbar region,M99.03,lumbar
+msk,Segmental and somatic dysfunction of lumbar region,M99.03,lumbar
+msk,Segmental and somatic dysfunction of sacral region,M99.04,sacral
+msk,Segmental and somatic dysfunction of sacral region,M99.04,sacral
+msk,Segmental and somatic dysfunction of sacral region,M99.04,sacral
+msk,Segmental and somatic dysfunction of sacral region,M99.04,sacral
+msk,Subluxation complex (vertebral) of cervical region,M99.11,cervical
+msk,Subluxation complex (vertebral) of cervical region,M99.11,cervical
+msk,Subluxation complex (vertebral) of cervical region,M99.11,cervical
+msk,Subluxation complex (vertebral) of cervical region,M99.11,cervical
+msk,Subluxation complex (vertebral) of thoracic region,M99.12,thoracic
+msk,Subluxation complex (vertebral) of thoracic region,M99.12,thoracic
+msk,Subluxation complex (vertebral) of thoracic region,M99.12,thoracic
+msk,Subluxation complex (vertebral) of thoracic region,M99.12,thoracic
+msk,Subluxation complex (vertebral) of lumbar region,M99.13,lumbar
+msk,Subluxation complex (vertebral) of lumbar region,M99.13,lumbar
+msk,Subluxation complex (vertebral) of lumbar region,M99.13,lumbar
+msk,Subluxation complex (vertebral) of lumbar region,M99.13,lumbar
+msk,Subluxation complex (vertebral) of sacral region,M99.14,sacral
+msk,Subluxation complex (vertebral) of sacral region,M99.14,sacral
+msk,Subluxation complex (vertebral) of sacral region,M99.14,sacral
+msk,Subluxation complex (vertebral) of sacral region,M99.14,sacral
+msk,Subluxation stenosis of neural canal of cervical region,M99.21,cervical
+msk,Subluxation stenosis of neural canal of cervical region,M99.21,cervical
+msk,Subluxation stenosis of neural canal of cervical region,M99.21,cervical
+msk,Subluxation stenosis of neural canal of cervical region,M99.21,cervical
+msk,Subluxation stenosis of neural canal of thoracic region,M99.22,thoracic
+msk,Subluxation stenosis of neural canal of thoracic region,M99.22,thoracic
+msk,Subluxation stenosis of neural canal of thoracic region,M99.22,thoracic
+msk,Subluxation stenosis of neural canal of thoracic region,M99.22,thoracic
+msk,Subluxation stenosis of neural canal of lumbar region,M99.23,lumbar
+msk,Subluxation stenosis of neural canal of lumbar region,M99.23,lumbar
+msk,Subluxation stenosis of neural canal of lumbar region,M99.23,lumbar
+msk,Subluxation stenosis of neural canal of lumbar region,M99.23,lumbar
+msk,Subluxation stenosis of neural canal of sacral region,M99.24,sacral
+msk,Subluxation stenosis of neural canal of sacral region,M99.24,sacral
+msk,Subluxation stenosis of neural canal of sacral region,M99.24,sacral
+msk,Subluxation stenosis of neural canal of sacral region,M99.24,sacral
+msk,Osseous stenosis of neural canal of cervical region,M99.31,cervical
+msk,Osseous stenosis of neural canal of cervical region,M99.31,cervical
+msk,Osseous stenosis of neural canal of cervical region,M99.31,cervical
+msk,Osseous stenosis of neural canal of cervical region,M99.31,cervical
+msk,Osseous stenosis of neural canal of thoracic region,M99.32,thoracic
+msk,Osseous stenosis of neural canal of thoracic region,M99.32,thoracic
+msk,Osseous stenosis of neural canal of thoracic region,M99.32,thoracic
+msk,Osseous stenosis of neural canal of thoracic region,M99.32,thoracic
+msk,Osseous stenosis of neural canal of lumbar region,M99.33,lumbar
+msk,Osseous stenosis of neural canal of lumbar region,M99.33,lumbar
+msk,Osseous stenosis of neural canal of lumbar region,M99.33,lumbar
+msk,Osseous stenosis of neural canal of lumbar region,M99.33,lumbar
+msk,Osseous stenosis of neural canal of sacral region,M99.34,sacral
+msk,Osseous stenosis of neural canal of sacral region,M99.34,sacral
+msk,Osseous stenosis of neural canal of sacral region,M99.34,sacral
+msk,Osseous stenosis of neural canal of sacral region,M99.34,sacral
+msk,Connective tissue stenosis of neural canal of cervical region,M99.41,cervical
+msk,Connective tissue stenosis of neural canal of cervical region,M99.41,cervical
+msk,Connective tissue stenosis of neural canal of cervical region,M99.41,cervical
+msk,Connective tissue stenosis of neural canal of cervical region,M99.41,cervical
+msk,Connective tissue stenosis of neural canal of thoracic region,M99.42,thoracic
+msk,Connective tissue stenosis of neural canal of thoracic region,M99.42,thoracic
+msk,Connective tissue stenosis of neural canal of thoracic region,M99.42,thoracic
+msk,Connective tissue stenosis of neural canal of thoracic region,M99.42,thoracic
+msk,Connective tissue stenosis of neural canal of lumbar region,M99.43,lumbar
+msk,Connective tissue stenosis of neural canal of lumbar region,M99.43,lumbar
+msk,Connective tissue stenosis of neural canal of lumbar region,M99.43,lumbar
+msk,Connective tissue stenosis of neural canal of lumbar region,M99.43,lumbar
+msk,Connective tissue stenosis of neural canal of sacral region,M99.44,sacral
+msk,Connective tissue stenosis of neural canal of sacral region,M99.44,sacral
+msk,Connective tissue stenosis of neural canal of sacral region,M99.44,sacral
+msk,Connective tissue stenosis of neural canal of sacral region,M99.44,sacral
+msk,Intervertebral disc stenosis of neural canal of cervical region,M99.51,cervical
+msk,Intervertebral disc stenosis of neural canal of cervical region,M99.51,cervical
+msk,Intervertebral disc stenosis of neural canal of cervical region,M99.51,cervical
+msk,Intervertebral disc stenosis of neural canal of cervical region,M99.51,cervical
+msk,Intervertebral disc stenosis of neural canal of thoracic region,M99.52,thoracic
+msk,Intervertebral disc stenosis of neural canal of thoracic region,M99.52,thoracic
+msk,Intervertebral disc stenosis of neural canal of thoracic region,M99.52,thoracic
+msk,Intervertebral disc stenosis of neural canal of thoracic region,M99.52,thoracic
+msk,Intervertebral disc stenosis of neural canal of lumbar region,M99.53,lumbar
+msk,Intervertebral disc stenosis of neural canal of lumbar region,M99.53,lumbar
+msk,Intervertebral disc stenosis of neural canal of lumbar region,M99.53,lumbar
+msk,Intervertebral disc stenosis of neural canal of lumbar region,M99.53,lumbar
+msk,Intervertebral disc stenosis of neural canal of sacral region,M99.54,sacral
+msk,Intervertebral disc stenosis of neural canal of sacral region,M99.54,sacral
+msk,Intervertebral disc stenosis of neural canal of sacral region,M99.54,sacral
+msk,Intervertebral disc stenosis of neural canal of sacral region,M99.54,sacral
+msk,Osseous and subluxation stenosis of intervertebral foramina of cervical region,M99.61,cervical
+msk,Osseous and subluxation stenosis of intervertebral foramina of cervical region,M99.61,cervical
+msk,Osseous and subluxation stenosis of intervertebral foramina of cervical region,M99.61,cervical
+msk,Osseous and subluxation stenosis of intervertebral foramina of cervical region,M99.61,cervical
+msk,Osseous and subluxation stenosis of intervertebral foramina of thoracic region,M99.62,thoracic
+msk,Osseous and subluxation stenosis of intervertebral foramina of thoracic region,M99.62,thoracic
+msk,Osseous and subluxation stenosis of intervertebral foramina of thoracic region,M99.62,thoracic
+msk,Osseous and subluxation stenosis of intervertebral foramina of thoracic region,M99.62,thoracic
+msk,Osseous and subluxation stenosis of intervertebral foramina of lumbar region,M99.63,lumbar
+msk,Osseous and subluxation stenosis of intervertebral foramina of lumbar region,M99.63,lumbar
+msk,Osseous and subluxation stenosis of intervertebral foramina of lumbar region,M99.63,lumbar
+msk,Osseous and subluxation stenosis of intervertebral foramina of lumbar region,M99.63,lumbar
+msk,Osseous and subluxation stenosis of intervertebral foramina of sacral region,M99.64,sacral
+msk,Osseous and subluxation stenosis of intervertebral foramina of sacral region,M99.64,sacral
+msk,Osseous and subluxation stenosis of intervertebral foramina of sacral region,M99.64,sacral
+msk,Osseous and subluxation stenosis of intervertebral foramina of sacral region,M99.64,sacral
+msk,Connective tissue and disc stenosis of intervertebral foramina of cervical region,M99.71,cervical
+msk,Connective tissue and disc stenosis of intervertebral foramina of cervical region,M99.71,cervical
+msk,Connective tissue and disc stenosis of intervertebral foramina of cervical region,M99.71,cervical
+msk,Connective tissue and disc stenosis of intervertebral foramina of cervical region,M99.71,cervical
+msk,Connective tissue and disc stenosis of intervertebral foramina of thoracic region,M99.72,thoracic
+msk,Connective tissue and disc stenosis of intervertebral foramina of thoracic region,M99.72,thoracic
+msk,Connective tissue and disc stenosis of intervertebral foramina of thoracic region,M99.72,thoracic
+msk,Connective tissue and disc stenosis of intervertebral foramina of thoracic region,M99.72,thoracic
+msk,Connective tissue and disc stenosis of intervertebral foramina of lumbar region,M99.73,lumbar
+msk,Connective tissue and disc stenosis of intervertebral foramina of lumbar region,M99.73,lumbar
+msk,Connective tissue and disc stenosis of intervertebral foramina of lumbar region,M99.73,lumbar
+msk,Connective tissue and disc stenosis of intervertebral foramina of lumbar region,M99.73,lumbar
+msk,Connective tissue and disc stenosis of intervertebral foramina of sacral region,M99.74,sacral
+msk,Connective tissue and disc stenosis of intervertebral foramina of sacral region,M99.74,sacral
+msk,Connective tissue and disc stenosis of intervertebral foramina of sacral region,M99.74,sacral
+msk,Connective tissue and disc stenosis of intervertebral foramina of sacral region,M99.74,sacral
+msk,Other biomechanical lesions of cervical region,M99.81,cervical
+msk,Other biomechanical lesions of cervical region,M99.81,cervical
+msk,Other biomechanical lesions of cervical region,M99.81,cervical
+msk,Other biomechanical lesions of cervical region,M99.81,cervical
+msk,Other biomechanical lesions of thoracic region,M99.82,thoracic
+msk,Other biomechanical lesions of thoracic region,M99.82,thoracic
+msk,Other biomechanical lesions of thoracic region,M99.82,thoracic
+msk,Other biomechanical lesions of thoracic region,M99.82,thoracic
+msk,Other biomechanical lesions of lumbar region,M99.83,lumbar
+msk,Other biomechanical lesions of lumbar region,M99.83,lumbar
+msk,Other biomechanical lesions of lumbar region,M99.83,lumbar
+msk,Other biomechanical lesions of lumbar region,M99.83,lumbar
+msk,Other biomechanical lesions of sacral region,M99.84,sacral
+msk,Other biomechanical lesions of sacral region,M99.84,sacral
+msk,Other biomechanical lesions of sacral region,M99.84,sacral
+msk,Other biomechanical lesions of sacral region,M99.84,sacral
+tumor,Malignant neoplasm of vertebral column,C41.2,unspecified
+tumor,"Malignant neoplasm of pelvic bones, sacrum and coccyx",C41.4,sacral
+tumor,Kaposi's sarcoma of other sites,C46.7,unspecified
+tumor,Malignant neoplasm of unspecified site of unspecified eye,C69.90,unspecified
+tumor,Malignant neoplasm of spinal cord,C72.0,unspecified
+tumor,Malignant neoplasm of cauda equina,C72.1,lumbar
+tumor,Malignant carcinoid tumor of unspecified site,C7A.00,unspecified
+tumor,Malignant carcinoid tumor of unspecified site,C7A.00,unspecified
+tumor,"Secondary carcinoid tumors, unspecified site",C7B.00,unspecified
+tumor,"Secondary carcinoid tumors, unspecified site",C7B.00,unspecified
+tumor,Secondary carcinoid tumors of bone,C7B.03,unspecified
+tumor,Secondary carcinoid tumors of bone,C7B.03,unspecified
+tumor,Secondary carcinoid tumors of other sites,C7B.09,unspecified
+tumor,Secondary carcinoid tumors of other sites,C7B.09,unspecified
+tumor,Secondary malignant neoplasm of unspecified part of nervous system,C79.40,unspecified
+tumor,Secondary malignant neoplasm of bone,C79.51,unspecified
+tumor,Secondary malignant neoplasm of bone marrow,C79.52,unspecified
+tumor,Secondary malignant neoplasm of other specified sites,C79.89,unspecified
+tumor,Secondary malignant neoplasm of unspecified site,C79.9,unspecified
+tumor,"Mycosis fungoides, unspecified site",C84.00,unspecified
+tumor,"Sezary disease, unspecified site",C84.10,unspecified
+tumor,Carcinoma in situ of other specified sites,D09.8,unspecified
+tumor,Benign neoplasm of vertebral column,D16.6,unspecified
+tumor,"Benign neoplasm of pelvic bones, sacrum and coccyx",D16.8,sacral
+tumor,Hemangioma unspecified site,D18.00,unspecified
+tumor,Benign neoplasm of unspecified site of unspecified orbit,D31.60,unspecified
+tumor,Benign neoplasm of spinal cord,D33.4,unspecified
+tumor,Benign neoplasm of other specified sites,D36.7,unspecified
+tumor,"Benign neoplasm, unspecified site",D36.9,unspecified
+tumor,Benign carcinoid tumor of unspecified site,D3A.00,unspecified
+tumor,Benign carcinoid tumor of unspecified site,D3A.00,unspecified
+tumor,Neoplasm of uncertain behavior of spinal cord,D43.4,unspecified
+tumor,Neoplasm of uncertain behavior of other specified sites,D48.7,unspecified
+tumor,"Neoplasm of unspecified behavior of bone, soft tissue, and skin",D49.2,unspecified
+tumor,"Neoplasm of unspecified behavior of bone, soft tissue, and skin",D49.2,unspecified
+tumor,Neoplasm of unspecified behavior of other specified sites,D49.89,unspecified
+tumor,Neoplasm of unspecified behavior of other specified sites,D49.89,unspecified
+tumor,Neoplasm of unspecified behavior of unspecified site,D49.9,unspecified
+tumor,Neoplasm of unspecified behavior of unspecified site,D49.9,unspecified
+congenital,Cervical spina bifida with hydrocephalus,Q05.0,cervical
+congenital,Thoracic spina bifida with hydrocephalus,Q05.1,thoracic
+congenital,Lumbar spina bifida with hydrocephalus,Q05.2,lumbar
+congenital,Sacral spina bifida with hydrocephalus,Q05.3,sacral
+congenital,Unspecified spina bifida with hydrocephalus,Q05.4,unspecified
+congenital,Cervical spina bifida without hydrocephalus,Q05.5,cervical
+congenital,Thoracic spina bifida without hydrocephalus,Q05.6,thoracic
+congenital,Lumbar spina bifida without hydrocephalus,Q05.7,lumbar
+congenital,Sacral spina bifida without hydrocephalus,Q05.8,sacral
+congenital,"Spina bifida, unspecified",Q05.9,unspecified
+congenital,Hypoplasia and dysplasia of spinal cord,Q06.1,unspecified
+congenital,Other congenital cauda equina malformations,Q06.3,lumbar
+congenital,Other specified congenital malformations of spinal cord,Q06.8,unspecified
+congenital,"Congenital malformation of spinal cord, unspecified",Q06.9,unspecified
+congenital,Arnold-Chiari syndrome without spina bifida or hydrocephalus,Q07.00,cervical
+congenital,Arnold-Chiari syndrome with spina bifida,Q07.01,cervical
+congenital,Arnold-Chiari syndrome with spina bifida and hydrocephalus,Q07.03,cervical
+congenital,Congenital deformity of spine,Q67.5,unspecified
+congenital,Spina bifida occulta,Q76.0,unspecified
+congenital,Klippel-Feil syndrome,Q76.1,unspecified
+congenital,Congenital scoliosis due to congenital bony malformation,Q76.3,unspecified
+congenital,"Congenital kyphosis, occipito-atlanto-axial region",Q76.411,occipito-atlanto-axial
+congenital,"Congenital kyphosis, cervical region",Q76.412,cervical
+congenital,"Congenital kyphosis, cervicothoracic region",Q76.413,cervicothoracic
+congenital,"Congenital kyphosis, thoracic region",Q76.414,thoracic
+congenital,"Congenital kyphosis, thoracolumbar region",Q76.415,thoracolumbar
+congenital,"Congenital kyphosis, unspecified region",Q76.419,unspecified
+congenital,"Congenital lordosis, thoracolumbar region",Q76.425,thoracolumbar
+congenital,"Congenital lordosis, lumbar region",Q76.426,lumbar
+congenital,"Congenital lordosis, lumbosacral region",Q76.427,lumbosacral
+congenital,"Congenital lordosis, sacral and sacrococcygeal region",Q76.428,sacral
+congenital,"Congenital lordosis, unspecified region",Q76.429,unspecified
+congenital,"Other congenital malformations of spine, not associated with scoliosis",Q76.49,unspecified
+congenital,Cervical rib,Q76.5,cervical
+congenital,Other congenital malformations of ribs,Q76.6,unspecified
+congenital,Other congenital malformations of bony thorax,Q76.8,unspecified
+congenital,Other osteochondrodysplasia with defects of growth of tubular bones and spine,Q77.8,unspecified
+congenital,"Osteochondrodysplasia with defects of growth of tubular bones and spine, unspecified",Q77.9,unspecified
+congenital,Other congenital malformations of diaphragm,Q79.1,unspecified
+congenital,Other congenital malformations of abdominal wall,Q79.59,unspecified
+congenital,Other congenital malformations of musculoskeletal system,Q79.8,unspecified
+congenital,Congenital sacral dimple,Q82.6,sacral
+congenital,Other congenital malformations of breast,Q83.8,unspecified
+congenital,Other congenital malformations of hair,Q84.2,unspecified
+congenital,Other congenital malformations of nails,Q84.6,unspecified
+congenital,"Neurofibromatosis, unspecified",Q85.00,unspecified
+congenital,"Neurofibromatosis, type 1",Q85.01,unspecified
+congenital,"Neurofibromatosis, type 2",Q85.02,unspecified
+congenital,Other neurofibromatosis,Q85.09,unspecified
+congenital,Other congenital malformation syndromes due to known exogenous causes,Q86.8,unspecified
+congenital,Other congenital malformation syndromes predominantly associated with short stature,Q87.19,unspecified
+congenital,"Marfan's syndrome, unspecified",Q87.40,unspecified
+congenital,Marfan's syndrome with aortic dilation,Q87.410,unspecified
+congenital,Marfan's syndrome with other cardiovascular manifestations,Q87.418,unspecified
+congenital,Marfan's syndrome with ocular manifestations,Q87.42,unspecified
+congenital,Marfan's syndrome with skeletal manifestation,Q87.43,unspecified
+congenital,Other congenital malformation syndromes with other skeletal changes,Q87.5,unspecified
+trauma,"Unspecified displaced fracture of first cervical vertebra, initial encounter for closed fracture",S12.000A,cervical
+trauma,"Unspecified displaced fracture of first cervical vertebra, initial encounter for open fracture",S12.000B,cervical
+trauma,"Unspecified nondisplaced fracture of first cervical vertebra, initial encounter for closed fracture",S12.001A,cervical
+trauma,"Unspecified nondisplaced fracture of first cervical vertebra, initial encounter for open fracture",S12.001B,cervical
+trauma,"Stable burst fracture of first cervical vertebra, initial encounter for closed fracture",S12.01XA,cervical
+trauma,"Stable burst fracture of first cervical vertebra, initial encounter for open fracture",S12.01XB,cervical
+trauma,"Unstable burst fracture of first cervical vertebra, initial encounter for closed fracture",S12.02XA,cervical
+trauma,"Unstable burst fracture of first cervical vertebra, initial encounter for open fracture",S12.02XB,cervical
+trauma,"Displaced posterior arch fracture of first cervical vertebra, initial encounter for closed fracture",S12.030A,cervical
+trauma,"Displaced posterior arch fracture of first cervical vertebra, initial encounter for open fracture",S12.030B,cervical
+trauma,"Nondisplaced posterior arch fracture of first cervical vertebra, initial encounter for closed fracture",S12.031A,cervical
+trauma,"Nondisplaced posterior arch fracture of first cervical vertebra, initial encounter for open fracture",S12.031B,cervical
+trauma,"Displaced lateral mass fracture of first cervical vertebra, initial encounter for closed fracture",S12.040A,cervical
+trauma,"Displaced lateral mass fracture of first cervical vertebra, initial encounter for open fracture",S12.040B,cervical
+trauma,"Nondisplaced lateral mass fracture of first cervical vertebra, initial encounter for closed fracture",S12.041A,cervical
+trauma,"Nondisplaced lateral mass fracture of first cervical vertebra, initial encounter for open fracture",S12.041B,cervical
+trauma,"Other displaced fracture of first cervical vertebra, initial encounter for closed fracture",S12.090A,cervical
+trauma,"Other displaced fracture of first cervical vertebra, initial encounter for open fracture",S12.090B,cervical
+trauma,"Other nondisplaced fracture of first cervical vertebra, initial encounter for closed fracture",S12.091A,cervical
+trauma,"Other nondisplaced fracture of first cervical vertebra, initial encounter for open fracture",S12.091B,cervical
+trauma,"Unspecified displaced fracture of second cervical vertebra, initial encounter for closed fracture",S12.100A,cervical
+trauma,"Unspecified displaced fracture of second cervical vertebra, initial encounter for open fracture",S12.100B,cervical
+trauma,"Unspecified nondisplaced fracture of second cervical vertebra, initial encounter for closed fracture",S12.101A,cervical
+trauma,"Unspecified nondisplaced fracture of second cervical vertebra, initial encounter for open fracture",S12.101B,cervical
+trauma,"Anterior displaced Type II dens fracture, initial encounter for closed fracture",S12.110A,cervical
+trauma,"Anterior displaced Type II dens fracture, initial encounter for open fracture",S12.110B,cervical
+trauma,"Posterior displaced Type II dens fracture, initial encounter for closed fracture",S12.111A,cervical
+trauma,"Posterior displaced Type II dens fracture, initial encounter for open fracture",S12.111B,cervical
+trauma,"Nondisplaced Type II dens fracture, initial encounter for closed fracture",S12.112A,cervical
+trauma,"Nondisplaced Type II dens fracture, initial encounter for open fracture",S12.112B,cervical
+trauma,"Other displaced dens fracture, initial encounter for closed fracture",S12.120A,cervical
+trauma,"Other displaced dens fracture, initial encounter for open fracture",S12.120B,cervical
+trauma,"Other nondisplaced dens fracture, initial encounter for closed fracture",S12.121A,cervical
+trauma,"Other nondisplaced dens fracture, initial encounter for open fracture",S12.121B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of second cervical vertebra, initial encounter for closed fracture",S12.130A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of second cervical vertebra, initial encounter for open fracture",S12.130B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of second cervical vertebra, initial encounter for closed fracture",S12.131A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of second cervical vertebra, initial encounter for open fracture",S12.131B,cervical
+trauma,"Type III traumatic spondylolisthesis of second cervical vertebra, initial encounter for closed fracture",S12.14XA,cervical
+trauma,"Type III traumatic spondylolisthesis of second cervical vertebra, initial encounter for open fracture",S12.14XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of second cervical vertebra, initial encounter for closed fracture",S12.150A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of second cervical vertebra, initial encounter for open fracture",S12.150B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of second cervical vertebra, initial encounter for closed fracture",S12.151A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of second cervical vertebra, initial encounter for open fracture",S12.151B,cervical
+trauma,"Other displaced fracture of second cervical vertebra, initial encounter for closed fracture",S12.190A,cervical
+trauma,"Other displaced fracture of second cervical vertebra, initial encounter for open fracture",S12.190B,cervical
+trauma,"Other nondisplaced fracture of second cervical vertebra, initial encounter for closed fracture",S12.191A,cervical
+trauma,"Other nondisplaced fracture of second cervical vertebra, initial encounter for open fracture",S12.191B,cervical
+trauma,"Unspecified displaced fracture of third cervical vertebra, initial encounter for closed fracture",S12.200A,cervical
+trauma,"Unspecified displaced fracture of third cervical vertebra, initial encounter for open fracture",S12.200B,cervical
+trauma,"Unspecified nondisplaced fracture of third cervical vertebra, initial encounter for closed fracture",S12.201A,cervical
+trauma,"Unspecified nondisplaced fracture of third cervical vertebra, initial encounter for open fracture",S12.201B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of third cervical vertebra, initial encounter for closed fracture",S12.230A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of third cervical vertebra, initial encounter for open fracture",S12.230B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of third cervical vertebra, initial encounter for closed fracture",S12.231A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of third cervical vertebra, initial encounter for open fracture",S12.231B,cervical
+trauma,"Type III traumatic spondylolisthesis of third cervical vertebra, initial encounter for closed fracture",S12.24XA,cervical
+trauma,"Type III traumatic spondylolisthesis of third cervical vertebra, initial encounter for open fracture",S12.24XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of third cervical vertebra, initial encounter for closed fracture",S12.250A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of third cervical vertebra, initial encounter for open fracture",S12.250B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of third cervical vertebra, initial encounter for closed fracture",S12.251A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of third cervical vertebra, initial encounter for open fracture",S12.251B,cervical
+trauma,"Other displaced fracture of third cervical vertebra, initial encounter for closed fracture",S12.290A,cervical
+trauma,"Other displaced fracture of third cervical vertebra, initial encounter for open fracture",S12.290B,cervical
+trauma,"Other nondisplaced fracture of third cervical vertebra, initial encounter for closed fracture",S12.291A,cervical
+trauma,"Other nondisplaced fracture of third cervical vertebra, initial encounter for open fracture",S12.291B,cervical
+trauma,"Unspecified displaced fracture of fourth cervical vertebra, initial encounter for closed fracture",S12.300A,cervical
+trauma,"Unspecified displaced fracture of fourth cervical vertebra, initial encounter for open fracture",S12.300B,cervical
+trauma,"Unspecified nondisplaced fracture of fourth cervical vertebra, initial encounter for closed fracture",S12.301A,cervical
+trauma,"Unspecified nondisplaced fracture of fourth cervical vertebra, initial encounter for open fracture",S12.301B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of fourth cervical vertebra, initial encounter for closed fracture",S12.330A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of fourth cervical vertebra, initial encounter for open fracture",S12.330B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of fourth cervical vertebra, initial encounter for closed fracture",S12.331A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of fourth cervical vertebra, initial encounter for open fracture",S12.331B,cervical
+trauma,"Type III traumatic spondylolisthesis of fourth cervical vertebra, initial encounter for closed fracture",S12.34XA,cervical
+trauma,"Type III traumatic spondylolisthesis of fourth cervical vertebra, initial encounter for open fracture",S12.34XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of fourth cervical vertebra, initial encounter for closed fracture",S12.350A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of fourth cervical vertebra, initial encounter for open fracture",S12.350B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of fourth cervical vertebra, initial encounter for closed fracture",S12.351A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of fourth cervical vertebra, initial encounter for open fracture",S12.351B,cervical
+trauma,"Other displaced fracture of fourth cervical vertebra, initial encounter for closed fracture",S12.390A,cervical
+trauma,"Other displaced fracture of fourth cervical vertebra, initial encounter for open fracture",S12.390B,cervical
+trauma,"Other nondisplaced fracture of fourth cervical vertebra, initial encounter for closed fracture",S12.391A,cervical
+trauma,"Other nondisplaced fracture of fourth cervical vertebra, initial encounter for open fracture",S12.391B,cervical
+trauma,"Unspecified displaced fracture of fifth cervical vertebra, initial encounter for closed fracture",S12.400A,cervical
+trauma,"Unspecified displaced fracture of fifth cervical vertebra, initial encounter for open fracture",S12.400B,cervical
+trauma,"Unspecified nondisplaced fracture of fifth cervical vertebra, initial encounter for closed fracture",S12.401A,cervical
+trauma,"Unspecified nondisplaced fracture of fifth cervical vertebra, initial encounter for open fracture",S12.401B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of fifth cervical vertebra, initial encounter for closed fracture",S12.430A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of fifth cervical vertebra, initial encounter for open fracture",S12.430B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of fifth cervical vertebra, initial encounter for closed fracture",S12.431A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of fifth cervical vertebra, initial encounter for open fracture",S12.431B,cervical
+trauma,"Type III traumatic spondylolisthesis of fifth cervical vertebra, initial encounter for closed fracture",S12.44XA,cervical
+trauma,"Type III traumatic spondylolisthesis of fifth cervical vertebra, initial encounter for open fracture",S12.44XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of fifth cervical vertebra, initial encounter for closed fracture",S12.450A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of fifth cervical vertebra, initial encounter for open fracture",S12.450B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of fifth cervical vertebra, initial encounter for closed fracture",S12.451A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of fifth cervical vertebra, initial encounter for open fracture",S12.451B,cervical
+trauma,"Other displaced fracture of fifth cervical vertebra, initial encounter for closed fracture",S12.490A,cervical
+trauma,"Other displaced fracture of fifth cervical vertebra, initial encounter for open fracture",S12.490B,cervical
+trauma,"Other nondisplaced fracture of fifth cervical vertebra, initial encounter for closed fracture",S12.491A,cervical
+trauma,"Other nondisplaced fracture of fifth cervical vertebra, initial encounter for open fracture",S12.491B,cervical
+trauma,"Unspecified displaced fracture of sixth cervical vertebra, initial encounter for closed fracture",S12.500A,cervical
+trauma,"Unspecified displaced fracture of sixth cervical vertebra, initial encounter for open fracture",S12.500B,cervical
+trauma,"Unspecified nondisplaced fracture of sixth cervical vertebra, initial encounter for closed fracture",S12.501A,cervical
+trauma,"Unspecified nondisplaced fracture of sixth cervical vertebra, initial encounter for open fracture",S12.501B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of sixth cervical vertebra, initial encounter for closed fracture",S12.530A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of sixth cervical vertebra, initial encounter for open fracture",S12.530B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of sixth cervical vertebra, initial encounter for closed fracture",S12.531A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of sixth cervical vertebra, initial encounter for open fracture",S12.531B,cervical
+trauma,"Type III traumatic spondylolisthesis of sixth cervical vertebra, initial encounter for closed fracture",S12.54XA,cervical
+trauma,"Type III traumatic spondylolisthesis of sixth cervical vertebra, initial encounter for open fracture",S12.54XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of sixth cervical vertebra, initial encounter for closed fracture",S12.550A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of sixth cervical vertebra, initial encounter for open fracture",S12.550B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of sixth cervical vertebra, initial encounter for closed fracture",S12.551A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of sixth cervical vertebra, initial encounter for open fracture",S12.551B,cervical
+trauma,"Other displaced fracture of sixth cervical vertebra, initial encounter for closed fracture",S12.590A,cervical
+trauma,"Other displaced fracture of sixth cervical vertebra, initial encounter for open fracture",S12.590B,cervical
+trauma,"Other nondisplaced fracture of sixth cervical vertebra, initial encounter for closed fracture",S12.591A,cervical
+trauma,"Other nondisplaced fracture of sixth cervical vertebra, initial encounter for open fracture",S12.591B,cervical
+trauma,"Unspecified displaced fracture of seventh cervical vertebra, initial encounter for closed fracture",S12.600A,cervical
+trauma,"Unspecified displaced fracture of seventh cervical vertebra, initial encounter for open fracture",S12.600B,cervical
+trauma,"Unspecified nondisplaced fracture of seventh cervical vertebra, initial encounter for closed fracture",S12.601A,cervical
+trauma,"Unspecified nondisplaced fracture of seventh cervical vertebra, initial encounter for open fracture",S12.601B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of seventh cervical vertebra, initial encounter for closed fracture",S12.630A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of seventh cervical vertebra, initial encounter for open fracture",S12.630B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of seventh cervical vertebra, initial encounter for closed fracture",S12.631A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of seventh cervical vertebra, initial encounter for open fracture",S12.631B,cervical
+trauma,"Type III traumatic spondylolisthesis of seventh cervical vertebra, initial encounter for closed fracture",S12.64XA,cervical
+trauma,"Type III traumatic spondylolisthesis of seventh cervical vertebra, initial encounter for open fracture",S12.64XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of seventh cervical vertebra, initial encounter for closed fracture",S12.650A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of seventh cervical vertebra, initial encounter for open fracture",S12.650B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of seventh cervical vertebra, initial encounter for closed fracture",S12.651A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of seventh cervical vertebra, initial encounter for open fracture",S12.651B,cervical
+trauma,"Other displaced fracture of seventh cervical vertebra, initial encounter for closed fracture",S12.690A,cervical
+trauma,"Other displaced fracture of seventh cervical vertebra, initial encounter for open fracture",S12.690B,cervical
+trauma,"Other nondisplaced fracture of seventh cervical vertebra, initial encounter for closed fracture",S12.691A,cervical
+trauma,"Other nondisplaced fracture of seventh cervical vertebra, initial encounter for open fracture",S12.691B,cervical
+trauma,"Fracture of other parts of neck, initial encounter",S12.8XXA,cervical
+trauma,"Fracture of neck, unspecified, initial encounter",S12.9XXA,cervical
+trauma,"Traumatic rupture of cervical intervertebral disc, initial encounter",S13.0XXA,cervical
+trauma,"Subluxation of unspecified cervical vertebrae, initial encounter",S13.100A,cervical
+trauma,"Dislocation of unspecified cervical vertebrae, initial encounter",S13.101A,cervical
+trauma,"Subluxation of C0/C1 cervical vertebrae, initial encounter",S13.110A,cervical
+trauma,"Dislocation of C0/C1 cervical vertebrae, initial encounter",S13.111A,cervical
+trauma,"Subluxation of C1/C2 cervical vertebrae, initial encounter",S13.120A,cervical
+trauma,"Dislocation of C1/C2 cervical vertebrae, initial encounter",S13.121A,cervical
+trauma,"Subluxation of C2/C3 cervical vertebrae, initial encounter",S13.130A,cervical
+trauma,"Dislocation of C2/C3 cervical vertebrae, initial encounter",S13.131A,cervical
+trauma,"Subluxation of C3/C4 cervical vertebrae, initial encounter",S13.140A,cervical
+trauma,"Dislocation of C3/C4 cervical vertebrae, initial encounter",S13.141A,cervical
+trauma,"Subluxation of C4/C5 cervical vertebrae, initial encounter",S13.150A,cervical
+trauma,"Dislocation of C4/C5 cervical vertebrae, initial encounter",S13.151A,cervical
+trauma,"Subluxation of C5/C6 cervical vertebrae, initial encounter",S13.160A,cervical
+trauma,"Dislocation of C5/C6 cervical vertebrae, initial encounter",S13.161A,cervical
+trauma,"Subluxation of C6/C7 cervical vertebrae, initial encounter",S13.170A,cervical
+trauma,"Dislocation of C6/C7 cervical vertebrae, initial encounter",S13.171A,cervical
+trauma,"Subluxation of C7/T1 cervical vertebrae, initial encounter",S13.180A,cervical
+trauma,"Dislocation of C7/T1 cervical vertebrae, initial encounter",S13.181A,cervical
+trauma,"Dislocation of unspecified parts of neck, initial encounter",S13.20XA,cervical
+trauma,"Dislocation of other parts of neck, initial encounter",S13.29XA,cervical
+trauma,"Sprain of ligaments of cervical spine, initial encounter",S13.4XXA,cervical
+trauma,"Concussion and edema of cervical spinal cord, initial encounter",S14.0XXA,cervical
+trauma,"Unspecified injury at C1 level of cervical spinal cord, initial encounter",S14.101A,cervical
+trauma,"Unspecified injury at C2 level of cervical spinal cord, initial encounter",S14.102A,cervical
+trauma,"Unspecified injury at C3 level of cervical spinal cord, initial encounter",S14.103A,cervical
+trauma,"Unspecified injury at C4 level of cervical spinal cord, initial encounter",S14.104A,cervical
+trauma,"Unspecified injury at C5 level of cervical spinal cord, initial encounter",S14.105A,cervical
+trauma,"Unspecified injury at C6 level of cervical spinal cord, initial encounter",S14.106A,cervical
+trauma,"Unspecified injury at C7 level of cervical spinal cord, initial encounter",S14.107A,cervical
+trauma,"Unspecified injury at C8 level of cervical spinal cord, initial encounter",S14.108A,cervical
+trauma,"Unspecified injury at unspecified level of cervical spinal cord, initial encounter",S14.109A,cervical
+trauma,"Complete lesion at C1 level of cervical spinal cord, initial encounter",S14.111A,cervical
+trauma,"Complete lesion at C2 level of cervical spinal cord, initial encounter",S14.112A,cervical
+trauma,"Complete lesion at C3 level of cervical spinal cord, initial encounter",S14.113A,cervical
+trauma,"Complete lesion at C4 level of cervical spinal cord, initial encounter",S14.114A,cervical
+trauma,"Complete lesion at C5 level of cervical spinal cord, initial encounter",S14.115A,cervical
+trauma,"Complete lesion at C6 level of cervical spinal cord, initial encounter",S14.116A,cervical
+trauma,"Complete lesion at C7 level of cervical spinal cord, initial encounter",S14.117A,cervical
+trauma,"Complete lesion at C8 level of cervical spinal cord, initial encounter",S14.118A,cervical
+trauma,"Complete lesion at unspecified level of cervical spinal cord, initial encounter",S14.119A,cervical
+trauma,"Central cord syndrome at C1 level of cervical spinal cord, initial encounter",S14.121A,cervical
+trauma,"Central cord syndrome at C2 level of cervical spinal cord, initial encounter",S14.122A,cervical
+trauma,"Central cord syndrome at C3 level of cervical spinal cord, initial encounter",S14.123A,cervical
+trauma,"Central cord syndrome at C4 level of cervical spinal cord, initial encounter",S14.124A,cervical
+trauma,"Central cord syndrome at C5 level of cervical spinal cord, initial encounter",S14.125A,cervical
+trauma,"Central cord syndrome at C6 level of cervical spinal cord, initial encounter",S14.126A,cervical
+trauma,"Central cord syndrome at C7 level of cervical spinal cord, initial encounter",S14.127A,cervical
+trauma,"Central cord syndrome at C8 level of cervical spinal cord, initial encounter",S14.128A,cervical
+trauma,"Central cord syndrome at unspecified level of cervical spinal cord, initial encounter",S14.129A,cervical
+trauma,"Anterior cord syndrome at C1 level of cervical spinal cord, initial encounter",S14.131A,cervical
+trauma,"Anterior cord syndrome at C2 level of cervical spinal cord, initial encounter",S14.132A,cervical
+trauma,"Anterior cord syndrome at C3 level of cervical spinal cord, initial encounter",S14.133A,cervical
+trauma,"Anterior cord syndrome at C4 level of cervical spinal cord, initial encounter",S14.134A,cervical
+trauma,"Anterior cord syndrome at C5 level of cervical spinal cord, initial encounter",S14.135A,cervical
+trauma,"Anterior cord syndrome at C6 level of cervical spinal cord, initial encounter",S14.136A,cervical
+trauma,"Anterior cord syndrome at C7 level of cervical spinal cord, initial encounter",S14.137A,cervical
+trauma,"Anterior cord syndrome at C8 level of cervical spinal cord, initial encounter",S14.138A,cervical
+trauma,"Anterior cord syndrome at unspecified level of cervical spinal cord, initial encounter",S14.139A,cervical
+trauma,"Brown-Sequard syndrome at C1 level of cervical spinal cord, initial encounter",S14.141A,cervical
+trauma,"Brown-Sequard syndrome at C2 level of cervical spinal cord, initial encounter",S14.142A,cervical
+trauma,"Brown-Sequard syndrome at C3 level of cervical spinal cord, initial encounter",S14.143A,cervical
+trauma,"Brown-Sequard syndrome at C4 level of cervical spinal cord, initial encounter",S14.144A,cervical
+trauma,"Brown-Sequard syndrome at C5 level of cervical spinal cord, initial encounter",S14.145A,cervical
+trauma,"Brown-Sequard syndrome at C6 level of cervical spinal cord, initial encounter",S14.146A,cervical
+trauma,"Brown-Sequard syndrome at C7 level of cervical spinal cord, initial encounter",S14.147A,cervical
+trauma,"Brown-Sequard syndrome at C8 level of cervical spinal cord, initial encounter",S14.148A,cervical
+trauma,"Brown-Sequard syndrome at unspecified level of cervical spinal cord, initial encounter",S14.149A,cervical
+trauma,"Other incomplete lesion at C1 level of cervical spinal cord, initial encounter",S14.151A,cervical
+trauma,"Other incomplete lesion at C2 level of cervical spinal cord, initial encounter",S14.152A,cervical
+trauma,"Other incomplete lesion at C3 level of cervical spinal cord, initial encounter",S14.153A,cervical
+trauma,"Other incomplete lesion at C4 level of cervical spinal cord, initial encounter",S14.154A,cervical
+trauma,"Other incomplete lesion at C5 level of cervical spinal cord, initial encounter",S14.155A,cervical
+trauma,"Other incomplete lesion at C6 level of cervical spinal cord, initial encounter",S14.156A,cervical
+trauma,"Other incomplete lesion at C7 level of cervical spinal cord, initial encounter",S14.157A,cervical
+trauma,"Other incomplete lesion at C8 level of cervical spinal cord, initial encounter",S14.158A,cervical
+trauma,"Other incomplete lesion at unspecified level of cervical spinal cord, initial encounter",S14.159A,cervical
+trauma,"Injury of nerve root of cervical spine, initial encounter",S14.2XXA,cervical
+trauma,"Injury of cervical sympathetic nerves, initial encounter",S14.5XXA,cervical
+trauma,"Other specified injuries of cervical trachea, initial encounter",S19.82XA,cervical
+trauma,"Unspecified injury of neck, initial encounter",S19.9XXA,cervical
+trauma,"Wedge compression fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.000A,lumbar
+trauma,"Wedge compression fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.000B,lumbar
+trauma,"Stable burst fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.001A,lumbar
+trauma,"Stable burst fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.001B,lumbar
+trauma,"Unstable burst fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.002A,lumbar
+trauma,"Unstable burst fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.002B,lumbar
+trauma,"Other fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.008A,lumbar
+trauma,"Other fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.008B,lumbar
+trauma,"Unspecified fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.009A,lumbar
+trauma,"Unspecified fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.009B,lumbar
+trauma,"Wedge compression fracture of first lumbar vertebra, initial encounter for closed fracture",S32.010A,lumbar
+trauma,"Wedge compression fracture of first lumbar vertebra, initial encounter for open fracture",S32.010B,lumbar
+trauma,"Stable burst fracture of first lumbar vertebra, initial encounter for closed fracture",S32.011A,lumbar
+trauma,"Stable burst fracture of first lumbar vertebra, initial encounter for open fracture",S32.011B,lumbar
+trauma,"Unstable burst fracture of first lumbar vertebra, initial encounter for closed fracture",S32.012A,lumbar
+trauma,"Unstable burst fracture of first lumbar vertebra, initial encounter for open fracture",S32.012B,lumbar
+trauma,"Other fracture of first lumbar vertebra, initial encounter for closed fracture",S32.018A,lumbar
+trauma,"Other fracture of first lumbar vertebra, initial encounter for open fracture",S32.018B,lumbar
+trauma,"Unspecified fracture of first lumbar vertebra, initial encounter for closed fracture",S32.019A,lumbar
+trauma,"Unspecified fracture of first lumbar vertebra, initial encounter for open fracture",S32.019B,lumbar
+trauma,"Wedge compression fracture of second lumbar vertebra, initial encounter for closed fracture",S32.020A,lumbar
+trauma,"Wedge compression fracture of second lumbar vertebra, initial encounter for open fracture",S32.020B,lumbar
+trauma,"Stable burst fracture of second lumbar vertebra, initial encounter for closed fracture",S32.021A,lumbar
+trauma,"Stable burst fracture of second lumbar vertebra, initial encounter for open fracture",S32.021B,lumbar
+trauma,"Unstable burst fracture of second lumbar vertebra, initial encounter for closed fracture",S32.022A,lumbar
+trauma,"Unstable burst fracture of second lumbar vertebra, initial encounter for open fracture",S32.022B,lumbar
+trauma,"Other fracture of second lumbar vertebra, initial encounter for closed fracture",S32.028A,lumbar
+trauma,"Other fracture of second lumbar vertebra, initial encounter for open fracture",S32.028B,lumbar
+trauma,"Unspecified fracture of second lumbar vertebra, initial encounter for closed fracture",S32.029A,lumbar
+trauma,"Unspecified fracture of second lumbar vertebra, initial encounter for open fracture",S32.029B,lumbar
+trauma,"Wedge compression fracture of third lumbar vertebra, initial encounter for closed fracture",S32.030A,lumbar
+trauma,"Wedge compression fracture of third lumbar vertebra, initial encounter for open fracture",S32.030B,lumbar
+trauma,"Stable burst fracture of third lumbar vertebra, initial encounter for closed fracture",S32.031A,lumbar
+trauma,"Stable burst fracture of third lumbar vertebra, initial encounter for open fracture",S32.031B,lumbar
+trauma,"Unstable burst fracture of third lumbar vertebra, initial encounter for closed fracture",S32.032A,lumbar
+trauma,"Unstable burst fracture of third lumbar vertebra, initial encounter for open fracture",S32.032B,lumbar
+trauma,"Other fracture of third lumbar vertebra, initial encounter for closed fracture",S32.038A,lumbar
+trauma,"Other fracture of third lumbar vertebra, initial encounter for open fracture",S32.038B,lumbar
+trauma,"Unspecified fracture of third lumbar vertebra, initial encounter for closed fracture",S32.039A,lumbar
+trauma,"Unspecified fracture of third lumbar vertebra, initial encounter for open fracture",S32.039B,lumbar
+trauma,"Wedge compression fracture of fourth lumbar vertebra, initial encounter for closed fracture",S32.040A,lumbar
+trauma,"Wedge compression fracture of fourth lumbar vertebra, initial encounter for open fracture",S32.040B,lumbar
+trauma,"Stable burst fracture of fourth lumbar vertebra, initial encounter for closed fracture",S32.041A,lumbar
+trauma,"Stable burst fracture of fourth lumbar vertebra, initial encounter for open fracture",S32.041B,lumbar
+trauma,"Unstable burst fracture of fourth lumbar vertebra, initial encounter for closed fracture",S32.042A,lumbar
+trauma,"Unstable burst fracture of fourth lumbar vertebra, initial encounter for open fracture",S32.042B,lumbar
+trauma,"Other fracture of fourth lumbar vertebra, initial encounter for closed fracture",S32.048A,lumbar
+trauma,"Other fracture of fourth lumbar vertebra, initial encounter for open fracture",S32.048B,lumbar
+trauma,"Unspecified fracture of fourth lumbar vertebra, initial encounter for closed fracture",S32.049A,lumbar
+trauma,"Unspecified fracture of fourth lumbar vertebra, initial encounter for open fracture",S32.049B,lumbar
+trauma,"Wedge compression fracture of fifth lumbar vertebra, initial encounter for closed fracture",S32.050A,lumbar
+trauma,"Wedge compression fracture of fifth lumbar vertebra, initial encounter for open fracture",S32.050B,lumbar
+trauma,"Stable burst fracture of fifth lumbar vertebra, initial encounter for closed fracture",S32.051A,lumbar
+trauma,"Stable burst fracture of fifth lumbar vertebra, initial encounter for open fracture",S32.051B,lumbar
+trauma,"Unstable burst fracture of fifth lumbar vertebra, initial encounter for closed fracture",S32.052A,lumbar
+trauma,"Unstable burst fracture of fifth lumbar vertebra, initial encounter for open fracture",S32.052B,lumbar
+trauma,"Other fracture of fifth lumbar vertebra, initial encounter for closed fracture",S32.058A,lumbar
+trauma,"Other fracture of fifth lumbar vertebra, initial encounter for open fracture",S32.058B,lumbar
+trauma,"Unspecified fracture of fifth lumbar vertebra, initial encounter for closed fracture",S32.059A,lumbar
+trauma,"Unspecified fracture of fifth lumbar vertebra, initial encounter for open fracture",S32.059B,lumbar
+trauma,"Unspecified fracture of sacrum, initial encounter for closed fracture",S32.10XA,sacral
+trauma,"Unspecified fracture of sacrum, initial encounter for open fracture",S32.10XB,sacral
+trauma,"Nondisplaced Zone I fracture of sacrum, initial encounter for closed fracture",S32.110A,sacral
+trauma,"Nondisplaced Zone I fracture of sacrum, initial encounter for open fracture",S32.110B,sacral
+trauma,"Minimally displaced Zone I fracture of sacrum, initial encounter for closed fracture",S32.111A,sacral
+trauma,"Minimally displaced Zone I fracture of sacrum, initial encounter for open fracture",S32.111B,sacral
+trauma,"Severely displaced Zone I fracture of sacrum, initial encounter for closed fracture",S32.112A,sacral
+trauma,"Severely displaced Zone I fracture of sacrum, initial encounter for open fracture",S32.112B,sacral
+trauma,"Unspecified Zone I fracture of sacrum, initial encounter for closed fracture",S32.119A,sacral
+trauma,"Unspecified Zone I fracture of sacrum, initial encounter for open fracture",S32.119B,sacral
+trauma,"Nondisplaced Zone II fracture of sacrum, initial encounter for closed fracture",S32.120A,sacral
+trauma,"Nondisplaced Zone II fracture of sacrum, initial encounter for open fracture",S32.120B,sacral
+trauma,"Minimally displaced Zone II fracture of sacrum, initial encounter for closed fracture",S32.121A,sacral
+trauma,"Minimally displaced Zone II fracture of sacrum, initial encounter for open fracture",S32.121B,sacral
+trauma,"Severely displaced Zone II fracture of sacrum, initial encounter for closed fracture",S32.122A,sacral
+trauma,"Severely displaced Zone II fracture of sacrum, initial encounter for open fracture",S32.122B,sacral
+trauma,"Unspecified Zone II fracture of sacrum, initial encounter for closed fracture",S32.129A,sacral
+trauma,"Unspecified Zone II fracture of sacrum, initial encounter for open fracture",S32.129B,sacral
+trauma,"Nondisplaced Zone III fracture of sacrum, initial encounter for closed fracture",S32.130A,sacral
+trauma,"Nondisplaced Zone III fracture of sacrum, initial encounter for open fracture",S32.130B,sacral
+trauma,"Minimally displaced Zone III fracture of sacrum, initial encounter for closed fracture",S32.131A,sacral
+trauma,"Minimally displaced Zone III fracture of sacrum, initial encounter for open fracture",S32.131B,sacral
+trauma,"Severely displaced Zone III fracture of sacrum, initial encounter for closed fracture",S32.132A,sacral
+trauma,"Severely displaced Zone III fracture of sacrum, initial encounter for open fracture",S32.132B,sacral
+trauma,"Unspecified Zone III fracture of sacrum, initial encounter for closed fracture",S32.139A,sacral
+trauma,"Unspecified Zone III fracture of sacrum, initial encounter for open fracture",S32.139B,sacral
+trauma,"Type 1 fracture of sacrum, initial encounter for closed fracture",S32.14XA,sacral
+trauma,"Type 1 fracture of sacrum, initial encounter for open fracture",S32.14XB,sacral
+trauma,"Type 2 fracture of sacrum, initial encounter for closed fracture",S32.15XA,sacral
+trauma,"Type 2 fracture of sacrum, initial encounter for open fracture",S32.15XB,sacral
+trauma,"Type 3 fracture of sacrum, initial encounter for closed fracture",S32.16XA,sacral
+trauma,"Type 3 fracture of sacrum, initial encounter for open fracture",S32.16XB,sacral
+trauma,"Type 4 fracture of sacrum, initial encounter for closed fracture",S32.17XA,sacral
+trauma,"Type 4 fracture of sacrum, initial encounter for open fracture",S32.17XB,sacral
+trauma,"Other fracture of sacrum, initial encounter for closed fracture",S32.19XA,sacral
+trauma,"Other fracture of sacrum, initial encounter for open fracture",S32.19XB,sacral
+trauma,"Fracture of coccyx, initial encounter for closed fracture",S32.2XXA,unspecified
+trauma,"Fracture of coccyx, initial encounter for open fracture",S32.2XXB,unspecified
+trauma,"Fracture of other parts of pelvis, initial encounter for closed fracture",S32.89XA,unspecified
+trauma,"Fracture of other parts of pelvis, initial encounter for open fracture",S32.89XB,unspecified
+trauma,"Fracture of unspecified parts of lumbosacral spine and pelvis, initial encounter for closed fracture",S32.9XXA,sacral
+trauma,"Fracture of unspecified parts of lumbosacral spine and pelvis, initial encounter for open fracture",S32.9XXB,sacral
+trauma,"Traumatic rupture of lumbar intervertebral disc, initial encounter",S33.0XXA,lumbar
+trauma,"Subluxation of unspecified lumbar vertebra, initial encounter",S33.100A,lumbar
+trauma,"Dislocation of unspecified lumbar vertebra, initial encounter",S33.101A,lumbar
+trauma,"Subluxation of L1/L2 lumbar vertebra, initial encounter",S33.110A,lumbar
+trauma,"Dislocation of L1/L2 lumbar vertebra, initial encounter",S33.111A,lumbar
+trauma,"Subluxation of L2/L3 lumbar vertebra, initial encounter",S33.120A,lumbar
+trauma,"Dislocation of L2/L3 lumbar vertebra, initial encounter",S33.121A,lumbar
+trauma,"Subluxation of L3/L4 lumbar vertebra, initial encounter",S33.130A,lumbar
+trauma,"Dislocation of L3/L4 lumbar vertebra, initial encounter",S33.131A,lumbar
+trauma,"Subluxation of L4/L5 lumbar vertebra, initial encounter",S33.140A,lumbar
+trauma,"Dislocation of L4/L5 lumbar vertebra, initial encounter",S33.141A,lumbar
+trauma,"Dislocation of sacroiliac and sacrococcygeal joint, initial encounter",S33.2XXA,sacral
+trauma,"Dislocation of unspecified parts of lumbar spine and pelvis, initial encounter",S33.30XA,lumbar
+trauma,"Dislocation of other parts of lumbar spine and pelvis, initial encounter",S33.39XA,lumbar
+trauma,"Sprain of ligaments of lumbar spine, initial encounter",S33.5XXA,lumbar
+trauma,"Sprain of other parts of lumbar spine and pelvis, initial encounter",S33.8XXA,lumbar
+trauma,"Sprain of unspecified parts of lumbar spine and pelvis, initial encounter",S33.9XXA,lumbar
+trauma,"Concussion and edema of lumbar spinal cord, initial encounter",S34.01XA,lumbar
+trauma,"Concussion and edema of sacral spinal cord, initial encounter",S34.02XA,sacral
+trauma,"Unspecified injury to L1 level of lumbar spinal cord, initial encounter",S34.101A,lumbar
+trauma,"Unspecified injury to L2 level of lumbar spinal cord, initial encounter",S34.102A,lumbar
+trauma,"Unspecified injury to L3 level of lumbar spinal cord, initial encounter",S34.103A,lumbar
+trauma,"Unspecified injury to L4 level of lumbar spinal cord, initial encounter",S34.104A,lumbar
+trauma,"Unspecified injury to L5 level of lumbar spinal cord, initial encounter",S34.105A,lumbar
+trauma,"Unspecified injury to unspecified level of lumbar spinal cord, initial encounter",S34.109A,lumbar
+trauma,"Complete lesion of L1 level of lumbar spinal cord, initial encounter",S34.111A,lumbar
+trauma,"Complete lesion of L2 level of lumbar spinal cord, initial encounter",S34.112A,lumbar
+trauma,"Complete lesion of L3 level of lumbar spinal cord, initial encounter",S34.113A,lumbar
+trauma,"Complete lesion of L4 level of lumbar spinal cord, initial encounter",S34.114A,lumbar
+trauma,"Complete lesion of L5 level of lumbar spinal cord, initial encounter",S34.115A,lumbar
+trauma,"Complete lesion of unspecified level of lumbar spinal cord, initial encounter",S34.119A,lumbar
+trauma,"Incomplete lesion of L1 level of lumbar spinal cord, initial encounter",S34.121A,lumbar
+trauma,"Incomplete lesion of L2 level of lumbar spinal cord, initial encounter",S34.122A,lumbar
+trauma,"Incomplete lesion of L3 level of lumbar spinal cord, initial encounter",S34.123A,lumbar
+trauma,"Incomplete lesion of L4 level of lumbar spinal cord, initial encounter",S34.124A,lumbar
+trauma,"Incomplete lesion of L5 level of lumbar spinal cord, initial encounter",S34.125A,lumbar
+trauma,"Incomplete lesion of unspecified level of lumbar spinal cord, initial encounter",S34.129A,lumbar
+trauma,"Complete lesion of sacral spinal cord, initial encounter",S34.131A,sacral
+trauma,"Incomplete lesion of sacral spinal cord, initial encounter",S34.132A,sacral
+trauma,"Unspecified injury to sacral spinal cord, initial encounter",S34.139A,sacral
+trauma,"Injury of nerve root of lumbar spine, initial encounter",S34.21XA,lumbar
+trauma,"Injury of nerve root of sacral spine, initial encounter",S34.22XA,sacral
+trauma,"Injury of cauda equina, initial encounter",S34.3XXA,lumbar
+trauma,"Injury of lumbosacral plexus, initial encounter",S34.4XXA,sacral
+trauma,"Injury of lumbar, sacral and pelvic sympathetic nerves, initial encounter",S34.5XXA,lumbar

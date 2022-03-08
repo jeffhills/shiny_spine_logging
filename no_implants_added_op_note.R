@@ -164,61 +164,7 @@ no_implants_op_note_procedures_performed_numbered_function <- function(additiona
     mutate(count = row_number()) %>%
     mutate(procedures_performed_numbered = glue("{count}. {procedure_performed_statement}")) %>%
     select(procedures_performed_numbered)
-  # if(length(revision_decompression_vector) > 0){
-  #   summary_nested_df <- objects_added_df %>%
-  #     mutate(revision_levels_vector = list(revision_decompression_vector)) %>%
-  #     select(level, vertebral_number, approach, category, object, side, revision_levels_vector, implant_statement, screw_size_type) %>%
-  #     mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
-  #     select(-revision_levels_vector) %>%
-  #     mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
-  #     unnest() %>%
-  #     replace_na(list(implant_statement = " ", screw_size_type = " ", revision_level = FALSE)) %>%
-  #     mutate(revision_label = paste0("revision_", object)) %>%
-  #     mutate(object = if_else(revision_level == FALSE, object, if_else(category == "decompression", revision_label, object))) %>%
-  #     select(-revision_label) %>%
-  #     mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-  #     mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
-  # }else{
-  #   summary_nested_df <- objects_added_df %>%
-  #     select(level, object, vertebral_number) %>%
-  #     mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-  #     mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
-  # }
-  # 
-  # 
-  # summary_single_statements <- summary_nested_df %>%
-  #   filter(procedures_per_line == "distinct") %>%
-  #   mutate(procedure_performed_statement = glue("{procedure_class} at {level}"))%>%
-  #   select(procedure_class, procedure_performed_statement)
-  # 
-  # summary_multiple_nested <- summary_nested_df %>%
-  #   filter(procedures_per_line == "combine") %>%
-  #   group_by(procedure_class) %>%
-  #   nest() %>%
-  #   ungroup() %>%
-  #   mutate(count = row_number()) %>%
-  #   mutate(levels = map(.x = data, .f = ~ extract_levels_function(input_df = .x))) %>%
-  #   select(-data) %>%
-  #   unnest(levels) %>%
-  #   mutate(procedure_performed_statement = glue("{procedure_class} at {levels}")) %>%
-  #   mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation", paste("Instrumentation of the Pelvis with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
-  #   select(procedure_class, procedure_performed_statement)
-  # 
-  # added_procedures_df <- tibble(procedure_performed_statement = additional_procedures_performed_vector) 
-  # 
-  # procedures_numbered_df <- summary_nested_df %>%
-  #   select(procedure_class) %>%
-  #   filter(str_detect(string = procedure_class, pattern = "Inferior facetectom") == FALSE) %>%
-  #   distinct() %>%
-  #   left_join(summary_single_statements %>%
-  #               union_all(summary_multiple_nested)) %>%
-  #   select(procedure_performed_statement) %>%
-  #   add_row(procedure_performed_statement = if_else(length(fusion_levels_vector) == 0, "xx", paste("Posterior Spinal Fusion at", glue_collapse(fusion_levels_vector, sep = ", ", last = " and ")))) %>%
-  #   union_all(added_procedures_df) %>%
-  #   filter(procedure_performed_statement !="xx") %>%
-    # mutate(count = row_number()) %>%
-    # mutate(procedures_performed_numbered = glue("{count}. {procedure_performed_statement}")) %>%
-    # select(procedures_performed_numbered)
+
   
   return(glue_collapse(procedures_numbered_df$procedures_performed_numbered, sep = "\n"))
   

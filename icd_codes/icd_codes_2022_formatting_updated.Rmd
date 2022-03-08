@@ -1,0 +1,731 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+library(shiny)
+library(shinyWidgets)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+library(shinyBS)
+library(cowplot)
+library(magick)
+library(ggpattern)
+library(glue)
+library(rlist)
+library(janitor)
+library(lubridate)
+library(redcapAPI)
+library(ggpmisc)
+library(rclipboard)
+library(nngeo)
+library(shinydashboard)
+
+library(icd.data)
+
+
+# library(shinyauthr)
+# library(sodium)
+
+# rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = "2A930AE845C92CBF95467E59ADBA0D20")
+
+source("short_shiny_functions.R", local = TRUE)
+source("make_geoms_functions.R", local = TRUE)
+source("build_spine_objects_functions.R", local = TRUE)
+# source("load_coordinates_build_objects.R", local = TRUE)
+# source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
+# source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
+# source("no_implants_added_op_note.R", local = TRUE)
+# source("screw_size_type_inputs.R", local = TRUE)
+# source("modal_functions.R", local = TRUE)
+# 
+#   shinyApp(
+#     ui = basicPage(
+#       column(6,
+#              textInput(inputId = "text_in", label = "Text:", value = ""),
+#              awesomeCheckboxGroup(inputId = "check_in", label = "Check:", choices = c("proc_1", "proc 2", "proc 3"))
+#       ),
+#       column(6,
+#              tableOutput(outputId = "table"))
+#     ),
+#     
+#     server = function(input, output) {
+#       
+# 
+#       showModal(
+#         startup_modal_box()
+#         # addition_surgical_details_modal_box_function()
+#       )
+#       
+#       
+#     }
+#   )
+
+```
+############################################ COMPLETED ALREADY
+
+```{r}
+
+# spine_codes_df <- spine_codes_df %>%
+#   mutate(section = if_else(str_detect(str_to_lower(diagnosis), "myelitis|infecti|bacteria|coccal|meningitis") & section == "msk", "infection", section))
+
+spine_codes_df_msk_trauma <- spine_codes_df %>%
+  filter(section == "msk" | section == "trauma")
+
+
+test_list <- list("Degen/Deformity" = (spine_codes_df_msk_trauma %>% filter(section == "msk"))$diagnosis,
+                           "Trauma" = (spine_codes_df_msk_trauma %>% filter(section == "trauma"))$diagnosis, 
+                           "Tumor" = (spine_codes_df_msk_trauma %>% filter(section == "tumor"))$diagnosis, 
+                           "Infection" = (spine_codes_df_msk_trauma %>% filter(section == "infection"))$diagnosis,
+                           "Congenital" = (spine_codes_df_msk_trauma %>% filter(section == "congenital"))$diagnosis, 
+                           "Other Neurological Diseases" = (spine_codes_df_msk_trauma %>% filter(section == "other_neuro_conditions"))$diagnosis)
+
+
+test_list <- purrr::discard(list("Degen/Deformity" = (spine_codes_df_msk_trauma %>% filter(section == "msk"))$diagnosis,
+                           "Trauma" = (spine_codes_df_msk_trauma %>% filter(section == "trauma"))$diagnosis, 
+                           "Tumor" = (spine_codes_df_msk_trauma %>% filter(section == "tumor"))$diagnosis, 
+                           "Infection" = (spine_codes_df_msk_trauma %>% filter(section == "infection"))$diagnosis,
+                           "Congenital" = (spine_codes_df_msk_trauma %>% filter(section == "congenital"))$diagnosis, 
+                           "Other Neurological Diseases" = (spine_codes_df_msk_trauma %>% filter(section == "other_neuro_conditions"))$diagnosis),
+                           .p = ~ length(.x) <1)
+
+
+
+
+
+jh_filter_icd_codes_generate_vector_function <- function(section_input, spine_region_input){
+  filtered_df <- spine_codes_df %>%
+    filter(section %in% section_input) %>%
+    filter(spine_region %in% spine_region_input | spine_region == "unspecified")
+  
+  
+  
+  return(filtered_df$diagnosis)
+}
+
+
+
+
+```
+
+
+
+
+#############################################
+
+### import
+```{r}
+icd10cm_codes_2022_df <- read_delim("icd_codes/icd10cm_codes_2022_text.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_names = FALSE, trim_ws = TRUE) %>%
+  clean_names() %>%
+  separate(col = x1, into = c("code", "diagnosis"), sep = " ", extra = "merge") %>%
+  mutate(code = str_trim(code), diagnosis = str_trim(diagnosis))%>%
+  mutate(dx_number = row_number())
+
+
+complications_df <- icd10cm_codes_2022_df %>%
+  filter(str_detect(code, "T84|T81")) %>%
+  filter(str_detect(diagnosis, "vert|spin|Infection following a procedure")) %>%
+  filter(str_detect(diagnosis, "subsequent|sequela", negate = TRUE)) %>%
+  mutate(icd_10_code = str_replace_all(code, "T81", "T81.")) %>%
+  mutate(icd_10_code = str_replace_all(icd_10_code, "T84", "T84."))
+
+complications_df
+
+```
+
+
+```{r}
+icd_chapters_df <-tibble(chapter = names(icd10_chapters)) %>%
+  mutate(chapter_number = row_number()) %>%
+  mutate(start_end = icd10_chapters[chapter_number]) %>%
+  unnest_wider(col = start_end) %>%
+  select(chapter_number, chapter, start, end)
+
+icd_chapters_df
+
+chapters_of_interest_vector <- c("Certain infectious and parasitic diseases", "Neoplasms", "Diseases of the nervous system", "Diseases of the musculoskeletal system and connective tissue", "Congenital malformations, deformations and chromosomal abnormalities", "Injury, poisoning and certain other consequences of external causes")
+
+```
+
+
+```{r}
+dx_start_df <- icd10cm_codes_2022_df %>%
+  mutate(chapter_start = substr(as.character(code), start = 1, stop = 2)) %>%
+  filter(chapter_start %in% substr(icd_chapters_df$start, start = 1, stop = 2)) %>%
+  group_by(chapter_start) %>%
+  mutate(n_per = row_number()) %>%
+  filter(n_per == min(n_per)) %>%
+  mutate(new_chapter_starting_dx_number = dx_number - 0.5) %>%
+  ungroup() %>%
+  # select(new_chapter_starting_dx_number) %>%
+    mutate(chapter_number = row_number()) 
+
+dx_number_start_ends_with_chapter_df <- dx_start_df %>%
+  filter(chapter_number > 1) %>%
+  mutate(chapter_end_number = new_chapter_starting_dx_number) %>%
+  mutate(chapter_number = row_number()) %>%
+  select(chapter_number, chapter_end_number) %>%
+  full_join(dx_start_df) %>%
+  select(chapter_number, chapter_start_number = new_chapter_starting_dx_number, chapter_end_number)%>%
+  replace_na(list(chapter_end_number = 90000))%>%
+  mutate(text_case = glue("between(dx_number, {chapter_start_number}, {chapter_end_number}) ~ {chapter_number},"))
+
+glue_collapse(x = dx_number_start_ends_with_chapter_df$text_case, sep = "\n")
+
+dx_number_start_ends_with_chapter_df
+```
+
+
+```{r}
+icd_subs_majors_df <- icd10_sub_chapters %>%
+  as_tibble() %>%
+  slice_head(n = 1) %>%
+  # top_n(n = 1)
+  pivot_longer(cols = everything(), names_to = "subchapter", values_to = "start_three_digit") %>%
+  left_join((icd10_sub_chapters %>%
+  as_tibble() %>%
+  top_n(n = 1) %>%
+  pivot_longer(cols = everything(), names_to = "subchapter", values_to = "end_three_digit"))) %>%
+  pivot_longer(cols = -subchapter, names_to = "point", values_to = "major_category") %>%
+  select(major_category, subchapter)
+
+icd_codes_chapters_df <- icd10cm_codes_2022_df %>%
+  mutate(chapter_number = case_when(
+    between(dx_number, 0.5, 1064.5) ~ 1,
+    between(dx_number, 1064.5, 2728.5) ~ 2,
+    between(dx_number, 2728.5, 3023.5) ~ 3,
+    between(dx_number, 3023.5, 3936.5) ~ 4,
+    between(dx_number, 3936.5, 4706.5) ~ 5,
+    between(dx_number, 4706.5, 5356.5) ~ 6,
+    between(dx_number, 5356.5, 7984.5) ~ 7,
+    between(dx_number, 7984.5, 8637.5) ~ 8,
+    between(dx_number, 8637.5, 10016.5) ~ 9,
+    between(dx_number, 10016.5, 10362.5) ~ 10,
+    between(dx_number, 10362.5, 11179.5) ~ 11,
+    between(dx_number, 11179.5, 12058.5) ~ 12,
+    between(dx_number, 12058.5, 18621.5) ~ 13,
+    between(dx_number, 18621.5, 19307.5) ~ 14,
+    between(dx_number, 19307.5, 21578.5) ~ 15,
+    between(dx_number, 21578.5, 22033.5) ~ 16,
+    between(dx_number, 22033.5, 22870.5) ~ 17,
+    between(dx_number, 22870.5, 23605.5) ~ 18,
+    between(dx_number, 23605.5, 64391.5) ~ 19,
+    between(dx_number, 64391.5, 71458.5) ~ 20,
+    between(dx_number, 71458.5, 90000) ~ 21
+  )) %>%
+  left_join(icd_chapters_df) %>%
+  select(chapter_number, chapter, diagnosis, code) %>%
+  mutate(major_category = substr(code, start = 1, stop = 3)) %>%
+  mutate(diagnosis_code = substr(code, start = 4, stop = 9)) %>%
+  left_join(icd_subs_majors_df) %>%
+  fill(subchapter, .direction = "down")
+
+
+
+```
+
+
+```{r}
+icd_codes_chapters_of_interest_initial_only_df <- icd_codes_chapters_df %>%
+  filter(str_detect(diagnosis_code, "D") == FALSE)%>%
+  filter(str_detect(diagnosis_code, "S") == FALSE) %>%
+  select(chapter_number, chapter,subchapter, diagnosis, major_category, diagnosis_code, code) %>%
+  filter(chapter %in% chapters_of_interest_vector) %>%
+  mutate(diagnosis_lower = str_to_lower(diagnosis))
+
+icd_codes_chapters_of_interest_initial_only_df 
+
+icd_codes_chapters_of_interest_initial_only_df %>%
+  select(chapter_number, chapter) %>%
+  distinct()
+```
+
+#MSK
+```{r}
+icd_codes_chapters_of_interest_initial_only_df %>%
+  filter(chapter_number == 13)  %>%
+  select(subchapter) %>%
+  distinct()
+
+msk_subchapters_of_interest_vector <- c("Infectious Arthropathies", "Osteoarthritis", "Deforming Dorsopathies", "Spondylopathies", "Other Dorsopathies", "Disorders Of Bone Density And Structure", "Other Osteopathies", "Other Disorders Of The Musculoskeletal System And Connective Tissue", "Intraoperative And Postprocedural Complications And Disorders Of Musculoskeletal System, Not Elsewhere Classified", "Biomechanical Lesions, Not Elsewhere Classified")
+
+sites_to_exclude_df <- icd_codes_chapters_of_interest_initial_only_df %>%
+  filter(chapter_number == 13)%>%
+  filter(subchapter %in% msk_subchapters_of_interest_vector) %>%
+  separate(diagnosis, into = c("dx", "site"), sep = ", ") %>%
+  select(site) %>%
+  mutate(site = str_trim(str_remove_all(site, "right|left|unspecified "))) %>%
+  distinct() %>%
+    filter(str_detect(site, "vertebra|other specified site|site unspecified|thoracic region|thoracolumbar region|cervical region|lumbar region|lumbosacral region|sacral and sacrococcygeal region|occipito-atlanto-axial region|multiple sites in spine|not elsewhere classified|level|intervertebral disc disorder|neck and back|initial encounter") == FALSE) %>%
+  filter(!is.na(site))
+
+glue_collapse(sites_to_exclude_df$site, sep = "|")
+
+key_spine_words_to_keep_string <- "vertebra|other specified site|site unspecified|thoracic region|spine|thoracolumbar region|cervical region|lumbar region|lumbosacral region|sacral and sacrococcygeal region|occipito-atlanto-axial region|multiple sites in spine|not elsewhere classified|level|intervertebral disc disorder|neck and back|atlantoaxial|cervicalgia|vertebrogenic|low back|dorsalgia|pseudarthrosis|kyphosis|lordosis|scoliosis|deformity of neck|sacral region"
+  
+
+key_non_spine_words_to_remove_string <- "metacarp|shoulder|elbow|wrist|hand|hip|knee|ankle and foot|unspecified|site|multiple sites|side|humerus|forearm|femur|lower leg|other site|ulna|radius|ulna and radius|finger|toe|pelvis|tibia|fibula|tibia and fibula|ankle|foot|toe(s)|leg|pelvic region and thigh|upper arm|thigh|radius and ulna|other sites|sites|bone|jaw|proximal humerus|distal humerus|carpus|nose|head|distal radius|proximal femur|distal femur|proximal tibia|distal tibia|shoulder region|ear|joint prosthesis|polyarthritis|extremity|rib|abdomen|pelvic region"
+
+icd_spine_msk_chapter_df <- icd_codes_chapters_of_interest_initial_only_df %>%
+    filter(chapter_number == 13)%>%
+    filter(subchapter %in% msk_subchapters_of_interest_vector) %>%
+    filter(str_detect(diagnosis_lower, key_non_spine_words_to_remove_string) == FALSE) %>%
+    filter(str_detect(diagnosis_lower, key_spine_words_to_keep_string))
+  
+
+icd_msk_chapter_spine_regions <- icd_spine_msk_chapter_df %>%
+  select(diagnosis_lower, diagnosis_code) %>%
+  # filter(str_detect(diagnosis_lower, "ankyl")) %>%
+  mutate(code_anatomic_region = substring(diagnosis_code, first = 2, last = 2)) %>%
+  mutate(code_anatomic_region = if_else(code_anatomic_region == "", diagnosis_code, code_anatomic_region)) %>%
+  mutate(code_anatomic_region == as.double(code_anatomic_region))  %>%
+  mutate(spine_region = case_when(
+    str_detect(diagnosis_lower, "occipito-atlanto-axial") ~ "occipito-atlanto-axial",
+    str_detect(diagnosis_lower, "cervical region") ~ "cervical",
+    str_detect(diagnosis_lower, "cervicothoracic region") ~ "cervicothoracic",
+    str_detect(diagnosis_lower, "thoracic region") ~ "thoracic",
+    str_detect(diagnosis_lower, " thoracic") ~ "thoracic",
+    str_detect(diagnosis_lower, "thoracolumbar region") ~ "thoracolumbar",
+    str_detect(diagnosis_lower, " lumbar region") ~ "lumbar",
+    str_detect(diagnosis_lower, "lumbosacral region") ~ "lumbosacral",
+    str_detect(diagnosis_lower, "sacral and sacrococcygeal region") ~ "sacral",
+    str_detect(diagnosis_lower, " sacral region") ~ "sacral",
+    str_detect(diagnosis_lower, "low back pain") ~ "lumbar",
+    str_detect(diagnosis_lower, "-c") ~ "cervical",
+    str_detect(diagnosis_lower, "neck") ~ "cervical",TRUE ~ "unspecified"
+  )) %>%
+  select(diagnosis_lower, spine_region)
+
+ 
+
+icd_msk_chapter_final_df <- icd_spine_msk_chapter_df %>%
+  left_join(icd_msk_chapter_spine_regions) %>%
+  mutate(icd_10_code = paste0(major_category, ".", diagnosis_code)) %>%
+  select(chapter_number, chapter, subchapter, diagnosis, icd_10_code, spine_region)
+
+
+icd_msk_chapter_final_df %>%
+  select(subchapter) %>%
+  distinct()
+
+final_spine_icd_codes_df_list <- list()
+
+
+final_spine_icd_codes_df_list$msk <- icd_msk_chapter_final_df
+
+```
+
+## Neoplasms
+
+```{r}
+icd_codes_chapters_of_interest_initial_only_df 
+
+# icd_codes_chapters_of_interest_initial_only_df %>%
+#   select()(chapter_number, chapter) %>%
+#   distinct
+
+key_spine_words_to_keep_string <- "vertebra|other specified site|site unspecified|thoracic region|spine|thoracolumbar region|cervical region|lumbar region|lumbosacral region|sacral and sacrococcygeal region|occipito-atlanto-axial region|multiple sites in spine|not elsewhere classified|level|intervertebral disc disorder|neck and back|atlantoaxial|cervicalgia|vertebrogenic|low back|dorsalgia|pseudarthrosis|kyphosis|lordosis|scoliosis|deformity of neck|sacral region"
+  
+
+key_non_spine_words_to_remove_string <- "mediastinum|intestine |bladder|skin|brain|peritoneum|rectum|respiratory|thorax|cranial|limb|cerebral|cerebellum|lobe|mandible|left|right|metacarp|shoulder|elbow|wrist|hand|hip|knee|ankle and foot|unspecified|site|multiple sites|side|humerus|forearm|femur|lower leg|other site|ulna|radius|ulna and radius|finger|toe|pelvis|tibia|fibula|tibia and fibula|ankle|foot|toe(s)|leg|pelvic region and thigh|upper arm|thigh|radius and ulna|other sites|sites|bone|jaw|proximal humerus|distal humerus|carpus|nose|head|distal radius|proximal femur|distal femur|proximal tibia|distal tibia|shoulder region|ear|joint prosthesis|polyarthritis|extremity|rib|abdomen|pelvic region"
+
+additional_key_non_spine_words_to_remove_string <- "pleura|small intestine|liver and intrahepatic bile duct|other digestive organs|other urinary organs|bilateral ovaries|breast|genital organs|follicular lymphoma, intrathoracic lymph nodes|follicular lymphoma, intra-abdominal lymph nodes|follicular lymphoma, intrapelvic lymph nodes|follicular lymphoma, spleen|non-Hodgkin lymphoma, intrathoracic lymph nodes|non-Hodgkin lymphoma, intra-abdominal lymph nodes|non-Hodgkin lymphoma, intrapelvic lymph nodes|non-Hodgkin lymphoma, spleen|mucosa-associated lymphoid tissue [MALT-lymphoma]|B-cell type not having achieved remission|B-cell type in remission|B-cell type in relapse|B-cell type, in remission|B-cell type, in relapse|T-cell type not having achieved remission|T-cell type, in remission|T-cell type, in relapse|ibrosis not having achieved remission|ibrosis, in remission|ibrosis, in relapse|dendritic cells (accessory cells)|lymphoid, hematopoietic and related tissue|labial mucosa and vermilion border|buccal mucosa|gingiva and edentulous alveolar ridge|hard palate|floor|tongue|pharynx|esophagus|stomach|colon|rectosigmoid junction|anus and anal canal|other specified digestive organs|larynx|trachea|lip|scalp and neck|other part|endocervix|exocervix|endometrium|vulva|vagina|other female genital organs|penis|prostate|scrotum|other male genital organs|thyroid and other endocrine glands|uncertain behavior|blasts 1|blasts 2|ibrosis| lymph nodes|spleen|cell lymphoma"
+
+
+key_spine_words_to_keep_string <- "vertebra|other specified site|site unspecified|thoracic region|spine|thoracolumbar region|cervical region|lumbar region|lumbosacral region|sacral and sacrococcygeal region|occipito-atlanto-axial region|multiple sites in spine|not elsewhere classified|level|intervertebral disc disorder|neck and back|atlantoaxial|cervicalgia|vertebrogenic|low back|dorsalgia|pseudarthrosis|kyphosis|lordosis|scoliosis|deformity of neck|sacral region|secondary malignant neoplasm of bone|cord|verteb|cauda equin|bone|neoplasm of unspecified behavior of unspecified site"
+
+
+neoplasm_subchapters_of_interest <- c("In Situ Neoplasms", "Neoplasms Of Uncertain Behavior, Polycythemia Vera And Myelodysplastic Syndromes", "Neoplasms Of Unspecified Behavior", "Malignant Neoplasms Of Ill-Defined, Other Secondary And Unspecified Sites", "Malignant Neoplasms Of Lymphoid, Hematopoietic And Related Tissue", "Malignant Neoplasms Of Eye, Brain And Other Parts Of Central Nervous System", "Malignant Neoplasms Of Bone And Articular Cartilage")
+
+# tumor_locations <- icd_codes_chapters_of_interest_initial_only_df %>%
+#   filter(chapter_number == 2)  %>%
+#   filter(subchapter %in% neoplasm_subchapters_of_interest) %>%
+#   filter(str_detect(diagnosis_lower, key_non_spine_words_to_remove_string, negate = TRUE)) %>%
+#   filter(str_detect(diagnosis_lower, key_spine_words_to_keep_string, negate = TRUE)) %>%
+#   select(diagnosis) %>%
+#   separate(diagnosis, into = c("type", "location"), sep = "of") %>%
+#   filter(!is.na(location)) %>%
+#   mutate(location = str_trim(location)) %>%
+#   select(location) %>%
+#   distinct()
+
+# glue_collapse(tumor_locations$location, sep = "|")
+
+
+icd_neoplasm_chapter_final_df <- icd_codes_chapters_of_interest_initial_only_df %>%
+  filter(chapter_number == 2) %>%
+  filter(str_detect(diagnosis_lower, "spine|verte|dura|secondary malignant neoplasm of bone|unspecified part of nervous system|secondary carcinoid tumors of other sites|tumors of bone|unspecified site|sacrum and coccyx|spinal cord|cauda equina|other specified sites|bone, soft tissue|sarcoma of other sites|chondrosar")) %>%
+  filter(str_detect(diagnosis_lower, "lymphoma|gastro|breast|left|right|lipomatous neoplasm of skin and subcutaneous tissue|oral cavity", negate = TRUE))
+
+  final_spine_icd_codes_df_list$icd_neoplasm_chapter_final_df <- icd_neoplasm_chapter_final_df
+  
+
+```
+
+
+#Diseases of the nervous system
+```{r}
+icd_codes_chapters_of_interest_initial_only_df 
+
+icd_codes_chapters_of_interest_initial_only_df %>%
+  select(chapter_number, chapter) %>%
+  distinct
+
+key_spine_words_to_keep_string <- "vertebra|other specified site|site unspecified|thoracic region|spine|thoracolumbar region|cervical region|lumbar region|lumbosacral region|sacral and sacrococcygeal region|occipito-atlanto-axial region|multiple sites in spine|not elsewhere classified|level|intervertebral disc disorder|neck and back|atlantoaxial|cervicalgia|vertebrogenic|low back|dorsalgia|pseudarthrosis|kyphosis|lordosis|scoliosis|deformity of neck|sacral region|secondary malignant neoplasm of bone|cord|verteb|cauda equin|bone|neoplasm of unspecified behavior of unspecified site|spinal"
+
+
+key_spine_words_to_keep_string <- "lumbar|cervical|thoracic|cerebrospinal|spine|spinal|vertebr|postprocedural complications and disorders of nervous system|dura|lumbosacral root disorders|plegia|cauda equina syndrome|brown-sequard syndrome|anterior cord syndrome|posterior cord syndrome|other specified paralytic syndromes|myelopath|other cord compression|accidental puncture and laceration of other nervous system|other intraoperative complications of nervous system|paralytic syndrome, unspecified|conus medullaris syndrome"
+
+key_words_to_remove <- "meningitis|migraine|seizu|epilep|limb|vertebro-basilar|cerebral|cranial"
+
+icd_nervous_system_chapter_final_df <- icd_codes_chapters_of_interest_initial_only_df %>%
+  filter(chapter_number == 6) %>%
+  select(diagnosis_lower) %>%
+  # print()
+  filter(str_detect(diagnosis_lower, key_spine_words_to_keep_string)) %>%
+  filter(str_detect(diagnosis_lower, key_words_to_remove, negate = TRUE)) 
+
+  final_spine_icd_codes_df_list$icd_nervous_system_chapter_final_df <- icd_nervous_system_chapter_final_df
+
+```
+
+
+## certain infectious diseases
+
+```{r}
+# icd_codes_chapters_of_interest_initial_only_df
+# 
+# icd_codes_chapters_of_interest_initial_only_df %>%
+#   select(chapter_number, chapter) %>%
+#   distinct
+# 
+# # icd_nervous_system_chapter_final_df <-
+# icd_codes_chapters_of_interest_initial_only_df %>%
+#   filter(chapter_number == 1) %>%
+#   select(diagnosis_lower, major_category) %>%
+#   filter(str_detect(diagnosis_lower, "spin|verteb"))
+
+```
+
+
+#	Congenital malformations
+```{r}
+
+icd_codes_chapters_of_interest_initial_only_df %>%
+  select(chapter_number, chapter) %>%
+  distinct
+
+key_words_to_keep <- "cervical|lumbar|thoracic|sacral|spina|cauda equina|spina bifida|spine|kyphosis|klippel-feil syndrome|scoliosis|lordosis|neurofibromatosis|marfan's|other congenital malformation"
+
+key_words_to_remove <- "limb"
+
+icd_congenital_chapter_final_df <- icd_codes_chapters_of_interest_initial_only_df %>%
+  filter(chapter_number == 17) %>%
+  filter(str_detect(major_category, "Q0|Q65|Q66|Q67|Q68|Q69|Q70|Q71|Q72|Q73|Q74|Q75|Q76|Q77|Q78|Q79|Q80|Q81|Q82|Q83|Q84|Q85|Q86|Q87|Q88|Q89|Q90|Q91|Q92|Q93|Q94|Q95|Q96|Q97|Q98|Q99")) %>%
+  filter(str_detect(diagnosis_lower, key_words_to_keep)) %>%
+  filter(str_detect(diagnosis_lower, key_words_to_remove, negate = TRUE))
+
+# glue_collapse(map(.x = c(65:99), .f = ~ paste0("Q", .x)), sep = "|")
+
+final_spine_icd_codes_df_list$icd_congenital_chapter_final_df <- icd_congenital_chapter_final_df
+
+```
+
+
+#Injury
+```{r}
+
+icd_codes_chapters_of_interest_initial_only_df %>%
+  select(chapter_number, chapter) %>%
+  distinct
+
+icd_codes_chapters_of_interest_initial_only_df %>%
+  filter(chapter_number == 19) 
+
+subchapters_to_examine <- "S10|S11|S12|S13|S14|S15|S16|S17|S18|S19|S22|S23|S24|S30|S31|S32|S33|S34|S35|S36|S37|S38|S39"
+
+key_words_to_keep <- "cervical|lumbar|thoracic|sacral|spina|cauda equina|scoliosis|lordosis|fracture|dislocation|unspecified injury of neck"
+
+key_words_to_remove <- "superficial|bite|esophagus|pharynx|subsequent encounter|ilium|acetabulum|pubis|ischium|pelvic ring|penis"
+
+# glue_collapse(map(.x = c(30:39), .f = ~ paste0("S", .x)), sep = "|")
+
+icd_trauma_chapter_final_df <- icd_codes_chapters_of_interest_initial_only_df %>%
+  filter(chapter_number == 19)  %>%
+  filter(str_detect(major_category, subchapters_to_examine)) %>%
+  filter(str_detect(diagnosis_lower, key_words_to_keep))%>%
+  filter(str_detect(diagnosis_lower, key_words_to_remove, negate = TRUE))
+
+final_spine_icd_codes_df_list$icd_trauma_chapter_final_df <- icd_trauma_chapter_final_df
+
+icd_trauma_chapter_final_df
+```
+
+```{r}
+complications_df
+```
+
+
+```{r}
+
+all_spine_related_icd_codes_df <- final_spine_icd_codes_df_list$msk %>%
+  union_all(final_spine_icd_codes_df_list$icd_neoplasm_chapter_final_df) %>%
+  union_all(final_spine_icd_codes_df_list$icd_nervous_system_chapter_final_df) %>%
+  union_all(final_spine_icd_codes_df_list$icd_congenital_chapter_final_df) %>%
+  union_all(final_spine_icd_codes_df_list$icd_trauma_chapter_final_df)  %>%
+  select(chapter_number, chapter, subchapter, diagnosis)  %>%
+  left_join(icd10cm_codes_2022_df) %>%
+  select(-dx_number) %>%
+  mutate(major_category = substring(code, 1, 3))%>%
+  mutate(detail_code = substring(code, 4, 10)) %>%
+  mutate(icd_10_code = paste0(major_category, ".", detail_code)) %>%
+  select(-detail_code,-code, -major_category) %>%
+  mutate(diagnosis_lower = str_to_lower(diagnosis)) %>%
+    mutate(spine_region = case_when(
+    str_detect(diagnosis_lower, "occipito-atlanto-axial") ~ "occipito-atlanto-axial",
+    str_detect(diagnosis_lower, "cervical|dens") ~ "cervical",
+    str_detect(diagnosis_lower, "cervicothoracic region") ~ "cervicothoracic",
+    str_detect(diagnosis_lower, "thoracic region") ~ "thoracic",
+    str_detect(diagnosis_lower, "thoracic") ~ "thoracic",
+    str_detect(diagnosis_lower, "thoracolumbar region") ~ "thoracolumbar",
+    str_detect(diagnosis_lower, "lumbar|cauda equina") ~ "lumbar",
+    str_detect(diagnosis_lower, "lumbosacral region") ~ "lumbosacral",
+    str_detect(diagnosis_lower, "sacral and sacrococcygeal region|sacr") ~ "sacral",
+    str_detect(diagnosis_lower, " sacral region") ~ "sacral",
+    str_detect(diagnosis_lower, "low back pain") ~ "lumbar",
+    str_detect(diagnosis_lower, "-c") ~ "cervical",
+    str_detect(diagnosis_lower, "neck") ~ "cervical",TRUE ~ "unspecified"
+  )) %>%
+  filter(str_detect(diagnosis_lower, "subsequent", negate = TRUE)) %>%
+  mutate(section = case_when(
+    chapter == "Diseases of the musculoskeletal system and connective tissue" ~ "msk",
+    chapter == "Neoplasms" ~ "tumor", 
+    chapter == "Congenital malformations, deformations and chromosomal abnormalities" ~ "congenital",
+    chapter == "Injury, poisoning and certain other consequences of external causes" ~ "trauma"
+  ))
+
+
+
+spine_dx_codes_and_region_only_df <- all_spine_related_icd_codes_df %>%
+  select(section, diagnosis, icd_10_code, spine_region) %>%
+  distinct()
+
+
+spine_dx_codes_and_region_only_df
+
+write_csv(x = spine_dx_codes_and_region_only_df, file = "icd10_codes_2022_updated_spine_onlyv2.csv", na = "")
+
+
+spine_dx_codes_and_region_only_df %>%
+  filter(section == "trauma") %>%
+  filter(spine_region == "thoracic")
+
+
+
+```
+
+
+```{r}
+
+spine_codes_df <- read_csv("icd10_codes_2022_updated_spine_onlyv2.csv")
+
+
+spine_codes_df
+
+jh_filter_icd_codes_generate_vector_function <- function(section_input, spine_region_input){
+  filtered_df <- spine_codes_df %>%
+    filter(section == section_input) %>%
+    filter(spine_region == spine_region_input | spine_region == "unspecified")
+  
+  return(filtered_df$diagnosis)
+  
+}
+
+glue_collapse((spine_codes_df %>%
+  select(spine_region) %>%
+  distinct())$spine_region, sep = "', '")
+
+spine_sections <- c("msk", "tumor", "congenital", "trauma")
+
+spine_regions <- c('unspecified', 'cervicothoracic', 'thoracic', 'thoracolumbar', 'cervical', 'lumbar', 'lumbosacral', 'sacral', 'occipito-atlanto-axial')
+
+spine_codes_df %>%
+    filter(section == "msk") %>%
+    filter(spine_region == "lumbar" | spine_region == "unspecified")
+
+jh_filter_icd_codes_generate_vector_function(section_input = "msk", spine_region_input = "lumbar")
+
+
+jh_filter_icd_codes_generate_vector_function <- function(section_input, spine_region_input){
+  filtered_df <- spine_codes_df %>%
+    filter(section == section_input) %>%
+    filter(spine_region == spine_region_input | spine_region == "unspecified")
+  
+  return(filtered_df$diagnosis)
+}
+
+spine_codes_df %>%
+    filter(section %in% c("msk", "trauma")) %>%
+    filter(spine_region == "lumbar" | spine_region == "unspecified")
+
+
+```
+
+
+```{r}
+neuro_chapter <- icd_codes_chapters_of_interest_initial_only_df %>%
+  filter(chapter_number == 6) %>%
+  select(diagnosis_lower)
+
+
+other_neuro_conditions_df <- spine_codes_df %>%
+  mutate(diagnosis_lower = str_to_lower(diagnosis)) %>%
+  full_join(neuro_chapter) %>%
+  filter(is.na(section)) %>%
+  select(diagnosis_lower) %>%
+  left_join(icd_codes_chapters_of_interest_initial_only_df) %>%
+  mutate(section = "other_neuro_conditions",
+         icd_10_code = if_else(diagnosis_code == "", paste0(major_category), paste0(major_category, ".", diagnosis_code))) %>%
+  select(section, diagnosis, icd_10_code) 
+
+# other_neuro_icd_codes_2022_df <- write_csv(other_neuro_conditions_df, "other_neuro_icd_codes_2022_df.csv")
+
+```
+
+
+```{r}
+
+spine_region_labels <- c("O-C2" = 'occipito-atlanto-axial',
+                        "Cervical" ='cervical',
+                         "Cervicothoraic" = 'cervicothoracic', 
+                         "Thoracic" = 'thoracic',
+                         "Thoracolumbar" = 'thoracolumbar',
+                         "Lumbar" = 'lumbar', 
+                         "Lumbosacral" ='lumbosacral',
+                        "Sacral" =  'sacral')
+
+  shinyApp(
+    ui = basicPage(
+      column(6,
+             # textInput(inputId = "text_in", label = "Text:", value = ""),
+             radioButtons(inputId = "choices", label = "region", choices = spine_region_labels)
+             # awesomeCheckboxGroup(inputId = "check_in", label = "Check:", choices = c("proc_1", "proc 2", "proc 3"))
+      ),
+      column(6,
+             textOutput(outputId = "result")
+             # tableOutput(outputId = "table"))
+    ),
+    ),
+
+    server = function(input, output) {
+      
+      output$result <- renderText({
+        input$choices
+      })
+
+
+      # showModal(
+      #   startup_modal_box()
+      #   # addition_surgical_details_modal_box_function()
+      # )
+
+
+    }
+  )
+  
+  
+  shinyApp(
+    ui = basicPage(
+      column(6,
+             # textInput(inputId = "text_in", label = "Text:", value = ""),
+             radioButtons(inputId = "choices", label = "region", choices = spine_region_labels)
+             # awesomeCheckboxGroup(inputId = "check_in", label = "Check:", choices = c("proc_1", "proc 2", "proc 3"))
+      ),
+      column(6,
+             textOutput(outputId = "result")
+             # tableOutput(outputId = "table"))
+    )
+    ),
+
+    server = function(input, output) {
+
+
+      output$result <- renderText({
+        input$choices
+      })
+
+
+    }
+  )
+
+```
+
+```{r}
+
+
+ c("Malignant neoplasm of vertebral column", "odafd") %in% (spine_codes_df %>% filter(section == "tumor"))$diagnosis
+
+jh_filter_icd_codes_generate_vector_function(section_input = c("msk", "trauma"), spine_region_input = c("lumbar", "thoracic"))
+
+jh_determine_if_tumor_dx_function <- function(diagnosis_vector){
+  
+  if(length(diagnosis_vector)>0){
+    any(diagnosis_vector %in% (spine_codes_df %>% filter(section == "tumor"))$diagnosis)
+  }else{
+    FALSE
+  }
+}
+
+jh_add_codes_to_diagnosis_function <- function(diagnosis_vector){
+  codes_df <- tibble(diagnosis = diagnosis_vector) %>%
+    left_join(spine_codes_df) %>%
+    mutate(diagnosis_codes = paste(diagnosis, " (", icd_10_code, ")", sep = ""))
+  
+  return(codes_df$diagnosis_codes)
+}
+
+jh_add_codes_to_diagnosis_function(c("Malignant neoplasm of vertebral column"))
+
+spine_codes_df %>%
+  filter(str_detect(diagnosis, "itis"))
+
+
+
+```
+
+
+```{r}
+spine_icd_ordered_df <- spine_codes_df %>%
+  filter(str_detect(string = str_to_lower(diagnosis), pattern = "abdominal wall|breast|unspecified eye|hair|nails|aortic dilation|ocular|fractures of rib|fracture of one rib|sternum|manubrium|xiphoid|sternal manubrial", negate = TRUE)) %>%
+  mutate(spine_region = if_else(str_detect(diagnosis, "T1|T2|T3|T4|T5|T6|T7|T8|T9|T10|T11|T12"), "thoracic", spine_region)) %>%
+  mutate(spine_region = if_else(str_detect(diagnosis, "C7/T1"), "cervicothoracic", spine_region)) 
+
+spine_icd_ordered_df %>%
+  filter(section != "other_neuro_conditions") %>%
+  filter(spine_region == "unspecified")
+
+spine_icd_ordered_df %>%
+  select(spine_region) %>%
+  distinct()
+
+# write_csv(x = spine_icd_ordered_df, file = "icd10_codes_2022_updated_dec_21.csv", na = "")
+
+```
+
+```{r}
+complications_df %>%
+  mutate(icd_10_code = str_replace_all(code, "T84", "T84.")) %>%
+  filter(str_detect(diagnosis, "subsequent", negate = TRUE))
+```
+
+
+```{r}
+spine_codes_df
+```
+
+

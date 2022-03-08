@@ -1,0 +1,1681 @@
+section,diagnosis,icd_10_code,spine_region
+infection,"Staphylococcal arthritis, vertebrae",M00.08,unspecified
+infection,"Pneumococcal arthritis, vertebrae",M00.18,unspecified
+infection,"Other streptococcal arthritis, vertebrae",M00.28,unspecified
+infection,"Arthritis due to other bacteria, vertebrae",M00.88,unspecified
+infection,Direct infection of vertebrae in infectious and parasitic diseases classified elsewhere,M01.X8,unspecified
+msk,"Arthropathy following intestinal bypass, vertebrae",M02.08,unspecified
+msk,"Postdysenteric arthropathy, vertebrae",M02.18,unspecified
+msk,"Postimmunization arthropathy, vertebrae",M02.28,unspecified
+msk,"Reiter's disease, vertebrae",M02.38,unspecified
+msk,"Other reactive arthropathies, vertebrae",M02.88,unspecified
+deformity,"Postural kyphosis, cervicothoracic region",M40.03,cervicothoracic
+deformity,"Postural kyphosis, thoracic region",M40.04,thoracic
+deformity,"Postural kyphosis, thoracolumbar region",M40.05,thoracolumbar
+deformity,"Other secondary kyphosis, cervical region",M40.12,cervical
+deformity,"Other secondary kyphosis, cervicothoracic region",M40.13,cervicothoracic
+deformity,"Other secondary kyphosis, thoracic region",M40.14,thoracic
+deformity,"Other secondary kyphosis, thoracolumbar region",M40.15,thoracolumbar
+deformity,"Other kyphosis, cervical region",M40.292,cervical
+deformity,"Other kyphosis, cervicothoracic region",M40.293,cervicothoracic
+deformity,"Other kyphosis, thoracic region",M40.294,thoracic
+deformity,"Other kyphosis, thoracolumbar region",M40.295,thoracolumbar
+deformity,"Flatback syndrome, thoracolumbar region",M40.35,thoracolumbar
+deformity,"Flatback syndrome, lumbar region",M40.36,lumbar
+deformity,"Flatback syndrome, lumbosacral region",M40.37,lumbosacral
+deformity,"Postural lordosis, thoracolumbar region",M40.45,thoracolumbar
+deformity,"Postural lordosis, lumbar region",M40.46,lumbar
+deformity,"Postural lordosis, lumbosacral region",M40.47,lumbosacral
+deformity,"Infantile idiopathic scoliosis, cervical region",M41.02,cervical
+deformity,"Infantile idiopathic scoliosis, cervicothoracic region",M41.03,cervicothoracic
+deformity,"Infantile idiopathic scoliosis, thoracic region",M41.04,thoracic
+deformity,"Infantile idiopathic scoliosis, thoracolumbar region",M41.05,thoracolumbar
+deformity,"Infantile idiopathic scoliosis, lumbar region",M41.06,lumbar
+deformity,"Infantile idiopathic scoliosis, lumbosacral region",M41.07,lumbosacral
+deformity,"Infantile idiopathic scoliosis, sacral and sacrococcygeal region",M41.08,sacral
+deformity,"Juvenile idiopathic scoliosis, cervical region",M41.112,cervical
+deformity,"Juvenile idiopathic scoliosis, cervicothoracic region",M41.113,cervicothoracic
+deformity,"Juvenile idiopathic scoliosis, thoracic region",M41.114,thoracic
+deformity,"Juvenile idiopathic scoliosis, thoracolumbar region",M41.115,thoracolumbar
+deformity,"Juvenile idiopathic scoliosis, lumbar region",M41.116,lumbar
+deformity,"Juvenile idiopathic scoliosis, lumbosacral region",M41.117,lumbosacral
+deformity,"Adolescent idiopathic scoliosis, cervical region",M41.122,cervical
+deformity,"Adolescent idiopathic scoliosis, cervicothoracic region",M41.123,cervicothoracic
+deformity,"Adolescent idiopathic scoliosis, thoracic region",M41.124,thoracic
+deformity,"Adolescent idiopathic scoliosis, thoracolumbar region",M41.125,thoracolumbar
+deformity,"Adolescent idiopathic scoliosis, lumbar region",M41.126,lumbar
+deformity,"Adolescent idiopathic scoliosis, lumbosacral region",M41.127,lumbosacral
+deformity,"Other idiopathic scoliosis, cervical region",M41.22,cervical
+deformity,"Other idiopathic scoliosis, cervicothoracic region",M41.23,cervicothoracic
+deformity,"Other idiopathic scoliosis, thoracic region",M41.24,thoracic
+deformity,"Other idiopathic scoliosis, thoracolumbar region",M41.25,thoracolumbar
+deformity,"Other idiopathic scoliosis, lumbar region",M41.26,lumbar
+deformity,"Other idiopathic scoliosis, lumbosacral region",M41.27,lumbosacral
+deformity,"Thoracogenic scoliosis, thoracic region",M41.34,thoracic
+deformity,"Thoracogenic scoliosis, thoracolumbar region",M41.35,thoracolumbar
+deformity,"Neuromuscular scoliosis, occipito-atlanto-axial region",M41.41,occipito-atlanto-axial
+deformity,"Neuromuscular scoliosis, cervical region",M41.42,cervical
+deformity,"Neuromuscular scoliosis, cervicothoracic region",M41.43,cervicothoracic
+deformity,"Neuromuscular scoliosis, thoracic region",M41.44,thoracic
+deformity,"Neuromuscular scoliosis, thoracolumbar region",M41.45,thoracolumbar
+deformity,"Neuromuscular scoliosis, lumbar region",M41.46,lumbar
+deformity,"Neuromuscular scoliosis, lumbosacral region",M41.47,lumbosacral
+deformity,"Other secondary scoliosis, cervical region",M41.52,cervical
+deformity,"Other secondary scoliosis, cervicothoracic region",M41.53,cervicothoracic
+deformity,"Other secondary scoliosis, thoracic region",M41.54,thoracic
+deformity,"Other secondary scoliosis, thoracolumbar region",M41.55,thoracolumbar
+deformity,"Other secondary scoliosis, lumbar region",M41.56,lumbar
+deformity,"Other secondary scoliosis, lumbosacral region",M41.57,lumbosacral
+deformity,"Other forms of scoliosis, cervical region",M41.82,cervical
+deformity,"Other forms of scoliosis, cervicothoracic region",M41.83,cervicothoracic
+deformity,"Other forms of scoliosis, thoracic region",M41.84,thoracic
+deformity,"Other forms of scoliosis, thoracolumbar region",M41.85,thoracolumbar
+deformity,"Other forms of scoliosis, lumbar region",M41.86,lumbar
+deformity,"Other forms of scoliosis, lumbosacral region",M41.87,lumbosacral
+msk,"Juvenile osteochondrosis of spine, occipito-atlanto-axial region",M42.01,occipito-atlanto-axial
+msk,"Juvenile osteochondrosis of spine, cervical region",M42.02,cervical
+msk,"Juvenile osteochondrosis of spine, cervicothoracic region",M42.03,cervicothoracic
+msk,"Juvenile osteochondrosis of spine, thoracic region",M42.04,thoracic
+msk,"Juvenile osteochondrosis of spine, thoracolumbar region",M42.05,thoracolumbar
+msk,"Juvenile osteochondrosis of spine, lumbar region",M42.06,lumbar
+msk,"Juvenile osteochondrosis of spine, lumbosacral region",M42.07,lumbosacral
+msk,"Juvenile osteochondrosis of spine, sacral and sacrococcygeal region",M42.08,sacral
+msk,"Adult osteochondrosis of spine, occipito-atlanto-axial region",M42.11,occipito-atlanto-axial
+msk,"Adult osteochondrosis of spine, cervical region",M42.12,cervical
+msk,"Adult osteochondrosis of spine, cervicothoracic region",M42.13,cervicothoracic
+msk,"Adult osteochondrosis of spine, thoracic region",M42.14,thoracic
+msk,"Adult osteochondrosis of spine, thoracolumbar region",M42.15,thoracolumbar
+msk,"Adult osteochondrosis of spine, lumbar region",M42.16,lumbar
+msk,"Adult osteochondrosis of spine, lumbosacral region",M42.17,lumbosacral
+msk,"Adult osteochondrosis of spine, sacral and sacrococcygeal region",M42.18,sacral
+msk,"Spondylolysis, occipito-atlanto-axial region",M43.01,occipito-atlanto-axial
+msk,"Spondylolysis, cervical region",M43.02,cervical
+msk,"Spondylolysis, cervicothoracic region",M43.03,cervicothoracic
+msk,"Spondylolysis, thoracic region",M43.04,thoracic
+msk,"Spondylolysis, thoracolumbar region",M43.05,thoracolumbar
+msk,"Spondylolysis, lumbar region",M43.06,lumbar
+msk,"Spondylolysis, lumbosacral region",M43.07,lumbosacral
+msk,"Spondylolysis, sacral and sacrococcygeal region",M43.08,sacral
+msk,"Spondylolisthesis, occipito-atlanto-axial region",M43.11,occipito-atlanto-axial
+msk,"Spondylolisthesis, cervical region",M43.12,cervical
+msk,"Spondylolisthesis, cervicothoracic region",M43.13,cervicothoracic
+msk,"Spondylolisthesis, thoracic region",M43.14,thoracic
+msk,"Spondylolisthesis, thoracolumbar region",M43.15,thoracolumbar
+msk,"Spondylolisthesis, lumbar region",M43.16,lumbar
+msk,"Spondylolisthesis, lumbosacral region",M43.17,lumbosacral
+msk,"Spondylolisthesis, sacral and sacrococcygeal region",M43.18,sacral
+msk,"Fusion of spine, occipito-atlanto-axial region",M43.21,occipito-atlanto-axial
+msk,"Fusion of spine, cervical region",M43.22,cervical
+msk,"Fusion of spine, cervicothoracic region",M43.23,cervicothoracic
+msk,"Fusion of spine, thoracic region",M43.24,thoracic
+msk,"Fusion of spine, thoracolumbar region",M43.25,thoracolumbar
+msk,"Fusion of spine, lumbar region",M43.26,lumbar
+msk,"Fusion of spine, lumbosacral region",M43.27,lumbosacral
+msk,"Fusion of spine, sacral and sacrococcygeal region",M43.28,sacral
+msk,Recurrent atlantoaxial dislocation with myelopathy,M43.3,occipito-atlanto-axial
+msk,Other recurrent atlantoaxial dislocation,M43.4,occipito-atlanto-axial
+msk,"Other recurrent vertebral dislocation, cervical region",M43.5X2,cervical
+msk,"Other recurrent vertebral dislocation, cervicothoracic region",M43.5X3,cervicothoracic
+msk,"Other recurrent vertebral dislocation, thoracic region",M43.5X4,thoracic
+msk,"Other recurrent vertebral dislocation, thoracolumbar region",M43.5X5,thoracolumbar
+msk,"Other recurrent vertebral dislocation, lumbar region",M43.5X6,lumbar
+msk,"Other recurrent vertebral dislocation, lumbosacral region",M43.5X7,lumbosacral
+msk,"Other recurrent vertebral dislocation, sacral and sacrococcygeal region",M43.5X8,sacral
+deformity,"Other specified deforming dorsopathies, occipito-atlanto-axial region",M43.8X1,occipito-atlanto-axial
+deformity,"Other specified deforming dorsopathies, cervical region",M43.8X2,cervical
+deformity,"Other specified deforming dorsopathies, cervicothoracic region",M43.8X3,cervicothoracic
+deformity,"Other specified deforming dorsopathies, thoracic region",M43.8X4,thoracic
+deformity,"Other specified deforming dorsopathies, thoracolumbar region",M43.8X5,thoracolumbar
+deformity,"Other specified deforming dorsopathies, lumbar region",M43.8X6,lumbar
+deformity,"Other specified deforming dorsopathies, lumbosacral region",M43.8X7,lumbosacral
+deformity,"Other specified deforming dorsopathies, sacral and sacrococcygeal region",M43.8X8,sacral
+msk,Ankylosing spondylitis of occipito-atlanto-axial region,M45.1,occipito-atlanto-axial
+msk,Ankylosing spondylitis of cervical region,M45.2,cervical
+msk,Ankylosing spondylitis of cervicothoracic region,M45.3,cervicothoracic
+msk,Ankylosing spondylitis of thoracic region,M45.4,thoracic
+msk,Ankylosing spondylitis of thoracolumbar region,M45.5,thoracolumbar
+msk,Ankylosing spondylitis lumbar region,M45.6,lumbar
+msk,Ankylosing spondylitis of lumbosacral region,M45.7,lumbosacral
+msk,Ankylosing spondylitis sacral and sacrococcygeal region,M45.8,sacral
+msk,Non-radiographic axial spondyloarthritis of occipito-atlanto-axial region,M45.A1,occipito-atlanto-axial
+msk,Non-radiographic axial spondyloarthritis of cervical region,M45.A2,cervical
+msk,Non-radiographic axial spondyloarthritis of cervicothoracic region,M45.A3,cervicothoracic
+msk,Non-radiographic axial spondyloarthritis of thoracic region,M45.A4,thoracic
+msk,Non-radiographic axial spondyloarthritis of thoracolumbar region,M45.A5,thoracolumbar
+msk,Non-radiographic axial spondyloarthritis of lumbar region,M45.A6,lumbar
+msk,Non-radiographic axial spondyloarthritis of lumbosacral region,M45.A7,lumbosacral
+msk,Non-radiographic axial spondyloarthritis of sacral and sacrococcygeal region,M45.A8,sacral
+msk,"Spinal enthesopathy, occipito-atlanto-axial region",M46.01,occipito-atlanto-axial
+msk,"Spinal enthesopathy, cervical region",M46.02,cervical
+msk,"Spinal enthesopathy, cervicothoracic region",M46.03,cervicothoracic
+msk,"Spinal enthesopathy, thoracic region",M46.04,thoracic
+msk,"Spinal enthesopathy, thoracolumbar region",M46.05,thoracolumbar
+msk,"Spinal enthesopathy, lumbar region",M46.06,lumbar
+msk,"Spinal enthesopathy, lumbosacral region",M46.07,lumbosacral
+msk,"Spinal enthesopathy, sacral and sacrococcygeal region",M46.08,sacral
+msk,"Sacroiliitis, not elsewhere classified",M46.1,sacral
+infection,"Osteomyelitis of vertebra, occipito-atlanto-axial region",M46.21,occipito-atlanto-axial
+infection,"Osteomyelitis of vertebra, cervical region",M46.22,cervical
+infection,"Osteomyelitis of vertebra, cervicothoracic region",M46.23,cervicothoracic
+infection,"Osteomyelitis of vertebra, thoracic region",M46.24,thoracic
+infection,"Osteomyelitis of vertebra, thoracolumbar region",M46.25,thoracolumbar
+infection,"Osteomyelitis of vertebra, lumbar region",M46.26,lumbar
+infection,"Osteomyelitis of vertebra, lumbosacral region",M46.27,lumbosacral
+infection,"Osteomyelitis of vertebra, sacral and sacrococcygeal region",M46.28,sacral
+infection,"Infection of intervertebral disc (pyogenic), occipito-atlanto-axial region",M46.31,occipito-atlanto-axial
+infection,"Infection of intervertebral disc (pyogenic), cervical region",M46.32,cervical
+infection,"Infection of intervertebral disc (pyogenic), cervicothoracic region",M46.33,cervicothoracic
+infection,"Infection of intervertebral disc (pyogenic), thoracic region",M46.34,thoracic
+infection,"Infection of intervertebral disc (pyogenic), thoracolumbar region",M46.35,thoracolumbar
+infection,"Infection of intervertebral disc (pyogenic), lumbar region",M46.36,lumbar
+infection,"Infection of intervertebral disc (pyogenic), lumbosacral region",M46.37,lumbosacral
+infection,"Infection of intervertebral disc (pyogenic), sacral and sacrococcygeal region",M46.38,sacral
+infection,"Other infective spondylopathies, occipito-atlanto-axial region",M46.51,occipito-atlanto-axial
+infection,"Other infective spondylopathies, cervical region",M46.52,cervical
+infection,"Other infective spondylopathies, cervicothoracic region",M46.53,cervicothoracic
+infection,"Other infective spondylopathies, thoracic region",M46.54,thoracic
+infection,"Other infective spondylopathies, thoracolumbar region",M46.55,thoracolumbar
+infection,"Other infective spondylopathies, lumbar region",M46.56,lumbar
+infection,"Other infective spondylopathies, lumbosacral region",M46.57,lumbosacral
+infection,"Other infective spondylopathies, sacral and sacrococcygeal region",M46.58,sacral
+msk,"Other specified inflammatory spondylopathies, occipito-atlanto-axial region",M46.81,occipito-atlanto-axial
+msk,"Other specified inflammatory spondylopathies, cervical region",M46.82,cervical
+msk,"Other specified inflammatory spondylopathies, cervicothoracic region",M46.83,cervicothoracic
+msk,"Other specified inflammatory spondylopathies, thoracic region",M46.84,thoracic
+msk,"Other specified inflammatory spondylopathies, thoracolumbar region",M46.85,thoracolumbar
+msk,"Other specified inflammatory spondylopathies, lumbar region",M46.86,lumbar
+msk,"Other specified inflammatory spondylopathies, lumbosacral region",M46.87,lumbosacral
+msk,"Other specified inflammatory spondylopathies, sacral and sacrococcygeal region",M46.88,sacral
+msk,"Anterior spinal artery compression syndromes, occipito-atlanto-axial region",M47.011,occipito-atlanto-axial
+msk,"Anterior spinal artery compression syndromes, cervical region",M47.012,cervical
+msk,"Anterior spinal artery compression syndromes, cervicothoracic region",M47.013,cervicothoracic
+msk,"Anterior spinal artery compression syndromes, thoracic region",M47.014,thoracic
+msk,"Anterior spinal artery compression syndromes, thoracolumbar region",M47.015,thoracolumbar
+msk,"Anterior spinal artery compression syndromes, lumbar region",M47.016,lumbar
+msk,"Vertebral artery compression syndromes, occipito-atlanto-axial region",M47.021,occipito-atlanto-axial
+msk,"Vertebral artery compression syndromes, cervical region",M47.022,cervical
+msk,"Other spondylosis with myelopathy, occipito-atlanto-axial region",M47.11,occipito-atlanto-axial
+msk,"Other spondylosis with myelopathy, cervical region",M47.12,cervical
+msk,"Other spondylosis with myelopathy, cervicothoracic region",M47.13,cervicothoracic
+msk,"Other spondylosis with myelopathy, thoracic region",M47.14,thoracic
+msk,"Other spondylosis with myelopathy, thoracolumbar region",M47.15,thoracolumbar
+msk,"Other spondylosis with myelopathy, lumbar region",M47.16,lumbar
+msk,"Other spondylosis with radiculopathy, occipito-atlanto-axial region",M47.21,occipito-atlanto-axial
+msk,"Other spondylosis with radiculopathy, cervical region",M47.22,cervical
+msk,"Other spondylosis with radiculopathy, cervicothoracic region",M47.23,cervicothoracic
+msk,"Other spondylosis with radiculopathy, thoracic region",M47.24,thoracic
+msk,"Other spondylosis with radiculopathy, thoracolumbar region",M47.25,thoracolumbar
+msk,"Other spondylosis with radiculopathy, lumbar region",M47.26,lumbar
+msk,"Other spondylosis with radiculopathy, lumbosacral region",M47.27,lumbosacral
+msk,"Other spondylosis with radiculopathy, sacral and sacrococcygeal region",M47.28,sacral
+msk,"Spondylosis without myelopathy or radiculopathy, occipito-atlanto-axial region",M47.811,occipito-atlanto-axial
+msk,"Spondylosis without myelopathy or radiculopathy, cervical region",M47.812,cervical
+msk,"Spondylosis without myelopathy or radiculopathy, cervicothoracic region",M47.813,cervicothoracic
+msk,"Spondylosis without myelopathy or radiculopathy, thoracic region",M47.814,thoracic
+msk,"Spondylosis without myelopathy or radiculopathy, thoracolumbar region",M47.815,thoracolumbar
+msk,"Spondylosis without myelopathy or radiculopathy, lumbar region",M47.816,lumbar
+msk,"Spondylosis without myelopathy or radiculopathy, lumbosacral region",M47.817,lumbosacral
+msk,"Spondylosis without myelopathy or radiculopathy, sacral and sacrococcygeal region",M47.818,sacral
+msk,"Other spondylosis, occipito-atlanto-axial region",M47.891,occipito-atlanto-axial
+msk,"Other spondylosis, cervical region",M47.892,cervical
+msk,"Other spondylosis, cervicothoracic region",M47.893,cervicothoracic
+msk,"Other spondylosis, thoracic region",M47.894,thoracic
+msk,"Other spondylosis, thoracolumbar region",M47.895,thoracolumbar
+msk,"Other spondylosis, lumbar region",M47.896,lumbar
+msk,"Other spondylosis, lumbosacral region",M47.897,lumbosacral
+msk,"Other spondylosis, sacral and sacrococcygeal region",M47.898,sacral
+msk,"Spinal stenosis, occipito-atlanto-axial region",M48.01,occipito-atlanto-axial
+msk,"Spinal stenosis, cervical region",M48.02,cervical
+msk,"Spinal stenosis, cervicothoracic region",M48.03,cervicothoracic
+msk,"Spinal stenosis, thoracic region",M48.04,thoracic
+msk,"Spinal stenosis, thoracolumbar region",M48.05,thoracolumbar
+msk,"Spinal stenosis, lumbar region without neurogenic claudication",M48.061,lumbar
+msk,"Spinal stenosis, lumbar region with neurogenic claudication",M48.062,lumbar
+msk,"Spinal stenosis, lumbosacral region",M48.07,lumbosacral
+msk,"Spinal stenosis, sacral and sacrococcygeal region",M48.08,sacral
+msk,"Ankylosing hyperostosis [Forestier], occipito-atlanto-axial region",M48.11,occipito-atlanto-axial
+msk,"Ankylosing hyperostosis [Forestier], cervical region",M48.12,cervical
+msk,"Ankylosing hyperostosis [Forestier], cervicothoracic region",M48.13,cervicothoracic
+msk,"Ankylosing hyperostosis [Forestier], thoracic region",M48.14,thoracic
+msk,"Ankylosing hyperostosis [Forestier], thoracolumbar region",M48.15,thoracolumbar
+msk,"Ankylosing hyperostosis [Forestier], lumbar region",M48.16,lumbar
+msk,"Ankylosing hyperostosis [Forestier], lumbosacral region",M48.17,lumbosacral
+msk,"Ankylosing hyperostosis [Forestier], sacral and sacrococcygeal region",M48.18,sacral
+deformity,"Kissing spine, occipito-atlanto-axial region",M48.21,occipito-atlanto-axial
+deformity,"Kissing spine, cervical region",M48.22,cervical
+deformity,"Kissing spine, cervicothoracic region",M48.23,cervicothoracic
+deformity,"Kissing spine, thoracic region",M48.24,thoracic
+deformity,"Kissing spine, thoracolumbar region",M48.25,thoracolumbar
+deformity,"Kissing spine, lumbar region",M48.26,lumbar
+deformity,"Kissing spine, lumbosacral region",M48.27,lumbosacral
+trauma,"Traumatic spondylopathy, occipito-atlanto-axial region",M48.31,occipito-atlanto-axial
+trauma,"Traumatic spondylopathy, cervical region",M48.32,cervical
+trauma,"Traumatic spondylopathy, cervicothoracic region",M48.33,cervicothoracic
+trauma,"Traumatic spondylopathy, thoracic region",M48.34,thoracic
+trauma,"Traumatic spondylopathy, thoracolumbar region",M48.35,thoracolumbar
+trauma,"Traumatic spondylopathy, lumbar region",M48.36,lumbar
+trauma,"Traumatic spondylopathy, lumbosacral region",M48.37,lumbosacral
+trauma,"Traumatic spondylopathy, sacral and sacrococcygeal region",M48.38,sacral
+trauma,"Fatigue fracture of vertebra, occipito-atlanto-axial region, initial encounter for fracture",M48.41XA,occipito-atlanto-axial
+trauma,"Fatigue fracture of vertebra, cervical region, initial encounter for fracture",M48.42XA,cervical
+trauma,"Fatigue fracture of vertebra, cervicothoracic region, initial encounter for fracture",M48.43XA,cervicothoracic
+trauma,"Fatigue fracture of vertebra, thoracic region, initial encounter for fracture",M48.44XA,thoracic
+trauma,"Fatigue fracture of vertebra, thoracolumbar region, initial encounter for fracture",M48.45XA,thoracolumbar
+trauma,"Fatigue fracture of vertebra, lumbar region, initial encounter for fracture",M48.46XA,lumbar
+trauma,"Fatigue fracture of vertebra, lumbosacral region, initial encounter for fracture",M48.47XA,lumbosacral
+trauma,"Fatigue fracture of vertebra, sacral and sacrococcygeal region, initial encounter for fracture",M48.48XA,sacral
+trauma,"Collapsed vertebra, not elsewhere classified, occipito-atlanto-axial region, initial encounter for fracture",M48.51XA,occipito-atlanto-axial
+trauma,"Collapsed vertebra, not elsewhere classified, cervical region, initial encounter for fracture",M48.52XA,cervical
+trauma,"Collapsed vertebra, not elsewhere classified, cervicothoracic region, initial encounter for fracture",M48.53XA,cervicothoracic
+trauma,"Collapsed vertebra, not elsewhere classified, thoracic region, initial encounter for fracture",M48.54XA,thoracic
+trauma,"Collapsed vertebra, not elsewhere classified, thoracolumbar region, initial encounter for fracture",M48.55XA,thoracolumbar
+trauma,"Collapsed vertebra, not elsewhere classified, lumbar region, initial encounter for fracture",M48.56XA,lumbar
+trauma,"Collapsed vertebra, not elsewhere classified, lumbosacral region, initial encounter for fracture",M48.57XA,lumbosacral
+trauma,"Collapsed vertebra, not elsewhere classified, sacral and sacrococcygeal region, initial encounter for fracture",M48.58XA,sacral
+msk,"Other specified spondylopathies, occipito-atlanto-axial region",M48.8X1,occipito-atlanto-axial
+msk,"Other specified spondylopathies, cervical region",M48.8X2,cervical
+msk,"Other specified spondylopathies, cervicothoracic region",M48.8X3,cervicothoracic
+msk,"Other specified spondylopathies, thoracic region",M48.8X4,thoracic
+msk,"Other specified spondylopathies, thoracolumbar region",M48.8X5,thoracolumbar
+msk,"Other specified spondylopathies, lumbar region",M48.8X6,lumbar
+msk,"Other specified spondylopathies, lumbosacral region",M48.8X7,lumbosacral
+msk,"Other specified spondylopathies, sacral and sacrococcygeal region",M48.8X8,sacral
+msk,"Spondylopathy in diseases classified elsewhere, occipito-atlanto-axial region",M49.81,occipito-atlanto-axial
+msk,"Spondylopathy in diseases classified elsewhere, cervical region",M49.82,cervical
+msk,"Spondylopathy in diseases classified elsewhere, cervicothoracic region",M49.83,cervicothoracic
+msk,"Spondylopathy in diseases classified elsewhere, thoracic region",M49.84,thoracic
+msk,"Spondylopathy in diseases classified elsewhere, thoracolumbar region",M49.85,thoracolumbar
+msk,"Spondylopathy in diseases classified elsewhere, lumbar region",M49.86,lumbar
+msk,"Spondylopathy in diseases classified elsewhere, lumbosacral region",M49.87,lumbosacral
+msk,"Spondylopathy in diseases classified elsewhere, sacral and sacrococcygeal region",M49.88,sacral
+msk,"Cervical disc disorder with myelopathy, high cervical region",M50.01,cervical
+msk,Cervical disc disorder at C4-C5 level with myelopathy,M50.021,cervical
+msk,Cervical disc disorder at C5-C6 level with myelopathy,M50.022,cervical
+msk,Cervical disc disorder at C6-C7 level with myelopathy,M50.023,cervical
+msk,"Cervical disc disorder with myelopathy, cervicothoracic region",M50.03,cervical
+msk,"Cervical disc disorder with radiculopathy, high cervical region",M50.11,cervical
+msk,Cervical disc disorder at C4-C5 level with radiculopathy,M50.121,cervical
+msk,Cervical disc disorder at C5-C6 level with radiculopathy,M50.122,cervical
+msk,Cervical disc disorder at C6-C7 level with radiculopathy,M50.123,cervical
+msk,"Cervical disc disorder with radiculopathy, cervicothoracic region",M50.13,cervical
+msk,"Other cervical disc displacement, high cervical region",M50.21,cervical
+msk,Other cervical disc displacement at C4-C5 level,M50.221,cervical
+msk,Other cervical disc displacement at C5-C6 level,M50.222,cervical
+msk,Other cervical disc displacement at C6-C7 level,M50.223,cervical
+msk,"Other cervical disc displacement, cervicothoracic region",M50.23,cervical
+msk,"Other cervical disc degeneration, high cervical region",M50.31,cervical
+msk,Other cervical disc degeneration at C4-C5 level,M50.321,cervical
+msk,Other cervical disc degeneration at C5-C6 level,M50.322,cervical
+msk,Other cervical disc degeneration at C6-C7 level,M50.323,cervical
+msk,"Other cervical disc degeneration, cervicothoracic region",M50.33,cervical
+msk,"Other cervical disc disorders, high cervical region",M50.81,cervical
+msk,Other cervical disc disorders at C4-C5 level,M50.821,cervical
+msk,Other cervical disc disorders at C5-C6 level,M50.822,cervical
+msk,Other cervical disc disorders at C6-C7 level,M50.823,cervical
+msk,"Other cervical disc disorders, cervicothoracic region",M50.83,cervical
+msk,"Intervertebral disc disorders with myelopathy, thoracic region",M51.04,thoracic
+msk,"Intervertebral disc disorders with myelopathy, thoracolumbar region",M51.05,thoracolumbar
+msk,"Intervertebral disc disorders with myelopathy, lumbar region",M51.06,lumbar
+msk,"Intervertebral disc disorders with radiculopathy, thoracic region",M51.14,thoracic
+msk,"Intervertebral disc disorders with radiculopathy, thoracolumbar region",M51.15,thoracolumbar
+msk,"Intervertebral disc disorders with radiculopathy, lumbar region",M51.16,lumbar
+msk,"Intervertebral disc disorders with radiculopathy, lumbosacral region",M51.17,lumbosacral
+msk,"Other intervertebral disc displacement, thoracic region",M51.24,thoracic
+msk,"Other intervertebral disc displacement, thoracolumbar region",M51.25,thoracolumbar
+msk,"Other intervertebral disc displacement, lumbar region",M51.26,lumbar
+msk,"Other intervertebral disc displacement, lumbosacral region",M51.27,lumbosacral
+msk,"Other intervertebral disc degeneration, thoracic region",M51.34,thoracic
+msk,"Other intervertebral disc degeneration, thoracolumbar region",M51.35,thoracolumbar
+msk,"Other intervertebral disc degeneration, lumbar region",M51.36,lumbar
+msk,"Other intervertebral disc degeneration, lumbosacral region",M51.37,lumbosacral
+msk,"Schmorl's nodes, thoracic region",M51.44,thoracic
+msk,"Schmorl's nodes, thoracolumbar region",M51.45,thoracolumbar
+msk,"Schmorl's nodes, lumbar region",M51.46,lumbar
+msk,"Schmorl's nodes, lumbosacral region",M51.47,lumbosacral
+msk,"Other intervertebral disc disorders, thoracic region",M51.84,thoracic
+msk,"Other intervertebral disc disorders, thoracolumbar region",M51.85,thoracolumbar
+msk,"Other intervertebral disc disorders, lumbar region",M51.86,lumbar
+msk,"Other intervertebral disc disorders, lumbosacral region",M51.87,lumbosacral
+msk,"Spinal instabilities, occipito-atlanto-axial region",M53.2X1,occipito-atlanto-axial
+msk,"Spinal instabilities, cervical region",M53.2X2,cervical
+msk,"Spinal instabilities, cervicothoracic region",M53.2X3,cervicothoracic
+msk,"Spinal instabilities, thoracic region",M53.2X4,thoracic
+msk,"Spinal instabilities, thoracolumbar region",M53.2X5,thoracolumbar
+msk,"Spinal instabilities, lumbar region",M53.2X6,lumbar
+msk,"Spinal instabilities, lumbosacral region",M53.2X7,lumbosacral
+msk,"Spinal instabilities, sacral and sacrococcygeal region",M53.2X8,sacral
+msk,"Sacrococcygeal disorders, not elsewhere classified",M53.3,sacral
+msk,"Other specified dorsopathies, occipito-atlanto-axial region",M53.81,occipito-atlanto-axial
+msk,"Other specified dorsopathies, cervical region",M53.82,cervical
+msk,"Other specified dorsopathies, cervicothoracic region",M53.83,cervicothoracic
+msk,"Other specified dorsopathies, thoracic region",M53.84,thoracic
+msk,"Other specified dorsopathies, thoracolumbar region",M53.85,thoracolumbar
+msk,"Other specified dorsopathies, lumbar region",M53.86,lumbar
+msk,"Other specified dorsopathies, lumbosacral region",M53.87,lumbosacral
+msk,"Other specified dorsopathies, sacral and sacrococcygeal region",M53.88,sacral
+msk,"Panniculitis affecting regions of neck and back, occipito-atlanto-axial region",M54.01,occipito-atlanto-axial
+msk,"Panniculitis affecting regions of neck and back, cervical region",M54.02,cervical
+msk,"Panniculitis affecting regions of neck and back, cervicothoracic region",M54.03,cervicothoracic
+msk,"Panniculitis affecting regions of neck and back, thoracic region",M54.04,thoracic
+msk,"Panniculitis affecting regions of neck and back, thoracolumbar region",M54.05,thoracolumbar
+msk,"Panniculitis affecting regions of neck and back, lumbar region",M54.06,lumbar
+msk,"Panniculitis affecting regions of neck and back, lumbosacral region",M54.07,lumbosacral
+msk,"Panniculitis affecting regions of neck and back, sacral and sacrococcygeal region",M54.08,sacral
+msk,"Radiculopathy, occipito-atlanto-axial region",M54.11,occipito-atlanto-axial
+msk,"Radiculopathy, cervical region",M54.12,cervical
+msk,"Radiculopathy, cervicothoracic region",M54.13,cervicothoracic
+msk,"Radiculopathy, thoracic region",M54.14,thoracic
+msk,"Radiculopathy, thoracolumbar region",M54.15,thoracolumbar
+msk,"Radiculopathy, lumbar region",M54.16,lumbar
+msk,"Radiculopathy, lumbosacral region",M54.17,lumbosacral
+msk,"Radiculopathy, sacral and sacrococcygeal region",M54.18,sacral
+msk,Cervicalgia,M54.2,cervical
+msk,Vertebrogenic low back pain,M54.51,lumbar
+msk,Other low back pain,M54.59,lumbar
+msk,Pain in thoracic spine,M54.6,thoracic
+msk,Other dorsalgia,M54.89,unspecified
+trauma,"Age-related osteoporosis with current pathological fracture, vertebra(e), initial encounter for fracture",M80.08XA,unspecified
+trauma,"Other osteoporosis with current pathological fracture, vertebra(e), initial encounter for fracture",M80.88XA,unspecified
+msk,Osteitis deformans of vertebrae,M88.1,unspecified
+msk,Acquired deformity of neck,M95.3,cervical
+msk,Pseudarthrosis after fusion or arthrodesis,M96.0,unspecified
+msk,"Postlaminectomy syndrome, not elsewhere classified",M96.1,unspecified
+deformity,Postradiation kyphosis,M96.2,unspecified
+deformity,Postlaminectomy kyphosis,M96.3,unspecified
+deformity,Postsurgical lordosis,M96.4,unspecified
+deformity,Postradiation scoliosis,M96.5,unspecified
+msk,Segmental and somatic dysfunction of cervical region,M99.01,cervical
+msk,Segmental and somatic dysfunction of thoracic region,M99.02,thoracic
+msk,Segmental and somatic dysfunction of lumbar region,M99.03,lumbar
+msk,Segmental and somatic dysfunction of sacral region,M99.04,sacral
+msk,Subluxation complex (vertebral) of cervical region,M99.11,cervical
+msk,Subluxation complex (vertebral) of thoracic region,M99.12,thoracic
+msk,Subluxation complex (vertebral) of lumbar region,M99.13,lumbar
+msk,Subluxation complex (vertebral) of sacral region,M99.14,sacral
+msk,Subluxation stenosis of neural canal of cervical region,M99.21,cervical
+msk,Subluxation stenosis of neural canal of thoracic region,M99.22,thoracic
+msk,Subluxation stenosis of neural canal of lumbar region,M99.23,lumbar
+msk,Subluxation stenosis of neural canal of sacral region,M99.24,sacral
+msk,Osseous stenosis of neural canal of cervical region,M99.31,cervical
+msk,Osseous stenosis of neural canal of thoracic region,M99.32,thoracic
+msk,Osseous stenosis of neural canal of lumbar region,M99.33,lumbar
+msk,Osseous stenosis of neural canal of sacral region,M99.34,sacral
+msk,Connective tissue stenosis of neural canal of cervical region,M99.41,cervical
+msk,Connective tissue stenosis of neural canal of thoracic region,M99.42,thoracic
+msk,Connective tissue stenosis of neural canal of lumbar region,M99.43,lumbar
+msk,Connective tissue stenosis of neural canal of sacral region,M99.44,sacral
+msk,Intervertebral disc stenosis of neural canal of cervical region,M99.51,cervical
+msk,Intervertebral disc stenosis of neural canal of thoracic region,M99.52,thoracic
+msk,Intervertebral disc stenosis of neural canal of lumbar region,M99.53,lumbar
+msk,Intervertebral disc stenosis of neural canal of sacral region,M99.54,sacral
+msk,Osseous and subluxation stenosis of intervertebral foramina of cervical region,M99.61,cervical
+msk,Osseous and subluxation stenosis of intervertebral foramina of thoracic region,M99.62,thoracic
+msk,Osseous and subluxation stenosis of intervertebral foramina of lumbar region,M99.63,lumbar
+msk,Osseous and subluxation stenosis of intervertebral foramina of sacral region,M99.64,sacral
+msk,Connective tissue and disc stenosis of intervertebral foramina of cervical region,M99.71,cervical
+msk,Connective tissue and disc stenosis of intervertebral foramina of thoracic region,M99.72,thoracic
+msk,Connective tissue and disc stenosis of intervertebral foramina of lumbar region,M99.73,lumbar
+msk,Connective tissue and disc stenosis of intervertebral foramina of sacral region,M99.74,sacral
+msk,Other biomechanical lesions of cervical region,M99.81,cervical
+msk,Other biomechanical lesions of thoracic region,M99.82,thoracic
+msk,Other biomechanical lesions of lumbar region,M99.83,lumbar
+msk,Other biomechanical lesions of sacral region,M99.84,sacral
+tumor,Malignant neoplasm of vertebral column,C41.2,unspecified
+tumor,"Malignant neoplasm of pelvic bones, sacrum and coccyx",C41.4,sacral
+tumor,Kaposi's sarcoma of other sites,C46.7,unspecified
+tumor,Malignant neoplasm of spinal cord,C72.0,unspecified
+tumor,Malignant neoplasm of cauda equina,C72.1,lumbar
+tumor,Malignant carcinoid tumor of unspecified site,C7A.00,unspecified
+tumor,"Secondary carcinoid tumors, unspecified site",C7B.00,unspecified
+tumor,Secondary carcinoid tumors of bone,C7B.03,unspecified
+tumor,Secondary carcinoid tumors of other sites,C7B.09,unspecified
+tumor,Secondary malignant neoplasm of unspecified part of nervous system,C79.40,unspecified
+tumor,Secondary malignant neoplasm of bone,C79.51,unspecified
+tumor,Secondary malignant neoplasm of bone marrow,C79.52,unspecified
+tumor,Secondary malignant neoplasm of other specified sites,C79.89,unspecified
+tumor,Secondary malignant neoplasm of unspecified site,C79.9,unspecified
+tumor,"Mycosis fungoides, unspecified site",C84.00,unspecified
+tumor,"Sezary disease, unspecified site",C84.10,unspecified
+tumor,Carcinoma in situ of other specified sites,D09.8,unspecified
+tumor,Benign neoplasm of vertebral column,D16.6,unspecified
+tumor,"Benign neoplasm of pelvic bones, sacrum and coccyx",D16.8,sacral
+tumor,Hemangioma unspecified site,D18.00,unspecified
+tumor,Benign neoplasm of unspecified site of unspecified orbit,D31.60,unspecified
+tumor,Benign neoplasm of spinal cord,D33.4,unspecified
+tumor,Benign neoplasm of other specified sites,D36.7,unspecified
+tumor,"Benign neoplasm, unspecified site",D36.9,unspecified
+tumor,Benign carcinoid tumor of unspecified site,D3A.00,unspecified
+tumor,Neoplasm of uncertain behavior of spinal cord,D43.4,unspecified
+tumor,Neoplasm of uncertain behavior of other specified sites,D48.7,unspecified
+tumor,"Neoplasm of unspecified behavior of bone, soft tissue, and skin",D49.2,unspecified
+tumor,Neoplasm of unspecified behavior of other specified sites,D49.89,unspecified
+tumor,Neoplasm of unspecified behavior of unspecified site,D49.9,unspecified
+congenital,Cervical spina bifida with hydrocephalus,Q05.0,cervical
+congenital,Thoracic spina bifida with hydrocephalus,Q05.1,thoracic
+congenital,Lumbar spina bifida with hydrocephalus,Q05.2,lumbar
+congenital,Sacral spina bifida with hydrocephalus,Q05.3,sacral
+congenital,Unspecified spina bifida with hydrocephalus,Q05.4,unspecified
+congenital,Cervical spina bifida without hydrocephalus,Q05.5,cervical
+congenital,Thoracic spina bifida without hydrocephalus,Q05.6,thoracic
+congenital,Lumbar spina bifida without hydrocephalus,Q05.7,lumbar
+congenital,Sacral spina bifida without hydrocephalus,Q05.8,sacral
+congenital,"Spina bifida, unspecified",Q05.9,unspecified
+congenital,Hypoplasia and dysplasia of spinal cord,Q06.1,unspecified
+congenital,Other congenital cauda equina malformations,Q06.3,lumbar
+congenital,Other specified congenital malformations of spinal cord,Q06.8,unspecified
+congenital,"Congenital malformation of spinal cord, unspecified",Q06.9,unspecified
+congenital,Arnold-Chiari syndrome without spina bifida or hydrocephalus,Q07.00,cervical
+congenital,Arnold-Chiari syndrome with spina bifida,Q07.01,cervical
+congenital,Arnold-Chiari syndrome with spina bifida and hydrocephalus,Q07.03,cervical
+congenital,Congenital deformity of spine,Q67.5,unspecified
+congenital,Spina bifida occulta,Q76.0,unspecified
+congenital,Klippel-Feil syndrome,Q76.1,unspecified
+congenital,Congenital scoliosis due to congenital bony malformation,Q76.3,unspecified
+congenital,"Congenital kyphosis, occipito-atlanto-axial region",Q76.411,occipito-atlanto-axial
+congenital,"Congenital kyphosis, cervical region",Q76.412,cervical
+congenital,"Congenital kyphosis, cervicothoracic region",Q76.413,cervicothoracic
+congenital,"Congenital kyphosis, thoracic region",Q76.414,thoracic
+congenital,"Congenital kyphosis, thoracolumbar region",Q76.415,thoracolumbar
+congenital,"Congenital kyphosis, unspecified region",Q76.419,unspecified
+congenital,"Congenital lordosis, thoracolumbar region",Q76.425,thoracolumbar
+congenital,"Congenital lordosis, lumbar region",Q76.426,lumbar
+congenital,"Congenital lordosis, lumbosacral region",Q76.427,lumbosacral
+congenital,"Congenital lordosis, sacral and sacrococcygeal region",Q76.428,sacral
+congenital,"Congenital lordosis, unspecified region",Q76.429,unspecified
+congenital,"Other congenital malformations of spine, not associated with scoliosis",Q76.49,unspecified
+congenital,Cervical rib,Q76.5,cervical
+congenital,Other congenital malformations of ribs,Q76.6,unspecified
+congenital,Other congenital malformations of bony thorax,Q76.8,unspecified
+congenital,Other osteochondrodysplasia with defects of growth of tubular bones and spine,Q77.8,unspecified
+congenital,"Osteochondrodysplasia with defects of growth of tubular bones and spine, unspecified",Q77.9,unspecified
+congenital,Other congenital malformations of diaphragm,Q79.1,unspecified
+congenital,Other congenital malformations of musculoskeletal system,Q79.8,unspecified
+congenital,Congenital sacral dimple,Q82.6,sacral
+congenital,"Neurofibromatosis, unspecified",Q85.00,unspecified
+congenital,"Neurofibromatosis, type 1",Q85.01,unspecified
+congenital,"Neurofibromatosis, type 2",Q85.02,unspecified
+congenital,Other neurofibromatosis,Q85.09,unspecified
+congenital,Other congenital malformation syndromes due to known exogenous causes,Q86.8,unspecified
+congenital,Other congenital malformation syndromes predominantly associated with short stature,Q87.19,unspecified
+congenital,"Marfan's syndrome, unspecified",Q87.40,unspecified
+congenital,Marfan's syndrome with other cardiovascular manifestations,Q87.418,unspecified
+congenital,Marfan's syndrome with skeletal manifestation,Q87.43,unspecified
+congenital,Other congenital malformation syndromes with other skeletal changes,Q87.5,unspecified
+trauma,"Unspecified displaced fracture of first cervical vertebra, initial encounter for closed fracture",S12.000A,cervical
+trauma,"Unspecified displaced fracture of first cervical vertebra, initial encounter for open fracture",S12.000B,cervical
+trauma,"Unspecified nondisplaced fracture of first cervical vertebra, initial encounter for closed fracture",S12.001A,cervical
+trauma,"Unspecified nondisplaced fracture of first cervical vertebra, initial encounter for open fracture",S12.001B,cervical
+trauma,"Stable burst fracture of first cervical vertebra, initial encounter for closed fracture",S12.01XA,cervical
+trauma,"Stable burst fracture of first cervical vertebra, initial encounter for open fracture",S12.01XB,cervical
+trauma,"Unstable burst fracture of first cervical vertebra, initial encounter for closed fracture",S12.02XA,cervical
+trauma,"Unstable burst fracture of first cervical vertebra, initial encounter for open fracture",S12.02XB,cervical
+trauma,"Displaced posterior arch fracture of first cervical vertebra, initial encounter for closed fracture",S12.030A,cervical
+trauma,"Displaced posterior arch fracture of first cervical vertebra, initial encounter for open fracture",S12.030B,cervical
+trauma,"Nondisplaced posterior arch fracture of first cervical vertebra, initial encounter for closed fracture",S12.031A,cervical
+trauma,"Nondisplaced posterior arch fracture of first cervical vertebra, initial encounter for open fracture",S12.031B,cervical
+trauma,"Displaced lateral mass fracture of first cervical vertebra, initial encounter for closed fracture",S12.040A,cervical
+trauma,"Displaced lateral mass fracture of first cervical vertebra, initial encounter for open fracture",S12.040B,cervical
+trauma,"Nondisplaced lateral mass fracture of first cervical vertebra, initial encounter for closed fracture",S12.041A,cervical
+trauma,"Nondisplaced lateral mass fracture of first cervical vertebra, initial encounter for open fracture",S12.041B,cervical
+trauma,"Other displaced fracture of first cervical vertebra, initial encounter for closed fracture",S12.090A,cervical
+trauma,"Other displaced fracture of first cervical vertebra, initial encounter for open fracture",S12.090B,cervical
+trauma,"Other nondisplaced fracture of first cervical vertebra, initial encounter for closed fracture",S12.091A,cervical
+trauma,"Other nondisplaced fracture of first cervical vertebra, initial encounter for open fracture",S12.091B,cervical
+trauma,"Unspecified displaced fracture of second cervical vertebra, initial encounter for closed fracture",S12.100A,cervical
+trauma,"Unspecified displaced fracture of second cervical vertebra, initial encounter for open fracture",S12.100B,cervical
+trauma,"Unspecified nondisplaced fracture of second cervical vertebra, initial encounter for closed fracture",S12.101A,cervical
+trauma,"Unspecified nondisplaced fracture of second cervical vertebra, initial encounter for open fracture",S12.101B,cervical
+trauma,"Anterior displaced Type II dens fracture, initial encounter for closed fracture",S12.110A,cervical
+trauma,"Anterior displaced Type II dens fracture, initial encounter for open fracture",S12.110B,cervical
+trauma,"Posterior displaced Type II dens fracture, initial encounter for closed fracture",S12.111A,cervical
+trauma,"Posterior displaced Type II dens fracture, initial encounter for open fracture",S12.111B,cervical
+trauma,"Nondisplaced Type II dens fracture, initial encounter for closed fracture",S12.112A,cervical
+trauma,"Nondisplaced Type II dens fracture, initial encounter for open fracture",S12.112B,cervical
+trauma,"Other displaced dens fracture, initial encounter for closed fracture",S12.120A,cervical
+trauma,"Other displaced dens fracture, initial encounter for open fracture",S12.120B,cervical
+trauma,"Other nondisplaced dens fracture, initial encounter for closed fracture",S12.121A,cervical
+trauma,"Other nondisplaced dens fracture, initial encounter for open fracture",S12.121B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of second cervical vertebra, initial encounter for closed fracture",S12.130A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of second cervical vertebra, initial encounter for open fracture",S12.130B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of second cervical vertebra, initial encounter for closed fracture",S12.131A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of second cervical vertebra, initial encounter for open fracture",S12.131B,cervical
+trauma,"Type III traumatic spondylolisthesis of second cervical vertebra, initial encounter for closed fracture",S12.14XA,cervical
+trauma,"Type III traumatic spondylolisthesis of second cervical vertebra, initial encounter for open fracture",S12.14XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of second cervical vertebra, initial encounter for closed fracture",S12.150A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of second cervical vertebra, initial encounter for open fracture",S12.150B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of second cervical vertebra, initial encounter for closed fracture",S12.151A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of second cervical vertebra, initial encounter for open fracture",S12.151B,cervical
+trauma,"Other displaced fracture of second cervical vertebra, initial encounter for closed fracture",S12.190A,cervical
+trauma,"Other displaced fracture of second cervical vertebra, initial encounter for open fracture",S12.190B,cervical
+trauma,"Other nondisplaced fracture of second cervical vertebra, initial encounter for closed fracture",S12.191A,cervical
+trauma,"Other nondisplaced fracture of second cervical vertebra, initial encounter for open fracture",S12.191B,cervical
+trauma,"Unspecified displaced fracture of third cervical vertebra, initial encounter for closed fracture",S12.200A,cervical
+trauma,"Unspecified displaced fracture of third cervical vertebra, initial encounter for open fracture",S12.200B,cervical
+trauma,"Unspecified nondisplaced fracture of third cervical vertebra, initial encounter for closed fracture",S12.201A,cervical
+trauma,"Unspecified nondisplaced fracture of third cervical vertebra, initial encounter for open fracture",S12.201B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of third cervical vertebra, initial encounter for closed fracture",S12.230A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of third cervical vertebra, initial encounter for open fracture",S12.230B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of third cervical vertebra, initial encounter for closed fracture",S12.231A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of third cervical vertebra, initial encounter for open fracture",S12.231B,cervical
+trauma,"Type III traumatic spondylolisthesis of third cervical vertebra, initial encounter for closed fracture",S12.24XA,cervical
+trauma,"Type III traumatic spondylolisthesis of third cervical vertebra, initial encounter for open fracture",S12.24XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of third cervical vertebra, initial encounter for closed fracture",S12.250A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of third cervical vertebra, initial encounter for open fracture",S12.250B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of third cervical vertebra, initial encounter for closed fracture",S12.251A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of third cervical vertebra, initial encounter for open fracture",S12.251B,cervical
+trauma,"Other displaced fracture of third cervical vertebra, initial encounter for closed fracture",S12.290A,cervical
+trauma,"Other displaced fracture of third cervical vertebra, initial encounter for open fracture",S12.290B,cervical
+trauma,"Other nondisplaced fracture of third cervical vertebra, initial encounter for closed fracture",S12.291A,cervical
+trauma,"Other nondisplaced fracture of third cervical vertebra, initial encounter for open fracture",S12.291B,cervical
+trauma,"Unspecified displaced fracture of fourth cervical vertebra, initial encounter for closed fracture",S12.300A,cervical
+trauma,"Unspecified displaced fracture of fourth cervical vertebra, initial encounter for open fracture",S12.300B,cervical
+trauma,"Unspecified nondisplaced fracture of fourth cervical vertebra, initial encounter for closed fracture",S12.301A,cervical
+trauma,"Unspecified nondisplaced fracture of fourth cervical vertebra, initial encounter for open fracture",S12.301B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of fourth cervical vertebra, initial encounter for closed fracture",S12.330A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of fourth cervical vertebra, initial encounter for open fracture",S12.330B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of fourth cervical vertebra, initial encounter for closed fracture",S12.331A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of fourth cervical vertebra, initial encounter for open fracture",S12.331B,cervical
+trauma,"Type III traumatic spondylolisthesis of fourth cervical vertebra, initial encounter for closed fracture",S12.34XA,cervical
+trauma,"Type III traumatic spondylolisthesis of fourth cervical vertebra, initial encounter for open fracture",S12.34XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of fourth cervical vertebra, initial encounter for closed fracture",S12.350A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of fourth cervical vertebra, initial encounter for open fracture",S12.350B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of fourth cervical vertebra, initial encounter for closed fracture",S12.351A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of fourth cervical vertebra, initial encounter for open fracture",S12.351B,cervical
+trauma,"Other displaced fracture of fourth cervical vertebra, initial encounter for closed fracture",S12.390A,cervical
+trauma,"Other displaced fracture of fourth cervical vertebra, initial encounter for open fracture",S12.390B,cervical
+trauma,"Other nondisplaced fracture of fourth cervical vertebra, initial encounter for closed fracture",S12.391A,cervical
+trauma,"Other nondisplaced fracture of fourth cervical vertebra, initial encounter for open fracture",S12.391B,cervical
+trauma,"Unspecified displaced fracture of fifth cervical vertebra, initial encounter for closed fracture",S12.400A,cervical
+trauma,"Unspecified displaced fracture of fifth cervical vertebra, initial encounter for open fracture",S12.400B,cervical
+trauma,"Unspecified nondisplaced fracture of fifth cervical vertebra, initial encounter for closed fracture",S12.401A,cervical
+trauma,"Unspecified nondisplaced fracture of fifth cervical vertebra, initial encounter for open fracture",S12.401B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of fifth cervical vertebra, initial encounter for closed fracture",S12.430A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of fifth cervical vertebra, initial encounter for open fracture",S12.430B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of fifth cervical vertebra, initial encounter for closed fracture",S12.431A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of fifth cervical vertebra, initial encounter for open fracture",S12.431B,cervical
+trauma,"Type III traumatic spondylolisthesis of fifth cervical vertebra, initial encounter for closed fracture",S12.44XA,cervical
+trauma,"Type III traumatic spondylolisthesis of fifth cervical vertebra, initial encounter for open fracture",S12.44XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of fifth cervical vertebra, initial encounter for closed fracture",S12.450A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of fifth cervical vertebra, initial encounter for open fracture",S12.450B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of fifth cervical vertebra, initial encounter for closed fracture",S12.451A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of fifth cervical vertebra, initial encounter for open fracture",S12.451B,cervical
+trauma,"Other displaced fracture of fifth cervical vertebra, initial encounter for closed fracture",S12.490A,cervical
+trauma,"Other displaced fracture of fifth cervical vertebra, initial encounter for open fracture",S12.490B,cervical
+trauma,"Other nondisplaced fracture of fifth cervical vertebra, initial encounter for closed fracture",S12.491A,cervical
+trauma,"Other nondisplaced fracture of fifth cervical vertebra, initial encounter for open fracture",S12.491B,cervical
+trauma,"Unspecified displaced fracture of sixth cervical vertebra, initial encounter for closed fracture",S12.500A,cervical
+trauma,"Unspecified displaced fracture of sixth cervical vertebra, initial encounter for open fracture",S12.500B,cervical
+trauma,"Unspecified nondisplaced fracture of sixth cervical vertebra, initial encounter for closed fracture",S12.501A,cervical
+trauma,"Unspecified nondisplaced fracture of sixth cervical vertebra, initial encounter for open fracture",S12.501B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of sixth cervical vertebra, initial encounter for closed fracture",S12.530A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of sixth cervical vertebra, initial encounter for open fracture",S12.530B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of sixth cervical vertebra, initial encounter for closed fracture",S12.531A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of sixth cervical vertebra, initial encounter for open fracture",S12.531B,cervical
+trauma,"Type III traumatic spondylolisthesis of sixth cervical vertebra, initial encounter for closed fracture",S12.54XA,cervical
+trauma,"Type III traumatic spondylolisthesis of sixth cervical vertebra, initial encounter for open fracture",S12.54XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of sixth cervical vertebra, initial encounter for closed fracture",S12.550A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of sixth cervical vertebra, initial encounter for open fracture",S12.550B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of sixth cervical vertebra, initial encounter for closed fracture",S12.551A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of sixth cervical vertebra, initial encounter for open fracture",S12.551B,cervical
+trauma,"Other displaced fracture of sixth cervical vertebra, initial encounter for closed fracture",S12.590A,cervical
+trauma,"Other displaced fracture of sixth cervical vertebra, initial encounter for open fracture",S12.590B,cervical
+trauma,"Other nondisplaced fracture of sixth cervical vertebra, initial encounter for closed fracture",S12.591A,cervical
+trauma,"Other nondisplaced fracture of sixth cervical vertebra, initial encounter for open fracture",S12.591B,cervical
+trauma,"Unspecified displaced fracture of seventh cervical vertebra, initial encounter for closed fracture",S12.600A,cervical
+trauma,"Unspecified displaced fracture of seventh cervical vertebra, initial encounter for open fracture",S12.600B,cervical
+trauma,"Unspecified nondisplaced fracture of seventh cervical vertebra, initial encounter for closed fracture",S12.601A,cervical
+trauma,"Unspecified nondisplaced fracture of seventh cervical vertebra, initial encounter for open fracture",S12.601B,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of seventh cervical vertebra, initial encounter for closed fracture",S12.630A,cervical
+trauma,"Unspecified traumatic displaced spondylolisthesis of seventh cervical vertebra, initial encounter for open fracture",S12.630B,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of seventh cervical vertebra, initial encounter for closed fracture",S12.631A,cervical
+trauma,"Unspecified traumatic nondisplaced spondylolisthesis of seventh cervical vertebra, initial encounter for open fracture",S12.631B,cervical
+trauma,"Type III traumatic spondylolisthesis of seventh cervical vertebra, initial encounter for closed fracture",S12.64XA,cervical
+trauma,"Type III traumatic spondylolisthesis of seventh cervical vertebra, initial encounter for open fracture",S12.64XB,cervical
+trauma,"Other traumatic displaced spondylolisthesis of seventh cervical vertebra, initial encounter for closed fracture",S12.650A,cervical
+trauma,"Other traumatic displaced spondylolisthesis of seventh cervical vertebra, initial encounter for open fracture",S12.650B,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of seventh cervical vertebra, initial encounter for closed fracture",S12.651A,cervical
+trauma,"Other traumatic nondisplaced spondylolisthesis of seventh cervical vertebra, initial encounter for open fracture",S12.651B,cervical
+trauma,"Other displaced fracture of seventh cervical vertebra, initial encounter for closed fracture",S12.690A,cervical
+trauma,"Other displaced fracture of seventh cervical vertebra, initial encounter for open fracture",S12.690B,cervical
+trauma,"Other nondisplaced fracture of seventh cervical vertebra, initial encounter for closed fracture",S12.691A,cervical
+trauma,"Other nondisplaced fracture of seventh cervical vertebra, initial encounter for open fracture",S12.691B,cervical
+trauma,"Fracture of other parts of neck, initial encounter",S12.8XXA,cervical
+trauma,"Fracture of neck, unspecified, initial encounter",S12.9XXA,cervical
+trauma,"Traumatic rupture of cervical intervertebral disc, initial encounter",S13.0XXA,cervical
+trauma,"Subluxation of unspecified cervical vertebrae, initial encounter",S13.100A,cervical
+trauma,"Dislocation of unspecified cervical vertebrae, initial encounter",S13.101A,cervical
+trauma,"Subluxation of C0/C1 cervical vertebrae, initial encounter",S13.110A,cervical
+trauma,"Dislocation of C0/C1 cervical vertebrae, initial encounter",S13.111A,cervical
+trauma,"Subluxation of C1/C2 cervical vertebrae, initial encounter",S13.120A,cervical
+trauma,"Dislocation of C1/C2 cervical vertebrae, initial encounter",S13.121A,cervical
+trauma,"Subluxation of C2/C3 cervical vertebrae, initial encounter",S13.130A,cervical
+trauma,"Dislocation of C2/C3 cervical vertebrae, initial encounter",S13.131A,cervical
+trauma,"Subluxation of C3/C4 cervical vertebrae, initial encounter",S13.140A,cervical
+trauma,"Dislocation of C3/C4 cervical vertebrae, initial encounter",S13.141A,cervical
+trauma,"Subluxation of C4/C5 cervical vertebrae, initial encounter",S13.150A,cervical
+trauma,"Dislocation of C4/C5 cervical vertebrae, initial encounter",S13.151A,cervical
+trauma,"Subluxation of C5/C6 cervical vertebrae, initial encounter",S13.160A,cervical
+trauma,"Dislocation of C5/C6 cervical vertebrae, initial encounter",S13.161A,cervical
+trauma,"Subluxation of C6/C7 cervical vertebrae, initial encounter",S13.170A,cervical
+trauma,"Dislocation of C6/C7 cervical vertebrae, initial encounter",S13.171A,cervical
+trauma,"Subluxation of C7/T1 cervical vertebrae, initial encounter",S13.180A,cervicothoracic
+trauma,"Dislocation of C7/T1 cervical vertebrae, initial encounter",S13.181A,cervicothoracic
+trauma,"Dislocation of unspecified parts of neck, initial encounter",S13.20XA,cervical
+trauma,"Dislocation of other parts of neck, initial encounter",S13.29XA,cervical
+trauma,"Sprain of ligaments of cervical spine, initial encounter",S13.4XXA,cervical
+trauma,"Concussion and edema of cervical spinal cord, initial encounter",S14.0XXA,cervical
+trauma,"Unspecified injury at C1 level of cervical spinal cord, initial encounter",S14.101A,cervical
+trauma,"Unspecified injury at C2 level of cervical spinal cord, initial encounter",S14.102A,cervical
+trauma,"Unspecified injury at C3 level of cervical spinal cord, initial encounter",S14.103A,cervical
+trauma,"Unspecified injury at C4 level of cervical spinal cord, initial encounter",S14.104A,cervical
+trauma,"Unspecified injury at C5 level of cervical spinal cord, initial encounter",S14.105A,cervical
+trauma,"Unspecified injury at C6 level of cervical spinal cord, initial encounter",S14.106A,cervical
+trauma,"Unspecified injury at C7 level of cervical spinal cord, initial encounter",S14.107A,cervical
+trauma,"Unspecified injury at C8 level of cervical spinal cord, initial encounter",S14.108A,cervical
+trauma,"Unspecified injury at unspecified level of cervical spinal cord, initial encounter",S14.109A,cervical
+trauma,"Complete lesion at C1 level of cervical spinal cord, initial encounter",S14.111A,cervical
+trauma,"Complete lesion at C2 level of cervical spinal cord, initial encounter",S14.112A,cervical
+trauma,"Complete lesion at C3 level of cervical spinal cord, initial encounter",S14.113A,cervical
+trauma,"Complete lesion at C4 level of cervical spinal cord, initial encounter",S14.114A,cervical
+trauma,"Complete lesion at C5 level of cervical spinal cord, initial encounter",S14.115A,cervical
+trauma,"Complete lesion at C6 level of cervical spinal cord, initial encounter",S14.116A,cervical
+trauma,"Complete lesion at C7 level of cervical spinal cord, initial encounter",S14.117A,cervical
+trauma,"Complete lesion at C8 level of cervical spinal cord, initial encounter",S14.118A,cervical
+trauma,"Complete lesion at unspecified level of cervical spinal cord, initial encounter",S14.119A,cervical
+trauma,"Central cord syndrome at C1 level of cervical spinal cord, initial encounter",S14.121A,cervical
+trauma,"Central cord syndrome at C2 level of cervical spinal cord, initial encounter",S14.122A,cervical
+trauma,"Central cord syndrome at C3 level of cervical spinal cord, initial encounter",S14.123A,cervical
+trauma,"Central cord syndrome at C4 level of cervical spinal cord, initial encounter",S14.124A,cervical
+trauma,"Central cord syndrome at C5 level of cervical spinal cord, initial encounter",S14.125A,cervical
+trauma,"Central cord syndrome at C6 level of cervical spinal cord, initial encounter",S14.126A,cervical
+trauma,"Central cord syndrome at C7 level of cervical spinal cord, initial encounter",S14.127A,cervical
+trauma,"Central cord syndrome at C8 level of cervical spinal cord, initial encounter",S14.128A,cervical
+trauma,"Central cord syndrome at unspecified level of cervical spinal cord, initial encounter",S14.129A,cervical
+trauma,"Anterior cord syndrome at C1 level of cervical spinal cord, initial encounter",S14.131A,cervical
+trauma,"Anterior cord syndrome at C2 level of cervical spinal cord, initial encounter",S14.132A,cervical
+trauma,"Anterior cord syndrome at C3 level of cervical spinal cord, initial encounter",S14.133A,cervical
+trauma,"Anterior cord syndrome at C4 level of cervical spinal cord, initial encounter",S14.134A,cervical
+trauma,"Anterior cord syndrome at C5 level of cervical spinal cord, initial encounter",S14.135A,cervical
+trauma,"Anterior cord syndrome at C6 level of cervical spinal cord, initial encounter",S14.136A,cervical
+trauma,"Anterior cord syndrome at C7 level of cervical spinal cord, initial encounter",S14.137A,cervical
+trauma,"Anterior cord syndrome at C8 level of cervical spinal cord, initial encounter",S14.138A,cervical
+trauma,"Anterior cord syndrome at unspecified level of cervical spinal cord, initial encounter",S14.139A,cervical
+trauma,"Brown-Sequard syndrome at C1 level of cervical spinal cord, initial encounter",S14.141A,cervical
+trauma,"Brown-Sequard syndrome at C2 level of cervical spinal cord, initial encounter",S14.142A,cervical
+trauma,"Brown-Sequard syndrome at C3 level of cervical spinal cord, initial encounter",S14.143A,cervical
+trauma,"Brown-Sequard syndrome at C4 level of cervical spinal cord, initial encounter",S14.144A,cervical
+trauma,"Brown-Sequard syndrome at C5 level of cervical spinal cord, initial encounter",S14.145A,cervical
+trauma,"Brown-Sequard syndrome at C6 level of cervical spinal cord, initial encounter",S14.146A,cervical
+trauma,"Brown-Sequard syndrome at C7 level of cervical spinal cord, initial encounter",S14.147A,cervical
+trauma,"Brown-Sequard syndrome at C8 level of cervical spinal cord, initial encounter",S14.148A,cervical
+trauma,"Brown-Sequard syndrome at unspecified level of cervical spinal cord, initial encounter",S14.149A,cervical
+trauma,"Other incomplete lesion at C1 level of cervical spinal cord, initial encounter",S14.151A,cervical
+trauma,"Other incomplete lesion at C2 level of cervical spinal cord, initial encounter",S14.152A,cervical
+trauma,"Other incomplete lesion at C3 level of cervical spinal cord, initial encounter",S14.153A,cervical
+trauma,"Other incomplete lesion at C4 level of cervical spinal cord, initial encounter",S14.154A,cervical
+trauma,"Other incomplete lesion at C5 level of cervical spinal cord, initial encounter",S14.155A,cervical
+trauma,"Other incomplete lesion at C6 level of cervical spinal cord, initial encounter",S14.156A,cervical
+trauma,"Other incomplete lesion at C7 level of cervical spinal cord, initial encounter",S14.157A,cervical
+trauma,"Other incomplete lesion at C8 level of cervical spinal cord, initial encounter",S14.158A,cervical
+trauma,"Other incomplete lesion at unspecified level of cervical spinal cord, initial encounter",S14.159A,cervical
+trauma,"Injury of nerve root of cervical spine, initial encounter",S14.2XXA,cervical
+trauma,"Injury of cervical sympathetic nerves, initial encounter",S14.5XXA,cervical
+trauma,"Other specified injuries of cervical trachea, initial encounter",S19.82XA,cervical
+trauma,"Unspecified injury of neck, initial encounter",S19.9XXA,cervical
+trauma,"Wedge compression fracture of unspecified thoracic vertebra, initial encounter for closed fracture",S22.000A,thoracic
+trauma,"Wedge compression fracture of unspecified thoracic vertebra, initial encounter for open fracture",S22.000B,thoracic
+trauma,"Stable burst fracture of unspecified thoracic vertebra, initial encounter for closed fracture",S22.001A,thoracic
+trauma,"Stable burst fracture of unspecified thoracic vertebra, initial encounter for open fracture",S22.001B,thoracic
+trauma,"Unstable burst fracture of unspecified thoracic vertebra, initial encounter for closed fracture",S22.002A,thoracic
+trauma,"Unstable burst fracture of unspecified thoracic vertebra, initial encounter for open fracture",S22.002B,thoracic
+trauma,"Other fracture of unspecified thoracic vertebra, initial encounter for closed fracture",S22.008A,thoracic
+trauma,"Other fracture of unspecified thoracic vertebra, initial encounter for open fracture",S22.008B,thoracic
+trauma,"Unspecified fracture of unspecified thoracic vertebra, initial encounter for closed fracture",S22.009A,thoracic
+trauma,"Unspecified fracture of unspecified thoracic vertebra, initial encounter for open fracture",S22.009B,thoracic
+trauma,"Wedge compression fracture of first thoracic vertebra, initial encounter for closed fracture",S22.010A,thoracic
+trauma,"Wedge compression fracture of first thoracic vertebra, initial encounter for open fracture",S22.010B,thoracic
+trauma,"Stable burst fracture of first thoracic vertebra, initial encounter for closed fracture",S22.011A,thoracic
+trauma,"Stable burst fracture of first thoracic vertebra, initial encounter for open fracture",S22.011B,thoracic
+trauma,"Unstable burst fracture of first thoracic vertebra, initial encounter for closed fracture",S22.012A,thoracic
+trauma,"Unstable burst fracture of first thoracic vertebra, initial encounter for open fracture",S22.012B,thoracic
+trauma,"Other fracture of first thoracic vertebra, initial encounter for closed fracture",S22.018A,thoracic
+trauma,"Other fracture of first thoracic vertebra, initial encounter for open fracture",S22.018B,thoracic
+trauma,"Unspecified fracture of first thoracic vertebra, initial encounter for closed fracture",S22.019A,thoracic
+trauma,"Unspecified fracture of first thoracic vertebra, initial encounter for open fracture",S22.019B,thoracic
+trauma,"Wedge compression fracture of second thoracic vertebra, initial encounter for closed fracture",S22.020A,thoracic
+trauma,"Wedge compression fracture of second thoracic vertebra, initial encounter for open fracture",S22.020B,thoracic
+trauma,"Stable burst fracture of second thoracic vertebra, initial encounter for closed fracture",S22.021A,thoracic
+trauma,"Stable burst fracture of second thoracic vertebra, initial encounter for open fracture",S22.021B,thoracic
+trauma,"Unstable burst fracture of second thoracic vertebra, initial encounter for closed fracture",S22.022A,thoracic
+trauma,"Unstable burst fracture of second thoracic vertebra, initial encounter for open fracture",S22.022B,thoracic
+trauma,"Other fracture of second thoracic vertebra, initial encounter for closed fracture",S22.028A,thoracic
+trauma,"Other fracture of second thoracic vertebra, initial encounter for open fracture",S22.028B,thoracic
+trauma,"Unspecified fracture of second thoracic vertebra, initial encounter for closed fracture",S22.029A,thoracic
+trauma,"Unspecified fracture of second thoracic vertebra, initial encounter for open fracture",S22.029B,thoracic
+trauma,"Wedge compression fracture of third thoracic vertebra, initial encounter for closed fracture",S22.030A,thoracic
+trauma,"Wedge compression fracture of third thoracic vertebra, initial encounter for open fracture",S22.030B,thoracic
+trauma,"Stable burst fracture of third thoracic vertebra, initial encounter for closed fracture",S22.031A,thoracic
+trauma,"Stable burst fracture of third thoracic vertebra, initial encounter for open fracture",S22.031B,thoracic
+trauma,"Unstable burst fracture of third thoracic vertebra, initial encounter for closed fracture",S22.032A,thoracic
+trauma,"Unstable burst fracture of third thoracic vertebra, initial encounter for open fracture",S22.032B,thoracic
+trauma,"Other fracture of third thoracic vertebra, initial encounter for closed fracture",S22.038A,thoracic
+trauma,"Other fracture of third thoracic vertebra, initial encounter for open fracture",S22.038B,thoracic
+trauma,"Unspecified fracture of third thoracic vertebra, initial encounter for closed fracture",S22.039A,thoracic
+trauma,"Unspecified fracture of third thoracic vertebra, initial encounter for open fracture",S22.039B,thoracic
+trauma,"Wedge compression fracture of fourth thoracic vertebra, initial encounter for closed fracture",S22.040A,thoracic
+trauma,"Wedge compression fracture of fourth thoracic vertebra, initial encounter for open fracture",S22.040B,thoracic
+trauma,"Stable burst fracture of fourth thoracic vertebra, initial encounter for closed fracture",S22.041A,thoracic
+trauma,"Stable burst fracture of fourth thoracic vertebra, initial encounter for open fracture",S22.041B,thoracic
+trauma,"Unstable burst fracture of fourth thoracic vertebra, initial encounter for closed fracture",S22.042A,thoracic
+trauma,"Unstable burst fracture of fourth thoracic vertebra, initial encounter for open fracture",S22.042B,thoracic
+trauma,"Other fracture of fourth thoracic vertebra, initial encounter for closed fracture",S22.048A,thoracic
+trauma,"Other fracture of fourth thoracic vertebra, initial encounter for open fracture",S22.048B,thoracic
+trauma,"Unspecified fracture of fourth thoracic vertebra, initial encounter for closed fracture",S22.049A,thoracic
+trauma,"Unspecified fracture of fourth thoracic vertebra, initial encounter for open fracture",S22.049B,thoracic
+trauma,"Wedge compression fracture of T5-T6 vertebra, initial encounter for closed fracture",S22.050A,thoracic
+trauma,"Wedge compression fracture of T5-T6 vertebra, initial encounter for open fracture",S22.050B,thoracic
+trauma,"Stable burst fracture of T5-T6 vertebra, initial encounter for closed fracture",S22.051A,thoracic
+trauma,"Stable burst fracture of T5-T6 vertebra, initial encounter for open fracture",S22.051B,thoracic
+trauma,"Unstable burst fracture of T5-T6 vertebra, initial encounter for closed fracture",S22.052A,thoracic
+trauma,"Unstable burst fracture of T5-T6 vertebra, initial encounter for open fracture",S22.052B,thoracic
+trauma,"Other fracture of T5-T6 vertebra, initial encounter for closed fracture",S22.058A,thoracic
+trauma,"Other fracture of T5-T6 vertebra, initial encounter for open fracture",S22.058B,thoracic
+trauma,"Unspecified fracture of T5-T6 vertebra, initial encounter for closed fracture",S22.059A,thoracic
+trauma,"Unspecified fracture of T5-T6 vertebra, initial encounter for open fracture",S22.059B,thoracic
+trauma,"Wedge compression fracture of T7-T8 vertebra, initial encounter for closed fracture",S22.060A,thoracic
+trauma,"Wedge compression fracture of T7-T8 vertebra, initial encounter for open fracture",S22.060B,thoracic
+trauma,"Stable burst fracture of T7-T8 vertebra, initial encounter for closed fracture",S22.061A,thoracic
+trauma,"Stable burst fracture of T7-T8 vertebra, initial encounter for open fracture",S22.061B,thoracic
+trauma,"Unstable burst fracture of T7-T8 vertebra, initial encounter for closed fracture",S22.062A,thoracic
+trauma,"Unstable burst fracture of T7-T8 vertebra, initial encounter for open fracture",S22.062B,thoracic
+trauma,"Other fracture of T7-T8 thoracic vertebra, initial encounter for closed fracture",S22.068A,thoracic
+trauma,"Other fracture of T7-T8 thoracic vertebra, initial encounter for open fracture",S22.068B,thoracic
+trauma,"Unspecified fracture of T7-T8 vertebra, initial encounter for closed fracture",S22.069A,thoracic
+trauma,"Unspecified fracture of T7-T8 vertebra, initial encounter for open fracture",S22.069B,thoracic
+trauma,"Wedge compression fracture of T9-T10 vertebra, initial encounter for closed fracture",S22.070A,thoracic
+trauma,"Wedge compression fracture of T9-T10 vertebra, initial encounter for open fracture",S22.070B,thoracic
+trauma,"Stable burst fracture of T9-T10 vertebra, initial encounter for closed fracture",S22.071A,thoracic
+trauma,"Stable burst fracture of T9-T10 vertebra, initial encounter for open fracture",S22.071B,thoracic
+trauma,"Unstable burst fracture of T9-T10 vertebra, initial encounter for closed fracture",S22.072A,thoracic
+trauma,"Unstable burst fracture of T9-T10 vertebra, initial encounter for open fracture",S22.072B,thoracic
+trauma,"Other fracture of T9-T10 vertebra, initial encounter for closed fracture",S22.078A,thoracic
+trauma,"Other fracture of T9-T10 vertebra, initial encounter for open fracture",S22.078B,thoracic
+trauma,"Unspecified fracture of T9-T10 vertebra, initial encounter for closed fracture",S22.079A,thoracic
+trauma,"Unspecified fracture of T9-T10 vertebra, initial encounter for open fracture",S22.079B,thoracic
+trauma,"Wedge compression fracture of T11-T12 vertebra, initial encounter for closed fracture",S22.080A,thoracic
+trauma,"Wedge compression fracture of T11-T12 vertebra, initial encounter for open fracture",S22.080B,thoracic
+trauma,"Stable burst fracture of T11-T12 vertebra, initial encounter for closed fracture",S22.081A,thoracic
+trauma,"Stable burst fracture of T11-T12 vertebra, initial encounter for open fracture",S22.081B,thoracic
+trauma,"Unstable burst fracture of T11-T12 vertebra, initial encounter for closed fracture",S22.082A,thoracic
+trauma,"Unstable burst fracture of T11-T12 vertebra, initial encounter for open fracture",S22.082B,thoracic
+trauma,"Other fracture of T11-T12 vertebra, initial encounter for closed fracture",S22.088A,thoracic
+trauma,"Other fracture of T11-T12 vertebra, initial encounter for open fracture",S22.088B,thoracic
+trauma,"Unspecified fracture of T11-T12 vertebra, initial encounter for closed fracture",S22.089A,thoracic
+trauma,"Unspecified fracture of T11-T12 vertebra, initial encounter for open fracture",S22.089B,thoracic
+trauma,"Flail chest, initial encounter for closed fracture",S22.5XXA,unspecified
+trauma,"Flail chest, initial encounter for open fracture",S22.5XXB,unspecified
+trauma,"Fracture of bony thorax, part unspecified, initial encounter for closed fracture",S22.9XXA,unspecified
+trauma,"Fracture of bony thorax, part unspecified, initial encounter for open fracture",S22.9XXB,unspecified
+trauma,"Traumatic rupture of thoracic intervertebral disc, initial encounter",S23.0XXA,thoracic
+trauma,"Subluxation of unspecified thoracic vertebra, initial encounter",S23.100A,thoracic
+trauma,"Dislocation of unspecified thoracic vertebra, initial encounter",S23.101A,thoracic
+trauma,"Subluxation of T1/T2 thoracic vertebra, initial encounter",S23.110A,thoracic
+trauma,"Dislocation of T1/T2 thoracic vertebra, initial encounter",S23.111A,thoracic
+trauma,"Subluxation of T2/T3 thoracic vertebra, initial encounter",S23.120A,thoracic
+trauma,"Dislocation of T2/T3 thoracic vertebra, initial encounter",S23.121A,thoracic
+trauma,"Subluxation of T3/T4 thoracic vertebra, initial encounter",S23.122A,thoracic
+trauma,"Dislocation of T3/T4 thoracic vertebra, initial encounter",S23.123A,thoracic
+trauma,"Subluxation of T4/T5 thoracic vertebra, initial encounter",S23.130A,thoracic
+trauma,"Dislocation of T4/T5 thoracic vertebra, initial encounter",S23.131A,thoracic
+trauma,"Subluxation of T5/T6 thoracic vertebra, initial encounter",S23.132A,thoracic
+trauma,"Dislocation of T5/T6 thoracic vertebra, initial encounter",S23.133A,thoracic
+trauma,"Subluxation of T6/T7 thoracic vertebra, initial encounter",S23.140A,thoracic
+trauma,"Dislocation of T6/T7 thoracic vertebra, initial encounter",S23.141A,thoracic
+trauma,"Subluxation of T7/T8 thoracic vertebra, initial encounter",S23.142A,thoracic
+trauma,"Dislocation of T7/T8 thoracic vertebra, initial encounter",S23.143A,thoracic
+trauma,"Subluxation of T8/T9 thoracic vertebra, initial encounter",S23.150A,thoracic
+trauma,"Dislocation of T8/T9 thoracic vertebra, initial encounter",S23.151A,thoracic
+trauma,"Subluxation of T9/T10 thoracic vertebra, initial encounter",S23.152A,thoracic
+trauma,"Dislocation of T9/T10 thoracic vertebra, initial encounter",S23.153A,thoracic
+trauma,"Subluxation of T10/T11 thoracic vertebra, initial encounter",S23.160A,thoracic
+trauma,"Dislocation of T10/T11 thoracic vertebra, initial encounter",S23.161A,thoracic
+trauma,"Subluxation of T11/T12 thoracic vertebra, initial encounter",S23.162A,thoracic
+trauma,"Dislocation of T11/T12 thoracic vertebra, initial encounter",S23.163A,thoracic
+trauma,"Subluxation of T12/L1 thoracic vertebra, initial encounter",S23.170A,thoracic
+trauma,"Dislocation of T12/L1 thoracic vertebra, initial encounter",S23.171A,thoracic
+trauma,"Dislocation of unspecified part of thorax, initial encounter",S23.20XA,unspecified
+trauma,"Dislocation of other parts of thorax, initial encounter",S23.29XA,unspecified
+trauma,"Sprain of ligaments of thoracic spine, initial encounter",S23.3XXA,thoracic
+trauma,"Concussion and edema of thoracic spinal cord, initial encounter",S24.0XXA,thoracic
+trauma,"Unspecified injury at T1 level of thoracic spinal cord, initial encounter",S24.101A,thoracic
+trauma,"Unspecified injury at T2-T6 level of thoracic spinal cord, initial encounter",S24.102A,thoracic
+trauma,"Unspecified injury at T7-T10 level of thoracic spinal cord, initial encounter",S24.103A,thoracic
+trauma,"Unspecified injury at T11-T12 level of thoracic spinal cord, initial encounter",S24.104A,thoracic
+trauma,"Unspecified injury at unspecified level of thoracic spinal cord, initial encounter",S24.109A,thoracic
+trauma,"Complete lesion at T1 level of thoracic spinal cord, initial encounter",S24.111A,thoracic
+trauma,"Complete lesion at T2-T6 level of thoracic spinal cord, initial encounter",S24.112A,thoracic
+trauma,"Complete lesion at T7-T10 level of thoracic spinal cord, initial encounter",S24.113A,thoracic
+trauma,"Complete lesion at T11-T12 level of thoracic spinal cord, initial encounter",S24.114A,thoracic
+trauma,"Complete lesion at unspecified level of thoracic spinal cord, initial encounter",S24.119A,thoracic
+trauma,"Anterior cord syndrome at T1 level of thoracic spinal cord, initial encounter",S24.131A,thoracic
+trauma,"Anterior cord syndrome at T2-T6 level of thoracic spinal cord, initial encounter",S24.132A,thoracic
+trauma,"Anterior cord syndrome at T7-T10 level of thoracic spinal cord, initial encounter",S24.133A,thoracic
+trauma,"Anterior cord syndrome at T11-T12 level of thoracic spinal cord, initial encounter",S24.134A,thoracic
+trauma,"Anterior cord syndrome at unspecified level of thoracic spinal cord, initial encounter",S24.139A,thoracic
+trauma,"Brown-Sequard syndrome at T1 level of thoracic spinal cord, initial encounter",S24.141A,thoracic
+trauma,"Brown-Sequard syndrome at T2-T6 level of thoracic spinal cord, initial encounter",S24.142A,thoracic
+trauma,"Brown-Sequard syndrome at T7-T10 level of thoracic spinal cord, initial encounter",S24.143A,thoracic
+trauma,"Brown-Sequard syndrome at T11-T12 level of thoracic spinal cord, initial encounter",S24.144A,thoracic
+trauma,"Brown-Sequard syndrome at unspecified level of thoracic spinal cord, initial encounter",S24.149A,thoracic
+trauma,"Other incomplete lesion at T1 level of thoracic spinal cord, initial encounter",S24.151A,thoracic
+trauma,"Other incomplete lesion at T2-T6 level of thoracic spinal cord, initial encounter",S24.152A,thoracic
+trauma,"Other incomplete lesion at T7-T10 level of thoracic spinal cord, initial encounter",S24.153A,thoracic
+trauma,"Other incomplete lesion at T11-T12 level of thoracic spinal cord, initial encounter",S24.154A,thoracic
+trauma,"Other incomplete lesion at unspecified level of thoracic spinal cord, initial encounter",S24.159A,thoracic
+trauma,"Injury of nerve root of thoracic spine, initial encounter",S24.2XXA,thoracic
+trauma,"Injury of thoracic sympathetic nervous system, initial encounter",S24.4XXA,thoracic
+trauma,"Wedge compression fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.000A,lumbar
+trauma,"Wedge compression fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.000B,lumbar
+trauma,"Stable burst fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.001A,lumbar
+trauma,"Stable burst fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.001B,lumbar
+trauma,"Unstable burst fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.002A,lumbar
+trauma,"Unstable burst fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.002B,lumbar
+trauma,"Other fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.008A,lumbar
+trauma,"Other fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.008B,lumbar
+trauma,"Unspecified fracture of unspecified lumbar vertebra, initial encounter for closed fracture",S32.009A,lumbar
+trauma,"Unspecified fracture of unspecified lumbar vertebra, initial encounter for open fracture",S32.009B,lumbar
+trauma,"Wedge compression fracture of first lumbar vertebra, initial encounter for closed fracture",S32.010A,lumbar
+trauma,"Wedge compression fracture of first lumbar vertebra, initial encounter for open fracture",S32.010B,lumbar
+trauma,"Stable burst fracture of first lumbar vertebra, initial encounter for closed fracture",S32.011A,lumbar
+trauma,"Stable burst fracture of first lumbar vertebra, initial encounter for open fracture",S32.011B,lumbar
+trauma,"Unstable burst fracture of first lumbar vertebra, initial encounter for closed fracture",S32.012A,lumbar
+trauma,"Unstable burst fracture of first lumbar vertebra, initial encounter for open fracture",S32.012B,lumbar
+trauma,"Other fracture of first lumbar vertebra, initial encounter for closed fracture",S32.018A,lumbar
+trauma,"Other fracture of first lumbar vertebra, initial encounter for open fracture",S32.018B,lumbar
+trauma,"Unspecified fracture of first lumbar vertebra, initial encounter for closed fracture",S32.019A,lumbar
+trauma,"Unspecified fracture of first lumbar vertebra, initial encounter for open fracture",S32.019B,lumbar
+trauma,"Wedge compression fracture of second lumbar vertebra, initial encounter for closed fracture",S32.020A,lumbar
+trauma,"Wedge compression fracture of second lumbar vertebra, initial encounter for open fracture",S32.020B,lumbar
+trauma,"Stable burst fracture of second lumbar vertebra, initial encounter for closed fracture",S32.021A,lumbar
+trauma,"Stable burst fracture of second lumbar vertebra, initial encounter for open fracture",S32.021B,lumbar
+trauma,"Unstable burst fracture of second lumbar vertebra, initial encounter for closed fracture",S32.022A,lumbar
+trauma,"Unstable burst fracture of second lumbar vertebra, initial encounter for open fracture",S32.022B,lumbar
+trauma,"Other fracture of second lumbar vertebra, initial encounter for closed fracture",S32.028A,lumbar
+trauma,"Other fracture of second lumbar vertebra, initial encounter for open fracture",S32.028B,lumbar
+trauma,"Unspecified fracture of second lumbar vertebra, initial encounter for closed fracture",S32.029A,lumbar
+trauma,"Unspecified fracture of second lumbar vertebra, initial encounter for open fracture",S32.029B,lumbar
+trauma,"Wedge compression fracture of third lumbar vertebra, initial encounter for closed fracture",S32.030A,lumbar
+trauma,"Wedge compression fracture of third lumbar vertebra, initial encounter for open fracture",S32.030B,lumbar
+trauma,"Stable burst fracture of third lumbar vertebra, initial encounter for closed fracture",S32.031A,lumbar
+trauma,"Stable burst fracture of third lumbar vertebra, initial encounter for open fracture",S32.031B,lumbar
+trauma,"Unstable burst fracture of third lumbar vertebra, initial encounter for closed fracture",S32.032A,lumbar
+trauma,"Unstable burst fracture of third lumbar vertebra, initial encounter for open fracture",S32.032B,lumbar
+trauma,"Other fracture of third lumbar vertebra, initial encounter for closed fracture",S32.038A,lumbar
+trauma,"Other fracture of third lumbar vertebra, initial encounter for open fracture",S32.038B,lumbar
+trauma,"Unspecified fracture of third lumbar vertebra, initial encounter for closed fracture",S32.039A,lumbar
+trauma,"Unspecified fracture of third lumbar vertebra, initial encounter for open fracture",S32.039B,lumbar
+trauma,"Wedge compression fracture of fourth lumbar vertebra, initial encounter for closed fracture",S32.040A,lumbar
+trauma,"Wedge compression fracture of fourth lumbar vertebra, initial encounter for open fracture",S32.040B,lumbar
+trauma,"Stable burst fracture of fourth lumbar vertebra, initial encounter for closed fracture",S32.041A,lumbar
+trauma,"Stable burst fracture of fourth lumbar vertebra, initial encounter for open fracture",S32.041B,lumbar
+trauma,"Unstable burst fracture of fourth lumbar vertebra, initial encounter for closed fracture",S32.042A,lumbar
+trauma,"Unstable burst fracture of fourth lumbar vertebra, initial encounter for open fracture",S32.042B,lumbar
+trauma,"Other fracture of fourth lumbar vertebra, initial encounter for closed fracture",S32.048A,lumbar
+trauma,"Other fracture of fourth lumbar vertebra, initial encounter for open fracture",S32.048B,lumbar
+trauma,"Unspecified fracture of fourth lumbar vertebra, initial encounter for closed fracture",S32.049A,lumbar
+trauma,"Unspecified fracture of fourth lumbar vertebra, initial encounter for open fracture",S32.049B,lumbar
+trauma,"Wedge compression fracture of fifth lumbar vertebra, initial encounter for closed fracture",S32.050A,lumbar
+trauma,"Wedge compression fracture of fifth lumbar vertebra, initial encounter for open fracture",S32.050B,lumbar
+trauma,"Stable burst fracture of fifth lumbar vertebra, initial encounter for closed fracture",S32.051A,lumbar
+trauma,"Stable burst fracture of fifth lumbar vertebra, initial encounter for open fracture",S32.051B,lumbar
+trauma,"Unstable burst fracture of fifth lumbar vertebra, initial encounter for closed fracture",S32.052A,lumbar
+trauma,"Unstable burst fracture of fifth lumbar vertebra, initial encounter for open fracture",S32.052B,lumbar
+trauma,"Other fracture of fifth lumbar vertebra, initial encounter for closed fracture",S32.058A,lumbar
+trauma,"Other fracture of fifth lumbar vertebra, initial encounter for open fracture",S32.058B,lumbar
+trauma,"Unspecified fracture of fifth lumbar vertebra, initial encounter for closed fracture",S32.059A,lumbar
+trauma,"Unspecified fracture of fifth lumbar vertebra, initial encounter for open fracture",S32.059B,lumbar
+trauma,"Unspecified fracture of sacrum, initial encounter for closed fracture",S32.10XA,sacral
+trauma,"Unspecified fracture of sacrum, initial encounter for open fracture",S32.10XB,sacral
+trauma,"Nondisplaced Zone I fracture of sacrum, initial encounter for closed fracture",S32.110A,sacral
+trauma,"Nondisplaced Zone I fracture of sacrum, initial encounter for open fracture",S32.110B,sacral
+trauma,"Minimally displaced Zone I fracture of sacrum, initial encounter for closed fracture",S32.111A,sacral
+trauma,"Minimally displaced Zone I fracture of sacrum, initial encounter for open fracture",S32.111B,sacral
+trauma,"Severely displaced Zone I fracture of sacrum, initial encounter for closed fracture",S32.112A,sacral
+trauma,"Severely displaced Zone I fracture of sacrum, initial encounter for open fracture",S32.112B,sacral
+trauma,"Unspecified Zone I fracture of sacrum, initial encounter for closed fracture",S32.119A,sacral
+trauma,"Unspecified Zone I fracture of sacrum, initial encounter for open fracture",S32.119B,sacral
+trauma,"Nondisplaced Zone II fracture of sacrum, initial encounter for closed fracture",S32.120A,sacral
+trauma,"Nondisplaced Zone II fracture of sacrum, initial encounter for open fracture",S32.120B,sacral
+trauma,"Minimally displaced Zone II fracture of sacrum, initial encounter for closed fracture",S32.121A,sacral
+trauma,"Minimally displaced Zone II fracture of sacrum, initial encounter for open fracture",S32.121B,sacral
+trauma,"Severely displaced Zone II fracture of sacrum, initial encounter for closed fracture",S32.122A,sacral
+trauma,"Severely displaced Zone II fracture of sacrum, initial encounter for open fracture",S32.122B,sacral
+trauma,"Unspecified Zone II fracture of sacrum, initial encounter for closed fracture",S32.129A,sacral
+trauma,"Unspecified Zone II fracture of sacrum, initial encounter for open fracture",S32.129B,sacral
+trauma,"Nondisplaced Zone III fracture of sacrum, initial encounter for closed fracture",S32.130A,sacral
+trauma,"Nondisplaced Zone III fracture of sacrum, initial encounter for open fracture",S32.130B,sacral
+trauma,"Minimally displaced Zone III fracture of sacrum, initial encounter for closed fracture",S32.131A,sacral
+trauma,"Minimally displaced Zone III fracture of sacrum, initial encounter for open fracture",S32.131B,sacral
+trauma,"Severely displaced Zone III fracture of sacrum, initial encounter for closed fracture",S32.132A,sacral
+trauma,"Severely displaced Zone III fracture of sacrum, initial encounter for open fracture",S32.132B,sacral
+trauma,"Unspecified Zone III fracture of sacrum, initial encounter for closed fracture",S32.139A,sacral
+trauma,"Unspecified Zone III fracture of sacrum, initial encounter for open fracture",S32.139B,sacral
+trauma,"Type 1 fracture of sacrum, initial encounter for closed fracture",S32.14XA,sacral
+trauma,"Type 1 fracture of sacrum, initial encounter for open fracture",S32.14XB,sacral
+trauma,"Type 2 fracture of sacrum, initial encounter for closed fracture",S32.15XA,sacral
+trauma,"Type 2 fracture of sacrum, initial encounter for open fracture",S32.15XB,sacral
+trauma,"Type 3 fracture of sacrum, initial encounter for closed fracture",S32.16XA,sacral
+trauma,"Type 3 fracture of sacrum, initial encounter for open fracture",S32.16XB,sacral
+trauma,"Type 4 fracture of sacrum, initial encounter for closed fracture",S32.17XA,sacral
+trauma,"Type 4 fracture of sacrum, initial encounter for open fracture",S32.17XB,sacral
+trauma,"Other fracture of sacrum, initial encounter for closed fracture",S32.19XA,sacral
+trauma,"Other fracture of sacrum, initial encounter for open fracture",S32.19XB,sacral
+trauma,"Fracture of coccyx, initial encounter for closed fracture",S32.2XXA,unspecified
+trauma,"Fracture of coccyx, initial encounter for open fracture",S32.2XXB,unspecified
+trauma,"Fracture of other parts of pelvis, initial encounter for closed fracture",S32.89XA,unspecified
+trauma,"Fracture of other parts of pelvis, initial encounter for open fracture",S32.89XB,unspecified
+trauma,"Fracture of unspecified parts of lumbosacral spine and pelvis, initial encounter for closed fracture",S32.9XXA,sacral
+trauma,"Fracture of unspecified parts of lumbosacral spine and pelvis, initial encounter for open fracture",S32.9XXB,sacral
+trauma,"Traumatic rupture of lumbar intervertebral disc, initial encounter",S33.0XXA,lumbar
+trauma,"Subluxation of unspecified lumbar vertebra, initial encounter",S33.100A,lumbar
+trauma,"Dislocation of unspecified lumbar vertebra, initial encounter",S33.101A,lumbar
+trauma,"Subluxation of L1/L2 lumbar vertebra, initial encounter",S33.110A,lumbar
+trauma,"Dislocation of L1/L2 lumbar vertebra, initial encounter",S33.111A,lumbar
+trauma,"Subluxation of L2/L3 lumbar vertebra, initial encounter",S33.120A,lumbar
+trauma,"Dislocation of L2/L3 lumbar vertebra, initial encounter",S33.121A,lumbar
+trauma,"Subluxation of L3/L4 lumbar vertebra, initial encounter",S33.130A,lumbar
+trauma,"Dislocation of L3/L4 lumbar vertebra, initial encounter",S33.131A,lumbar
+trauma,"Subluxation of L4/L5 lumbar vertebra, initial encounter",S33.140A,lumbar
+trauma,"Dislocation of L4/L5 lumbar vertebra, initial encounter",S33.141A,lumbar
+trauma,"Dislocation of sacroiliac and sacrococcygeal joint, initial encounter",S33.2XXA,sacral
+trauma,"Dislocation of unspecified parts of lumbar spine and pelvis, initial encounter",S33.30XA,lumbar
+trauma,"Dislocation of other parts of lumbar spine and pelvis, initial encounter",S33.39XA,lumbar
+trauma,"Sprain of ligaments of lumbar spine, initial encounter",S33.5XXA,lumbar
+trauma,"Sprain of other parts of lumbar spine and pelvis, initial encounter",S33.8XXA,lumbar
+trauma,"Sprain of unspecified parts of lumbar spine and pelvis, initial encounter",S33.9XXA,lumbar
+trauma,"Concussion and edema of lumbar spinal cord, initial encounter",S34.01XA,lumbar
+trauma,"Concussion and edema of sacral spinal cord, initial encounter",S34.02XA,sacral
+trauma,"Unspecified injury to L1 level of lumbar spinal cord, initial encounter",S34.101A,lumbar
+trauma,"Unspecified injury to L2 level of lumbar spinal cord, initial encounter",S34.102A,lumbar
+trauma,"Unspecified injury to L3 level of lumbar spinal cord, initial encounter",S34.103A,lumbar
+trauma,"Unspecified injury to L4 level of lumbar spinal cord, initial encounter",S34.104A,lumbar
+trauma,"Unspecified injury to L5 level of lumbar spinal cord, initial encounter",S34.105A,lumbar
+trauma,"Unspecified injury to unspecified level of lumbar spinal cord, initial encounter",S34.109A,lumbar
+trauma,"Complete lesion of L1 level of lumbar spinal cord, initial encounter",S34.111A,lumbar
+trauma,"Complete lesion of L2 level of lumbar spinal cord, initial encounter",S34.112A,lumbar
+trauma,"Complete lesion of L3 level of lumbar spinal cord, initial encounter",S34.113A,lumbar
+trauma,"Complete lesion of L4 level of lumbar spinal cord, initial encounter",S34.114A,lumbar
+trauma,"Complete lesion of L5 level of lumbar spinal cord, initial encounter",S34.115A,lumbar
+trauma,"Complete lesion of unspecified level of lumbar spinal cord, initial encounter",S34.119A,lumbar
+trauma,"Incomplete lesion of L1 level of lumbar spinal cord, initial encounter",S34.121A,lumbar
+trauma,"Incomplete lesion of L2 level of lumbar spinal cord, initial encounter",S34.122A,lumbar
+trauma,"Incomplete lesion of L3 level of lumbar spinal cord, initial encounter",S34.123A,lumbar
+trauma,"Incomplete lesion of L4 level of lumbar spinal cord, initial encounter",S34.124A,lumbar
+trauma,"Incomplete lesion of L5 level of lumbar spinal cord, initial encounter",S34.125A,lumbar
+trauma,"Incomplete lesion of unspecified level of lumbar spinal cord, initial encounter",S34.129A,lumbar
+trauma,"Complete lesion of sacral spinal cord, initial encounter",S34.131A,sacral
+trauma,"Incomplete lesion of sacral spinal cord, initial encounter",S34.132A,sacral
+trauma,"Unspecified injury to sacral spinal cord, initial encounter",S34.139A,sacral
+trauma,"Injury of nerve root of lumbar spine, initial encounter",S34.21XA,lumbar
+trauma,"Injury of nerve root of sacral spine, initial encounter",S34.22XA,sacral
+trauma,"Injury of cauda equina, initial encounter",S34.3XXA,lumbar
+trauma,"Injury of lumbosacral plexus, initial encounter",S34.4XXA,sacral
+trauma,"Injury of lumbar, sacral and pelvic sympathetic nerves, initial encounter",S34.5XXA,lumbar
+other_neuro_conditions,Hemophilus meningitis,G00.0,unspecified
+other_neuro_conditions,Pneumococcal meningitis,G00.1,unspecified
+other_neuro_conditions,Streptococcal meningitis,G00.2,unspecified
+other_neuro_conditions,Staphylococcal meningitis,G00.3,unspecified
+other_neuro_conditions,Other bacterial meningitis,G00.8,unspecified
+other_neuro_conditions,"Bacterial meningitis, unspecified",G00.9,unspecified
+other_neuro_conditions,Meningitis in bacterial diseases classified elsewhere,G01,unspecified
+other_neuro_conditions,Meningitis in other infectious and parasitic diseases classified elsewhere,G02,unspecified
+other_neuro_conditions,Nonpyogenic meningitis,G03.0,unspecified
+other_neuro_conditions,Chronic meningitis,G03.1,unspecified
+other_neuro_conditions,Benign recurrent meningitis [Mollaret],G03.2,unspecified
+other_neuro_conditions,Meningitis due to other specified causes,G03.8,unspecified
+other_neuro_conditions,"Meningitis, unspecified",G03.9,unspecified
+other_neuro_conditions,"Acute disseminated encephalitis and encephalomyelitis, unspecified",G04.00,unspecified
+other_neuro_conditions,Postinfectious acute disseminated encephalitis and encephalomyelitis (postinfectious ADEM),G04.01,unspecified
+other_neuro_conditions,"Postimmunization acute disseminated encephalitis, myelitis and encephalomyelitis",G04.02,unspecified
+other_neuro_conditions,Tropical spastic paraplegia,G04.1,unspecified
+other_neuro_conditions,"Bacterial meningoencephalitis and meningomyelitis, not elsewhere classified",G04.2,unspecified
+other_neuro_conditions,"Acute necrotizing hemorrhagic encephalopathy, unspecified",G04.30,unspecified
+other_neuro_conditions,Postinfectious acute necrotizing hemorrhagic encephalopathy,G04.31,unspecified
+other_neuro_conditions,Postimmunization acute necrotizing hemorrhagic encephalopathy,G04.32,unspecified
+other_neuro_conditions,Other acute necrotizing hemorrhagic encephalopathy,G04.39,unspecified
+other_neuro_conditions,Other encephalitis and encephalomyelitis,G04.81,unspecified
+other_neuro_conditions,Acute flaccid myelitis,G04.82,unspecified
+other_neuro_conditions,Other myelitis,G04.89,unspecified
+other_neuro_conditions,"Encephalitis and encephalomyelitis, unspecified",G04.90,unspecified
+other_neuro_conditions,"Myelitis, unspecified",G04.91,unspecified
+other_neuro_conditions,Encephalitis and encephalomyelitis in diseases classified elsewhere,G05.3,unspecified
+other_neuro_conditions,Myelitis in diseases classified elsewhere,G05.4,unspecified
+other_neuro_conditions,Intracranial abscess and granuloma,G06.0,unspecified
+other_neuro_conditions,Intraspinal abscess and granuloma,G06.1,unspecified
+other_neuro_conditions,"Extradural and subdural abscess, unspecified",G06.2,unspecified
+other_neuro_conditions,Intracranial and intraspinal abscess and granuloma in diseases classified elsewhere,G07,unspecified
+other_neuro_conditions,Intracranial and intraspinal phlebitis and thrombophlebitis,G08,unspecified
+other_neuro_conditions,Sequelae of inflammatory diseases of central nervous system,G09,unspecified
+other_neuro_conditions,Huntington's disease,G10,unspecified
+other_neuro_conditions,Congenital nonprogressive ataxia,G11.0,unspecified
+other_neuro_conditions,"Early-onset cerebellar ataxia, unspecified",G11.10,unspecified
+other_neuro_conditions,Friedreich ataxia,G11.11,unspecified
+other_neuro_conditions,Other early-onset cerebellar ataxia,G11.19,unspecified
+other_neuro_conditions,Late-onset cerebellar ataxia,G11.2,unspecified
+other_neuro_conditions,Cerebellar ataxia with defective DNA repair,G11.3,unspecified
+other_neuro_conditions,Hereditary spastic paraplegia,G11.4,unspecified
+other_neuro_conditions,Other hereditary ataxias,G11.8,unspecified
+other_neuro_conditions,"Hereditary ataxia, unspecified",G11.9,unspecified
+other_neuro_conditions,"Infantile spinal muscular atrophy, type I [Werdnig-Hoffman]",G12.0,unspecified
+other_neuro_conditions,Other inherited spinal muscular atrophy,G12.1,unspecified
+other_neuro_conditions,"Motor neuron disease, unspecified",G12.20,unspecified
+other_neuro_conditions,Amyotrophic lateral sclerosis,G12.21,unspecified
+other_neuro_conditions,Progressive bulbar palsy,G12.22,unspecified
+other_neuro_conditions,Primary lateral sclerosis,G12.23,unspecified
+other_neuro_conditions,Familial motor neuron disease,G12.24,unspecified
+other_neuro_conditions,Progressive spinal muscle atrophy,G12.25,unspecified
+other_neuro_conditions,Other motor neuron disease,G12.29,unspecified
+other_neuro_conditions,Other spinal muscular atrophies and related syndromes,G12.8,unspecified
+other_neuro_conditions,"Spinal muscular atrophy, unspecified",G12.9,unspecified
+other_neuro_conditions,Paraneoplastic neuromyopathy and neuropathy,G13.0,unspecified
+other_neuro_conditions,Other systemic atrophy primarily affecting central nervous system in neoplastic disease,G13.1,unspecified
+other_neuro_conditions,Systemic atrophy primarily affecting the central nervous system in myxedema,G13.2,unspecified
+other_neuro_conditions,Systemic atrophy primarily affecting central nervous system in other diseases classified elsewhere,G13.8,unspecified
+other_neuro_conditions,Postpolio syndrome,G14,unspecified
+other_neuro_conditions,Parkinson's disease,G20,unspecified
+other_neuro_conditions,Malignant neuroleptic syndrome,G21.0,unspecified
+other_neuro_conditions,Neuroleptic induced parkinsonism,G21.11,unspecified
+other_neuro_conditions,Other drug induced secondary parkinsonism,G21.19,unspecified
+other_neuro_conditions,Secondary parkinsonism due to other external agents,G21.2,unspecified
+other_neuro_conditions,Postencephalitic parkinsonism,G21.3,unspecified
+other_neuro_conditions,Vascular parkinsonism,G21.4,unspecified
+other_neuro_conditions,Other secondary parkinsonism,G21.8,unspecified
+other_neuro_conditions,"Secondary parkinsonism, unspecified",G21.9,unspecified
+other_neuro_conditions,Hallervorden-Spatz disease,G23.0,unspecified
+other_neuro_conditions,Progressive supranuclear ophthalmoplegia [Steele-Richardson-Olszewski],G23.1,unspecified
+other_neuro_conditions,Striatonigral degeneration,G23.2,unspecified
+other_neuro_conditions,Other specified degenerative diseases of basal ganglia,G23.8,unspecified
+other_neuro_conditions,"Degenerative disease of basal ganglia, unspecified",G23.9,unspecified
+other_neuro_conditions,Drug induced subacute dyskinesia,G24.01,unspecified
+other_neuro_conditions,Drug induced acute dystonia,G24.02,unspecified
+other_neuro_conditions,Other drug induced dystonia,G24.09,unspecified
+other_neuro_conditions,Genetic torsion dystonia,G24.1,unspecified
+other_neuro_conditions,Idiopathic nonfamilial dystonia,G24.2,unspecified
+other_neuro_conditions,Spasmodic torticollis,G24.3,unspecified
+other_neuro_conditions,Idiopathic orofacial dystonia,G24.4,unspecified
+other_neuro_conditions,Blepharospasm,G24.5,unspecified
+other_neuro_conditions,Other dystonia,G24.8,unspecified
+other_neuro_conditions,"Dystonia, unspecified",G24.9,unspecified
+other_neuro_conditions,Essential tremor,G25.0,unspecified
+other_neuro_conditions,Drug-induced tremor,G25.1,unspecified
+other_neuro_conditions,Other specified forms of tremor,G25.2,unspecified
+other_neuro_conditions,Myoclonus,G25.3,unspecified
+other_neuro_conditions,Drug-induced chorea,G25.4,unspecified
+other_neuro_conditions,Other chorea,G25.5,unspecified
+other_neuro_conditions,Drug induced tics,G25.61,unspecified
+other_neuro_conditions,Other tics of organic origin,G25.69,unspecified
+other_neuro_conditions,"Drug induced movement disorder, unspecified",G25.70,unspecified
+other_neuro_conditions,Drug induced akathisia,G25.71,unspecified
+other_neuro_conditions,Other drug induced movement disorders,G25.79,unspecified
+other_neuro_conditions,Restless legs syndrome,G25.81,unspecified
+other_neuro_conditions,Stiff-man syndrome,G25.82,unspecified
+other_neuro_conditions,Benign shuddering attacks,G25.83,unspecified
+other_neuro_conditions,Other specified extrapyramidal and movement disorders,G25.89,unspecified
+other_neuro_conditions,"Extrapyramidal and movement disorder, unspecified",G25.9,unspecified
+other_neuro_conditions,Extrapyramidal and movement disorders in diseases classified elsewhere,G26,unspecified
+other_neuro_conditions,Alzheimer's disease with early onset,G30.0,unspecified
+other_neuro_conditions,Alzheimer's disease with late onset,G30.1,unspecified
+other_neuro_conditions,Other Alzheimer's disease,G30.8,unspecified
+other_neuro_conditions,"Alzheimer's disease, unspecified",G30.9,unspecified
+other_neuro_conditions,Pick's disease,G31.01,unspecified
+other_neuro_conditions,Other frontotemporal dementia,G31.09,unspecified
+other_neuro_conditions,"Senile degeneration of brain, not elsewhere classified",G31.1,unspecified
+other_neuro_conditions,Degeneration of nervous system due to alcohol,G31.2,unspecified
+other_neuro_conditions,Alpers disease,G31.81,unspecified
+other_neuro_conditions,Leigh's disease,G31.82,unspecified
+other_neuro_conditions,Dementia with Lewy bodies,G31.83,unspecified
+other_neuro_conditions,"Mild cognitive impairment, so stated",G31.84,unspecified
+other_neuro_conditions,Corticobasal degeneration,G31.85,unspecified
+other_neuro_conditions,Other specified degenerative diseases of nervous system,G31.89,unspecified
+other_neuro_conditions,"Degenerative disease of nervous system, unspecified",G31.9,unspecified
+other_neuro_conditions,Subacute combined degeneration of spinal cord in diseases classified elsewhere,G32.0,unspecified
+other_neuro_conditions,Cerebellar ataxia in diseases classified elsewhere,G32.81,unspecified
+other_neuro_conditions,Other specified degenerative disorders of nervous system in diseases classified elsewhere,G32.89,unspecified
+other_neuro_conditions,Multiple sclerosis,G35,unspecified
+other_neuro_conditions,Neuromyelitis optica [Devic],G36.0,unspecified
+other_neuro_conditions,Acute and subacute hemorrhagic leukoencephalitis [Hurst],G36.1,unspecified
+other_neuro_conditions,Other specified acute disseminated demyelination,G36.8,unspecified
+other_neuro_conditions,"Acute disseminated demyelination, unspecified",G36.9,unspecified
+other_neuro_conditions,Diffuse sclerosis of central nervous system,G37.0,unspecified
+other_neuro_conditions,Central demyelination of corpus callosum,G37.1,unspecified
+other_neuro_conditions,Central pontine myelinolysis,G37.2,unspecified
+other_neuro_conditions,Acute transverse myelitis in demyelinating disease of central nervous system,G37.3,unspecified
+other_neuro_conditions,Subacute necrotizing myelitis of central nervous system,G37.4,unspecified
+other_neuro_conditions,Concentric sclerosis [Balo] of central nervous system,G37.5,unspecified
+other_neuro_conditions,Other specified demyelinating diseases of central nervous system,G37.8,unspecified
+other_neuro_conditions,"Demyelinating disease of central nervous system, unspecified",G37.9,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, not intractable, with status epilepticus",G40.001,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, not intractable, without status epilepticus",G40.009,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, intractable, with status epilepticus",G40.011,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, intractable, without status epilepticus",G40.019,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with simple partial seizures, not intractable, with status epilepticus",G40.101,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with simple partial seizures, not intractable, without status epilepticus",G40.109,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with simple partial seizures, intractable, with status epilepticus",G40.111,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with simple partial seizures, intractable, without status epilepticus",G40.119,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, not intractable, with status epilepticus",G40.201,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, not intractable, without status epilepticus",G40.209,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, intractable, with status epilepticus",G40.211,unspecified
+other_neuro_conditions,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, intractable, without status epilepticus",G40.219,unspecified
+other_neuro_conditions,"Generalized idiopathic epilepsy and epileptic syndromes, not intractable, with status epilepticus",G40.301,unspecified
+other_neuro_conditions,"Generalized idiopathic epilepsy and epileptic syndromes, not intractable, without status epilepticus",G40.309,unspecified
+other_neuro_conditions,"Generalized idiopathic epilepsy and epileptic syndromes, intractable, with status epilepticus",G40.311,unspecified
+other_neuro_conditions,"Generalized idiopathic epilepsy and epileptic syndromes, intractable, without status epilepticus",G40.319,unspecified
+other_neuro_conditions,"Absence epileptic syndrome, not intractable, with status epilepticus",G40.A01,unspecified
+other_neuro_conditions,"Absence epileptic syndrome, not intractable, without status epilepticus",G40.A09,unspecified
+other_neuro_conditions,"Absence epileptic syndrome, intractable, with status epilepticus",G40.A11,unspecified
+other_neuro_conditions,"Absence epileptic syndrome, intractable, without status epilepticus",G40.A19,unspecified
+other_neuro_conditions,"Juvenile myoclonic epilepsy, not intractable, with status epilepticus",G40.B01,unspecified
+other_neuro_conditions,"Juvenile myoclonic epilepsy, not intractable, without status epilepticus",G40.B09,unspecified
+other_neuro_conditions,"Juvenile myoclonic epilepsy, intractable, with status epilepticus",G40.B11,unspecified
+other_neuro_conditions,"Juvenile myoclonic epilepsy, intractable, without status epilepticus",G40.B19,unspecified
+other_neuro_conditions,"Other generalized epilepsy and epileptic syndromes, not intractable, with status epilepticus",G40.401,unspecified
+other_neuro_conditions,"Other generalized epilepsy and epileptic syndromes, not intractable, without status epilepticus",G40.409,unspecified
+other_neuro_conditions,"Other generalized epilepsy and epileptic syndromes, intractable, with status epilepticus",G40.411,unspecified
+other_neuro_conditions,"Other generalized epilepsy and epileptic syndromes, intractable, without status epilepticus",G40.419,unspecified
+other_neuro_conditions,Cyclin-Dependent Kinase-Like 5 Deficiency Disorder,G40.42,unspecified
+other_neuro_conditions,"Epileptic seizures related to external causes, not intractable, with status epilepticus",G40.501,unspecified
+other_neuro_conditions,"Epileptic seizures related to external causes, not intractable, without status epilepticus",G40.509,unspecified
+other_neuro_conditions,"Other epilepsy, not intractable, with status epilepticus",G40.801,unspecified
+other_neuro_conditions,"Other epilepsy, not intractable, without status epilepticus",G40.802,unspecified
+other_neuro_conditions,"Other epilepsy, intractable, with status epilepticus",G40.803,unspecified
+other_neuro_conditions,"Other epilepsy, intractable, without status epilepticus",G40.804,unspecified
+other_neuro_conditions,"Lennox-Gastaut syndrome, not intractable, with status epilepticus",G40.811,unspecified
+other_neuro_conditions,"Lennox-Gastaut syndrome, not intractable, without status epilepticus",G40.812,unspecified
+other_neuro_conditions,"Lennox-Gastaut syndrome, intractable, with status epilepticus",G40.813,unspecified
+other_neuro_conditions,"Lennox-Gastaut syndrome, intractable, without status epilepticus",G40.814,unspecified
+other_neuro_conditions,"Epileptic spasms, not intractable, with status epilepticus",G40.821,unspecified
+other_neuro_conditions,"Epileptic spasms, not intractable, without status epilepticus",G40.822,unspecified
+other_neuro_conditions,"Epileptic spasms, intractable, with status epilepticus",G40.823,unspecified
+other_neuro_conditions,"Epileptic spasms, intractable, without status epilepticus",G40.824,unspecified
+other_neuro_conditions,"Dravet syndrome, intractable, with status epilepticus",G40.833,unspecified
+other_neuro_conditions,"Dravet syndrome, intractable, without status epilepticus",G40.834,unspecified
+other_neuro_conditions,Other seizures,G40.89,unspecified
+other_neuro_conditions,"Epilepsy, unspecified, not intractable, with status epilepticus",G40.901,unspecified
+other_neuro_conditions,"Epilepsy, unspecified, not intractable, without status epilepticus",G40.909,unspecified
+other_neuro_conditions,"Epilepsy, unspecified, intractable, with status epilepticus",G40.911,unspecified
+other_neuro_conditions,"Epilepsy, unspecified, intractable, without status epilepticus",G40.919,unspecified
+other_neuro_conditions,"Migraine without aura, not intractable, with status migrainosus",G43.001,unspecified
+other_neuro_conditions,"Migraine without aura, not intractable, without status migrainosus",G43.009,unspecified
+other_neuro_conditions,"Migraine without aura, intractable, with status migrainosus",G43.011,unspecified
+other_neuro_conditions,"Migraine without aura, intractable, without status migrainosus",G43.019,unspecified
+other_neuro_conditions,"Migraine with aura, not intractable, with status migrainosus",G43.101,unspecified
+other_neuro_conditions,"Migraine with aura, not intractable, without status migrainosus",G43.109,unspecified
+other_neuro_conditions,"Migraine with aura, intractable, with status migrainosus",G43.111,unspecified
+other_neuro_conditions,"Migraine with aura, intractable, without status migrainosus",G43.119,unspecified
+other_neuro_conditions,"Hemiplegic migraine, not intractable, with status migrainosus",G43.401,unspecified
+other_neuro_conditions,"Hemiplegic migraine, not intractable, without status migrainosus",G43.409,unspecified
+other_neuro_conditions,"Hemiplegic migraine, intractable, with status migrainosus",G43.411,unspecified
+other_neuro_conditions,"Hemiplegic migraine, intractable, without status migrainosus",G43.419,unspecified
+other_neuro_conditions,"Persistent migraine aura without cerebral infarction, not intractable, with status migrainosus",G43.501,unspecified
+other_neuro_conditions,"Persistent migraine aura without cerebral infarction, not intractable, without status migrainosus",G43.509,unspecified
+other_neuro_conditions,"Persistent migraine aura without cerebral infarction, intractable, with status migrainosus",G43.511,unspecified
+other_neuro_conditions,"Persistent migraine aura without cerebral infarction, intractable, without status migrainosus",G43.519,unspecified
+other_neuro_conditions,"Persistent migraine aura with cerebral infarction, not intractable, with status migrainosus",G43.601,unspecified
+other_neuro_conditions,"Persistent migraine aura with cerebral infarction, not intractable, without status migrainosus",G43.609,unspecified
+other_neuro_conditions,"Persistent migraine aura with cerebral infarction, intractable, with status migrainosus",G43.611,unspecified
+other_neuro_conditions,"Persistent migraine aura with cerebral infarction, intractable, without status migrainosus",G43.619,unspecified
+other_neuro_conditions,"Chronic migraine without aura, not intractable, with status migrainosus",G43.701,unspecified
+other_neuro_conditions,"Chronic migraine without aura, not intractable, without status migrainosus",G43.709,unspecified
+other_neuro_conditions,"Chronic migraine without aura, intractable, with status migrainosus",G43.711,unspecified
+other_neuro_conditions,"Chronic migraine without aura, intractable, without status migrainosus",G43.719,unspecified
+other_neuro_conditions,"Cyclical vomiting, in migraine, not intractable",G43.A0,unspecified
+other_neuro_conditions,"Cyclical vomiting, in migraine, intractable",G43.A1,unspecified
+other_neuro_conditions,"Ophthalmoplegic migraine, not intractable",G43.B0,unspecified
+other_neuro_conditions,"Ophthalmoplegic migraine, intractable",G43.B1,unspecified
+other_neuro_conditions,"Periodic headache syndromes in child or adult, not intractable",G43.C0,unspecified
+other_neuro_conditions,"Periodic headache syndromes in child or adult, intractable",G43.C1,unspecified
+other_neuro_conditions,"Other migraine, not intractable, with status migrainosus",G43.801,unspecified
+other_neuro_conditions,"Other migraine, not intractable, without status migrainosus",G43.809,unspecified
+other_neuro_conditions,"Other migraine, intractable, with status migrainosus",G43.811,unspecified
+other_neuro_conditions,"Other migraine, intractable, without status migrainosus",G43.819,unspecified
+other_neuro_conditions,"Menstrual migraine, not intractable, with status migrainosus",G43.821,unspecified
+other_neuro_conditions,"Menstrual migraine, not intractable, without status migrainosus",G43.829,unspecified
+other_neuro_conditions,"Menstrual migraine, intractable, with status migrainosus",G43.831,unspecified
+other_neuro_conditions,"Menstrual migraine, intractable, without status migrainosus",G43.839,unspecified
+other_neuro_conditions,"Migraine, unspecified, not intractable, with status migrainosus",G43.901,unspecified
+other_neuro_conditions,"Migraine, unspecified, not intractable, without status migrainosus",G43.909,unspecified
+other_neuro_conditions,"Migraine, unspecified, intractable, with status migrainosus",G43.911,unspecified
+other_neuro_conditions,"Migraine, unspecified, intractable, without status migrainosus",G43.919,unspecified
+other_neuro_conditions,"Cluster headache syndrome, unspecified, intractable",G44.001,unspecified
+other_neuro_conditions,"Cluster headache syndrome, unspecified, not intractable",G44.009,unspecified
+other_neuro_conditions,"Episodic cluster headache, intractable",G44.011,unspecified
+other_neuro_conditions,"Episodic cluster headache, not intractable",G44.019,unspecified
+other_neuro_conditions,"Chronic cluster headache, intractable",G44.021,unspecified
+other_neuro_conditions,"Chronic cluster headache, not intractable",G44.029,unspecified
+other_neuro_conditions,"Episodic paroxysmal hemicrania, intractable",G44.031,unspecified
+other_neuro_conditions,"Episodic paroxysmal hemicrania, not intractable",G44.039,unspecified
+other_neuro_conditions,"Chronic paroxysmal hemicrania, intractable",G44.041,unspecified
+other_neuro_conditions,"Chronic paroxysmal hemicrania, not intractable",G44.049,unspecified
+other_neuro_conditions,"Short lasting unilateral neuralgiform headache with conjunctival injection and tearing (SUNCT), intractable",G44.051,unspecified
+other_neuro_conditions,"Short lasting unilateral neuralgiform headache with conjunctival injection and tearing (SUNCT), not intractable",G44.059,unspecified
+other_neuro_conditions,"Other trigeminal autonomic cephalgias (TAC), intractable",G44.091,unspecified
+other_neuro_conditions,"Other trigeminal autonomic cephalgias (TAC), not intractable",G44.099,unspecified
+other_neuro_conditions,"Vascular headache, not elsewhere classified",G44.1,unspecified
+other_neuro_conditions,"Tension-type headache, unspecified, intractable",G44.201,unspecified
+other_neuro_conditions,"Tension-type headache, unspecified, not intractable",G44.209,unspecified
+other_neuro_conditions,"Episodic tension-type headache, intractable",G44.211,unspecified
+other_neuro_conditions,"Episodic tension-type headache, not intractable",G44.219,unspecified
+other_neuro_conditions,"Chronic tension-type headache, intractable",G44.221,unspecified
+other_neuro_conditions,"Chronic tension-type headache, not intractable",G44.229,unspecified
+trauma,"Post-traumatic headache, unspecified, intractable",G44.301,unspecified
+trauma,"Post-traumatic headache, unspecified, not intractable",G44.309,unspecified
+trauma,"Acute post-traumatic headache, intractable",G44.311,unspecified
+trauma,"Acute post-traumatic headache, not intractable",G44.319,unspecified
+trauma,"Chronic post-traumatic headache, intractable",G44.321,unspecified
+trauma,"Chronic post-traumatic headache, not intractable",G44.329,unspecified
+other_neuro_conditions,"Drug-induced headache, not elsewhere classified, not intractable",G44.40,unspecified
+other_neuro_conditions,"Drug-induced headache, not elsewhere classified, intractable",G44.41,unspecified
+other_neuro_conditions,Hemicrania continua,G44.51,unspecified
+other_neuro_conditions,New daily persistent headache (NDPH),G44.52,unspecified
+other_neuro_conditions,Primary thunderclap headache,G44.53,unspecified
+other_neuro_conditions,Other complicated headache syndrome,G44.59,unspecified
+other_neuro_conditions,Hypnic headache,G44.81,unspecified
+other_neuro_conditions,Headache associated with sexual activity,G44.82,unspecified
+other_neuro_conditions,Primary cough headache,G44.83,unspecified
+other_neuro_conditions,Primary exertional headache,G44.84,unspecified
+other_neuro_conditions,Primary stabbing headache,G44.85,unspecified
+other_neuro_conditions,Cervicogenic headache,G44.86,unspecified
+other_neuro_conditions,Other headache syndrome,G44.89,unspecified
+other_neuro_conditions,Vertebro-basilar artery syndrome,G45.0,unspecified
+other_neuro_conditions,Carotid artery syndrome (hemispheric),G45.1,unspecified
+other_neuro_conditions,Multiple and bilateral precerebral artery syndromes,G45.2,unspecified
+other_neuro_conditions,Amaurosis fugax,G45.3,unspecified
+other_neuro_conditions,Transient global amnesia,G45.4,unspecified
+other_neuro_conditions,Other transient cerebral ischemic attacks and related syndromes,G45.8,unspecified
+other_neuro_conditions,"Transient cerebral ischemic attack, unspecified",G45.9,unspecified
+other_neuro_conditions,Middle cerebral artery syndrome,G46.0,unspecified
+other_neuro_conditions,Anterior cerebral artery syndrome,G46.1,unspecified
+other_neuro_conditions,Posterior cerebral artery syndrome,G46.2,unspecified
+other_neuro_conditions,Brain stem stroke syndrome,G46.3,unspecified
+other_neuro_conditions,Cerebellar stroke syndrome,G46.4,unspecified
+other_neuro_conditions,Pure motor lacunar syndrome,G46.5,unspecified
+other_neuro_conditions,Pure sensory lacunar syndrome,G46.6,unspecified
+other_neuro_conditions,Other lacunar syndromes,G46.7,unspecified
+other_neuro_conditions,Other vascular syndromes of brain in cerebrovascular diseases,G46.8,unspecified
+other_neuro_conditions,"Insomnia, unspecified",G47.00,unspecified
+other_neuro_conditions,Insomnia due to medical condition,G47.01,unspecified
+other_neuro_conditions,Other insomnia,G47.09,unspecified
+other_neuro_conditions,"Hypersomnia, unspecified",G47.10,unspecified
+other_neuro_conditions,Idiopathic hypersomnia with long sleep time,G47.11,unspecified
+other_neuro_conditions,Idiopathic hypersomnia without long sleep time,G47.12,unspecified
+other_neuro_conditions,Recurrent hypersomnia,G47.13,unspecified
+other_neuro_conditions,Hypersomnia due to medical condition,G47.14,unspecified
+other_neuro_conditions,Other hypersomnia,G47.19,unspecified
+other_neuro_conditions,"Circadian rhythm sleep disorder, unspecified type",G47.20,unspecified
+other_neuro_conditions,"Circadian rhythm sleep disorder, delayed sleep phase type",G47.21,unspecified
+other_neuro_conditions,"Circadian rhythm sleep disorder, advanced sleep phase type",G47.22,unspecified
+other_neuro_conditions,"Circadian rhythm sleep disorder, irregular sleep wake type",G47.23,unspecified
+other_neuro_conditions,"Circadian rhythm sleep disorder, free running type",G47.24,unspecified
+other_neuro_conditions,"Circadian rhythm sleep disorder, jet lag type",G47.25,unspecified
+other_neuro_conditions,"Circadian rhythm sleep disorder, shift work type",G47.26,unspecified
+other_neuro_conditions,Circadian rhythm sleep disorder in conditions classified elsewhere,G47.27,unspecified
+other_neuro_conditions,Other circadian rhythm sleep disorder,G47.29,unspecified
+other_neuro_conditions,"Sleep apnea, unspecified",G47.30,unspecified
+other_neuro_conditions,Primary central sleep apnea,G47.31,unspecified
+other_neuro_conditions,High altitude periodic breathing,G47.32,unspecified
+other_neuro_conditions,Obstructive sleep apnea (adult) (pediatric),G47.33,unspecified
+other_neuro_conditions,Idiopathic sleep related nonobstructive alveolar hypoventilation,G47.34,unspecified
+other_neuro_conditions,Congenital central alveolar hypoventilation syndrome,G47.35,unspecified
+other_neuro_conditions,Sleep related hypoventilation in conditions classified elsewhere,G47.36,unspecified
+other_neuro_conditions,Central sleep apnea in conditions classified elsewhere,G47.37,unspecified
+other_neuro_conditions,Other sleep apnea,G47.39,unspecified
+other_neuro_conditions,Narcolepsy with cataplexy,G47.411,unspecified
+other_neuro_conditions,Narcolepsy without cataplexy,G47.419,unspecified
+other_neuro_conditions,Narcolepsy in conditions classified elsewhere with cataplexy,G47.421,unspecified
+other_neuro_conditions,Narcolepsy in conditions classified elsewhere without cataplexy,G47.429,unspecified
+other_neuro_conditions,"Parasomnia, unspecified",G47.50,unspecified
+other_neuro_conditions,Confusional arousals,G47.51,unspecified
+other_neuro_conditions,REM sleep behavior disorder,G47.52,unspecified
+other_neuro_conditions,Recurrent isolated sleep paralysis,G47.53,unspecified
+other_neuro_conditions,Parasomnia in conditions classified elsewhere,G47.54,unspecified
+other_neuro_conditions,Other parasomnia,G47.59,unspecified
+other_neuro_conditions,Periodic limb movement disorder,G47.61,unspecified
+other_neuro_conditions,Sleep related leg cramps,G47.62,unspecified
+other_neuro_conditions,Sleep related bruxism,G47.63,unspecified
+other_neuro_conditions,Other sleep related movement disorders,G47.69,unspecified
+other_neuro_conditions,Other sleep disorders,G47.8,unspecified
+other_neuro_conditions,"Sleep disorder, unspecified",G47.9,unspecified
+other_neuro_conditions,Trigeminal neuralgia,G50.0,unspecified
+other_neuro_conditions,Atypical facial pain,G50.1,unspecified
+other_neuro_conditions,Other disorders of trigeminal nerve,G50.8,unspecified
+other_neuro_conditions,"Disorder of trigeminal nerve, unspecified",G50.9,unspecified
+other_neuro_conditions,Bell's palsy,G51.0,unspecified
+other_neuro_conditions,Geniculate ganglionitis,G51.1,unspecified
+other_neuro_conditions,Melkersson's syndrome,G51.2,unspecified
+other_neuro_conditions,"Clonic hemifacial spasm, right",G51.31,unspecified
+other_neuro_conditions,"Clonic hemifacial spasm, left",G51.32,unspecified
+other_neuro_conditions,"Clonic hemifacial spasm, bilateral",G51.33,unspecified
+other_neuro_conditions,"Clonic hemifacial spasm, unspecified",G51.39,unspecified
+other_neuro_conditions,Facial myokymia,G51.4,unspecified
+other_neuro_conditions,Other disorders of facial nerve,G51.8,unspecified
+other_neuro_conditions,"Disorder of facial nerve, unspecified",G51.9,unspecified
+other_neuro_conditions,Disorders of olfactory nerve,G52.0,unspecified
+other_neuro_conditions,Disorders of glossopharyngeal nerve,G52.1,unspecified
+other_neuro_conditions,Disorders of vagus nerve,G52.2,unspecified
+other_neuro_conditions,Disorders of hypoglossal nerve,G52.3,unspecified
+other_neuro_conditions,Disorders of multiple cranial nerves,G52.7,unspecified
+other_neuro_conditions,Disorders of other specified cranial nerves,G52.8,unspecified
+other_neuro_conditions,"Cranial nerve disorder, unspecified",G52.9,unspecified
+other_neuro_conditions,Cranial nerve disorders in diseases classified elsewhere,G53,unspecified
+other_neuro_conditions,Brachial plexus disorders,G54.0,unspecified
+other_neuro_conditions,Lumbosacral plexus disorders,G54.1,unspecified
+other_neuro_conditions,"Cervical root disorders, not elsewhere classified",G54.2,unspecified
+other_neuro_conditions,"Thoracic root disorders, not elsewhere classified",G54.3,unspecified
+other_neuro_conditions,"Lumbosacral root disorders, not elsewhere classified",G54.4,unspecified
+other_neuro_conditions,Neuralgic amyotrophy,G54.5,unspecified
+other_neuro_conditions,Phantom limb syndrome with pain,G54.6,unspecified
+other_neuro_conditions,Phantom limb syndrome without pain,G54.7,unspecified
+other_neuro_conditions,Other nerve root and plexus disorders,G54.8,unspecified
+other_neuro_conditions,"Nerve root and plexus disorder, unspecified",G54.9,unspecified
+other_neuro_conditions,Nerve root and plexus compressions in diseases classified elsewhere,G55,unspecified
+other_neuro_conditions,"Carpal tunnel syndrome, unspecified upper limb",G56.00,unspecified
+other_neuro_conditions,"Carpal tunnel syndrome, right upper limb",G56.01,unspecified
+other_neuro_conditions,"Carpal tunnel syndrome, left upper limb",G56.02,unspecified
+other_neuro_conditions,"Carpal tunnel syndrome, bilateral upper limbs",G56.03,unspecified
+other_neuro_conditions,"Other lesions of median nerve, unspecified upper limb",G56.10,unspecified
+other_neuro_conditions,"Other lesions of median nerve, right upper limb",G56.11,unspecified
+other_neuro_conditions,"Other lesions of median nerve, left upper limb",G56.12,unspecified
+other_neuro_conditions,"Other lesions of median nerve, bilateral upper limbs",G56.13,unspecified
+other_neuro_conditions,"Lesion of ulnar nerve, unspecified upper limb",G56.20,unspecified
+other_neuro_conditions,"Lesion of ulnar nerve, right upper limb",G56.21,unspecified
+other_neuro_conditions,"Lesion of ulnar nerve, left upper limb",G56.22,unspecified
+other_neuro_conditions,"Lesion of ulnar nerve, bilateral upper limbs",G56.23,unspecified
+other_neuro_conditions,"Lesion of radial nerve, unspecified upper limb",G56.30,unspecified
+other_neuro_conditions,"Lesion of radial nerve, right upper limb",G56.31,unspecified
+other_neuro_conditions,"Lesion of radial nerve, left upper limb",G56.32,unspecified
+other_neuro_conditions,"Lesion of radial nerve, bilateral upper limbs",G56.33,unspecified
+other_neuro_conditions,Causalgia of unspecified upper limb,G56.40,unspecified
+other_neuro_conditions,Causalgia of right upper limb,G56.41,unspecified
+other_neuro_conditions,Causalgia of left upper limb,G56.42,unspecified
+other_neuro_conditions,Causalgia of bilateral upper limbs,G56.43,unspecified
+other_neuro_conditions,Other specified mononeuropathies of unspecified upper limb,G56.80,unspecified
+other_neuro_conditions,Other specified mononeuropathies of right upper limb,G56.81,unspecified
+other_neuro_conditions,Other specified mononeuropathies of left upper limb,G56.82,unspecified
+other_neuro_conditions,Other specified mononeuropathies of bilateral upper limbs,G56.83,unspecified
+other_neuro_conditions,Unspecified mononeuropathy of unspecified upper limb,G56.90,unspecified
+other_neuro_conditions,Unspecified mononeuropathy of right upper limb,G56.91,unspecified
+other_neuro_conditions,Unspecified mononeuropathy of left upper limb,G56.92,unspecified
+other_neuro_conditions,Unspecified mononeuropathy of bilateral upper limbs,G56.93,unspecified
+other_neuro_conditions,"Lesion of sciatic nerve, unspecified lower limb",G57.00,unspecified
+other_neuro_conditions,"Lesion of sciatic nerve, right lower limb",G57.01,unspecified
+other_neuro_conditions,"Lesion of sciatic nerve, left lower limb",G57.02,unspecified
+other_neuro_conditions,"Lesion of sciatic nerve, bilateral lower limbs",G57.03,unspecified
+other_neuro_conditions,"Meralgia paresthetica, unspecified lower limb",G57.10,unspecified
+other_neuro_conditions,"Meralgia paresthetica, right lower limb",G57.11,unspecified
+other_neuro_conditions,"Meralgia paresthetica, left lower limb",G57.12,unspecified
+other_neuro_conditions,"Meralgia paresthetica, bilateral lower limbs",G57.13,unspecified
+other_neuro_conditions,"Lesion of femoral nerve, unspecified lower limb",G57.20,unspecified
+other_neuro_conditions,"Lesion of femoral nerve, right lower limb",G57.21,unspecified
+other_neuro_conditions,"Lesion of femoral nerve, left lower limb",G57.22,unspecified
+other_neuro_conditions,"Lesion of femoral nerve, bilateral lower limbs",G57.23,unspecified
+other_neuro_conditions,"Lesion of lateral popliteal nerve, unspecified lower limb",G57.30,unspecified
+other_neuro_conditions,"Lesion of lateral popliteal nerve, right lower limb",G57.31,unspecified
+other_neuro_conditions,"Lesion of lateral popliteal nerve, left lower limb",G57.32,unspecified
+other_neuro_conditions,"Lesion of lateral popliteal nerve, bilateral lower limbs",G57.33,unspecified
+other_neuro_conditions,"Lesion of medial popliteal nerve, unspecified lower limb",G57.40,unspecified
+other_neuro_conditions,"Lesion of medial popliteal nerve, right lower limb",G57.41,unspecified
+other_neuro_conditions,"Lesion of medial popliteal nerve, left lower limb",G57.42,unspecified
+other_neuro_conditions,"Lesion of medial popliteal nerve, bilateral lower limbs",G57.43,unspecified
+other_neuro_conditions,"Tarsal tunnel syndrome, unspecified lower limb",G57.50,unspecified
+other_neuro_conditions,"Tarsal tunnel syndrome, right lower limb",G57.51,unspecified
+other_neuro_conditions,"Tarsal tunnel syndrome, left lower limb",G57.52,unspecified
+other_neuro_conditions,"Tarsal tunnel syndrome, bilateral lower limbs",G57.53,unspecified
+other_neuro_conditions,"Lesion of plantar nerve, unspecified lower limb",G57.60,unspecified
+other_neuro_conditions,"Lesion of plantar nerve, right lower limb",G57.61,unspecified
+other_neuro_conditions,"Lesion of plantar nerve, left lower limb",G57.62,unspecified
+other_neuro_conditions,"Lesion of plantar nerve, bilateral lower limbs",G57.63,unspecified
+other_neuro_conditions,Causalgia of unspecified lower limb,G57.70,unspecified
+other_neuro_conditions,Causalgia of right lower limb,G57.71,unspecified
+other_neuro_conditions,Causalgia of left lower limb,G57.72,unspecified
+other_neuro_conditions,Causalgia of bilateral lower limbs,G57.73,unspecified
+other_neuro_conditions,Other specified mononeuropathies of unspecified lower limb,G57.80,unspecified
+other_neuro_conditions,Other specified mononeuropathies of right lower limb,G57.81,unspecified
+other_neuro_conditions,Other specified mononeuropathies of left lower limb,G57.82,unspecified
+other_neuro_conditions,Other specified mononeuropathies of bilateral lower limbs,G57.83,unspecified
+other_neuro_conditions,Unspecified mononeuropathy of unspecified lower limb,G57.90,unspecified
+other_neuro_conditions,Unspecified mononeuropathy of right lower limb,G57.91,unspecified
+other_neuro_conditions,Unspecified mononeuropathy of left lower limb,G57.92,unspecified
+other_neuro_conditions,Unspecified mononeuropathy of bilateral lower limbs,G57.93,unspecified
+other_neuro_conditions,Intercostal neuropathy,G58.0,unspecified
+other_neuro_conditions,Mononeuritis multiplex,G58.7,unspecified
+other_neuro_conditions,Other specified mononeuropathies,G58.8,unspecified
+other_neuro_conditions,"Mononeuropathy, unspecified",G58.9,unspecified
+other_neuro_conditions,Mononeuropathy in diseases classified elsewhere,G59,unspecified
+other_neuro_conditions,Hereditary motor and sensory neuropathy,G60.0,unspecified
+other_neuro_conditions,Refsum's disease,G60.1,unspecified
+other_neuro_conditions,Neuropathy in association with hereditary ataxia,G60.2,unspecified
+other_neuro_conditions,Idiopathic progressive neuropathy,G60.3,unspecified
+other_neuro_conditions,Other hereditary and idiopathic neuropathies,G60.8,unspecified
+other_neuro_conditions,"Hereditary and idiopathic neuropathy, unspecified",G60.9,unspecified
+other_neuro_conditions,Guillain-Barre syndrome,G61.0,unspecified
+other_neuro_conditions,Serum neuropathy,G61.1,unspecified
+other_neuro_conditions,Chronic inflammatory demyelinating polyneuritis,G61.81,unspecified
+other_neuro_conditions,Multifocal motor neuropathy,G61.82,unspecified
+other_neuro_conditions,Other inflammatory polyneuropathies,G61.89,unspecified
+other_neuro_conditions,"Inflammatory polyneuropathy, unspecified",G61.9,unspecified
+other_neuro_conditions,Drug-induced polyneuropathy,G62.0,unspecified
+other_neuro_conditions,Alcoholic polyneuropathy,G62.1,unspecified
+other_neuro_conditions,Polyneuropathy due to other toxic agents,G62.2,unspecified
+other_neuro_conditions,Critical illness polyneuropathy,G62.81,unspecified
+other_neuro_conditions,Radiation-induced polyneuropathy,G62.82,unspecified
+other_neuro_conditions,Other specified polyneuropathies,G62.89,unspecified
+other_neuro_conditions,"Polyneuropathy, unspecified",G62.9,unspecified
+other_neuro_conditions,Polyneuropathy in diseases classified elsewhere,G63,unspecified
+other_neuro_conditions,Other disorders of peripheral nervous system,G64,unspecified
+other_neuro_conditions,Sequelae of Guillain-Barre syndrome,G65.0,unspecified
+other_neuro_conditions,Sequelae of other inflammatory polyneuropathy,G65.1,unspecified
+other_neuro_conditions,Sequelae of toxic polyneuropathy,G65.2,unspecified
+other_neuro_conditions,Myasthenia gravis without (acute) exacerbation,G70.00,unspecified
+other_neuro_conditions,Myasthenia gravis with (acute) exacerbation,G70.01,unspecified
+other_neuro_conditions,Toxic myoneural disorders,G70.1,unspecified
+other_neuro_conditions,Congenital and developmental myasthenia,G70.2,unspecified
+other_neuro_conditions,"Lambert-Eaton syndrome, unspecified",G70.80,unspecified
+other_neuro_conditions,Lambert-Eaton syndrome in disease classified elsewhere,G70.81,unspecified
+other_neuro_conditions,Other specified myoneural disorders,G70.89,unspecified
+other_neuro_conditions,"Myoneural disorder, unspecified",G70.9,unspecified
+other_neuro_conditions,"Muscular dystrophy, unspecified",G71.00,unspecified
+other_neuro_conditions,Duchenne or Becker muscular dystrophy,G71.01,unspecified
+other_neuro_conditions,Facioscapulohumeral muscular dystrophy,G71.02,unspecified
+other_neuro_conditions,Other specified muscular dystrophies,G71.09,unspecified
+other_neuro_conditions,Myotonic muscular dystrophy,G71.11,unspecified
+other_neuro_conditions,Myotonia congenita,G71.12,unspecified
+other_neuro_conditions,Myotonic chondrodystrophy,G71.13,unspecified
+other_neuro_conditions,Drug induced myotonia,G71.14,unspecified
+other_neuro_conditions,Other specified myotonic disorders,G71.19,unspecified
+other_neuro_conditions,"Congenital myopathy, unspecified",G71.20,unspecified
+other_neuro_conditions,Nemaline myopathy,G71.21,unspecified
+other_neuro_conditions,X-linked myotubular myopathy,G71.220,unspecified
+other_neuro_conditions,Other centronuclear myopathy,G71.228,unspecified
+other_neuro_conditions,Other congenital myopathy,G71.29,unspecified
+other_neuro_conditions,"Mitochondrial myopathy, not elsewhere classified",G71.3,unspecified
+other_neuro_conditions,Other primary disorders of muscles,G71.8,unspecified
+other_neuro_conditions,"Primary disorder of muscle, unspecified",G71.9,unspecified
+other_neuro_conditions,Drug-induced myopathy,G72.0,unspecified
+other_neuro_conditions,Alcoholic myopathy,G72.1,unspecified
+other_neuro_conditions,Myopathy due to other toxic agents,G72.2,unspecified
+other_neuro_conditions,Periodic paralysis,G72.3,unspecified
+other_neuro_conditions,Inclusion body myositis [IBM],G72.41,unspecified
+other_neuro_conditions,"Other inflammatory and immune myopathies, not elsewhere classified",G72.49,unspecified
+other_neuro_conditions,Critical illness myopathy,G72.81,unspecified
+other_neuro_conditions,Other specified myopathies,G72.89,unspecified
+other_neuro_conditions,"Myopathy, unspecified",G72.9,unspecified
+other_neuro_conditions,Lambert-Eaton syndrome in neoplastic disease,G73.1,unspecified
+other_neuro_conditions,Myasthenic syndromes in other diseases classified elsewhere,G73.3,unspecified
+other_neuro_conditions,Myopathy in diseases classified elsewhere,G73.7,unspecified
+other_neuro_conditions,Spastic quadriplegic cerebral palsy,G80.0,unspecified
+other_neuro_conditions,Spastic diplegic cerebral palsy,G80.1,unspecified
+other_neuro_conditions,Spastic hemiplegic cerebral palsy,G80.2,unspecified
+other_neuro_conditions,Athetoid cerebral palsy,G80.3,unspecified
+other_neuro_conditions,Ataxic cerebral palsy,G80.4,unspecified
+other_neuro_conditions,Other cerebral palsy,G80.8,unspecified
+other_neuro_conditions,"Cerebral palsy, unspecified",G80.9,unspecified
+other_neuro_conditions,Flaccid hemiplegia affecting unspecified side,G81.00,unspecified
+other_neuro_conditions,Flaccid hemiplegia affecting right dominant side,G81.01,unspecified
+other_neuro_conditions,Flaccid hemiplegia affecting left dominant side,G81.02,unspecified
+other_neuro_conditions,Flaccid hemiplegia affecting right nondominant side,G81.03,unspecified
+other_neuro_conditions,Flaccid hemiplegia affecting left nondominant side,G81.04,unspecified
+other_neuro_conditions,Spastic hemiplegia affecting unspecified side,G81.10,unspecified
+other_neuro_conditions,Spastic hemiplegia affecting right dominant side,G81.11,unspecified
+other_neuro_conditions,Spastic hemiplegia affecting left dominant side,G81.12,unspecified
+other_neuro_conditions,Spastic hemiplegia affecting right nondominant side,G81.13,unspecified
+other_neuro_conditions,Spastic hemiplegia affecting left nondominant side,G81.14,unspecified
+other_neuro_conditions,"Hemiplegia, unspecified affecting unspecified side",G81.90,unspecified
+other_neuro_conditions,"Hemiplegia, unspecified affecting right dominant side",G81.91,unspecified
+other_neuro_conditions,"Hemiplegia, unspecified affecting left dominant side",G81.92,unspecified
+other_neuro_conditions,"Hemiplegia, unspecified affecting right nondominant side",G81.93,unspecified
+other_neuro_conditions,"Hemiplegia, unspecified affecting left nondominant side",G81.94,unspecified
+other_neuro_conditions,"Paraplegia, unspecified",G82.20,unspecified
+other_neuro_conditions,"Paraplegia, complete",G82.21,unspecified
+other_neuro_conditions,"Paraplegia, incomplete",G82.22,unspecified
+other_neuro_conditions,"Quadriplegia, unspecified",G82.50,unspecified
+other_neuro_conditions,"Quadriplegia, C1-C4 complete",G82.51,unspecified
+other_neuro_conditions,"Quadriplegia, C1-C4 incomplete",G82.52,unspecified
+other_neuro_conditions,"Quadriplegia, C5-C7 complete",G82.53,unspecified
+other_neuro_conditions,"Quadriplegia, C5-C7 incomplete",G82.54,unspecified
+other_neuro_conditions,Diplegia of upper limbs,G83.0,unspecified
+other_neuro_conditions,Monoplegia of lower limb affecting unspecified side,G83.10,unspecified
+other_neuro_conditions,Monoplegia of lower limb affecting right dominant side,G83.11,unspecified
+other_neuro_conditions,Monoplegia of lower limb affecting left dominant side,G83.12,unspecified
+other_neuro_conditions,Monoplegia of lower limb affecting right nondominant side,G83.13,unspecified
+other_neuro_conditions,Monoplegia of lower limb affecting left nondominant side,G83.14,unspecified
+other_neuro_conditions,Monoplegia of upper limb affecting unspecified side,G83.20,unspecified
+other_neuro_conditions,Monoplegia of upper limb affecting right dominant side,G83.21,unspecified
+other_neuro_conditions,Monoplegia of upper limb affecting left dominant side,G83.22,unspecified
+other_neuro_conditions,Monoplegia of upper limb affecting right nondominant side,G83.23,unspecified
+other_neuro_conditions,Monoplegia of upper limb affecting left nondominant side,G83.24,unspecified
+other_neuro_conditions,"Monoplegia, unspecified affecting unspecified side",G83.30,unspecified
+other_neuro_conditions,"Monoplegia, unspecified affecting right dominant side",G83.31,unspecified
+other_neuro_conditions,"Monoplegia, unspecified affecting left dominant side",G83.32,unspecified
+other_neuro_conditions,"Monoplegia, unspecified affecting right nondominant side",G83.33,unspecified
+other_neuro_conditions,"Monoplegia, unspecified affecting left nondominant side",G83.34,unspecified
+other_neuro_conditions,Cauda equina syndrome,G83.4,unspecified
+other_neuro_conditions,Locked-in state,G83.5,unspecified
+other_neuro_conditions,Brown-Sequard syndrome,G83.81,unspecified
+other_neuro_conditions,Anterior cord syndrome,G83.82,unspecified
+other_neuro_conditions,Posterior cord syndrome,G83.83,unspecified
+other_neuro_conditions,Todd's paralysis (postepileptic),G83.84,unspecified
+other_neuro_conditions,Other specified paralytic syndromes,G83.89,unspecified
+other_neuro_conditions,"Paralytic syndrome, unspecified",G83.9,unspecified
+other_neuro_conditions,Central pain syndrome,G89.0,unspecified
+trauma,Acute pain due to trauma,G89.11,unspecified
+other_neuro_conditions,Acute post-thoracotomy pain,G89.12,unspecified
+other_neuro_conditions,Other acute postprocedural pain,G89.18,unspecified
+trauma,Chronic pain due to trauma,G89.21,unspecified
+other_neuro_conditions,Chronic post-thoracotomy pain,G89.22,unspecified
+other_neuro_conditions,Other chronic postprocedural pain,G89.28,unspecified
+other_neuro_conditions,Other chronic pain,G89.29,unspecified
+other_neuro_conditions,Neoplasm related pain (acute) (chronic),G89.3,unspecified
+other_neuro_conditions,Chronic pain syndrome,G89.4,unspecified
+other_neuro_conditions,Carotid sinus syncope,G90.01,unspecified
+other_neuro_conditions,Other idiopathic peripheral autonomic neuropathy,G90.09,unspecified
+other_neuro_conditions,Familial dysautonomia [Riley-Day],G90.1,unspecified
+other_neuro_conditions,Horner's syndrome,G90.2,unspecified
+other_neuro_conditions,Multi-system degeneration of the autonomic nervous system,G90.3,unspecified
+other_neuro_conditions,Autonomic dysreflexia,G90.4,unspecified
+other_neuro_conditions,"Complex regional pain syndrome I, unspecified",G90.50,unspecified
+other_neuro_conditions,Complex regional pain syndrome I of right upper limb,G90.511,unspecified
+other_neuro_conditions,Complex regional pain syndrome I of left upper limb,G90.512,unspecified
+other_neuro_conditions,"Complex regional pain syndrome I of upper limb, bilateral",G90.513,unspecified
+other_neuro_conditions,Complex regional pain syndrome I of unspecified upper limb,G90.519,unspecified
+other_neuro_conditions,Complex regional pain syndrome I of right lower limb,G90.521,unspecified
+other_neuro_conditions,Complex regional pain syndrome I of left lower limb,G90.522,unspecified
+other_neuro_conditions,"Complex regional pain syndrome I of lower limb, bilateral",G90.523,unspecified
+other_neuro_conditions,Complex regional pain syndrome I of unspecified lower limb,G90.529,unspecified
+other_neuro_conditions,Complex regional pain syndrome I of other specified site,G90.59,unspecified
+other_neuro_conditions,Other disorders of autonomic nervous system,G90.8,unspecified
+other_neuro_conditions,"Disorder of the autonomic nervous system, unspecified",G90.9,unspecified
+other_neuro_conditions,Communicating hydrocephalus,G91.0,unspecified
+other_neuro_conditions,Obstructive hydrocephalus,G91.1,unspecified
+other_neuro_conditions,(Idiopathic) normal pressure hydrocephalus,G91.2,unspecified
+trauma,"Post-traumatic hydrocephalus, unspecified",G91.3,unspecified
+other_neuro_conditions,Hydrocephalus in diseases classified elsewhere,G91.4,unspecified
+other_neuro_conditions,Other hydrocephalus,G91.8,unspecified
+other_neuro_conditions,"Hydrocephalus, unspecified",G91.9,unspecified
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade unspecified",G92.00,unspecified
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade 1",G92.01,unspecified
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade 2",G92.02,unspecified
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade 3",G92.03,unspecified
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade 4",G92.04,unspecified
+other_neuro_conditions,"Immune effector cell-associated neurotoxicity syndrome, grade 5",G92.05,unspecified
+other_neuro_conditions,Other toxic encephalopathy,G92.8,unspecified
+other_neuro_conditions,Unspecified toxic encephalopathy,G92.9,unspecified
+other_neuro_conditions,Cerebral cysts,G93.0,unspecified
+other_neuro_conditions,"Anoxic brain damage, not elsewhere classified",G93.1,unspecified
+other_neuro_conditions,Benign intracranial hypertension,G93.2,unspecified
+other_neuro_conditions,Postviral fatigue syndrome,G93.3,unspecified
+other_neuro_conditions,"Encephalopathy, unspecified",G93.40,unspecified
+other_neuro_conditions,Metabolic encephalopathy,G93.41,unspecified
+other_neuro_conditions,Other encephalopathy,G93.49,unspecified
+other_neuro_conditions,Compression of brain,G93.5,unspecified
+other_neuro_conditions,Cerebral edema,G93.6,unspecified
+other_neuro_conditions,Reye's syndrome,G93.7,unspecified
+other_neuro_conditions,Temporal sclerosis,G93.81,unspecified
+other_neuro_conditions,Brain death,G93.82,unspecified
+other_neuro_conditions,Other specified disorders of brain,G93.89,unspecified
+other_neuro_conditions,"Disorder of brain, unspecified",G93.9,unspecified
+other_neuro_conditions,Other disorders of brain in diseases classified elsewhere,G94,unspecified
+other_neuro_conditions,Syringomyelia and syringobulbia,G95.0,unspecified
+other_neuro_conditions,Acute infarction of spinal cord (embolic) (nonembolic),G95.11,unspecified
+other_neuro_conditions,Other vascular myelopathies,G95.19,unspecified
+other_neuro_conditions,Unspecified cord compression,G95.20,unspecified
+other_neuro_conditions,Other cord compression,G95.29,unspecified
+other_neuro_conditions,Conus medullaris syndrome,G95.81,unspecified
+other_neuro_conditions,Other specified diseases of spinal cord,G95.89,unspecified
+other_neuro_conditions,"Disease of spinal cord, unspecified",G95.9,unspecified
+other_neuro_conditions,"Cerebrospinal fluid leak, unspecified",G96.00,unspecified
+other_neuro_conditions,"Cranial cerebrospinal fluid leak, spontaneous",G96.01,unspecified
+other_neuro_conditions,"Spinal cerebrospinal fluid leak, spontaneous",G96.02,unspecified
+other_neuro_conditions,Other cranial cerebrospinal fluid leak,G96.08,unspecified
+other_neuro_conditions,Other spinal cerebrospinal fluid leak,G96.09,unspecified
+other_neuro_conditions,Dural tear,G96.11,unspecified
+other_neuro_conditions,Meningeal adhesions (cerebral) (spinal),G96.12,unspecified
+other_neuro_conditions,Perineural cyst,G96.191,unspecified
+other_neuro_conditions,"Other disorders of meninges, not elsewhere classified",G96.198,unspecified
+other_neuro_conditions,"Intracranial hypotension, unspecified",G96.810,unspecified
+other_neuro_conditions,"Intracranial hypotension, spontaneous",G96.811,unspecified
+other_neuro_conditions,Other intracranial hypotension,G96.819,unspecified
+other_neuro_conditions,Other specified disorders of central nervous system,G96.89,unspecified
+other_neuro_conditions,"Disorder of central nervous system, unspecified",G96.9,unspecified
+other_neuro_conditions,Cerebrospinal fluid leak from spinal puncture,G97.0,unspecified
+other_neuro_conditions,Other reaction to spinal and lumbar puncture,G97.1,unspecified
+other_neuro_conditions,Intracranial hypotension following ventricular shunting,G97.2,unspecified
+other_neuro_conditions,Intraoperative hemorrhage and hematoma of a nervous system organ or structure complicating a nervous system procedure,G97.31,unspecified
+other_neuro_conditions,Intraoperative hemorrhage and hematoma of a nervous system organ or structure complicating other procedure,G97.32,unspecified
+other_neuro_conditions,Accidental puncture or laceration of dura during a procedure,G97.41,unspecified
+other_neuro_conditions,Accidental puncture and laceration of other nervous system organ or structure during a nervous system procedure,G97.48,unspecified
+other_neuro_conditions,Accidental puncture and laceration of other nervous system organ or structure during other procedure,G97.49,unspecified
+other_neuro_conditions,Postprocedural hemorrhage of a nervous system organ or structure following a nervous system procedure,G97.51,unspecified
+other_neuro_conditions,Postprocedural hemorrhage of a nervous system organ or structure following other procedure,G97.52,unspecified
+other_neuro_conditions,Postprocedural hematoma of a nervous system organ or structure following a nervous system procedure,G97.61,unspecified
+other_neuro_conditions,Postprocedural hematoma of a nervous system organ or structure following other procedure,G97.62,unspecified
+other_neuro_conditions,Postprocedural seroma of a nervous system organ or structure following a nervous system procedure,G97.63,unspecified
+other_neuro_conditions,Postprocedural seroma of a nervous system organ or structure following other procedure,G97.64,unspecified
+other_neuro_conditions,Other intraoperative complications of nervous system,G97.81,unspecified
+other_neuro_conditions,Other postprocedural complications and disorders of nervous system,G97.82,unspecified
+other_neuro_conditions,Intracranial hypotension following lumbar cerebrospinal fluid shunting,G97.83,unspecified
+other_neuro_conditions,Intracranial hypotension following other procedure,G97.84,unspecified
+other_neuro_conditions,"Neurogenic arthritis, not elsewhere classified",G98.0,unspecified
+other_neuro_conditions,Other disorders of nervous system,G98.8,unspecified
+other_neuro_conditions,Autonomic neuropathy in diseases classified elsewhere,G99.0,unspecified
+other_neuro_conditions,Myelopathy in diseases classified elsewhere,G99.2,unspecified
+other_neuro_conditions,Other specified disorders of nervous system in diseases classified elsewhere,G99.8,unspecified
+deformity,"Breakdown (mechanical) of internal fixation device of vertebrae, initial encounter",T84.216A,unspecified
+deformity,"Displacement of internal fixation device of vertebrae, initial encounter",T84.226A,unspecified
+deformity,"Other mechanical complication of internal fixation device of vertebrae, initial encounter",T84.296A,unspecified
+infection,"Infection and inflammatory reaction due to internal fixation device of spine, initial encounter",T84.63XA,unspecified
+infection,"Infection following a procedure, unspecified, initial encounter",T81.40XA,unspecified
+infection,"Infection following a procedure, superficial incisional surgical site, initial encounter",T81.41XA,unspecified
+infection,"Infection following a procedure, deep incisional surgical site, initial encounter",T81.42XA,unspecified
+msk,"Breakdown (mechanical) of internal fixation device of vertebrae, initial encounter",T84.216A,unspecified
+msk,"Displacement of internal fixation device of vertebrae, initial encounter",T84.226A,unspecified
+msk,"Other mechanical complication of internal fixation device of vertebrae, initial encounter",T84.296A,unspecified

@@ -19,7 +19,7 @@ jh_reorder_levels_function <- function(level_vector){
     select(level) %>%
     as_vector()
   return(levels)
-}
+} 
 
 # ## for screw sizes
 # screw_levels_vector <- c('Occiput', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'S1', 'Iliac', 'S2AI')
@@ -515,7 +515,9 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                                              text_align = "left", 
                                              top_margin = "auto",
                                              bottom_margin = "auto", 
+                                             status_color = "success",
                                              individual_buttons = FALSE,
+                                             justified_radio_buttons  = TRUE,
                                              check_icon_for_radiogroupbuttons = list(
                                                yes = tags$i(class = "fa fa-check-square", 
                                                             style = "color: steelblue"),
@@ -551,6 +553,19 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                    tags$td(width = paste0(right_column_percent_width, "%"), textInput(inputId = input_id, label = NULL, value = initial_value_selected))
     )  
   }
+  if(input_type == "textAreaInput"){
+    row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   tags$td(width = paste0(right_column_percent_width, "%"), textAreaInput(inputId = input_id, label = NULL, 
+                                                                                          value = initial_value_selected,
+                                                                                          width = "100%", height = 200))
+    )  
+  }
+  
+  # textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 750),
   if(input_type == "picker"){
     row <- tags$tr(width = "100%",
                    if(required_option == TRUE){
@@ -604,7 +619,9 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                      tags$td(width = "3%", tags$div(style = required_label_style, "***"))
                    },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
-                   tags$td(width = paste0(right_column_percent_width, "%"), radioGroupButtons(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical"), checkIcon = check_icon_for_radiogroupbuttons, individual = individual_buttons))
+                   tags$td(width = paste0(right_column_percent_width, "%"), 
+                           radioGroupButtons(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical"), checkIcon = check_icon_for_radiogroupbuttons,
+                                             individual = individual_buttons))
     )  
   }
   if(input_type == "awesomeRadio"){
@@ -613,7 +630,12 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                      tags$td(width = "3%", tags$div(style = required_label_style, "***"))
                    },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
-                   tags$td(width = paste0(right_column_percent_width, "%"), awesomeRadio(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, inline = checkboxes_inline, status = "success"))
+                   tags$td(width = paste0(right_column_percent_width, "%"), awesomeRadio(inputId = input_id, 
+                                                                                         label = NULL,
+                                                                                         choices = choices_vector, 
+                                                                                         selected = initial_value_selected,
+                                                                                         inline = checkboxes_inline, 
+                                                                                         status = status_color))
     )  
   }
   if(input_type == "date"){

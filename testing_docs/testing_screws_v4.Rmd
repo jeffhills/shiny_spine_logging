@@ -1,0 +1,711 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(shiny)
+library(shinyWidgets)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+library(shinyBS)
+library(cowplot)
+library(magick)
+library(ggpattern)
+library(glue)
+library(rlist)
+library(janitor)
+library(lubridate)
+library(redcapAPI)
+# library(ggpmisc)
+# library(rclipboard)
+library(nngeo)# 
+library(shinydashboard)
+source("short_shiny_functions.R", local = TRUE)
+source("make_geoms_functions.R", local = TRUE)
+source("build_spine_objects_functions.R", local = TRUE)
+source("load_coordinates_build_objects.R", local = TRUE)
+source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
+source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
+# source("no_implants_added_op_note.R", local = TRUE)
+source("screw_size_type_inputs.R", local = TRUE)
+
+l6_all_implants_constructed_df
+```
+
+
+```{r}
+all_screws_long_df <- all_implants_constructed_df %>%
+  filter(vertebral_number < 23.9) %>%
+  union_all(l6_all_implants_constructed_df) %>%
+  select(level, vertebral_number, side, object) %>%
+  filter(str_detect(object, "screw")) %>%
+  filter(side == "left" | side == "right") %>%
+  arrange(vertebral_number) %>%
+  select(-vertebral_number) %>%
+  group_by(level, side, object) %>%
+  mutate(count = row_number()) %>%
+  ungroup() %>%
+  mutate(level_object = if_else(object %in% c("pelvic_screw"), str_to_lower(paste(level, object, count, sep = "_")), str_to_lower(paste(level, object, sep = "_")))) %>%
+  mutate(level_object_label = if_else(object %in% c("pelvic_screw"), str_to_title(paste(level, str_replace_all(object, "_", " "), count, sep = " ")), 
+                                      str_to_title(paste(level, str_replace_all(object, "_", " "), sep = " ")))) %>%
+  select(-side) %>%
+  distinct() %>%
+  mutate(left_input_name_prefix = paste("left", level_object, sep = "_"))%>%
+  mutate(right_input_name_prefix = paste("right", level_object, sep = "_")) %>%
+  mutate(implant_row_id = row_number()) %>%
+  select(implant_row_id, everything())
+
+all_screws_long_df
+```
+
+### make screw size inputs df
+```{r}
+screw_size_inputs_laterality_long_df <- all_screws_long_df %>%
+  mutate(laterality = "bilateral") %>%
+  mutate(shiny_input = pmap(list(
+                                  ..1 = level_object_label,
+                                  ..2 = left_input_name_prefix,
+                                  ..3 = right_input_name_prefix), 
+         .f = ~ fluidRow(
+           column(4, 
+                             ..1), 
+                      column(2, 
+                             numericInput(inputId = paste0(..2, "_diameter"),
+                                                                      label = NULL, 
+                                                                      value = "",
+                                                                      width = '85%')), 
+                      column(2, 
+                             numericInput(inputId = paste0(..2, "_length"),
+                                                                      label = NULL, 
+                                                                      value = "",
+                                                                      width = '85%')), 
+                      column(2, 
+                             numericInput(inputId = paste0(..3, "_diameter"),
+                                                                      label = NULL, 
+                                                                      value = "",
+                                                                      width = '85%')), 
+                      column(2, 
+                             numericInput(inputId = paste0(..3, "_length"),
+                                                                      label = NULL, 
+                                                                      value = "",
+                                                                      width = '85%'))))
+  ) %>%
+  select(implant_row_id, level_object, laterality, left_input_name_prefix, right_input_name_prefix, shiny_input) %>%
+  union_all(all_screws_long_df %>%
+  mutate(laterality = "left_only") %>%
+  mutate(shiny_input = pmap(list(
+                                  ..1 = level_object_label,
+                                  ..2 = left_input_name_prefix,
+                                  ..3 = right_input_name_prefix), 
+         .f = ~ fluidRow(
+           column(4, 
+                             ..1), 
+                      column(2, 
+                             numericInput(inputId = paste0(..2, "_diameter"),
+                                                                      label = NULL, 
+                                                                      value = "",
+                                                                      width = '85%')), 
+                      column(2, 
+                             numericInput(inputId = paste0(..2, "_length"),
+                                                                      label = NULL, 
+                                                                      value = "",
+                                                                      width = '85%')), 
+                      column(2, 
+                             " "), 
+                      column(2, 
+                             " ")))
+  ) %>%
+  select(implant_row_id, level_object, laterality, left_input_name_prefix, shiny_input)) %>%
+  union_all(all_screws_long_df %>%
+  mutate(laterality = "right_only") %>%
+  mutate(shiny_input = pmap(list(
+                                  ..1 = level_object_label,
+                                  ..2 = left_input_name_prefix,
+                                  ..3 = right_input_name_prefix), 
+         .f = ~ fluidRow(
+           column(4, 
+                             ..1), 
+                      column(2, 
+                             " "), 
+                      column(2, 
+                             " "), 
+                      column(2, 
+                             numericInput(inputId = paste0(..3, "_diameter"),
+                                                                      label = NULL, 
+                                                                      value = "",
+                                                                      width = '85%')), 
+                      column(2, 
+                             numericInput(inputId = paste0(..3, "_length"),
+                                                                      label = NULL, 
+                                                                      value = "",
+                                                                      width = '85%'))))
+  ) %>%
+  select(implant_row_id, level_object, laterality, right_input_name_prefix,  shiny_input)) %>%
+    replace_na(list(left_input_name_prefix = "", right_input_name_prefix = "")) %>%
+  mutate(left_diameter_input_name = paste(left_input_name_prefix, "diameter", sep = "_")) %>%
+  mutate(left_length_input_name = paste(left_input_name_prefix, "length", sep = "_")) %>%
+  mutate(right_diameter_input_name = paste(right_input_name_prefix, "diameter", sep = "_")) %>%
+  mutate(right_length_input_name = paste(right_input_name_prefix, "length", sep = "_")) %>%
+  select(implant_row_id, level_object, laterality, left_diameter_input_name, left_length_input_name,right_diameter_input_name, right_length_input_name, shiny_input) %>%
+  mutate(level_object_laterality = paste(level_object, laterality, sep = "_")) %>%
+  select(level_object_laterality, everything())
+
+
+
+screw_size_inputs_laterality_long_df
+
+```
+
+### make screw types input long df
+```{r}
+screw_types_inputs_laterality_long_df <- all_screws_long_df %>%
+  mutate(laterality = "bilateral") %>%
+  mutate(shiny_input = pmap(list(
+                                  ..1 = level_object_label,
+                                  ..2 = left_input_name_prefix,
+                                  ..3 = right_input_name_prefix), 
+         .f = ~ fluidRow(
+           column(4, 
+                             ..1), 
+                      column(4, 
+                             radioGroupButtons( #"option2",  
+                               inputId = paste0(..2, "_diameter"),
+                               label = NULL, 
+                               choices = c("M", "U", "P", "Red", "Offset"),
+                               selected = "P",
+                               checkIcon = list(yes = icon("wrench")),
+                               size = "xs", direction = "horizontal",
+                               justified = TRUE,
+                               width = "95%"
+                             )
+                             ), 
+                      column(4, 
+                             radioGroupButtons( #"option2",  
+                               inputId = paste0(..3, "_diameter"),
+                               label = NULL, 
+                               choices = c("M", "U", "P", "Red", "Offset"),
+                               selected = "P",
+                               checkIcon = list(yes = icon("wrench")),
+                               size = "xs", direction = "horizontal",
+                               justified = TRUE,
+                               width = "95%"
+                             )
+                             ), 
+         )
+  )
+  ) %>%
+  select(implant_row_id, level_object, laterality, left_input_name_prefix, right_input_name_prefix, shiny_input) %>%
+  union_all(all_screws_long_df %>%
+  mutate(laterality = "left_only") %>%
+  mutate(shiny_input = pmap(list(
+                                  ..1 = level_object_label,
+                                  ..2 = left_input_name_prefix,
+                                  ..3 = right_input_name_prefix), 
+         .f = ~ fluidRow(
+           column(4, 
+                             ..1), 
+                      column(4, 
+                             radioGroupButtons( #"option2",  
+                               inputId = paste0(..2, "_diameter"),
+                               label = NULL, 
+                               choices = c("M", "U", "P", "Red", "Offset"),
+                               selected = "P",
+                               checkIcon = list(yes = icon("wrench")),
+                               size = "xs", direction = "horizontal",
+                               justified = TRUE,
+                               width = "95%"
+                             )
+                             ), 
+                      column(4, 
+                             " "
+                             ), 
+         )
+  )
+  ) %>%
+  select(implant_row_id, level_object, laterality, left_input_name_prefix, shiny_input)) %>% 
+  union_all(all_screws_long_df %>%
+  mutate(laterality = "right_only") %>%
+  mutate(shiny_input = pmap(list(
+                                  ..1 = level_object_label,
+                                  ..2 = left_input_name_prefix,
+                                  ..3 = right_input_name_prefix), 
+         .f = ~ fluidRow(
+           column(4, 
+                             ..1), 
+                      column(4, 
+                             " "
+                             ), 
+                      column(4, 
+                             radioGroupButtons( #"option2",  
+                               inputId = paste0(..3, "_diameter"),
+                               label = NULL, 
+                               choices = c("M", "U", "P", "Red", "Offset"),
+                               selected = "P",
+                               checkIcon = list(yes = icon("wrench")),
+                               size = "xs", direction = "horizontal",
+                               justified = TRUE,
+                               width = "95%"
+                             )
+                             ), 
+         )
+  )
+  ) %>%
+  select(implant_row_id, level_object, laterality, right_input_name_prefix, shiny_input)) %>%
+  replace_na(list(left_input_name_prefix = "", right_input_name_prefix = "")) %>%
+  mutate(left_type_input_name = paste(left_input_name_prefix, "type", sep = "_")) %>%
+  mutate(right_type_input_name = paste(right_input_name_prefix, "type", sep = "_")) %>%
+  select(implant_row_id, level_object, laterality, left_type_input_name, right_type_input_name, shiny_input)%>%
+  mutate(level_object_laterality = paste(level_object, laterality, sep = "_")) %>%
+  select(level_object_laterality, everything())
+
+
+```
+
+
+```{r}
+
+screw_size_inputs_laterality_long_df
+
+screw_types_inputs_laterality_long_df
+
+```
+
+
+```{r}
+# test_implant_df <- 
+all_implants_constructed_df
+
+test_implant_df <- all_implants_constructed_df %>%
+  select(level, vertebral_number, side, object) %>%
+  filter(str_detect(object, "pedicle_screw") | str_detect(object, "pelvic_sc")) %>%
+  filter(side == "left") %>%
+  filter(vertebral_number %in% c(23, 24, 27)) %>%
+  union_all(all_implants_constructed_df %>%
+  select(level, vertebral_number, side, object) %>%
+  filter(str_detect(object, "pedicle_screw") | str_detect(object, "pelvic_sc")) %>%
+  filter(side == "right") %>%
+  filter(vertebral_number %in% c(23, 24, 25, 27))) %>%
+  arrange(vertebral_number)
+
+test_implant_df
+
+jh_generate_screw_laterality_df_from_full_implant_df_function(full_implant_df = test_implant_df)
+
+implant_df_for_testing <- all_implants_constructed_df %>%
+  select(level, vertebral_number, side, object) %>%
+  filter(str_detect(object, "screw")) %>%
+  filter(vertebral_number > 22) %>%
+  mutate(level_object_for_choosing = paste(level, side, object, sep = "_")) %>%
+  mutate(implant_id = row_number())
+
+implant_df_for_testing
+```
+
+### now need to retrieve the results
+```{r}
+
+df_of_selected_screws_testing <- jh_generate_screw_laterality_df_from_full_implant_df_function(full_implant_df = test_implant_df)
+
+df_of_selected_screws_testing %>%
+  select(-shiny_input) %>%
+  select(level_object, left_diameter_input_name, right_diameter_input_name) %>%
+  pivot_longer()
+
+
+jh_function_for_generating_screw_details_df <- function(all_objects_df){
+  all_objects_df %>%
+    filter(str_detect(object, "screw")) %>%
+    group_by(level, side, object) %>%
+    mutate(count = row_number()) %>%
+    ungroup() %>%
+    mutate(diameter_input_name = if_else(object == "pelvic_screw", str_to_lower(paste(side, level, object, count, "diameter", sep = "_")),
+                                         str_to_lower(paste(side, level, object,"diameter", sep = "_")))) %>%
+    mutate(length_input_name = if_else(object == "pelvic_screw", str_to_lower(paste(side, level, object, count, "length", sep = "_")), 
+                                       str_to_lower(paste(side, level, object,"length", sep = "_")))) %>%
+    mutate(type_input_name = if_else(object == "pelvic_screw", str_to_lower(paste(side, level, object, count, "type", sep = "_")),
+                                     str_to_lower(paste(side, level, object, "type", sep = "_")))) %>%
+    mutate(screw_diameter = map(.x = diameter_input_name, .f = ~ input[[.x]])) %>%
+    unnest() %>%
+    mutate(screw_length = map(.x = length_input_name, .f = ~ input[[.x]])) %>%
+    unnest() %>%
+    mutate(screw_type = map(.x = type_input_name, .f = ~ input[[.x]])) %>%
+    unnest()
+}
+
+# select(level, side, object, screw_diameter, screw_length, screw_type)
+  
+all_screws_long_df
+
+```
+
+```{r}
+
+ui <- shinyUI(basicPage(
+  
+  column(width = 12, 
+           column(width = 3, 
+         checkboxGroupInput(inputId = "screws_selected", 
+                                                 label = "Screws Selected:", 
+                                                 choices = implant_df_for_testing$level_object_for_choosing)
+         ),
+  column(width = 9,
+         box(width = 12,  
+          switchInput(inputId = "test", label = "Switch", value = FALSE),
+             conditionalPanel(condition = "input.test == true",
+                              checkboxGroupInput(inputId = "screw_options_for_verification",
+                                                 label = "screws selected for verification:", 
+                                                 choices = implant_df_for_testing$level_object_for_choosing
+                              ),
+                              checkboxGroupInput(inputId = "level_object_laterality",
+                                                 label = "Screw Levels:",
+                                                 choices = screw_size_inputs_laterality_long_df$level_object_laterality)
+             )
+          ),
+         br(),
+         box(width = 12,
+          title = "Screw Size Inputs",
+          fluidRow(
+           column(4, 
+                             "Implant"), 
+                      column(2, 
+                             "Left Diameter"), 
+                      column(2, 
+                             "Left Length"), 
+                      column(2, 
+                             "Right Diameter"), 
+                      column(2, 
+                             "Right Length")
+           ),
+          map(.x = c(1:nrow(screw_size_inputs_laterality_long_df)),
+              .f = ~ 
+                       conditionalPanel(condition = glue("input.level_object_laterality.indexOf('{screw_size_inputs_laterality_long_df$level_object_laterality[.x]}') >-1"),
+                        screw_size_inputs_laterality_long_df$shiny_input[.x]
+              )
+          )
+         ),
+         hr(),
+         box(width = 12,
+          title = "Screw TYPES",
+          fluidRow(
+           column(4, 
+                             "Implant"), 
+                      column(4, 
+                             "Left Screw Type"), 
+                      column(4, 
+                             "Right Screw Type"), 
+           ),
+          map(.x = c(1:nrow(screw_types_inputs_laterality_long_df)),
+              .f = ~ 
+                       conditionalPanel(condition = glue("input.level_object_laterality.indexOf('{screw_types_inputs_laterality_long_df$level_object_laterality[.x]}') >-1"),
+                        screw_types_inputs_laterality_long_df$shiny_input[.x]
+                       )
+          )
+         ),
+         box(width = 12, 
+             tableOutput(outputId = "screw_details_redcap_df_sidetab")
+         )
+  )
+  )
+)
+)
+
+
+
+
+################################################ SERVER ################################################ 
+################################################ SERVER ################################################ 
+################################################ SERVER ################################################ 
+
+server <- function(input, output, session) {
+  
+  ####################### update levels and screws selected inputs
+  observeEvent(input$screws_selected, {
+    if(length(input$screws_selected)>0){
+         updateCheckboxGroupInput(session = session, 
+                      inputId = "screw_options_for_verification",
+                      choices = input$screws_selected,
+                      selected = input$screws_selected) 
+    }
+  })
+  
+      ####################### Generate reactive DF
+  
+  screws_selected_full_laterality_df_reactive <- reactive({
+    if(length(input$screws_selected)>0){
+      implants_added_df <-  tibble(level_object_for_choosing = input$screws_selected) %>%
+        left_join(implant_df_for_testing) %>%
+        arrange(implant_id) %>%
+        select(-level_object_for_choosing)
+      
+      jh_generate_screw_laterality_df_from_full_implant_df_function(full_implant_df = implants_added_df)
+      
+    }else{
+      tibble(level_object = character(), laterality = character(), level_object_laterality = character())
+    }
+
+  })
+  ####################### NOW UPDATE THE INPUT TO HAVE THE LATERALITY FOR EACH IMPLANT 
+  
+    observeEvent(input$screws_selected, {
+    if(length(input$screws_selected)>0){
+      
+      # laterality_df <- jh_generate_screw_laterality_df_from_full_implant_df_function(full_implant_df = screws_selected_full_laterality_df_reactive())
+
+      
+         updateCheckboxGroupInput(session = session, 
+                      inputId = "level_object_laterality",
+                      choices = screws_selected_full_laterality_df_reactive()$level_object_laterality,
+                      selected = screws_selected_full_laterality_df_reactive()$level_object_laterality) 
+    }
+  })
+  
+
+
+  
+  output$screw_details_redcap_df_sidetab <- renderTable({
+    
+    screws_selected_full_laterality_df_reactive() %>%
+      select(-contains("input")) 
+    
+    
+  })
+  
+  
+  
+}
+
+rm(ui, server)
+
+shinyApp(ui = ui, server = server)
+
+all_screw_size_type_inputs_df
+```
+
+
+
+```{r}
+all_implants_constructed_df %>%
+  filter(vertebral_number < 23.9) %>%
+  union_all(l6_all_implants_constructed_df) %>%
+  select(level, vertebral_number, side, object) %>%
+  filter(str_detect(object, "screw")) %>%
+  filter(side == "left" | side == "right") %>%
+  arrange(vertebral_number) %>%
+  select(-vertebral_number) %>%
+  group_by(level, side, object) %>%
+  mutate(count = row_number()) %>%
+  ungroup() %>%
+  mutate(level_object = if_else(object %in% c("pelvic_screw"), str_to_lower(paste(level, object, count, sep = "_")), str_to_lower(paste(level, object, sep = "_")))) %>%
+  mutate(level_object_label = if_else(object %in% c("pelvic_screw"), str_to_title(paste(level, str_replace_all(object, "_", " "), count, sep = " ")), 
+                                      str_to_title(paste(level, str_replace_all(object, "_", " "), sep = " ")))) %>%
+  select(-side) %>%
+  distinct() %>%
+  mutate(left_input_name_prefix = paste("left", level_object, sep = "_"))%>%
+  mutate(right_input_name_prefix = paste("right", level_object, sep = "_")) %>%
+  mutate(implant_row_id = row_number()) %>%
+  select(implant_row_id, everything())
+```
+
+
+```{r}
+all_screws_inputs_long_df <- all_screws_long_df %>%
+  select(implant_row_id, level_object_label, left_input_name_prefix, right_input_name_prefix) %>%
+  mutate(left_diameter_input = map(.x = left_input_name_prefix, 
+                                   .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                      label = NULL, 
+                                                      value = "",
+                                                      width = '85%'))) %>%
+  mutate(left_length_input = map(.x = left_input_name_prefix, 
+                                 .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                    label = NULL, 
+                                                    value = "",
+                                                    width = '85%'))) %>%
+  mutate(right_diameter_input = map(.x = right_input_name_prefix, 
+                                    .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                       label = NULL, 
+                                                       value = "",
+                                                       width = '85%'))) %>%
+  mutate(right_length_input = map(.x = right_input_name_prefix, 
+                                  .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                     label = NULL, 
+                                                     value = "",
+                                                     width = '85%'))) %>%
+  mutate(left_type_input = map(.x = left_input_name_prefix, 
+                                  .f = ~radioGroupButtons( #"option2",  
+                           inputId = paste0(.x, "_type"),
+                           label = NULL, 
+                           choices = c("M", "U", "P", "Red", "Offset"),
+                           selected = "P",
+                           checkIcon = list(yes = icon("wrench")),
+                           size = "xs", direction = "horizontal",
+                           justified = TRUE,
+                           width = "95%"
+                         ))) %>%
+  mutate(right_type_input = map(.x = right_input_name_prefix, 
+                                  .f = ~radioGroupButtons( #"option2",  
+                           inputId = paste0(.x, "_type"),
+                           label = NULL, 
+                           choices = c("M", "U", "P", "Red", "Offset"),
+                           selected = "P",
+                           checkIcon = list(yes = icon("wrench")),
+                           size = "xs", direction = "horizontal",
+                           justified = TRUE,
+                           width = "95%"
+                         ))) 
+
+all_screws_inputs_long_df
+```
+
+
+```{r}
+
+all_screws_inputs_long_df %>%
+  mutate(laterality = "bilateral") %>%
+  mutate(shiny_input = pmap(list(
+    ..1 = level_object_label,
+    ..2 = left_diameter_input,
+    ..3 = left_length_input,
+    ..4 = right_diameter_input,
+    ..5 = right_length_input), 
+    .f = ~ fluidRow(
+      column(4, 
+             ..1), 
+      column(2, 
+             ..2), 
+      column(2, 
+             ..3), 
+      column(2, 
+             ..4), 
+      column(2, 
+             ..5)))
+  ) %>%
+  select(implant_row_id, level_object_label, laterality, left_input_name_prefix, right_input_name_prefix, shiny_input) %>%
+  union_all(all_screws_inputs_long_df %>%
+  mutate(laterality = "left_only") %>%
+  mutate(shiny_input = pmap(list(
+    ..1 = level_object_label,
+    ..2 = left_diameter_input,
+    ..3 = left_length_input,
+    ..4 = right_diameter_input,
+    ..5 = right_length_input), 
+    .f = ~ fluidRow(
+      column(4, 
+             ..1), 
+      column(2, 
+             ..2), 
+      column(2, 
+             ..3), 
+      column(2, 
+             " "), 
+      column(2, 
+             " ")))
+  ) %>%
+  select(implant_row_id, level_object_label, laterality, left_input_name_prefix, right_input_name_prefix, shiny_input)) %>% 
+  union_all(all_screws_inputs_long_df %>%
+  mutate(laterality = "right_only") %>%
+  mutate(shiny_input = pmap(list(
+    ..1 = level_object_label,
+    ..2 = left_diameter_input,
+    ..3 = left_length_input,
+    ..4 = right_diameter_input,
+    ..5 = right_length_input), 
+    .f = ~ fluidRow(
+      column(4, 
+             ..1), 
+      column(2, 
+             " "), 
+      column(2, 
+            " "), 
+      column(2, 
+             ..4), 
+      column(2, 
+             ..5)))
+  ) %>%
+  select(implant_row_id, level_object_label, laterality, left_input_name_prefix, right_input_name_prefix, shiny_input)) %>%
+  mutate(level_object = str_to_lower(str_replace_all(level_object_label, " ", "_"))) %>%
+  select(implant_row_id, level_object, laterality, shiny_input) %>%
+  mutate(level_object_laterality = paste(level_object, laterality, sep = "_")) %>%
+  select(level_object_laterality, everything())%>%
+  arrange(implant_row_id)
+
+
+all_screws_inputs_long_df
+```
+
+```{r}
+all_screws_inputs_long_df %>%
+  mutate(laterality = "bilateral") %>%
+    mutate(shiny_input = pmap(list(
+    ..1 = level_object_label,
+    ..2 = left_type_input,
+    ..3 = right_type_input), 
+    .f = ~ fluidRow(
+      column(4, 
+             ..1
+             ), 
+      column(4, 
+             ..2
+             ), 
+      column(4, 
+             ..3
+             )
+      )
+    )
+    ) %>%
+  select(implant_row_id, level_object_label, laterality, left_input_name_prefix, right_input_name_prefix, shiny_input) %>%
+  union_all(all_screws_inputs_long_df %>%
+  mutate(laterality = "left_only") %>%
+    mutate(shiny_input = pmap(list(
+    ..1 = level_object_label,
+    ..2 = left_type_input,
+    ..3 = right_type_input), 
+    .f = ~ fluidRow(
+      column(4, 
+             ..1
+             ), 
+      column(4, 
+             ..2
+             ), 
+      column(4, 
+             " "
+             )
+      )
+    )
+    ) %>%
+  select(implant_row_id, level_object_label, laterality, left_input_name_prefix, right_input_name_prefix, shiny_input)) %>% 
+  union_all(all_screws_inputs_long_df %>%
+  mutate(laterality = "right_only") %>%
+    mutate(shiny_input = pmap(list(
+    ..1 = level_object_label,
+    ..2 = left_type_input,
+    ..3 = right_type_input), 
+    .f = ~ fluidRow(
+      column(4, 
+             ..1
+             ), 
+      column(4, 
+             " "
+             ), 
+      column(4, 
+             ..3
+             )
+      )
+    )
+    ) %>%
+  select(implant_row_id, level_object_label, laterality, left_input_name_prefix, right_input_name_prefix, shiny_input)) %>%
+  mutate(level_object = str_to_lower(str_replace_all(level_object_label, " ", "_"))) %>%
+  select(implant_row_id, level_object, laterality, shiny_input) %>%
+  mutate(level_object_laterality = paste(level_object, laterality, sep = "_")) %>%
+  select(level_object_laterality, everything())%>%
+  arrange(implant_row_id)
+```
+
+
+```{r}
+
+
+
+```
+
+
