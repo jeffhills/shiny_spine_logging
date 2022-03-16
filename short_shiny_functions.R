@@ -69,7 +69,7 @@ jh_convert_body_levels_to_interspace_vector_function <- function(vertebral_bodie
 #################################
 jh_check_body_or_interspace_function <- function(level){
   result <- case_when(level %in% vertebral_bodies_vector ~ "body",
-            level %in% interspaces_vector ~ "interspace")
+                      level %in% interspaces_vector ~ "interspace")
   
   result
 }
@@ -377,7 +377,7 @@ jh_filter_osteotomies_function <- function(full_df_to_filter){
                                      distal_level %in% grade_3_osteotomy_df$level |
                                      distal_level %in% grade_4_osteotomy_df$level |
                                      distal_level %in% grade_5_osteotomy_df$level, "remove", "keep")) %>%
-        select(-proximal_level, -distal_level)
+      select(-proximal_level, -distal_level)
   }
   
   if(nrow(grade_3_osteotomy_df)>0){
@@ -394,7 +394,7 @@ jh_filter_osteotomies_function <- function(full_df_to_filter){
     grade_5_osteotomy_df <- grade_5_osteotomy_df %>%
       mutate(keep_remove = "keep")
   }
-
+  
   
   all_grades_df <- grade_1_osteotomy_df %>%
     union_all(grade_2_osteotomy_df) %>%
@@ -655,7 +655,7 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
   }else{
     return(row)
   }
-
+  
 }
 
 jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
@@ -824,9 +824,9 @@ jh_make_shiny_table_column_function <- function(input_type,
                                                 text_align = "left",
                                                 bottom_margin = "auto",
                                                 top_margin = "auto"
-                                                ){
-
-
+){
+  
+  
   if(input_type == "title"){
     left_shiny_input <-  div(style = glue("font-size:{font_size}px; font-weight:bold; text-align:{text_align}; margin-bottom:{bottom_margin}; margin-top:{top_margin}"), left_label)
     
@@ -836,116 +836,116 @@ jh_make_shiny_table_column_function <- function(input_type,
   
   if(input_type == "numericInput"){
     left_shiny_input <-numericInput(inputId = left_input_id, 
-                             label = left_label, 
-                             value = initial_value_selected, 
-                             min = min,
-                             max = max,
-                             step = step
+                                    label = left_label, 
+                                    value = initial_value_selected, 
+                                    min = min,
+                                    max = max,
+                                    step = step
     )
     
     right_shiny_input <-numericInput(inputId = right_input_id, 
-                              label = right_label, 
-                              value = initial_value_selected, min = min, max = max, step = step
+                                     label = right_label, 
+                                     value = initial_value_selected, min = min, max = max, step = step
     )
   }
   
   if(input_type == "textInput"){
     left_shiny_input <-textInput(inputId = left_input_id, 
-                          label = left_label, 
-                          value = initial_value_selected 
+                                 label = left_label, 
+                                 value = initial_value_selected 
     )
     
     right_shiny_input <-textInput(inputId = right_input_id, 
-                           label = right_label, 
-                           value = initial_value_selected
+                                  label = right_label, 
+                                  value = initial_value_selected
     )
   }
-
-    if(input_type == "pickerInput"){
+  
+  if(input_type == "pickerInput"){
     left_shiny_input <-pickerInput(inputId = left_input_id, 
-                            label = left_label, 
-                            choices = choices_vector,
-                            selected = initial_value_selected, 
-                            multiple = picker_choose_multiple 
+                                   label = left_label, 
+                                   choices = choices_vector,
+                                   selected = initial_value_selected, 
+                                   multiple = picker_choose_multiple 
     )
     
     right_shiny_input <-pickerInput(inputId = right_input_id, 
-                             label = right_label, 
-                             choices = choices_vector,
-                             selected = initial_value_selected,
-                             multiple = picker_choose_multiple )
-
+                                    label = right_label, 
+                                    choices = choices_vector,
+                                    selected = initial_value_selected,
+                                    multiple = picker_choose_multiple )
+    
   }
   
   if(input_type == "switchInput"){
     left_shiny_input <-switchInput(inputId = left_input_id, 
-                            label = left_label, 
-                            onLabel = switch_input_on_label, 
-                            offLabel = switch_input_off_label
+                                   label = left_label, 
+                                   onLabel = switch_input_on_label, 
+                                   offLabel = switch_input_off_label
     )
     
     right_shiny_input <-switchInput(inputId = right_input_id, 
-                             label = right_label, 
-                             onLabel = switch_input_on_label, 
-                             offLabel = switch_input_off_label
+                                    label = right_label, 
+                                    onLabel = switch_input_on_label, 
+                                    offLabel = switch_input_off_label
     )
-
+    
   }
   
   if(input_type == "awesomeCheckboxGroup"){
     left_shiny_input <-awesomeCheckboxGroup(inputId = left_input_id, 
-                                     label = left_label, 
-                                     choices = choices_vector,
-                                     selected = initial_value_selected, 
-                                     inline = checkboxes_inline, 
-                                     status = status)
+                                            label = left_label, 
+                                            choices = choices_vector,
+                                            selected = initial_value_selected, 
+                                            inline = checkboxes_inline, 
+                                            status = status)
     
     right_shiny_input <-awesomeCheckboxGroup(inputId = right_input_id, 
-                                      label = right_label, 
-                                      choices = choices_vector,
-                                      selected = initial_value_selected,
-                                      inline = checkboxes_inline, 
-                                      status = status)
+                                             label = right_label, 
+                                             choices = choices_vector,
+                                             selected = initial_value_selected,
+                                             inline = checkboxes_inline, 
+                                             status = status)
     
   }
   if(input_type == "radioGroupButtons"){
     left_shiny_input <-radioGroupButtons(inputId = left_input_id, 
-                                  label = left_label, 
-                                  choices = choices_vector,
-                                  selected = initial_value_selected, 
-                                  direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical"),
-                                  size = button_size, 
-                                  status = status, 
-                                  checkIcon = list(
-                                    yes = tags$i(class = "fas fa-check",
-                                                 style = "color: steelblue")))
+                                         label = left_label, 
+                                         choices = choices_vector,
+                                         selected = initial_value_selected, 
+                                         direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical"),
+                                         size = button_size, 
+                                         status = status, 
+                                         checkIcon = list(
+                                           yes = tags$i(class = "fas fa-check",
+                                                        style = "color: steelblue")))
     
     right_shiny_input <-radioGroupButtons(inputId = right_input_id, 
-                                   label = right_label, 
-                                   choices = choices_vector,
-                                   selected = initial_value_selected,
-                                   direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical"),
-                                   size = button_size, 
-                                   status = status, 
-                                   checkIcon = list(
-                                     yes = tags$i(class = "fas fa-check",
-                                                  style = "color: steelblue")))
+                                          label = right_label, 
+                                          choices = choices_vector,
+                                          selected = initial_value_selected,
+                                          direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical"),
+                                          size = button_size, 
+                                          status = status, 
+                                          checkIcon = list(
+                                            yes = tags$i(class = "fas fa-check",
+                                                         style = "color: steelblue")))
     
   }
   if(input_type == "awesomeRadio"){
     left_shiny_input <-awesomeRadio(inputId = left_input_id, 
-                             label = left_label, 
-                             choices = choices_vector,
-                             selected = initial_value_selected, 
-                             inline = checkboxes_inline, 
-                             status = status)
+                                    label = left_label, 
+                                    choices = choices_vector,
+                                    selected = initial_value_selected, 
+                                    inline = checkboxes_inline, 
+                                    status = status)
     
     right_shiny_input <-awesomeRadio(inputId = right_input_id, 
-                              label = right_label, 
-                              choices = choices_vector,
-                              selected = initial_value_selected, 
-                              inline = checkboxes_inline, 
-                              status = status)
+                                     label = right_label, 
+                                     choices = choices_vector,
+                                     selected = initial_value_selected, 
+                                     inline = checkboxes_inline, 
+                                     status = status)
     
   }
   if(input_type == "awesomeCheckbox"){
@@ -965,18 +965,18 @@ jh_make_shiny_table_column_function <- function(input_type,
   }
   
   if(input_type == "sliderTextInput"){
-     left_shiny_input <- sliderTextInput(
+    left_shiny_input <- sliderTextInput(
       inputId = left_input_id,
       label = left_label,
       choices = choices_vector,
       selected = initial_value_selected
     )
-     right_shiny_input <- sliderTextInput(
-       inputId = right_input_id,
-       label = right_label,
-       choices = choices_vector,
-       selected = initial_value_selected
-     )
+    right_shiny_input <- sliderTextInput(
+      inputId = right_input_id,
+      label = right_label,
+      choices = choices_vector,
+      selected = initial_value_selected
+    )
   }
   
   if(str_detect(string = left_condition_statement, pattern = "input") | str_detect(string = right_condition_statement, pattern = "input")){
@@ -996,21 +996,21 @@ jh_make_shiny_table_column_function <- function(input_type,
                                )
     )
   }else{
-      table_column <- tags$table(width = paste0(table_percent_width, "%"),
-                             tags$tr(
-                               tags$td(width = "5%"),
-                               tags$td(width = paste0(left_column_percent_width - 7.5, "%"),
-                                                        left_shiny_input
+    table_column <- tags$table(width = paste0(table_percent_width, "%"),
+                               tags$tr(
+                                 tags$td(width = "5%"),
+                                 tags$td(width = paste0(left_column_percent_width - 7.5, "%"),
+                                         left_shiny_input
+                                 ),
+                                 tags$td(width = "5%"),
+                                 tags$td(width = paste0(right_column_percent_width - 7.5, "%"),
+                                         right_shiny_input)
                                ),
                                tags$td(width = "5%"),
-                               tags$td(width = paste0(right_column_percent_width - 7.5, "%"),
-                                                        right_shiny_input)
-                               ),
-                             tags$td(width = "5%"),
-      )
+    )
   }
   
-
+  
   
   return(table_column)
 }
@@ -1049,7 +1049,7 @@ fusion_levels_df_function <- function(all_objects_to_add_df){
         arrange(vertebral_number) %>%
         distinct()
     }
-
+    
   }else{
     fusions_levels_df <- tibble(level = character(), vertebral_number = double(), category = character())
   }
@@ -1078,10 +1078,10 @@ jh_fusion_category_function <- function(fusion_vector, all_objects_df){
     arrange(vertebral_number) %>%
     select(level, vertebral_number, approach, object) %>%
     mutate(fusion_category = if_else(approach == "anterior", "anterior_interbody_fusion",
-                              case_when(
-                                str_detect(object, "screw") | str_detect(object, "hook") |str_detect(object, "wire") ~ "posterolateral_fusion",
-                                str_detect(object, "lif") | str_detect(object, "interbody") |str_detect(object, "cage")| str_detect(object, "extracav")  ~ "posterior_interbody_fusion",
-                              ))) %>%
+                                     case_when(
+                                       str_detect(object, "screw") | str_detect(object, "hook") |str_detect(object, "wire") ~ "posterolateral_fusion",
+                                       str_detect(object, "lif") | str_detect(object, "interbody") |str_detect(object, "cage")| str_detect(object, "extracav")  ~ "posterior_interbody_fusion",
+                                     ))) %>%
     mutate(fusion_rank = if_else(str_detect(string = fusion_category, pattern = "interbody"), 1, 2)) 
   
   if(length(fusion_vector)>0){
@@ -1418,20 +1418,20 @@ jh_cranial_and_caudal_list_for_supplementary_rods_function <- function(all_objec
     
     osteotomy_df <- tibble(level = osteotomy_site) %>%
       mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))
-
-
+    
+    
     cranial_satellite_df <- implant_df %>%
       mutate(satellite_cranial_number = min(osteotomy_df$vertebral_number) - 1) %>%
       filter(vertebral_number <= satellite_cranial_number)
-
+    
     caudal_satellite_df <- implant_df %>%
       mutate(satellite_caudal_number = max(osteotomy_df$vertebral_number) + 1) %>%
       filter(vertebral_number >= satellite_caudal_number)
-
+    
     cranial_point_satellite <- jh_get_vertebral_level_function(number = (max(cranial_satellite_df$vertebral_number)))
     caudal_point_satellite <- jh_get_vertebral_level_function(number = (min(caudal_satellite_df$vertebral_number)))
     
-
+    
     satellite_vector <- c(cranial_point_satellite, caudal_point_satellite)
     # satellite_vector <- c("WRONG", "WRONG")
   }else if(nrow(implant_df) > 3){
@@ -1441,7 +1441,7 @@ jh_cranial_and_caudal_list_for_supplementary_rods_function <- function(all_objec
   }
   if(satellite_vector[[1]] == satellite_vector[[2]]){
     satellite_vector <- c("a", "b")  
-    }
+  }
   
   
   ############## Intercalary ROD ###################
@@ -1449,7 +1449,7 @@ jh_cranial_and_caudal_list_for_supplementary_rods_function <- function(all_objec
     
     osteotomy_df <- tibble(level = osteotomy_site) %>%
       mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))
-      # left_join(levels_numbered_df)
+    # left_join(levels_numbered_df)
     
     cranial_intercalary_df <- implant_df %>%
       mutate(intercalary_cranial_number = min(osteotomy_df$vertebral_number) - 1) %>%
@@ -1509,7 +1509,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
                                                 revision_rods_retained_df = tibble(level = character(), vertebral_number = double(), x = double(), y = double()),
                                                 unilateral_full_implant_df, 
                                                 intercalary_junction){
-
+  
   if(!is.null(unilateral_full_implant_df) && nrow(unilateral_full_implant_df)>0){
     rods_list <- list()
     connector_list <- list()
@@ -1545,10 +1545,10 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
           connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
         }
       }
-
-        
+      
+      
     }
-
+    
     implant_levels_vector <- unilateral_full_implant_df$level
     
     if(nrow(unilateral_full_implant_df) >1){

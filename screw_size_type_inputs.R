@@ -68,32 +68,32 @@ all_screw_size_type_inputs_df <- implant_starts_df %>%
 
 
 jh_generate_df_for_screening_screw_inputs_function <- function(all_implants_df){
-
+  
   level_object_df <- all_implants_df %>%
     select(level, vertebral_number, side, object) %>%
     mutate(level_object_label = str_to_title(str_replace_all(paste(level, object), "_", " "))) %>%
     mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI"))
-
+  
   level_object_label_df <- level_object_df %>%
     select(level, level_object_label) %>%
     distinct()
-
+  
   left_objects_df <- level_object_df %>%
     filter(side == "left") %>%
     mutate(left_object = str_to_lower(str_replace_all(paste(side, level_object_label, sep = "_"), " ", "_"))) %>%
     select(level_object_label, left_object)
-
+  
   right_objects_df <- level_object_df %>%
     filter(side == "right") %>%
     mutate(right_object = str_to_lower(str_replace_all(paste(side, level_object_label, sep = "_"), " ", "_"))) %>%
     select(level_object_label, right_object)
-
+  
   level_object_label_df %>%
     left_join(left_objects_df) %>%
     left_join(right_objects_df) %>%
     replace_na(list(left_object = "no_screw", right_object = "no_screw"))
-
-
+  
+  
 }
 
 

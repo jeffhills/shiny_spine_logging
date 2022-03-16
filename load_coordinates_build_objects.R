@@ -331,13 +331,13 @@ implants_constructed_df <- implant_starts_df %>%
                                               ..8 = length_for_tether,
                                               ..9 = superior_y,
                                               ..10 = inferior_y), .f = ~ screw_hook_implant_function(implant_type = ..1,
-                                                                                                           start_x = ..2,
-                                                                                                           y = ..3,
-                                                                                                           angle = ..4,
-                                                                                                           screw_length_mod = ..5,
-                                                                                                           screw_width_mod = ..6,
-                                                                                                           sublaminar_band_length = ..7,
-                                                                                                           length_for_tether = ..8,
+                                                                                                     start_x = ..2,
+                                                                                                     y = ..3,
+                                                                                                     angle = ..4,
+                                                                                                     screw_length_mod = ..5,
+                                                                                                     screw_width_mod = ..6,
+                                                                                                     sublaminar_band_length = ..7,
+                                                                                                     length_for_tether = ..8,
                                                                                                      y_superior = ..9,
                                                                                                      y_inferior = ..10)))
 
@@ -430,16 +430,16 @@ incision_drainage_df <- implant_starts_df %>%
                                         ..10 = inferior_pedicle_y,
                                         ..11 = inferior_facet_superior_border_y),
                                    .f = ~ build_incision_drainage_function(left_x = ..1,
-                                                                       superior_y = ..2,
-                                                                       right_x = ..3,
-                                                                       inferior_y = ..4,
-                                                                       top_width = ..5,
-                                                                       object = ..6,
-                                                                       x_lateral_pars = ..7,
-                                                                       y_inferior_tp = ..8,
-                                                                       side = ..9,
-                                                                       inferior_pedicle_y = ..10,
-                                                                       inferior_facet_superior_border_y = ..11)))
+                                                                           superior_y = ..2,
+                                                                           right_x = ..3,
+                                                                           inferior_y = ..4,
+                                                                           top_width = ..5,
+                                                                           object = ..6,
+                                                                           x_lateral_pars = ..7,
+                                                                           y_inferior_tp = ..8,
+                                                                           side = ..9,
+                                                                           inferior_pedicle_y = ..10,
+                                                                           inferior_facet_superior_border_y = ..11)))
 
 
 #############-----------------------   Build Open Canal df  ----------------------###############

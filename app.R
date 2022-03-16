@@ -19,7 +19,7 @@ library(nngeo)
 library(shinydashboard)
 
 
-# 
+
 # packageList <- c("shiny", "shinyWidgets", "sf", "tidyverse", "shinyBS", "cowplot", "magick", "ggpattern", "glue", "rlist",
 #                  "janitor", "lubridate", "redcapAPI", "ggpmisc", "rclipboard", "nngeo", "shinydashboard")
 # for(package in packageList){
@@ -1071,8 +1071,8 @@ server <- function(input, output, session) {
                      
                      if(length(unique(existing_patient_data$patient_df$approach))>1){
                        approach_to_use <- (all_implants_constructed_df %>%
-                          count(approach) %>%
-                          filter(n == max(n)))$approach[[1]]
+                                             count(approach) %>%
+                                             filter(n == max(n)))$approach[[1]]
                        
                        existing_patient_data$patient_df <- existing_patient_data$patient_df %>%
                          filter(approach == approach_to_use)

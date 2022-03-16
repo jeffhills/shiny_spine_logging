@@ -192,7 +192,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }else{
     geoms_list_posterior$lateral_extraforaminal_approach_sf_geom <- NULL
   }
-
+  
   if(any(all_posterior_objects_df$object == "diskectomy")){
     geoms_list_posterior$diskectomy_sf_geom <- ggpattern::geom_sf_pattern(
       data = st_multipolygon((all_posterior_objects_df %>% filter(object == "diskectomy"))$object_constructed),
@@ -209,7 +209,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
     geoms_list_posterior$laminoplasty_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(object == "laminoplasty"))$object_constructed), fill  = "blue") 
     geoms_list_posterior$laminoplasty_cut_df_sf_geom <- geom_line(data = tibble(x = 0.515,
                                                                                 # y = c(max(as_tibble(st_coordinates(head(all_posterior_objects_df %>% filter(object == "laminoplasty"), 1)$object_constructed))$Y), 
-                                                                                      # min(as_tibble(st_coordinates(tail(all_posterior_objects_df %>% filter(object == "laminoplasty"), 1)$object_constructed))$Y))),
+                                                                                # min(as_tibble(st_coordinates(tail(all_posterior_objects_df %>% filter(object == "laminoplasty"), 1)$object_constructed))$Y))),
                                                                                 y =  c(max((all_posterior_objects_df %>% filter(object == "laminoplasty"))$y + 0.01),
                                                                                        min((all_posterior_objects_df %>% filter(object == "laminoplasty"))$y) - 0.01)),
                                                                   aes(x = x, y = y), linetype = "dotted", size = 2, color = "red") 
