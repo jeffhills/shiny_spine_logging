@@ -75,7 +75,7 @@ startup_modal_box <-
         ),
         fluidRow(
           column(
-            3,
+            2,
             awesomeRadio(
               inputId = "sex",
               label = "Sex:",
@@ -95,7 +95,7 @@ startup_modal_box <-
             )
           ),
           column(
-            3,
+            4,
             dateInput(
               inputId = "date_of_surgery",
               label = "Date of Surgery (mm-dd-yyyy):",
@@ -1311,9 +1311,10 @@ addition_surgical_details_modal_box_2_function <-
           checkboxes_inline = FALSE,
           input_type = "checkbox",
           choices_vector = c("SCD's while in bed",
-                             "Hold any chemical dvt ppx for minimum 72hrs",
+                             "OK to restart dvt ppx",
+                             "Please hold any chemical dvt ppx for 48hrs",
+                             "Please hold any chemical dvt ppx/anti-platelet/anti-coag for 5 days after surgery (High risk for hematoma/wound complications)",
                              "Please do not start any chemical dvt ppx without discussion with spine team",
-                             "Please hold any chemical dvt ppx/anti-platelet/anti-coag for minimum 7days after surgery",
                              "***"),
           initial_value_selected = postop_dvt_ppx
         ),

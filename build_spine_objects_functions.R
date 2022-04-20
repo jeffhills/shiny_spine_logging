@@ -596,7 +596,7 @@ build_decompression_function <- function(left_x,
     decompression_sf <- st_buffer(decompression, dist = 0.013, endCapStyle = "ROUND")
   }
   
-  if(object == "laminectomy" | object == "laminectomy_for_tumor" | object == "sublaminar_decompression" | object == "laminotomy" | object == "diskectomy"){
+  if(object == "laminectomy" | object == "laminectomy_for_tumor" | object == "sublaminar_decompression" | object == "laminotomy" | object == "diskectomy" | object == "cervical_foraminotomy"){
     bottom_width <- right_x - left_x
     
     top_width_difference = bottom_width - top_width

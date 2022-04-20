@@ -1391,98 +1391,7 @@ server <- function(input, output, session) {
   
   
   
-  # output$screw_size_types_ui <- renderUI({
-  #   
-  #   if(nrow(screw_size_types_df_reactive())>0){
-  #     box(width = 12, 
-  #         title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
-  #         jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
-  #                                          left_column_percent_width = 30,
-  #                                          input_type = "checkbox",
-  #                                          font_size = 16, 
-  #                                          checkboxes_inline = TRUE,
-  #                                          input_id = "implant_manufacturer", choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
-  #         ),
-  #         h4("Screw Sizes:"),
-  #         fluidRow(
-  #           column(4, 
-  #                  "Implant"), 
-  #           column(2, 
-  #                  "Left Diameter"), 
-  #           column(2, 
-  #                  "Left Length"), 
-  #           column(2, 
-  #                  "Right Diameter"), 
-  #           column(2, 
-  #                  "Right Length")
-  #         ),
-  #         map(.x = c(1:length(screw_size_types_df_reactive()$level_object_label)),
-  #             .f = ~ 
-  #               conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$level_object_label[[.x]]}') >-1"),
-  #                                fluidRow(
-  #                                  column(4, 
-  #                                         screw_size_types_df_reactive()$level_object_label[[.x]]
-  #                                  ), 
-  #                                  column(2,
-  #                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$left_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$left_diameter_input[[.x]]
-  #                                         )
-  #                                  ), 
-  #                                  column(2, 
-  #                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$left_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$left_length_input[[.x]]
-  #                                         )
-  #                                  ), 
-  #                                  column(2, 
-  #                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$right_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$right_diameter_input[[.x]]
-  #                                         )
-  #                                  ), 
-  #                                  column(2, 
-  #                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$right_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$right_length_input[[.x]]
-  #                                         )
-  #                                  )
-  #                                )
-  #               )
-  #         ),
-  #         hr(),
-  #         h4("Screw Types:"),
-  #         fluidRow(
-  #           column(4, 
-  #                  "Implant"), 
-  #           column(4, 
-  #                  "Left Screw Type"), 
-  #           column(4, 
-  #                  "Right Screw Type"), 
-  #         ),
-  #         map(.x = c(1:length(screw_size_types_df_reactive()$level_object_label)),
-  #             .f = ~ 
-  #               conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$level_object_label[.x]}') >-1"),
-  #                                fluidRow(
-  #                                  column(4, 
-  #                                         screw_size_types_df_reactive()$level_object_label[[.x]]
-  #                                  ), 
-  #                                  column(4, 
-  #                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$left_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$left_type_input[[.x]]
-  #                                         )
-  #                                  ), 
-  #                                  column(4,
-  #                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$right_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$right_type_input[[.x]]
-  #                                         )
-  #                                  ), 
-  #                                )
-  #               )
-  #         )
-  #     )
-  #   }
-  #   
-  #   
-  # })
-  
-  
+
   
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
@@ -1752,21 +1661,7 @@ server <- function(input, output, session) {
     )
   })
   
-  # I THINK THIS MESSED IT UP
-  # observeEvent(list(input$deep_drains_anterior, input$superficial_drains_anterior, input$deep_drains_posterior, input$superficial_drains_posterior), ignoreInit = TRUE, {
-  #     
-  #     if(any((as.numeric(input$deep_drains_anterior) > 0 | 
-  #             as.numeric(input$superficial_drains_anterior) >0| 
-  #             as.numeric(input$deep_drains_posterior) >0| 
-  #             as.numeric(input$superficial_drains_posterior) >0))){
-  #      updateAwesomeCheckboxGroup(session = session, 
-  #                                 inputId = "postop_drains_dressing", 
-  #                                 selected = "Monitor and record drain output q12h")
-  #     }
-  #     }
-  # )
-  
-  
+
   
   observeEvent(input$additional_surgical_details_complete, ignoreInit = TRUE, {
     removeModal()
@@ -2230,6 +2125,7 @@ server <- function(input, output, session) {
       "Central Laminectomy" = "laminectomy",
       "Laminectomy for Cyst Excision" = "laminectomy_for_facet_cyst",
       "Laminotomy (Hemilaminectomy)" = "laminotomy",
+      "Posterior Cervical Foraminotomy" = "cervical_foraminotomy",
       "Complete Facetectomy (Unilateral)" = "complete_facetectomy",
       "Diskectomy" = "diskectomy",
       "Transpedicular Decompression" = "transpedicular_approach",
@@ -2732,9 +2628,7 @@ server <- function(input, output, session) {
     }else{
       object_currently_selected_to_add <- input$object_to_add
     }
-    # object_type_filtered_df <- implant_starts_df %>%
-    #     filter(object %in% object_currently_selected_to_add)
-    # 
+
     object_type_filtered_df <- all_implants_constructed_df %>%
       filter(object %in% object_currently_selected_to_add)
     
@@ -4460,6 +4354,8 @@ server <- function(input, output, session) {
     
     ##########   Hospital #############
     surgery_details_list$hospital <- as.character(input$hospital)
+    
+    surgery_details_list$hospital_mrn <- as.character(input$hospital_mrn)
     
     ##########   age #############
     surgery_details_list$age <- if_else(paste(input$date_of_birth) == "1900-01-01", "--", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0)))

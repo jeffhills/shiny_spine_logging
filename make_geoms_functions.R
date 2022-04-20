@@ -147,6 +147,18 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }else{
     geoms_list_posterior$laminotomy_sf_geom <- NULL
   }
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "cervical_foraminotomy"))){
+    geoms_list_posterior$cervical_foraminotomy_sf_geom <- ggpattern::geom_sf_pattern(
+      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "cervical_foraminotomy"))$object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }else{
+    geoms_list_posterior$cervical_foraminotomy_sf_geom <- NULL
+  }
+  
   if(any(str_detect(all_posterior_objects_df$object, pattern = "transpedicular_approach"))){
     geoms_list_posterior$transpedicular_sf_geom <- ggpattern::geom_sf_pattern(
       data = st_multipolygon((all_posterior_objects_df %>% filter(object == "transpedicular_approach"))$object_constructed),
