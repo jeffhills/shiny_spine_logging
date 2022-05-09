@@ -61,6 +61,7 @@ source("no_implants_added_op_note.R", local = TRUE)
 # 
 # server <- function(input, output) {
 #   output$date_text_output <- renderText({
+#     as.character(input$input_date)
 #   })
 # }
 # 
@@ -292,7 +293,7 @@ ui <- dashboardPage(skin = "black",
                                                                   label = NULL, 
                                                                   inline = TRUE,
                                                                   choices = c("Midline",
-                                                                              "Paraspinal or Paramedian", 
+                                                                              "Paraspinal (Wiltse)", 
                                                                               "Stab"),
                                                                   icon = icon("check"), 
                                                                   bigger = TRUE,
@@ -303,7 +304,7 @@ ui <- dashboardPage(skin = "black",
                                                                 column(width = 6, 
                                                                        prettyRadioButtons(
                                                                          inputId = "approach_open_mis",
-                                                                         label = NULL, 
+                                                                         label = "Select any techniques used:", 
                                                                          inline = TRUE,
                                                                          choices = c("Open",
                                                                                      "Tubular", 
@@ -320,11 +321,14 @@ ui <- dashboardPage(skin = "black",
                                                                 column(width = 6, 
                                                                        prettyCheckboxGroup(
                                                                          inputId = "approach_robot_navigation",
-                                                                         label = NULL, 
+                                                                         label = "Select any techniques used:", 
                                                                          inline = TRUE,
-                                                                         choices = c("Microscopic", 
-                                                                                     "Navigated", 
-                                                                                     "Robotic"),
+                                                                         choices = c(
+                                                                           "Open",
+                                                                           "Microscopic", 
+                                                                           "Fluoroscopy-guided",
+                                                                           "Navigated", 
+                                                                           "Robotic"),
                                                                          icon = icon("check"), 
                                                                          bigger = TRUE,
                                                                          status = "success"
@@ -340,12 +344,11 @@ ui <- dashboardPage(skin = "black",
                                                                 choices = c("Left-sided", 
                                                                             "Right-sided",
                                                                             "Paramedian",
-                                                                            "Lateral Transpsoas",
-                                                                            "Lateral Antepsoas",
+                                                                            "Lateral Retroperitoneal Transpsoas",
+                                                                            "Lateral Retroperitoneal Antepsoas",
                                                                             "Thoracoabdominal",
                                                                             "Thoracotomy",
-                                                                            "Transperitoneal",
-                                                                            "Retroperitoneal"),
+                                                                            "Transperitoneal"),
                                                                 selected = "Left-sided",
                                                                 icon = icon("check"),
                                                                 bigger = TRUE,
@@ -4182,6 +4185,9 @@ server <- function(input, output, session) {
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_approach_objects_df,
                                                                        fusion_levels_df = fusions_df,
                                                                        head_position = input$head_positioning,
+                                                                       surgical_approach = input$approach_specified_posterior,
+                                                                       approach_mis_open = input$approach_open_mis,
+                                                                       approach_robot_nav_xray = input$approach_robot_navigation,
                                                                        revision_decompression_vector = input$open_canal,
                                                                        revision_implants_df = revision_implants_df,
                                                                        left_main_rod_size = input$left_main_rod_size,
@@ -5053,47 +5059,47 @@ server <- function(input, output, session) {
   ########################
   
   ######## Render "Patient Details Table for side tab:"    ######## 
-  # output$patient_details_redcap_df_sidetab <- renderTable({
-  #     row_1 <- patient_details_redcap_df_reactive() %>%
-  #         slice(1) %>%
-  #         as.character()
-  #     
-  #     tibble(Variable = names(patient_details_redcap_df_reactive()), 
-  #            Result = row_1) 
-  #     
-  # })
-  
+  output$patient_details_redcap_df_sidetab <- renderTable({
+      row_1 <- patient_details_redcap_df_reactive() %>%
+          slice(1) %>%
+          as.character()
+
+      tibble(Variable = names(patient_details_redcap_df_reactive()),
+             Result = row_1)
+
+  })
+
   
   ######## Render "Procedure Summary Table for side tab:"    ######## 
-  # output$surgical_details_redcap_df_sidetab <- renderTable({
-  #     surgical_details_redcap_df_reactive()
-  # })
-  
+  output$surgical_details_redcap_df_sidetab <- renderTable({
+      surgical_details_redcap_df_reactive()
+  })
+
   
   ######## Render "Intraoperative Details Table for side tab:"    ######## 
-  # output$intraoperative_details_redcap_df_sidetab <- renderTable({
-  #     intraoperative_details_redcap_df_reactive() 
-  # })
-  # 
+  output$intraoperative_details_redcap_df_sidetab <- renderTable({
+      intraoperative_details_redcap_df_reactive()
+  })
+
   
   ######## Render "Procedures By Level Table for side tab:"    ######## 
-  # output$procedures_by_level_redcap_df_sidetab <- renderTable({
-  #     procedures_by_level_redcap_df_reactive()
-  # })
+  output$procedures_by_level_redcap_df_sidetab <- renderTable({
+      procedures_by_level_redcap_df_reactive()
+  })
   
   ######## Render "Screw Details Table for side tab:"    ######## 
-  # output$screw_details_redcap_df_sidetab <- renderTable({
-  #     
-  #     screw_details_redcap_df_reactive()
-  #     
-  # })  
-  # 
+  output$screw_details_redcap_df_sidetab <- renderTable({
+
+      screw_details_redcap_df_reactive()
+
+  })
+
   
   ######## Render "Interbody Details Table for side tab:"    ######## 
-  # output$interbody_details_redcap_df_sidetab <- renderTable({
-  #     interbody_details_redcap_df_reactive()
-  # })
-  # 
+  output$interbody_details_redcap_df_sidetab <- renderTable({
+      interbody_details_redcap_df_reactive()
+  })
+
   
   ############### ############### NOW RENDER EACH OF THE TABLES FOR THE FINAL REVIEW IN THE MODAL:    ###############     ############### 
   ############### ############### NOW RENDER EACH OF THE TABLES FOR THE FINAL REVIEW IN THE MODAL:    ###############     ############### 

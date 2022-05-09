@@ -430,8 +430,15 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$spinal_cord_monitoring <- "Spinal Cord Monitoring needles were inserted by the neurophysiology technologist."
   }
   
-  first_paragraph_list$positioning <- paste("The patient was then positioned Supine on the OR table and all bony prominences were appropriately padded.",
-                                            "After prepping and draping in the standard fashion, a surgical timeout was performed.")
+  if(str_detect(anterior_approach_laterality, "Lateral Retroperitoneal")){
+    first_paragraph_list$positioning <- paste("The patient was then positioned in the lateral position on the OR table and all bony prominences were appropriately padded.",
+                                              "After prepping and draping in the standard fashion, a surgical timeout was performed.")
+    
+  }else{
+    first_paragraph_list$positioning <- paste("The patient was then positioned Supine on the OR table and all bony prominences were appropriately padded.",
+                                              "After prepping and draping in the standard fashion, a surgical timeout was performed.")  
+  }
+  
   
   proximal_exposure_level <- all_objects_to_add_df %>%
     filter(vertebral_number == min(vertebral_number)) %>%
@@ -464,7 +471,17 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                                     glue("The longus coli was elevated bilaterally from {proximal_exposure_level$level[[1]]} proximally and to {distal_exposure_level$level[[1]]} distally. Once exposure was adequate, the deep retractors were placed into the anterior spine. "),
                                                     microscope_statement)
   }else{
-    first_paragraph_list$surgical_approach <- glue("The anterior approach to the spine was carried out with assistance from the vascular surgeon. A {anterior_approach_laterality} incision was made and the approach was carried out down toward the spine. Once the approach was complete, retractors were placed and the surgical levels were confirmed using fluoroscopy. ")
+    
+    if(anterior_approach_laterality == "Lateral Retroperitoneal Antepsoas"){
+      first_paragraph_list$surgical_approach <- glue("Fluoroscopy was used to obtain a perfect AP and lateral xray and mark the levels. The skin and subcutaneous fat was incised in line with the disk space. The aponeurosis of the external obliques were incised and the muscle fibers divided. The internal obliques were divided, and the transversus abdominis was then divided. I then bluntly dissected the plane between the retroperitoneal fat and the psoas fascia, and the peritoneal cavity was retracted medially. The surface of the psoas was identified and followed down to the vertebral body and I remained anterior to the psoas. Once I was down to the spine, a pin was placed to confirm levels using xray. The dilators were then inserted sequentially and EMG was used to test each dilator. Once the largest dilator had been placed, the retractors were inserted. ")
+      
+    }else if(anterior_approach_laterality == "Lateral Retroperitoneal Transpsoas"){
+      first_paragraph_list$surgical_approach <- glue("Fluoroscopy was used to obtain a perfect AP and lateral xrays and mark the levels. The skin and subcutaneous fat was incised in line with the disk space. The aponeurosis of the external obliques were incised and the muscle fibers divided. The internal obliques were divided, and the transversus abdominis was then divided. I then bluntly dissected the plane between the retroperitoneal fat and the psoas fascia, and the peritoneal cavity was retracted medially. The surface of the psoas was identified and followed down to the vertebral body. Once I was down to the spine, a pin was placed to confirm levels using xray. The dilators were then inserted sequentially and EMG was used to test each dilator. Once the largest dilator had been placed, the retractors were inserted. ")
+      
+    }else{
+      first_paragraph_list$surgical_approach <- glue("The anterior approach to the spine was carried out with assistance from the vascular surgeon. A {anterior_approach_laterality} incision was made and the approach was carried out down toward the spine. Once the approach was complete, retractors were placed and the surgical levels were confirmed using fluoroscopy. ")
+      
+    }
   }
   
   procedure_details_list$approach_statement <- glue_collapse(x = first_paragraph_list, sep = " ")
@@ -661,7 +678,7 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
 
 #############-----------------------   Generate ALL THE PROCEDURE PARAGRAPHS: input 1: the objects added df ----------------------###############
 
-op_note_procedure_paragraphs_function <- function(objects_added_df, revision_decompression_vector = c()){
+op_note_procedure_paragraphs_function <- function(objects_added_df, revision_decompression_vector = c(), approach_technique = "Na", image_guidance = "Na"){
   
   if("implant_statement" %in% names(objects_added_df) == FALSE){ 
     objects_added_df <- objects_added_df %>%
@@ -712,13 +729,19 @@ op_note_procedure_paragraphs_function <- function(objects_added_df, revision_dec
   # nested df names ('nested_data') = 'object, level, vertebral_number, side, implant_statement, screw_size_type'
   
   procedures_op_full_df <- df_for_paragraphs %>%
+    mutate(approach_technique_input = approach_technique,
+           image_guidance_technique_input = image_guidance) %>%
     # replace_na(list(procedures_combine = "distinct", procedure_category = "insertion of intervertebral biomechanical implant")) %>%
     mutate(procedure_statement = pmap(list(..1 = procedure_category,
                                            ..2 = nested_data, 
-                                           ..3 = procedures_combine),
+                                           ..3 = procedures_combine, 
+                                           ..4 = approach_technique_input, 
+                                           ..5 = image_guidance_technique_input),
                                       .f = ~create_full_paragraph_statement_function(procedure_paragraph_intro = ..1,
                                                                                      df_with_levels_object_nested = ..2, 
-                                                                                     paragraphs_combined_or_distinct = ..3))) %>%
+                                                                                     paragraphs_combined_or_distinct = ..3, 
+                                                                                     approach_technique = ..4, 
+                                                                                     image_guidance = ..5))) %>%
     select(procedure_category, procedures_combine, procedure_statement) %>%
     unnest(procedure_statement)
   
@@ -729,7 +752,11 @@ op_note_procedure_paragraphs_function <- function(objects_added_df, revision_dec
 #############-----------------------               End              ----------------------###############
 
 #############-----------------------   Generate a FULL PARAGRAPH ----------------------###############
-create_full_paragraph_statement_function <- function(procedure_paragraph_intro, df_with_levels_object_nested, paragraphs_combined_or_distinct){
+create_full_paragraph_statement_function <- function(procedure_paragraph_intro, 
+                                                     df_with_levels_object_nested, 
+                                                     paragraphs_combined_or_distinct, 
+                                                     approach_technique = "na", 
+                                                     image_guidance = "na"){
   if(paragraphs_combined_or_distinct == "combine"){
     
     df_with_statement <- df_with_levels_object_nested %>%
@@ -738,7 +765,18 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro, 
       nest() %>% 
       mutate(object_levels_side_df = data) %>%  ### this creates a dataframe with only two columns: 'object' and 'object_levels_side_df'. #The nested dataframe has columns: level, vertebral_number, side, implant_statement, screw_size_type
       select(-data) %>%
-      mutate(tech_statement = map2(.x = object, .y = object_levels_side_df, .f = ~ op_note_technique_combine_statement(object = .x, levels_side_df = .y))) %>%
+      mutate(approach = approach_technique, 
+             image_guidance_used = image_guidance) %>%
+      mutate(tech_statement = pmap(list(..1 = object,
+                                             ..2 = object_levels_side_df, 
+                                             ..3 = approach, 
+                                             ..4 = image_guidance_used),
+                                        .f = ~op_note_technique_combine_statement(object = ..1,
+                                                                                  levels_side_df = ..2, 
+                                                                                       approach_technique = ..3, 
+                                                                                       image_guidance = ..4))) %>%
+      
+      # mutate(tech_statement = map2(.x = object, .y = object_levels_side_df, .f = ~ op_note_technique_combine_statement(object = .x, levels_side_df = .y))) %>%
       select(object, tech_statement) %>%
       unnest(tech_statement) %>%
       distinct()
@@ -787,7 +825,7 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro, 
 
 #############-----------------------   Building Paragraphs that are combined (e.g. pedicle screws, decompressions) ----------------------###############
 
-op_note_technique_combine_statement <- function(object, levels_side_df){
+op_note_technique_combine_statement <- function(object, levels_side_df, approach_technique = "Open", image_guidance = "Open"){
   
   if(str_detect(object, "pelvic_screw")){
     
@@ -880,6 +918,17 @@ op_note_technique_combine_statement <- function(object, levels_side_df){
   
   
   # cervical_foraminotomy
+  screw_technique_statement <- case_when(
+    image_guidance == "Open" ~ "For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a high speed burr. A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate.",
+    image_guidance == "Fluoroscopy-guided" ~ "For pedicle screws, the TP was palpated and a Jamshidi needle was placed at the junction of the TP and superior facet. An AP and lateral xray was used to identify and confirm an appropriate start point and trajectory. The Jamshidi needle was then advanced down the pedicle and a wire placed through the pedicle and into the vertebral body. With the wire in place, the pedicles were then sequentially tapped to allow for screw placement. Xray was used frequently throughout the procedure to confirm the position.",
+    image_guidance == "Navigated" ~ "An intraoperative CT scan was obtained with a reference point attached to the patient. Navigated instruments were then used in conjuction with the navigation system to identify the appropraite starting point and trajectory for each screw. The pedicle was cannulated with navigation assistance and then palpated for a medial, inferior, superior and lateral wall to confirm a safe trajectory for placement of the screw.",
+    image_guidance == "Robotic" ~ "Intraoperative 3 dimensional imaging was used to place the pedicle screws with robotic assistance. Once the images were merged with the preoperative plan, the appropriate start point was identified for each pedicle and then pedicle was then cannulated and tapped in preparation for screw placement. ",
+  )
+  
+  # screw_technique_statement <- case_when(
+  #   approach_technique == "Open" ~ "For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a high speed burr. A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate.",
+  # )
+  # # approach_technique = "Open", image_guidance = "Open"
   
   technique_statement <- case_when(
     object == "incision_drainage" ~ glue("The wound was inspected thoroughly and any necrotic appearing tissue was excised. Tissue samples from deep and superficial wound bed were sent for cultures. The wound bed was thoroughly irrigated and then Working layer by layer from deep to superficial, the bone, deep muscle, fascia and subcutaneous tissue was meticulously debrided with a currette. Devitalized muscle, fascia and subcutaneous tissue was excised. Once I felt the wound was clean and an adequate debridement had been completed, I again copiously irrigated the wound."), 
@@ -891,7 +940,7 @@ op_note_technique_combine_statement <- function(object, levels_side_df){
     object == "lateral_mass_screw" ~ glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a high speed burr and the screw path drilled incrementally to the far cortex. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
     object == "occipital_screw" ~ glue("An appropriately sized occipital plate was selected and was placed centered in the midline and just caudal to the external occipital protuberance, but cranial to the foramen magnum. The plate was held in place to identify the appropriate start points for the occipital screws. The occipital screws were drilled incrementally until the anterior cortex was penetrated. The length of the path was measured to acheive bicortical fixation. The screw paths were then tapped and the screws placed, securing the plate to the occiput."), 
     object == "pars_screw" ~ glue("For pars screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. Once the start point was identified, the superficial cortex was opened at the entry point using the high speed burr. A drill was used to cannulate a screw path, aiming as dorsal as possible while not perforating the dorsal cortex of the pars. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
-    object == "pedicle_screw" ~ glue("For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a high speed burr. A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
+    object == "pedicle_screw" ~ glue("{screw_technique_statement} {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
     object == "translaminar_screw" ~ glue("For translaminar screw fixation, the starting point was identified using the spinolaminar junction and in the central plane of the contralateral lamina. A burr hole was made to open the superficial cortex, the path was then cannulated and intralaminar screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
     object == "pedicle_hook" ~ glue("For pedicle hooks, a pedicle finder was carefully placed just under the inferior facet and above the superior facet, until the pedicle was found. Once the pedicle was identified, a pedicle hook was inserted directly toward the inferior pedicle, secured within the residual facet joint {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
     object == "pelvic_screw" ~ pelvic_screw_statement,
@@ -1172,7 +1221,10 @@ revision_implants_paragraph_function <- function(revision_implants_details_df){
 
 op_note_posterior_function <- function(all_objects_to_add_df,
                                        fusion_levels_df = tibble(level = character(), vertebral_number = double(), object = character()),
-                                       head_position = "Cranial Tongs",
+                                       head_position = "Cranial Tongs", 
+                                       surgical_approach = "Midline",
+                                       approach_mis_open = "Open",
+                                       approach_robot_nav_xray = "Open",
                                        revision_decompression_vector = c(""),
                                        revision_implants_df = tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character()),
                                        left_main_rod_size = "5.5",
@@ -1295,6 +1347,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   
   first_paragraph_list$positioning <- paste("The patient was then positioned prone on the OR table and all bony prominences were appropriately padded.",
                                             "After prepping and draping in the standard fashion, a surgical timeout was performed.")
+  
   ############### JUST START OVER AT THIS POINT IF IT IS A MULTIPLE POSITION CASE
   if(multiple_position_procedure == TRUE){
     first_paragraph_list <- list()
@@ -1335,7 +1388,19 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                              if_else(level == "Iliac", "S1", 
                                      level)))  
     
-    first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, exposing proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
+
+    if(surgical_approach == "Midline"){
+      first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, exposing proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
+      
+    }
+    if(surgical_approach == "Paraspinal (Wiltse)"){
+      first_paragraph_list$surgical_approach <- glue("A paraspinal (Wiltse) posterior approach to the spine was performed. Skin was incised with a knife and cautery was used to control any skin bleeding. I dissected down until I identifed the muscle layer and bluntly dissected between the multifidus and longissimus intermuscular plane. I exposed proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level. I manually palpated the transverse process and confirmed the level with xray. ")
+      
+    }
+    if(surgical_approach == "Stab"){
+      first_paragraph_list$surgical_approach <- glue("Intraoperative xray was used to confirm levels and stab incisions were made to access each pedicle from the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
+      
+    }
     
   }else{
     if(nrow(revision_implants_df)>0){
@@ -1394,12 +1459,31 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     procedure_details_list$revision_implants <- revision_implants_paragraph_function(revision_implants_details_df = revision_implants_df)
   }
   
+  # ## TECHNIQUES STATEMENT
+  # mis_open_technique_statement <- case_when(
+  #   approach_mis_open == "Open" ~ "Open",
+  #   approach_mis_open == "Tubular" ~ "xxxx",
+  #   approach_mis_open == "Mini Open" ~ "xxxx",
+  #   approach_mis_open == "Percutaneous Screw" ~ "xxxx"
+  # )
+  # 
+  # image_guidance_technique_statement <- case_when(
+  #   approach_robot_nav_xray == "Open" ~ "xxxx",
+  #   approach_robot_nav_xray == "Microscopic" ~ "xxxx",
+  #   approach_robot_nav_xray == "Fluoroscopy-guided" ~ "xxxx",
+  #   approach_robot_nav_xray == "Navigated" ~ "xxxx",
+  #   approach_robot_nav_xray == "Robotic" ~ "xxxx",
+  # )
+  
+  
   
   ################### PROCEDURE PARAGRAPHS ##################
   
   if(nrow(all_objects_to_add_df)>0){
     procedure_details_list$procedures <- op_note_procedure_paragraphs_function(objects_added_df = all_objects_to_add_df,
-                                                                               revision_decompression_vector = revision_decompression_vector)
+                                                                               revision_decompression_vector = revision_decompression_vector, 
+                                                                               approach_technique = approach_mis_open, 
+                                                                               image_guidance = approach_robot_nav_xray)
   }
   
   

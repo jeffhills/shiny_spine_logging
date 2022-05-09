@@ -1,0 +1,1596 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+library(shiny)
+library(shinyWidgets)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+library(shinyBS)
+library(cowplot)
+library(magick)
+library(ggpattern)
+library(glue)
+library(rlist)
+library(janitor)
+library(lubridate)
+library(redcapAPI)
+library(ggpmisc)
+library(rclipboard)
+library(nngeo)
+library(shinydashboard)
+
+# jh_build_test_implant_function <- function(side_level_object_list = list("left_L3_pedicle_screw", "left_l4_pedicle_screw", "left_l5_pedicle_screw", 
+#                                                                          "right_L3_pedicle_screw", "right_l5_pedicle_screw")){
+#   
+#   test_df <- all_implants_constructed_df %>%
+#     mutate(side_level_object = str_to_lower(paste0(side, "_", level, "_", object))) %>%
+#     select(side_level_object, everything()) %>%
+#     filter(side_level_object %in% str_to_lower(side_level_object_list)) %>%
+#     select(-side_level_object)
+#   
+#   return(test_df)
+# }
+
+
+
+# ui <- shinyUI(basicPage(
+#   dateInput(inputId = "input_date", label = "Date:", value = ""),
+#   textOutput(outputId = "date_text_output")
+# ))
+# 
+# server <- function(input, output) {
+#   output$date_text_output <- renderText({
+#   })
+# }
+# 
+# shinyApp(ui = ui, server = server)
+
+```
+
+
+
+```{r}
+cpt_df <- tibble(cpt_code = double(), 
+                 spine_region = character(), 
+                 approach = character(),
+                 category = character(),
+                 short_description = character(), 
+                 laterality = character(),
+                 segment_or_interspace = character(),
+                 fusion = character(), 
+                 number_of_levels = character(), 
+                 full_description = character(),
+                 add_on_code_or_distinct = character(), 
+                 additional_level_code = double(), 
+                 notes = character())
+ 
+add_cpt_code_function <- function(full_df, 
+                                            spine_region_input = "NA", 
+                                            cpt_code_input,
+                                            category_input = "na",
+                                            short_description_input = "NA",
+                                            approach_input = "NA",
+                                            laterality_input = "NA", 
+                                            segment_or_interspace_input = "NA", 
+                                            fusion_input = "NA", 
+                                            number_of_levels_input = "NA",
+                                            add_on_code_or_distinct_input = "NA",
+                                            full_description_input, 
+                                            additional_level_code_input = 0,
+                                            notes_input = "na"){
+
+        new_df <- full_df %>%
+          filter(cpt_code != cpt_code_input) %>%
+          add_row(cpt_code = cpt_code_input, 
+                  spine_region = spine_region_input, 
+                  approach = approach_input, 
+                  category = category_input,
+                  short_description = short_description_input, 
+                  laterality = laterality_input, 
+                  segment_or_interspace = segment_or_interspace_input,
+                  fusion = fusion_input, 
+                  number_of_levels = number_of_levels_input, 
+                  full_description = full_description_input, 
+                  add_on_code_or_distinct = add_on_code_or_distinct_input,
+                  additional_level_code = additional_level_code_input, 
+                  notes = notes_input) %>%
+          distinct()
+        
+        
+        new_df 
+        
+}
+
+
+```
+
+
+```{r}
+cpt_df <-
+  add_cpt_code_function( 
+    full_df = cpt_df,
+    spine_region_input = "cervical", 
+    cpt_code_input = 63001,
+    approach_input = "posterior", 
+    category_input = "decompression",
+    short_description_input = "laminectomy",
+    laterality_input = "central",
+    segment_or_interspace_input = "segment",
+    fusion_input = "no",
+    number_of_levels_input = "2",
+    full_description_input = "Laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), 1 or 2 vertebral segments",
+    add_on_code_or_distinct_input = "distinct"
+  )
+
+
+
+cpt_df <-
+  add_cpt_code_function(
+    full_df = cpt_df,
+    spine_region_input = "thoracic",
+    cpt_code_input = 63003,
+    approach_input = "posterior", 
+    category_input = "decompression",
+    short_description_input = "laminectomy",
+    laterality_input = "central",
+    segment_or_interspace_input = "segment",
+    fusion_input = "no",
+    number_of_levels_input = "2",
+    full_description_input = "Laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), 1 or 2 vertebral segments",
+    add_on_code_or_distinct_input = "distinct"
+  )
+
+cpt_df <-
+  add_cpt_code_function(
+    full_df = cpt_df,
+    spine_region_input = "lumbar",
+    cpt_code_input = 63005,
+    approach_input = "posterior",
+    category_input = "decompression",
+    short_description_input = "laminectomy",
+    laterality_input = "central",
+    segment_or_interspace_input = "segment",
+    fusion_input = "no",
+    number_of_levels_input = "2",
+    full_description_input = "Laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), 1 or 2 vertebral segments",
+    add_on_code_or_distinct_input = "distinct"
+  )
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "sacral", 
+                                                    cpt_code_input = 63011, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy",
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "2", 
+                                                    full_description_input = "Laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), 1 or 2 vertebral segments", 
+                                                    add_on_code_or_distinct_input = "distinct", 
+                                                    additional_level_code_input = 0)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63011, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "Gill laminectomy",
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy with removal of abnormal facets and/or pars inter-articularis with decompression of cauda equina and nerve roots for spondylolisthesis, lumbar (Gill type procedure)", 
+                                                    add_on_code_or_distinct_input = "distinct", 
+                                                    additional_level_code_input = 0)
+
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63015, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = ">2", 
+                                                    full_description_input = "Laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), more than 2 vertebral segments", 
+                                                    add_on_code_or_distinct_input = "distinct")
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63016, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = ">2", 
+                                                    full_description_input = "Laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), more than 2 vertebral segments", 
+                                                    add_on_code_or_distinct_input = "distinct")
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63017, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = ">2", 
+                                                    full_description_input = "Laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), more than 2 vertebral segments", 
+                                                    add_on_code_or_distinct_input = "distinct")
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63020, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "nerve root decompression", 
+                                                    laterality_input = "unilateral", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminotomy (hemilaminectomy), with decompression of nerve root(s), including partial facetectomy, foraminotomy and/or excision of herniated intervertebral disc; 1 interspace", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63035)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63030, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "nerve root decompression", 
+                                                    laterality_input = "unilateral", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminotomy (hemilaminectomy), with decompression of nerve root(s), including partial facetectomy, foraminotomy and/or excision of herniated intervertebral disc; 1 interspace", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63035)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63040, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "revision nerve root decompression", 
+                                                    laterality_input = "unilateral", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminotomy (hemilaminectomy), with decompression of nerve root(s), including partial facetectomy, foraminotomy and/or excision of herniated intervertebral disc, reexploration, single interspace;", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63043)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63042, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "revision nerve root decompression", 
+                                                    laterality_input = "unilateral", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminotomy (hemilaminectomy), with decompression of nerve root(s), including partial facetectomy, foraminotomy and/or excision of herniated intervertebral disc, reexploration, single interspace;", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63044)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63045, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "central and nerve root decompression", 
+                                                    laterality_input = "bilateral", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy, facetectomy and foraminotomy (unilateral or bilateral with decompression of spinal cord, cauda equina and/or nerve root[s], [eg, spinal or lateral recess stenosis]), single vertebral segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63048)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63046, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "central and nerve root decompression", 
+                                                    laterality_input = "bilateral", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy, facetectomy and foraminotomy (unilateral or bilateral with decompression of spinal cord, cauda equina and/or nerve root[s], [eg, spinal or lateral recess stenosis]), single vertebral segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63048)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63047, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "central and nerve root decompression", 
+                                                    laterality_input = "bilateral", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy, facetectomy and foraminotomy (unilateral or bilateral with decompression of spinal cord, cauda equina and/or nerve root[s], [eg, spinal or lateral recess stenosis]), single vertebral segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63048)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63050, 
+                                                    approach_input = "posterior",
+                                category_input = "laminoplasty",
+                                                    short_description_input = "laminoplasty no plates", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = ">1", 
+                                                    full_description_input = "Laminoplasty, cervical, with decompression of the spinal cord, 2 or more vertebral segments;", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63051, 
+                                                    approach_input = "posterior",
+                                category_input = "laminoplasty",
+                                                    short_description_input = "laminoplasty with plates", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = ">1", 
+                                                    full_description_input = "Laminoplasty, cervical, with decompression of the spinal cord, with reconstruction of the posterior bony elements (including the application of bridging bone graft and non-segmental fixation devices [eg, wire, suture, mini-plates], when performed), 2 or more vertebral segments;", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+
+
+### ANTERIOR OR ANTEROLATERAL approach_input FOR EXTRADURAL EXPLORATION/DECOMPRESSION
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63055, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "transpedicular decompression", 
+                                                    laterality_input = "unilateral", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "11", 
+                                                    full_description_input = "Transpedicular approach with decompression of spinal cord, equina and/or nerve root(s) (eg, herniated intervertebral disc), single segment; thoracic", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63057)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63056, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "transpedicular decompression", 
+                                                    laterality_input = "unilateral", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Transpedicular approach with decompression of spinal cord, equina and/or nerve root(s) (eg, herniated intervertebral disc), single segment; lumbar (including transfacet, or lateral extraforaminal approach_input) (eg, far lateral herniated intervertebral
+disc)", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63057)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63064, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "costovertebral approach_input with decompression", 
+                                                    laterality_input = "unilateral", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Costovertebral approach with decompression of spinal cord or nerve root(s) (eg, herniated intervertebral disc), thoracic; single segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63066)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63075, 
+                                                    approach_input = "anterior",
+                                category_input = "anterior_discectomy_fusion",
+                                                    short_description_input = "anterior discectomy with decompression", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Discectomy, anterior, with decompression of spinal cord and/or nerve root(s), including osteophytectomy; single interspace", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63076)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63077, 
+                                                    approach_input = "anterior",
+                                category_input = "anterior_discectomy_fusion",
+                                                    short_description_input = "anterior discectomy with decompression", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Discectomy, anterior, with decompression of spinal cord and/or nerve root(s), including osteophytectomy; single interspace", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63078)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63081, 
+                                                    approach_input = "anterior",
+                                category_input = "corpectomy",
+                                                    short_description_input = "corpectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Vertebral corpectomy (vertebral body resection), partial or complete, anterior approach_input with decompression of spinal cord and/or nerve root(s), single segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63082)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63085, 
+                                                    approach_input = "transthoracic",
+                                category_input = "corpectomy",
+                                                    short_description_input = "corpectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Vertebral corpectomy (vertebral body resection), partial or complete, transthoracic approach_input with decompression of spinal cord and/or nerve root(s), single segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63086)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63087, 
+                                                    approach_input = "thoracolumbar",
+                                category_input = "corpectomy",
+                                                    short_description_input = "corpectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Vertebral corpectomy (vertebral body resection), partial or complete, combined thoracolumbar approach_input with decompression of spinal cord, cauda equina or nerve root(s), lower thoracic or lumbar; single segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63088)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63090, 
+                                                    approach_input = "retroperitoneal or transperitoneal",
+                                category_input = "corpectomy",
+                                                    short_description_input = "corpectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Vertebral corpectomy (vertebral body resection), partial or complete, transperitoneal or retroperitoneal approach_input with decompression of spinal cord, cauda equina or nerve root(s), lower thoracic, lumbar, or sacral; single segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63091)
+
+
+
+
+### LATERAL EXTRACAVITARY approach_input FOR EXTRADURAL EXPLORATION/DECOMPRESSION
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("thoracic", "lumbar"), 
+                                                    cpt_code_input = c(63101, 63102), 
+                                                    approach_input = "lateral extracavitary",
+                                category_input = "corpectomy",
+                                                    short_description_input = "corpectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Vertebral corpectomy (vertebral body resection), partial or complete, lateral extracavitary approach with decompression of spinal cord and/or nerve root(s) (eg, for tumor or retropulsed bone fragments), single segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63103)
+
+
+
+### EXCISION BY LAMINECTOMY OF LESION OTHER THAN HERNIATED DISC
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63265, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for lesion", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for excision or evacuation of intraspinal lesion other than neoplasm, extradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63266, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for lesion", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for excision or evacuation of intraspinal lesion other than neoplasm, extradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63267, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for lesion", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for excision or evacuation of intraspinal lesion other than neoplasm, extradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "sacral", 
+                                                    cpt_code_input = 63268, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for lesion", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for excision or evacuation of intraspinal lesion other than neoplasm, extradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63270, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for intradural lesion", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for excision of intraspinal lesion other than neoplasm, intradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63271, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for intradural lesion", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for excision of intraspinal lesion other than neoplasm, intradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63272, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for intradural lesion", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for excision of intraspinal lesion other than neoplasm, intradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "sacral", 
+                                                    cpt_code_input = 63273, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for intradural lesion", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for excision of intraspinal lesion other than neoplasm, intradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63275, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for excision/biopsy of intraspinal extradural neoplasm", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for biopsy/excision of intraspinal neoplasm; extradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63276, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for excision/biopsy of intraspinal extradural neoplasm", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for biopsy/excision of intraspinal neoplasm; extradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63277, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for excision/biopsy of intraspinal extradural neoplasm", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for biopsy/excision of intraspinal neoplasm; extradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "sacral", 
+                                                    cpt_code_input = 63278, 
+                                                    approach_input = "posterior",
+                                category_input = "decompression",
+                                                    short_description_input = "laminectomy for excision/biopsy of intraspinal extradural neoplasm", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Laminectomy for biopsy/excision of intraspinal neoplasm; extradural", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+### Excision, Anterior or Anterolateral Approach, Intraspinal Lesion
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 63300, 
+                                                    approach_input = "Anterior",
+                                category_input = "corpectomy",
+                                                    short_description_input = "corpectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single
+segment; extradural", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63308)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63301, 
+                                                    approach_input = "transthoracic",
+                                category_input = "corpectomy",
+                                                    short_description_input = "corpectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single
+segment; extradural,", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63308)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "thoracic", 
+                                                    cpt_code_input = 63301, 
+                                                    approach_input = "thoracolumbar",
+                                category_input = "corpectomy",
+                                                    short_description_input = "corpectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single
+segment; extradural,", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63308)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 63303, 
+                                                    approach_input = "retroperitoneal or transperitoneal",
+                                category_input = "corpectomy",
+                                                    short_description_input = "corpectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Vertebral corpectomy (vertebral body resection), partial or complete, for excision of intraspinal lesion, single
+segment; extradural,", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 63308)
+
+
+
+
+### INCISION
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "thoracic", "lumbar", "sacral"), 
+                                                    cpt_code_input = c(22010, 22010, 22015, 22015), 
+                                                    approach_input = "posterior",
+                                category_input = "incision_drainage",
+                                                    short_description_input = "incision", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "any", 
+                                                    full_description_input = "Incision and drainage, open, of deep abscess (subfascial), posterior spine", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "thoracic", "lumbar"), 
+                                                    cpt_code_input = c(22100, 22101, 22102), 
+                                                    approach_input = "posterior",
+                                category_input = "bone_excision",
+                                                    short_description_input = "excision of posterior element", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Partial excision of posterior vertebral component (eg, spinous process, lamina or facet) for intrinsic bony lesion,
+single vertebral segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22103)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "thoracic", "lumbar"), 
+                                                    cpt_code_input = c(22110, 22112, 22114), 
+                                                    approach_input = "posterior",
+                                category_input = "bone_excision",
+                                                    short_description_input = "excision of vertebral body", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Partial excision of vertebral body, for intrinsic bony lesion, without decompression of spinal cord or nerve root(s), single vertebral segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22116)
+
+
+### OSTEOTOMY
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("thoracic", "lumbar"), 
+                                                    cpt_code_input = c(22206, 22207), 
+                                                    approach_input = "posterior",
+                                category_input = "osteotomy",
+                                                    short_description_input = "osteotomy, three column", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Osteotomy of spine, posterior or posterolateral approach, 3 columns, 1 vertebral segment (eg, pedicle/vertebral body subtraction)",
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22208, 
+                                                    notes_input = "Spinal osteotomy procedures are reported when a portion(s) of the vertebral segment(s) is cut and removed in preparation for re-aligning the spine as part of a spinal deformity correction. For excision of an intrinsic lesion of the vertebra without deformity correction, see 22100-22116. For decompression of the spinal cord and/or nerve roots, see 63001-63308.")
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "thoracic", "lumbar"), 
+                                                    cpt_code_input = c(22210, 22212, 22214), 
+                                                    approach_input = "posterior",
+                                category_input = "osteotomy",
+                                                    short_description_input = "osteotomy, posterior column", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Osteotomy of spine, posterior or posterolateral approach, 1 vertebral segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22216)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "thoracic", "lumbar"), 
+                                                    cpt_code_input = c(22220, 22222, 22224), 
+                                                    approach_input = "anterior",
+                                category_input = "osteotomy",
+                                                    short_description_input = "osteotomy, anterior", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Osteotomy of spine, including discectomy, anterior approach, single vertebral segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22226)
+
+
+
+
+### FRACTURE AND DISLOCATION
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 22318, 
+                                                    approach_input = "anterior",
+                                category_input = "fracture_open_treatment",
+                                                    short_description_input = "ORIF odontoid fracture", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Open treatment and/or reduction of odontoid fracture(s) and or dislocation(s) (including os odontoideum), anterior approach, including placement of internal fixation; without grafting", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "thoracic", "lumbar"), 
+                                                    cpt_code_input = c(22326, 22327, 22325), 
+                                                    approach_input = "posterior",
+                                category_input = "fracture_open_treatment",
+                                                    short_description_input = "Open treatment of vertebral fracture", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Open treatment and/or reduction of vertebral fracture(s) and/or dislocation(s), posterior approach, 1 fractured vertebra or dislocated segment", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22328)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "thoracic", "lumbar"), 
+                                                    cpt_code_input = 22505, 
+                                                    approach_input = "any",
+                                category_input = "exam_under_anesthesia",
+                                                    short_description_input = "Manipulation under anesthesia", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "any", 
+                                                    full_description_input = "Manipulation of spine requiring anesthesia", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "thoracic"), 
+                                                    cpt_code_input = 22510, 
+                                                    approach_input = "posterior",
+                                category_input = "cement_augmentation",
+                                                    short_description_input = "Percutaneous Vertebroplasty", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Percutaneous vertebroplasty (bone biopsy included when performed), 1 vertebral body, unilateral or bilateral injection, inclusive of all imaging guidance", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22512)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 22511, 
+                                                    approach_input = "posterior",
+                                category_input = "cement_augmentation",
+                                                    short_description_input = "Percutaneous Vertebroplasty", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Percutaneous vertebroplasty (bone biopsy included when performed), 1 vertebral body, unilateral or bilateral injection, inclusive of all imaging guidance", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22512)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("thoracic", "lumbar"), 
+                                                    cpt_code_input = c(22513, 22514), 
+                                                    approach_input = "posterior",
+                                category_input = "cement_augmentation",
+                                                    short_description_input = "Percutaneous Kyphoplasty/Vertebral Augmentation", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Percutaneous vertebral augmentation, including cavity creation (fracture reduction and bone biopsy included when performed) using mechanical device (eg, kyphoplasty), 1 vertebral body, unilateral or bilateral cannulation, inclusive of all imaging guidance;", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22515)
+
+
+
+### ARTHRODESIS
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("thoracic", "lumbar"), 
+                                                    cpt_code_input = c(22532, 22533), 
+                                                    approach_input = "lateral extracavitary",
+                                category_input = "fusion",
+                                                    short_description_input = "arthrodesis", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Arthrodesis, lateral extracavitary technique, including minimal discectomy to prepare interspace (other than for decompression)", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22534)
+
+
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 22548, 
+                                                    approach_input = "anterior",
+                                category_input = "fusion",
+                                                    short_description_input = "arthrodesis", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Arthrodesis, anterior transoral or extraoral technique, clivus-C1-C2 (atlas-axis), with or without excision of odontoid process", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 22551, 
+                                                    approach_input = "anterior",
+                                category_input = "fusion",
+                                                    short_description_input = "arthrodesis with decompression", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Arthrodesis, anterior interbody, including disc space preparation, discectomy, osteophytectomy and decompression of spinal cord and/or nerve roots; cervical below C2", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22552)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "thoracic", "lumbar"), 
+                                                    cpt_code_input = c(22554, 22556, 22558), 
+                                                    approach_input = "anterior",
+                                category_input = "fusion",
+                                                    short_description_input = "arthrodesis without decompression", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Arthrodesis, anterior interbody technique, including minimal discectomy to prepare interspace (other than for decompression)", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22585)
+
+
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 22586, 
+                                                    approach_input = "anterior",
+                                category_input = "fusion",
+                                                    short_description_input = "arthrodesis without decompression", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Arthrodesis, pre-sacral interbody technique, including disc space preparation, discectomy, with posterior instrumentation, with image guidance, includes bone graft when performed, L5-S1 interspace", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22585)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                spine_region_input = "cervical", 
+                                cpt_code_input = 22590, 
+                                approach_input = "posterior",
+                                category_input = "fusion",
+                                short_description_input = "posterior arthrodesis", 
+                                laterality_input = "central", 
+                                segment_or_interspace_input = "interspace", 
+                                fusion_input = "yes",
+                                number_of_levels_input = "2", 
+                                full_description_input = "Arthrodesis, posterior or posterolateral technique, Craniocervical (occiput-C2), single level", 
+                                add_on_code_or_distinct_input = "distinct",
+                                additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                spine_region_input = "cervical", 
+                                cpt_code_input = 22595, 
+                                approach_input = "posterior",
+                                category_input = "fusion",
+                                short_description_input = "posterior arthrodesis", 
+                                laterality_input = "central", 
+                                segment_or_interspace_input = "interspace", 
+                                fusion_input = "yes",
+                                number_of_levels_input = "1", 
+                                full_description_input = "Arthrodesis, posterior or posterolateral technique, C1-C2, single level", 
+                                add_on_code_or_distinct_input = "distinct",
+                                additional_level_code_input = 0)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "thoracic", "lumbar"), 
+                                                    cpt_code_input = c(22600, 22610, 22612), 
+                                                    approach_input = "posterior",
+                                category_input = "fusion",
+                                                    short_description_input = "posterolateral arthrodesis", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Arthrodesis, posterior or posterolateral technique, single level", 
+                                                    add_on_code_or_distinct_input = "add_on", 
+                                notes_input = "Do not report 22612 in conjunction with 22630 for the same interspace and segment, use 22633. 
+                                Use 22614 in conjunction with 22600, 22610, 22612,22630 or 22633 when performed at a different level. 
+                                When performing a posterior or posterolateral technique for fusion/arthrodesis at an additional level, use 22614. 
+                                When performing a posterior interbody fusion arthrodesis at an additional level, use 22632. 
+                                When performing a combined posterior or posterolateral technique with posterior interbody arthrodesis at an additional level, use 22634",
+                                                    additional_level_code_input = 22614)
+
+
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 22630, 
+                                                    approach_input = "posterior",
+                                category_input = "fusion",
+                                                    short_description_input = "posterior interbody arthrodesis", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Arthrodesis, posterior interbody technique, including laminectomy and/or discectomy to prepare interspace (other than for decompression), single interspace; lumbar", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22632)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 22633, 
+                                                    approach_input = "posterior",
+                                category_input = "fusion",
+                                                    short_description_input = "posterior interbody + posterolateral arthrodesis", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Arthrodesis, combined posterior or posterolateral technique with posterior interbody technique including laminectomy and/or discectomy sufficient to prepare interspace (other than for decompression), single interspace and segment; lumbar", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22634)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = c(22800, 22802, 22804), 
+                                                    approach_input = "posterior",
+                                category_input = "fusion",
+                                                    short_description_input = "arthrodesis for spinal deformity", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = c("<7", "7 to 12", ">12"), 
+                                                    full_description_input = "Arthrodesis, posterior, for spinal deformity,", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = c(22808, 22810, 22812), 
+                                                    approach_input = "anterior",
+                                category_input = "fusion",
+                                                    short_description_input = "arthrodesis for spinal deformity", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = c("2-3", "4-7", ">7"), 
+                                                    full_description_input = "Arthrodesis, anterior, for spinal deformity,", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = c(22818, 22819), 
+                                                    approach_input = "posterior",
+                                category_input = "osteotomy",
+                                                    short_description_input = "kyphectomy", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = c("1-2", ">2"), 
+                                                    full_description_input = "Kyphectomy, circumferential exposure of spine and resection of vertebral segment(s) (including body and posterior elements)", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = 22830, 
+                                                    approach_input = c("anterior", "posterior"),
+                                category_input = "exploration",
+                                                    short_description_input = "Exploration of fusion", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "any", 
+                                                    full_description_input = "Exploration of spinal fusion", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+
+### Spinal Instrumentation
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = 22840, 
+                                                    approach_input = "posterior",
+                                category_input = "instrumentation",
+                                                    short_description_input = "instrumentation", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "any", 
+                                                    full_description_input = "Posterior non-segmental instrumentation (eg, Harrington rod technique, pedicle fixation across 1 interspace,
+atlantoaxial transarticular screw fixation, sublaminar wiring at C1, facet screw fixation) (List separately in addition to code for primary procedure)", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = 22841, 
+                                                    approach_input = "posterior",
+                                category_input = "instrumentation",
+                                                    short_description_input = "instrumentation", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "any", 
+                                                    full_description_input = "Internal spinal fixation by wiring of spinous processes (List separately in addition to code for primary procedure)", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = c(22842, 22843, 22844), 
+                                                    approach_input = "posterior",
+                                category_input = "instrumentation",
+                                                    short_description_input = "instrumentation", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = c("3-6", "7-12", ">12"), 
+                                                    full_description_input = "Posterior segmental instrumentation (eg, pedicle fixation, dual rods with multiple hooks and sublaminar wires); (List separately in addition to code for primary procedure)", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = c(22845, 22846, 22847), 
+                                                    approach_input = "anterior",
+                                category_input = "instrumentation",
+                                                    short_description_input = "instrumentation", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = c("2-3", "4-7", ">7"), 
+                                                    full_description_input = "Anterior instrumentation", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "pelvis", 
+                                                    cpt_code_input = 22848, 
+                                                    approach_input = "posterior",
+                                category_input = "instrumentation",
+                                                    short_description_input = "pelvic fixation", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Pelvic fixation (attachment of caudal end of instrumentation to pelvic bony structures) other than sacrum", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = 22849, 
+                                                    approach_input = "posterior",
+                                category_input = "instrumentation",
+                                                    short_description_input = "reinsertion of spinal fixation device", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Reinsertion of spinal fixation device", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = 22850, 
+                                                    approach_input = "posterior",
+                                category_input = "instrumentation_removal",
+                                                    short_description_input = "removal of spinal fixation", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Removal of posterior nonsegmental instrumentation (eg, Harrington rod)", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = 22851, 
+                                                    approach_input = c("anterior", "posterior"),
+                                category_input = "instrumentation",
+                                                    short_description_input = "application of intervertebral biomechanical device", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Application of intervertebral biomechanical device(s) (eg, synthetic cage(s), methylmethacrylate) to vertebral defect or interspace", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "any", 
+                                                    cpt_code_input = c(22852, 22855), 
+                                                    approach_input = c("posterior", "anterior"),
+                                category_input = "instrumentation_removal",
+                                                    short_description_input = "removal of spinal instrumentation", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "segment", 
+                                                    fusion_input = "yes", 
+                                                    number_of_levels_input = "any", 
+                                                    full_description_input = "Removal of instrumentation", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "cervical", 
+                                                    cpt_code_input = 22856, 
+                                                    approach_input = "anterior",
+                                category_input = "arthroplasty",
+                                                    short_description_input = "total disc arthroplasty", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Total disc arthroplasty (artificial disc), anterior approach, including discectomy with end plate preparation (includes osteophytectomy for nerve root or spinal cord decompression and microdissection); single interspace, cervical", 
+                                                    add_on_code_or_distinct_input = "add_on",
+                                                    additional_level_code_input = 22858)
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = "lumbar", 
+                                                    cpt_code_input = 22857, 
+                                                    approach_input = "anterior",
+                                category_input = "arthroplasty",
+                                                    short_description_input = "total disc arthroplasty", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Total disc arthroplasty (artificial disc), anterior approach, including discectomy with end plate preparation (includes osteophytectomy for nerve root or spinal cord decompression and microdissection); single interspace, lumbar", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0, 
+                                          notes_input = "(For additional interspace, use Category III code 0163T)")
+
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "lumbar"), 
+                                                    cpt_code_input = c(22861, 22862), 
+                                                    approach_input = "anterior",
+                                category_input = "arthroplasty",
+                                                    short_description_input = "revision total disc arthroplasty", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Revision including replacement of total disc arthroplasty (artificial disc), anterior approach, single interspace", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0, 
+                                          notes_input = "(For additional interspace, use Category III code 0098T)")
+
+cpt_df <- add_cpt_code_function(full_df = cpt_df, 
+                                                    spine_region_input = c("cervical", "lumbar"), 
+                                                    cpt_code_input = c(22864, 22865), 
+                                                    approach_input = "anterior",
+                                category_input = "arthroplasty",
+                                                    short_description_input = "removal total disc arthroplasty", 
+                                                    laterality_input = "central", 
+                                                    segment_or_interspace_input = "interspace", 
+                                                    fusion_input = "no", 
+                                                    number_of_levels_input = "1", 
+                                                    full_description_input = "Removal of total disc arthroplasty (artificial disc), anterior approach, single interspace;", 
+                                                    add_on_code_or_distinct_input = "distinct",
+                                                    additional_level_code_input = 0, 
+                                          notes_input = "(For additional interspace, use Category III code 0095T)")
+
+```
+
+```{r}
+
+cpt_expanded_df <- cpt_df %>%
+  filter(spine_region != "any") %>%
+  union_all(cpt_df %>%
+              filter(spine_region == "any") %>%
+              mutate(spine_region = "cervical") %>%
+              union_all(cpt_df %>%
+                          filter(spine_region == "any") %>%
+                          mutate(spine_region = "thoracic")) %>%
+              union_all(cpt_df %>%
+                          filter(spine_region == "any") %>%
+                          mutate(spine_region = "lumbar"))) %>%
+  mutate(approach = str_to_lower(approach)) %>%
+  mutate(category = as_factor(category)) %>%
+  mutate(category = fct_relevel(category, "decompression", 
+                                "laminoplasty", 
+                                "osteotomy", 
+                                "corpectomy", 
+                                "arthroplasty",
+                                "anterior_discectomy_fusion",
+                                "fusion",
+                                "instrumentation",
+                                "instrumentation_removal",
+                                "exploration",
+                                "incision_drainage",
+                                "bone_excision",
+                                "fracture_open_treatment",
+                                "cement_augmentation",
+                                "exam_under_anesthesia")) %>%
+  arrange(category) %>%
+  mutate(cpt_code_with_description = paste(cpt_code, ": ", full_description, sep = ""))
+
+
+```
+
+```{r}
+spine_regions_vector <- unique(cpt_expanded_df$spine_region)
+
+approach_vector <- unique(cpt_expanded_df$approach)
+
+cpt_codes_added_list <- list()
+
+approach_vector
+
+cpt_expanded_df %>%
+  select(cpt_code, full_description, add_on_code_or_distinct, additional_level_code, notes)
+```
+
+
+```{r}
+
+# jh_build_test_implant_function <- function(side_level_object_list = list("left_L3_pedicle_screw", "left_l4_pedicle_screw", "left_l5_pedicle_screw", 
+#                                                                          "right_L3_pedicle_screw", "right_l5_pedicle_screw")){
+#   
+#   test_df <- all_implants_constructed_df %>%
+#     mutate(side_level_object = str_to_lower(paste0(side, "_", level, "_", object))) %>%
+#     select(side_level_object, everything()) %>%
+#     filter(side_level_object %in% str_to_lower(side_level_object_list)) %>%
+#     select(-side_level_object)
+#   
+#   return(test_df)
+# }
+spine_regions_vector <- unique(cpt_expanded_df$spine_region)
+
+approach_vector <- unique(cpt_expanded_df$approach)
+
+cpt_codes_added_list <- list()
+
+
+
+ui <- shinyUI(basicPage(
+  column(4,
+         h1("Select to Narrow"),
+         radioGroupButtons(
+           inputId = "spine_region",
+           label = "Select Spine Region",
+           choices = spine_regions_vector,
+           justified = TRUE, 
+           selected = "",
+           # direction = "vertical",
+           # individual = TRUE,
+           checkIcon = list(
+             yes = tags$i(class = "fa fa-circle", 
+                          style = "color: steelblue"),
+             no = tags$i(class = "fa fa-circle-o", 
+                         style = "color: steelblue"))
+         ),
+         br(),
+         radioGroupButtons(
+           inputId = "approach",
+           label = "Select Spine Approach",
+           choices = approach_vector,
+           selected = "", 
+           justified = TRUE,
+           direction = "vertical",
+           checkIcon = list(
+             yes = tags$i(class = "fa fa-circle", 
+                          style = "color: steelblue"),
+             no = tags$i(class = "fa fa-circle-o", 
+                         style = "color: steelblue"))
+         ),
+         br(),
+         radioGroupButtons(
+           inputId = "category",
+           label = "Select Procedure Category:",
+           choices = c(""),
+           selected = "",
+           direction = "vertical",
+           checkIcon = list(
+             yes = tags$i(class = "fa fa-circle", 
+                          style = "color: steelblue"),
+             no = tags$i(class = "fa fa-circle-o", 
+                         style = "color: steelblue"))
+         ),
+  ),
+  column(8,
+         h1("Select codes to add"),
+         radioGroupButtons(
+           inputId = "cpt_code",
+           label = "Select Code and Click 'Add':", 
+           choiceNames = "", 
+           choiceValues = "",
+           # choices = c(" "),
+           justified = TRUE,
+           direction = "vertical"
+         ),
+         actionBttn(
+           inputId = "add_code_button",
+           label = "Add Code",
+           style = "jelly", 
+           color = "success"
+         ),
+br(),
+br(),
+         h1("Code List"),
+         tableOutput(outputId = "cpt_table"),
+br(),
+textAreaInput(inputId = "cpt_text", label = "CPT Codes:", resize = "both")
+         # textOutput(outputId = "approach")
+         )
+))
+
+server <- function(input, output, session) {
+  observeEvent(input$spine_region, {
+    
+    spine_approach_choices_df <- cpt_expanded_df %>%
+      filter(spine_region == input$spine_region) 
+    
+    updateRadioGroupButtons(session = session,
+                            inputId = "approach", 
+                            choices = unique(spine_approach_choices_df$approach), selected = "")
+  })
+  
+    observeEvent(input$approach, {
+    
+    spine_category_choices_df <- cpt_expanded_df %>%
+      filter(spine_region == input$spine_region) %>%
+      filter(approach == input$approach) %>%
+      mutate(category = as.character(category))
+    
+    updateRadioGroupButtons(session = session,
+                            inputId = "category", 
+                            choices = unique(spine_category_choices_df$category), selected = "")
+  })
+    
+    observeEvent(input$category, ignoreInit = TRUE, ignoreNULL = TRUE, {
+      
+      cpt_choices_df <- cpt_expanded_df %>%
+        filter(spine_region == input$spine_region) %>%
+        filter(approach == input$approach) %>%
+        mutate(category = as.character(category)) %>%
+        filter(category == input$category) 
+      
+      updateRadioGroupButtons(session = session,
+                              inputId = "cpt_code", 
+                              choiceNames = unique(cpt_choices_df$cpt_code_with_description),
+                              choiceValues = unique(cpt_choices_df$cpt_code))
+    })
+    
+    ######## add codes to a list
+   cpt_codes_added_list <- reactiveValues()
+  
+  cpt_codes_added_list$cpt_df <- tibble(cpt_code = double(),
+                                        segment_or_interspace = character(),
+                                               description = character(), 
+                                        additional_level_code = double(), 
+                                        notes = character())
+  
+    observeEvent(input$add_code_button, {
+      
+      cpt_to_add_df <- cpt_expanded_df %>%
+        filter(cpt_code == input$cpt_code) %>%
+        select(cpt_code, segment_or_interspace, description = full_description, additional_level_code, notes) %>%
+        distinct()
+      
+       cpt_codes_added_list$cpt_df <- cpt_codes_added_list$cpt_df %>%
+         union_all(cpt_to_add_df) %>%
+         distinct()%>%
+        mutate(cpt_code = as.integer(cpt_code)) %>%
+         mutate(additional_level_code = as.integer(additional_level_code))
+    })
+    
+    output$cpt_table <- renderTable({
+      cpt_codes_added_list$cpt_df 
+  })
+    
+    
+    observeEvent(input$add_code_button, {
+      
+      cpt_text_df <- cpt_codes_added_list$cpt_df %>%
+        distinct() %>%
+        mutate(additional_level_text = if_else(additional_level_code == 0, 
+                                               glue(" "), 
+                                               glue("+ {additional_level_code} x *** {segment_or_interspace}(s)"))) %>%
+        mutate(cpt_text = glue("- {cpt_code}: {description} {additional_level_text}"))
+        # mutate(number = row_number()) %>%
+        # select(cpt_text) %>%
+        # mutate(cpt_text_numbered = paste(number, ".", cpt_text, sep = "")) 
+      
+      cpt_text <- glue_collapse(cpt_text_df$cpt_text, sep = "\n")
+      
+          updateTextAreaInput(session = session,
+                        inputId = "cpt_text",
+                        value = HTML(cpt_text))
+    })
+    
+  # observeEvent(input$generate_operative_note, {
+  #   output$clipboard_ui <- renderUI({
+  #     rclipboard::rclipButton(inputId = "clip_button", label = "Copy To Clipboard", clipText = input$operative_note_text, icon = icon("clipboard"))
+  #   })
+  # }
+  # )
+    
+}
+
+shinyApp(ui = ui, server = server)
+
+
+```
+
