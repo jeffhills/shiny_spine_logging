@@ -16,6 +16,7 @@ op_note_procedure_performed_summary_classifier_function <- function(object){
     object == "incision_drainage" ~ "Incision and drainage",
     object == "vertebroplasty" ~ "Vertebroplasty",
     object == "vertebral_cement_augmentation" ~ "Vertebral body augmentation",
+    ### INSTRUMENTATION
     object == "laminar_downgoing_hook" ~ "Posterior spinal instrumentation",
     object == "laminar_upgoing_hook" ~ "Posterior spinal instrumentation",
     object == "lateral_mass_screw" ~ "Posterior spinal instrumentation",
@@ -32,33 +33,39 @@ op_note_procedure_performed_summary_classifier_function <- function(object){
     object == "pelvic_screw_1" ~ "Pelvic instrumentation",
     object == "pelvic_screw_2" ~ "Pelvic instrumentation",
     object == "tether" ~ "Spinous process posterior tethering/wiring",
-    object == "costovertebral_approach" ~ "Decompression using a costovertebral approach",
+    ### DECOMPRESSION 
+          ## COMPLEX
+    object == "costovertebral_approach" ~ "Costovertebral approach with decompression of the spinal cord", 
     object == "revision_costovertebral_approach" ~ "Reexploration and revision decompression using a costovertebral approach",
-    object == "transpedicular_approach" ~ "Decompression using a transpedicular approach",
+    object == "transpedicular_approach" ~ "Transpedicular approach with decompression", #63056	
     object == "lateral_extraforaminal_approach" ~ "Decompression using a lateral extraforaminal approach",
     object == "lateral_extracavitary_approach" ~ "Arthrodesis using a modified lateral extracavitary approach",
     object == "corpectomy_extracavitary_tumor" ~ "Partial Corpectomy with decompression using a modified lateral extracavitary approach for tumor",
     object == "laminectomy_for_tumor" ~ "Laminectomy for biopsy and excision of extradural spinal tumor",
     object == "laminectomy_for_facet_cyst" ~ "Laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)",
     object == "revision_transpedicular_approach" ~ "Reexploration and revision decompression using a transpedicular approach",
-    object == "diskectomy" ~ "Decompression with diskectomy and laminotomy",
-    object == "sublaminar_decompression" ~ "Decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies",
-    object == "laminectomy" ~ "Decompression with central laminectomy",
-    object == "laminotomy" ~  "Decompression with laminotomy and medial facetectomy",
-    object == "cervical_foraminotomy" ~ "Posterior cervical foraminotomy",
-    object == "revision_diskectomy" ~ "Reexploration and revision decompression with diskectomy and laminotomy",
+          ## COMMON
+    object == "sublaminar_decompression" ~ "Bilateral laminectomy, foraminotomy, and medial facetectomy for decompression of the cauda equina and nerve roots", #63047
+    object == "laminectomy" ~ "Central Laminectomy for decompression",
+    object == "diskectomy" ~ "Laminotomy and discectomy for decompression of the nerve root",
+    object == "laminotomy" ~  "Partial laminectomy with facetectomy & foraminotomy for decompression of the cauda equina and nerve roots", # 63047
+    object == "cervical_foraminotomy" ~ "Posterior cervical foraminotomy for decompression of the nerve root",
+    
+    object == "revision_diskectomy" ~ "Reexploration and revision laminotomy and discectomy for decompression of the nerve root",
     object == "revision_sublaminar_decompression" ~ "Reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies",
     object == "revision_laminectomy" ~ "Reexploration and revision decompression with central laminectomy",
     object == "revision_laminotomy" ~ "Reexploration and revision decompression with laminotomy and medial facetectomy",
     object == "laminoplasty" ~ "Laminoplasty",
     object == "grade_1" ~ "Inferior facetectomies",
-    object == "complete_facetectomy" ~ "Decompression with a laminotomy and complete facetectomy",
+    object == "complete_facetectomy" ~ "Patial laminectomy with complete facetectomy & foraminotomy for decompression of the nerve root", ## 63047
     object == "revision_complete_facetectomy" ~ "Reexploration and revision decompression with a laminotomy and complete facetectomy",
+    #### OSTEOTOMY
     object == "grade_2" ~ "Posterior column osteotomy",
     object == "grade_3" ~ "Pedicle subtraction osteotomy",
     object == "grade_4" ~ "Extended three column osteotomy (vertebral body partial corpectomy)",
     object == "grade_5" ~ "Vertebral column resection",
     object == "costotransversectomy" ~ "Costovertebral approach with costotransversectomy",
+    ### INTERBODY CAGE PLACEMENT AND FUSION
     object == "no_implant_interbody_fusion" ~ "Interbody fusion (without interbody implant)",
     object == "llif" ~ "Lateral lumbar interbody fusion and insertion of interbody device",
     object == "plif" ~ "Posterior lumbar interbody fusion and insertion of interbody device",
@@ -332,12 +339,22 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
 
 #############-----------------------   Paragraphs: Generate All Distinct Paragraphs  ----------------------###############
 
-all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df){
+all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, bone_graft_df = tibble(name = character(), value = double())){
+  
+  if(nrow(bone_graft_df)>0){
+    bone_graft_statement_df <- bone_graft_df %>%
+      mutate(statement = as.character(glue("{value}cc of {name}")))
+    
+    all_statements <- glue_collapse(x = bone_graft_statement_df$statement, sep = ", ", last = " and ")
+    
+    fusion_graft_statement <- as.character(glue("I placed a total of {all_statements} into the fusion bed"))
+    
+  }else{
+    fusion_graft_statement <- NULL
+  }
   
   anterior_df <- all_objects_to_add_df %>%
     select(level, vertebral_number, object, side, implant_statement) %>%
-    # separate(level, into = c("cranial", "caudal"), remove = FALSE) %>%
-    # mutate(level = if_else(object == "anterior_buttress_plate", caudal, level)) %>%
     mutate(order_number = row_number())
   
   anterior_df <- anterior_df %>%
@@ -370,6 +387,12 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df){
   
   procedure_paragraphs <- glue_collapse(x = paragraphs_df$paragraphs, sep = "\n\n")
   
+  
+  if(nrow(bone_graft_df)>0){
+  procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = ". The final position was ", replacement = as.character(glue(". {fusion_graft_statement}. The final position was ")))
+    }
+  
+  
   return(procedure_paragraphs)
   
 }
@@ -379,10 +402,11 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df){
 
 op_note_anterior_function <- function(all_objects_to_add_df,
                                       anterior_approach_laterality,
-                                      microscope_statement = "none",
+                                      approach_statement = "none",
                                       antibiotics = vector(),
                                       additional_procedures_vector = NULL,
                                       bmp = NULL,
+                                      anterior_biologics_df = tibble(name = character(), value = double()),
                                       bone_graft_vector = NULL,
                                       morselized_allograft = 0,
                                       morselized_autograft_separate = 0,
@@ -465,11 +489,11 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   
   ## Approach for cervical vs thoracic/lumbar
   if(max(all_objects_to_add_df$vertebral_number)<11){
-    microscope_statement <- if_else(microscope_statement == "none", "", microscope_statement)
+    approach_statement <- if_else(approach_statement == "none", "", approach_statement)
     
     first_paragraph_list$surgical_approach <- paste(glue("A standard {anterior_approach_laterality} Smith Robinson approach was utilized to get to the anterior cervical spine. The skin, subcutaneous tissue were incised, the platysma was transected, and then blunt dissection was carried out between the sternocleidomastoid and carotid sheath laterally, and trachea and esophogus medially, down to the prevertebral fascia. Once the anterior spine was palpated, fluoroscopy was used to localize and confirm levels. "), 
                                                     glue("The longus coli was elevated bilaterally from {proximal_exposure_level$level[[1]]} proximally and to {distal_exposure_level$level[[1]]} distally. Once exposure was adequate, the deep retractors were placed into the anterior spine. "),
-                                                    microscope_statement)
+                                                    approach_statement)
   }else{
     
     if(anterior_approach_laterality == "Lateral Retroperitoneal Antepsoas"){
@@ -488,7 +512,8 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   
   ################### PROCEDURE PARAGRAPHS ##################
   
-  procedure_details_list$procedures <- all_anterior_procedures_paragraphs_function(all_objects_to_add_df = all_objects_to_add_df)
+  procedure_details_list$procedures <- all_anterior_procedures_paragraphs_function(all_objects_to_add_df = all_objects_to_add_df, 
+                                                                                   bone_graft_df = anterior_biologics_df)
   
   ############################# CLOSURE #########################
   
@@ -925,10 +950,6 @@ op_note_technique_combine_statement <- function(object, levels_side_df, approach
     image_guidance == "Robotic" ~ "Intraoperative 3 dimensional imaging was used to place the pedicle screws with robotic assistance. Once the images were merged with the preoperative plan, the appropriate start point was identified for each pedicle and then pedicle was then cannulated and tapped in preparation for screw placement. ",
   )
   
-  # screw_technique_statement <- case_when(
-  #   approach_technique == "Open" ~ "For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a high speed burr. A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate.",
-  # )
-  # # approach_technique = "Open", image_guidance = "Open"
   
   technique_statement <- case_when(
     object == "incision_drainage" ~ glue("The wound was inspected thoroughly and any necrotic appearing tissue was excised. Tissue samples from deep and superficial wound bed were sent for cultures. The wound bed was thoroughly irrigated and then Working layer by layer from deep to superficial, the bone, deep muscle, fascia and subcutaneous tissue was meticulously debrided with a currette. Devitalized muscle, fascia and subcutaneous tissue was excised. Once I felt the wound was clean and an adequate debridement had been completed, I again copiously irrigated the wound."), 

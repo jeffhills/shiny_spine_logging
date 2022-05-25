@@ -61,7 +61,6 @@ source("no_implants_added_op_note.R", local = TRUE)
 # 
 # server <- function(input, output) {
 #   output$date_text_output <- renderText({
-#     as.character(input$input_date)
 #   })
 # }
 # 
@@ -293,7 +292,7 @@ ui <- dashboardPage(skin = "black",
                                                                   label = NULL, 
                                                                   inline = TRUE,
                                                                   choices = c("Midline",
-                                                                              "Paraspinal (Wiltse)", 
+                                                                              "Paraspinal or Paramedian", 
                                                                               "Stab"),
                                                                   icon = icon("check"), 
                                                                   bigger = TRUE,
@@ -304,7 +303,7 @@ ui <- dashboardPage(skin = "black",
                                                                 column(width = 6, 
                                                                        prettyRadioButtons(
                                                                          inputId = "approach_open_mis",
-                                                                         label = "Select any techniques used:", 
+                                                                         label = NULL, 
                                                                          inline = TRUE,
                                                                          choices = c("Open",
                                                                                      "Tubular", 
@@ -321,14 +320,11 @@ ui <- dashboardPage(skin = "black",
                                                                 column(width = 6, 
                                                                        prettyCheckboxGroup(
                                                                          inputId = "approach_robot_navigation",
-                                                                         label = "Select any techniques used:", 
+                                                                         label = NULL, 
                                                                          inline = TRUE,
-                                                                         choices = c(
-                                                                           "Open",
-                                                                           "Microscopic", 
-                                                                           "Fluoroscopy-guided",
-                                                                           "Navigated", 
-                                                                           "Robotic"),
+                                                                         choices = c("Microscopic", 
+                                                                                     "Navigated", 
+                                                                                     "Robotic"),
                                                                          icon = icon("check"), 
                                                                          bigger = TRUE,
                                                                          status = "success"
@@ -344,11 +340,12 @@ ui <- dashboardPage(skin = "black",
                                                                 choices = c("Left-sided", 
                                                                             "Right-sided",
                                                                             "Paramedian",
-                                                                            "Lateral Retroperitoneal Transpsoas",
-                                                                            "Lateral Retroperitoneal Antepsoas",
+                                                                            "Lateral Transpsoas",
+                                                                            "Lateral Antepsoas",
                                                                             "Thoracoabdominal",
                                                                             "Thoracotomy",
-                                                                            "Transperitoneal"),
+                                                                            "Transperitoneal",
+                                                                            "Retroperitoneal"),
                                                                 selected = "Left-sided",
                                                                 icon = icon("check"),
                                                                 bigger = TRUE,
@@ -540,7 +537,8 @@ ui <- dashboardPage(skin = "black",
                                                                                 label = NULL,
                                                                                 choices = c("Bone Marrow Aspirate",
                                                                                             "Cell Based Allograft",
-                                                                                            "DBM"
+                                                                                            "DBM", 
+                                                                                            "iFactor"
                                                                                 )
                                                             )
                                                      )
@@ -591,6 +589,15 @@ ui <- dashboardPage(skin = "black",
                                                                                                input_type = "numeric",
                                                                                                input_id = "posterior_dbm_volume",
                                                                                                initial_value_selected = 0, min = 0, max = 500, step = 5)
+                                                            ),
+                                                            conditionalPanel(
+                                                              condition = "input.posterior_biologics.indexOf('iFactor') > -1",
+                                                              jh_make_shiny_table_row_function(left_column_label = "iFactor Volume (cc):",bottom_margin = "5px",
+                                                                                               left_column_percent_width = 60,
+                                                                                               font_size = 16,
+                                                                                               input_type = "numeric",
+                                                                                               input_id = "posterior_ifactor_volume",
+                                                                                               initial_value_selected = 0, min = 0, max = 50, step = 5)
                                                             )
                                                      )
                                                    ),
@@ -626,7 +633,8 @@ ui <- dashboardPage(skin = "black",
                                                                                               label = NULL,
                                                                                               choices = c("Bone Marrow Aspirate",
                                                                                                           "Cell Based Allograft",
-                                                                                                          "DBM"
+                                                                                                          "DBM",
+                                                                                                          "iFactor"
                                                                                               )
                                                                           )
                                                                   )
@@ -641,7 +649,8 @@ ui <- dashboardPage(skin = "black",
                                                                                                left_column_percent_width = 60, 
                                                                                                font_size = 16,
                                                                                                input_type = "numeric",
-                                                                                               input_id = "anterior_allograft_amount", initial_value_selected = 0, min = 0, max = 500, step = 30)
+                                                                                               input_id = "anterior_allograft_amount", 
+                                                                                               initial_value_selected = 0, min = 0, max = 500, step = 30)
                                                             ),
                                                             conditionalPanel(
                                                               condition = "input.anterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
@@ -674,6 +683,15 @@ ui <- dashboardPage(skin = "black",
                                                                                                font_size = 16,
                                                                                                input_type = "numeric",
                                                                                                input_id = "anterior_dbm_volume", initial_value_selected = 0, min = 0, max = 500, step = 5)
+                                                            ),
+                                                            conditionalPanel(
+                                                              condition = "input.anterior_biologics.indexOf('iFactor') > -1",
+                                                              jh_make_shiny_table_row_function(left_column_label = "iFactor Volume (cc):",bottom_margin = "5px",
+                                                                                               left_column_percent_width = 60,
+                                                                                               font_size = 16,
+                                                                                               input_type = "numeric",
+                                                                                               input_id = "anterior_ifactor_volume",
+                                                                                               initial_value_selected = 0, min = 0, max = 50, step = 5)
                                                             )
                                                      )
                                                    ),
@@ -935,8 +953,8 @@ ui <- dashboardPage(skin = "black",
                               uiOutput("clipboard_ui")
                           )
                           ###########################################
-                  )
-                  # tabItem(tabName = "tables",
+                  ),
+                  tabItem(tabName = "tables",
                   #         ###########################################
                   #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Patient Details Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
                   #             tableOutput(outputId = "patient_details_redcap_df_sidetab")
@@ -947,9 +965,9 @@ ui <- dashboardPage(skin = "black",
                   #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Intraoperative Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                   #             tableOutput(outputId = "intraoperative_details_redcap_df_sidetab")
                   #         ),
-                  #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Specifics"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                  #             tableOutput(outputId = "procedures_by_level_redcap_df_sidetab")
-                  #         ),
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Specifics"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                              tableOutput(outputId = "procedures_by_level_redcap_df_sidetab")
+                          ),
                   #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                   #             tableOutput("screw_details_redcap_df_sidetab")
                   #         ),
@@ -963,7 +981,7 @@ ui <- dashboardPage(skin = "black",
                   #             tableOutput(outputId = "left_revision_implants_table")
                   #         ),
                   #         ###########################################
-                  # )
+                  )
                 )
                     )
 )
@@ -1394,7 +1412,98 @@ server <- function(input, output, session) {
   
   
   
-
+  # output$screw_size_types_ui <- renderUI({
+  #   
+  #   if(nrow(screw_size_types_df_reactive())>0){
+  #     box(width = 12, 
+  #         title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
+  #         jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
+  #                                          left_column_percent_width = 30,
+  #                                          input_type = "checkbox",
+  #                                          font_size = 16, 
+  #                                          checkboxes_inline = TRUE,
+  #                                          input_id = "implant_manufacturer", choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
+  #         ),
+  #         h4("Screw Sizes:"),
+  #         fluidRow(
+  #           column(4, 
+  #                  "Implant"), 
+  #           column(2, 
+  #                  "Left Diameter"), 
+  #           column(2, 
+  #                  "Left Length"), 
+  #           column(2, 
+  #                  "Right Diameter"), 
+  #           column(2, 
+  #                  "Right Length")
+  #         ),
+  #         map(.x = c(1:length(screw_size_types_df_reactive()$level_object_label)),
+  #             .f = ~ 
+  #               conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$level_object_label[[.x]]}') >-1"),
+  #                                fluidRow(
+  #                                  column(4, 
+  #                                         screw_size_types_df_reactive()$level_object_label[[.x]]
+  #                                  ), 
+  #                                  column(2,
+  #                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$left_object[[.x]]}') >-1"),
+  #                                                          screw_size_types_df_reactive()$left_diameter_input[[.x]]
+  #                                         )
+  #                                  ), 
+  #                                  column(2, 
+  #                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$left_object[[.x]]}') >-1"),
+  #                                                          screw_size_types_df_reactive()$left_length_input[[.x]]
+  #                                         )
+  #                                  ), 
+  #                                  column(2, 
+  #                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$right_object[[.x]]}') >-1"),
+  #                                                          screw_size_types_df_reactive()$right_diameter_input[[.x]]
+  #                                         )
+  #                                  ), 
+  #                                  column(2, 
+  #                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$right_object[[.x]]}') >-1"),
+  #                                                          screw_size_types_df_reactive()$right_length_input[[.x]]
+  #                                         )
+  #                                  )
+  #                                )
+  #               )
+  #         ),
+  #         hr(),
+  #         h4("Screw Types:"),
+  #         fluidRow(
+  #           column(4, 
+  #                  "Implant"), 
+  #           column(4, 
+  #                  "Left Screw Type"), 
+  #           column(4, 
+  #                  "Right Screw Type"), 
+  #         ),
+  #         map(.x = c(1:length(screw_size_types_df_reactive()$level_object_label)),
+  #             .f = ~ 
+  #               conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$level_object_label[.x]}') >-1"),
+  #                                fluidRow(
+  #                                  column(4, 
+  #                                         screw_size_types_df_reactive()$level_object_label[[.x]]
+  #                                  ), 
+  #                                  column(4, 
+  #                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$left_object[[.x]]}') >-1"),
+  #                                                          screw_size_types_df_reactive()$left_type_input[[.x]]
+  #                                         )
+  #                                  ), 
+  #                                  column(4,
+  #                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$right_object[[.x]]}') >-1"),
+  #                                                          screw_size_types_df_reactive()$right_type_input[[.x]]
+  #                                         )
+  #                                  ), 
+  #                                )
+  #               )
+  #         )
+  #     )
+  #   }
+  #   
+  #   
+  # })
+  
+  
   
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
@@ -1641,7 +1750,8 @@ server <- function(input, output, session) {
                                                  preop_antibiotics = input$preop_antibiotics,
                                                  anti_fibrinolytic = input$anti_fibrinolytic,
                                                  txa_loading = input$txa_loading,
-                                                 txa_maintenance = input$txa_maintenance)
+                                                 txa_maintenance = input$txa_maintenance, 
+                                                 anterior_cervical_approach_details_checkbox = input$anterior_cervical_approach_details_checkbox)
   })
   
   ## NOW OBSERVE THE COMPLETION OF MODAL BOX 1 AND THEN SHOW MODAL BOX 2
@@ -1664,7 +1774,21 @@ server <- function(input, output, session) {
     )
   })
   
-
+  # I THINK THIS MESSED IT UP
+  # observeEvent(list(input$deep_drains_anterior, input$superficial_drains_anterior, input$deep_drains_posterior, input$superficial_drains_posterior), ignoreInit = TRUE, {
+  #     
+  #     if(any((as.numeric(input$deep_drains_anterior) > 0 | 
+  #             as.numeric(input$superficial_drains_anterior) >0| 
+  #             as.numeric(input$deep_drains_posterior) >0| 
+  #             as.numeric(input$superficial_drains_posterior) >0))){
+  #      updateAwesomeCheckboxGroup(session = session, 
+  #                                 inputId = "postop_drains_dressing", 
+  #                                 selected = "Monitor and record drain output q12h")
+  #     }
+  #     }
+  # )
+  
+  
   
   observeEvent(input$additional_surgical_details_complete, ignoreInit = TRUE, {
     removeModal()
@@ -2128,7 +2252,6 @@ server <- function(input, output, session) {
       "Central Laminectomy" = "laminectomy",
       "Laminectomy for Cyst Excision" = "laminectomy_for_facet_cyst",
       "Laminotomy (Hemilaminectomy)" = "laminotomy",
-      "Posterior Cervical Foraminotomy" = "cervical_foraminotomy",
       "Complete Facetectomy (Unilateral)" = "complete_facetectomy",
       "Diskectomy" = "diskectomy",
       "Transpedicular Decompression" = "transpedicular_approach",
@@ -2631,7 +2754,9 @@ server <- function(input, output, session) {
     }else{
       object_currently_selected_to_add <- input$object_to_add
     }
-
+    # object_type_filtered_df <- implant_starts_df %>%
+    #     filter(object %in% object_currently_selected_to_add)
+    # 
     object_type_filtered_df <- all_implants_constructed_df %>%
       filter(object %in% object_currently_selected_to_add)
     
@@ -4185,9 +4310,6 @@ server <- function(input, output, session) {
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_approach_objects_df,
                                                                        fusion_levels_df = fusions_df,
                                                                        head_position = input$head_positioning,
-                                                                       surgical_approach = input$approach_specified_posterior,
-                                                                       approach_mis_open = input$approach_open_mis,
-                                                                       approach_robot_nav_xray = input$approach_robot_navigation,
                                                                        revision_decompression_vector = input$open_canal,
                                                                        revision_implants_df = revision_implants_df,
                                                                        left_main_rod_size = input$left_main_rod_size,
@@ -4224,18 +4346,58 @@ server <- function(input, output, session) {
             mutate(implant_statement = " ")
         }
         
-        if(any(str_detect(str_to_lower(input$additional_procedures), "microscop"))){
-          microscope_use <- "The microscope was then draped and brought into the field for the microscopic portion of the procedure."
-        }else{
-          microscope_use <- "none"
+        anterior_cervical_approach_details <- list()
+        if(any(str_detect(str_to_lower(input$anterior_cervical_approach_details_checkbox), "caspar"))){
+          anterior_cervical_approach_details$caspar_pins <- "A small start point was created using a burr, and Caspar pins were placed into the cranial and caudal vertebrae to allow for distraction across the disc space."
         }
+        
+        if(any(str_detect(str_to_lower(input$anterior_cervical_approach_details_checkbox), "microscop"))){
+          anterior_cervical_approach_details$microscope_use <- "The microscope was then brought into the field for the next steps in the procedure."
+        }
+        if(length(anterior_cervical_approach_details)>0){
+          anterior_cervical_approach_details <- as.character(glue_collapse(x = anterior_cervical_approach_details, sep = " "))
+        }else{
+          anterior_cervical_approach_details <- "none"
+        }
+        
+        #### BONE GRAFT DATAFRAME
+        anterior_biologics_list <- list()
+        if(any(input$anterior_bone_graft == "Morselized Allograft")){
+          anterior_biologics_list$'Morselized Allograft' <- input$anterior_allograft_amount
+        }else{
+          anterior_biologics_list$'Morselized Allograft' <- 0
+        }
+        if(any(input$anterior_biologics == "Bone Marrow Aspirate")){
+          anterior_biologics_list$'Bone Marrow Aspirate' <- input$anterior_bone_marrow_aspirate_volume
+        }else{
+          anterior_biologics_list$'Bone Marrow Aspirate' <- 0
+        }
+        if(any(input$anterior_biologics == "Cell Based Allograft")){
+          anterior_biologics_list$'Cell Based Allograft' <- input$anterior_cell_based_allograft_volume
+        }else{
+          anterior_biologics_list$'Cell Based Allograft' <- 0
+        }
+        if(any(input$anterior_biologics == "DBM")){
+          anterior_biologics_list$'DBM' <- input$anterior_dbm_volume
+        }else{
+          anterior_biologics_list$'DBM' <- 0
+        }
+        if(any(input$anterior_biologics == "iFactor")){
+          anterior_biologics_list$'iFactor' <- input$anterior_ifactor_volume
+        }else{
+          anterior_biologics_list$'iFactor' <- 0
+        }
+        anterior_biologics_df_formatted <- enframe(anterior_biologics_list) %>%
+          unnest() %>%
+          filter(value != 0)
         
         procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_approach_objects_df,
                                                                      anterior_approach_laterality = input$approach_specified_anterior,
-                                                                     microscope_statement = microscope_use, 
+                                                                     approach_statement = anterior_cervical_approach_details, 
                                                                      antibiotics = input$preop_antibiotics, 
                                                                      additional_procedures_vector = input$additional_procedures, 
                                                                      bmp = anterior_bmp_dose_reactive(),
+                                                                     anterior_biologics_df = anterior_biologics_df_formatted,
                                                                      bone_graft_vector = input$anterior_bone_graft,
                                                                      morselized_allograft = input$anterior_allograft_amount,
                                                                      deep_drains = input$deep_drains_anterior,
@@ -4694,8 +4856,9 @@ server <- function(input, output, session) {
         anterior_bma <- if_else("Bone Marrow Aspirate" %in% input$anterior_biologics, glue("Bone Marrow Aspirate ({input$anterior_bone_marrow_aspirate_volume})cc"), glue("xx"))
         anterior_cell_based <- if_else("Cell Based Allograft" %in% input$anterior_biologics, glue("Cell Based Allograft ({input$anterior_cell_based_allograft_volume})cc"), glue("xx"))
         anterior_dbm <- if_else("DBM" %in% input$anterior_biologics, glue("DBM ({input$anterior_dbm_volume})cc"), glue("xx"))
+        anterior_ifactor <- if_else("iFactor" %in% input$posterior_biologics, glue("iFactor ({input$anterior_ifactor_volume})cc"), glue("xx"))
         
-        anterior_biologics_vector <- discard(c(as.character(anterior_bma), as.character(anterior_cell_based), as.character(anterior_dbm)), .p = ~ .x == "xx")
+        anterior_biologics_vector <- discard(c(as.character(anterior_bma), as.character(anterior_cell_based), as.character(anterior_dbm), as.character(anterior_ifactor)), .p = ~ .x == "xx")
         
         if(length(anterior_biologics_vector) > 0){
           surgery_details_list$anterior_biologics <- glue_collapse(anterior_biologics_vector, sep = "; ") 
@@ -4720,8 +4883,9 @@ server <- function(input, output, session) {
         posterior_bma <- if_else("Bone Marrow Aspirate" %in% input$posterior_biologics, glue("Bone Marrow Aspirate ({input$posterior_bone_marrow_aspirate_volume})cc"), glue("xx"))
         posterior_cell_based <- if_else("Cell Based Allograft" %in% input$posterior_biologics, glue("Cell Based Allograft ({input$posterior_cell_based_allograft_volume})cc"), glue("xx"))
         posterior_dbm <- if_else("DBM" %in% input$posterior_biologics, glue("DBM ({input$posterior_dbm_volume})cc"), glue("xx"))
+        posterior_ifactor <- if_else("iFactor" %in% input$posterior_biologics, glue("iFactor ({input$posterior_ifactor_volume})cc"), glue("xx"))
         
-        posterior_biologics_vector <- discard(c(as.character(posterior_bma), as.character(posterior_cell_based), as.character(posterior_dbm)), .p = ~ .x == "xx")
+        posterior_biologics_vector <- discard(c(as.character(posterior_bma), as.character(posterior_cell_based), as.character(posterior_dbm),  as.character(posterior_ifactor)), .p = ~ .x == "xx")
         
         if(length(posterior_biologics_vector) > 0){
           surgery_details_list$posterior_biologics <- glue_collapse(posterior_biologics_vector, sep = "; ") 
@@ -5059,47 +5223,54 @@ server <- function(input, output, session) {
   ########################
   
   ######## Render "Patient Details Table for side tab:"    ######## 
-  output$patient_details_redcap_df_sidetab <- renderTable({
-      row_1 <- patient_details_redcap_df_reactive() %>%
-          slice(1) %>%
-          as.character()
-
-      tibble(Variable = names(patient_details_redcap_df_reactive()),
-             Result = row_1)
-
-  })
-
+  # output$patient_details_redcap_df_sidetab <- renderTable({
+  #     row_1 <- patient_details_redcap_df_reactive() %>%
+  #         slice(1) %>%
+  #         as.character()
+  #     
+  #     tibble(Variable = names(patient_details_redcap_df_reactive()), 
+  #            Result = row_1) 
+  #     
+  # })
+  
   
   ######## Render "Procedure Summary Table for side tab:"    ######## 
-  output$surgical_details_redcap_df_sidetab <- renderTable({
-      surgical_details_redcap_df_reactive()
-  })
-
+  # output$surgical_details_redcap_df_sidetab <- renderTable({
+  #     surgical_details_redcap_df_reactive()
+  # })
+  
   
   ######## Render "Intraoperative Details Table for side tab:"    ######## 
-  output$intraoperative_details_redcap_df_sidetab <- renderTable({
-      intraoperative_details_redcap_df_reactive()
-  })
-
+  # output$intraoperative_details_redcap_df_sidetab <- renderTable({
+  #     intraoperative_details_redcap_df_reactive() 
+  # })
+  # 
   
-  ######## Render "Procedures By Level Table for side tab:"    ######## 
+  ####### Render "Procedures By Level Table for side tab:"    ########
   output$procedures_by_level_redcap_df_sidetab <- renderTable({
-      procedures_by_level_redcap_df_reactive()
+      procedures_by_level_redcap_df_reactive() %>%
+      pivot_longer(cols = c(-redcap_repeat_instrument, 
+                            -redcap_repeat_instance, 
+                            -dos_surg_repeating,
+                            -approach_repeating,
+                            -category,
+                            -side))
   })
   
+ 
   ######## Render "Screw Details Table for side tab:"    ######## 
-  output$screw_details_redcap_df_sidetab <- renderTable({
-
-      screw_details_redcap_df_reactive()
-
-  })
-
+  # output$screw_details_redcap_df_sidetab <- renderTable({
+  #     
+  #     screw_details_redcap_df_reactive()
+  #     
+  # })  
+  # 
   
   ######## Render "Interbody Details Table for side tab:"    ######## 
-  output$interbody_details_redcap_df_sidetab <- renderTable({
-      interbody_details_redcap_df_reactive()
-  })
-
+  # output$interbody_details_redcap_df_sidetab <- renderTable({
+  #     interbody_details_redcap_df_reactive()
+  # })
+  # 
   
   ############### ############### NOW RENDER EACH OF THE TABLES FOR THE FINAL REVIEW IN THE MODAL:    ###############     ############### 
   ############### ############### NOW RENDER EACH OF THE TABLES FOR THE FINAL REVIEW IN THE MODAL:    ###############     ############### 

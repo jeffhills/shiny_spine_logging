@@ -17,7 +17,7 @@ jh_reorder_levels_function <- function(level_vector){
     mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
     arrange(vertebral_number) %>%
     select(level) %>%
-    as_vector()
+    as_vector() 
   return(levels)
 } 
 

@@ -512,7 +512,8 @@ addition_surgical_details_modal_box_function <-
            preop_antibiotics = c("Cefazolin (Ancef)"),
            anti_fibrinolytic = "",
            txa_loading = 20,
-           txa_maintenance = 5) {
+           txa_maintenance = 5,
+           anterior_cervical_approach_details_checkbox = c()) {
     
     if(editing_the_details == FALSE){
       footer_button <- actionBttn(
@@ -686,7 +687,20 @@ addition_surgical_details_modal_box_function <-
             step = 5,
             text_align = "right",
           )
-        )
+        ),
+        hr(),
+        jh_make_shiny_table_row_function(
+          left_column_label = "Microscope",
+          input_type = "checkbox",
+          input_id = "anterior_cervical_approach_details_checkbox",
+          left_column_percent_width = 30,
+          font_size = row_label_font_size,
+          choices_vector = c(
+            "Microscope was utilized",
+            "Caspar Pins were utilized"
+          ),
+          initial_value_selected = anterior_cervical_approach_details_checkbox,
+        ),
       )
     )
   }

@@ -398,7 +398,7 @@ decompression_df <- implant_starts_df %>%
                                         ..6 = object,
                                         ..7 = lateral_pars_x,
                                         ..8 = superior_tp_y,
-                                        ..9 = side,
+                                        ..9 = side, 
                                         ..10 = inferior_pedicle_y,
                                         ..11 = inferior_facet_superior_border_y),
                                    .f = ~ build_decompression_function(left_x = ..1,
