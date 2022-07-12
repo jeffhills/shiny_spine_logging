@@ -4,6 +4,69 @@
 # - add the revision objects if needed
 # - add the 
 
+procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragraph_type, 
+                                        'incision_drainage', 'Incision and drainage', 'combine',
+                                        'vertebroplasty', 'Vertebroplasty', 'combine',
+                                        'vertebral_cement_augmentation', 'Vertebral body augmentation', 'combine',
+                                        'laminar_downgoing_hook', 'Posterior spinal instrumentation', 'combine',
+                                        'laminar_upgoing_hook', 'Posterior spinal instrumentation', 'combine',
+                                        'lateral_mass_screw', 'Posterior spinal instrumentation', 'combine',
+                                        'occipital_screw', 'Occiput instrumentation', 'combine',
+                                        'pars_screw', 'Posterior spinal instrumentation', 'combine',
+                                        'pedicle_hook', 'Posterior spinal instrumentation', 'combine',
+                                        'pedicle_screw', 'Posterior spinal instrumentation', 'combine',
+                                        'crosslink', 'Posterior spinal instrumentation', 'combine',
+                                        'laminar_downgoing_hook', 'Posterior spinal instrumentation', 'combine',
+                                        'sublaminar_wire', 'Posterior spinal instrumentation', 'combine',
+                                        'tp_hook', 'Posterior spinal instrumentation', 'combine',
+                                        'translaminar_screw', 'Posterior spinal instrumentation', 'combine',
+                                        'pelvic_screw', 'Pelvic instrumentation', 'combine',
+                                        'pelvic_screw_1', 'Pelvic instrumentation', 'combine',
+                                        'pelvic_screw_2', 'Pelvic instrumentation', 'combine',
+                                        'tether', 'Spinous process posterior tethering/wiring', 'combine',
+                                        'costovertebral_approach', 'Costovertebral approach with decompression of the spinal cord', 'distinct',
+                                        'revision_costovertebral_approach', 'Reexploration and revision decompression using a costovertebral approach', 'distinct',
+                                        'transpedicular_approach', 'Transpedicular approach with decompression', 'distinct',
+                                        'lateral_extraforaminal_approach', 'Decompression using a lateral extraforaminal approach', 'distinct',
+                                        'lateral_extracavitary_approach', 'Arthrodesis using a modified lateral extracavitary approach', 'distinct',
+                                        'corpectomy_extracavitary_tumor', 'Partial Corpectomy with decompression using a modified lateral extracavitary approach for tumor', 'distinct',
+                                        'laminectomy_for_tumor', 'Laminectomy for biopsy and excision of extradural spinal tumor', 'combine',
+                                        'laminectomy_for_facet_cyst', 'Laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)', 'combine',
+                                        'revision_transpedicular_approach', 'Reexploration and revision decompression using a transpedicular approach', 'distinct',
+                                        'sublaminar_decompression', 'Bilateral laminectomy, foraminotomy, and medial facetectomy for decompression of the cauda equina and nerve roots', 'combine',
+                                        'laminectomy', 'Central Laminectomy for decompression', 'combine',
+                                        'diskectomy', 'Laminotomy and discectomy for decompression of the nerve root', 'combine',
+                                        'laminotomy', 'Partial laminectomy with facetectomy & foraminotomy for decompression of the cauda equina and nerve roots', 'combine',
+                                        'cervical_foraminotomy', 'Posterior cervical foraminotomy for decompression of the nerve root', 'combine',
+                                        'revision_diskectomy', 'Reexploration and revision laminotomy and discectomy for decompression of the nerve root', 'combine',
+                                        'revision_sublaminar_decompression', 'Reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies', 'combine',
+                                        'revision_laminectomy', 'Reexploration and revision decompression with central laminectomy', 'combine',
+                                        'revision_laminotomy', 'Reexploration and revision decompression with laminotomy and medial facetectomy', 'combine',
+                                        'laminoplasty', 'Laminoplasty', 'combine',
+                                        'grade_1', 'Inferior facetectomies', 'combine',
+                                        'complete_facetectomy', 'Partial laminectomy with complete facetectomy & foraminotomy for decompression of the nerve root', 'combine',
+                                        'revision_complete_facetectomy', 'Reexploration and revision decompression with a laminotomy and complete facetectomy', 'combine',
+                                        'grade_2', 'Posterior column osteotomy', 'combine',
+                                        'grade_3', 'Pedicle subtraction osteotomy', 'distinct',
+                                        'grade_4', 'Extended three column osteotomy (vertebral body partial corpectomy)', 'distinct',
+                                        'grade_5', 'Vertebral column resection', 'distinct',
+                                        'costotransversectomy', 'Costovertebral approach with costotransversectomy', 'combine',
+                                        'no_implant_interbody_fusion', 'Interbody fusion (without interbody implant)', 'distinct',
+                                        'llif', 'Lateral lumbar interbody fusion and insertion of interbody device', 'distinct',
+                                        'plif', 'Posterior lumbar interbody fusion and insertion of interbody device', 'distinct',
+                                        'tlif', 'Transforaminal lumbar interbody fusion and insertion of interbody device', 'distinct',
+                                        'intervertebral_cage', 'Insertion of intervertebral biomechanical implant', 'distinct',
+                                        'structural_allograft', 'Application of structural allograft', 'combine',
+                                        'anterior_disc_arthroplasty', 'Total disk arthroplasty', 'distinct',
+                                        'decompression_diskectomy_fusion', 'Anterior diskectomy and fusion with decompression of the central canal and nerve roots', 'distinct',
+                                        'diskectomy_fusion', 'Anterior diskectomy and fusion', 'distinct',
+                                        'diskectomy_fusion_no_interbody_device', 'Anterior diskectomy and fusion', 'distinct',
+                                        'anterior_interbody_implant', 'Insertion of interbody biomechanical implant', 'distinct',
+                                        'corpectomy', 'Anterior vertebral corpectomy', 'combine',
+                                        'corpectomy_cage', 'Anterior insertion of intervertebral biomechanical implant', 'combine',
+                                        'anterior_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
+                                        'anterior_buttress_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
+                                        'screw_washer', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine')
 
 ################-------------------------#################### -------- ANTERIOR & POSTERIOR FUNCTIONS  -----------################-------------------------#################### 
 ################-------------------------#################### -------- ANTERIOR & POSTERIOR FUNCTIONS  -----------################-------------------------#################### 
@@ -12,144 +75,168 @@
 
 
 op_note_procedure_performed_summary_classifier_function <- function(object){
-  procedure_category <- case_when(
-    object == "incision_drainage" ~ "Incision and drainage",
-    object == "vertebroplasty" ~ "Vertebroplasty",
-    object == "vertebral_cement_augmentation" ~ "Vertebral body augmentation",
-    ### INSTRUMENTATION
-    object == "laminar_downgoing_hook" ~ "Posterior spinal instrumentation",
-    object == "laminar_upgoing_hook" ~ "Posterior spinal instrumentation",
-    object == "lateral_mass_screw" ~ "Posterior spinal instrumentation",
-    object == "occipital_screw" ~ "Occiput instrumentation",
-    object == "pars_screw" ~ "Posterior spinal instrumentation",
-    object == "pedicle_hook" ~ "Posterior spinal instrumentation",
-    object == "pedicle_screw" ~ "Posterior spinal instrumentation",
-    object == "crosslink" ~ "Posterior spinal instrumentation",
-    object == "laminar_downgoing_hook" ~ "Posterior spinal instrumentation",
-    object == "sublaminar_wire" ~ "Posterior spinal instrumentation",
-    object == "tp_hook" ~ "Posterior spinal instrumentation",
-    object == "translaminar_screw" ~ "Posterior spinal instrumentation",
-    object == "pelvic_screw" ~ "Pelvic instrumentation",
-    object == "pelvic_screw_1" ~ "Pelvic instrumentation",
-    object == "pelvic_screw_2" ~ "Pelvic instrumentation",
-    object == "tether" ~ "Spinous process posterior tethering/wiring",
-    ### DECOMPRESSION 
-          ## COMPLEX
-    object == "costovertebral_approach" ~ "Costovertebral approach with decompression of the spinal cord", 
-    object == "revision_costovertebral_approach" ~ "Reexploration and revision decompression using a costovertebral approach",
-    object == "transpedicular_approach" ~ "Transpedicular approach with decompression", #63056	
-    object == "lateral_extraforaminal_approach" ~ "Decompression using a lateral extraforaminal approach",
-    object == "lateral_extracavitary_approach" ~ "Arthrodesis using a modified lateral extracavitary approach",
-    object == "corpectomy_extracavitary_tumor" ~ "Partial Corpectomy with decompression using a modified lateral extracavitary approach for tumor",
-    object == "laminectomy_for_tumor" ~ "Laminectomy for biopsy and excision of extradural spinal tumor",
-    object == "laminectomy_for_facet_cyst" ~ "Laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)",
-    object == "revision_transpedicular_approach" ~ "Reexploration and revision decompression using a transpedicular approach",
-          ## COMMON
-    object == "sublaminar_decompression" ~ "Bilateral laminectomy, foraminotomy, and medial facetectomy for decompression of the cauda equina and nerve roots", #63047
-    object == "laminectomy" ~ "Central Laminectomy for decompression",
-    object == "diskectomy" ~ "Laminotomy and discectomy for decompression of the nerve root",
-    object == "laminotomy" ~  "Partial laminectomy with facetectomy & foraminotomy for decompression of the cauda equina and nerve roots", # 63047
-    object == "cervical_foraminotomy" ~ "Posterior cervical foraminotomy for decompression of the nerve root",
-    
-    object == "revision_diskectomy" ~ "Reexploration and revision laminotomy and discectomy for decompression of the nerve root",
-    object == "revision_sublaminar_decompression" ~ "Reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies",
-    object == "revision_laminectomy" ~ "Reexploration and revision decompression with central laminectomy",
-    object == "revision_laminotomy" ~ "Reexploration and revision decompression with laminotomy and medial facetectomy",
-    object == "laminoplasty" ~ "Laminoplasty",
-    object == "grade_1" ~ "Inferior facetectomies",
-    object == "complete_facetectomy" ~ "Patial laminectomy with complete facetectomy & foraminotomy for decompression of the nerve root", ## 63047
-    object == "revision_complete_facetectomy" ~ "Reexploration and revision decompression with a laminotomy and complete facetectomy",
-    #### OSTEOTOMY
-    object == "grade_2" ~ "Posterior column osteotomy",
-    object == "grade_3" ~ "Pedicle subtraction osteotomy",
-    object == "grade_4" ~ "Extended three column osteotomy (vertebral body partial corpectomy)",
-    object == "grade_5" ~ "Vertebral column resection",
-    object == "costotransversectomy" ~ "Costovertebral approach with costotransversectomy",
-    ### INTERBODY CAGE PLACEMENT AND FUSION
-    object == "no_implant_interbody_fusion" ~ "Interbody fusion (without interbody implant)",
-    object == "llif" ~ "Lateral lumbar interbody fusion and insertion of interbody device",
-    object == "plif" ~ "Posterior lumbar interbody fusion and insertion of interbody device",
-    object == "tlif" ~ "Transforaminal lumbar interbody fusion and insertion of interbody device",
-    object == "intervertebral_cage" ~ "Insertion of intervertebral biomechanical implant",
-    object == "structural_allograft" ~ "Application of structural allograft",
-    ## ANTERIOR
-    object == "anterior_disc_arthroplasty" ~ "Total disk arthroplasty",
-    object == "decompression_diskectomy_fusion" ~ "Anterior diskectomy and fusion with decompression of the central canal and nerve roots",
-    object == "diskectomy_fusion" ~ "Anterior diskectomy and fusion",
-    object == "diskectomy_fusion_no_interbody_device" ~ "Anterior diskectomy and fusion",
-    object == "anterior_interbody_implant" ~ "Insertion of interbody biomechanical implant",
-    object == "corpectomy" ~ "Anterior vertebral corpectomy",
-    object == "corpectomy_cage" ~ "Anterior insertion of intervertebral biomechanical implant",
-    object == "anterior_plate" ~ "Anterior spinal instrumentation (distinct from an interbody implant)",
-    object == "anterior_buttress_plate" ~ "Anterior spinal instrumentation (distinct from an interbody implant)",
-    object == "screw_washer" ~ "Anterior spinal instrumentation (distinct from an interbody implant)"
-  )
-  procedure_category
-}
+  
+  label_df <- procedure_classifier_type_df %>%
+    filter(object_name == object)
+  
+  procedure_category <- label_df$procedure_label[[1]]
+  
+  return(procedure_category)
+  
+  # procedure_category <- case_when(
+  #   object == "incision_drainage" ~ "Incision and drainage",
+  #   object == "vertebroplasty" ~ "Vertebroplasty",
+  #   object == "vertebral_cement_augmentation" ~ "Vertebral body augmentation",
+  #   ### INSTRUMENTATION
+  #   object == "laminar_downgoing_hook" ~ "Posterior spinal instrumentation",
+  #   object == "laminar_upgoing_hook" ~ "Posterior spinal instrumentation",
+  #   object == "lateral_mass_screw" ~ "Posterior spinal instrumentation",
+  #   object == "occipital_screw" ~ "Occiput instrumentation",
+  #   object == "pars_screw" ~ "Posterior spinal instrumentation",
+  #   object == "pedicle_hook" ~ "Posterior spinal instrumentation",
+  #   object == "pedicle_screw" ~ "Posterior spinal instrumentation",
+  #   object == "crosslink" ~ "Posterior spinal instrumentation",
+  #   object == "laminar_downgoing_hook" ~ "Posterior spinal instrumentation",
+  #   object == "sublaminar_wire" ~ "Posterior spinal instrumentation",
+  #   object == "tp_hook" ~ "Posterior spinal instrumentation",
+  #   object == "translaminar_screw" ~ "Posterior spinal instrumentation",
+  #   object == "transarticular_screw" ~ "Posterior spinal instrumentation",
+  #   object == "pelvic_screw" ~ "Pelvic instrumentation",
+  #   object == "pelvic_screw_1" ~ "Pelvic instrumentation",
+  #   object == "pelvic_screw_2" ~ "Pelvic instrumentation",
+  #   object == "tether" ~ "Spinous process posterior tethering/wiring",
+  #   ### DECOMPRESSION 
+  #         ## COMPLEX
+  #   object == "costovertebral_approach" ~ "Costovertebral approach with decompression of the spinal cord", 
+  #   object == "revision_costovertebral_approach" ~ "Reexploration and revision decompression using a costovertebral approach",
+  #   object == "transpedicular_approach" ~ "Transpedicular approach with decompression", #63056	
+  #   object == "lateral_extraforaminal_approach" ~ "Decompression using a lateral extraforaminal approach",
+  #   object == "lateral_extracavitary_approach" ~ "Arthrodesis using a modified lateral extracavitary approach",
+  #   object == "corpectomy_extracavitary_tumor" ~ "Partial Corpectomy with decompression using a modified lateral extracavitary approach for tumor",
+  #   object == "laminectomy_for_tumor" ~ "Laminectomy for biopsy and excision of extradural spinal tumor",
+  #   object == "laminectomy_for_facet_cyst" ~ "Laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)",
+  #   object == "revision_transpedicular_approach" ~ "Reexploration and revision decompression using a transpedicular approach",
+  #         ## COMMON
+  #   object == "sublaminar_decompression" ~ "Bilateral laminectomy, foraminotomy, and medial facetectomy for decompression of the cauda equina and nerve roots", #63047
+  #   object == "laminectomy" ~ "Central Laminectomy for decompression",
+  #   object == "diskectomy" ~ "Laminotomy and discectomy for decompression of the nerve root",
+  #   object == "laminotomy" ~  "Partial laminectomy with facetectomy & foraminotomy for decompression of the cauda equina and nerve roots", # 63047
+  #   object == "cervical_foraminotomy" ~ "Posterior cervical foraminotomy for decompression of the nerve root",
+  #   
+  #   object == "revision_diskectomy" ~ "Reexploration and revision laminotomy and discectomy for decompression of the nerve root",
+  #   object == "revision_sublaminar_decompression" ~ "Reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies",
+  #   object == "revision_laminectomy" ~ "Reexploration and revision decompression with central laminectomy",
+  #   object == "revision_laminotomy" ~ "Reexploration and revision decompression with laminotomy and medial facetectomy",
+  #   object == "laminoplasty" ~ "Laminoplasty",
+  #   object == "grade_1" ~ "Inferior facetectomies",
+  #   object == "complete_facetectomy" ~ "Partial laminectomy with complete facetectomy & foraminotomy for decompression of the nerve root", ## 63047
+  #   object == "revision_complete_facetectomy" ~ "Reexploration and revision decompression with a laminotomy and complete facetectomy",
+  #   #### OSTEOTOMY
+  #   object == "grade_2" ~ "Posterior column osteotomy",
+  #   object == "grade_3" ~ "Pedicle subtraction osteotomy",
+  #   object == "grade_4" ~ "Extended three column osteotomy (vertebral body partial corpectomy)",
+  #   object == "grade_5" ~ "Vertebral column resection",
+  #   object == "costotransversectomy" ~ "Costovertebral approach with costotransversectomy",
+  #   ### INTERBODY CAGE PLACEMENT AND FUSION
+  #   object == "no_implant_interbody_fusion" ~ "Interbody fusion (without interbody implant)",
+  #   object == "llif" ~ "Lateral lumbar interbody fusion and insertion of interbody device",
+  #   object == "plif" ~ "Posterior lumbar interbody fusion and insertion of interbody device",
+  #   object == "tlif" ~ "Transforaminal lumbar interbody fusion and insertion of interbody device",
+  #   object == "intervertebral_cage" ~ "Insertion of intervertebral biomechanical implant",
+  #   object == "structural_allograft" ~ "Application of structural allograft",
+  #   ## ANTERIOR
+  #   object == "anterior_disc_arthroplasty" ~ "Total disk arthroplasty",
+  #   object == "decompression_diskectomy_fusion" ~ "Anterior diskectomy and fusion with decompression of the central canal and nerve roots",
+  #   object == "diskectomy_fusion" ~ "Anterior diskectomy and fusion",
+  #   object == "diskectomy_fusion_no_interbody_device" ~ "Anterior diskectomy and fusion",
+  #   object == "anterior_interbody_implant" ~ "Insertion of interbody biomechanical implant",
+  #   object == "corpectomy" ~ "Anterior vertebral corpectomy",
+  #   object == "corpectomy_cage" ~ "Anterior insertion of intervertebral biomechanical implant",
+  #   object == "anterior_plate" ~ "Anterior spinal instrumentation (distinct from an interbody implant)",
+  #   object == "anterior_buttress_plate" ~ "Anterior spinal instrumentation (distinct from an interbody implant)",
+  #   object == "screw_washer" ~ "Anterior spinal instrumentation (distinct from an interbody implant)"
+  # )
+  
+  # procedure_category
+  
+  }
 
 op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
-  
   procedure_cat <- str_to_lower(procedure_cat)
   
-  paragraph_type <- case_when(
-    procedure_cat == "incision and drainage" ~ "combine",
-    procedure_cat == "vertebroplasty" ~ "combine",
-    procedure_cat == "vertebral body augmentation" ~ "combine",
-    ## INSTRUMENTATION
-    procedure_cat == "posterior spinal instrumentation" ~ "combine",
-    procedure_cat == "occiput instrumentation" ~ "combine",
-    procedure_cat == "pelvic instrumentation" ~ "combine",
-    procedure_cat == "spinous process posterior tethering/wiring" ~ "combine",
-    ## DECOMPRESSION
-      ##COMPLEX
-    procedure_cat == "costovertebral approach with decompression of the spinal cord" ~ "distinct",
-    procedure_cat == "reexploration with revision decompression using a costovertebral approach" ~ "distinct",
-    procedure_cat == "transpedicular approach with decompression" ~ "distinct",
-    procedure_cat == "decompression using a lateral extraforaminal approach" ~ "distinct",
-    procedure_cat == "reexploration with revision decompression using a transpedicular approach" ~ "distinct",
-    procedure_cat == "arthrodesis using a modified lateral extracavitary approach" ~ "distinct",
-      ## COMMON
-    procedure_cat == 'central laminectomy for decompression' ~ 'combine',
-    procedure_cat == 'bilateral laminectomy, foraminotomy, and medial facetectomy for decompression of the cauda equina and nerve roots' ~ 'combine',
-    procedure_cat == 'laminotomy and discectomy for decompression of the nerve root' ~ 'combine',
-    procedure_cat == 'partial laminectomy with facetectomy & foraminotomy for decompression of the cauda equina and nerve roots' ~ 'combine',
-    procedure_cat == 'posterior cervical foraminotomy for decompression of the nerve root' ~ 'combine',
-    procedure_cat == "patial laminectomy with complete facetectomy & foraminotomy for decompression of the nerve root" ~ "combine",
-    procedure_cat == "laminoplasty" ~ "combine",
-      ###common revision
-    procedure_cat == "Reexploration and revision laminotomy and discectomy for decompression of the nerve root" ~ 'combine',
-    procedure_cat == "reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies" ~ 'combine',
-    procedure_cat == "reexploration and revision decompression with central laminectomy" ~ 'combine',
-    procedure_cat == "reexploration and revision decompression with a laminotomy and complete facetectomy"~ 'combine',
-    procedure_cat == "laminectomy for biopsy and excision of extradural spinal tumor" ~ "combine",
-    procedure_cat == "laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)" ~ "combine",
-    procedure_cat == "decompression" ~ "combine",
-    procedure_cat == "reexploration with revision decompression" ~ "combine",
-    procedure_cat == "partial corpectomy with decompression using a modified lateral extracavitary approach for tumor" ~ "distinct",
-    ## osteotomies and other
-    procedure_cat == "inferior facetectomies" ~ "combine",
-    procedure_cat == "posterior column osteotomy" ~ "combine",
-    procedure_cat == "pedicle subtraction osteotomy" ~ "distinct",
-    procedure_cat == "extended three column osteotomy (vertebral body partial corpectomy)" ~ "distinct",
-    procedure_cat == "vertebral column resection" ~ "distinct",
-    procedure_cat == "costovertebral approach with costotransversectomy" ~ "combine",
-    procedure_cat == "interbody fusion (without interbody implant)" ~ "distinct",
-    procedure_cat == "lateral lumbar interbody fusion and insertion of interbody device" ~ "distinct",
-    procedure_cat == "posterior lumbar interbody fusion and insertion of interbody device" ~ "distinct",
-    procedure_cat == "transforaminal lumbar interbody fusion and insertion of interbody device" ~ "distinct",
-    procedure_cat == "insertion of intervertebral biomechanical implant" ~ "distinct",
-    procedure_cat == "application of structural allograft" ~ "combine",
-    #anterior#
-    procedure_cat == "total disk arthroplasty" ~ "distinct",
-    procedure_cat == "anterior diskectomy and fusion with decompression of the central canal and nerve roots" ~ "distinct",
-    procedure_cat == "anterior diskectomy and fusion" ~ "distinct",
-    procedure_cat == "insertion of interbody biomechanical implant" ~ "distinct",
-    procedure_cat == "anterior vertebral corpectomy" ~ "combine",
-    procedure_cat == "anterior insertion of intervertebral biomechanical implant" ~ "combine",
-    procedure_cat == "anterior spinal instrumentation (distinct from an interbody implant)" ~ "combine"
-  )
+  # "object_name"     "procedure_label" "paragraph_type" 
   
-  paragraph_type
+  paragraph_type_df <- procedure_classifier_type_df %>%
+    mutate(procedure_label = str_to_lower(procedure_label)) %>%
+    filter(procedure_label == procedure_cat) %>%
+    select(paragraph_type)
+  
+  paragraph_type <- paragraph_type_df$paragraph_type[[1]]
+  
+  return(paragraph_type)
+  
+  # procedure_cat <- str_to_lower(procedure_cat)
+  # 
+  # paragraph_type <- case_when(
+  #   procedure_cat == "incision and drainage" ~ "combine",
+  #   procedure_cat == "vertebroplasty" ~ "combine",
+  #   procedure_cat == "vertebral body augmentation" ~ "combine",
+  #   ## INSTRUMENTATION
+  #   procedure_cat == "posterior spinal instrumentation" ~ "combine",
+  #   procedure_cat == "occiput instrumentation" ~ "combine",
+  #   procedure_cat == "pelvic instrumentation" ~ "combine",
+  #   procedure_cat == "spinous process posterior tethering/wiring" ~ "combine",
+  #   ## DECOMPRESSION
+  #     ##COMPLEX
+  #   procedure_cat == "costovertebral approach with decompression of the spinal cord" ~ "distinct",
+  #   procedure_cat == "reexploration and revision decompression using a costovertebral approach" ~ "distinct",
+  #   procedure_cat == "transpedicular approach with decompression" ~ "distinct",
+  #   procedure_cat == "decompression using a lateral extraforaminal approach" ~ "distinct",
+  #   procedure_cat == "reexploration and revision decompression using a transpedicular approach" ~ "distinct",
+  #   procedure_cat == "arthrodesis using a modified lateral extracavitary approach" ~ "distinct",
+  #     ## COMMON
+  #   procedure_cat == 'central laminectomy for decompression' ~ 'combine',
+  #   procedure_cat == 'bilateral laminectomy, foraminotomy, and medial facetectomy for decompression of the cauda equina and nerve roots' ~ 'combine',
+  #   procedure_cat == 'laminotomy and discectomy for decompression of the nerve root' ~ 'combine',
+  #   procedure_cat == 'partial laminectomy with facetectomy & foraminotomy for decompression of the cauda equina and nerve roots' ~ 'combine',
+  #   procedure_cat == 'posterior cervical foraminotomy for decompression of the nerve root' ~ 'combine',
+  #   procedure_cat == "partial laminectomy with complete facetectomy & foraminotomy for decompression of the nerve root" ~ "combine",
+  #   procedure_cat == "laminoplasty" ~ "combine",
+  #     ###common revision
+  #   procedure_cat == "reexploration and revision laminotomy and discectomy for decompression of the nerve root" ~ 'combine',
+  #   procedure_cat == "reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies" ~ 'combine',
+  #   procedure_cat == "reexploration and revision decompression with central laminectomy" ~ 'combine',
+  #   procedure_cat == "reexploration and revision decompression with a laminotomy and complete facetectomy"~ 'combine',
+  #   procedure_cat == "laminectomy for biopsy and excision of extradural spinal tumor" ~ "combine",
+  #   procedure_cat == "laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)" ~ "combine",
+  #   procedure_cat == "reexploration and revision decompression with laminotomy and medial facetectomy" ~ "combine",
+  #   procedure_cat == "decompression" ~ "combine",
+  #   procedure_cat == "reexploration with revision decompression" ~ "combine",
+  #   procedure_cat == "partial corpectomy with decompression using a modified lateral extracavitary approach for tumor" ~ "distinct",
+  #   ## osteotomies and other
+  #   procedure_cat == "inferior facetectomies" ~ "combine",
+  #   procedure_cat == "posterior column osteotomy" ~ "combine",
+  #   procedure_cat == "pedicle subtraction osteotomy" ~ "distinct",
+  #   procedure_cat == "extended three column osteotomy (vertebral body partial corpectomy)" ~ "distinct",
+  #   procedure_cat == "vertebral column resection" ~ "distinct",
+  #   procedure_cat == "costovertebral approach with costotransversectomy" ~ "combine",
+  #   procedure_cat == "interbody fusion (without interbody implant)" ~ "distinct",
+  #   procedure_cat == "lateral lumbar interbody fusion and insertion of interbody device" ~ "distinct",
+  #   procedure_cat == "posterior lumbar interbody fusion and insertion of interbody device" ~ "distinct",
+  #   procedure_cat == "transforaminal lumbar interbody fusion and insertion of interbody device" ~ "distinct",
+  #   procedure_cat == "insertion of intervertebral biomechanical implant" ~ "distinct",
+  #   procedure_cat == "application of structural allograft" ~ "combine",
+  #   #anterior#
+  #   procedure_cat == "total disk arthroplasty" ~ "distinct",
+  #   procedure_cat == "anterior diskectomy and fusion with decompression of the central canal and nerve roots" ~ "distinct",
+  #   procedure_cat == "anterior diskectomy and fusion" ~ "distinct",
+  #   procedure_cat == "insertion of interbody biomechanical implant" ~ "distinct",
+  #   procedure_cat == "anterior vertebral corpectomy" ~ "combine",
+  #   procedure_cat == "anterior insertion of intervertebral biomechanical implant" ~ "combine",
+  #   procedure_cat == "anterior spinal instrumentation (distinct from an interbody implant)" ~ "combine"
+  # )
+  # 
+  # paragraph_type
 }
 
 
@@ -376,12 +463,19 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
     arrange(object)
   
   anterior_procedure_category_nested_df <- anterior_df %>%
-    mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
-    mutate(paragraphs_combine_or_distinct = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+    # mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+    mutate(procedure_category = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
+    unnest(procedure_category) %>%
+    mutate(procedure_category = str_to_lower(procedure_category)) %>%
+    # mutate(paragraphs_combine_or_distinct = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+    mutate(paragraphs_combine_or_distinct = map(.x = procedure_category, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+    unnest(paragraphs_combine_or_distinct) %>%
     select(level, vertebral_number , procedure_category, object, side, paragraphs_combine_or_distinct, implant_statement) %>%
     group_by(procedure_category) %>%
     nest() %>%
-    mutate(paragraphs_combine_or_distinct = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) 
+    mutate(paragraphs_combine_or_distinct = map(.x = procedure_category, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+    unnest(paragraphs_combine_or_distinct)
+    # mutate(paragraphs_combine_or_distinct = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) 
   
   paragraphs_df <- anterior_procedure_category_nested_df %>%
     mutate(paragraphs = pmap(.l = list(..1 = procedure_category, 
@@ -623,13 +717,21 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
       unnest(revision_level) %>%
       mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
       select(level, object, vertebral_number) %>%
-      mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+      # mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
+      mutate(procedure_class = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
+      unnest(procedure_class) %>%
+      # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+      mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      unnest(procedures_per_line) 
   }else{
     summary_nested_df <- objects_added_df %>%
       select(level, object, vertebral_number) %>%
-      mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+      # mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
+      mutate(procedure_class = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
+      unnest(procedure_class) %>%
+      # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+      mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      unnest(procedures_per_line) 
   }
   
   
@@ -707,7 +809,11 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
 
 #############-----------------------   Generate ALL THE PROCEDURE PARAGRAPHS: input 1: the objects added df ----------------------###############
 
-op_note_procedure_paragraphs_function <- function(objects_added_df, revision_decompression_vector = c(), approach_technique = "Na", image_guidance = "Na"){
+op_note_procedure_paragraphs_function <- function(objects_added_df, 
+                                                  revision_decompression_vector = c(), 
+                                                  approach_technique = "Na", 
+                                                  image_guidance = "Na", 
+                                                  neuromonitoring_emg_statement = "No"){
   
   if("implant_statement" %in% names(objects_added_df) == FALSE){ 
     objects_added_df <- objects_added_df %>%
@@ -731,9 +837,14 @@ op_note_procedure_paragraphs_function <- function(objects_added_df, revision_dec
       mutate(revision_label = paste0("revision_", object)) %>%
       mutate(object = if_else(revision_level == FALSE, object, if_else(category == "decompression", revision_label, object))) %>%
       select(-revision_label) %>%
-      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      # mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      mutate(procedure_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
+      unnest(procedure_category) %>%
+      mutate(procedure_category = str_to_lower(procedure_category)) %>%
       select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
-      mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+      # mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+      mutate(procedures_combine = map(.x = procedure_category, .f = ~ op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      unnest(procedures_combine) %>%
       group_by(procedure_category, procedures_combine, object) %>%
       nest() %>%
       ungroup() %>%
@@ -743,9 +854,12 @@ op_note_procedure_paragraphs_function <- function(objects_added_df, revision_dec
       select(-data) 
   }else{
     df_for_paragraphs <- objects_added_df %>%
-      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      mutate(procedure_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
+      unnest(procedure_category) %>%
+      mutate(procedure_category = str_to_lower(procedure_category)) %>%
       select(level, vertebral_number, procedure_category, object, side, implant_statement, screw_size_type) %>%
-      mutate(procedures_combine = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) %>%
+      mutate(procedures_combine = map(.x = procedure_category, .f = ~ op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      unnest(procedures_combine) %>%
       group_by(procedure_category, procedures_combine, object) %>%
       nest() %>%
       ungroup() %>%
@@ -759,18 +873,20 @@ op_note_procedure_paragraphs_function <- function(objects_added_df, revision_dec
   
   procedures_op_full_df <- df_for_paragraphs %>%
     mutate(approach_technique_input = approach_technique,
-           image_guidance_technique_input = image_guidance) %>%
-    # replace_na(list(procedures_combine = "distinct", procedure_category = "insertion of intervertebral biomechanical implant")) %>%
+           image_guidance_technique_input = image_guidance, 
+           neuromonitoring_emg_statement_input = neuromonitoring_emg_statement) %>%
     mutate(procedure_statement = pmap(list(..1 = procedure_category,
                                            ..2 = nested_data, 
                                            ..3 = procedures_combine, 
                                            ..4 = approach_technique_input, 
-                                           ..5 = image_guidance_technique_input),
+                                           ..5 = image_guidance_technique_input, 
+                                           ..6 = neuromonitoring_emg_statement_input),
                                       .f = ~create_full_paragraph_statement_function(procedure_paragraph_intro = ..1,
                                                                                      df_with_levels_object_nested = ..2, 
                                                                                      paragraphs_combined_or_distinct = ..3, 
                                                                                      approach_technique = ..4, 
-                                                                                     image_guidance = ..5))) %>%
+                                                                                     image_guidance = ..5, 
+                                                                                     neuromonitoring_emg = ..6))) %>%
     select(procedure_category, procedures_combine, procedure_statement) %>%
     unnest(procedure_statement)
   
@@ -785,7 +901,8 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
                                                      df_with_levels_object_nested, 
                                                      paragraphs_combined_or_distinct, 
                                                      approach_technique = "na", 
-                                                     image_guidance = "na"){
+                                                     image_guidance = "na", 
+                                                     neuromonitoring_emg = "No"){
   if(paragraphs_combined_or_distinct == "combine"){
     
     df_with_statement <- df_with_levels_object_nested %>%
@@ -815,17 +932,31 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       distinct() %>%
       arrange(vertebral_number)
     
-    if(procedure_paragraph_intro == "pelvic instrumentation" | procedure_paragraph_intro == "posterior spinal instrumentation"){
+    if(neuromonitoring_emg != "No"){
+      emg_statement <- neuromonitoring_emg
+    }else{
+      emg_statement <- ""
+    }
+    
       if(procedure_paragraph_intro == "pelvic instrumentation"){
         statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
-      }
-      if(procedure_paragraph_intro == "posterior spinal instrumentation"){
-        statement <- glue("I then proceeded with the posterior spinal instrumentation. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
-      }
-      
-    }else{
+      }else if(procedure_paragraph_intro == "posterior spinal instrumentation"){
+        statement <- glue("I then proceeded with the posterior spinal instrumentation. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {emg_statement} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+      } else{
       statement <- glue("I then proceeded with the {procedure_paragraph_intro}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
     }
+    
+    # if(procedure_paragraph_intro == "pelvic instrumentation" | procedure_paragraph_intro == "posterior spinal instrumentation"){
+    #   if(procedure_paragraph_intro == "pelvic instrumentation"){
+    #     statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
+    #   }
+    #   if(procedure_paragraph_intro == "posterior spinal instrumentation"){
+    #     statement <- glue("I then proceeded with the posterior spinal instrumentation. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    #   }
+    #   
+    # }else{
+    #   statement <- glue("I then proceeded with the {procedure_paragraph_intro}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    # }
     
   }
   
@@ -839,7 +970,10 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
                                           .f = ~op_note_distinct_technique_statement(object = ..1, level = ..2, side = ..3, interbody_statement = ..4))) %>% 
       select(object, level, object, tech_statement_detail) %>%
       unnest(tech_statement_detail) %>%
-      mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      mutate(procedure_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
+      unnest(procedure_category) %>%
+      mutate(procedure_category = str_to_lower(procedure_category)) %>%
+      
       mutate(tech_statement = paste(tech_statement_detail, glue("This completed the {procedure_category} at the {level} {if_else(str_detect(level, '-'), 'interspace', 'level')}.")))
     
     statement <- glue_collapse(df_with_statement$tech_statement, sep = "\n\n")
@@ -1065,13 +1199,22 @@ op_note_procedures_present_listed_function <- function(objects_added_df,
       unnest(revision_level) %>%
       mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
       select(level, object, vertebral_number) %>%
-      mutate(procedure_class = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
-      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+      # mutate(procedure_class = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+      mutate(procedure_class = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
+      unnest(procedure_class) %>%
+      mutate(procedure_class = str_to_lower(procedure_category)) %>%
+      # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+    mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      unnest(procedures_per_line)
   }else{
     summary_nested_df <- objects_added_df %>%
       select(level, object, vertebral_number) %>%
-      mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+      # mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
+      mutate(procedure_class = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
+      unnest(procedure_class) %>%
+      # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+    mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      unnest(procedures_per_line)
   }
   
   
@@ -1250,6 +1393,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                                        surgical_approach = "Midline",
                                        approach_mis_open = "Open",
                                        approach_robot_nav_xray = "Open",
+                                       neuromonitoring_list = list(),
                                        revision_decompression_vector = c(""),
                                        revision_implants_df = tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character()),
                                        left_main_rod_size = "5.5",
@@ -1357,9 +1501,18 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     }
   }
   
-  if(any(str_detect(additional_procedures_vector, "Spinal Cord Monitoring"))){
-    first_paragraph_list$spinal_cord_monitoring <- "Spinal Cord Monitoring needles were inserted by the neurophysiology technologist."
+
+  if(length(neuromonitoring_list$modalities) > 0){
+    first_paragraph_list$spinal_cord_monitoring <- glue("Spinal cord monitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
   }
+  
+  if(length(neuromonitoring_list$pre_flip_motors) > 1){
+    first_paragraph_list$pre_flip_motors <- neuromonitoring_list$pre_flip_motors 
+  }
+  
+  # if(any(str_detect(additional_procedures_vector, "Spinal Cord Monitoring"))){
+  #   first_paragraph_list$spinal_cord_monitoring <- "Spinal Cord Monitoring needles were inserted by the neurophysiology technologist."
+  # }
   
   first_paragraph_list$head_statement <- case_when(
     head_position == "Supine/Lateral" ~ "The patient's head rested in a position of comfort, securely on the bed.",
@@ -1508,13 +1661,17 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     procedure_details_list$procedures <- op_note_procedure_paragraphs_function(objects_added_df = all_objects_to_add_df,
                                                                                revision_decompression_vector = revision_decompression_vector, 
                                                                                approach_technique = approach_mis_open, 
-                                                                               image_guidance = approach_robot_nav_xray)
+                                                                               image_guidance = approach_robot_nav_xray, 
+                                                                               neuromonitoring_emg_statement = neuromonitoring_list$emg)
   }
   
   
   ################### COMPLETING INSTRUMENTATION ##################
   posterior_implants_all_df <- all_objects_to_add_df %>%
-    mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+    # mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+    mutate(procedure_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
+    unnest(procedure_category) %>%
+    mutate(procedure_category = str_to_lower(procedure_category)) %>%
     filter(str_detect(string = procedure_category, pattern = "instrumentation")) %>%
     left_join(levels_numbered_df) %>%
     select(level, vertebral_number, procedure_category, object, side) %>%
@@ -1735,13 +1892,21 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
       mutate(revision_label = paste0("revision_", object)) %>%
       mutate(object = if_else(revision_level == FALSE, object, if_else(category == "decompression", revision_label, object))) %>%
       select(-revision_label) %>%
-      mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+      # mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
+      mutate(procedure_class = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
+      unnest(procedure_class) %>%
+      # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) %>%
+      mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      unnest(procedures_per_line)
   }else{
     summary_nested_df <- objects_added_df %>%
       select(level, object, vertebral_number) %>%
-      mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-      mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+      # mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
+      mutate(procedure_class = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
+      unnest(procedure_class) %>%
+      # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+    mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      unnest(procedures_per_line)
   }
   
   

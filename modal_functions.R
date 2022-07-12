@@ -509,6 +509,8 @@ addition_surgical_details_modal_box_function <-
            asa_class = "",
            anesthesia = "",
            neuromonitoring = c("SSEP", "tc MEP"),
+           triggered_emg = "No",
+           pre_flip_motors = "Pre-flip motors not obtained",
            preop_antibiotics = c("Cefazolin (Ancef)"),
            anti_fibrinolytic = "",
            txa_loading = 20,
@@ -618,10 +620,39 @@ addition_surgical_details_modal_box_function <-
           font_size = row_label_font_size,
           input_type = "checkbox",
           input_id = "neuromonitoring",
-          choices_vector = c("EMG", "SSEP", "tc MEP", "DNEP (Cord Stimulation)", "H reflex", "None"),
+          choices_vector = c("EMG", "SSEP", "tcMEP", "DNEP (Cord Stimulation)", "H reflex", "None"),
           checkboxes_inline = TRUE,
           initial_value_selected = neuromonitoring
         ),
+        conditionalPanel(condition = "input.neuromonitoring.indexOf('EMG') > -1",
+                         jh_make_shiny_table_row_function(
+                           left_column_percent_width = 30,
+                           left_column_label = "Did you test screws with triggered EMG?",
+                           font_size = row_label_font_size,
+                           input_type = "awesomeRadio",
+                           input_id = "triggered_emg", 
+                           choices_vector = c("No", 
+                                              "Triggered EMG was used to test screws and no responses were below 10mA.", 
+                                              "Triggered EMG was used to test screws and no responses were below 20mA.", 
+                                              "Triggered EMG was used to test screws and showed a response of ***."),
+                           checkboxes_inline = TRUE,
+                           initial_value_selected = triggered_emg
+                         )),
+        conditionalPanel(condition = "input.neuromonitoring.indexOf('tcMEP') > -1",
+                         jh_make_shiny_table_row_function(
+                           left_column_percent_width = 30,
+                           left_column_label = "Were pre-flip motor signals normal?",
+                           font_size = row_label_font_size,
+                           input_type = "awesomeRadio",
+                           input_id = "pre_flip_motors", 
+                           choices_vector = c("Pre-flip motors not obtained", 
+                                              "Pre-flip motor signals were obtained and were normal", 
+                                              "Pre-flip motor signals were not detected", 
+                                              "Pre flip motor signals were absent to ***",
+                                              "***"),
+                           checkboxes_inline = TRUE,
+                           initial_value_selected = pre_flip_motors
+                         )),
         hr(),
         jh_make_shiny_table_row_function(
           left_column_label = "Preop Antibiotics:",
@@ -739,13 +770,14 @@ addition_surgical_details_modal_box_2_function <-
            dressing_details = NULL, 
            postop_dispo = c(""),
            postop_abx = c("Ancef x 24hrs"),
+           postop_map_goals = " ",
            postop_imaging = c(""),
            postop_pain = c(""),
            postop_activity = c("PT/OT daily",
                                "please mobilize out of bed minimum 3x daily", 
                                "No bending, twisting, lifting > 10lbs"),
            postop_brace = c(""),
-           postop_diet = c("Senokit-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
+           postop_diet = c("Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
            postop_dvt_ppx = c("SCD's while in bed", "Hold any chemical dvt ppx for minimum 72hrs"),
            postop_drains_dressing = c(""),
            postop_followup = c("")) {
@@ -782,6 +814,7 @@ addition_surgical_details_modal_box_2_function <-
             checkboxes_inline = TRUE,
             choices_vector = c(
               "Supine/Lateral",
+              "C-flex head positioner",
               "Cranial Tongs",
               "Halo",
               "Mayfield"
@@ -802,6 +835,7 @@ addition_surgical_details_modal_box_2_function <-
             checkboxes_inline = TRUE,
             choices_vector = c(
               "Proneview Faceplate",
+              "C-flex head positioner",
               "Cranial Tongs",
               "Halo",
               "Mayfield"
@@ -823,6 +857,7 @@ addition_surgical_details_modal_box_2_function <-
             choices_vector = c(
               "Supine/Lateral",
               "Proneview Faceplate",
+              "C-flex head positioner",
               "Cranial Tongs",
               "Halo",
               "Mayfield"
@@ -1223,9 +1258,26 @@ addition_surgical_details_modal_box_2_function <-
           choices_vector = c("Ancef x 24hrs",
                              "Ancef x 48hrs",
                              "Vancomycin x 48hrs",
+                             "Continue broad spectrum antibiotics and f/u cultures",
+                             "Per infectious disease team recommendations",
                              "Ancef until drains removed",
                              "***"),
           initial_value_selected = postop_abx
+        ),
+        br(),
+        jh_make_shiny_table_row_function(
+          left_column_label = "MAP Goals:",
+          font_size = row_label_font_size,
+          input_id = "postop_map_goals",
+          left_column_percent_width = 20,
+          checkboxes_inline = FALSE,
+          input_type = "checkbox",
+          choices_vector = c("No MAP goals needed",
+                             "Please maintain MAPs 85-90 for a total of 7 days post-injury per AANS/CNS guidelines for incomplete spinal cord injury",
+                             "Please maintain MAPs 85-90 for a total of 5 days post-injury",
+                             "Please maintain MAPs 85-90 for a total of 2 days post-injury",
+                             "***"),
+          initial_value_selected = postop_map_goals
         ),
         br(),
         jh_make_shiny_table_row_function(
@@ -1251,7 +1303,8 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("PCA with plan to dc on POD 1 (in addition to all other pain medication orders)", 
+          choices_vector = c("Ice pack to affected area, PRN",
+                             "PCA with plan to dc on POD 1 (in addition to all other pain medication orders)", 
                              "Oxycodone 5mg q4h, ok to give additional dose if needed", 
                              "Oxycodone 10mg q4h, ok to give additional dose if needed",
                              "Tylenol 1000mg q8h scheduled.", 
@@ -1313,7 +1366,8 @@ addition_surgical_details_modal_box_2_function <-
           choices_vector = c("OK to resume normal diet", 
                              "Start with clear liquid diet and advance as tolerated", 
                              "NPO until return of bowel sounds",
-                             "Senokit-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
+                             "Please place Nutrition Consult",
+                             "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
           initial_value_selected = postop_diet
         ),
         br(),

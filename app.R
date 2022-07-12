@@ -1258,7 +1258,8 @@ server <- function(input, output, session) {
         filter(str_detect(object, "decompression")) %>%
         distinct()
       if(nrow(prior_decompression_df)>0){
-        updatePickerInput(session = session, inputId = "open_canal", selected = jh_convert_interspace_to_body_vector_function(prior_decompression_df$level))
+        updatePickerInput(session = session, inputId = "open_canal", 
+                          selected = jh_convert_interspace_to_body_vector_function(prior_decompression_df$level))
       }
     }
   })
@@ -1747,6 +1748,8 @@ server <- function(input, output, session) {
                                                  anesthesia = input$anesthesia,
                                                  indications = input$indications,
                                                  neuromonitoring = input$neuromonitoring,
+                                                 triggered_emg = input$triggered_emg,
+                                                 pre_flip_motors = input$pre_flip_motors,
                                                  preop_antibiotics = input$preop_antibiotics,
                                                  anti_fibrinolytic = input$anti_fibrinolytic,
                                                  txa_loading = input$txa_loading,
@@ -1828,6 +1831,7 @@ server <- function(input, output, session) {
                                                                     dressing_details = input$dressing_details,
                                                                     postop_dispo = input$postop_dispo,
                                                                     postop_abx = input$postop_abx,
+                                                                    postop_map_goals = input$postop_map_goals,
                                                                     postop_imaging = input$postop_imaging,
                                                                     postop_pain = input$postop_pain,
                                                                     postop_activity = input$postop_activity,
@@ -1874,6 +1878,7 @@ server <- function(input, output, session) {
       dressing_details = input$dressing_details, 
       postop_dispo = input$postop_dispo,
       postop_abx = input$postop_abx,
+      postop_map_goals = input$postop_map_goals,
       postop_imaging = input$postop_imaging,
       postop_pain = input$postop_pain,
       postop_activity = input$postop_activity,
@@ -2251,6 +2256,7 @@ server <- function(input, output, session) {
       "Decompression + Foraminotomies" = "sublaminar_decompression",
       "Central Laminectomy" = "laminectomy",
       "Laminectomy for Cyst Excision" = "laminectomy_for_facet_cyst",
+      "Cervical Foraminotomy  " = "cervical_foraminotomy",
       "Laminotomy (Hemilaminectomy)" = "laminotomy",
       "Complete Facetectomy (Unilateral)" = "complete_facetectomy",
       "Diskectomy" = "diskectomy",
@@ -4143,6 +4149,10 @@ server <- function(input, output, session) {
     if(length(input$postop_abx) >0){
       postop_plan$postop_abx_label <- paste("  -Postop Abx: ", glue_collapse(input$postop_abx, sep = "; ", last = "; and "))
     }
+    ##########   postop_map_goals  #############
+    if(length(input$postop_map_goals) > 0){
+      postop_plan$postop_map_goals_label <- paste("  -Postop MAP goals: ", glue_collapse(input$postop_map_goals, sep = "; ", last = "; and "))
+    }
     ##########   postop_imaging  #############
     if(length(input$postop_imaging) >0){
       postop_plan$postop_imaging_label <- paste("  -Postop Imaging: ", glue_collapse(input$postop_imaging, sep = "; ", last = "; and "))
@@ -4181,7 +4191,6 @@ server <- function(input, output, session) {
   
   
   op_note_text_reactive <- reactive({
-    
     ################# COMPLICATIONS ################3
     complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
       filter(complication != "") %>%
@@ -4218,6 +4227,8 @@ server <- function(input, output, session) {
     }
     
     ################# BUILD ANTERIOR OR POSTERIOR OR COMBINED OP NOTES ############
+    
+    #### NO OBJECTS ADDED OP NOTE: ###
     if(nrow(all_objects_to_add_list$objects_df) == 0){
       procedure_results_list <- list()
       revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
@@ -4241,7 +4252,6 @@ server <- function(input, output, session) {
       op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
       op_note_list$"\nPre-operative Diagnosis:" <- if_else(!is.null(input$preoperative_diagnosis), paste0("-", as.character(input$preoperative_diagnosis)), " ")
       op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), glue_collapse(x = unlist(str_split(input$postoperative_diagnosis, pattern = "; ")), sep = "\n"), " ")
-      # op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), as.character(input$postoperative_diagnosis), " ")
       op_note_list$"\nIndications:" <- if_else(!is.null(input$indications), as.character(input$indications), " ") 
       op_note_list$"\nProcedures Performed:" <- if_else(!is.null(procedure_results_list$procedures_numbered_paragraph), as.character(procedure_results_list$procedures_numbered_paragraph), " ")
       op_note_list$"\nSurgical Findings:" <- if_else(!is.na(input$surgical_finding), as.character(input$surgical_finding), " ") 
@@ -4259,6 +4269,7 @@ server <- function(input, output, session) {
         select(row, full_text_vector)
       
     }else{
+      
       ####### BUILD PROCEDURE PARAGRAPHS ########
       posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
         filter(approach == "posterior")  %>%
@@ -4305,11 +4316,21 @@ server <- function(input, output, session) {
         revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
           union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
         
+        
+        ### make neuromonitoring list
+        neuromonitoring_input_list <- list()
+        neuromonitoring_input_list$modalities <- input$neuromonitoring
+        neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
+        neuromonitoring_input_list$pre_flip_motors <- if_else(input$pre_flip_motors == "Pre-flip motors not obtained", "", input$pre_flip_motors)
+        
+        
+        ### NOW MAKE PROCEDURES LIST
         procedure_results_list_posterior <- list()
         
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_approach_objects_df,
                                                                        fusion_levels_df = fusions_df,
                                                                        head_position = input$head_positioning,
+                                                                       neuromonitoring_list = neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_flip_motors
                                                                        revision_decompression_vector = input$open_canal,
                                                                        revision_implants_df = revision_implants_df,
                                                                        left_main_rod_size = input$left_main_rod_size,
@@ -4504,7 +4525,7 @@ server <- function(input, output, session) {
   patient_details_redcap_df_reactive <- reactive({
     patient_details_df <- tibble(last_name = input$patient_last_name,
                                  first_name = input$patient_first_name,
-                                 date_of_birth = paste(paste(input$date_of_birth)),
+                                 date_of_birth = as.character(paste(input$date_of_birth)),
                                  # date_of_birth = if_else(paste(input$date_of_birth) == "1900-01-01", "--", paste(input$date_of_birth)),
                                  sex = input$sex)
     patient_details_df

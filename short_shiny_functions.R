@@ -66,6 +66,19 @@ jh_convert_body_levels_to_interspace_vector_function <- function(vertebral_bodie
   
   return(jh_reorder_levels_function(level_vector = discard(levels_vector, .p = ~ is.na(.x) | .x == "Sacro-iliac")))
 }
+
+jh_convert_interspace_to_body_vector_function <- function(interspaces_vector){
+  body_df <- tibble(interspaces = interspaces_vector) %>%
+    separate(col = interspaces, into = c("proximal", "distal")) %>%
+    pivot_longer(cols = c(proximal, distal)) %>%
+    select(value) %>%
+    distinct()
+  
+  return(body_df$value)
+  
+}
+
+
 #################################
 jh_check_body_or_interspace_function <- function(level){
   result <- case_when(level %in% vertebral_bodies_vector ~ "body",
@@ -73,6 +86,8 @@ jh_check_body_or_interspace_function <- function(level){
   
   result
 }
+
+
 #################################
 jh_get_exiting_nerve_root_function <- function(interspace){
   if(str_detect(string = interspace, pattern = "-") == FALSE){

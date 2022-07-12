@@ -1,0 +1,63 @@
+object,procedure_label,paragraph_type
+incision_drainage,Incision and drainage,combine
+vertebroplasty,Vertebroplasty,combine
+vertebral_cement_augmentation,Vertebral body augmentation,combine
+laminar_downgoing_hook,Posterior spinal instrumentation,combine
+laminar_upgoing_hook,Posterior spinal instrumentation,combine
+lateral_mass_screw,Posterior spinal instrumentation,combine
+occipital_screw,Occiput instrumentation,combine
+pars_screw,Posterior spinal instrumentation,combine
+pedicle_hook,Posterior spinal instrumentation,combine
+pedicle_screw,Posterior spinal instrumentation,combine
+crosslink,Posterior spinal instrumentation,combine
+laminar_downgoing_hook,Posterior spinal instrumentation,combine
+sublaminar_wire,Posterior spinal instrumentation,combine
+tp_hook,Posterior spinal instrumentation,combine
+translaminar_screw,Posterior spinal instrumentation,combine
+pelvic_screw,Pelvic instrumentation,combine
+pelvic_screw_1,Pelvic instrumentation,combine
+pelvic_screw_2,Pelvic instrumentation,combine
+tether,Spinous process posterior tethering/wiring,combine
+costovertebral_approach,Costovertebral approach with decompression of the spinal cord,distinct
+revision_costovertebral_approach,Reexploration and revision decompression using a costovertebral approach,distinct
+transpedicular_approach,Transpedicular approach with decompression,distinct
+lateral_extraforaminal_approach,Decompression using a lateral extraforaminal approach,distinct
+lateral_extracavitary_approach,Arthrodesis using a modified lateral extracavitary approach,distinct
+corpectomy_extracavitary_tumor,Partial Corpectomy with decompression using a modified lateral extracavitary approach for tumor,distinct
+laminectomy_for_tumor,Laminectomy for biopsy and excision of extradural spinal tumor,combine
+laminectomy_for_facet_cyst,"Laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)",combine
+revision_transpedicular_approach,Reexploration and revision decompression using a transpedicular approach,distinct
+sublaminar_decompression,"Bilateral laminectomy, foraminotomy, and medial facetectomy for decompression of the cauda equina and nerve roots",combine
+laminectomy,Central Laminectomy for decompression,combine
+diskectomy,Laminotomy and discectomy for decompression of the nerve root,combine
+laminotomy,Partial laminectomy with facetectomy & foraminotomy for decompression of the cauda equina and nerve roots,combine
+cervical_foraminotomy,Posterior cervical foraminotomy for decompression of the nerve root,combine
+revision_diskectomy,Reexploration and revision laminotomy and discectomy for decompression of the nerve root,combine
+revision_sublaminar_decompression,"Reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies",combine
+revision_laminectomy,Reexploration and revision decompression with central laminectomy,combine
+revision_laminotomy,Reexploration and revision decompression with laminotomy and medial facetectomy,combine
+laminoplasty,Laminoplasty,combine
+grade_1,Inferior facetectomies,combine
+complete_facetectomy,Patial laminectomy with complete facetectomy & foraminotomy for decompression of the nerve root,combine
+revision_complete_facetectomy,Reexploration and revision decompression with a laminotomy and complete facetectomy,combine
+grade_2,Posterior column osteotomy,combine
+grade_3,Pedicle subtraction osteotomy,distinct
+grade_4,Extended three column osteotomy (vertebral body partial corpectomy),distinct
+grade_5,Vertebral column resection,distinct
+costotransversectomy,Costovertebral approach with costotransversectomy,combine
+no_implant_interbody_fusion,Interbody fusion (without interbody implant),distinct
+llif,Lateral lumbar interbody fusion and insertion of interbody device,distinct
+plif,Posterior lumbar interbody fusion and insertion of interbody device,distinct
+tlif,Transforaminal lumbar interbody fusion and insertion of interbody device,distinct
+intervertebral_cage,Insertion of intervertebral biomechanical implant,distinct
+structural_allograft,Application of structural allograft,combine
+anterior_disc_arthroplasty,Total disk arthroplasty,distinct
+decompression_diskectomy_fusion,Anterior diskectomy and fusion with decompression of the central canal and nerve roots,distinct
+diskectomy_fusion,Anterior diskectomy and fusion,distinct
+diskectomy_fusion_no_interbody_device,Anterior diskectomy and fusion,distinct
+anterior_interbody_implant,Insertion of interbody biomechanical implant,distinct
+corpectomy,Anterior vertebral corpectomy,combine
+corpectomy_cage,Anterior insertion of intervertebral biomechanical implant,combine
+anterior_plate,Anterior spinal instrumentation (distinct from an interbody implant),combine
+anterior_buttress_plate,Anterior spinal instrumentation (distinct from an interbody implant),combine
+screw_washer,Anterior spinal instrumentation (distinct from an interbody implant),combine
