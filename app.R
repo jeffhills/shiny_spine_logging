@@ -955,32 +955,32 @@ ui <- dashboardPage(skin = "black",
                           ###########################################
                   ),
                   tabItem(tabName = "tables",
-                  #         ###########################################
-                  #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Patient Details Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                  #             tableOutput(outputId = "patient_details_redcap_df_sidetab")
-                  #         ),
-                  #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Summary Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                  #             tableOutput(outputId = "surgical_details_redcap_df_sidetab")
-                  #         ),
-                  #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Intraoperative Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                  #             tableOutput(outputId = "intraoperative_details_redcap_df_sidetab")
-                  #         ),
+                          #         ###########################################
+                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Patient Details Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
+                          #             tableOutput(outputId = "patient_details_redcap_df_sidetab")
+                          #         ),
+                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Summary Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
+                          #             tableOutput(outputId = "surgical_details_redcap_df_sidetab")
+                          #         ),
+                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Intraoperative Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                          #             tableOutput(outputId = "intraoperative_details_redcap_df_sidetab")
+                          #         ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Specifics"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                               tableOutput(outputId = "procedures_by_level_redcap_df_sidetab")
                           ),
-                  #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                  #             tableOutput("screw_details_redcap_df_sidetab")
-                  #         ),
-                  #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody implants:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                  #             tableOutput(outputId = "interbody_details_redcap_df_sidetab")
-                  #         ),
-                  #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All objects table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                  #             tableOutput(outputId = "all_objects_table")
-                  #         ),
-                  #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Left Revision Implants table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                  #             tableOutput(outputId = "left_revision_implants_table")
-                  #         ),
-                  #         ###########################################
+                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                          #             tableOutput("screw_details_redcap_df_sidetab")
+                          #         ),
+                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody implants:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
+                          #             tableOutput(outputId = "interbody_details_redcap_df_sidetab")
+                          #         ),
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All objects table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                                      tableOutput(outputId = "all_objects_table")
+                                  )
+                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Left Revision Implants table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                          #             tableOutput(outputId = "left_revision_implants_table")
+                          #         ),
+                          #         ###########################################
                   )
                 )
                     )
@@ -5047,13 +5047,19 @@ server <- function(input, output, session) {
   
   ################# MAKE THE procedures by level DATAFRAME ##################
   procedures_by_level_redcap_df_reactive <- reactive({
+    
     fusion_df <- jh_fusion_category_function(fusion_vector = input$fusion_levels_confirmed, 
                                              all_objects_df = all_objects_to_add_list$objects_df)
     
-    data_wide <- all_objects_to_add_list$objects_df %>%
-      as_tibble() %>%
-      select(-object_constructed) %>%
-      mutate(category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+    # data_wide <- all_objects_to_add_list$objects_df %>%
+    #   as_tibble() %>%
+    #   select(-object_constructed) 
+    
+    data_wide <-all_objects_to_add_list$objects_df %>%
+      select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
+      mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
+      unnest() %>%
+      select(proc_category, everything()) %>%
       union_all(fusion_df) %>%
       arrange(vertebral_number) %>%
       select(level, approach, category, procedure = object, side) %>%
@@ -5067,7 +5073,27 @@ server <- function(input, output, session) {
       mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
       select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) %>%
       clean_names() %>%
-      mutate(across(everything(), ~ replace_na(.x, " "))) 
+      mutate(across(everything(), ~ replace_na(.x, " ")))
+    
+    # data_wide <- all_objects_to_add_list$objects_df %>%
+    #   as_tibble() %>%
+    #   select(-object_constructed) %>%
+    #   mutate(category = map(.x = object, .f =  ~ str_to_lower(op_note_procedure_performed_summary_classifier_function(object = .x))))
+    #   # mutate(category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
+    #   union_all(fusion_df) %>%
+    #   arrange(vertebral_number) %>%
+    #   select(level, approach, category, procedure = object, side) %>%
+    #   group_by(level, side, category) %>%
+    #   mutate(redcap_repeat_instance = row_number()) %>%
+    #   pivot_wider(names_from = level, values_from = procedure) %>%
+    #   mutate(across(everything(), ~ replace_na(.x, ""))) %>%
+    #   ungroup() %>%
+    #   mutate(redcap_repeat_instance = row_number()) %>%
+    #   mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
+    #   mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
+    #   select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) %>%
+    #   clean_names() %>%
+    #   mutate(across(everything(), ~ replace_na(.x, " "))) 
     
     data_wide
   })
@@ -5222,17 +5248,17 @@ server <- function(input, output, session) {
   
   
   #################  ALL OBJECTS TABLE ##################
-  # output$all_objects_table <- renderTable({
-  #     
-  #     
-  #     all_objects_to_add_list$objects_df %>%
-  #         select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
-  #         mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
-  #         unnest() %>%
-  #         select(proc_category, everything())
-  #     
-  #     
-  # })
+  output$all_objects_table <- renderTable({
+    
+
+      all_objects_to_add_list$objects_df %>%
+          select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
+          mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
+          unnest() %>%
+          select(proc_category, everything())
+
+
+  })
   
   
   
@@ -5269,7 +5295,7 @@ server <- function(input, output, session) {
   
   ####### Render "Procedures By Level Table for side tab:"    ########
   output$procedures_by_level_redcap_df_sidetab <- renderTable({
-      procedures_by_level_redcap_df_reactive() %>%
+    procedures_by_level_redcap_df_reactive() %>%
       pivot_longer(cols = c(-redcap_repeat_instrument, 
                             -redcap_repeat_instance, 
                             -dos_surg_repeating,
@@ -5278,7 +5304,7 @@ server <- function(input, output, session) {
                             -side))
   })
   
- 
+  
   ######## Render "Screw Details Table for side tab:"    ######## 
   # output$screw_details_redcap_df_sidetab <- renderTable({
   #     

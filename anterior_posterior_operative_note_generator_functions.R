@@ -159,7 +159,7 @@ op_note_procedure_performed_summary_classifier_function <- function(object){
   
   # procedure_category
   
-  }
+}
 
 op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
   procedure_cat <- str_to_lower(procedure_cat)
@@ -288,9 +288,9 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
     
     statement <- glue_collapse(statement_df$statements, sep = " ")
   }
-
+  
   if(object == "corpectomy"){
-
+    
     levels_df <- levels_nested_df %>%
       select(level) %>%
       distinct()
@@ -306,7 +306,7 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
       mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
       select(level) %>%
       distinct()
-
+    
     
     statement_df <- levels_nested_df %>%
       mutate(paragraph = glue("I confirmed that the exposure had been carried cranially to visualze the entire {jh_get_cranial_caudal_interspace_body_list_function(level = cranial_level_df$level[[1]])$caudal_interspace} disk, the anterior body of {glue_collapse(levels_df$level, sep = ', ', last = ' and ')}, and caudally to the {jh_get_cranial_caudal_interspace_body_list_function(level = caudal_level_df$level[[1]])$cranial_interspace} disk space. I then started with the diskectomies. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} to {jh_get_cranial_caudal_interspace_body_list_function(level = caudal_level_df$level[[1]])$caudal_interspace} disc's were completely excised. Once I was satisfied with the diskectomies, I used a combination of a burr and rongeur's to excise roughly 80% of the {glue_collapse(levels_df$level, sep = ', ', last = ' and ')} vertebral body. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
@@ -475,7 +475,7 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
     nest() %>%
     mutate(paragraphs_combine_or_distinct = map(.x = procedure_category, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
     unnest(paragraphs_combine_or_distinct)
-    # mutate(paragraphs_combine_or_distinct = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) 
+  # mutate(paragraphs_combine_or_distinct = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) 
   
   paragraphs_df <- anterior_procedure_category_nested_df %>%
     mutate(paragraphs = pmap(.l = list(..1 = procedure_category, 
@@ -487,8 +487,8 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
   
   
   if(nrow(bone_graft_df)>0){
-  procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = ". The final position was ", replacement = as.character(glue(". {fusion_graft_statement}. The final position was ")))
-    }
+    procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = ". The final position was ", replacement = as.character(glue(". {fusion_graft_statement}. The final position was ")))
+  }
   
   
   return(procedure_paragraphs)
@@ -914,13 +914,13 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       mutate(approach = approach_technique, 
              image_guidance_used = image_guidance) %>%
       mutate(tech_statement = pmap(list(..1 = object,
-                                             ..2 = object_levels_side_df, 
-                                             ..3 = approach, 
-                                             ..4 = image_guidance_used),
-                                        .f = ~op_note_technique_combine_statement(object = ..1,
-                                                                                  levels_side_df = ..2, 
-                                                                                       approach_technique = ..3, 
-                                                                                       image_guidance = ..4))) %>%
+                                        ..2 = object_levels_side_df, 
+                                        ..3 = approach, 
+                                        ..4 = image_guidance_used),
+                                   .f = ~op_note_technique_combine_statement(object = ..1,
+                                                                             levels_side_df = ..2, 
+                                                                             approach_technique = ..3, 
+                                                                             image_guidance = ..4))) %>%
       
       # mutate(tech_statement = map2(.x = object, .y = object_levels_side_df, .f = ~ op_note_technique_combine_statement(object = .x, levels_side_df = .y))) %>%
       select(object, tech_statement) %>%
@@ -938,11 +938,11 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       emg_statement <- ""
     }
     
-      if(procedure_paragraph_intro == "pelvic instrumentation"){
-        statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
-      }else if(procedure_paragraph_intro == "posterior spinal instrumentation"){
-        statement <- glue("I then proceeded with the posterior spinal instrumentation. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {emg_statement} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
-      } else{
+    if(procedure_paragraph_intro == "pelvic instrumentation"){
+      statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
+    }else if(procedure_paragraph_intro == "posterior spinal instrumentation"){
+      statement <- glue("I then proceeded with the posterior spinal instrumentation. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {emg_statement} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    } else{
       statement <- glue("I then proceeded with the {procedure_paragraph_intro}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
     }
     
@@ -1204,7 +1204,7 @@ op_note_procedures_present_listed_function <- function(objects_added_df,
       unnest(procedure_class) %>%
       mutate(procedure_class = str_to_lower(procedure_category)) %>%
       # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
-    mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
       unnest(procedures_per_line)
   }else{
     summary_nested_df <- objects_added_df %>%
@@ -1213,7 +1213,7 @@ op_note_procedures_present_listed_function <- function(objects_added_df,
       mutate(procedure_class = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
       unnest(procedure_class) %>%
       # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
-    mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
       unnest(procedures_per_line)
   }
   
@@ -1501,7 +1501,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     }
   }
   
-
+  
   if(length(neuromonitoring_list$modalities) > 0){
     first_paragraph_list$spinal_cord_monitoring <- glue("Spinal cord monitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
   }
@@ -1566,7 +1566,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                              if_else(level == "Iliac", "S1", 
                                      level)))  
     
-
+    
     if(surgical_approach == "Midline"){
       first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, exposing proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
       
@@ -1696,9 +1696,9 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                                           distinct())$level)
   
   (posterior_implants_all_df %>% 
-    mutate(level = if_else(level == "Iliac", "the pelvis", level)) %>%
-    mutate(level = if_else(level == "S2AI", "the pelvis", level)) %>%
-    distinct())$level
+      mutate(level = if_else(level == "Iliac", "the pelvis", level)) %>%
+      mutate(level = if_else(level == "S2AI", "the pelvis", level)) %>%
+      distinct())$level
   
   # instrumented_levels_vector <- unique(posterior_implants_all_df$level)
   
@@ -1905,7 +1905,7 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
       mutate(procedure_class = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
       unnest(procedure_class) %>%
       # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
-    mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+      mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
       unnest(procedures_per_line)
   }
   
@@ -1946,4 +1946,3 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
   
   glue_collapse(procedures_numbered_df$procedures_performed_numbered, sep = "\n")
 }
-
