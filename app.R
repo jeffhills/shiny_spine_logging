@@ -41,7 +41,7 @@ source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
 source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
 source("load_icd_codes.R", local = TRUE)
-source("no_implants_added_op_note.R", local = TRUE)
+# source("no_implants_added_op_note.R", local = TRUE)
 
 # jh_build_test_implant_function <- function(side_level_object_list = list("left_L3_pedicle_screw", "left_l4_pedicle_screw", "left_l5_pedicle_screw", 
 #                                                                          "right_L3_pedicle_screw", "right_l5_pedicle_screw")){
@@ -976,10 +976,10 @@ ui <- dashboardPage(skin = "black",
                           #         ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All objects table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                                       tableOutput(outputId = "all_objects_table")
-                                  )
-                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Left Revision Implants table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                          #             tableOutput(outputId = "left_revision_implants_table")
-                          #         ),
+                                  ),
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Left Revision Implants table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                              tableOutput(outputId = "revision_implants_table")
+                          )
                           #         ###########################################
                   )
                 )
@@ -1413,99 +1413,6 @@ server <- function(input, output, session) {
   
   
   
-  # output$screw_size_types_ui <- renderUI({
-  #   
-  #   if(nrow(screw_size_types_df_reactive())>0){
-  #     box(width = 12, 
-  #         title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
-  #         jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
-  #                                          left_column_percent_width = 30,
-  #                                          input_type = "checkbox",
-  #                                          font_size = 16, 
-  #                                          checkboxes_inline = TRUE,
-  #                                          input_id = "implant_manufacturer", choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
-  #         ),
-  #         h4("Screw Sizes:"),
-  #         fluidRow(
-  #           column(4, 
-  #                  "Implant"), 
-  #           column(2, 
-  #                  "Left Diameter"), 
-  #           column(2, 
-  #                  "Left Length"), 
-  #           column(2, 
-  #                  "Right Diameter"), 
-  #           column(2, 
-  #                  "Right Length")
-  #         ),
-  #         map(.x = c(1:length(screw_size_types_df_reactive()$level_object_label)),
-  #             .f = ~ 
-  #               conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$level_object_label[[.x]]}') >-1"),
-  #                                fluidRow(
-  #                                  column(4, 
-  #                                         screw_size_types_df_reactive()$level_object_label[[.x]]
-  #                                  ), 
-  #                                  column(2,
-  #                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$left_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$left_diameter_input[[.x]]
-  #                                         )
-  #                                  ), 
-  #                                  column(2, 
-  #                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$left_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$left_length_input[[.x]]
-  #                                         )
-  #                                  ), 
-  #                                  column(2, 
-  #                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$right_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$right_diameter_input[[.x]]
-  #                                         )
-  #                                  ), 
-  #                                  column(2, 
-  #                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$right_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$right_length_input[[.x]]
-  #                                         )
-  #                                  )
-  #                                )
-  #               )
-  #         ),
-  #         hr(),
-  #         h4("Screw Types:"),
-  #         fluidRow(
-  #           column(4, 
-  #                  "Implant"), 
-  #           column(4, 
-  #                  "Left Screw Type"), 
-  #           column(4, 
-  #                  "Right Screw Type"), 
-  #         ),
-  #         map(.x = c(1:length(screw_size_types_df_reactive()$level_object_label)),
-  #             .f = ~ 
-  #               conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$level_object_label[.x]}') >-1"),
-  #                                fluidRow(
-  #                                  column(4, 
-  #                                         screw_size_types_df_reactive()$level_object_label[[.x]]
-  #                                  ), 
-  #                                  column(4, 
-  #                                         conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$left_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$left_type_input[[.x]]
-  #                                         )
-  #                                  ), 
-  #                                  column(4,
-  #                                         conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{screw_size_types_df_reactive()$right_object[[.x]]}') >-1"),
-  #                                                          screw_size_types_df_reactive()$right_type_input[[.x]]
-  #                                         )
-  #                                  ), 
-  #                                )
-  #               )
-  #         )
-  #     )
-  #   }
-  #   
-  #   
-  # })
-  
-  
-  
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   
@@ -1653,7 +1560,7 @@ server <- function(input, output, session) {
     additional_procedures_list <- discard(additional_procedures_list, .p = ~ (.x == "Other"))
     
     if(any(input$dressing_details == "Wound Vac")){
-      additional_procedures_list$wound_vac <- "Application of Wound Vac (nevative pressure wound therapy; CPT = 97605)"    
+      additional_procedures_list$wound_vac <- "Application of Wound Vac (negative pressure wound therapy; CPT = 97605)"    
     }
     
     unlist(additional_procedures_list, use.names = FALSE)
@@ -1777,21 +1684,7 @@ server <- function(input, output, session) {
     )
   })
   
-  # I THINK THIS MESSED IT UP
-  # observeEvent(list(input$deep_drains_anterior, input$superficial_drains_anterior, input$deep_drains_posterior, input$superficial_drains_posterior), ignoreInit = TRUE, {
-  #     
-  #     if(any((as.numeric(input$deep_drains_anterior) > 0 | 
-  #             as.numeric(input$superficial_drains_anterior) >0| 
-  #             as.numeric(input$deep_drains_posterior) >0| 
-  #             as.numeric(input$superficial_drains_posterior) >0))){
-  #      updateAwesomeCheckboxGroup(session = session, 
-  #                                 inputId = "postop_drains_dressing", 
-  #                                 selected = "Monitor and record drain output q12h")
-  #     }
-  #     }
-  # )
-  
-  
+
   
   observeEvent(input$additional_surgical_details_complete, ignoreInit = TRUE, {
     removeModal()
@@ -3278,11 +3171,11 @@ server <- function(input, output, session) {
          revision_implants_status_df = revision_implants_status_df)
   })
   
-  # output$left_revision_implants_table <- renderTable({
-  #     revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
-  #         union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
-  #     revision_implants_df
-  # })
+  output$revision_implants_table <- renderTable({
+      revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
+          union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
+      revision_implants_df
+  })
   
   observeEvent(right_revision_implants_reactive_list(), ignoreNULL = TRUE, ignoreInit = TRUE, {
     if(nrow(right_revision_implants_reactive_list()$retained_df) < 2){
@@ -4233,16 +4126,7 @@ server <- function(input, output, session) {
       procedure_results_list <- list()
       revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
         union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
-      
-      procedure_results_list <- no_implants_op_note_posterior_function(head_position = input$head_positioning,
-                                                                       revision_implants_df = revision_implants_df,
-                                                                       additional_procedures_vector = additional_procedures_vector_reactive(), 
-                                                                       antibiotics = input$preop_antibiotics, 
-                                                                       deep_drains = input$deep_drains_posterior,
-                                                                       superficial_drains = input$superficial_drains_posterior,
-                                                                       end_procedure_details = input$additional_end_procedure_details, 
-                                                                       closure = input$closure_details, 
-                                                                       dressing = input$dressing_details)
+
       
       op_note_list <- list()
       
@@ -4259,7 +4143,8 @@ server <- function(input, output, session) {
       op_note_list$"\nEstimated Blood Loss:" <- if_else(!is.na(input$ebl), as.character(input$ebl), " ") 
       op_note_list$"\nFluids/Transfusions:" <- if_else(!is.na(fluids_transfusions_statement), as.character(fluids_transfusions_statement), " ")
       op_note_list$"\nIntraoperative Complications:" <- if_else(!is.na(complication_statement), as.character(complication_statement), " ")
-      op_note_list$"\nSurgery Description:" <- if_else(!is.null(procedure_results_list$procedure_details_paragraph), as.character(procedure_results_list$procedure_details_paragraph), " ") 
+      op_note_list$"\nSurgery Description:" <- "***"
+      # op_note_list$"\nSurgery Description:" <- if_else(!is.null(procedure_results_list$procedure_details_paragraph), as.character(procedure_results_list$procedure_details_paragraph), " ") 
       op_note_list$"\nPostop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
       
       secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
@@ -4320,9 +4205,17 @@ server <- function(input, output, session) {
         ### make neuromonitoring list
         neuromonitoring_input_list <- list()
         neuromonitoring_input_list$modalities <- input$neuromonitoring
-        neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
-        neuromonitoring_input_list$pre_flip_motors <- if_else(input$pre_flip_motors == "Pre-flip motors not obtained", "", input$pre_flip_motors)
+        neuromonitoring_input_list$emg <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "),pattern = "EMG"), input$triggered_emg, "")
+        if(neuromonitoring_input_list$emg == "No"){
+          neuromonitoring_input_list$emg <- ""
+        }
+        neuromonitoring_input_list$pre_flip_motors <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "tcMEP"), input$pre_flip_motors, "")
+        if(neuromonitoring_input_list$pre_flip_motors == "Pre-flip motors not obtained"){
+          neuromonitoring_input_list$pre_flip_motors <- ""
+        }
         
+        # neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
+        # neuromonitoring_input_list$pre_flip_motors <- if_else(input$pre_flip_motors == "Pre-flip motors not obtained", "", input$pre_flip_motors)
         
         ### NOW MAKE PROCEDURES LIST
         procedure_results_list_posterior <- list()
@@ -5075,25 +4968,6 @@ server <- function(input, output, session) {
       clean_names() %>%
       mutate(across(everything(), ~ replace_na(.x, " ")))
     
-    # data_wide <- all_objects_to_add_list$objects_df %>%
-    #   as_tibble() %>%
-    #   select(-object_constructed) %>%
-    #   mutate(category = map(.x = object, .f =  ~ str_to_lower(op_note_procedure_performed_summary_classifier_function(object = .x))))
-    #   # mutate(category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
-    #   union_all(fusion_df) %>%
-    #   arrange(vertebral_number) %>%
-    #   select(level, approach, category, procedure = object, side) %>%
-    #   group_by(level, side, category) %>%
-    #   mutate(redcap_repeat_instance = row_number()) %>%
-    #   pivot_wider(names_from = level, values_from = procedure) %>%
-    #   mutate(across(everything(), ~ replace_na(.x, ""))) %>%
-    #   ungroup() %>%
-    #   mutate(redcap_repeat_instance = row_number()) %>%
-    #   mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-    #   mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-    #   select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) %>%
-    #   clean_names() %>%
-    #   mutate(across(everything(), ~ replace_na(.x, " "))) 
     
     data_wide
   })

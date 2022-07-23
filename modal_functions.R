@@ -508,7 +508,7 @@ addition_surgical_details_modal_box_function <-
            indications = "",
            asa_class = "",
            anesthesia = "",
-           neuromonitoring = c("SSEP", "tc MEP"),
+           neuromonitoring = c("SSEP", "tcMEP"),
            triggered_emg = "No",
            pre_flip_motors = "Pre-flip motors not obtained",
            preop_antibiotics = c("Cefazolin (Ancef)"),
@@ -766,6 +766,10 @@ addition_surgical_details_modal_box_2_function <-
            additional_procedures = NULL,
            additional_procedures_other = "",
            additional_end_procedure_details = NULL,
+           superficial_drains_anterior = 0,
+           deep_drains_anterior = 0,
+           superficial_drains_posterior = 0,
+           deep_drains_posterior = 1,
            closure_details = NULL,
            dressing_details = NULL, 
            postop_dispo = c(""),
@@ -999,30 +1003,10 @@ addition_surgical_details_modal_box_2_function <-
           )
         ),
         hr(),
-        # jh_make_shiny_table_row_function(
-        #   left_column_percent_width = 20,
-        #   left_column_label = "Head Positioning:",
-        #   font_size = row_label_font_size,
-        #   input_type = "radioGroupButtons",
-        #   input_id = "head_positioning", 
-        #   individual_buttons = TRUE,
-        #   required_option = TRUE,
-        #   button_size = "xs",
-        #   checkboxes_inline = TRUE,
-        #   choices_vector = c(
-        #     "Supine/Lateral",
-        #     "Proneview Faceplate",
-        #     "Cranial Tongs",
-        #     "Halo",
-        #     "Mayfield"
-        #   ),
-        #   initial_value_selected = head_positioning
-        # )
         jh_make_shiny_table_row_function(required_option = TRUE, 
                                          left_column_label = "Complications?", 
                                          left_column_percent_width = 40,
                                          font_size = row_label_font_size, 
-                                         # input_type = "awesomeRadio", 
                                          input_type = "radioGroupButtons",
                                          input_id = "intraoperative_complications_yes_no", 
                                          initial_value_selected = intraoperative_complications_yes_no,  justified_radio_buttons = TRUE, 
@@ -1126,7 +1110,7 @@ addition_surgical_details_modal_box_2_function <-
                                            input_id = "deep_drains_anterior", 
                                            left_column_percent_width = 45, 
                                            font_size = 16, 
-                                           initial_value_selected = 0, 
+                                           initial_value_selected = deep_drains_anterior, 
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
@@ -1136,7 +1120,7 @@ addition_surgical_details_modal_box_2_function <-
                                            input_id = "superficial_drains_anterior", 
                                            left_column_percent_width = 45, 
                                            font_size = 16, 
-                                           initial_value_selected = 0, 
+                                           initial_value_selected = superficial_drains_anterior, 
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
@@ -1146,7 +1130,7 @@ addition_surgical_details_modal_box_2_function <-
                                            input_id = "deep_drains_posterior", 
                                            left_column_percent_width = 45, 
                                            font_size = 16, 
-                                           initial_value_selected = 1, 
+                                           initial_value_selected = deep_drains_posterior, 
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
@@ -1156,11 +1140,10 @@ addition_surgical_details_modal_box_2_function <-
                                            input_id = "superficial_drains_posterior", 
                                            left_column_percent_width = 45, 
                                            font_size = 16, 
-                                           initial_value_selected = 1, 
+                                           initial_value_selected = superficial_drains_posterior, 
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        # uiOutput(outputId = "drains_ui"),
         hr(),
         jh_make_shiny_table_row_function(
           left_column_label = "Select any used during closure:",
@@ -1396,6 +1379,7 @@ addition_surgical_details_modal_box_2_function <-
           input_type = "checkbox",
           choices_vector = c("Monitor and record drain output q12h", 
                              "Incisional wound vac continuous therapy",
+                             "Wound vac to continuous therapy",
                              "Please keep a watertight dressing in place over wound and reinforce as needed with tegaderms",
                              "Please change surgical dressing prior to discharge from hospital",
                              "***"),
@@ -1411,6 +1395,7 @@ addition_surgical_details_modal_box_2_function <-
           input_type = "awesomeRadio",
           choices_vector = c("Follow-up in spine clinic in 2wks.", 
                              "Follow-up in spine clinic in 6wks.",
+                             "Follow-up in spine clinic in ***wks.",
                              "Follow-up in spine trauma clinic in 2wks."),
           initial_value_selected = postop_followup
         )

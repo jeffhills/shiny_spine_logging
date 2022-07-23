@@ -1037,24 +1037,26 @@ op_note_technique_combine_statement <- function(object, levels_side_df, approach
     
   }
   
-  screw_statements_wide_df <- levels_side_df %>%
-    mutate(unilateral_screw_statement = str_to_lower(glue("a {screw_size_type} screw was inserted on the {side}"))) %>%
-    select(level, side, unilateral_screw_statement) %>%
-    pivot_wider(names_from = side, values_from = unilateral_screw_statement) %>%
-    unnest() 
-  
-  screw_statements_df <- tibble(level = character(), left = character(), right = character(), unilateral_screw_statement = character()) %>%
-    union_all(screw_statements_wide_df) %>%
-    replace_na(replace = list(left = "xx", right = "xx")) %>%
-    mutate(screw_statement = case_when(
-      left != "xx" & right != "xx" ~ glue("At {level}, {left} and {right}."), 
-      left == "xx" & right != "xx" ~ glue("At {level}, {right}."), 
-      left != "xx" & right == "xx" ~ glue("At {level}, {left}."), 
-      left == "xx" & right == "xx" ~ glue(""))) %>%
-    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-    arrange(vertebral_number)
-  
-  
+  if(str_detect(string = object, pattern = "screw")){
+    screw_statements_wide_df <- levels_side_df %>%
+      mutate(unilateral_screw_statement = str_to_lower(glue("a {screw_size_type} screw was inserted on the {side}"))) %>%
+      select(level, side, unilateral_screw_statement) %>%
+      pivot_wider(names_from = side, values_from = unilateral_screw_statement) %>%
+      unnest() 
+    
+    screw_statements_df <- tibble(level = character(), left = character(), right = character(), unilateral_screw_statement = character()) %>%
+      union_all(screw_statements_wide_df) %>%
+      replace_na(replace = list(left = "xx", right = "xx")) %>%
+      mutate(screw_statement = case_when(
+        left != "xx" & right != "xx" ~ glue("At {level}, {left} and {right}."), 
+        left == "xx" & right != "xx" ~ glue("At {level}, {right}."), 
+        left != "xx" & right == "xx" ~ glue("At {level}, {left}."), 
+        left == "xx" & right == "xx" ~ glue(""))) %>%
+      mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+      arrange(vertebral_number) 
+  }else{
+    screw_statements_df <- tibble(screw_statement = c(" "))
+  }
   
   exiting_roots_df <- levels_side_df %>%
     mutate(exiting_root = jh_get_exiting_nerve_root_function(interspace = level)) %>%
@@ -1128,6 +1130,8 @@ op_note_technique_combine_statement <- function(object, levels_side_df, approach
   )
   
   technique_statement <- str_replace_all(string = technique_statement, pattern = "a na ", replacement = "a ")
+  
+  technique_statement
 }
 
 #############-----------------------               End              ----------------------###############
@@ -1202,7 +1206,7 @@ op_note_procedures_present_listed_function <- function(objects_added_df,
       # mutate(procedure_class = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
       mutate(procedure_class = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
       unnest(procedure_class) %>%
-      mutate(procedure_class = str_to_lower(procedure_category)) %>%
+      # mutate(procedure_class = str_to_lower(procedure_category)) %>%
       # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
       mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
       unnest(procedures_per_line)
@@ -1517,6 +1521,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   first_paragraph_list$head_statement <- case_when(
     head_position == "Supine/Lateral" ~ "The patient's head rested in a position of comfort, securely on the bed.",
     head_position == "Proneview Faceplate" ~ "The proneview faceplate was used to pad and secure the patient's head and face during surgery.",
+    head_position == "C-flex head positioner" ~ "The C-flex head positioner was used to pad and secure the patient's head during surgery.", 
     head_position == "Cranial Tongs" ~ "Cranial tongs were applied to the patient's skull for positioning and an appropriate weight was selected for cranial traction.",
     head_position == "Halo" ~ "A Halo was applied to the patient's skull for positioning and the pins were sequentially tightened to the appropriate torque.",
     head_position == "Mayfield" ~ "A Mayfield head holder was applied to the patient's skull for positioning and secured to the bed.",
@@ -1533,6 +1538,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     
     first_paragraph_list$head_statement <- case_when(
       head_position == "Proneview Faceplate" ~ "The proneview faceplate was used to pad and secure the patient's head and face during surgery.",
+      head_position == "C-flex head positioner" ~ "The C-flex head positioner was used to pad and secure the patient's head during surgery.", 
       head_position == "Cranial Tongs" ~ "Cranial tongs applied to the patient's skull with an appropriate weight for cranial traction was used to position the head.",
       head_position == "Halo" ~ "A Halo applied to the patient's skull was used for positioning and the pins were sequentially tightened to the appropriate torque.",
       head_position == "Mayfield" ~ "A Mayfield head holder was applied to the patient's skull for positioning and secured to the bed.",
@@ -1832,7 +1838,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   }
   
   if(any(dressing == "Wound Vac")){
-    closure_statements_list$dressing <- "A wound vac was then applied to the open wound, measuring roughly *** in length by *** in width."
+    closure_statements_list$dressing <- "A wound vac was then applied to the open wound, measuring roughly ***cm length by ***cm width by ***cm in depth."
     
   }else{
     closure_statements_list$dressing <- str_replace_all(str_to_sentence(glue("Lastly, {glue_collapse(dressing, sep = ', ', last = ', and ')} was applied to the surgical site.")), pattern = "steristrips was", replacement = "steristrips were")
