@@ -693,7 +693,7 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
       mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
       select(-revision_levels_vector) %>%
       mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
-      unnest() %>%
+      unnest(revision_level) %>%
       replace_na(list(implant_statement = " ", screw_size_type = " ", revision_level = FALSE)) %>%
       mutate(revision_label = paste0("revision_", object)) %>%
       mutate(object = if_else(revision_level == FALSE, object, if_else(category == "decompression", revision_label, object))) %>%
@@ -1754,7 +1754,7 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
       mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
       select(-revision_levels_vector) %>%
       mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
-      unnest() %>%
+      unnest(revision_level) %>%
       replace_na(list(implant_statement = " ", screw_size_type = " ", revision_level = FALSE)) %>%
       mutate(revision_label = paste0("revision_", object)) %>%
       mutate(object = if_else(revision_level == FALSE, object, if_else(category == "decompression", revision_label, object))) %>%

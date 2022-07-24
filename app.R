@@ -158,6 +158,10 @@ ui <- dashboardPage(skin = "black",
                         overflow-x: auto;
                 }"),
                 tags$style(
+                  "#posterior_approach_objects_for_op_note_df {
+                        overflow-x: auto;
+                }"),
+                tags$style(
                   "#patient_details_redcap_df_sidetab {
                         overflow-x: auto;
                 }"),
@@ -977,9 +981,11 @@ ui <- dashboardPage(skin = "black",
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All objects table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                                       tableOutput(outputId = "all_objects_table")
                                   ),
-                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Left Revision Implants table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Revision Implants table:"), status = "success", collapsible = TRUE,solidHeader = TRUE,
                               tableOutput(outputId = "revision_implants_table")
-                          )
+                          ),
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Posterior Approach Objects for Op Note:"), status = "success", collapsible = TRUE,solidHeader = TRUE, 
+                               tableOutput(outputId = "posterior_approach_objects_for_op_note_df"))
                           #         ###########################################
                   )
                 )
@@ -2865,7 +2871,9 @@ server <- function(input, output, session) {
         mutate(integrated_fixation = if_else(integrated_fixation == "xx", "No integrated fixation", "Integrated Fixation")) %>%
         mutate(expandable = if_else(expandable == "xx", "Static", "Expandable")) %>%
         select(level, vertebral_number, approach, object, composition, device_name, height, integrated_fixation, expandable, other, implant_statement) %>%
-        mutate(across(everything(), ~ replace_na(.x, " "))) 
+        mutate(across(everything(), ~ as.character(.x))) %>%
+        mutate(across(everything(), ~ replace_na(.x, " ")))
+        
       
       
     }else{
@@ -4090,6 +4098,42 @@ server <- function(input, output, session) {
   })
   
   
+ ######### TESTING ############## ###posterior approach objects for testing 
+  
+  output$posterior_approach_objects_for_op_note_df <- renderTable({
+    posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
+      filter(approach == "posterior")  %>%
+      select(-object_constructed)
+    
+    if(nrow(interbody_details_df_reactive()) > 0){
+      posterior_approach_objects_df <- posterior_approach_objects_df %>%
+        left_join(interbody_details_df_reactive() %>% select(level, approach, object, implant_statement)) %>%
+        replace_na(list(implant_statement = " "))
+    }else{
+      posterior_approach_objects_df %>%
+        mutate(implant_statement = " ")
+    }
+    
+    posterior_screws_df <- posterior_approach_objects_df %>%
+      filter(approach == "posterior") %>%
+      filter(str_detect(object, "screw")) %>%
+      mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
+      left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
+      select(level, approach, side, object, screw_size_type) %>%
+      mutate(screw_size_type = as.character(screw_size_type)) %>%
+      replace_na(list(screw_size_type = " "))
+    
+    posterior_approach_objects_df <- posterior_approach_objects_df%>%
+      left_join(posterior_screws_df) %>%
+      mutate(screw_size_type = as.character(screw_size_type)) %>%
+      replace_na(list(screw_size_type = " "))
+    
+    posterior_approach_objects_df
+    
+  })
+  
+  ######################
+  
   op_note_text_reactive <- reactive({
     ################# COMPLICATIONS ################3
     complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
@@ -4198,10 +4242,12 @@ server <- function(input, output, session) {
             mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
             left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
             select(level, approach, side, object, screw_size_type) %>%
+            mutate(screw_size_type = as.character(screw_size_type)) %>%
             replace_na(list(screw_size_type = " "))
           
           posterior_approach_objects_df <- posterior_approach_objects_df%>%
             left_join(posterior_screws_df) %>%
+            mutate(screw_size_type = as.character(screw_size_type)) %>%
             replace_na(list(screw_size_type = " "))
         }
         
@@ -5070,7 +5116,11 @@ server <- function(input, output, session) {
           screw_type == "Red" ~ "Reduction",
           screw_type == "Offset" ~ "Offset"
         )) %>%
-        replace_na(list(screw_diameter = "na", screw_length = "na")) %>%
+        mutate(screw_diameter = as.character(screw_diameter)) %>%
+        mutate(screw_length = as.character(screw_length)) %>%
+        mutate(screw_diameter = if_else(is.na(screw_diameter), "na", screw_diameter)) %>%
+        mutate(screw_length = if_else(is.na(screw_length), "na", screw_length)) %>%
+        # replace_na(list(screw_diameter = "na", screw_length = "na")) %>%
         mutate(screw_size = case_when(
           screw_diameter == "na" & screw_length == "na" ~ "",
           screw_diameter != "na" & screw_length == "na" ~ paste0(screw_diameter, "mm"),
