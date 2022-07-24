@@ -1,9 +1,3 @@
-#### ADDING AN OBJECT: you must do the following:
-# - add the object to the "op_note_procedure_performed_summary_classifier_function"
-# - add the object to the "op_note_number_of_paragraphs_for_procedure_category"
-# - add the revision objects if needed
-# - add the 
-
 procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragraph_type, 
                                         'incision_drainage', 'Incision and drainage', 'combine',
                                         'vertebroplasty', 'Vertebroplasty', 'combine',
@@ -68,6 +62,13 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'anterior_buttress_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'screw_washer', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine')
 
+#### ADDING AN OBJECT: you must do the following:
+# - add the object to the "op_note_procedure_performed_summary_classifier_function"
+# - add the object to the "op_note_number_of_paragraphs_for_procedure_category"
+# - add the revision objects if needed
+# - add the 
+
+
 ################-------------------------#################### -------- ANTERIOR & POSTERIOR FUNCTIONS  -----------################-------------------------#################### 
 ################-------------------------#################### -------- ANTERIOR & POSTERIOR FUNCTIONS  -----------################-------------------------#################### 
 ################-------------------------#################### -------- ANTERIOR & POSTERIOR FUNCTIONS  -----------################-------------------------#################### 
@@ -82,83 +83,6 @@ op_note_procedure_performed_summary_classifier_function <- function(object){
   procedure_category <- label_df$procedure_label[[1]]
   
   return(procedure_category)
-  
-  # procedure_category <- case_when(
-  #   object == "incision_drainage" ~ "Incision and drainage",
-  #   object == "vertebroplasty" ~ "Vertebroplasty",
-  #   object == "vertebral_cement_augmentation" ~ "Vertebral body augmentation",
-  #   ### INSTRUMENTATION
-  #   object == "laminar_downgoing_hook" ~ "Posterior spinal instrumentation",
-  #   object == "laminar_upgoing_hook" ~ "Posterior spinal instrumentation",
-  #   object == "lateral_mass_screw" ~ "Posterior spinal instrumentation",
-  #   object == "occipital_screw" ~ "Occiput instrumentation",
-  #   object == "pars_screw" ~ "Posterior spinal instrumentation",
-  #   object == "pedicle_hook" ~ "Posterior spinal instrumentation",
-  #   object == "pedicle_screw" ~ "Posterior spinal instrumentation",
-  #   object == "crosslink" ~ "Posterior spinal instrumentation",
-  #   object == "laminar_downgoing_hook" ~ "Posterior spinal instrumentation",
-  #   object == "sublaminar_wire" ~ "Posterior spinal instrumentation",
-  #   object == "tp_hook" ~ "Posterior spinal instrumentation",
-  #   object == "translaminar_screw" ~ "Posterior spinal instrumentation",
-  #   object == "transarticular_screw" ~ "Posterior spinal instrumentation",
-  #   object == "pelvic_screw" ~ "Pelvic instrumentation",
-  #   object == "pelvic_screw_1" ~ "Pelvic instrumentation",
-  #   object == "pelvic_screw_2" ~ "Pelvic instrumentation",
-  #   object == "tether" ~ "Spinous process posterior tethering/wiring",
-  #   ### DECOMPRESSION 
-  #         ## COMPLEX
-  #   object == "costovertebral_approach" ~ "Costovertebral approach with decompression of the spinal cord", 
-  #   object == "revision_costovertebral_approach" ~ "Reexploration and revision decompression using a costovertebral approach",
-  #   object == "transpedicular_approach" ~ "Transpedicular approach with decompression", #63056	
-  #   object == "lateral_extraforaminal_approach" ~ "Decompression using a lateral extraforaminal approach",
-  #   object == "lateral_extracavitary_approach" ~ "Arthrodesis using a modified lateral extracavitary approach",
-  #   object == "corpectomy_extracavitary_tumor" ~ "Partial Corpectomy with decompression using a modified lateral extracavitary approach for tumor",
-  #   object == "laminectomy_for_tumor" ~ "Laminectomy for biopsy and excision of extradural spinal tumor",
-  #   object == "laminectomy_for_facet_cyst" ~ "Laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)",
-  #   object == "revision_transpedicular_approach" ~ "Reexploration and revision decompression using a transpedicular approach",
-  #         ## COMMON
-  #   object == "sublaminar_decompression" ~ "Bilateral laminectomy, foraminotomy, and medial facetectomy for decompression of the cauda equina and nerve roots", #63047
-  #   object == "laminectomy" ~ "Central Laminectomy for decompression",
-  #   object == "diskectomy" ~ "Laminotomy and discectomy for decompression of the nerve root",
-  #   object == "laminotomy" ~  "Partial laminectomy with facetectomy & foraminotomy for decompression of the cauda equina and nerve roots", # 63047
-  #   object == "cervical_foraminotomy" ~ "Posterior cervical foraminotomy for decompression of the nerve root",
-  #   
-  #   object == "revision_diskectomy" ~ "Reexploration and revision laminotomy and discectomy for decompression of the nerve root",
-  #   object == "revision_sublaminar_decompression" ~ "Reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies",
-  #   object == "revision_laminectomy" ~ "Reexploration and revision decompression with central laminectomy",
-  #   object == "revision_laminotomy" ~ "Reexploration and revision decompression with laminotomy and medial facetectomy",
-  #   object == "laminoplasty" ~ "Laminoplasty",
-  #   object == "grade_1" ~ "Inferior facetectomies",
-  #   object == "complete_facetectomy" ~ "Partial laminectomy with complete facetectomy & foraminotomy for decompression of the nerve root", ## 63047
-  #   object == "revision_complete_facetectomy" ~ "Reexploration and revision decompression with a laminotomy and complete facetectomy",
-  #   #### OSTEOTOMY
-  #   object == "grade_2" ~ "Posterior column osteotomy",
-  #   object == "grade_3" ~ "Pedicle subtraction osteotomy",
-  #   object == "grade_4" ~ "Extended three column osteotomy (vertebral body partial corpectomy)",
-  #   object == "grade_5" ~ "Vertebral column resection",
-  #   object == "costotransversectomy" ~ "Costovertebral approach with costotransversectomy",
-  #   ### INTERBODY CAGE PLACEMENT AND FUSION
-  #   object == "no_implant_interbody_fusion" ~ "Interbody fusion (without interbody implant)",
-  #   object == "llif" ~ "Lateral lumbar interbody fusion and insertion of interbody device",
-  #   object == "plif" ~ "Posterior lumbar interbody fusion and insertion of interbody device",
-  #   object == "tlif" ~ "Transforaminal lumbar interbody fusion and insertion of interbody device",
-  #   object == "intervertebral_cage" ~ "Insertion of intervertebral biomechanical implant",
-  #   object == "structural_allograft" ~ "Application of structural allograft",
-  #   ## ANTERIOR
-  #   object == "anterior_disc_arthroplasty" ~ "Total disk arthroplasty",
-  #   object == "decompression_diskectomy_fusion" ~ "Anterior diskectomy and fusion with decompression of the central canal and nerve roots",
-  #   object == "diskectomy_fusion" ~ "Anterior diskectomy and fusion",
-  #   object == "diskectomy_fusion_no_interbody_device" ~ "Anterior diskectomy and fusion",
-  #   object == "anterior_interbody_implant" ~ "Insertion of interbody biomechanical implant",
-  #   object == "corpectomy" ~ "Anterior vertebral corpectomy",
-  #   object == "corpectomy_cage" ~ "Anterior insertion of intervertebral biomechanical implant",
-  #   object == "anterior_plate" ~ "Anterior spinal instrumentation (distinct from an interbody implant)",
-  #   object == "anterior_buttress_plate" ~ "Anterior spinal instrumentation (distinct from an interbody implant)",
-  #   object == "screw_washer" ~ "Anterior spinal instrumentation (distinct from an interbody implant)"
-  # )
-  
-  # procedure_category
-  
 }
 
 op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
@@ -174,69 +98,6 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
   paragraph_type <- paragraph_type_df$paragraph_type[[1]]
   
   return(paragraph_type)
-  
-  # procedure_cat <- str_to_lower(procedure_cat)
-  # 
-  # paragraph_type <- case_when(
-  #   procedure_cat == "incision and drainage" ~ "combine",
-  #   procedure_cat == "vertebroplasty" ~ "combine",
-  #   procedure_cat == "vertebral body augmentation" ~ "combine",
-  #   ## INSTRUMENTATION
-  #   procedure_cat == "posterior spinal instrumentation" ~ "combine",
-  #   procedure_cat == "occiput instrumentation" ~ "combine",
-  #   procedure_cat == "pelvic instrumentation" ~ "combine",
-  #   procedure_cat == "spinous process posterior tethering/wiring" ~ "combine",
-  #   ## DECOMPRESSION
-  #     ##COMPLEX
-  #   procedure_cat == "costovertebral approach with decompression of the spinal cord" ~ "distinct",
-  #   procedure_cat == "reexploration and revision decompression using a costovertebral approach" ~ "distinct",
-  #   procedure_cat == "transpedicular approach with decompression" ~ "distinct",
-  #   procedure_cat == "decompression using a lateral extraforaminal approach" ~ "distinct",
-  #   procedure_cat == "reexploration and revision decompression using a transpedicular approach" ~ "distinct",
-  #   procedure_cat == "arthrodesis using a modified lateral extracavitary approach" ~ "distinct",
-  #     ## COMMON
-  #   procedure_cat == 'central laminectomy for decompression' ~ 'combine',
-  #   procedure_cat == 'bilateral laminectomy, foraminotomy, and medial facetectomy for decompression of the cauda equina and nerve roots' ~ 'combine',
-  #   procedure_cat == 'laminotomy and discectomy for decompression of the nerve root' ~ 'combine',
-  #   procedure_cat == 'partial laminectomy with facetectomy & foraminotomy for decompression of the cauda equina and nerve roots' ~ 'combine',
-  #   procedure_cat == 'posterior cervical foraminotomy for decompression of the nerve root' ~ 'combine',
-  #   procedure_cat == "partial laminectomy with complete facetectomy & foraminotomy for decompression of the nerve root" ~ "combine",
-  #   procedure_cat == "laminoplasty" ~ "combine",
-  #     ###common revision
-  #   procedure_cat == "reexploration and revision laminotomy and discectomy for decompression of the nerve root" ~ 'combine',
-  #   procedure_cat == "reexploration and revision decompression with bilateral partial laminectomies, foraminotomies, and medial facetectomies" ~ 'combine',
-  #   procedure_cat == "reexploration and revision decompression with central laminectomy" ~ 'combine',
-  #   procedure_cat == "reexploration and revision decompression with a laminotomy and complete facetectomy"~ 'combine',
-  #   procedure_cat == "laminectomy for biopsy and excision of extradural spinal tumor" ~ "combine",
-  #   procedure_cat == "laminectomy for excision of facet cyst (instraspinal lesion, not neoplasm)" ~ "combine",
-  #   procedure_cat == "reexploration and revision decompression with laminotomy and medial facetectomy" ~ "combine",
-  #   procedure_cat == "decompression" ~ "combine",
-  #   procedure_cat == "reexploration with revision decompression" ~ "combine",
-  #   procedure_cat == "partial corpectomy with decompression using a modified lateral extracavitary approach for tumor" ~ "distinct",
-  #   ## osteotomies and other
-  #   procedure_cat == "inferior facetectomies" ~ "combine",
-  #   procedure_cat == "posterior column osteotomy" ~ "combine",
-  #   procedure_cat == "pedicle subtraction osteotomy" ~ "distinct",
-  #   procedure_cat == "extended three column osteotomy (vertebral body partial corpectomy)" ~ "distinct",
-  #   procedure_cat == "vertebral column resection" ~ "distinct",
-  #   procedure_cat == "costovertebral approach with costotransversectomy" ~ "combine",
-  #   procedure_cat == "interbody fusion (without interbody implant)" ~ "distinct",
-  #   procedure_cat == "lateral lumbar interbody fusion and insertion of interbody device" ~ "distinct",
-  #   procedure_cat == "posterior lumbar interbody fusion and insertion of interbody device" ~ "distinct",
-  #   procedure_cat == "transforaminal lumbar interbody fusion and insertion of interbody device" ~ "distinct",
-  #   procedure_cat == "insertion of intervertebral biomechanical implant" ~ "distinct",
-  #   procedure_cat == "application of structural allograft" ~ "combine",
-  #   #anterior#
-  #   procedure_cat == "total disk arthroplasty" ~ "distinct",
-  #   procedure_cat == "anterior diskectomy and fusion with decompression of the central canal and nerve roots" ~ "distinct",
-  #   procedure_cat == "anterior diskectomy and fusion" ~ "distinct",
-  #   procedure_cat == "insertion of interbody biomechanical implant" ~ "distinct",
-  #   procedure_cat == "anterior vertebral corpectomy" ~ "combine",
-  #   procedure_cat == "anterior insertion of intervertebral biomechanical implant" ~ "combine",
-  #   procedure_cat == "anterior spinal instrumentation (distinct from an interbody implant)" ~ "combine"
-  # )
-  # 
-  # paragraph_type
 }
 
 

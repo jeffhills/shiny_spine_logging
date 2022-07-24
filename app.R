@@ -1,15 +1,15 @@
 ####################### SURGICAL PLANNING V2 ###########################
 library(shiny)
-library(shinyWidgets)
+library(shinyWidgets) 
 library(sf)
 library(tidyverse)
 library(ggplot2)
-library(shinyBS)
+library(shinyBS) 
 library(cowplot)
 library(magick)
 library(ggpattern)
 library(glue)
-library(rlist)
+library(rlist) 
 library(janitor)
 library(lubridate)
 library(redcapAPI)
@@ -17,8 +17,6 @@ library(ggpmisc)
 library(rclipboard)
 library(nngeo)
 library(shinydashboard)
-
-
 
 # packageList <- c("shiny", "shinyWidgets", "sf", "tidyverse", "shinyBS", "cowplot", "magick", "ggpattern", "glue", "rlist",
 #                  "janitor", "lubridate", "redcapAPI", "ggpmisc", "rclipboard", "nngeo", "shinydashboard")
@@ -4944,9 +4942,6 @@ server <- function(input, output, session) {
     fusion_df <- jh_fusion_category_function(fusion_vector = input$fusion_levels_confirmed, 
                                              all_objects_df = all_objects_to_add_list$objects_df)
     
-    # data_wide <- all_objects_to_add_list$objects_df %>%
-    #   as_tibble() %>%
-    #   select(-object_constructed) 
     
     data_wide <-all_objects_to_add_list$objects_df %>%
       select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
@@ -4967,8 +4962,7 @@ server <- function(input, output, session) {
       select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) %>%
       clean_names() %>%
       mutate(across(everything(), ~ replace_na(.x, " ")))
-    
-    
+  
     data_wide
   })
   
