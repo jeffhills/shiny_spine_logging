@@ -239,6 +239,12 @@ anterior_op_note_distinct_paragraph_function <- function(levels_nested_df){
 #############-----------------------   Paragraphs: Generate FULL Paragraphs  ----------------------###############
 
 anterior_create_full_paragraph_statement_function <- function(procedure_paragraph_intro, df_with_levels_object_nested, paragraphs_combined_or_distinct){
+  
+  if("data" %in% names(df_with_levels_object_nested)){
+    df_with_levels_object_nested <- df_with_levels_object_nested %>%
+      unnest(data)
+  }
+  
   if(paragraphs_combined_or_distinct == "combine"){
     
     if(procedure_paragraph_intro == "anterior spinal instrumentation (distinct from an interbody implant)"){
@@ -342,7 +348,9 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
     mutate(paragraphs = pmap(.l = list(..1 = procedure_category, 
                                        ..2 = data,
                                        ..3 = paragraphs_combine_or_distinct), 
-                             .f = ~ anterior_create_full_paragraph_statement_function(procedure_paragraph_intro = ..1, df_with_levels_object_nested = ..2, paragraphs_combined_or_distinct = ..3)))
+                             .f = ~ anterior_create_full_paragraph_statement_function(procedure_paragraph_intro = ..1, 
+                                                                                      df_with_levels_object_nested = ..2, 
+                                                                                      paragraphs_combined_or_distinct = ..3)))
   
   procedure_paragraphs <- glue_collapse(x = paragraphs_df$paragraphs, sep = "\n\n")
   
@@ -711,7 +719,8 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
       ungroup() %>%
       group_by(procedure_category, procedures_combine) %>%
       nest() %>%
-      mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
+      mutate(nested_data = map(.x = data, .f =  ~ unnest(data = .x, cols = c()))) %>%
+      # mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
       select(-data) 
   }else{
     df_for_paragraphs <- objects_added_df %>%
@@ -726,7 +735,7 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
       ungroup() %>%
       group_by(procedure_category, procedures_combine) %>%
       nest() %>%
-      mutate(nested_data = map(.x = data, .f = ~ unnest(.x))) %>%
+      mutate(nested_data = map(.x = data, .f = ~ unnest(data = .x, cols = c()))) %>%
       select(-data)  
   }
   # THIS CREATES A DATAFRAME WITH NESTED DATAFRAMES.... full dataframe names = 'procedure_category, procedures_combine, nested_data'
@@ -764,6 +773,12 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
                                                      approach_technique = "na", 
                                                      image_guidance = "na", 
                                                      neuromonitoring_emg = "No"){
+  
+  if("data" %in% names(df_with_levels_object_nested)){
+    df_with_levels_object_nested <- df_with_levels_object_nested %>%
+      unnest(data)
+  }
+  
   if(paragraphs_combined_or_distinct == "combine"){
     
     df_with_statement <- df_with_levels_object_nested %>%
@@ -851,13 +866,18 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
 
 op_note_technique_combine_statement <- function(object, levels_side_df, approach_technique = "Open", image_guidance = "Open"){
   
+  if(ncol(levels_side_df)==1){
+    levels_side_df <- levels_side_df%>%
+      unnest(data)
+  }
+  
   if(str_detect(object, "pelvic_screw")){
     
     pelvic_screws_wide <- levels_side_df %>%
       select(level, side) %>%
       mutate(count = row_number()) %>%
       pivot_wider(names_from = side, values_from = count) %>%
-      unnest()
+      unnest(everything())
     
     pelvic_screws_statement_list <- list()
     
@@ -903,11 +923,13 @@ op_note_technique_combine_statement <- function(object, levels_side_df, approach
       mutate(unilateral_screw_statement = str_to_lower(glue("a {screw_size_type} screw was inserted on the {side}"))) %>%
       select(level, side, unilateral_screw_statement) %>%
       pivot_wider(names_from = side, values_from = unilateral_screw_statement) %>%
-      unnest() 
+      unnest(everything()) 
     
     screw_statements_df <- tibble(level = character(), left = character(), right = character(), unilateral_screw_statement = character()) %>%
       union_all(screw_statements_wide_df) %>%
-      replace_na(replace = list(left = "xx", right = "xx")) %>%
+      mutate(left = if_else(is.na(left), "xx", left)) %>%
+      mutate(right = if_else(is.na(right), "xx", right)) %>%
+      # replace_na(replace = list(left = "xx", right = "xx")) %>%
       mutate(screw_statement = case_when(
         left != "xx" & right != "xx" ~ glue("At {level}, {left} and {right}."), 
         left == "xx" & right != "xx" ~ glue("At {level}, {right}."), 
@@ -920,7 +942,10 @@ op_note_technique_combine_statement <- function(object, levels_side_df, approach
   }
   
   exiting_roots_df <- levels_side_df %>%
-    mutate(exiting_root = jh_get_exiting_nerve_root_function(interspace = level)) %>%
+    # mutate(level = if_else(is.na(level), "xx", level)) %>%
+    mutate(exiting_root = map(.x = level, .f = ~jh_get_exiting_nerve_root_function(.x))) %>%
+    unnest(exiting_root) %>%
+    # mutate(exiting_root = jh_get_exiting_nerve_root_function(interspace = level)) %>%
     filter(!is.na(exiting_root)) %>%
     select(level, exiting_root, side) %>%
     group_by(exiting_root) %>%

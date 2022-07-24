@@ -42,7 +42,7 @@ source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
 source("load_icd_codes.R", local = TRUE)
 # source("no_implants_added_op_note.R", local = TRUE)
-
+ 
 # jh_build_test_implant_function <- function(side_level_object_list = list("left_L3_pedicle_screw", "left_l4_pedicle_screw", "left_l5_pedicle_screw", 
 #                                                                          "right_L3_pedicle_screw", "right_l5_pedicle_screw")){
 #   
