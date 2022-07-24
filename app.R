@@ -4940,28 +4940,47 @@ server <- function(input, output, session) {
   procedures_by_level_redcap_df_reactive <- reactive({
     
     fusion_df <- jh_fusion_category_function(fusion_vector = input$fusion_levels_confirmed, 
-                                             all_objects_df = all_objects_to_add_list$objects_df)
+                                             all_objects_df = all_objects_to_add_list$objects_df)%>%
+      mutate(side = "central")
     
     
-    data_wide <-all_objects_to_add_list$objects_df %>%
+    # data_wide <- all_objects_to_add_list$objects_df %>%
+    #   select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
+    #   mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
+    #   unnest() %>%
+    #   select(proc_category, everything()) %>%
+    #   union_all(fusion_df) %>%
+    #   arrange(vertebral_number) %>%
+    #   select(level, approach, category, procedure = object, side) %>%
+    #   group_by(level, side, category) %>%
+    #   mutate(redcap_repeat_instance = row_number()) %>%
+    #   pivot_wider(names_from = level, values_from = procedure) %>%
+    #   mutate(across(everything(), ~ replace_na(.x, ""))) %>%
+    #   ungroup() %>%
+    #   mutate(redcap_repeat_instance = row_number()) %>%
+    #   mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
+    #   mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
+    #   select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) %>%
+    #   clean_names() %>%
+    #   mutate(across(everything(), ~ replace_na(.x, " ")))
+    
+    data_wide <- all_objects_to_add_list$objects_df %>%
       select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
       mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
-      unnest() %>%
-      select(proc_category, everything()) %>%
-      union_all(fusion_df) %>%
-      arrange(vertebral_number) %>%
-      select(level, approach, category, procedure = object, side) %>%
-      group_by(level, side, category) %>%
-      mutate(redcap_repeat_instance = row_number()) %>%
-      pivot_wider(names_from = level, values_from = procedure) %>%
-      mutate(across(everything(), ~ replace_na(.x, ""))) %>%
+      unnest(proc_category) %>%
+      union_all(fusion_sample_df) %>%
+      select(level, approach, category, object, side) %>%
+      group_by(level, category, side) %>%
+      mutate(repeat_count = row_number()) %>%
       ungroup() %>%
+      pivot_wider(names_from = level, values_from = object) %>%
+      select(-repeat_count) %>%
+      clean_names() %>%
+      mutate(across(everything(), ~ replace_na(.x, " "))) %>%
       mutate(redcap_repeat_instance = row_number()) %>%
       mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
       mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-      select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) %>%
-      clean_names() %>%
-      mutate(across(everything(), ~ replace_na(.x, " ")))
+      select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) 
   
     data_wide
   })
@@ -5169,7 +5188,8 @@ server <- function(input, output, session) {
                             -dos_surg_repeating,
                             -approach_repeating,
                             -category,
-                            -side))
+                            -side))%>%
+      filter(value != " ")
   })
   
   
@@ -5393,8 +5413,9 @@ server <- function(input, output, session) {
       
       ###### Upload repeating objects for all levels ####
       procedures_by_level_repeating_instrument <- procedures_by_level_redcap_df_reactive() %>%
-        mutate(record_id = record_number) %>%
+        mutate(record_id = record_number) %>% 
         mutate(redcap_event_name = "surgery_arm_1") %>%
+        arrange(category) %>%
         mutate(redcap_repeat_instance = row_number() + procedures_by_level_repeating_instance_add) %>%
         mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
         mutate(procedures_by_level_repeating_complete = "Complete") %>%
