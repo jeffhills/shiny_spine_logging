@@ -29,6 +29,8 @@ library(shinydashboard)
 # rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "58C0BC0A6CA8B8DFB21A054C2F5A3C49")
 # rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = "2A930AE845C92CBF95467E59ADBA0D20")
 
+# sudo su - -c "R -e \"install.packages('devtools', repos='http://cran.rstudio.com/')\""
+
 source("short_shiny_functions.R", local = TRUE)
 source("load_icd_codes.R", local = TRUE)
 source("modal_functions.R", local = TRUE)
@@ -1867,8 +1869,15 @@ server <- function(input, output, session) {
     details_list$'Skin Closure:' <- toString(input$closure_details)
     details_list$'Skin/Dressing:' <- toString(input$dressing_details)
     
+    details_list <- map(details_list, .f = ~ as.character(.x)) 
+    
     enframe(details_list, name = "Variable", value = "Input") %>%
-      replace_na(list(Input = "No Value Entered"))
+      unnest("Input") %>%
+      mutate(Input = if_else(Input == "NA", "No Value Entered", Input))
+      # replace_na(list(Input = "No Value Entered"))
+    
+      # replace_na(list(Input = "No Value Entered"))
+    
   })
   
   output$additional_surgical_details_table <- renderTable({
@@ -4968,7 +4977,7 @@ server <- function(input, output, session) {
       select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
       mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
       unnest(proc_category) %>%
-      union_all(fusion_sample_df) %>%
+      union_all(fusion_df) %>%
       select(level, approach, category, object, side) %>%
       group_by(level, category, side) %>%
       mutate(repeat_count = row_number()) %>%
