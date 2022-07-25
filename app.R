@@ -288,75 +288,75 @@ ui <- dashboardPage(skin = "black",
                                          )
                                      ),
                                      box(width = 5, ##### RIGHT COLUMN NEXT TO SPINE PLOT
-                                         box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),collapsible = TRUE,  
-                                             conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
-                                                              fluidRow(
-                                                                prettyRadioButtons(
-                                                                  inputId = "approach_specified_posterior",
-                                                                  label = NULL, 
-                                                                  inline = TRUE,
-                                                                  choices = c("Midline",
-                                                                              "Paraspinal or Paramedian", 
-                                                                              "Stab"),
-                                                                  icon = icon("check"), 
-                                                                  bigger = TRUE,
-                                                                  status = "info"
-                                                                )
-                                                              ),
-                                                              fluidRow(
-                                                                column(width = 6, 
-                                                                       prettyRadioButtons(
-                                                                         inputId = "approach_open_mis",
-                                                                         label = NULL, 
-                                                                         inline = TRUE,
-                                                                         choices = c("Open",
-                                                                                     "Tubular", 
-                                                                                     "Endoscopic", 
-                                                                                     "Mini Open",
-                                                                                     "Percutaneous Screw"
-                                                                         ),
-                                                                         selected = "Open",
-                                                                         icon = icon("check"), 
-                                                                         bigger = TRUE,
-                                                                         status = "success"
-                                                                       )
-                                                                ), 
-                                                                column(width = 6, 
-                                                                       prettyCheckboxGroup(
-                                                                         inputId = "approach_robot_navigation",
-                                                                         label = NULL, 
-                                                                         inline = TRUE,
-                                                                         choices = c("Microscopic", 
-                                                                                     "Navigated", 
-                                                                                     "Robotic"),
-                                                                         icon = icon("check"), 
-                                                                         bigger = TRUE,
-                                                                         status = "success"
-                                                                       )
-                                                                )
-                                                              )
-                                             ),
-                                             conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
-                                                              prettyRadioButtons(
-                                                                inputId = "approach_specified_anterior",
-                                                                label = NULL,
-                                                                inline = TRUE,
-                                                                choices = c("Left-sided", 
-                                                                            "Right-sided",
-                                                                            "Paramedian",
-                                                                            "Lateral Transpsoas",
-                                                                            "Lateral Antepsoas",
-                                                                            "Thoracoabdominal",
-                                                                            "Thoracotomy",
-                                                                            "Transperitoneal",
-                                                                            "Retroperitoneal"),
-                                                                selected = "Left-sided",
-                                                                icon = icon("check"),
-                                                                bigger = TRUE,
-                                                                status = "info"
-                                                              )
-                                             )
-                                         ),
+                                         # box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),collapsible = TRUE,  
+                                         #     conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
+                                         #                      fluidRow(
+                                         #                        prettyRadioButtons(
+                                         #                          inputId = "approach_specified_posterior",
+                                         #                          label = NULL, 
+                                         #                          inline = TRUE,
+                                         #                          choices = c("Midline",
+                                         #                                      "Paraspinal or Paramedian", 
+                                         #                                      "Stab"),
+                                         #                          icon = icon("check"), 
+                                         #                          bigger = TRUE,
+                                         #                          status = "info"
+                                         #                        )
+                                         #                      ),
+                                         #                      fluidRow(
+                                         #                        column(width = 6, 
+                                         #                               prettyRadioButtons(
+                                         #                                 inputId = "approach_open_mis",
+                                         #                                 label = NULL, 
+                                         #                                 inline = TRUE,
+                                         #                                 choices = c("Open",
+                                         #                                             "Tubular", 
+                                         #                                             "Endoscopic", 
+                                         #                                             "Mini Open",
+                                         #                                             "Percutaneous Screw"
+                                         #                                 ),
+                                         #                                 selected = "Open",
+                                         #                                 icon = icon("check"), 
+                                         #                                 bigger = TRUE,
+                                         #                                 status = "success"
+                                         #                               )
+                                         #                        ), 
+                                         #                        column(width = 6, 
+                                         #                               prettyCheckboxGroup(
+                                         #                                 inputId = "approach_robot_navigation",
+                                         #                                 label = NULL, 
+                                         #                                 inline = TRUE,
+                                         #                                 choices = c("Microscopic", 
+                                         #                                             "Navigated", 
+                                         #                                             "Robotic"),
+                                         #                                 icon = icon("check"), 
+                                         #                                 bigger = TRUE,
+                                         #                                 status = "success"
+                                         #                               )
+                                         #                        )
+                                         #                      )
+                                         #     ),
+                                         #     conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
+                                         #                      prettyRadioButtons(
+                                         #                        inputId = "approach_specified_anterior",
+                                         #                        label = NULL,
+                                         #                        inline = TRUE,
+                                         #                        choices = c("Left-sided", 
+                                         #                                    "Right-sided",
+                                         #                                    "Paramedian",
+                                         #                                    "Lateral Transpsoas",
+                                         #                                    "Lateral Antepsoas",
+                                         #                                    "Thoracoabdominal",
+                                         #                                    "Thoracotomy",
+                                         #                                    "Transperitoneal",
+                                         #                                    "Retroperitoneal"),
+                                         #                        selected = "Left-sided",
+                                         #                        icon = icon("check"),
+                                         #                        bigger = TRUE,
+                                         #                        status = "info"
+                                         #                      )
+                                         #     )
+                                         # ),
                                          uiOutput(outputId = "currently_adding_ui"),
                                          conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
                                                           div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Procedure & Click Spine to Add:")
@@ -1016,10 +1016,10 @@ server <- function(input, output, session) {
   
   rcon_reactive <- reactiveValues()
   
-  observeEvent(input$redcap_token_last_8, {
-    redcap_token <- paste0("2A930AE845C92CBF95467E59", input$redcap_token_last_8)
+  observeEvent(input$redcap_token, {
+    # redcap_token <- paste0("2A930AE845C92CBF95467E59", input$redcap_token)
     
-    rcon_reactive$rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = redcap_token)    
+    rcon_reactive$rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = input$redcap_token)    
     
   })
   
@@ -1050,7 +1050,7 @@ server <- function(input, output, session) {
                       starting_dob = input$date_of_birth,
                       starting_dos = input$date_of_surgery, 
                       starting_sex = input$sex, 
-                      hospital_input = input$hospital, redcap_token_last_8_input = input$redcap_token_last_8,
+                      hospital_input = input$hospital, redcap_token_input = input$redcap_token,
                       button_proceed = "exit"
     )
   })
@@ -1919,21 +1919,98 @@ server <- function(input, output, session) {
   
   observeEvent(input$implants_complete,ignoreNULL = TRUE, ignoreInit = TRUE, {
     
-    if(length(fusion_levels_computed_reactive_df()$level)>0){
       showModal(
         modalDialog(title = "Confirm Fusion Levels", easyClose = TRUE, footer = modalButton(label = "Confirmed"),
-                    column(6, 
-                           prettyCheckboxGroup(
-                             inputId = "fusion_levels_confirmed",
-                             label = "Please Confirm The Fusion Levels:", 
-                             bigger = TRUE,
-                             choices = interbody_levels_df$level, 
-                             selected = fusion_levels_computed_reactive_df()$level,
-                             icon = icon("check"), 
-                             status = "success"
-                           )
-                    )))
-    }
+                    box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
+                        if(length(fusion_levels_computed_reactive_df()$level)>0){
+                          prettyCheckboxGroup(
+                          inputId = "fusion_levels_confirmed",
+                          label = "Please Confirm The Fusion Levels:", 
+                          bigger = TRUE,
+                          choices = interbody_levels_df$level, 
+                          selected = fusion_levels_computed_reactive_df()$level,
+                          icon = icon("check"), 
+                          status = "success"
+                        )},
+                        conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
+                                         fluidRow(
+                                           prettyRadioButtons(
+                                             inputId = "approach_specified_posterior",
+                                             label = "Posterior approach was:", 
+                                             inline = TRUE,
+                                             choices = c("Midline",
+                                                         "Paraspinal or Paramedian", 
+                                                         "Stab"),
+                                             icon = icon("check"), 
+                                             bigger = TRUE,
+                                             status = "info"
+                                           )
+                                         ),
+                                         fluidRow(
+                                           prettyRadioButtons(
+                                             inputId = "approach_open_mis",
+                                             label = "The procedure was performed:", 
+                                             inline = TRUE,
+                                             choices = c("Open",
+                                                         "Tubular", 
+                                                         "Endoscopic", 
+                                                         "Mini Open",
+                                                         "Percutaneous Screw"
+                                             ),
+                                             selected = "Open",
+                                             icon = icon("check"), 
+                                             bigger = TRUE,
+                                             status = "success"
+                                           )
+                                         ),
+                                         fluidRow(
+                                           prettyCheckboxGroup(
+                                             inputId = "approach_robot_navigation",
+                                             label = "Select any modality used:", 
+                                             inline = TRUE,
+                                             choices = c("Microscopic", 
+                                                         "Navigated", 
+                                                         "Robotic"),
+                                             icon = icon("check"), 
+                                             bigger = TRUE,
+                                             status = "success"
+                                           )
+                                         )
+                        ),
+                        conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
+                                         prettyRadioButtons(
+                                           inputId = "approach_specified_anterior",
+                                           label = "Approach was:",
+                                           inline = TRUE,
+                                           choices = c("Left-sided", 
+                                                       "Right-sided",
+                                                       "Paramedian",
+                                                       "Lateral Transpsoas",
+                                                       "Lateral Antepsoas",
+                                                       "Thoracoabdominal",
+                                                       "Thoracotomy",
+                                                       "Transperitoneal",
+                                                       "Retroperitoneal"),
+                                           selected = "Left-sided",
+                                           icon = icon("check"),
+                                           bigger = TRUE,
+                                           status = "info"
+                                         )
+                        )
+                    ),
+                    # column(6, 
+                    #        prettyCheckboxGroup(
+                    #          inputId = "fusion_levels_confirmed",
+                    #          label = "Please Confirm The Fusion Levels:", 
+                    #          bigger = TRUE,
+                    #          choices = interbody_levels_df$level, 
+                    #          selected = fusion_levels_computed_reactive_df()$level,
+                    #          icon = icon("check"), 
+                    #          status = "success"
+                    #        )
+                    # )
+        )
+      )
   })
   
   ###### ######  -----------   ######### UPDATE TABS ###### ######  -----------   ######### 

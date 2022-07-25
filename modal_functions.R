@@ -13,7 +13,7 @@ startup_modal_box <-
            starting_sex = "", 
            hospital_input = "",
            starting_mrn = "",
-           redcap_token_last_8_input = "",
+           redcap_token_input = "",
            button_proceed = "proceed_to_details"
   ) {
     if (button_proceed == "proceed_to_details") {
@@ -113,7 +113,10 @@ startup_modal_box <-
         fluidRow(
           column(
             6,
-            textInput(inputId = "redcap_token_last_8", label = "Redcap Token ID:", placeholder = "########"),
+            textInput(inputId = "redcap_token", 
+                      label = "Redcap Token ID:", 
+                      placeholder = "## Enter Unique Redcap Token ##", 
+                      value = redcap_token_input),
           ),
           column(
             6,
