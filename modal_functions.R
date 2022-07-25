@@ -513,7 +513,8 @@ addition_surgical_details_modal_box_function <-
            anesthesia = "",
            neuromonitoring = c("SSEP", "tcMEP"),
            triggered_emg = "No",
-           pre_flip_motors = "Pre-flip motors not obtained",
+           pre_positioning_motors = "Pre-positioning motors not obtained",
+           neuromonitoring_signal_stability = "Neuromonitoring signals were stable throughout the case.",
            preop_antibiotics = c("Cefazolin (Ancef)"),
            anti_fibrinolytic = "",
            txa_loading = 20,
@@ -644,18 +645,34 @@ addition_surgical_details_modal_box_function <-
         conditionalPanel(condition = "input.neuromonitoring.indexOf('tcMEP') > -1",
                          jh_make_shiny_table_row_function(
                            left_column_percent_width = 30,
-                           left_column_label = "Were pre-flip motor signals normal?",
+                           left_column_label = "Were pre-positioning motor signals normal?",
                            font_size = row_label_font_size,
                            input_type = "awesomeRadio",
-                           input_id = "pre_flip_motors", 
-                           choices_vector = c("Pre-flip motors not obtained", 
-                                              "Pre-flip motor signals were obtained and were normal", 
-                                              "Pre-flip motor signals were not detected", 
-                                              "Pre flip motor signals were absent to ***",
+                           input_id = "pre_positioning_motors", 
+                           choices_vector = c("Pre-positioning motors not obtained", 
+                                              "Pre-positioning motor signals were obtained and were normal", 
+                                              "Pre-positioning motor signals were not detected", 
+                                              "Pre positioning motor signals were absent to ***",
                                               "***"),
                            checkboxes_inline = TRUE,
-                           initial_value_selected = pre_flip_motors
-                         )),
+                           initial_value_selected = pre_positioning_motors
+                         )
+                         ),
+        conditionalPanel(condition = "input.neuromonitoring.indexOf('SSEP') > -1",
+                         jh_make_shiny_table_row_function(
+                           left_column_percent_width = 30,
+                           left_column_label = "During the case:",
+                           font_size = row_label_font_size,
+                           input_type = "awesomeRadio",
+                           input_id = "neuromonitoring_signal_stability", 
+                           choices_vector = c("Neuromonitoring signals were stable throughout the case.", 
+                                              "There were intermittent loss of neuromonitoring signals during the case, which were addressed and corrected.", 
+                                              "During the case, neuromonitoring signals ***", 
+                                              "***"),
+                           checkboxes_inline = TRUE,
+                           initial_value_selected = neuromonitoring_signal_stability
+                         )
+        ),
         hr(),
         jh_make_shiny_table_row_function(
           left_column_label = "Preop Antibiotics:",

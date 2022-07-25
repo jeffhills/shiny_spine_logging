@@ -26,9 +26,6 @@ library(shinydashboard)
 # }
 
 
-# rcon <- redcapConnection(url = 'https://redcap.wustl.edu/redcap/api/', token = "58C0BC0A6CA8B8DFB21A054C2F5A3C49")
-# rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = "2A930AE845C92CBF95467E59ADBA0D20")
-
 # sudo su - -c "R -e \"install.packages('devtools', repos='http://cran.rstudio.com/')\""
 
 source("short_shiny_functions.R", local = TRUE)
@@ -1662,7 +1659,8 @@ server <- function(input, output, session) {
                                                  indications = input$indications,
                                                  neuromonitoring = input$neuromonitoring,
                                                  triggered_emg = input$triggered_emg,
-                                                 pre_flip_motors = input$pre_flip_motors,
+                                                 pre_positioning_motors = input$pre_positioning_motors,
+                                                 neuromonitoring_signal_stability = input$neuromonitoring_signal_stability,
                                                  preop_antibiotics = input$preop_antibiotics,
                                                  anti_fibrinolytic = input$anti_fibrinolytic,
                                                  txa_loading = input$txa_loading,
@@ -4339,21 +4337,21 @@ server <- function(input, output, session) {
         if(neuromonitoring_input_list$emg == "No"){
           neuromonitoring_input_list$emg <- ""
         }
-        neuromonitoring_input_list$pre_flip_motors <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "tcMEP"), input$pre_flip_motors, "")
-        if(neuromonitoring_input_list$pre_flip_motors == "Pre-flip motors not obtained"){
-          neuromonitoring_input_list$pre_flip_motors <- ""
+        neuromonitoring_input_list$pre_positioning_motors <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "tcMEP"), input$pre_positioning_motors, "")
+        if(neuromonitoring_input_list$pre_positioning_motors == "Pre-positioning motors not obtained"){
+          neuromonitoring_input_list$pre_positioning_motors <- ""
         }
-        
-        # neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
-        # neuromonitoring_input_list$pre_flip_motors <- if_else(input$pre_flip_motors == "Pre-flip motors not obtained", "", input$pre_flip_motors)
-        
+        neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
+                                                                               as.character(input$neuromonitoring_signal_stability),
+                                                                               "")
+
         ### NOW MAKE PROCEDURES LIST
         procedure_results_list_posterior <- list()
         
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_approach_objects_df,
                                                                        fusion_levels_df = fusions_df,
                                                                        head_position = input$head_positioning,
-                                                                       neuromonitoring_list = neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_flip_motors
+                                                                       neuromonitoring_list = neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
                                                                        revision_decompression_vector = input$open_canal,
                                                                        revision_implants_df = revision_implants_df,
                                                                        left_main_rod_size = input$left_main_rod_size,
@@ -4435,11 +4433,28 @@ server <- function(input, output, session) {
           unnest() %>%
           filter(value != 0)
         
+        ### make neuromonitoring list
+        neuromonitoring_input_list <- list()
+        neuromonitoring_input_list$modalities <- input$neuromonitoring
+        neuromonitoring_input_list$emg <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "),pattern = "EMG"), input$triggered_emg, "")
+        if(neuromonitoring_input_list$emg == "No"){
+          neuromonitoring_input_list$emg <- ""
+        }
+        neuromonitoring_input_list$pre_positioning_motors <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "tcMEP"), input$pre_positioning_motors, "")
+        if(neuromonitoring_input_list$pre_positioning_motors == "Pre-positioning motors not obtained"){
+          neuromonitoring_input_list$pre_positioning_motors <- ""
+        }
+
+        neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
+                                                                               as.character(input$neuromonitoring_signal_stability),
+                                                                               "")        
+        
         procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_approach_objects_df,
                                                                      anterior_approach_laterality = input$approach_specified_anterior,
                                                                      approach_statement = anterior_cervical_approach_details, 
                                                                      antibiotics = input$preop_antibiotics, 
                                                                      additional_procedures_vector = input$additional_procedures, 
+                                                                     neuromonitoring_list = neuromonitoring_input_list,
                                                                      bmp = anterior_bmp_dose_reactive(),
                                                                      anterior_biologics_df = anterior_biologics_df_formatted,
                                                                      bone_graft_vector = input$anterior_bone_graft,
