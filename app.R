@@ -2933,7 +2933,13 @@ server <- function(input, output, session) {
         mutate(integrated_fixation = map(.x = integrated_fixation_label, .f = ~if_else(is.null(input[[.x]]), "xx", input[[.x]]))) %>%
         mutate(expandable = map(.x = expandable_label, .f = ~if_else(is.null(input[[.x]]), "xx", input[[.x]]))) %>%
         mutate(other = map(.x = other_label, .f = ~if_else(is.null(input[[.x]]), "xx", input[[.x]]))) %>%
-        replace_na(list(composition = " ", other = " ", device_name = " ")) %>%
+        unnest(composition) %>%
+        unnest(other) %>%
+        unnest(device_name) %>%
+        mutate(composition = if_else(is.na(composition), " ", composition)) %>%
+        mutate(other = if_else(is.na(other), " ", other)) %>%
+        mutate(device_name = if_else(is.na(device_name), " ", device_name)) %>%
+        # replace_na(list(composition = " ", other = " ", device_name = " ")) %>%
         mutate(implant_statement = paste(glue("At the {level} interspace, a {height}mm height {composition}"), 
                                          device_name,
                                          if_else(other == "", glue(" "), glue(" ({other}) ")),
