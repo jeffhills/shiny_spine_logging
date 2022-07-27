@@ -2928,14 +2928,20 @@ server <- function(input, output, session) {
         mutate(expandable_label = glue("{level_label}_interbody_expandable")) %>%
         mutate(other_label = glue("{level_label}_interbody_other")) %>%
         mutate(composition = map(.x = composition_label, .f = ~input[[.x]])) %>%
-        mutate(device_name = map(.x = device_name_label, .f = ~input[[.x]])) %>%
-        mutate(height = map(.x = height_label, .f = ~input[[.x]])) %>%
-        mutate(integrated_fixation = map(.x = integrated_fixation_label, .f = ~if_else(is.null(input[[.x]]), "xx", input[[.x]]))) %>%
-        mutate(expandable = map(.x = expandable_label, .f = ~if_else(is.null(input[[.x]]), "xx", input[[.x]]))) %>%
-        mutate(other = map(.x = other_label, .f = ~if_else(is.null(input[[.x]]), "xx", input[[.x]]))) %>%
         unnest(composition) %>%
-        unnest(other) %>%
+        mutate(device_name = map(.x = device_name_label, .f = ~input[[.x]])) %>%
         unnest(device_name) %>%
+        mutate(height = map(.x = height_label, .f = ~input[[.x]])) %>%
+        unnest(height) %>%
+        mutate(integrated_fixation = map(.x = integrated_fixation_label, .f = ~if_else(is.null(input[[.x]]), "xx", input[[.x]]))) %>%
+        unnest(integrated_fixation) %>%
+        mutate(expandable = map(.x = expandable_label, .f = ~if_else(is.null(input[[.x]]), "xx", input[[.x]]))) %>%
+        unnest(expandable) %>%
+        mutate(other = map(.x = other_label, .f = ~if_else(is.null(input[[.x]]), "xx", input[[.x]]))) %>%
+        unnest(other) %>%
+        mutate(composition = as.character(composition), 
+               other = as.character(other), 
+               device_name = as.character(device_name)) %>%
         mutate(composition = if_else(is.na(composition), " ", composition)) %>%
         mutate(other = if_else(is.na(other), " ", other)) %>%
         mutate(device_name = if_else(is.na(device_name), " ", device_name)) %>%
