@@ -1,6 +1,18 @@
 
 
 # all_screw_size_type_inputs_df <-  all_implants_constructed_df %>%
+
+anterior_plate_screws_df <- implant_starts_df %>%
+  filter(vertebral_number < 23.9) %>%
+  union_all(l6_all_implants_constructed_df) %>%
+  select(level, vertebral_number, side, object) %>%
+  filter(str_detect(object, "screw")) %>%
+  filter(side == "left" | side == "right") %>%
+  arrange(vertebral_number) %>%
+  select(-vertebral_number) %>%
+  filter(object == "pedicle_screw") %>%
+  mutate(object = str_replace_all(object, "pedicle", "anterior_plate"))
+
 all_screw_size_type_inputs_df <- implant_starts_df %>%
   filter(vertebral_number < 23.9) %>%
   union_all(l6_all_implants_constructed_df) %>%
@@ -10,6 +22,7 @@ all_screw_size_type_inputs_df <- implant_starts_df %>%
   arrange(vertebral_number) %>%
   select(-vertebral_number) %>%
   group_by(level, side, object) %>%
+  union_all(anterior_plate_screws_df) %>% ### added this NEW for ANTERIOR PLATE SCREWS
   mutate(count = row_number()) %>%
   ungroup() %>%
   mutate(level_object = str_to_lower(paste(level, object, sep = "_"))) %>%
@@ -67,10 +80,63 @@ all_screw_size_type_inputs_df <- implant_starts_df %>%
                                 )))
 
 
+  anterior_plate_screws_all_df <- all_screw_size_type_inputs_df %>%
+    filter(str_detect(string = left_object, pattern = "anterior_plate")) %>%
+    mutate(left_type_input = map(.x = left_object,
+                                 .f = ~radioGroupButtons( #"option2",
+                                   inputId = paste0(.x, "_type"),
+                                   label = NULL,
+                                   choices = c("Anterior"),
+                                   selected = "Anterior",
+                                   checkIcon = list(yes = icon("wrench")),
+                                   size = "xs", direction = "horizontal",
+                                   justified = TRUE,
+                                   width = "95%"
+                                 ))) %>%
+    mutate(right_type_input = map(.x = right_object,
+                                  .f = ~radioGroupButtons( #"option2",
+                                    inputId = paste0(.x, "_type"),
+                                    label = NULL,
+                                    choices = c("Anterior"),
+                                    selected = "Anterior",
+                                    checkIcon = list(yes = icon("wrench")),
+                                    size = "xs", direction = "horizontal",
+                                    justified = TRUE,
+                                    width = "95%"
+                                  )))
+  
+  all_screw_size_type_inputs_df <- all_screw_size_type_inputs_df %>%
+    filter(str_detect(string = left_object, pattern = "anterior_plate", negate = TRUE)) %>%
+    union_all(anterior_plate_screws_all_df)
+
+
+
 jh_generate_df_for_screening_screw_inputs_function <- function(all_implants_df){
   
+  ## new for anterior plate screws
+  if(any(all_implants_df$object == "anterior_plate")){
+    anterior_plate_df <- all_implants_df %>%
+      filter(object == "anterior_plate") %>%
+      select(level, vertebral_number, side, object)%>%
+      separate(col = level, into = c("cranial_level", "caudal_level"), sep = "-") %>%
+      mutate(side_left = "left", side_right = "right") %>%
+      select(-side, vertebral_number) %>%
+      pivot_longer(cols = c(cranial_level, caudal_level), names_to = "cranial_caudal", values_to = "level") %>%
+      select(level, object, side_left, side_right) %>%
+      pivot_longer(cols = c(side_left, side_right), names_to = "remove", values_to = "side") %>%
+      distinct() %>%
+      mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+      select(level, vertebral_number, side, object) %>%
+      mutate(object = "anterior_plate_screw")
+  }else{
+    anterior_plate_df <- tibble(level = character(), vertebral_number = double(), side = character(), object = character())
+  }
+  
+  
   level_object_df <- all_implants_df %>%
+    filter(object != "anterior_plate") %>%
     select(level, vertebral_number, side, object) %>%
+    union_all(anterior_plate_df) %>% ### NEW
     mutate(level_object_label = str_to_title(str_replace_all(paste(level, object), "_", " "))) %>%
     mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI"))
   

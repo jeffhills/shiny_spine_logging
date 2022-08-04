@@ -113,12 +113,20 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "laminectomy"))){
-    geoms_list_posterior$laminectomy_sf_geom <- ggpattern::geom_sf_pattern(
+    # geoms_list_posterior$laminectomy_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.7,
+    #   pattern_spacing = 0.01
+    # )
+    geoms_list_posterior$laminectomy_sf_geom <- geom_sf(
       data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.7,
-      pattern_spacing = 0.01
+      # pattern = "stripe",
+      # pattern_colour = "red",
+      fill = "red",
+      alpha = 0.5
+      # pattern_spacing = 0.01
     )
   }else{
     geoms_list_posterior$laminectomy_sf_geom <- NULL
@@ -129,7 +137,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
       data = st_multipolygon((all_posterior_objects_df %>% filter(object == "sublaminar_decompression"))$object_constructed),
       pattern = "stripe",
       pattern_colour = "red",
-      alpha = 0.7,
+      alpha = 0.5,
       pattern_spacing = 0.01
     )
   }else{
@@ -396,15 +404,22 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
       ungroup() %>%
       distinct()
     
-    geoms_list_anterior_diskectomy$diskectomy_fusion_sf_geom <- ggpattern::geom_sf_pattern(
+    # geoms_list_anterior_diskectomy$diskectomy_fusion_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data =  st_multipolygon((diskectomy_fusion_df)$object_constructed),
+    #   pattern = "circle",
+    #   pattern_fill = "#F5A105",
+    #   color = "#F7B28F",
+    #   fill = "#F7B28F",
+    #   alpha = 0.3,
+    #   pattern_spacing = 0.005,
+    #   pattern_density = 0.7
+    # )
+    
+    geoms_list_anterior_diskectomy$diskectomy_fusion_sf_geom <- geom_sf(
       data =  st_multipolygon((diskectomy_fusion_df)$object_constructed),
-      pattern = "circle",
-      pattern_fill = "#F5A105",
       color = "#F7B28F",
-      fill = "#A89E9E",
-      alpha = 0.6,
-      pattern_spacing = 0.005,
-      pattern_density = 0.7
+      fill = "#F7B28F",
+      alpha = 0.3
     )
   }else{
     geoms_list_anterior_diskectomy$diskectomy_fusion_sf_geom <- NULL
@@ -447,7 +462,7 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
       pattern = "crosshatch",
       pattern_fill = "grey90",
       fill = "#7899F5",
-      alpha = 0.3,
+      alpha = 0.6,
       pattern_spacing = 0.01,
       pattern_density = 0.7
     )
@@ -458,15 +473,21 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
   
   ########  Interbody Implant  ########
   if(any(all_anterior_objects_df$object == "anterior_interbody_implant")){
-    geoms_list_anterior_interbody$anterior_interbody_sf_geom <- ggpattern::geom_sf_pattern(
+    # geoms_list_anterior_interbody$anterior_interbody_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data =  st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_interbody_implant"))$object_constructed),
+    #   pattern = "crosshatch",
+    #   pattern_fill = "grey90",
+    #   fill = "#7899F5",
+    #   alpha = 0.3,
+    #   pattern_spacing = 0.02,
+    #   pattern_density = 0.7
+    # )
+    geoms_list_anterior_interbody$anterior_interbody_sf_geom <- geom_sf(
       data =  st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_interbody_implant"))$object_constructed),
-      pattern = "crosshatch",
-      pattern_fill = "grey90",
       fill = "#7899F5",
-      alpha = 0.3,
-      pattern_spacing = 0.02,
-      pattern_density = 0.7
-    ) 
+      color = "black",
+      alpha = 0.8 # 1.0 = not transparent at all. 
+    )
   }else{
     geoms_list_anterior_interbody$anterior_interbody_sf_geom <- NULL
   }
@@ -486,26 +507,38 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
   }
   ########  Anterior Buttress Plate  ########
   if(any(all_anterior_objects_df$object == "anterior_buttress_plate")){
-    geoms_list_anterior_instrumentation$anterior_buttress_plate_sf_geom <-ggpattern::geom_sf_pattern(
+    # geoms_list_anterior_instrumentation$anterior_buttress_plate_sf_geom <-ggpattern::geom_sf_pattern(
+    #   data =  st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_buttress_plate"))$object_constructed),
+    #   pattern = "circle",
+    #   pattern_fill = "grey90",
+    #   fill = "#7899F5",
+    #   pattern_spacing = 0.01,
+    #   pattern_density = 0.7
+    # )
+    geoms_list_anterior_instrumentation$anterior_buttress_plate_sf_geom <- geom_sf(
       data =  st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_buttress_plate"))$object_constructed),
-      pattern = "circle",
-      pattern_fill = "grey90",
-      fill = "#7899F5",
-      pattern_spacing = 0.01,
-      pattern_density = 0.7
+      fill = "lightblue",
+      color = "darkblue"
     )
+    
   }else{
     geoms_list_anterior_instrumentation$anterior_buttress_plate_sf_geom <- NULL
   }
   ########  Anterior Plate  ########
   if(any(all_anterior_objects_df$object == "anterior_plate")){
-    geoms_list_anterior_instrumentation$anterior_plate_sf_geom <- ggpattern::geom_sf_pattern(
+    # geoms_list_anterior_instrumentation$anterior_plate_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data =  st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_plate"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+    #   pattern = "circle",
+    #   pattern_fill = "grey60",
+    #   fill = "#3B86CC",
+    #   pattern_spacing = 0.01,
+    #   pattern_density = 0.7
+    # )
+    geoms_list_anterior_instrumentation$anterior_plate_sf_geom <- geom_sf(
       data =  st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "anterior_plate"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
-      pattern = "circle",
-      pattern_fill = "grey60",
-      fill = "#3B86CC",
-      pattern_spacing = 0.01,
-      pattern_density = 0.7
+      color = "darkblue",
+      fill = "darkblue",
+      alpha = 0.8
     )
   }else{
     geoms_list_anterior_instrumentation$anterior_plate_sf_geom <- NULL

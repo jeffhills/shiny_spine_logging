@@ -59,6 +59,7 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'corpectomy', 'Anterior vertebral corpectomy', 'combine',
                                         'corpectomy_cage', 'Anterior insertion of intervertebral biomechanical implant', 'combine',
                                         'anterior_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
+                                        'anterior_plate_screw', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'anterior_buttress_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'screw_washer', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine')
 
@@ -133,7 +134,31 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
       arrange(vertebral_number) %>%
       distinct()
     
-    statement <- glue("I placed an anterior plate spanning {glue_collapse(levels_df$level, sep = ', ', last = ' and ')}. After selecting an appropriately sized plate and length for the screws, I held the plate into position and drilled and tapped the path for the screws. The screws were then inserted sequentially into the vertebral body of {glue_collapse(levels_df$level, sep = ', ', last = ' and ')} to hold the plate into position.")
+    statement <- glue("I placed an anterior plate spanning {glue_collapse(levels_df$level, sep = ', ', last = ' and ')}. After selecting an appropriately sized plate, I held the plate into position and drilled and tapped the path for the screws. The screws were then inserted sequentially into the vertebral body of {glue_collapse(levels_df$level, sep = ', ', last = ' and ')} to hold the plate into position.")
+    }
+  
+  if(object == "anterior_plate_screw"){
+      levels_df <- levels_nested_df %>%
+        mutate(level = if_else(level == "Iliac" | level =="S2AI", "S1", level)) %>%
+        arrange(vertebral_number) %>%
+        distinct() %>%
+        mutate(screw_size_type = str_remove_all(string = screw_size_type, pattern = " Anterior")) %>%
+        pivot_wider(names_from = side, values_from = screw_size_type) %>%
+        mutate(left = if_else(is.na(left), "", left)) %>%
+        mutate(right = if_else(is.na(right), "", right)) %>%
+        mutate(left_statement = if_else(str_count(string = left) > 1, 
+                                        paste("a", left, "screw on the left"), 
+                                        "")) %>%
+        mutate(right_statement = if_else(str_count(string = right) > 1, 
+                                         if_else(str_count(string = left) > 1, 
+                                                 paste("and a", right, "screw on the right"), 
+                                                 paste("a", right, "screw on the right")), 
+                                         "")
+        ) %>%
+        mutate(screw_statement = glue("At {level}, I placed {paste(left_statement, right_statement)}."))
+      
+      statement <- as.character(glue_collapse(levels_df$screw_statement, sep = " "))
+    
   }
   
   if(object == "anterior_buttress_plate"){
@@ -292,7 +317,6 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
     if(procedure_paragraph_intro == "anterior spinal instrumentation (distinct from an interbody implant)"){
       
       levels_df <- df_with_levels_object_nested %>%
-        # mutate(level = if_else(object == "anterior_buttress_plate", jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level, level)) %>%
         separate(col = level, into = c("cranial", "caudal"), sep = "-") %>%
         pivot_longer(cols = c(cranial, caudal)) %>%
         select(level = value) %>%
@@ -308,7 +332,7 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
         arrange(vertebral_number)
     }
     
-    start_statement <- glue("I then proceeded with {procedure_paragraph_intro} at {glue_collapse(levels_df$level, sep = (', '), last = ' and ')}.")
+    start_statement <- glue("I then proceeded with the {procedure_paragraph_intro} at {glue_collapse(levels_df$level, sep = (', '), last = ' and ')}.")
     
     df_with_statement <- df_with_levels_object_nested %>%
       group_by(object) %>%
@@ -353,7 +377,7 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
   }
   
   anterior_df <- all_objects_to_add_df %>%
-    select(level, vertebral_number, object, side, implant_statement) %>%
+    select(level, vertebral_number, object, side, screw_size_type, implant_statement) %>%
     mutate(order_number = row_number())
   
   anterior_df <- anterior_df %>%
@@ -367,18 +391,20 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
                                           "corpectomy_cage",
                                           "screw_washer",
                                           "anterior_buttress_plate",
-                                          "anterior_plate"))) %>%
+                                          "anterior_plate", 
+                                          "anterior_plate_screw"))) %>%
     mutate(object = fct_drop(object)) %>%
     arrange(object)
   
   anterior_procedure_category_nested_df <- anterior_df %>%
+    mutate(screw_size_type = if_else(is.na(screw_size_type), " ", screw_size_type)) %>%
     # mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
     mutate(procedure_category = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
     unnest(procedure_category) %>%
     mutate(procedure_category = str_to_lower(procedure_category)) %>%
     mutate(paragraphs_combine_or_distinct = map(.x = procedure_category, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
     unnest(paragraphs_combine_or_distinct) %>%
-    select(level, vertebral_number , procedure_category, object, side, paragraphs_combine_or_distinct, implant_statement) %>%
+    select(level, vertebral_number , procedure_category, object, side, paragraphs_combine_or_distinct, implant_statement, screw_size_type) %>%
     group_by(procedure_category) %>%
     nest() %>%
     mutate(paragraphs_combine_or_distinct = map(.x = procedure_category, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
@@ -462,7 +488,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$spinal_cord_monitoring <- glue("Spinal cord monitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
   }
   
-  if(length(neuromonitoring_list$pre_positioning_motors) > 1){
+  if(length(neuromonitoring_list$pre_positioning_motors) > 0){
     first_paragraph_list$pre_positioning_motors <- neuromonitoring_list$pre_positioning_motors 
   }
   
@@ -1445,7 +1471,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$spinal_cord_monitoring <- glue("Spinal cord monitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
   }
   
-  if(length(neuromonitoring_list$pre_positioning_motors) > 1){
+  if(length(neuromonitoring_list$pre_positioning_motors) > 0){
     first_paragraph_list$pre_positioning_motors <- neuromonitoring_list$pre_positioning_motors 
   }
   
