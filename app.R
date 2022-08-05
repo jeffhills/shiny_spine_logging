@@ -5616,6 +5616,12 @@ server <- function(input, output, session) {
           interbody_implant_repeating_instance_add <- 0
         }
         
+        if("all_inputs_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+          all_inputs_repeating_instance_add <- repeat_list$all_inputs_repeating
+        }else{
+          all_inputs_repeating_instance_add <- 0
+        }
+        
         surgical_details_instance_start <- repeat_list$surgical_details + 1
         max_procedures_by_level_repeating <- repeat_list$procedures_by_level_repeating
         max_screw_details_repeating <- repeat_list$screw_details_repeating
@@ -5626,6 +5632,7 @@ server <- function(input, output, session) {
         procedures_by_level_repeating_instance_add <- 0
         screw_details_repeating_instance_add <- 0
         interbody_implant_repeating_instance_add <- 0
+        all_inputs_repeating_instance_add <- 0
       }
     }else{
       record_number <- exportNextRecordName(rcon = rcon_reactive$rcon)
@@ -5633,12 +5640,13 @@ server <- function(input, output, session) {
       procedures_by_level_repeating_instance_add <- 0
       screw_details_repeating_instance_add <- 0
       interbody_implant_repeating_instance_add <- 0
+      all_inputs_repeating_instance_add <- 0
     }
     
     ##### uploaded patient details #######
     
     withProgress(message = 'Uploading Data', value = 0, {
-      number_of_steps <- 7
+      number_of_steps <- 8
       
       incProgress(1/number_of_steps, detail = paste("Uploading Patient Details"))
       
@@ -5707,7 +5715,7 @@ server <- function(input, output, session) {
         importRecords(rcon = rcon_reactive$rcon, data = screw_details_repeating, returnContent = "count")
       }
       
-      incProgress(1/number_of_steps, detail = paste("Uploading Implant Data"))
+      incProgress(1/number_of_steps, detail = paste("Uploading Interbody Implant Data"))
       
       ##### uploaded interbody details #######
       if(nrow(interbody_details_redcap_df_reactive())>0){
@@ -5722,6 +5730,33 @@ server <- function(input, output, session) {
           select(record_id, redcap_event_name, everything())
         
         importRecords(rcon = rcon_reactive$rcon, data = interbody_implant_repeating, returnContent = "count")
+      }
+      
+      incProgress(1/number_of_steps, detail = paste("Uploading All Data Inputs"))
+      
+      ##### upload ALL INPUTS details #######
+      if(nrow(all_inputs_trimmed_reactive_df())>0){
+        
+        # "record_id, redcap_event_name, redcap_repeat_instrument, redcap_repeat_instance, dos_all_inputs_repeating, variable_input_name, variable_input_result, all_inputs_complete"
+        # enframe(all_inputs_reactive_list()) %>%
+        #   mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = ";")))) %>%
+        #   select(-value) %>%
+        #   unnest(result) %>%
+        #   anti_join(all_inputs_trimmed_reactive_df())
+        
+        all_inputs_repeating_df <- all_inputs_trimmed_reactive_df() %>%
+          mutate(record_id = record_number) %>%
+          select(record_id, everything()) %>%
+          rename(variable_input_name = name, variable_input_result = result) %>%
+          mutate(redcap_event_name = "surgery_arm_1") %>%
+          mutate(redcap_repeat_instance = row_number() + all_inputs_repeating_instance_add) %>%
+          mutate(dos_all_inputs_repeating = as.character(input$date_of_surgery)) %>%
+          mutate(redcap_repeat_instrument = "all_inputs_repeating") %>%
+          mutate(all_inputs_repeating_complete = "Complete") %>%
+          mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+          select(record_id, redcap_event_name, everything())
+        
+        importRecords(rcon = rcon_reactive$rcon, data = all_inputs_repeating_df, returnContent = "count")
       }
       
       incProgress(1/number_of_steps, detail = paste("Complete"))
