@@ -502,7 +502,9 @@ anterior_objects_df <- anterior_df %>%
                                                                     inferior_endplate_y = ..3,
                                                                     superior_endplate_y = ..4,
                                                                     superior_endplate_inferior_body_y = ..5,
-                                                                    inferior_endplate_superior_body_y = ..6, y_click = ..7, direction = ..8)))
+                                                                    inferior_endplate_superior_body_y = ..6, 
+                                                                    y_click = ..7,
+                                                                    direction = ..8)))
 
 
 

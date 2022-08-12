@@ -2166,6 +2166,7 @@ server <- function(input, output, session) {
                                 "Diskectomy & Fusion + Interbody Implant" = "diskectomy_fusion",
                                 "Decompression + Diskectomy & <br/>Fusion + Interbody Implant" = "decompression_diskectomy_fusion",
                                 "Corpectomy" = "corpectomy",
+                                "Partial Corpectomy" = "partial_corpectomy",
                                 "Corpectomy Cage" = "corpectomy_cage",
                                 "Anterior Plate (distinct from interbody)" = "anterior_plate",
                                 "Anterior Buttress Plate" = "anterior_buttress_plate",

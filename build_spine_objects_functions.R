@@ -940,6 +940,20 @@ anterior_implant_function <- function(object_type,
     object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.0015, endCapStyle = "ROUND")
   }
   
+  if(object_type == "partial_corpectomy"){
+    left_x <- left_body_x
+    right_x <- right_body_x
+    
+    superior_y <- inferior_endplate_y + abs(inferior_endplate_y - superior_endplate_y)/1.7
+    
+    bottom_left <- c(left_x, inferior_endplate_y)
+    bottom_right <- c(right_x, inferior_endplate_y)
+    top_right <- c(right_x, superior_y)
+    top_left <- c(left_x, superior_y)
+    
+    object_sf <- st_buffer(st_polygon(list(rbind(bottom_left,bottom_right,top_right, top_left, bottom_left))), dist = 0.0015, endCapStyle = "ROUND")
+  }
+  
   if(object_type == "diskectomy_fusion_no_interbody_device"){
     left_x <- 0.5 - (body_width*1.1)
     right_x <- 0.5 + (body_width*1.1)

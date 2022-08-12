@@ -57,6 +57,7 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'diskectomy_fusion_no_interbody_device', 'Anterior diskectomy and fusion', 'distinct',
                                         'anterior_interbody_implant', 'Insertion of interbody biomechanical implant', 'distinct',
                                         'corpectomy', 'Anterior vertebral corpectomy', 'combine',
+                                        'partial_corpectomy', 'Anterior vertebral partial corpectomy', 'combine',
                                         'corpectomy_cage', 'Anterior insertion of intervertebral biomechanical implant', 'combine',
                                         'anterior_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'anterior_plate_screw', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
@@ -181,21 +182,30 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
       select(level) %>%
       distinct()
     
-    cranial_level_df <- levels_nested_df %>%
-      filter(vertebral_number == min(vertebral_number)) %>%
-      mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level) %>%
-      select(level) %>%
-      distinct()
+    corpectomy_levels <- glue_collapse(levels_df$level, sep = ", ", last = " and ")
     
-    caudal_level_df <- levels_nested_df %>%
-      filter(vertebral_number == max(vertebral_number)) %>%
-      mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
-      select(level) %>%
-      distinct()
+    # cranial_level_df <- levels_nested_df %>%
+    #   filter(vertebral_number == min(vertebral_number)) %>%
+    #   mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level) %>%
+    #   select(level) %>%
+    #   distinct()
     
+    cranial_level_character <- jh_get_vertebral_level_function(number = unique(min(levels_nested_df$vertebral_number)))
+    
+    cranial_interspace_character <- jh_get_cranial_caudal_interspace_body_list_function(level = cranial_level_character)$cranial_interspace
+    
+    # caudal_level_df <- levels_nested_df %>%
+    #   filter(vertebral_number == max(vertebral_number)) %>%
+    #   mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
+    #   select(level) %>%
+    #   distinct()
+    
+    caudal_level_character <- jh_get_vertebral_level_function(number = unique(max(levels_nested_df$vertebral_number)))
+    
+    caudal_interspace_character <- jh_get_cranial_caudal_interspace_body_list_function(level = caudal_level_character)$caudal_interspace
     
     statement_df <- levels_nested_df %>%
-      mutate(paragraph = glue("I confirmed that the exposure had been carried cranially to visualze the entire {jh_get_cranial_caudal_interspace_body_list_function(level = cranial_level_df$level[[1]])$caudal_interspace} disk, the anterior body of {glue_collapse(levels_df$level, sep = ', ', last = ' and ')}, and caudally to the {jh_get_cranial_caudal_interspace_body_list_function(level = caudal_level_df$level[[1]])$cranial_interspace} disk space. I then started with the diskectomies. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} to {jh_get_cranial_caudal_interspace_body_list_function(level = caudal_level_df$level[[1]])$caudal_interspace} disc's were completely excised. Once I was satisfied with the diskectomies, I used a combination of a burr and rongeur's to excise roughly 80% of the {glue_collapse(levels_df$level, sep = ', ', last = ' and ')} vertebral body. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
+      mutate(paragraph = glue("I confirmed that I had adequately exposed up to the {cranial_interspace_character} disk cranially, and down to {caudal_interspace_character} disk caudally. I then started with the diskectomies. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the discs from {cranial_interspace_character} down to {caudal_interspace_character} were completely excised. Once I was satisfied with the diskectomies, I used a combination of a burr and rongeur's to excise roughly 80% of the {corpectomy_levels} vertebral {if_else(length(corpectomy_levels)>1, 'bodies', 'body')}. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
       select(paragraph) %>%
       distinct()
     
@@ -203,21 +213,66 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
     
   }
   
-  if(object == "corpectomy_cage"){
-    cranial_level_df <- levels_nested_df %>%
-      filter(vertebral_number == min(vertebral_number)) %>%
-      mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level) %>%
+  if(object == "partial_corpectomy"){
+    
+    levels_df <- levels_nested_df %>%
       select(level) %>%
       distinct()
     
-    caudal_level_df <- levels_nested_df %>%
-      filter(vertebral_number == max(vertebral_number)) %>%
-      mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
-      select(level) %>%
-      distinct()
+    corpectomy_levels <- glue_collapse(levels_df$level, sep = ", ", last = " and ")
+    
+    cranial_level_character <- jh_get_vertebral_level_function(number = unique(min(levels_nested_df$vertebral_number)))
+    
+    caudal_level_character <- jh_get_vertebral_level_function(number = unique(max(levels_nested_df$vertebral_number)))
+    
+    interspace_character <- jh_get_cranial_caudal_interspace_body_list_function(level = cranial_level_character)$caudal_interspace
+    
+    ## for 1 level partial corpectomy:
+    if(cranial_level_character == caudal_level_character){
+      
+      caudal_to_corpectomy_level <- jh_get_cranial_caudal_interspace_body_list_function(level = cranial_level_character)$caudal_level
+      
+      statement_df <- levels_nested_df %>%
+        mutate(paragraph = glue("I confirmed that I had adequately exposed the {cranial_level_character} body, the {interspace_character} disk, and the {caudal_to_corpectomy_level} body. I then started with the diskectomy. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the diskectomy, I used a combination of a burr and rongeur's to excise roughly 60% of the {cranial_level_character} vertebral body. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
+        select(paragraph) %>%
+        distinct()
+      
+    }else{
+      ## for multilevel partial corpectomy:
+      
+      statement_df <- levels_nested_df %>%
+        mutate(paragraph = glue("I confirmed that I had adequately exposed {cranial_level_character} body, the {interspace_character} disk, and the {caudal_level_character} body. I then started with the diskectomy. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the diskectomy, I used a combination of a burr and rongeur's to excise roughly 60% of the {cranial_level_character} and {caudal_level_character} vertebral {if_else(length(corpectomy_levels)>1, 'bodies', 'body')}. I carried the corpectomies laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
+        select(paragraph) %>%
+        distinct()
+    }
+    
+    statement <- paste(statement_df$paragraph[[1]])
+    
+  }
+  
+  if(object == "corpectomy_cage"){
+    # cranial_level_df <- levels_nested_df %>%
+    #   filter(vertebral_number == min(vertebral_number)) %>%
+    #   mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_level) %>%
+    #   select(level) %>%
+    #   distinct()
+    
+    cranial_level_character <- jh_get_vertebral_level_function(number = unique(min(levels_nested_df$vertebral_number)))
+    
+    cranial_to_corpectomy_level <- jh_get_cranial_caudal_interspace_body_list_function(level = cranial_level_character)$cranial_level
+    
+    # caudal_level_df <- levels_nested_df %>%
+    #   filter(vertebral_number == max(vertebral_number)) %>%
+    #   mutate(level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
+    #   select(level) %>%
+    #   distinct()
+    
+    caudal_level_character <- jh_get_vertebral_level_function(number = unique(max(levels_nested_df$vertebral_number)))
+    
+    caudal_to_corpectomy_level <- jh_get_cranial_caudal_interspace_body_list_function(level = caudal_level_character)$caudal_level
     
     statement_df <- levels_nested_df %>%
-      mutate(paragraph = glue("I confirmed satisfactory decompression and end plate preparation. I then measured the distance from the inferior endplate of {cranial_level_df$level[[1]]} to the superior endplate of {caudal_level_df$level[[1]]} and selected an appropriately sized implant and inserted the implant into the corpectomy defect. The implant had a good press fit between the endplates.")) %>%
+      mutate(paragraph = glue("I confirmed satisfactory decompression and end plate preparation. I then measured the distance from the inferior endplate of {cranial_to_corpectomy_level} to the superior endplate of {caudal_to_corpectomy_level} and selected an appropriately sized implant and inserted the implant into the corpectomy defect. The implant had a good press fit between the endplates.")) %>%
       select(paragraph) %>%
       distinct()
     
@@ -257,7 +312,8 @@ distinct_anterior_procedure_paragraph_function <- function(level_input, object_i
   
   if(object_input == "corpectomy"){
     paragraph <- glue("I then proceeded with decompression and anterior vertebral body corpectomy at the {level_input} vertebral level. I confirmed that the exposure had been carried cranially to visualze the entire {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} disk, the anterior body of {level_input} and caudally to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} disk space. First I started with the diskectomies. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} and {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} disc's were completely excised. Once I was satisfied with the diskectomies, I used a combination of a burr and rongeur's to excise roughly 80% of the {level_input} vertebral body. I carried the corpectomy dorsally to the posterior longitudinal ligament, effectively decompressing the central canal. This completed the vertebral body corpectomy at {level_input}.")
-  }
+  
+    }
   
   if(object_input == "corpectomy_cage"){
     paragraph <- glue("I then proceeded with the insertion of the intervertebral implant into the {level_input} interspace. I again confirmed that the endplates were adequately decorticated and appropriately level. Once I was fully satisfied with the preparation of the endplates, I used trials and measured the interspace to determine the appropriate size of the interbody implant. {implant_statement_input} I then inserted the  implant into the {level_input} space. The final position was confirmed using intraoperative xray. This completed the insertion of the intervertebral implant at {level_input}.")
@@ -337,7 +393,9 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
     df_with_statement <- df_with_levels_object_nested %>%
       group_by(object) %>%
       nest() %>%
-      mutate(tech_statement = map(.x = data, .f = ~ op_note_object_combine_paragraph_function(object = object, levels_nested_df = .x))) %>%
+      mutate(tech_statement = map(.x = data, 
+                                  .f = ~ op_note_object_combine_paragraph_function(object = object, 
+                                                                                   levels_nested_df = .x))) %>%
       select(object, tech_statement) %>%
       unnest(tech_statement) %>%
       distinct()
@@ -377,7 +435,7 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
   }
   
   anterior_df <- all_objects_to_add_df %>%
-    select(level, vertebral_number, object, side, screw_size_type, implant_statement) %>%
+    select(level, vertebral_number, object, side, contains("screw_size_type"), contains("implant_statement")) %>%
     mutate(order_number = row_number())
   
   anterior_df <- anterior_df %>%
@@ -395,6 +453,11 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
                                           "anterior_plate_screw"))) %>%
     mutate(object = fct_drop(object)) %>%
     arrange(object)
+  
+  if(any(names(anterior_df) == "screw_size_type") == FALSE){
+    anterior_df <- anterior_df %>%
+      mutate(screw_size_type = " ")
+  }
   
   anterior_procedure_category_nested_df <- anterior_df %>%
     mutate(screw_size_type = if_else(is.na(screw_size_type), " ", screw_size_type)) %>%

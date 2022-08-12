@@ -231,7 +231,7 @@ startup_modal_box_diagnosis_symptoms <-
                     liveSearchNormalize = TRUE
                   ),
                   multiple = TRUE,
-                  selected = ""
+                  selected = primary_diagnosis_value
                 )
               ),
             ),

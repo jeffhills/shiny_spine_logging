@@ -440,6 +440,21 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
     geoms_list_anterior_diskectomy$corpectomy_sf_geom <- NULL
   }
   
+  ########  PARTIAL Corpectomy  ########
+  if(any(all_anterior_objects_df$object == "partial_corpectomy")){
+    geoms_list_anterior_diskectomy$partial_corpectomy_sf_geom <- ggpattern::geom_sf_pattern(
+      data =  st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "partial_corpectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.6,
+      pattern_angle = 90,
+      pattern_spacing = 0.01,
+      pattern_density = 0.1
+    )
+  }else{
+    geoms_list_anterior_diskectomy$partial_corpectomy_sf_geom <- NULL
+  }
+  
   ########  Arthroplasty  ########
   if(any(all_anterior_objects_df$object == "anterior_disc_arthroplasty")){
     anterior_disc_arthroplasty_df <- all_anterior_objects_df %>%
