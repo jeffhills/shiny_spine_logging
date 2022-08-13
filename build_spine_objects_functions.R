@@ -944,10 +944,18 @@ anterior_implant_function <- function(object_type,
     left_x <- left_body_x
     right_x <- right_body_x
     
-    superior_y <- inferior_endplate_y + abs(inferior_endplate_y - superior_endplate_y)/1.7
+    if(direction == "superior"){
+      superior_y <- superior_endplate_y 
+      inferior_y <- superior_endplate_y - abs(inferior_endplate_y - superior_endplate_y)/1.7
+    }
     
-    bottom_left <- c(left_x, inferior_endplate_y)
-    bottom_right <- c(right_x, inferior_endplate_y)
+    if(direction == "inferior"){
+      superior_y <- inferior_endplate_y + abs(inferior_endplate_y - superior_endplate_y)/1.7
+      inferior_y <- inferior_endplate_y
+    }
+    
+    bottom_left <- c(left_x, inferior_y)
+    bottom_right <- c(right_x, inferior_y)
     top_right <- c(right_x, superior_y)
     top_left <- c(left_x, superior_y)
     
