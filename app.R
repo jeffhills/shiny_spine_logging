@@ -1641,7 +1641,7 @@ server <- function(input, output, session) {
       addition_surgical_details_modal_box_function(preoperative_diagnosis = preop_dx, 
                                                    postoperative_diagnosis = postop_dx,
                                                    indications = procedure_indications,
-                                                   neuromonitoring = c("SSEP", "tc MEP"),
+                                                   neuromonitoring = c("SSEP", "tc MEP"), 
                                                    preop_antibiotics = c("Cefazolin (Ancef)"))
     )
   })
@@ -1677,6 +1677,7 @@ server <- function(input, output, session) {
                                                  postoperative_diagnosis = input$postoperative_diagnosis, 
                                                  asa_class = input$asa_class,
                                                  anesthesia = input$anesthesia,
+                                                 local_anesthesia = input$local_anesthesia,
                                                  indications = input$indications,
                                                  neuromonitoring = input$neuromonitoring,
                                                  triggered_emg = input$triggered_emg,
@@ -1941,16 +1942,6 @@ server <- function(input, output, session) {
       showModal(
         modalDialog(title = "Confirm Fusion Levels", easyClose = TRUE, footer = modalButton(label = "Confirmed"),
                     box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
-                        if(length(fusion_levels_computed_reactive_df()$level)>0){
-                          prettyCheckboxGroup(
-                          inputId = "fusion_levels_confirmed",
-                          label = "Please Confirm The Fusion Levels:", 
-                          bigger = TRUE,
-                          choices = interbody_levels_df$level, 
-                          selected = fusion_levels_computed_reactive_df()$level,
-                          icon = icon("check"), 
-                          status = "success"
-                        )},
                         conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
                                          fluidRow(
                                            prettyRadioButtons(
@@ -2015,19 +2006,53 @@ server <- function(input, output, session) {
                                            bigger = TRUE,
                                            status = "info"
                                          )
-                        )
-                    ),
-                    # column(6, 
-                    #        prettyCheckboxGroup(
-                    #          inputId = "fusion_levels_confirmed",
-                    #          label = "Please Confirm The Fusion Levels:", 
-                    #          bigger = TRUE,
-                    #          choices = interbody_levels_df$level, 
-                    #          selected = fusion_levels_computed_reactive_df()$level,
-                    #          icon = icon("check"), 
-                    #          status = "success"
-                    #        )
-                    # )
+                        ),
+                        if(nrow(screws_selected_df_reactive())>0){
+                          fluidRow(
+                            awesomeRadio(
+                              inputId = "implant_start_point_method",
+                              label = "Method for identifying screw start point:",
+                              choices = c(
+                                "Implant start points were identified using anatomic landmarks.",
+                                "Intraoperative fluoroscopy and pedicle markers were used to confirm start points for screw placement.", 
+                                "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
+                                "Intraoperative navigation was used for identifying start points.",
+                                "N/A"),
+                              selected = "", 
+                              inline = FALSE, 
+                              status = "success"
+                            )
+                          )
+                        },
+                        if(nrow(screws_selected_df_reactive())>0){
+                          fluidRow(
+                            awesomeRadio(
+                              inputId = "implant_position_confirmation_method",
+                              label = "Method for confirming implant position:",
+                              choices = c(
+                                "Intraoperative fluoroscopy was used to confirm position of all implants.", 
+                                "Intraoperative CT scan was used to confirm position of all implants.",
+                                "N/A"), 
+                              selected = "Intraoperative fluoroscopy was used to confirm position of all implants.",
+                              inline = FALSE, 
+                              status = "success"
+                            )
+                          )
+                        },
+                        if(length(fusion_levels_computed_reactive_df()$level)>0){
+                          fluidRow(
+                           prettyCheckboxGroup(
+                                   inputId = "fusion_levels_confirmed",
+                                   label = "Please Confirm The Fusion Levels:", 
+                                   bigger = TRUE,
+                                   choices = interbody_levels_df$level, 
+                                   selected = fusion_levels_computed_reactive_df()$level,
+                                   icon = icon("check"), 
+                                   status = "success"
+                                 ) 
+                          )
+                          }
+                    )
         )
       )
   })
@@ -4341,6 +4366,9 @@ server <- function(input, output, session) {
                                                                        fusion_levels_df = fusions_df,
                                                                        head_position = input$head_positioning,
                                                                        neuromonitoring_list = neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
+                                                                       implant_start_point_method_input = input$implant_start_point_method,
+                                                                       implant_confirmation_method = input$implant_position_confirmation_method,
+                                                                       local_anesthesia = input$local_anesthesia,
                                                                        revision_decompression_vector = input$open_canal,
                                                                        revision_implants_df = revision_implants_df,
                                                                        left_main_rod_size = input$left_main_rod_size,
@@ -4443,6 +4471,7 @@ server <- function(input, output, session) {
                                                                      antibiotics = input$preop_antibiotics, 
                                                                      additional_procedures_vector = input$additional_procedures, 
                                                                      neuromonitoring_list = neuromonitoring_input_list,
+                                                                     local_anesthesia = input$local_anesthesia,
                                                                      bmp = anterior_bmp_dose_reactive(),
                                                                      anterior_biologics_df = anterior_biologics_df_formatted,
                                                                      bone_graft_vector = input$anterior_bone_graft,

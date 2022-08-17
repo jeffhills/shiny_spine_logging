@@ -497,6 +497,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                       antibiotics = vector(),
                                       additional_procedures_vector = NULL,
                                       neuromonitoring_list = list(),
+                                      local_anesthesia = "",
                                       bmp = NULL,
                                       anterior_biologics_df = tibble(name = character(), value = double()),
                                       bone_graft_vector = NULL,
@@ -618,6 +619,11 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     }
   }
   
+  ###### LOCAL ANESTHESIA
+  if(str_detect(string = str_to_lower(local_anesthesia), pattern = "exposure")){ 
+    first_paragraph_list$local_anesthesia <- glue("{str_to_sentence(local_anesthesia)}")
+  }
+  
   procedure_details_list$approach_statement <- glue_collapse(x = first_paragraph_list, sep = " ")
   
   ################### PROCEDURE PARAGRAPHS ##################
@@ -660,7 +666,11 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     )
   }else{
     closure_statements_list$superficial_closure <- "The subdermal layers and skin layers were then closed."
-    
+  }
+  
+  ###### LOCAL ANESTHESIA
+  if(str_detect(string = str_to_lower(local_anesthesia), pattern = "closure")){ 
+    closure_statements_list$local_anesthesia <- glue("{str_to_sentence(local_anesthesia)}")
   }
   
   # closure_statements_list$dressing <- glue("Lastly, {glue_collapse(dressing, sep = ', ', last = ', and ')} was applied to the surgical site.")
@@ -825,7 +835,9 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
                                                   revision_decompression_vector = c(), 
                                                   approach_technique = "Na", 
                                                   image_guidance = "Na", 
-                                                  neuromonitoring_emg_statement = "No"){
+                                                  neuromonitoring_emg_statement = "No", 
+                                                  implant_start_point_method = "NA",
+                                                  implant_confirmation_method = "NA"){
   
   if("implant_statement" %in% names(objects_added_df) == FALSE){ 
     objects_added_df <- objects_added_df %>%
@@ -893,13 +905,17 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
                                            ..3 = procedures_combine, 
                                            ..4 = approach_technique_input, 
                                            ..5 = image_guidance_technique_input, 
-                                           ..6 = neuromonitoring_emg_statement_input),
+                                           ..6 = neuromonitoring_emg_statement_input,
+                                           ..7 = implant_start_point_method, 
+                                           ..8 = implant_confirmation_method),
                                       .f = ~create_full_paragraph_statement_function(procedure_paragraph_intro = ..1,
                                                                                      df_with_levels_object_nested = ..2, 
                                                                                      paragraphs_combined_or_distinct = ..3, 
                                                                                      approach_technique = ..4, 
                                                                                      image_guidance = ..5, 
-                                                                                     neuromonitoring_emg = ..6))) %>%
+                                                                                     neuromonitoring_emg = ..6, 
+                                                                                     implant_start_point_method = ..7, 
+                                                                                     implant_confirmation_method = ..8))) %>%
     select(procedure_category, procedures_combine, procedure_statement) %>%
     unnest(procedure_statement)
   
@@ -915,6 +931,8 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
                                                      paragraphs_combined_or_distinct, 
                                                      approach_technique = "na", 
                                                      image_guidance = "na", 
+                                                     implant_start_point_method = "NA",
+                                                     implant_confirmation_method = "NA",
                                                      neuromonitoring_emg = "No"){
   
   if("data" %in% names(df_with_levels_object_nested)){
@@ -940,8 +958,6 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
                                                                              levels_side_df = ..2, 
                                                                              approach_technique = ..3, 
                                                                              image_guidance = ..4))) %>%
-      
-      # mutate(tech_statement = map2(.x = object, .y = object_levels_side_df, .f = ~ op_note_technique_combine_statement(object = .x, levels_side_df = .y))) %>%
       select(object, tech_statement) %>%
       unnest(tech_statement) %>%
       distinct()
@@ -951,31 +967,57 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       distinct() %>%
       arrange(vertebral_number)
     
+    #IMAGING MODALITY USED FOR STARTPOINTS?:
+    if(procedure_paragraph_intro == "posterior spinal instrumentation"){
+      if(str_length(implant_start_point_method) > 6){
+        implant_start_point_method_text <- implant_start_point_method
+      }else{
+        implant_start_point_method_text <- ""
+      }
+    }else{
+      implant_start_point_method_text <- ""
+    }
+    
+    ## EMG USED:
     if(neuromonitoring_emg != "No"){
       emg_statement <- neuromonitoring_emg
     }else{
       emg_statement <- ""
     }
     
-    if(procedure_paragraph_intro == "pelvic instrumentation"){
-      statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
-    }else if(procedure_paragraph_intro == "posterior spinal instrumentation"){
-      statement <- glue("I then proceeded with the posterior spinal instrumentation. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {emg_statement} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
-    } else{
-      statement <- glue("I then proceeded with the {procedure_paragraph_intro}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    if(procedure_paragraph_intro == "posterior spinal instrumentation"){
+      if(str_length(implant_confirmation_method) > 6){
+        implant_confirmation_method_text <- implant_confirmation_method
+      }else{
+        implant_confirmation_method_text <- ""
+      }
+    }else{
+      implant_confirmation_method_text <- ""
     }
     
-    # if(procedure_paragraph_intro == "pelvic instrumentation" | procedure_paragraph_intro == "posterior spinal instrumentation"){
-    #   if(procedure_paragraph_intro == "pelvic instrumentation"){
-    #     statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
-    #   }
-    #   if(procedure_paragraph_intro == "posterior spinal instrumentation"){
-    #     statement <- glue("I then proceeded with the posterior spinal instrumentation. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
-    #   }
-    #   
-    # }else{
+    ## Completion statement:
+    if(procedure_paragraph_intro == "posterior spinal instrumentation"){
+      procedure_completion <- glue("{implant_confirmation_method_text} {emg_statement} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    }else{
+      procedure_completion <- glue("This completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+      }
+    
+    
+    # if(procedure_paragraph_intro == "pelvic instrumentation"){
+    #   statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
+    # }else if(procedure_paragraph_intro == "posterior spinal instrumentation"){
+    #   statement <- glue("I then proceeded with the posterior spinal instrumentation. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {emg_statement} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    # } else{
     #   statement <- glue("I then proceeded with the {procedure_paragraph_intro}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
     # }
+    
+    ##CREATE THE STATEMENT
+    if(procedure_paragraph_intro == "pelvic instrumentation"){
+      statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
+    }else{
+      statement <- glue("I then proceeded with the {procedure_paragraph_intro}. {implant_start_point_method_text} {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
+      
+    }
     
   }
   
@@ -1426,7 +1468,10 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                                        surgical_approach = "Midline",
                                        approach_mis_open = "Open",
                                        approach_robot_nav_xray = "Open",
+                                       implant_start_point_method_input = "",
+                                       implant_confirmation_method = "Intraoperative Xray was used to confirm the final position of all implants.",
                                        neuromonitoring_list = list(),
+                                       local_anesthesia = "",
                                        revision_decompression_vector = c(""),
                                        revision_implants_df = tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character()),
                                        left_main_rod_size = "5.5",
@@ -1601,7 +1646,6 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                              if_else(level == "Iliac", "S1", 
                                      level)))  
     
-    
     if(surgical_approach == "Midline"){
       first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, exposing proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
       
@@ -1645,6 +1689,10 @@ op_note_posterior_function <- function(all_objects_to_add_df,
       first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, appropriately exposing all necessary levels.")
     }
   } 
+  
+  if(str_detect(string = str_to_lower(local_anesthesia), pattern = "exposure")){ 
+    first_paragraph_list$local_anesthesia <- glue("{str_to_sentence(local_anesthesia)}")
+  }
   
   procedure_details_list$approach_statement <- glue_collapse(x = first_paragraph_list, sep = " ")
   
@@ -1697,7 +1745,9 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                                                                                revision_decompression_vector = revision_decompression_vector, 
                                                                                approach_technique = approach_mis_open, 
                                                                                image_guidance = approach_robot_nav_xray, 
-                                                                               neuromonitoring_emg_statement = neuromonitoring_list$emg)
+                                                                               neuromonitoring_emg_statement = neuromonitoring_list$emg, 
+                                                                               implant_start_point_method = implant_start_point_method_input, 
+                                                                               implant_confirmation_method = implant_confirmation_method)
   }
   
   
@@ -1848,7 +1898,6 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   }
   
   if(length(closure > 0)){
-    
     if(any(closure == "left open")){
       closure_statements_list$superficial_closure <- paste("After the fascial layer was closed, the subdermal and skin layers were left open.")
       
@@ -1864,6 +1913,10 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   }else{
     closure_statements_list$superficial_closure <- "The subdermal layers and skin layers were then closed."
     
+  }
+  ###### LOCAL ANESTHESIA
+  if(str_detect(string = str_to_lower(local_anesthesia), pattern = "closure")){ 
+    closure_statements_list$local_anesthesia <- glue("{str_to_sentence(local_anesthesia)}")
   }
   
   if(any(dressing == "Wound Vac")){

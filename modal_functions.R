@@ -511,6 +511,7 @@ addition_surgical_details_modal_box_function <-
            indications = "",
            asa_class = "",
            anesthesia = "",
+           local_anesthesia = "None",
            neuromonitoring = c("SSEP", "tcMEP"),
            triggered_emg = "No",
            pre_positioning_motors = "Pre-positioning motors not obtained",
@@ -519,7 +520,8 @@ addition_surgical_details_modal_box_function <-
            anti_fibrinolytic = "",
            txa_loading = 20,
            txa_maintenance = 5,
-           anterior_cervical_approach_details_checkbox = c()) {
+           anterior_cervical_approach_details_checkbox = c()
+           ) {
     
     if(editing_the_details == FALSE){
       footer_button <- actionBttn(
@@ -604,7 +606,7 @@ addition_surgical_details_modal_box_function <-
         ),
         jh_make_shiny_table_row_function(
           left_column_percent_width = 30,
-          left_column_label = "Anethesia Type:",
+          left_column_label = "Anesthesia Type:",
           font_size = row_label_font_size,
           input_type = "checkbox",
           choices_vector = c(
@@ -616,6 +618,22 @@ addition_surgical_details_modal_box_function <-
           input_id = "anesthesia",
           checkboxes_inline = TRUE,
           initial_value_selected = anesthesia
+        ),
+        hr(),
+        jh_make_shiny_table_row_function(
+          left_column_percent_width = 30,
+          left_column_label = "Local Anesthesia:",
+          font_size = row_label_font_size,
+          input_type = "awesomeRadio",
+          choices_vector = c("None",
+            "During the EXPOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
+            "During the CLOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
+            "During the EXPOSURE, a liposomal Bupivicaine mixure was injected into the subcutaneous and deep tissues.",
+            "During CLOSURE, a liposomal Bupivicaine mixure was injected into the subcutaneous and deep tissues."
+          ),
+          input_id = "local_anesthesia", 
+          checkboxes_inline = FALSE,
+          initial_value_selected = local_anesthesia
         ),
         hr(),
         jh_make_shiny_table_row_function(
