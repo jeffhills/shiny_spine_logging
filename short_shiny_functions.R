@@ -731,8 +731,8 @@ jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
   
   left_input_identifier <- as.character(glue("add_left_{rod_type}"))
   right_input_identifier <- as.character(glue("add_right_{rod_type}"))
-  rod_material_vector <- c("Titanium", "Cobalt Chrome", "Stainless Steel")
-  rod_size_vector <- c("None", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/quarter in")
+  rod_material_vector <- c("NA", "Titanium", "Cobalt Chrome", "Stainless Steel")
+  rod_size_vector <- c("NA", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/quarter in")
   
   left_table <- tags$table(
     tags$tr(
@@ -748,7 +748,7 @@ jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
                                prettyRadioButtons(inputId = as.character(glue("left_{rod_type}_material")), 
                                                   label = NULL, 
                                                   choices = rod_material_vector, 
-                                                  selected = "Titanium", 
+                                                  selected = "NA", 
                                                   outline = TRUE, 
                                                   shape = "round", 
                                                   inline = FALSE,
@@ -760,10 +760,11 @@ jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
       tags$td(width = "30%",
               conditionalPanel(condition = glue("input.{left_input_identifier} == true"),
                                pickerInput(inputId = as.character(glue("left_{rod_type}_size")), 
-                                           label = NULL, 
+                                           label = "Size:", 
                                            choices = rod_size_vector, 
-                                           selected = "5.5mm", 
-                                           multiple = FALSE, width = "90%"
+                                           selected = "NA", 
+                                           multiple = FALSE, 
+                                           width = "90%"
                                )
               )
       )
@@ -784,7 +785,7 @@ jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
                                prettyRadioButtons(inputId = as.character(glue("right_{rod_type}_material")), 
                                                   label = NULL, 
                                                   choices = rod_material_vector, 
-                                                  selected = "Titanium", 
+                                                  selected = "NA", 
                                                   outline = TRUE, 
                                                   shape = "round", 
                                                   inline = FALSE, 
@@ -795,10 +796,11 @@ jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
       tags$td(width = "30%",
               conditionalPanel(condition = glue("input.{right_input_identifier} == true"),
                                pickerInput(inputId = as.character(glue("right_{rod_type}_size")), 
-                                           label = NULL, 
+                                           label = "Size:", 
                                            choices = rod_size_vector, 
-                                           selected = "5.5mm", 
-                                           multiple = FALSE, width = "90%"
+                                           selected = "NA", 
+                                           multiple = FALSE, 
+                                           width = "90%"
                                )
               )
       )
@@ -822,12 +824,16 @@ jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
                       fixedRow(
                         column(4, 
                                conditionalPanel(condition = glue("input.{left_input_identifier} == true"), 
-                                                sliderTextInput(inputId = as.character(glue("left_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                                                sliderTextInput(inputId = as.character(glue("left_{rod_type}")),
+                                                                label = NULL, 
+                                                                choices = c("a", "b"),
+                                                                selected = c("a", "b"), 
+                                                                width = "90%")
                                )
                         ),
                         column(2, 
                                conditionalPanel(condition = glue("input.{left_input_identifier} == true"), 
-                                                pickerInput(inputId = "left_intercalary_junction",
+                                                pickerInput(inputId = "left_intercalary_rod_junction",
                                                             label = "Junction:",
                                                             choices = c("a", "b"),
                                                             width = "fit")
@@ -835,11 +841,15 @@ jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
                         ),
                         column(4, 
                                conditionalPanel(condition = glue("input.{right_input_identifier} == true"), 
-                                                sliderTextInput(inputId = as.character(glue("right_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                                                sliderTextInput(inputId = as.character(glue("right_{rod_type}")), 
+                                                                label = NULL, 
+                                                                choices = c("a", "b"), 
+                                                                selected = c("a", "b"), 
+                                                                width = "90%")
                                )
                         ),
                         conditionalPanel(condition = glue("input.{right_input_identifier} == true"), 
-                                         pickerInput(inputId = "right_intercalary_junction",
+                                         pickerInput(inputId = "right_intercalary_rod_junction",
                                                      label = "Junction:",
                                                      choices = c("a", "b"),
                                                      width = "fit")
@@ -849,12 +859,20 @@ jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
                       fixedRow(
                         column(6, 
                                conditionalPanel(condition = glue("input.{left_input_identifier} == true"), 
-                                                sliderTextInput(inputId = as.character(glue("left_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                                                sliderTextInput(inputId = as.character(glue("left_{rod_type}")), 
+                                                                label = NULL,
+                                                                choices = c("a", "b"), 
+                                                                selected = c("a", "b"), 
+                                                                width = "90%")
                                )
                         ),
                         column(6, 
                                conditionalPanel(condition = glue("input.{right_input_identifier} == true"), 
-                                                sliderTextInput(inputId = as.character(glue("right_{rod_type}")), label = NULL, choices = c("a", "b"), selected = c("a", "b"), width = "90%")
+                                                sliderTextInput(inputId = as.character(glue("right_{rod_type}")), 
+                                                                label = NULL,
+                                                                choices = c("a", "b"), 
+                                                                selected = c("a", "b"),
+                                                                width = "90%")
                                )
                         )
                       ) 
@@ -1577,7 +1595,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
                                                 linked_rods_vector = c("a", "b"),
                                                 revision_rods_retained_df = tibble(level = character(), vertebral_number = double(), x = double(), y = double()),
                                                 unilateral_full_implant_df, 
-                                                intercalary_junction){
+                                                intercalary_rod_junction){
   
   if(!is.null(unilateral_full_implant_df) && nrow(unilateral_full_implant_df)>0){
     rods_list <- list()
@@ -1783,14 +1801,14 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
         as.matrix()
       
       top_intercalary_rod_matrix <- main_rod_df %>%
-        filter(vertebral_number < jh_get_vertebral_number_function(level_to_get_number = intercalary_junction)) %>%
+        filter(vertebral_number < jh_get_vertebral_number_function(level_to_get_number = intercalary_rod_junction)) %>%
         remove_missing() %>%
         select(x, y) %>%
         mutate(y = if_else(y == min(y), y - 0.015, y)) %>%
         as.matrix()
       
       bottom_intercalary_rod_matrix <- main_rod_df %>%
-        filter(vertebral_number >= jh_get_vertebral_number_function(level_to_get_number = intercalary_junction)) %>%
+        filter(vertebral_number >= jh_get_vertebral_number_function(level_to_get_number = intercalary_rod_junction)) %>%
         mutate(y = if_else(y == max(y), y + 0.015, y)) %>%
         remove_missing() %>%
         select(x, y) %>%

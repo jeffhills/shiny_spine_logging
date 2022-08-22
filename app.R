@@ -297,75 +297,6 @@ ui <- dashboardPage(skin = "black",
                                          )
                                      ),
                                      box(width = 5, ##### RIGHT COLUMN NEXT TO SPINE PLOT
-                                         # box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),collapsible = TRUE,  
-                                         #     conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
-                                         #                      fluidRow(
-                                         #                        prettyRadioButtons(
-                                         #                          inputId = "approach_specified_posterior",
-                                         #                          label = NULL, 
-                                         #                          inline = TRUE,
-                                         #                          choices = c("Midline",
-                                         #                                      "Paraspinal or Paramedian", 
-                                         #                                      "Stab"),
-                                         #                          icon = icon("check"), 
-                                         #                          bigger = TRUE,
-                                         #                          status = "info"
-                                         #                        )
-                                         #                      ),
-                                         #                      fluidRow(
-                                         #                        column(width = 6, 
-                                         #                               prettyRadioButtons(
-                                         #                                 inputId = "approach_open_mis",
-                                         #                                 label = NULL, 
-                                         #                                 inline = TRUE,
-                                         #                                 choices = c("Open",
-                                         #                                             "Tubular", 
-                                         #                                             "Endoscopic", 
-                                         #                                             "Mini Open",
-                                         #                                             "Percutaneous Screw"
-                                         #                                 ),
-                                         #                                 selected = "Open",
-                                         #                                 icon = icon("check"), 
-                                         #                                 bigger = TRUE,
-                                         #                                 status = "success"
-                                         #                               )
-                                         #                        ), 
-                                         #                        column(width = 6, 
-                                         #                               prettyCheckboxGroup(
-                                         #                                 inputId = "approach_robot_navigation",
-                                         #                                 label = NULL, 
-                                         #                                 inline = TRUE,
-                                         #                                 choices = c("Microscopic", 
-                                         #                                             "Navigated", 
-                                         #                                             "Robotic"),
-                                         #                                 icon = icon("check"), 
-                                         #                                 bigger = TRUE,
-                                         #                                 status = "success"
-                                         #                               )
-                                         #                        )
-                                         #                      )
-                                         #     ),
-                                         #     conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
-                                         #                      prettyRadioButtons(
-                                         #                        inputId = "approach_specified_anterior",
-                                         #                        label = NULL,
-                                         #                        inline = TRUE,
-                                         #                        choices = c("Left-sided", 
-                                         #                                    "Right-sided",
-                                         #                                    "Paramedian",
-                                         #                                    "Lateral Transpsoas",
-                                         #                                    "Lateral Antepsoas",
-                                         #                                    "Thoracoabdominal",
-                                         #                                    "Thoracotomy",
-                                         #                                    "Transperitoneal",
-                                         #                                    "Retroperitoneal"),
-                                         #                        selected = "Left-sided",
-                                         #                        icon = icon("check"),
-                                         #                        bigger = TRUE,
-                                         #                        status = "info"
-                                         #                      )
-                                         #     )
-                                         # ),
                                          uiOutput(outputId = "currently_adding_ui"),
                                          conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
                                                           div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Procedure & Click Spine to Add:")
@@ -738,7 +669,11 @@ ui <- dashboardPage(skin = "black",
                                                             ),
                                                             column(4)
                                                    ),
-                                                   jh_make_shiny_table_column_function(input_type = "title", left_label = "Left Rod(s):",right_label = "Right Rods(s):", font_size = 20, text_align = "left"),
+                                                   jh_make_shiny_table_column_function(input_type = "title", 
+                                                                                       left_label = "Left Rod(s):",
+                                                                                       right_label = "Right Rods(s):", 
+                                                                                       font_size = 20, 
+                                                                                       text_align = "left"),
                                                    jh_make_shiny_table_column_function(input_type = "pickerInput", 
                                                                                        left_input_id = "left_main_rod_size", 
                                                                                        left_label = "Size:",
@@ -777,7 +712,10 @@ ui <- dashboardPage(skin = "black",
                                                    fixedRow(
                                                      column(width = 6,
                                                             conditionalPanel(condition = "input.add_left_custom_rods == true",
-                                                                             awesomeRadio(inputId = "left_custom_rods_number", label = "Number of Left Total Rods:",choices = c(2,3,4,5), inline = TRUE, selected = 2),
+                                                                             awesomeRadio(inputId = "left_custom_rods_number",
+                                                                                          label = "Number of Left Total Rods:",
+                                                                                          choices = c(2,3,4,5), 
+                                                                                          inline = TRUE, selected = 2),
                                                                              uiOutput(outputId = "left_custom_rods_ui")
                                                             )
                                                      ),
@@ -806,7 +744,6 @@ ui <- dashboardPage(skin = "black",
                                                                   choices = all_screw_size_type_inputs_df$right_object,
                                                                   selected = "")),
                               conditionalPanel(condition = "input.fusion_procedure_performed == true",
-                                               # uiOutput(outputId = "screw_size_types_ui")
                                                box(width = 12,
                                                    title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
                                                    jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
@@ -1000,7 +937,7 @@ ui <- dashboardPage(skin = "black",
                                tableOutput(outputId = "posterior_approach_objects_for_op_note_df")),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
                               tableOutput(outputId = "all_inputs")),
-                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs Not Logged:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
                               tableOutput(outputId = "all_inputs_removed"))
                           # box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
                           #     tableOutput(outputId = "all_inputs_printed")),
@@ -2529,12 +2466,12 @@ server <- function(input, output, session) {
         left_join(levels_numbered_df)
       
       if(!is.null(osteotomy_level_reactive())){
-        updatePickerInput(session = session, inputId = "left_intercalary_junction",
+        updatePickerInput(session = session, inputId = "left_intercalary_rod_junction",
                           label = "Junction:",
                           choices = choices_df$level,
                           selected = osteotomy_level_reactive())
       }else{
-        updatePickerInput(session = session, inputId = "left_intercalary_junction",
+        updatePickerInput(session = session, inputId = "left_intercalary_rod_junction",
                           label = "Junction:",
                           choices = choices_df$level,
                           selected = head(x = tail(choices_df$level, 3), 1)
@@ -2650,12 +2587,12 @@ server <- function(input, output, session) {
         left_join(levels_numbered_df)
       
       if(!is.null(osteotomy_level_reactive())){
-        updatePickerInput(session = session, inputId = "right_intercalary_junction",
+        updatePickerInput(session = session, inputId = "right_intercalary_rod_junction",
                           label = "Junction:",
                           choices = choices_df$level,
                           selected = osteotomy_level_reactive())
       }else{
-        updatePickerInput(session = session, inputId = "right_intercalary_junction",
+        updatePickerInput(session = session, inputId = "right_intercalary_rod_junction",
                           label = "Junction:",
                           choices = choices_df$level,
                           selected = head(x = tail(choices_df$level, 3), 1)
@@ -3556,7 +3493,7 @@ server <- function(input, output, session) {
                     input$left_satellite_rod,
                     input$add_left_intercalary_rod,
                     input$left_intercalary_rod,
-                    input$left_intercalary_junction,
+                    input$left_intercalary_rod_junction,
                     input$add_left_linked_rods,
                     input$left_linked_rods,
                     input$left_revision_rod_status,
@@ -3577,7 +3514,7 @@ server <- function(input, output, session) {
                       }
                       if(input$add_left_intercalary_rod == TRUE){
                         intercalary_vector <- input$left_intercalary_rod
-                        junction <- input$left_intercalary_junction
+                        junction <- input$left_intercalary_rod_junction
                       }else{
                         intercalary_vector <- c("a", "b")
                         junction <- NULL
@@ -3592,7 +3529,7 @@ server <- function(input, output, session) {
                       left_rods_connectors_list <- build_unilateral_rods_list_function(accessory_rod_vector = accessory_vector,
                                                                                        satellite_rods_vector = satellite_vector,
                                                                                        intercalary_rods_vector = intercalary_vector,
-                                                                                       intercalary_junction = junction,
+                                                                                       intercalary_rod_junction = junction,
                                                                                        linked_rods_vector = linked_vector,
                                                                                        revision_rods_retained_df = left_revision_implants_reactive_list()$retained_df,
                                                                                        unilateral_full_implant_df = left_rod_implants_df_reactive())
@@ -3623,7 +3560,7 @@ server <- function(input, output, session) {
                     input$right_satellite_rod,
                     input$add_right_intercalary_rod,
                     input$right_intercalary_rod,
-                    input$right_intercalary_junction,
+                    input$right_intercalary_rod_junction,
                     input$add_right_linked_rods,
                     input$right_linked_rods,
                     input$right_revision_rod_status,
@@ -3644,7 +3581,7 @@ server <- function(input, output, session) {
                       }
                       if(input$add_right_intercalary_rod == TRUE){
                         intercalary_vector <- input$right_intercalary_rod
-                        junction <- input$right_intercalary_junction
+                        junction <- input$right_intercalary_rod_junction
                       }else{
                         intercalary_vector <- c("a", "b")
                         junction <- NULL
@@ -3666,7 +3603,7 @@ server <- function(input, output, session) {
                       right_rods_connectors_list <- build_unilateral_rods_list_function(accessory_rod_vector = accessory_vector,
                                                                                         satellite_rods_vector = satellite_vector,
                                                                                         intercalary_rods_vector = intercalary_vector,
-                                                                                        intercalary_junction = junction,
+                                                                                        intercalary_rod_junction = junction,
                                                                                         linked_rods_vector = linked_vector,
                                                                                         revision_rods_retained_df = right_revision_implants_reactive_list()$retained_df, # retained_rod_df, 
                                                                                         unilateral_full_implant_df = right_rod_implants_df_reactive())
@@ -4065,7 +4002,10 @@ server <- function(input, output, session) {
     additional_rods_list <- list()
     
     if(input$add_left_accessory_rod == TRUE){
-      additional_rods_list$left_accessory <- glue("On the left side, an accessory rod was connected from {input$left_accessory_rod[[1]]} to {input$left_accessory_rod[[2]]} to increase the overall stiffness of the construct.")
+      proximal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$left_accessory_rod[[1]])$caudal_interspace
+      distal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$left_accessory_rod[[2]])$cranial_interspace
+      
+      additional_rods_list$left_accessory <- glue("To increase the overall stiffness of the construct, an accessory rod was connected to the left main rod using side-to-side connectors at the {proximal_junction} junction down to the {distal_junction} junction.")
     }
     if(input$add_left_satellite_rod == TRUE){
       additional_rods_list$left_satellite <- glue("On the left side, a satellite rod construct was utilized, with the satellite rod spanning {input$left_satellite_rod[[1]]} to {input$left_satellite_rod[[2]]}.")
@@ -4077,7 +4017,10 @@ server <- function(input, output, session) {
       additional_rods_list$left_linked <- glue("On the left side, a linked-rods construct was used, with the rods overlapping from {input$left_linked_rods[[1]]} to {input$left_linked_rods[[2]]}.")
     }
     if(input$add_right_accessory_rod == TRUE){
-      additional_rods_list$right_accessory <- glue("On the right side, an accessory rod was connected from {input$right_accessory_rod[[1]]} to {input$right_accessory_rod[[2]]} to increase the overall stiffness of the construct.")
+      proximal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$right_accessory_rod[[1]])$caudal_interspace
+      distal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$right_accessory_rod[[2]])$cranial_interspace
+      
+      additional_rods_list$right_accessory <- glue("To increase the overall stiffness of the construct, an accessory rod was connected to the right main rod using side-to-side connectors at the {proximal_junction} junction down to the {distal_junction} junction.")
     }
     if(input$add_right_satellite_rod == TRUE){
       additional_rods_list$right_satellite <- glue("On the right side, a satellite rod construct was utilized, with the satellite rod spanning {input$right_satellite_rod[[1]]} to {input$right_satellite_rod[[2]]}.")
@@ -4583,22 +4526,25 @@ server <- function(input, output, session) {
   
 
   all_inputs_trimmed_reactive_df <- reactive({
-    enframe(all_inputs_reactive_list()) %>%
+    
+    all_inputs_to_log_df <- enframe(all_inputs_reactive_list()) %>%
       mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = "-AND-")))) %>%
       select(-value) %>%
       unnest(result) %>%
+      filter(str_detect(string = name, pattern = "operative_note_text", negate = TRUE)) %>%
+      filter(str_detect(string = name, pattern = "crop_y", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "screw_length", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "screw_diameter", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "screw_type", negate = TRUE)) %>%
-      filter(str_detect(string = name, pattern = "rod_material", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "rods_eligible", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "reset", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "button", negate = TRUE)) %>%
-      filter(str_detect(string = name, pattern = "rod", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "level_object_for_screw_details", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "pelvic_screw", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "modal", negate = TRUE)) %>%
-      filter((str_starts(string = name, pattern = "drop") & result == "0") == FALSE) %>%
+      filter(str_detect(string = name, pattern = "return_to", negate = TRUE)) %>%
+      filter(str_detect(string = name, pattern = "_complete", negate = TRUE)) %>%
+      # filter((str_starts(string = name, pattern = "drop") & result == "0") == FALSE) %>%
       filter(name != "object_to_add") %>%
       filter(!is.na(result)) %>%
       filter(result != "") %>%
@@ -4606,10 +4552,37 @@ server <- function(input, output, session) {
       filter(name != "tabs") %>%
       filter(name != "label_text_offset") %>%
       filter(name != "search_for_prior_patient") %>%
+      filter(name != "plot_summary_table") %>%
+      filter(name != "add_implants") %>%
       filter(str_detect(string = name, pattern = "[:upper:]", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "\\s", negate = TRUE) ) %>%
       filter(str_detect(string = name, pattern = "\\W", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "\\t", negate = TRUE))
+
+    rods_to_keep <- all_inputs_to_log_df %>%
+      filter(str_detect(name, "rod")) %>%
+      filter(str_detect(name, "add")) %>%
+      filter(result == "TRUE") %>%
+      mutate(rod_type = str_remove_all(string = name, pattern = "add_"))
+    
+    rod_types_to_keep_string <- paste0(rods_to_keep$rod_type, collapse = "|")
+    
+    all_rod_info_to_keep_df <- all_inputs_to_log_df %>%
+      filter(str_detect(string = name, pattern = rod_types_to_keep_string_test))
+    
+    main_rod_info_to_keep_df <- all_inputs_to_log_df %>%
+      filter(str_detect(string = name, pattern = "main_rod"))
+    
+    all_inputs_to_log_df <- all_inputs_to_log_df %>%
+      filter(str_detect(string = name, pattern = "rod") == FALSE) %>%
+      union_all(main_rod_info_to_keep_df) %>%
+      union_all(all_rod_info_to_keep_df)
+    
+    # all_inputs_to_log_df %>%
+      # filter(str_detect(measure, pattern = paste0(glue_collapse(rods_not_used$rod_type_not_used, sep = "|"))) == FALSE) 
+    
+    all_inputs_to_log_df
+    
   })
   
   output$all_inputs <- renderTable({
