@@ -1276,6 +1276,29 @@ make_interbody_ui_function <-  function(level = NULL){
                       # value = FALSE,
                       status = "danger",
                       shape = "curve"
+                    ), 
+                    conditionalPanel(condition = glue("input.{level_input_id}_interbody_integrated_fixation.indexOf('Integrated Fixation')>-1"),
+                                     h4("Leave 0 for no screw"), 
+                                     textInput(inputId = glue("{level_input_id}_interbody_cranial_screw_1_size"), 
+                                               label = "Cranial Screw 1 size:", 
+                                               value = "0",
+                                               placeholder = "W x L"
+                                                 ),
+                                     textInput(inputId = glue("{level_input_id}_interbody_cranial_screw_2_size"), 
+                                               label = "Cranial Screw 2 size:", 
+                                               value = "0",
+                                               placeholder = "W x L"
+                                     ),
+                                     textInput(inputId = glue("{level_input_id}_interbody_caudal_screw_1_size"), 
+                                               label = "Caudal Screw 1 size:", 
+                                               value = "0",
+                                               placeholder = "W x L"
+                                     ),
+                                     textInput(inputId = glue("{level_input_id}_interbody_caudal_screw_2_size"), 
+                                               label = "Caudal Screw 2 size:", 
+                                               value = "0",
+                                               placeholder = "W x L"
+                                     )
                     ),
                     prettyCheckboxGroup(
                       inputId = glue("{level_input_id}_interbody_expandable"),

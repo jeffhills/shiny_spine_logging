@@ -315,6 +315,8 @@ distinct_anterior_procedure_paragraph_function <- function(level_input, object_i
   return(paragraph)
 }
 
+
+
 anterior_op_note_distinct_paragraph_function <- function(levels_nested_df){
   
   object_statement_paragraphs_df <- levels_nested_df %>%
@@ -324,27 +326,16 @@ anterior_op_note_distinct_paragraph_function <- function(levels_nested_df){
                                       ..4 = implant_statement), 
                             .f = ~ distinct_anterior_procedure_paragraph_function(level_input = ..2,
                                                                                   object_input = ..1,
-                                                                                  side_input = ..3, implant_statement_input = ..4))
-    )
-    # mutate(paragraph = case_when(
-    #   object == "anterior_disc_arthroplasty" ~ glue("I then proceeded with total disk arthroplasty at the {level} interspace.  Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. The endplates were distracted and the posterior longitudinal ligament was adequately excised, fully decompressing the central canal and thecal sac. To complete the bilateral foraminotomies, I worked laterally on the left and right with a Kerrison rongeur, resecting any residual disk or osteophyte and fully decompressing the left and the right exiting nerve roots. Once I was satisfied with the decompression and end plate preparation, I trialed the implants and selected an appropriately sized disk replacement. The final implant was then inserted into the interspace of {level}. This completed the total disc arthroplasty of the {level} interspace."),
-    #   
-    #   object == "decompression_diskectomy_fusion" ~ glue("I then proceeded with the diskectomy, decompression, and interbody fusion of the {level} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. The endplates were distracted and the posterior longitudinal ligament was adequately excised, fully decompressing the central canal. I worked laterally on the left and right with a Kerrison rongeur, resecting any residual disk or osteophyte and fully decompressing the left and the right exiting nerve roots to complete the bilateral foraminotomies. This completed the anterior diskectomy with decompression of the {level} interspace and partially completed the fusion of {level}."),
-    #   
-    #   object == "diskectomy_fusion" ~ glue("I then proceeded with the diskectomy and interbody fusion of the {level} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. This completed the anterior diskectomy of {level} interspace and partially completed the fusion of {level}."),
-    #   
-    #   object == "diskectomy_fusion_no_interbody_device" ~ glue("I then proceeded with the diskectomy and interbody fusion of the {level} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the disc was excised. The endplates were distracted and the and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. Once I was satisfied with the endplate preparation, bone graft was placed into the disk space. This completed the anterior diskectomy and interbody fusion of the {level} interspace."),
-    #   
-    #   object == "anterior_interbody_implant" ~ glue("I then proceeded with the insertion of the interbody implant into the {level} interspace. I again confirmed that the endplates were adequately decorticated and appropriately level. Once I was fully satisfied with the preparation of the endplates, I used trials and measured the disk space to determine the appropriate size of the interbody implant. {implant_statement} I then inserted the interbody implant into the disk space of {level}. The final position was confirmed using intraoperative xray. This completed the anterior interbody implant at {level}."),
-    #   
-    #   object == "corpectomy" ~ glue("I then proceeded with decompression and anterior vertebral body corpectomy at the {level} vertebral level. I confirmed that the exposure had been carried cranially to visualze the entire {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} disk, the anterior body of {level} and caudally to the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} disk space. First I started with the diskectomies. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {jh_get_cranial_caudal_interspace_body_list_function(level = level)$cranial_interspace} and {jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_interspace} disc's were completely excised. Once I was satisfied with the diskectomies, I used a combination of a burr and rongeur's to excise roughly 80% of the {level} vertebral body. I carried the corpectomy dorsally to the posterior longitudinal ligament, effectively decompressing the central canal. This completed the vertebral body corpectomy at {level}."),
-    #   
-    #   object == "corpectomy_cage" ~ glue("I then proceeded with the insertion of the intervertebral implant into the {level} interspace. I again confirmed that the endplates were adequately decorticated and appropriately level. Once I was fully satisfied with the preparation of the endplates, I used trials and measured the interspace to determine the appropriate size of the interbody implant. {implant_statement} I then inserted the  implant into the {level} space. The final position was confirmed using intraoperative xray. This completed the insertion of the intervertebral implant at {level}."),
-    #   
-    # )
-    # )
+                                                                                  side_input = ..3, 
+                                                                                  implant_statement_input = ..4))
+    ) %>%
+    mutate(paragraph = as.character(paragraph))
+
   
-  paragraphs <- glue_collapse(object_statement_paragraphs_df$paragraph, sep = "\n\n")
+  paragraphs <- object_statement_paragraphs_df %>%
+    select(level, paragraph)
+  
+  # paragraphs <- glue_collapse(object_statement_paragraphs_df$paragraph, sep = "\n\n")
   
   return(paragraphs)
 }
@@ -354,12 +345,6 @@ anterior_op_note_distinct_paragraph_function <- function(levels_nested_df){
 #############-----------------------   Paragraphs: Generate FULL Paragraphs  ----------------------###############
 
 anterior_create_full_paragraph_statement_function <- function(procedure_paragraph_intro, df_with_levels_object_nested, paragraphs_combined_or_distinct){
-  
-  # if("data" %in% names(df_with_levels_object_nested)){
-  #   df_with_levels_object_nested <- df_with_levels_object_nested %>%
-  #     unnest(data)
-  # }
-
   
   if(paragraphs_combined_or_distinct == "combine"){
     
@@ -400,6 +385,7 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
                        end_statement)
   }
   
+  
   if(paragraphs_combined_or_distinct == "distinct"){
     paragraph <- anterior_op_note_distinct_paragraph_function(levels_nested_df = df_with_levels_object_nested)
     
@@ -427,6 +413,15 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
     fusion_graft_statement <- NULL
   }
   
+  if(any(names(all_objects_to_add_df) == "screw_size_type") == FALSE){
+    all_objects_to_add_df <- all_objects_to_add_df %>%
+      mutate(screw_size_type = " ")
+  }
+  if(any(names(all_objects_to_add_df) == "implant_statement") == FALSE){
+    all_objects_to_add_df <- all_objects_to_add_df %>%
+      mutate(implant_statement = " ")
+  }
+  
   anterior_df <- all_objects_to_add_df %>%
     select(level, vertebral_number, object, side, contains("screw_size_type"), contains("implant_statement"), direction) %>%
     mutate(order_number = row_number())
@@ -448,10 +443,6 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
     mutate(object = fct_drop(object)) %>%
     arrange(object)
   
-  if(any(names(anterior_df) == "screw_size_type") == FALSE){
-    anterior_df <- anterior_df %>%
-      mutate(screw_size_type = " ")
-  }
   
   anterior_procedure_category_nested_df <- anterior_df %>%
     mutate(screw_size_type = if_else(is.na(screw_size_type), " ", screw_size_type)) %>%
@@ -468,15 +459,56 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
     unnest(paragraphs_combine_or_distinct)
   # mutate(paragraphs_combine_or_distinct = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) 
   
+  # paragraphs_df <- anterior_procedure_category_nested_df %>%
+  #   mutate(paragraphs = pmap(.l = list(..1 = procedure_category, 
+  #                                      ..2 = data,
+  #                                      ..3 = paragraphs_combine_or_distinct), 
+  #                            .f = ~ anterior_create_full_paragraph_statement_function(procedure_paragraph_intro = ..1, 
+  #                                                                                     df_with_levels_object_nested = ..2, 
+  #                                                                                     paragraphs_combined_or_distinct = ..3)))
+  ########### NEW ############
   paragraphs_df <- anterior_procedure_category_nested_df %>%
     mutate(paragraphs = pmap(.l = list(..1 = procedure_category, 
                                        ..2 = data,
                                        ..3 = paragraphs_combine_or_distinct), 
                              .f = ~ anterior_create_full_paragraph_statement_function(procedure_paragraph_intro = ..1, 
                                                                                       df_with_levels_object_nested = ..2, 
-                                                                                      paragraphs_combined_or_distinct = ..3)))
+                                                                                      paragraphs_combined_or_distinct = ..3))) %>%
+    select(-data)
   
-  procedure_paragraphs <- glue_collapse(x = paragraphs_df$paragraphs, sep = "\n\n")
+  procedure_order_df <- anterior_df %>%
+    select(level, object, order_number) %>%
+    mutate(procedure_category = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
+    unnest(procedure_category) %>%
+    mutate(procedure_category = str_to_lower(procedure_category)) %>%
+    select(order_number, level, procedure_category)
+  
+  
+  distinct_unnested_df <- paragraphs_df %>%
+    filter(paragraphs_combine_or_distinct == "distinct") %>%
+    unnest(paragraphs) %>%
+    rename(paragraphs = paragraph) %>%
+    left_join(procedure_order_df) %>%
+    select(order_number, everything())%>%
+    select(order_number, procedure_category, paragraphs) 
+  
+  combine_unnested_df <- paragraphs_df %>%
+    filter(paragraphs_combine_or_distinct == "combine") %>%
+    unnest(paragraphs)%>%
+    left_join(procedure_order_df) %>%
+    select(order_number, procedure_category, paragraphs) 
+  
+  full_paragraphs_unnested_df <- distinct_unnested_df %>%
+    union_all(combine_unnested_df) %>%
+    arrange(order_number) %>%
+    ungroup() %>%
+    select(paragraphs) %>%
+    distinct()
+  
+  procedure_paragraphs <- glue_collapse(x = full_paragraphs_unnested_df$paragraphs, sep = "\n\n")
+
+  ##################
+  # procedure_paragraphs <- glue_collapse(x = paragraphs_df$paragraphs, sep = "\n\n")
   
   
   if(nrow(bone_graft_df)>0){
@@ -642,16 +674,10 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   }
   
   
-  # if(length(end_procedure_details) > 0){
-  #   closure_statements_list$added_to_wound <- glue("{glue_collapse(end_procedure_details, sep = ', ', last = ' and ')} was then placed into the surgical bed.")
-  # }
-  
   if(deep_drains >0){
     closure_statements_list$deep_drains_statement <- case_when(deep_drains == 1 ~ 'One drain was placed deep to the fascial layer.',
                                                                deep_drains >1 ~ paste(glue("A total of {deep_drains} drains were placed deep to the fascial layer.")))
   }
-  
-  # closure_statements_list$layered_closure <- "The wound was closed in a layered fashion."
   
   if(superficial_drains > 0){
     closure_statements_list$superficial_drains_statement <- case_when(superficial_drains == 1 ~ 'One drain was placed superficial to the fascial layer.',
