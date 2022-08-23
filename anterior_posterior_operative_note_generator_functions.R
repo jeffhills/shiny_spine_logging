@@ -500,8 +500,8 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
   
   full_paragraphs_unnested_df <- distinct_unnested_df %>%
     union_all(combine_unnested_df) %>%
-    arrange(order_number) %>%
     ungroup() %>%
+    arrange(order_number) %>%
     select(paragraphs) %>%
     distinct()
   
@@ -646,7 +646,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
       first_paragraph_list$surgical_approach <- glue("Fluoroscopy was used to obtain a perfect AP and lateral xrays and mark the levels. The skin and subcutaneous fat was incised in line with the disk space. The aponeurosis of the external obliques were incised and the muscle fibers divided. The internal obliques were divided, and the transversus abdominis was then divided. I then bluntly dissected the plane between the retroperitoneal fat and the psoas fascia, and the peritoneal cavity was retracted medially. The surface of the psoas was identified and followed down to the vertebral body. Once I was down to the spine, a pin was placed to confirm levels using xray. The dilators were then inserted sequentially and EMG was used to test each dilator. Once the largest dilator had been placed, the retractors were inserted. ")
       
     }else{
-      first_paragraph_list$surgical_approach <- glue("The anterior approach to the spine was carried out with assistance from the vascular surgeon. A {anterior_approach_laterality} incision was made and the approach was carried out down toward the spine. Once the approach was complete, retractors were placed and the surgical levels were confirmed using fluoroscopy. ")
+      first_paragraph_list$surgical_approach <- glue("The anterior approach to the spine was carried out with assistance from the vascular surgeon. A {anterior_approach_laterality} approach was carried out down toward the spine. Once the approach was complete, retractors were placed and the surgical levels were confirmed using fluoroscopy. ")
       
     }
   }

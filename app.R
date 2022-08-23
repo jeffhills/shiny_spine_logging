@@ -4259,7 +4259,7 @@ server <- function(input, output, session) {
         select(-object_constructed)
       
       if(any(anterior_approach_objects_df$object == "anterior_plate")){
-        anterior_approach_objects_df <- anterior_approach_objects_df %>% 
+        anterior_plate_screws_objects_df <- anterior_approach_objects_df %>% 
           filter(object == "anterior_plate") %>%
           select(level, vertebral_number, side, object)%>%
           separate(col = level, into = c("cranial_level", "caudal_level"), sep = "-") %>%
@@ -4271,9 +4271,11 @@ server <- function(input, output, session) {
           distinct() %>%
           mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
           select(level, vertebral_number, side, object) %>%
-          mutate(object = "anterior_plate_screw") %>%
-          union_all(anterior_approach_objects_df)
-          
+          mutate(object = "anterior_plate_screw")
+        
+        anterior_approach_objects_df <- anterior_approach_objects_df %>%
+          union_all(anterior_plate_screws_objects_df)
+        
         anterior_screws_df <- anterior_approach_objects_df %>%
           filter(str_detect(object, "screw")) %>%
           mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
