@@ -461,7 +461,10 @@ jh_filter_osteotomies_function <- function(full_df_to_filter){
   
   if(nrow(grade_1_osteotomy_df) > 0){
     grade_1_osteotomy_df <- grade_1_osteotomy_df %>%
-      mutate(distal_level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
+      mutate(distal_level = map(.x = level, .f =  ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level)) %>%
+      unnest(distal_level) %>%
+      distinct() %>%
+      # mutate(distal_level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
       mutate(keep_remove = if_else(level %in% grade_2_osteotomy_df$proximal_level | 
                                      level %in% grade_2_osteotomy_df$proximal_level |
                                      level %in% grade_3_osteotomy_df$level |
