@@ -1954,7 +1954,7 @@ server <- function(input, output, session) {
                                 "Intraoperative fluoroscopy and pedicle markers were used to confirm start points for screw placement.", 
                                 "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
                                 "Intraoperative navigation was used for identifying start points.",
-                                "N/A"),
+                                "NA"),
                               selected = "", 
                               inline = FALSE, 
                               status = "success"
@@ -1969,7 +1969,7 @@ server <- function(input, output, session) {
                               choices = c(
                                 "Intraoperative fluoroscopy was used to confirm position of all implants.", 
                                 "Intraoperative CT scan was used to confirm position of all implants.",
-                                "N/A"), 
+                                "NA"), 
                               selected = "Intraoperative fluoroscopy was used to confirm position of all implants.",
                               inline = FALSE, 
                               status = "success"
@@ -4305,11 +4305,14 @@ server <- function(input, output, session) {
         ### NOW MAKE PROCEDURES LIST
         procedure_results_list_posterior <- list()
         
+        implant_start_point_method <- if_else(is.na(input$implant_start_point_method) | is.null(input$implant_start_point_method), "NA", input$implant_start_point_method)
+        implant_position_confirmation_method <- if_else(is.na(input$implant_position_confirmation_method) | is.null(input$implant_position_confirmation_method), "NA", input$implant_position_confirmation_method)
+        
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_approach_objects_df,
                                                                        fusion_levels_df = fusions_df,
                                                                        head_position = input$head_positioning,
                                                                        neuromonitoring_list = neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
-                                                                       implant_start_point_method_input = input$implant_start_point_method,
+                                                                       implant_start_point_method_input = ,
                                                                        implant_confirmation_method = input$implant_position_confirmation_method,
                                                                        local_anesthesia = input$local_anesthesia,
                                                                        revision_decompression_vector = input$open_canal,
