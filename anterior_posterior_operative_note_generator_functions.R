@@ -571,13 +571,12 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   
   if(length(antibiotics) == 0){
     first_paragraph_list$antibiotic_statement <- "Preoperative Antibiotics were administered."
+  }else if(any(antibiotics == "None (Antibiotics were held)")){
+    first_paragraph_list$antibiotic_statement <- "Preoperative antibiotics were held until tissue cultures could be obtained."
   }else{
-    if(antibiotics == "None (Antibiotics were held)"){
-      first_paragraph_list$antibiotic_statement <- "Preoperative antibiotics were held until tissue cultures could be obtained."
-    }else{
-      first_paragraph_list$antibiotic_statement <- paste0("Preoperative Antibiotics were administered including ", glue_collapse(antibiotics, sep = ", ", last = " and "), ".")
-    }
+    first_paragraph_list$antibiotic_statement <- paste(glue("Preoperative Antibiotics were administered including {glue_collapse(antibiotics, sep = ',', last = ' and ')}."))
   }
+  
   
   if(any(str_detect(additional_procedures_vector, "Halo"))){
     first_paragraph_list$head_statement <- "A Halo was applied to the patient's skull for positioning and the pins were sequentially tightened to the appropriate torque."
@@ -969,14 +968,11 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   
   if(length(antibiotics) == 0){
     first_paragraph_list$antibiotic_statement <- "Preoperative Antibiotics were administered."
+  }else if(any(antibiotics == "None (Antibiotics were held)")){
+    first_paragraph_list$antibiotic_statement <- "Preoperative antibiotics were held until tissue cultures could be obtained."
   }else{
-    if(antibiotics == "None (Antibiotics were held)"){
-      first_paragraph_list$antibiotic_statement <- "Preoperative antibiotics were held until tissue cultures could be obtained."
-    }else{
-      first_paragraph_list$antibiotic_statement <- paste0("Preoperative Antibiotics were administered including ", glue_collapse(antibiotics, sep = ", ", last = " and "), ".")
-    }
+    first_paragraph_list$antibiotic_statement <- paste0("Preoperative Antibiotics were administered including ", glue_collapse(antibiotics, sep = ", ", last = " and "), ".")
   }
-  
   
   if(length(neuromonitoring_list$modalities) > 0){
     first_paragraph_list$spinal_cord_monitoring <- glue("Spinal cord monitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
@@ -1418,6 +1414,13 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
   }
   # THIS CREATES A DATAFRAME WITH NESTED DATAFRAMES.... full dataframe names = 'procedure_category, procedures_combine, nested_data'
   # nested df names ('nested_data') = 'object, level, vertebral_number, side, implant_statement, screw_size_type'
+  
+  if(is.na(implant_start_point_method) | is.null(implant_start_point_method)){
+    implant_start_point_method <- "NA"
+  }
+  if(is.na(implant_confirmation_method) | is.null(implant_confirmation_method)){
+    implant_confirmation_method <- "NA"
+  }
   
   procedures_op_full_df <- df_for_paragraphs %>%
     mutate(approach_technique_input = approach_technique,
