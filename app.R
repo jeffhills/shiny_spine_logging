@@ -3348,7 +3348,7 @@ server <- function(input, output, session) {
                                               ..3 = right_x,
                                               ..4 = inferior_y,
                                               ..5 = width, 
-                                              ..6 = object,
+                                              ..6 = object, 
                                               ..7 = lateral_pars_x,
                                               ..8 = superior_tp_y,
                                               ..9 = side, 

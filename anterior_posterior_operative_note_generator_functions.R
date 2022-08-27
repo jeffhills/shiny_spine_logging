@@ -1258,7 +1258,9 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                                     paste0("A total of ", morselized_allo_amount, "cc of morselized allograft"), 
                                     graft_type))
       
-      fusion_statement_list$morselized_allograft_statement <- glue("{glue_collapse(morselized_graft_df$graft_type, sep = ', ', last = ' and ')} was then impacted into the lateral gutters and into the facet joints.")
+      graft_statement <- str_to_sentence(glue_collapse(morselized_graft_df$graft_type, sep = ', ', last = ' and '))
+      
+      fusion_statement_list$morselized_allograft_statement <- glue("{graft_statement} was then impacted into the lateral gutters and into the facet joints.")
     }else{
       fusion_statement_list$morselized_allograft_statement <- glue("Allograft chips and and local autograft was then impacted into the lateral gutters and into the facet joints of {glue_collapse(fusion_levels_df$level, sep = ', ', last = ', and ')}.")
     }
@@ -1470,6 +1472,13 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
   
   if(paragraphs_combined_or_distinct == "combine"){
     
+    #IMAGING MODALITY USED FOR STARTPOINTS?:
+    if(procedure_paragraph_intro == "posterior spinal instrumentation" & str_length(implant_start_point_method) > 5){
+      implant_start_point_method_text <- implant_start_point_method
+    }else{
+      implant_start_point_method_text <- ""
+    }
+    
     df_with_statement <- df_with_levels_object_nested %>%
       mutate(object = if_else(str_detect(object, "pelvic_screw"), "pelvic_screw", object)) %>%
       group_by(object) %>%
@@ -1477,15 +1486,18 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       mutate(object_levels_side_df = data) %>%  ### this creates a dataframe with only two columns: 'object' and 'object_levels_side_df'. #The nested dataframe has columns: level, vertebral_number, side, implant_statement, screw_size_type
       select(-data) %>%
       mutate(approach = approach_technique, 
-             image_guidance_used = image_guidance) %>%
+             image_guidance_used = image_guidance, 
+             implant_start_point_method = implant_start_point_method_text) %>%
       mutate(tech_statement = pmap(list(..1 = object,
                                         ..2 = object_levels_side_df, 
                                         ..3 = approach, 
-                                        ..4 = image_guidance_used),
+                                        ..4 = image_guidance_used,
+                                        ..5 = implant_start_point_method),
                                    .f = ~op_note_technique_combine_statement(object = ..1,
                                                                              levels_side_df = ..2, 
                                                                              approach_technique = ..3, 
-                                                                             image_guidance = ..4))) %>%
+                                                                             image_guidance = ..4, 
+                                                                             implant_start_point_identification = ..5))) %>%
       select(object, tech_statement) %>%
       unnest(tech_statement) %>%
       distinct()
@@ -1495,16 +1507,6 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       distinct() %>%
       arrange(vertebral_number)
     
-    #IMAGING MODALITY USED FOR STARTPOINTS?:
-    if(procedure_paragraph_intro == "posterior spinal instrumentation"){
-      if(str_length(implant_start_point_method) > 6){
-        implant_start_point_method_text <- implant_start_point_method
-      }else{
-        implant_start_point_method_text <- ""
-      }
-    }else{
-      implant_start_point_method_text <- ""
-    }
     
     ## EMG USED:
     if(neuromonitoring_emg != "No"){
@@ -1537,7 +1539,7 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
     if(procedure_paragraph_intro == "pelvic instrumentation"){
       statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
     }else{
-      statement <- glue("I then proceeded with the {procedure_paragraph_intro}. {implant_start_point_method_text} {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
+      statement <- glue("I then proceeded with the {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
     }
     
   }
@@ -1570,13 +1572,18 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
 
 #############-----------------------   Building Paragraphs that are combined (e.g. pedicle screws, decompressions) ----------------------###############
 
-op_note_technique_combine_statement <- function(object, levels_side_df, approach_technique = "Open", image_guidance = "Open"){
+op_note_technique_combine_statement <- function(object, 
+                                                levels_side_df,
+                                                approach_technique = "Open",
+                                                image_guidance = "Open", 
+                                                implant_start_point_identification = ""){
   
   if(ncol(levels_side_df)==1){
     levels_side_df <- levels_side_df%>%
       unnest(data)
   }
   
+  ### PELVIC SCREWS:
   if(str_detect(object, "pelvic_screw")){
     
     pelvic_screws_wide <- levels_side_df %>%
@@ -1672,12 +1679,12 @@ op_note_technique_combine_statement <- function(object, levels_side_df, approach
     arrange(vertebral_number)   
   
   
-  # cervical_foraminotomy
+  # screw technique:
   screw_technique_statement <- case_when(
-    image_guidance == "Open" ~ "For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a high speed burr. A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate.",
+    image_guidance == "Open" ~ paste(glue("For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a high speed burr. {implant_start_point_identification} A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate.")),
     image_guidance == "Fluoroscopy-guided" ~ "For pedicle screws, the TP was palpated and a Jamshidi needle was placed at the junction of the TP and superior facet. An AP and lateral xray was used to identify and confirm an appropriate start point and trajectory. The Jamshidi needle was then advanced down the pedicle and a wire placed through the pedicle and into the vertebral body. With the wire in place, the pedicles were then sequentially tapped to allow for screw placement. Xray was used frequently throughout the procedure to confirm the position.",
     image_guidance == "Navigated" ~ "An intraoperative CT scan was obtained with a reference point attached to the patient. Navigated instruments were then used in conjuction with the navigation system to identify the appropraite starting point and trajectory for each screw. The pedicle was cannulated with navigation assistance and then palpated for a medial, inferior, superior and lateral wall to confirm a safe trajectory for placement of the screw.",
-    image_guidance == "Robotic" ~ "Intraoperative 3 dimensional imaging was used to place the pedicle screws with robotic assistance. Once the images were merged with the preoperative plan, the appropriate start point was identified for each pedicle and then pedicle was then cannulated and tapped in preparation for screw placement. ",
+    image_guidance == "Robotic" ~ "Intraoperative 3 dimensional imaging was used to place the pedicle screws with robotic assistance. Once the images were merged with the preoperative plan, the appropriate start point was identified for each pedicle and then pedicle was then cannulated and tapped in preparation for screw placement. "
   )
   
   
