@@ -954,6 +954,11 @@ op_note_posterior_function <- function(all_objects_to_add_df,
       mutate(screw_size_type = " ")
   }
   
+  ### MUST BE AT TOP BECAUSE THEY ARE REMOVED IN THE NEXT SECTION
+  crosslink_df <- all_objects_to_add_df %>%
+    filter(object == "crosslink") %>%
+    select(level, object)
+  
   structural_allograft_df <- all_objects_to_add_df %>%
     filter(object == "structural_allograft") %>%
     select(level, object)
@@ -1172,13 +1177,10 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   #     distinct())$level
   
 
-  if(nrow(posterior_implant_df) > 0){
+  if(nrow(posterior_implant_df) > 0){ 
     rod_statements_list <- list()
     
-    crosslink_df <- all_objects_to_add_df %>%
-      filter(object == "crosslink") %>%
-      select(level, object)
-    
+
     # if(str_detect(string = alignment_correction_technique, pattern = "rod benders")){
     #   alignment_and_rods <- str_to_sentence(string = paste(glue("The rods were set into place, secured with set screws and {alignment_correction_technique}.")))
     # }else if(str_detect(string = str_to_lower(alignment_correction_technique), pattern = "pro-axis")){
