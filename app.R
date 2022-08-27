@@ -1984,8 +1984,8 @@ server <- function(input, output, session) {
                               inputId = "alignment_correction_method",
                               label = "Method for any alignment correction:",
                               choices = c(
-                                "The Pro-axis bed was bent to acheive the desired sagittal plane alignment.", 
-                                "In situ rod benders were used to correct the coronal and sagittal plane.",
+                                "The Pro-axis bed was bent to acheive the desired sagittal plane alignment", 
+                                "In situ rod benders were used to correct the coronal and sagittal plane",
                                 "NA"), 
                               selected = "NA",
                               inline = FALSE, 
