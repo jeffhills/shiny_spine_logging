@@ -510,7 +510,7 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
 
   ##################
   # procedure_paragraphs <- glue_collapse(x = paragraphs_df$paragraphs, sep = "\n\n")
-  
+   
   
   if(nrow(bone_graft_df)>0){
     procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = ". The final position was ", replacement = as.character(glue(". {fusion_graft_statement}. The final position was ")))
@@ -542,7 +542,16 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                       end_procedure_details = NULL,
                                       closure = NULL,
                                       dressing = NULL,
-                                      multiple_position_procedure = FALSE){
+                                      multiple_position_procedure = FALSE, 
+                                      sex = "The patient"){
+  
+  he_or_she <- case_when(str_to_lower(sex) == "male" ~ "he", 
+                         str_to_lower(sex) == "female" ~ "she", 
+                         TRUE ~ "the patient")
+  
+  his_or_her <- case_when(str_to_lower(sex) == "male" ~ "his", 
+                         str_to_lower(sex) == "female" ~ "her", 
+                         TRUE ~ "the patient's")
   
   if(any(names(all_objects_to_add_df) == "implant_statement")== FALSE){
     all_objects_to_add_df <- all_objects_to_add_df %>%
@@ -567,7 +576,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                                                                                          additional_procedures_performed_vector = additional_procedures_for_numbered_list)
   first_paragraph_list <- list()
   
-  first_paragraph_list$transport_anesthesia <- paste("The patient was brought to the operating room and after obtaining appropriate IV access, the patient underwent general anesthesia.")
+  first_paragraph_list$transport_anesthesia <- paste(glue("The patient was brought to the operating room and after obtaining appropriate IV access, {he_or_she} underwent general anesthesia."))
   
   if(length(antibiotics) == 0){
     first_paragraph_list$antibiotic_statement <- "Preoperative Antibiotics were administered."
@@ -579,10 +588,10 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   
   
   if(any(str_detect(additional_procedures_vector, "Halo"))){
-    first_paragraph_list$head_statement <- "A Halo was applied to the patient's skull for positioning and the pins were sequentially tightened to the appropriate torque."
+    first_paragraph_list$head_statement <- paste(glue("A Halo was applied to {his_or_her} skull for positioning and the pins were sequentially tightened to the appropriate torque."))
   }
   if(any(str_detect(additional_procedures_vector, "Tongs"))){
-    first_paragraph_list$head_statement <- "Cranial tongs were applied to the patient's skull for positioning and an appropriate weight was selected for cranial traction."
+    first_paragraph_list$head_statement <- paste(glue("Cranial tongs were applied to {his_or_her} skull for positioning and an appropriate weight was selected for cranial traction."))
   }
   
   if(length(neuromonitoring_list$modalities) > 0){
@@ -597,13 +606,12 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   #   first_paragraph_list$spinal_cord_monitoring <- "Spinal Cord Monitoring needles were inserted by the neurophysiology technologist."
   # }
   
+  
   if(str_detect(anterior_approach_laterality, "Lateral Retroperitoneal")){
-    first_paragraph_list$positioning <- paste("The patient was then positioned in the lateral position on the OR table and all bony prominences were appropriately padded.",
-                                              "After prepping and draping in the standard fashion, a surgical timeout was performed.")
+    first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned in the lateral position on the OR table and all bony prominences were appropriately padded. After prepping and draping in the standard fashion, a surgical timeout was performed."))
     
   }else{
-    first_paragraph_list$positioning <- paste("The patient was then positioned Supine on the OR table and all bony prominences were appropriately padded.",
-                                              "After prepping and draping in the standard fashion, a surgical timeout was performed.")  
+    first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned Supine on the OR table and all bony prominences were appropriately padded. After prepping and draping in the standard fashion, a surgical timeout was performed."))
   }
   
   
@@ -716,7 +724,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   if(multiple_position_procedure == TRUE){
     procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and we prepared for the next portion of the procedure. I was personally present for the entirety of the {procedures_listed}.")
   }else{
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and the patient was transferred to the hospital bed, and awoke uneventfully. I was personally present for the entirety of the {procedures_listed}.")
+    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was transferred to the hospital bed, and awoke uneventfully. I was personally present for the entirety of the {procedures_listed}.")
   }
   
   procedure_paragraphs <- glue_collapse(x = procedure_details_list, sep = "\n\n")
@@ -892,7 +900,16 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                                        end_procedure_details = NULL,
                                        closure = NULL,
                                        dressing = NULL, 
-                                       multiple_position_procedure = FALSE){
+                                       multiple_position_procedure = FALSE,
+                                       alignment_correction_technique = " ",
+                                       sex = "The patient"){
+  
+  he_or_she <- case_when(str_to_lower(sex) == "male" ~ "he", 
+                         str_to_lower(sex) == "female" ~ "she", 
+                         TRUE ~ "the patient")
+  his_or_her <- case_when(str_to_lower(sex) == "male" ~ "his", 
+                         str_to_lower(sex) == "female" ~ "her", 
+                         TRUE ~ "the patient's")
   
   procedure_details_list <- list()
   
@@ -937,10 +954,6 @@ op_note_posterior_function <- function(all_objects_to_add_df,
       mutate(screw_size_type = " ")
   }
   
-  crosslink_df <- all_objects_to_add_df %>%
-    filter(object == "crosslink") %>%
-    select(level, object)
-  
   structural_allograft_df <- all_objects_to_add_df %>%
     filter(object == "structural_allograft") %>%
     select(level, object)
@@ -963,8 +976,9 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                                                                                                 additional_procedures_performed_vector = additional_procedures_for_numbered_list)
   
   first_paragraph_list <- list()
+
   
-  first_paragraph_list$transport_anesthesia <- paste("The patient was brought to the operating room and after obtaining appropriate IV access, the patient underwent general anesthesia.")
+  first_paragraph_list$transport_anesthesia <- paste(glue("The patient was brought to the operating room and after obtaining appropriate IV access, {he_or_she} underwent general anesthesia."))
   
   if(length(antibiotics) == 0){
     first_paragraph_list$antibiotic_statement <- "Preoperative Antibiotics were administered."
@@ -982,35 +996,32 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$pre_positioning_motors <- neuromonitoring_list$pre_positioning_motors 
   }
   
-  # if(any(str_detect(additional_procedures_vector, "Spinal Cord Monitoring"))){
-  #   first_paragraph_list$spinal_cord_monitoring <- "Spinal Cord Monitoring needles were inserted by the neurophysiology technologist."
-  # }
+
+  first_paragraph_list$head_statement <- as.character(case_when(
+    head_position == "Supine/Lateral" ~ glue("{str_to_title(his_or_her)} head rested in a position of comfort, securely on the bed."),
+    head_position == "Proneview Faceplate" ~ glue("The proneview faceplate was used to pad and secure {his_or_her} head and face during surgery."),
+    head_position == "C-flex head positioner" ~ glue("The C-flex head positioner was used to pad and secure {his_or_her} head during surgery."), 
+    head_position == "Cranial Tongs" ~ glue("Cranial tongs were applied to {his_or_her} skull for positioning and an appropriate weight was selected for cranial traction."),
+    head_position == "Halo" ~ glue("A Halo was applied to {his_or_her} skull for positioning and the pins were sequentially tightened to the appropriate torque."),
+    head_position == "Mayfield" ~ glue("A Mayfield head holder was applied to {his_or_her} skull for positioning and secured to the bed.")
+  ))
   
-  first_paragraph_list$head_statement <- case_when(
-    head_position == "Supine/Lateral" ~ "The patient's head rested in a position of comfort, securely on the bed.",
-    head_position == "Proneview Faceplate" ~ "The proneview faceplate was used to pad and secure the patient's head and face during surgery.",
-    head_position == "C-flex head positioner" ~ "The C-flex head positioner was used to pad and secure the patient's head during surgery.", 
-    head_position == "Cranial Tongs" ~ "Cranial tongs were applied to the patient's skull for positioning and an appropriate weight was selected for cranial traction.",
-    head_position == "Halo" ~ "A Halo was applied to the patient's skull for positioning and the pins were sequentially tightened to the appropriate torque.",
-    head_position == "Mayfield" ~ "A Mayfield head holder was applied to the patient's skull for positioning and secured to the bed.",
-  )
+  first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned prone on the OR table and all bony prominences were appropriately padded. After prepping and draping in the standard fashion, a surgical timeout was performed."))
   
-  
-  first_paragraph_list$positioning <- paste("The patient was then positioned prone on the OR table and all bony prominences were appropriately padded.",
-                                            "After prepping and draping in the standard fashion, a surgical timeout was performed.")
   
   ############### JUST START OVER AT THIS POINT IF IT IS A MULTIPLE POSITION CASE
   if(multiple_position_procedure == TRUE){
     first_paragraph_list <- list()
-    first_paragraph_list$positioning <- paste("The patient was then positioned prone on the OR table and all bony prominences were appropriately padded.")
+    first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned prone on the OR table and all bony prominences were appropriately padded."))
     
-    first_paragraph_list$head_statement <- case_when(
-      head_position == "Proneview Faceplate" ~ "The proneview faceplate was used to pad and secure the patient's head and face during surgery.",
-      head_position == "C-flex head positioner" ~ "The C-flex head positioner was used to pad and secure the patient's head during surgery.", 
-      head_position == "Cranial Tongs" ~ "Cranial tongs applied to the patient's skull with an appropriate weight for cranial traction was used to position the head.",
-      head_position == "Halo" ~ "A Halo applied to the patient's skull was used for positioning and the pins were sequentially tightened to the appropriate torque.",
-      head_position == "Mayfield" ~ "A Mayfield head holder was applied to the patient's skull for positioning and secured to the bed.",
-    )
+    first_paragraph_list$head_statement <- as.character(case_when(
+      head_position == "Supine/Lateral" ~ glue("{str_to_title(his_or_her)} head rested in a position of comfort, securely on the bed."),
+      head_position == "Proneview Faceplate" ~ glue("The proneview faceplate was used to pad and secure {his_or_her} head and face during surgery."),
+      head_position == "C-flex head positioner" ~ glue("The C-flex head positioner was used to pad and secure {his_or_her} head during surgery."), 
+      head_position == "Cranial Tongs" ~ glue("Cranial tongs were applied to {his_or_her} skull for positioning and an appropriate weight was selected for cranial traction."),
+      head_position == "Halo" ~ glue("A Halo was applied to {his_or_her} skull for positioning and the pins were sequentially tightened to the appropriate torque."),
+      head_position == "Mayfield" ~ glue("A Mayfield head holder was applied to {his_or_her} skull for positioning and secured to the bed.")
+    ))
     
     first_paragraph_list$draping <- paste("The posterior spine was then prepped and draped in the standard fashion.")
     
@@ -1114,23 +1125,6 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     procedure_details_list$revision_implants <- revision_implants_paragraph_function(revision_implants_details_df = revision_implants_df)
   }
   
-  # ## TECHNIQUES STATEMENT
-  # mis_open_technique_statement <- case_when(
-  #   approach_mis_open == "Open" ~ "Open",
-  #   approach_mis_open == "Tubular" ~ "xxxx",
-  #   approach_mis_open == "Mini Open" ~ "xxxx",
-  #   approach_mis_open == "Percutaneous Screw" ~ "xxxx"
-  # )
-  # 
-  # image_guidance_technique_statement <- case_when(
-  #   approach_robot_nav_xray == "Open" ~ "xxxx",
-  #   approach_robot_nav_xray == "Microscopic" ~ "xxxx",
-  #   approach_robot_nav_xray == "Fluoroscopy-guided" ~ "xxxx",
-  #   approach_robot_nav_xray == "Navigated" ~ "xxxx",
-  #   approach_robot_nav_xray == "Robotic" ~ "xxxx",
-  # )
-  
-  
   
   ################### PROCEDURE PARAGRAPHS ##################
   
@@ -1160,8 +1154,7 @@ op_note_posterior_function <- function(all_objects_to_add_df,
     add_tally(name = "total_per_level") %>%
     mutate(side = if_else(total_per_level == 2, "bilateral", side)) %>%
     ungroup() %>%
-    distinct() %>%
-    distinct()
+    distinct() 
   
   posterior_implant_df <- posterior_implants_all_df %>%
     filter(procedure_category != "pelvic instrumentation") %>%
@@ -1173,17 +1166,34 @@ op_note_posterior_function <- function(all_objects_to_add_df,
                                           mutate(level = if_else(level == "S2AI", "the pelvis", level)) %>%
                                           distinct())$level)
   
-  (posterior_implants_all_df %>% 
-      mutate(level = if_else(level == "Iliac", "the pelvis", level)) %>%
-      mutate(level = if_else(level == "S2AI", "the pelvis", level)) %>%
-      distinct())$level
+  # (posterior_implants_all_df %>% 
+  #     mutate(level = if_else(level == "Iliac", "the pelvis", level)) %>%
+  #     mutate(level = if_else(level == "S2AI", "the pelvis", level)) %>%
+  #     distinct())$level
   
 
   if(nrow(posterior_implant_df) > 0){
     rod_statements_list <- list()
     
+    crosslink_df <- all_objects_to_add_df %>%
+      filter(object == "crosslink") %>%
+      select(level, object)
+    
+    # if(str_detect(string = alignment_correction_technique, pattern = "rod benders")){
+    #   alignment_and_rods <- str_to_sentence(string = paste(glue("The rods were set into place, secured with set screws and {alignment_correction_technique}.")))
+    # }else if(str_detect(string = str_to_lower(alignment_correction_technique), pattern = "pro-axis")){
+    #   alignment_and_rods <- str_to_sentence(string = paste(glue("{alignment_correction_technique} and the rods were set into place and secured with set screws.")))
+    # }else{
+    #   alignment_and_rods <- "The rods placed into position and secured with set screws. "
+    # }
+    
     if(any(str_detect(posterior_implant_df$side, "bilateral"))){
-      rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} rod was contoured for the left and a {right_main_rod_size} {right_main_rod_material} rod was contoured for the right and the rods placed into position and secured with set screws.")
+
+      rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} rod was contoured for the left and a {right_main_rod_size} {right_main_rod_material} rod was contoured for the right. ") 
+      rod_statements_list$alignment_and_rod_placement <-  case_when(
+        str_detect(string = alignment_correction_technique, pattern = "rod benders") ~ glue("The rods were set into place, secured with set screws and {alignment_correction_technique}."), 
+        str_detect(string = str_to_lower(alignment_correction_technique), pattern = "pro-axis") ~ glue("{alignment_correction_technique} and the rods were set into place and secured with set screws."), 
+        TRUE ~ glue("The rods placed into position and secured with set screws. "))
       
       if(nrow(revision_implants_df) > 0){
         if(any(revision_implants_df$prior_rod_connected == "yes")){
@@ -1194,9 +1204,14 @@ op_note_posterior_function <- function(all_objects_to_add_df,
       rod_statements_list$additional_rods_statement <- additional_rods_statement
       rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
       
+      # rod_statements_list$crosslink <- if_else(nrow(crosslink_df) > 0, 
+      #                                          glue("To increase the rigidity of the construct, a crosslink connector was applied at the level of {glue_collapse(crosslink_df$level, sep = ', ', last = ' and ')}."), 
+      #                                          glue(" "))
+    
       if(nrow(crosslink_df) > 0){
         rod_statements_list$crosslink <- glue("To increase the rigidity of the construct, a crosslink connector was applied at the level of {glue_collapse(crosslink_df$level, sep = ', ', last = ' and ')}.")
       }
+    
       rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants.")
       rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}.")
       
@@ -1334,9 +1349,9 @@ op_note_posterior_function <- function(all_objects_to_add_df,
   
   
   if(multiple_position_procedure == TRUE){
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and the patient was turned uneventfully. I was personally present for the entirety of this portion of the case, including {procedures_listed}.")
+    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the entirety of this portion of the case, including {procedures_listed}.")
   }else{
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and the patient was turned onto the hospital bed, and awoke uneventfully. I was personally present for the entirety of the case, including {procedures_listed}.")
+    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned onto the hospital bed, and awoke uneventfully. I was personally present for the entirety of the case, including {procedures_listed}.")
   }
   
   procedure_paragraphs <- glue_collapse(x = procedure_details_list, sep = "\n\n")
@@ -1473,7 +1488,7 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
   if(paragraphs_combined_or_distinct == "combine"){
     
     #IMAGING MODALITY USED FOR STARTPOINTS?:
-    if(procedure_paragraph_intro == "posterior spinal instrumentation" & str_length(implant_start_point_method) > 5){
+    if(procedure_paragraph_intro == "posterior spinal instrumentation" && str_length(implant_start_point_method) > 5){
       implant_start_point_method_text <- implant_start_point_method
     }else{
       implant_start_point_method_text <- ""
@@ -1497,7 +1512,9 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
                                                                              levels_side_df = ..2, 
                                                                              approach_technique = ..3, 
                                                                              image_guidance = ..4, 
-                                                                             implant_start_point_identification = ..5))) %>%
+                                                                             implant_start_point_identification = ..5)
+                                   )
+             ) %>%
       select(object, tech_statement) %>%
       unnest(tech_statement) %>%
       distinct()

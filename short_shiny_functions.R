@@ -451,7 +451,7 @@ jh_filter_osteotomies_function <- function(full_df_to_filter){
   
   grade_3_osteotomy_df <- objects_in_sequence_df %>%
     filter(object == "grade_3") 
-  
+   
   grade_2_osteotomy_df <- objects_in_sequence_df %>%
     filter(object == "grade_2") %>%
     separate(col = level, into = c("proximal_level", "distal_level"), remove = FALSE)

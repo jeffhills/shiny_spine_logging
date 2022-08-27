@@ -654,8 +654,8 @@ addition_surgical_details_modal_box_function <-
                            input_type = "awesomeRadio",
                            input_id = "triggered_emg", 
                            choices_vector = c("No", 
-                                              "Triggered EMG was used to test screws and no responses were below 10mA.", 
-                                              "Triggered EMG was used to test screws and no responses were below 20mA.", 
+                                              "Triggered EMG was used to test screws and all responses were above 10mA.", 
+                                              "Triggered EMG was used to test screws and all responses were above 20mA.", 
                                               "Triggered EMG was used to test screws and showed a response of *** at ***."),
                            checkboxes_inline = FALSE,
                            initial_value_selected = triggered_emg
