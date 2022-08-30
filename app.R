@@ -1051,15 +1051,19 @@ server <- function(input, output, session) {
                        filter(!is.na(object)) %>%
                        rename(approach = approach_repeating) %>%
                        mutate(level = str_to_title(str_replace_all(string = level, pattern = "_", replacement = "-"))) %>%
-                       rename(date_of_surgery = dos_surg_repeating) 
+                       rename(date_of_surgery = dos_surg_repeating) %>%
+                       filter(object != " ") %>%
+                       filter(object != "")
                      
                      if(length(unique(existing_patient_data$patient_df$approach))>1){
-                       approach_to_use <- (all_implants_constructed_df %>%
-                                             count(approach) %>%
-                                             filter(n == max(n)))$approach[[1]]
+                       # approach_to_use <- (all_implants_constructed_df %>%
+                       #                       count(approach) %>%
+                       #                       filter(n == max(n)))$approach[[1]]
+                       
+                       approach_to_filter_by <- str_to_lower(input$spine_approach)
                        
                        existing_patient_data$patient_df <- existing_patient_data$patient_df %>%
-                         filter(approach == approach_to_use)
+                         filter(approach == approach_to_filter_by)
                      }
                      
                      existing_patient_data$match_found <- match_found
@@ -3201,7 +3205,8 @@ server <- function(input, output, session) {
     if(length(input$left_revision_implants)>0){
       retained_df <- tibble(level = input$left_revision_implants, side = "left") %>%
         filter(level %in% input$left_revision_implants_removed == FALSE) %>%
-        left_join(revision_implants_df) ## this is generated in Load coordinates
+        left_join(revision_implants_df) %>% ## this is generated in Load coordinates
+        filter(object != "pelvic_screw_2")
       
       ### create full summary table describing what is happening with the revision implants and rods
       if(length(input$left_revision_implants_removed)>0){
@@ -3209,6 +3214,7 @@ server <- function(input, output, session) {
           mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
           left_join(revision_implants_df) %>%
           select(-object_constructed)
+        
       }else{
         revision_implants_status_df <- tibble(level = input$left_revision_implants, side = "left") %>%
           mutate(remove_retain = "retain") %>%
@@ -3284,7 +3290,8 @@ server <- function(input, output, session) {
     if(length(input$right_revision_implants)>0){
       retained_df <- tibble(level = input$right_revision_implants, side = "right") %>%
         filter(level %in% input$right_revision_implants_removed == FALSE) %>%
-        left_join(revision_implants_df) ## this is generated in Load coordinates
+        left_join(revision_implants_df) %>% ## this is generated in Load coordinates
+        filter(object != "pelvic_screw_2")
       
       ### create full summary table describing what is happening with the revision implants and rods
       if(length(input$right_revision_implants_removed)>0){
