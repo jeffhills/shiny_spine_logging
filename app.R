@@ -3285,7 +3285,7 @@ server <- function(input, output, session) {
         left_join(revision_implants_df) ## this is generated in Load coordinates
     }else{
       removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
-    }
+    } 
     
     if(length(input$right_revision_implants)>0){
       retained_df <- tibble(level = input$right_revision_implants, side = "right") %>%
@@ -5102,7 +5102,7 @@ server <- function(input, output, session) {
         surgery_details_list$posterior_bone_graft <- glue_collapse(input$posterior_bone_graft, sep = "; ")
         
         if(str_detect(string = surgery_details_list$posterior_bone_graft, pattern = "Morselized Allograft")){
-          surgery_details_list$anterior_allograft_amount <- paste(input$posterior_allograft_amount)
+          surgery_details_list$posterior_allograft_amount <- paste(input$posterior_allograft_amount)
         }
       }
       
