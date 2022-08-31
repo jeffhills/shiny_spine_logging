@@ -440,7 +440,6 @@ jh_filter_objects_by_y_range_function <- function(y_min = 0, y_max = 1, object_v
 jh_filter_osteotomies_function <- function(full_df_to_filter){
   objects_in_sequence_df <- full_df_to_filter %>%
     union_all(tibble(level = "x", object = c("grade_1", "grade_2", "grade_3", "grade_4", "grade_5"))) %>%
-    # union_all(tibble(level = "x-x", object = "grade_2")) %>%
     mutate(order_number = row_number())
   
   grade_5_osteotomy_df <- objects_in_sequence_df %>%

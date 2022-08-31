@@ -2088,7 +2088,6 @@ server <- function(input, output, session) {
         union_all(l6_all_implants_constructed_df)
       
       anterior_df <<- l6_anterior_df
-      # implant_starts_df <- l6_implant_starts_df
       jh_get_vertebral_number_function <<- l6_jh_get_vertebral_number_function
       jh_get_vertebral_level_function <<- l6_jh_get_vertebral_level_function
       revision_implants_df <<- l6_revision_implants_df
