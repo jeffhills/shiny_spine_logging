@@ -1032,13 +1032,15 @@ server <- function(input, output, session) {
                           first_name = str_to_lower(first_name))
                  
                  if(nrow(all_patient_ids_df)>0){
+                   
                    joined_df <- patient_details_redcap_df_reactive() %>%
                      select(last_name, first_name, date_of_birth) %>%
                      mutate(last_name = str_to_lower(last_name), 
                             first_name = str_to_lower(first_name)) %>%
                      left_join(all_patient_ids_df)
                    
-                   match_found <- if_else(!is.na(joined_df$record_id[[1]]), TRUE, FALSE)
+                   # match_found <- if_else(!is.na(joined_df$record_id[[1]]), TRUE, FALSE)
+                   match_found <- if_else(nrow(joined_df) > 0, TRUE, FALSE)
                    
                    if(match_found == TRUE){
                      record_number <- joined_df$record_id[[1]]
@@ -1061,6 +1063,7 @@ server <- function(input, output, session) {
                        #                       filter(n == max(n)))$approach[[1]]
                        
                        approach_to_filter_by <- str_to_lower(input$spine_approach)
+                       # approach_to_filter_by <- "posterior"
                        
                        existing_patient_data$patient_df <- existing_patient_data$patient_df %>%
                          filter(approach == approach_to_filter_by)
@@ -1070,6 +1073,7 @@ server <- function(input, output, session) {
                      
                    }
                  }
+                 
                })
   
   output$patient_prior_data <- renderTable({
@@ -1176,7 +1180,9 @@ server <- function(input, output, session) {
   observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), {
     if(existing_patient_data$match_found == TRUE){
       if(nrow(existing_patient_data$patient_df %>% filter(str_detect(object, "screw") | str_detect(object, "hook"))) > 0){
-        updateSwitchInput(session = session, inputId = "prior_instrumentation", value = TRUE)
+        updateSwitchInput(session = session,
+                          inputId = "prior_instrumentation",
+                          value = TRUE)
       }
     }
   } )
@@ -1222,7 +1228,9 @@ server <- function(input, output, session) {
   observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), ignoreNULL = TRUE, ignoreInit = TRUE, {
     if(existing_patient_data$match_found == TRUE){
       prior_decompression_df <- existing_patient_data$patient_df %>%
-        filter(str_detect(object, "decompression")) %>%
+        # left_join(all_implants_constructed_df %>% select(approach, side, level, object, category)) %>%
+        # filter(str_detect(object, "decompression")) %>%
+        filter(str_detect(object, "complete_facetectomy|costovertebral_approach|costotransversectomy|diskectomy|laminectomy|laminoplasty|cervical_foraminotomy|laminotomy|sublaminar_decompression|transpedicular_approach|lateral_extracavitary_approach|lateral_extraforaminal_approach|laminectomy_for_facet_cyst")) %>%
         distinct()
       if(nrow(prior_decompression_df)>0){
         updatePickerInput(session = session, inputId = "open_canal", 
@@ -1235,7 +1243,9 @@ server <- function(input, output, session) {
   ############ UPDATE DIAGNOSIS & SYMPTOMS OPTIONS ##############
   
   
-  observeEvent(list(input$spinal_regions, input$diagnosis_category, input$open_diagnosis_symptoms_procedure_modal), ignoreInit = TRUE, {
+  observeEvent(list(input$spinal_regions,
+                    input$diagnosis_category, 
+                    input$open_diagnosis_symptoms_procedure_modal), ignoreInit = TRUE, {
     
     if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
       age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
