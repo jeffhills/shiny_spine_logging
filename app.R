@@ -1119,6 +1119,7 @@ server <- function(input, output, session) {
                                                      spinal_regions_selected = spine_region,
                                                      ##
                                                      primary_or_revision = input$primary_revision,
+                                                     revision_indication = input$revision_indication,
                                                      levels_with_prior_decompression = input$open_canal,
                                                      prior_fusion_levels = input$prior_fusion_levels,
                                                      prior_instrumentation = input$prior_instrumentation,
@@ -1144,6 +1145,7 @@ server <- function(input, output, session) {
                                          spinal_regions_selected = input$spinal_regions,
                                          ##
                                          primary_or_revision = input$primary_revision,
+                                         revision_indication = input$revision_indication,
                                          levels_with_prior_decompression = input$open_canal,
                                          prior_fusion_levels = input$prior_fusion_levels,
                                          prior_instrumentation = input$prior_instrumentation,
@@ -4417,7 +4419,9 @@ server <- function(input, output, session) {
         ### NOW MAKE PROCEDURES LIST
         procedure_results_list_posterior <- list()
         
-        implant_start_point_method <- if_else(is.na(input$implant_start_point_method) | is.null(input$implant_start_point_method), "NA", input$implant_start_point_method)
+        # implant_start_point_method <- if_else(is.na(input$implant_start_point_method) | is.null(input$implant_start_point_method), "NA", input$implant_start_point_method)
+        
+        implant_start_point_method <- if_else(length(input$implant_start_point_method) == 0, "NA", input$implant_start_point_method)
         implant_position_confirmation_method <- if_else(is.na(input$implant_position_confirmation_method) | is.null(input$implant_position_confirmation_method), "NA", input$implant_position_confirmation_method)
         
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_approach_objects_df,
@@ -4810,6 +4814,17 @@ server <- function(input, output, session) {
       surgery_details_list$anesthesia <- input$anesthesia
     }
     
+    ##########   anesthesia  #############
+    if(length(input$anesthesia) >0){
+      surgery_details_list$anesthesia <- input$anesthesia
+    }
+    
+    ##########   primary_revision  #############
+    surgery_details_list$primary_revision <- input$primary_revision
+    
+    if(length(input$revision_indication) >0){
+      surgery_details_list$revision_indication <- glue_collapse(input$revision_indication, sep = "; ") 
+    }
     
     ##########   prior_fusion_levels #############
     if(length(input$prior_fusion_levels)>0){
@@ -5811,7 +5826,7 @@ server <- function(input, output, session) {
     objects_passed_to_posterior_op_note_reactive_list$fusions_df <- fusions_df
     objects_passed_to_posterior_op_note_reactive_list$head_positioning <- input$head_positioning
     objects_passed_to_posterior_op_note_reactive_list$neuromonitoring_list <- neuromonitoring_input_list## this is a named list with names: modalities, emg, and pre_positioning_motors
-    objects_passed_to_posterior_op_note_reactive_list$implant_start_point_method_input <- if_else(length(input$implant_start_point_method) == 0, "", input$implant_start_point_method)
+    objects_passed_to_posterior_op_note_reactive_list$implant_start_point_method_input <- if_else(length(input$implant_start_point_method) == 0, " ", input$implant_start_point_method)
     objects_passed_to_posterior_op_note_reactive_list$implant_confirmation_method <- if_else(length(input$implant_position_confirmation_method) == 0, "", input$implant_position_confirmation_method)
     objects_passed_to_posterior_op_note_reactive_list$local_anesthesia <- input$local_anesthesia
     objects_passed_to_posterior_op_note_reactive_list$revision_decompression_vector <- input$open_canal

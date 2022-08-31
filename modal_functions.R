@@ -167,7 +167,8 @@ startup_modal_box_diagnosis_symptoms <-
            left_rod_status = "retained_connected",
            left_implants_still_connected = "",
            right_rod_status = "retained_connected",
-           right_implants_still_connected = ""
+           right_implants_still_connected = "", 
+           revision_indication = ""
   ) {
     modalDialog(
       size = "l",
@@ -322,6 +323,15 @@ startup_modal_box_diagnosis_symptoms <-
               ), 
               conditionalPanel(
                 "input.primary_revision.indexOf('Revision') > -1",
+                jh_make_shiny_table_row_function(
+                  left_column_label = "Revision for (select all that apply):",
+                  input_type = "picker",
+                  input_id = "revision_indication",
+                  initial_value_selected = revision_indication,
+                  left_column_percent_width = 60,
+                  font_size = 14,
+                  choices_vector = c("acute infection", "wound complication", "chronic infection", "early radiculopathy", "malpositioned implant", "pseudarthrosis", "rod fracture", "proximal junction failure", "distal junctional failure", "adjacent segment disease", "recurrent symptoms", "sagittal imbalance", "coronal imbalance", "other")
+                ),
                 jh_make_shiny_table_row_function(
                   left_column_label = "Select Levels with Prior Decompression:",
                   input_type = "picker",
