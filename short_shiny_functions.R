@@ -439,8 +439,8 @@ jh_filter_objects_by_y_range_function <- function(y_min = 0, y_max = 1, object_v
 #################################
 jh_filter_osteotomies_function <- function(full_df_to_filter){
   objects_in_sequence_df <- full_df_to_filter %>%
-    union_all(tibble(level = "x", object = c("grade_1", "grade_3", "grade_4", "grade_5"))) %>%
-    union_all(tibble(level = "x-x", object = "grade_2")) %>%
+    union_all(tibble(level = "x", object = c("grade_1", "grade_2", "grade_3", "grade_4", "grade_5"))) %>%
+    # union_all(tibble(level = "x-x", object = "grade_2")) %>%
     mutate(order_number = row_number())
   
   grade_5_osteotomy_df <- objects_in_sequence_df %>%
@@ -453,8 +453,8 @@ jh_filter_osteotomies_function <- function(full_df_to_filter){
     filter(object == "grade_3") 
    
   grade_2_osteotomy_df <- objects_in_sequence_df %>%
-    filter(object == "grade_2") %>%
-    separate(col = level, into = c("proximal_level", "distal_level"), remove = FALSE)
+    filter(object == "grade_2") 
+    # separate(col = level, into = c("proximal_level", "distal_level"), remove = FALSE)
   
   grade_1_osteotomy_df <- objects_in_sequence_df %>%
     filter(object == "grade_1") 
@@ -477,13 +477,17 @@ jh_filter_osteotomies_function <- function(full_df_to_filter){
   
   if(nrow(grade_2_osteotomy_df)>0){
     grade_2_osteotomy_df <- grade_2_osteotomy_df %>%
-      mutate(keep_remove = if_else(proximal_level %in% grade_3_osteotomy_df$level |
-                                     proximal_level %in% grade_4_osteotomy_df$level |
-                                     proximal_level %in% grade_5_osteotomy_df$level |
-                                     distal_level %in% grade_3_osteotomy_df$level |
-                                     distal_level %in% grade_4_osteotomy_df$level |
-                                     distal_level %in% grade_5_osteotomy_df$level, "remove", "keep")) %>%
-      select(-proximal_level, -distal_level)
+      mutate(keep_remove = if_else(level %in% grade_3_osteotomy_df$level |
+                                     level %in% grade_4_osteotomy_df$level | level %in% grade_5_osteotomy_df$level, "remove", "keep"))
+    
+    # grade_2_osteotomy_df <- grade_2_osteotomy_df %>%
+    #   mutate(keep_remove = if_else(proximal_level %in% grade_3_osteotomy_df$level |
+    #                                  proximal_level %in% grade_4_osteotomy_df$level |
+    #                                  proximal_level %in% grade_5_osteotomy_df$level |
+    #                                  distal_level %in% grade_3_osteotomy_df$level |
+    #                                  distal_level %in% grade_4_osteotomy_df$level |
+    #                                  distal_level %in% grade_5_osteotomy_df$level, "remove", "keep")) %>%
+    #   select(-proximal_level, -distal_level)
   }
   
   if(nrow(grade_3_osteotomy_df)>0){
