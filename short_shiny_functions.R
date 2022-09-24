@@ -6,8 +6,8 @@ jh_make_op_note_test_df_function <- function(posterior_or_anterior = "posterior"
     object_levels <- c("L4", "L5", "S1", "Iliac", "S2AI", "L3-L4", "L4-L5")
     object_list <- c("pedicle_screw", "pelvic_screw_1", "sublaminar_decompression", "anterior_interbody_implant", "diskectomy_fusion", "anterior_plate")
   }else{
-    object_levels <- c("C3", "C4", "C5", "C6", "C3-C4", "C4-C5", "C5-C6")
-    object_list <- c("lateral_mass_screw", "laminectomy", "anterior_interbody_implant", "decompression_diskectomy_fusion", "anterior_plate")
+    object_levels <- c("C2", "T1", "T2", "C3", "C4", "C5", "C6", "C3-C4", "C4-C5", "C5-C6")
+    object_list <- c("pars_screw", "pedicle_screw", "lateral_mass_screw", "laminectomy", "anterior_interbody_implant", "decompression_diskectomy_fusion", "anterior_plate")
   }
   
   if(surgical_objects[[1]] == "pre_selected"){

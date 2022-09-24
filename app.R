@@ -1391,6 +1391,218 @@ server <- function(input, output, session) {
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup COMPLETE  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   
   
+  ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   RUN CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
+  ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   RUN CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
+  ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   RUN CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
+  ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   RUN CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
+  
+  
+  
+  observeEvent(input$implants_complete, ignoreNULL = TRUE, ignoreInit = TRUE, once = TRUE, {
+    
+    if(length(fusion_levels_computed_reactive_df()$level)>0){
+      
+      fusion_levels_computed_reactive_input <- fusion_levels_computed_reactive_df()$level
+      
+    }else{
+      fusion_levels_computed_reactive_input <- c()
+    }
+    
+    showModal(
+      confirm_fusion_levels_and_technique_details_modal_box_function(screws_selected_df_reactive = screws_selected_df_reactive(), 
+                                                                     fusion_levels_confirmed = fusion_levels_computed_reactive_input
+                                                                     # approach_specified_posterior = input$approach_specified_posterior,
+                                                                     # approach_open_mis = input$approach_open_mis,
+                                                                     # approach_robot_navigation = input$approach_robot_navigation, 
+                                                                     # approach_specified_anterior = input$approach_specified_anterior,
+                                                                     # implant_start_point_method = input$implant_start_point_method,
+                                                                     # implant_position_confirmation_method = input$implant_position_confirmation_method, 
+                                                                     # alignment_correction_method = input$alignment_correction_method
+      )
+    )
+      
+      # modalDialog(title = "Confirm Fusion Levels", easyClose = TRUE, footer = modalButton(label = "Confirmed"),
+      #             box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
+      #                 conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
+      #                                  fluidRow(
+      #                                    prettyRadioButtons(
+      #                                      inputId = "approach_specified_posterior",
+      #                                      label = "Posterior approach was:", 
+      #                                      inline = TRUE,
+      #                                      choices = c("Midline",
+      #                                                  "Paraspinal or Paramedian", 
+      #                                                  "Stab"),
+      #                                      icon = icon("check"), 
+      #                                      bigger = TRUE,
+      #                                      status = "info"
+      #                                    )
+      #                                  ),
+      #                                  fluidRow(
+      #                                    prettyRadioButtons(
+      #                                      inputId = "approach_open_mis",
+      #                                      label = "The procedure was performed:", 
+      #                                      inline = TRUE,
+      #                                      choices = c("Open",
+      #                                                  "Tubular", 
+      #                                                  "Endoscopic", 
+      #                                                  "Mini Open",
+      #                                                  "Percutaneous Screw"
+      #                                      ),
+      #                                      selected = "Open",
+      #                                      icon = icon("check"), 
+      #                                      bigger = TRUE,
+      #                                      status = "success"
+      #                                    )
+      #                                  ),
+      #                                  fluidRow(
+      #                                    prettyCheckboxGroup(
+      #                                      inputId = "approach_robot_navigation",
+      #                                      label = "Select any modality used:", 
+      #                                      inline = TRUE,
+      #                                      choices = c("Microscopic", 
+      #                                                  "Navigated", 
+      #                                                  "Robotic"),
+      #                                      icon = icon("check"), 
+      #                                      bigger = TRUE,
+      #                                      status = "success"
+      #                                    )
+      #                                  )
+      #                 ),
+      #                 conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
+      #                                  prettyRadioButtons(
+      #                                    inputId = "approach_specified_anterior",
+      #                                    label = "Approach was:",
+      #                                    inline = TRUE,
+      #                                    choices = c("Left-sided", 
+      #                                                "Right-sided",
+      #                                                "Paramedian",
+      #                                                "Lateral Transpsoas",
+      #                                                "Lateral Antepsoas",
+      #                                                "Thoracoabdominal",
+      #                                                "Thoracotomy",
+      #                                                "Transperitoneal",
+      #                                                "Retroperitoneal"),
+      #                                    selected = "Left-sided",
+      #                                    icon = icon("check"),
+      #                                    bigger = TRUE,
+      #                                    status = "info"
+      #                                  )
+      #                 ),
+      #                 if(nrow(screws_selected_df_reactive())>0){
+      #                   fluidRow(
+      #                     awesomeRadio(
+      #                       inputId = "implant_start_point_method",
+      #                       label = "Method for identifying screw start point:",
+      #                       choices = c(
+      #                         "Implant start points were identified using anatomic landmarks.",
+      #                         "Intraoperative fluoroscopy and pedicle markers were used to confirm start points for screw placement.", 
+      #                         "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
+      #                         "Intraoperative navigation was used for identifying start points.",
+      #                         "NA"),
+      #                       selected = "", 
+      #                       inline = FALSE, 
+      #                       status = "success"
+      #                     )
+      #                   )
+      #                 },
+      #                 if(nrow(screws_selected_df_reactive())>0){
+      #                   fluidRow(
+      #                     awesomeRadio(
+      #                       inputId = "implant_position_confirmation_method",
+      #                       label = "Method for confirming implant position:",
+      #                       choices = c(
+      #                         "Intraoperative fluoroscopy was used to confirm position of all implants.", 
+      #                         "Intraoperative CT scan was used to confirm position of all implants.",
+      #                         "NA"), 
+      #                       selected = "Intraoperative fluoroscopy was used to confirm position of all implants.",
+      #                       inline = FALSE, 
+      #                       status = "success"
+      #                     )
+      #                   )
+      #                 },
+      #                 if(nrow(screws_selected_df_reactive())>0){
+      #                   fluidRow(
+      #                     awesomeRadio(
+      #                       inputId = "alignment_correction_method",
+      #                       label = "Method for any alignment correction:",
+      #                       choices = c(
+      #                         "The Pro-axis bed was bent to achieve the desired sagittal plane alignment", 
+      #                         "In situ rod benders were used to correct the coronal and sagittal plane",
+      #                         "NA"), 
+      #                       selected = "NA",
+      #                       inline = FALSE, 
+      #                       status = "success"
+      #                     )
+      #                   )
+      #                 },
+      #                 if(length(fusion_levels_computed_reactive_df()$level)>0){
+      #                   fluidRow(
+      #                    prettyCheckboxGroup(
+      #                            inputId = "fusion_levels_confirmed",
+      #                            label = "Please Confirm The Fusion Levels:", 
+      #                            bigger = TRUE,
+      #                            choices = interbody_levels_df$level, 
+      #                            selected = fusion_levels_computed_reactive_df()$level,
+      #                            icon = icon("check"), 
+      #                            status = "success"
+      #                          ) 
+      #                   )
+      #                   }
+      #             )
+      # )
+    # )
+  })
+  
+ 
+  observeEvent(input$implants_complete, ignoreInit = TRUE, {
+
+    if(input$implants_complete > 1){
+      showModal(
+        confirm_fusion_levels_and_technique_details_modal_box_function(screws_selected_df_reactive = screws_selected_df_reactive(), 
+                                                                       fusion_levels_confirmed = input$fusion_levels_confirmed,
+                                                                       approach_specified_posterior = input$approach_specified_posterior,
+                                                                       approach_open_mis = input$approach_open_mis,
+                                                                       approach_robot_navigation = input$approach_robot_navigation, 
+                                                                       approach_specified_anterior = input$approach_specified_anterior,
+                                                                       implant_start_point_method = input$implant_start_point_method,
+                                                                       implant_position_confirmation_method = input$implant_position_confirmation_method, 
+                                                                       alignment_correction_method = input$alignment_correction_method
+        )
+
+      )
+    }
+    }
+  )
+  observeEvent(input$fusion_levels_technique_details_modal_complete_button, ignoreNULL = TRUE, ignoreInit = TRUE, {
+  removeModal()
+    }
+  )
+  
+  observeEvent(input$fusion_levels_technique_details_modal_complete_button, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    implant_categories_vector <- (all_objects_to_add_list$objects_df %>%
+                                    select(object, category) %>%
+                                    distinct() %>%
+                                    filter(object == "lateral_mass_screw" | category == "decompression"))$category
+    
+    if(length(implant_categories_vector > 0)){
+      if(str_detect(string = glue_collapse(x = implant_categories_vector, sep = " "), pattern = "implant") &
+         str_detect(string = glue_collapse(x = implant_categories_vector, sep = " "), pattern = "decompression")){
+        
+        showModal(
+          lateral_mass_screws_after_decompression_modal_function(lateral_mass_screws_after_decompression = "No")
+        )
+        
+      }
+    }
+  }
+  )
+  
+  ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   COMPLETED CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
+  ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   COMPLETED CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
+  ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   COMPLETED CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
+  ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   COMPLETED CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
+  
+  
   
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
@@ -1413,8 +1625,6 @@ server <- function(input, output, session) {
     if(length(input$prior_fusion_levels)>0){
       additional_procedures_choices$exploration_prior_fusion <- "Exploration of prior spinal fusion"
     }
-    
-    # additional_procedures_choices$irrigation_debridement <- "Incision and Drainage"
     
     additional_procedures_choices$open_biopsy_body <- "Open Biopsy of vertebral body"
     
@@ -1892,140 +2102,6 @@ server <- function(input, output, session) {
   })
   
   
-  observeEvent(input$implants_complete,ignoreNULL = TRUE, ignoreInit = TRUE, {
-    
-      showModal(
-        modalDialog(title = "Confirm Fusion Levels", easyClose = TRUE, footer = modalButton(label = "Confirmed"),
-                    box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
-                        conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
-                                         fluidRow(
-                                           prettyRadioButtons(
-                                             inputId = "approach_specified_posterior",
-                                             label = "Posterior approach was:", 
-                                             inline = TRUE,
-                                             choices = c("Midline",
-                                                         "Paraspinal or Paramedian", 
-                                                         "Stab"),
-                                             icon = icon("check"), 
-                                             bigger = TRUE,
-                                             status = "info"
-                                           )
-                                         ),
-                                         fluidRow(
-                                           prettyRadioButtons(
-                                             inputId = "approach_open_mis",
-                                             label = "The procedure was performed:", 
-                                             inline = TRUE,
-                                             choices = c("Open",
-                                                         "Tubular", 
-                                                         "Endoscopic", 
-                                                         "Mini Open",
-                                                         "Percutaneous Screw"
-                                             ),
-                                             selected = "Open",
-                                             icon = icon("check"), 
-                                             bigger = TRUE,
-                                             status = "success"
-                                           )
-                                         ),
-                                         fluidRow(
-                                           prettyCheckboxGroup(
-                                             inputId = "approach_robot_navigation",
-                                             label = "Select any modality used:", 
-                                             inline = TRUE,
-                                             choices = c("Microscopic", 
-                                                         "Navigated", 
-                                                         "Robotic"),
-                                             icon = icon("check"), 
-                                             bigger = TRUE,
-                                             status = "success"
-                                           )
-                                         )
-                        ),
-                        conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
-                                         prettyRadioButtons(
-                                           inputId = "approach_specified_anterior",
-                                           label = "Approach was:",
-                                           inline = TRUE,
-                                           choices = c("Left-sided", 
-                                                       "Right-sided",
-                                                       "Paramedian",
-                                                       "Lateral Transpsoas",
-                                                       "Lateral Antepsoas",
-                                                       "Thoracoabdominal",
-                                                       "Thoracotomy",
-                                                       "Transperitoneal",
-                                                       "Retroperitoneal"),
-                                           selected = "Left-sided",
-                                           icon = icon("check"),
-                                           bigger = TRUE,
-                                           status = "info"
-                                         )
-                        ),
-                        if(nrow(screws_selected_df_reactive())>0){
-                          fluidRow(
-                            awesomeRadio(
-                              inputId = "implant_start_point_method",
-                              label = "Method for identifying screw start point:",
-                              choices = c(
-                                "Implant start points were identified using anatomic landmarks.",
-                                "Intraoperative fluoroscopy and pedicle markers were used to confirm start points for screw placement.", 
-                                "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
-                                "Intraoperative navigation was used for identifying start points.",
-                                "NA"),
-                              selected = "", 
-                              inline = FALSE, 
-                              status = "success"
-                            )
-                          )
-                        },
-                        if(nrow(screws_selected_df_reactive())>0){
-                          fluidRow(
-                            awesomeRadio(
-                              inputId = "implant_position_confirmation_method",
-                              label = "Method for confirming implant position:",
-                              choices = c(
-                                "Intraoperative fluoroscopy was used to confirm position of all implants.", 
-                                "Intraoperative CT scan was used to confirm position of all implants.",
-                                "NA"), 
-                              selected = "Intraoperative fluoroscopy was used to confirm position of all implants.",
-                              inline = FALSE, 
-                              status = "success"
-                            )
-                          )
-                        },
-                        if(nrow(screws_selected_df_reactive())>0){
-                          fluidRow(
-                            awesomeRadio(
-                              inputId = "alignment_correction_method",
-                              label = "Method for any alignment correction:",
-                              choices = c(
-                                "The Pro-axis bed was bent to achieve the desired sagittal plane alignment", 
-                                "In situ rod benders were used to correct the coronal and sagittal plane",
-                                "NA"), 
-                              selected = "NA",
-                              inline = FALSE, 
-                              status = "success"
-                            )
-                          )
-                        },
-                        if(length(fusion_levels_computed_reactive_df()$level)>0){
-                          fluidRow(
-                           prettyCheckboxGroup(
-                                   inputId = "fusion_levels_confirmed",
-                                   label = "Please Confirm The Fusion Levels:", 
-                                   bigger = TRUE,
-                                   choices = interbody_levels_df$level, 
-                                   selected = fusion_levels_computed_reactive_df()$level,
-                                   icon = icon("check"), 
-                                   status = "success"
-                                 ) 
-                          )
-                          }
-                    )
-        )
-      )
-  })
   
   ###### ######  -----------   ######### UPDATE TABS ###### ######  -----------   ######### 
   
@@ -4427,6 +4503,9 @@ server <- function(input, output, session) {
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_approach_objects_df,
                                                                        fusion_levels_df = fusions_df,
                                                                        head_position = input$head_positioning,
+                                                                       surgical_approach = input$approach_specified_posterior, 
+                                                                       approach_mis_open = input$approach_open_mis,
+                                                                       approach_robot_nav_xray = input$approach_robot_navigation,
                                                                        neuromonitoring_list = neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
                                                                        implant_start_point_method_input = implant_start_point_method,
                                                                        implant_confirmation_method = implant_position_confirmation_method,
@@ -4453,7 +4532,8 @@ server <- function(input, output, session) {
                                                                        dressing = input$dressing_details, 
                                                                        multiple_position_procedure = input$multiple_approach, 
                                                                        alignment_correction_technique = input$alignment_correction_method,
-                                                                       sex = input$sex)
+                                                                       sex = input$sex, 
+                                                                       lateral_mass_screws_after_decompression = input$lateral_mass_screws_after_decompression)
         
         
       }
@@ -5818,7 +5898,7 @@ server <- function(input, output, session) {
     neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
                                                                            as.character(input$neuromonitoring_signal_stability),
                                                                            "")
-    
+      
     ### NOW MAKE PROCEDURES LIST
     objects_passed_to_posterior_op_note_reactive_list <- list()
     

@@ -500,6 +500,188 @@ startup_modal_box_diagnosis_symptoms <-
     )
   }
 
+################################################    LATERAL MASS SCREW AND DECOMPRESSION SEQUENCE MODAL  ######################################
+################################################    LATERAL MASS SCREW AND DECOMPRESSION SEQUENCE MODAL  ######################################
+################################################    LATERAL MASS SCREW AND DECOMPRESSION SEQUENCE MODAL  ######################################
+
+lateral_mass_screws_after_decompression_modal_function <- function(lateral_mass_screws_after_decompression = "No"){
+  
+  modalDialog(title = "Lateral Mass Screws and Decompression", 
+              easyClose = TRUE, 
+              footer = modalButton(label = "Confirmed"),
+              box(width = 12,
+                                   fluidRow(
+                                     prettyRadioButtons(
+                                       inputId = "lateral_mass_screws_after_decompression",
+                                       label = "Were lateral mass screws placed AFTER the decompression?", 
+                                       inline = TRUE,
+                                       choices = c("No", 
+                                                   "Yes"),
+                                       icon = icon("check"), 
+                                       selected =  lateral_mass_screws_after_decompression,
+                                       bigger = TRUE,
+                                       status = "info"
+                                     )
+                                   )
+              )
+  )
+}
+                                   
+################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
+################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
+################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
+################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
+
+confirm_fusion_levels_and_technique_details_modal_box_function <- function(screws_selected_df_reactive = tibble(),
+                                                                           fusion_levels_confirmed = c(),
+                                                                           approach_specified_posterior = "Midline",
+                                                                           approach_open_mis = "Open",
+                                                                           approach_robot_navigation = "NA",
+                                                                           approach_specified_anterior = "Left-sided",
+                                                                           implant_start_point_method = "Implant start points were identified using anatomic landmarks.",
+                                                                           implant_position_confirmation_method = "Intraoperative fluoroscopy was used to confirm position of all implants.",
+                                                                           alignment_correction_method = "NA"){
+  
+  modalDialog(title = "Confirm Fusion Levels", 
+              easyClose = FALSE, 
+              # easyClose = TRUE,
+              # footer = modalButton(label = "Confirmed"), 
+              footer = actionButton(inputId = "fusion_levels_technique_details_modal_complete_button", label = "Confirmed"),
+              box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
+                  conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
+                                   fluidRow(
+                                     prettyRadioButtons(
+                                       inputId = "approach_specified_posterior",
+                                       label = "Posterior approach was:", 
+                                       inline = TRUE,
+                                       choices = c("Midline",
+                                                   "Paraspinal (Wiltse)", 
+                                                   "Stab"),
+                                       icon = icon("check"), 
+                                       selected =  approach_specified_posterior,
+                                       bigger = TRUE,
+                                       status = "info"
+                                     )
+                                   ),
+                                   fluidRow(
+                                     prettyRadioButtons(
+                                       inputId = "approach_open_mis",
+                                       label = "The procedure was performed:", 
+                                       inline = TRUE,
+                                       choices = c("Open",
+                                                   "Tubular", 
+                                                   "Endoscopic", 
+                                                   "Mini Open",
+                                                   "Percutaneous Screw"
+                                       ),
+                                       selected = approach_open_mis,
+                                       icon = icon("check"), 
+                                       bigger = TRUE,
+                                       status = "success"
+                                     )
+                                   ),
+                                   fluidRow(
+                                     prettyCheckboxGroup(
+                                       inputId = "approach_robot_navigation",
+                                       label = "Select any modality used:", 
+                                       inline = TRUE,
+                                       choices = c("Microscopic",
+                                                   "Fluoroscopy-guided",
+                                                   "Navigated", 
+                                                   "Robotic", 
+                                                   "NA"),
+                                       icon = icon("check"),
+                                       selected = approach_robot_navigation, 
+                                       bigger = TRUE,
+                                       status = "success"
+                                     )
+                                   )
+                  ),
+                  conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
+                                   prettyRadioButtons(
+                                     inputId = "approach_specified_anterior",
+                                     label = "Approach was:",
+                                     inline = TRUE,
+                                     choices = c("Left-sided", 
+                                                 "Right-sided",
+                                                 "Paramedian",
+                                                 "Lateral Transpsoas",
+                                                 "Lateral Antepsoas",
+                                                 "Thoracoabdominal",
+                                                 "Thoracotomy",
+                                                 "Transperitoneal",
+                                                 "Retroperitoneal"),
+                                     selected = approach_specified_anterior,
+                                     icon = icon("check"),
+                                     bigger = TRUE,
+                                     status = "info"
+                                   )
+                  ),
+                  if(nrow(screws_selected_df_reactive)>0){
+                    fluidRow(
+                      awesomeRadio(
+                        inputId = "implant_start_point_method",
+                        label = "Method for identifying screw start point:",
+                        choices = c(
+                          "Implant start points were identified using anatomic landmarks.",
+                          "Intraoperative fluoroscopy and pedicle markers were used to confirm start points for screw placement.", 
+                          "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
+                          "Intraoperative navigation was used for identifying start points.",
+                          "NA"),
+                        selected = implant_start_point_method, 
+                        inline = FALSE, 
+                        status = "success"
+                      )
+                    )
+                  },
+                  if(nrow(screws_selected_df_reactive)>0){
+                    fluidRow(
+                      awesomeRadio(
+                        inputId = "implant_position_confirmation_method",
+                        label = "Method for confirming implant position:",
+                        choices = c(
+                          "Intraoperative fluoroscopy was used to confirm position of all implants.", 
+                          "Intraoperative CT scan was used to confirm position of all implants.",
+                          "NA"), 
+                        selected = implant_position_confirmation_method,
+                        inline = FALSE, 
+                        status = "success"
+                      )
+                    )
+                  },
+                  if(nrow(screws_selected_df_reactive)>0){
+                    fluidRow(
+                      awesomeRadio(
+                        inputId = "alignment_correction_method",
+                        label = "Method for any alignment correction:",
+                        choices = c(
+                          "The Pro-axis bed was bent to achieve the desired sagittal plane alignment", 
+                          "In situ rod benders were used to correct the coronal and sagittal plane",
+                          "NA"), 
+                        selected = alignment_correction_method,
+                        inline = FALSE, 
+                        status = "success"
+                      )
+                    )
+                  },
+                  if(length(fusion_levels_confirmed)>0){
+                    fluidRow(
+                      prettyCheckboxGroup(
+                        inputId = "fusion_levels_confirmed",
+                        label = "Please Confirm The Fusion Levels:", 
+                        bigger = TRUE,
+                        choices = interbody_levels_df$level, 
+                        selected = fusion_levels_confirmed,
+                        icon = icon("check"), 
+                        status = "success"
+                      ) 
+                    )
+                  }
+              )
+  )
+  
+}
+
 
 ###################~~~~~~~~~~~~~~~~#############################    SURGICAL DETAILS MODAL  ##########~~~~~~~~~~~~~############################
 ################################################    SURGICAL DETAILS MODAL  ######################################
@@ -678,7 +860,7 @@ addition_surgical_details_modal_box_function <-
                            input_type = "awesomeRadio",
                            input_id = "pre_positioning_motors", 
                            choices_vector = c("Pre-positioning motors not obtained", 
-                                              "Pre-positioning motor signals were obtained and were normal.",
+                                              "Pre-positioning motor signals were obtained and were present in the upper and lower extremities.",
                                               "Pre positioning motor signals were poor in the lower extremities.",
                                               "Pre positioning motor signals were poor and upper extremities.",
                                               "Pre positioning motor signals were poor and unreliable in the upper and lower extremities.",
