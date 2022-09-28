@@ -1578,22 +1578,59 @@ server <- function(input, output, session) {
     }
   )
   
+  # lateral_mass_screws_after_decompression_modal <- reactive({
+  #   
+  #   lateral_mass_screw_present <- any(all_objects_to_add_list$objects_df$object == "lateral_mass_screw")
+  #   
+  #   decompression_present <- any(all_objects_to_add_list$objects_df$category == "decompression")
+  #   
+  #   if(lateral_mass_screw_present == TRUE & decompression_present == TRUE){
+  #     default_answer <- "Yes"
+  #   }else{
+  #     default_answer <- "No"
+  #   }
+  #   
+  #   modalDialog(title = "Lateral Mass Screws and Decompression", 
+  #               easyClose = TRUE, 
+  #               footer = modalButton(label = "Confirmed"),
+  #               box(width = 12,
+  #                   fluidRow(
+  #                     prettyRadioButtons(
+  #                       inputId = "lateral_mass_screws_after_decompression",
+  #                       label = "Were lateral mass screws placed AFTER the decompression?", 
+  #                       inline = TRUE,
+  #                       choices = c("No", 
+  #                                   "Yes"),
+  #                       icon = icon("check"), 
+  #                       selected =  default_answer,
+  #                       bigger = TRUE,
+  #                       status = "info"
+  #                     )
+  #                   )
+  #               )
+  #   )
+  #   
+  # })
+  
   observeEvent(input$fusion_levels_technique_details_modal_complete_button, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    implant_categories_vector <- (all_objects_to_add_list$objects_df %>%
-                                    select(object, category) %>%
-                                    distinct() %>%
-                                    filter(object == "lateral_mass_screw" | category == "decompression"))$category
+    # implant_categories_vector <- (all_objects_to_add_list$objects_df %>%
+    #                                 select(object, category) %>%
+    #                                 distinct() %>%
+    #                                 filter(object == "lateral_mass_screw" | category == "decompression"))$category
     
-    if(length(implant_categories_vector > 0)){
-      if(str_detect(string = glue_collapse(x = implant_categories_vector, sep = " "), pattern = "implant") &
-         str_detect(string = glue_collapse(x = implant_categories_vector, sep = " "), pattern = "decompression")){
-        
-        showModal(
-          lateral_mass_screws_after_decompression_modal_function(lateral_mass_screws_after_decompression = "No")
-        )
-        
-      }
-    }
+    lateral_mass_screws_after_decompression_modal_function(implant_objects_df = all_objects_to_add_list$objects_df)
+    
+    # if(length(implant_categories_vector > 0)){
+    #   if(str_detect(string = glue_collapse(x = implant_categories_vector, sep = " "), pattern = "implant") &
+    #      str_detect(string = glue_collapse(x = implant_categories_vector, sep = " "), pattern = "decompression")){
+    #     
+    #     showModal(
+    #       lateral_mass_screws_after_decompression_modal()
+    #       # lateral_mass_screws_after_decompression_modal_function(lateral_mass_screws_after_decompression = "No")
+    #     )
+    #     
+    #   }
+    # }
   }
   )
   
@@ -4500,6 +4537,12 @@ server <- function(input, output, session) {
         implant_start_point_method <- if_else(length(input$implant_start_point_method) == 0, "NA", input$implant_start_point_method)
         implant_position_confirmation_method <- if_else(is.na(input$implant_position_confirmation_method) | is.null(input$implant_position_confirmation_method), "NA", input$implant_position_confirmation_method)
         
+        if(length(input$lateral_mass_screws_after_decompression) == 0){
+          lateral_mass_screws_after_decompression <- "No"
+        }else{
+          lateral_mass_screws_after_decompression <- paste(input$lateral_mass_screws_after_decompression)
+        }
+        
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_approach_objects_df,
                                                                        fusion_levels_df = fusions_df,
                                                                        head_position = input$head_positioning,
@@ -4532,8 +4575,8 @@ server <- function(input, output, session) {
                                                                        dressing = input$dressing_details, 
                                                                        multiple_position_procedure = input$multiple_approach, 
                                                                        alignment_correction_technique = input$alignment_correction_method,
-                                                                       sex = input$sex, 
-                                                                       lateral_mass_screws_after_decompression = input$lateral_mass_screws_after_decompression)
+                                                                       sex = input$sex,
+                                                                       lateral_mass_screws_after_decompression = lateral_mass_screws_after_decompression)
         
         
       }
@@ -5899,6 +5942,15 @@ server <- function(input, output, session) {
                                                                            as.character(input$neuromonitoring_signal_stability),
                                                                            "")
       
+    implant_start_point_method <- if_else(length(input$implant_start_point_method) == 0, "NA", input$implant_start_point_method)
+    implant_position_confirmation_method <- if_else(is.na(input$implant_position_confirmation_method) | is.null(input$implant_position_confirmation_method), "NA", input$implant_position_confirmation_method)
+    
+    if(length(input$lateral_mass_screws_after_decompression) == 0){
+      lateral_mass_screws_after_decompression <- "No"
+    }else{
+      lateral_mass_screws_after_decompression <- paste(input$lateral_mass_screws_after_decompression)
+    }
+    
     ### NOW MAKE PROCEDURES LIST
     objects_passed_to_posterior_op_note_reactive_list <- list()
     
@@ -5906,8 +5958,8 @@ server <- function(input, output, session) {
     objects_passed_to_posterior_op_note_reactive_list$fusions_df <- fusions_df
     objects_passed_to_posterior_op_note_reactive_list$head_positioning <- input$head_positioning
     objects_passed_to_posterior_op_note_reactive_list$neuromonitoring_list <- neuromonitoring_input_list## this is a named list with names: modalities, emg, and pre_positioning_motors
-    objects_passed_to_posterior_op_note_reactive_list$implant_start_point_method_input <- if_else(length(input$implant_start_point_method) == 0, " ", input$implant_start_point_method)
-    objects_passed_to_posterior_op_note_reactive_list$implant_confirmation_method <- if_else(length(input$implant_position_confirmation_method) == 0, "", input$implant_position_confirmation_method)
+    objects_passed_to_posterior_op_note_reactive_list$implant_start_point_method_input = implant_start_point_method
+    objects_passed_to_posterior_op_note_reactive_list$implant_confirmation_method = implant_position_confirmation_method
     objects_passed_to_posterior_op_note_reactive_list$local_anesthesia <- input$local_anesthesia
     objects_passed_to_posterior_op_note_reactive_list$revision_decompression_vector <- input$open_canal
     objects_passed_to_posterior_op_note_reactive_list$revision_implants_df <- revision_implants_df
@@ -5932,6 +5984,7 @@ server <- function(input, output, session) {
     objects_passed_to_posterior_op_note_reactive_list$multiple_position_procedure <- input$multiple_approach
     objects_passed_to_posterior_op_note_reactive_list$alignment_correction_technique = input$alignment_correction_method
     objects_passed_to_posterior_op_note_reactive_list$sex = input$sex
+    objects_passed_to_posterior_op_note_reactive_list$lateral_mass_screws_after_decompression = lateral_mass_screws_after_decompression
     
     objects_passed_to_posterior_op_note_reactive_list
     

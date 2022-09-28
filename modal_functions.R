@@ -504,27 +504,42 @@ startup_modal_box_diagnosis_symptoms <-
 ################################################    LATERAL MASS SCREW AND DECOMPRESSION SEQUENCE MODAL  ######################################
 ################################################    LATERAL MASS SCREW AND DECOMPRESSION SEQUENCE MODAL  ######################################
 
-lateral_mass_screws_after_decompression_modal_function <- function(lateral_mass_screws_after_decompression = "No"){
+lateral_mass_screws_after_decompression_modal_function <- function(implant_objects_df = tibble(object = character(),
+                                                                                               category = character()), 
+                                                                   lateral_mass_screws_after_decompression = "No"){
   
-  modalDialog(title = "Lateral Mass Screws and Decompression", 
-              easyClose = TRUE, 
-              footer = modalButton(label = "Confirmed"),
-              box(width = 12,
-                                   fluidRow(
-                                     prettyRadioButtons(
-                                       inputId = "lateral_mass_screws_after_decompression",
-                                       label = "Were lateral mass screws placed AFTER the decompression?", 
-                                       inline = TRUE,
-                                       choices = c("No", 
-                                                   "Yes"),
-                                       icon = icon("check"), 
-                                       selected =  lateral_mass_screws_after_decompression,
-                                       bigger = TRUE,
-                                       status = "info"
-                                     )
-                                   )
-              )
-  )
+  lateral_mass_screw_present <- any(implant_objects_df$object == "lateral_mass_screw")
+  
+  decompression_present <- any(implant_objects_df$category == "decompression")
+  
+  if(lateral_mass_screw_present == TRUE & decompression_present == TRUE){
+    show_modal <- "Yes"
+  }else{
+    show_modal <- "No"
+  }
+  
+  if(show_modal == "Yes"){
+    showModal(  modalDialog(title = "Lateral Mass Screws and Decompression", 
+                            easyClose = TRUE, 
+                            footer = modalButton(label = "Confirmed"),
+                            box(width = 12,
+                                fluidRow(
+                                  prettyRadioButtons(
+                                    inputId = "lateral_mass_screws_after_decompression",
+                                    label = "Were lateral mass screws placed AFTER the decompression?", 
+                                    inline = TRUE,
+                                    choices = c("No", 
+                                                "Yes"),
+                                    icon = icon("check"), 
+                                    selected =  lateral_mass_screws_after_decompression,
+                                    bigger = TRUE,
+                                    status = "info"
+                                  )
+                                )
+                            )
+    )
+    )
+  }
 }
                                    
 ################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
@@ -838,6 +853,7 @@ addition_surgical_details_modal_box_function <-
           checkboxes_inline = TRUE,
           initial_value_selected = neuromonitoring
         ),
+        br(),
         conditionalPanel(condition = "input.neuromonitoring.indexOf('EMG') > -1",
                          jh_make_shiny_table_row_function(
                            left_column_percent_width = 30,
@@ -852,6 +868,7 @@ addition_surgical_details_modal_box_function <-
                            checkboxes_inline = FALSE,
                            initial_value_selected = triggered_emg
                          )),
+        br(),
         conditionalPanel(condition = "input.neuromonitoring.indexOf('tcMEP') > -1",
                          jh_make_shiny_table_row_function(
                            left_column_percent_width = 30,
@@ -870,6 +887,7 @@ addition_surgical_details_modal_box_function <-
                            initial_value_selected = pre_positioning_motors
                          )
                          ),
+        br(),
         conditionalPanel(condition = "input.neuromonitoring.indexOf('SSEP') > -1",
                          jh_make_shiny_table_row_function(
                            left_column_percent_width = 30,
