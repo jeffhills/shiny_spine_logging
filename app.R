@@ -974,8 +974,7 @@ server <- function(input, output, session) {
   rcon_reactive <- reactiveValues()
   
   observeEvent(input$redcap_token, {
-    # redcap_token <- paste0("2A930AE845C92CBF95467E59", input$redcap_token)
-    
+
     rcon_reactive$rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = input$redcap_token)    
     
   })
@@ -1007,7 +1006,8 @@ server <- function(input, output, session) {
                       starting_dob = input$date_of_birth,
                       starting_dos = input$date_of_surgery, 
                       starting_sex = input$sex, 
-                      hospital_input = input$hospital, redcap_token_input = input$redcap_token,
+                      hospital_input = input$hospital, 
+                      redcap_token_input = input$redcap_token,
                       button_proceed = "exit"
     )
   })
@@ -6079,9 +6079,42 @@ server <- function(input, output, session) {
     )
   })
   
+  # observeEvent(input$redcap_token_confirmed_button, {
+  #   
+  #   updateTextInput(session = session, 
+  #                   inputId = "redcap_token", 
+  #                   value = paste(input$redcap_token_input_2))
+  # }
+  # )
+  # 
+  # observeEvent(input$redcap_token_confirmed_button, {
+  #   removeModal()
+  # }
+  # )
   
-  observeEvent(input$confirm_upload_final, once = TRUE, {
-    
+  observeEvent(input$confirm_upload_final, {
+    if(str_length(input$redcap_token) < 5){
+      # show_alert(
+      #   session = session,
+      #   title = "No Redcap Token",
+      #   text = "PLEASE GO BACK AND ENTER A VALID REDCAP TOKEN ON FIRST PAGE, Edit Patient",
+      #   type = "error"
+      # )
+      showModal(modalDialog(title = "Please enter a valid Redcap Token and click the button below and then attempt to upload again", 
+                              easyClose = TRUE, 
+                              box(width = 12,
+                                  h3("PLEASE GO BACK AND ENTER A VALID REDCAP TOKEN ON FIRST PAGE, Edit Patient") 
+                                  # actionBttn(inputId = "redcap_token_confirmed_button", 
+                                  #            label = "Token Confirmed",
+                                  #            icon = icon("fas fa-user-edit"),
+                                  #            size = "sm", 
+                                  #            block = TRUE)
+                                  
+                              )
+      )
+      )
+    }else{
+      
     if(redcapAPI::exportNextRecordName(rcon = rcon_reactive$rcon)>1){
       all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
         type.convert() %>%
@@ -6288,6 +6321,7 @@ server <- function(input, output, session) {
       text = "All in order",
       type = "success"
     )
+    }
   })
   
   
