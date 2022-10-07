@@ -1613,24 +1613,7 @@ server <- function(input, output, session) {
   # })
   
   observeEvent(input$fusion_levels_technique_details_modal_complete_button, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    # implant_categories_vector <- (all_objects_to_add_list$objects_df %>%
-    #                                 select(object, category) %>%
-    #                                 distinct() %>%
-    #                                 filter(object == "lateral_mass_screw" | category == "decompression"))$category
-    
     lateral_mass_screws_after_decompression_modal_function(implant_objects_df = all_objects_to_add_list$objects_df)
-    
-    # if(length(implant_categories_vector > 0)){
-    #   if(str_detect(string = glue_collapse(x = implant_categories_vector, sep = " "), pattern = "implant") &
-    #      str_detect(string = glue_collapse(x = implant_categories_vector, sep = " "), pattern = "decompression")){
-    #     
-    #     showModal(
-    #       lateral_mass_screws_after_decompression_modal()
-    #       # lateral_mass_screws_after_decompression_modal_function(lateral_mass_screws_after_decompression = "No")
-    #     )
-    #     
-    #   }
-    # }
   }
   )
   
@@ -1819,7 +1802,7 @@ server <- function(input, output, session) {
     age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
     
     indications_list <- list()
-    indications_list$opening <- glue("This is a {age} year-old {input$sex} that presented with ")
+    indications_list$opening <- glue("This is a {age} year-old {input$sex} that presented with")
     
     if(symptoms != " "){
       indications_list$symptoms <- glue("{glue_collapse(x = symptoms, sep = ', ', last = ' and ')}")
@@ -4438,28 +4421,19 @@ server <- function(input, output, session) {
         select(-object_constructed)
       
       if(any(anterior_approach_objects_df$object == "anterior_plate")){
-        # anterior_approach_objects_df <- anterior_approach_objects_df %>% 
-        #   filter(object == "anterior_plate") %>%
-        #   select(level, vertebral_number, side, object)%>%
-        #   separate(col = level, into = c("cranial_level", "caudal_level"), sep = "-") %>%
-        #   mutate(side_left = "left", side_right = "right") %>%
-        #   select(-side, vertebral_number) %>%
-        #   pivot_longer(cols = c(cranial_level, caudal_level), names_to = "cranial_caudal", values_to = "level") %>%
-        #   select(level, object, side_left, side_right) %>%
-        #   pivot_longer(cols = c(side_left, side_right), names_to = "remove", values_to = "side") %>%
-        #   distinct() %>%
-        #   mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-        #   select(level, vertebral_number, side, object) %>%
-        #   mutate(object = "anterior_plate_screw") %>%
-        #   union_all(anterior_approach_objects_df)
-        anterior_plate_screws_objects_df <- anterior_approach_objects_df %>% 
+        anterior_plate_screws_objects_df <- anterior_approach_objects_df %>%
           filter(object == "anterior_plate") %>%
           select(level, vertebral_number, side, object)%>%
           separate(col = level, into = c("cranial_level", "caudal_level"), sep = "-") %>%
+          mutate(side_left = "left", side_right = "right") %>%
+          select(-side, vertebral_number) %>%
+          pivot_longer(cols = c(cranial_level, caudal_level), names_to = "cranial_caudal", values_to = "level") %>%
+          select(level, object, side_left, side_right) %>%
+          pivot_longer(cols = c(side_left, side_right), names_to = "remove", values_to = "side") %>%
           distinct() %>%
           mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
           select(level, vertebral_number, side, object) %>%
-          mutate(object = "anterior_plate_screw")
+          mutate(object = "anterior_plate_screw") 
         
         anterior_approach_objects_df <- anterior_approach_objects_df %>%
           union_all(anterior_plate_screws_objects_df)
@@ -4505,6 +4479,9 @@ server <- function(input, output, session) {
             left_join(posterior_screws_df) %>%
             mutate(screw_size_type = as.character(screw_size_type)) %>%
             replace_na(list(screw_size_type = " "))
+        }else{
+          posterior_approach_objects_df <- posterior_approach_objects_df%>%
+            mutate(screw_size_type = " ") 
         }
         
         revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
@@ -4518,13 +4495,6 @@ server <- function(input, output, session) {
         
         neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
         
-        # if(neuromonitoring_input_list$emg == "No"){
-        #   neuromonitoring_input_list$emg <- ""
-        # }
-        # neuromonitoring_input_list$pre_positioning_motors <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "tcMEP"), input$pre_positioning_motors, "")
-        # if(neuromonitoring_input_list$pre_positioning_motors == "Pre-positioning motors not obtained"){
-        #   neuromonitoring_input_list$pre_positioning_motors <- ""
-        # }
         neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
                                                                                as.character(input$neuromonitoring_signal_stability),
                                                                                "")
@@ -4532,17 +4502,29 @@ server <- function(input, output, session) {
         ### NOW MAKE PROCEDURES LIST
         procedure_results_list_posterior <- list()
         
-        # implant_start_point_method <- if_else(is.na(input$implant_start_point_method) | is.null(input$implant_start_point_method), "NA", input$implant_start_point_method)
+        # implant_start_point_method <- if_else(length(input$implant_start_point_method) == 0, "NA", input$implant_start_point_method)
+        # implant_start_point_method <- input$implant_start_point_method
+        if(length(input$start_point_method) == 0){
+          implant_start_point_method <- "NA"
+        }else{
+          implant_start_point_method <- input$implant_start_point_method
+        }
+        if(length(input$implant_position_confirmation_method) == 0){
+          implant_position_confirmation_method <- "NA"
+        }else{
+          implant_position_confirmation_method <- input$implant_position_confirmation_method
+        }
         
-        implant_start_point_method <- if_else(length(input$implant_start_point_method) == 0, "NA", input$implant_start_point_method)
-        implant_position_confirmation_method <- if_else(is.na(input$implant_position_confirmation_method) | is.null(input$implant_position_confirmation_method), "NA", input$implant_position_confirmation_method)
+        # implant_position_confirmation_method <- if_else(is.na(input$implant_position_confirmation_method) | is.null(input$implant_position_confirmation_method), "NA", input$implant_position_confirmation_method)
         
+        
+
         if(length(input$lateral_mass_screws_after_decompression) == 0){
           lateral_mass_screws_after_decompression <- "No"
         }else{
           lateral_mass_screws_after_decompression <- paste(input$lateral_mass_screws_after_decompression)
         }
-        
+
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_approach_objects_df,
                                                                        fusion_levels_df = fusions_df,
                                                                        head_position = input$head_positioning,
@@ -4576,7 +4558,8 @@ server <- function(input, output, session) {
                                                                        multiple_position_procedure = input$multiple_approach, 
                                                                        alignment_correction_technique = input$alignment_correction_method,
                                                                        sex = input$sex,
-                                                                       lateral_mass_screws_after_decompression = lateral_mass_screws_after_decompression)
+                                                                       lateral_mass_screws_after_decompression = lateral_mass_screws_after_decompression
+                                                                       )
         
         
       }
@@ -4643,14 +4626,7 @@ server <- function(input, output, session) {
         neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
         
         neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
-        # neuromonitoring_input_list$emg <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "),pattern = "EMG"), input$triggered_emg, "")
-        # if(neuromonitoring_input_list$emg == "No"){
-        #   neuromonitoring_input_list$emg <- ""
-        # }
-        # neuromonitoring_input_list$pre_positioning_motors <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "tcMEP"), input$pre_positioning_motors, "")
-        # if(neuromonitoring_input_list$pre_positioning_motors == "Pre-positioning motors not obtained"){
-        #   neuromonitoring_input_list$pre_positioning_motors <- ""
-        # }
+
         neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
                                                                                as.character(input$neuromonitoring_signal_stability),
                                                                                "")        

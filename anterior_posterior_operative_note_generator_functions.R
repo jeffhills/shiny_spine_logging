@@ -52,9 +52,9 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'intervertebral_cage', 'Insertion of intervertebral biomechanical implant', 'distinct',
                                         'structural_allograft', 'Application of structural allograft', 'combine',
                                         'anterior_disc_arthroplasty', 'Total disk arthroplasty', 'distinct',
-                                        'decompression_diskectomy_fusion', 'Anterior diskectomy and fusion with decompression of the central canal and nerve roots', 'distinct',
-                                        'diskectomy_fusion', 'Anterior diskectomy and fusion', 'distinct',
-                                        'diskectomy_fusion_no_interbody_device', 'Anterior diskectomy and fusion', 'distinct',
+                                        'decompression_diskectomy_fusion', 'Anterior discectomy and fusion with decompression of the central canal and nerve roots', 'distinct',
+                                        'diskectomy_fusion', 'Anterior discectomy and fusion', 'distinct',
+                                        'diskectomy_fusion_no_interbody_device', 'Anterior discectomy and fusion', 'distinct',
                                         'anterior_interbody_implant', 'Insertion of interbody biomechanical implant', 'distinct',
                                         'corpectomy', 'Anterior vertebral corpectomy', 'combine',
                                         'partial_corpectomy', 'Anterior vertebral partial corpectomy', 'combine',
@@ -68,7 +68,7 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
 # - add the object to the "op_note_procedure_performed_summary_classifier_function"
 # - add the object to the "op_note_number_of_paragraphs_for_procedure_category"
 # - add the revision objects if needed
-# - add the 
+# - add the geom
 
 
 ################-------------------------#################### -------- ANTERIOR & POSTERIOR FUNCTIONS  -----------################-------------------------#################### 
@@ -213,7 +213,7 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
         cranial_to_corpectomy_level <- jh_get_cranial_caudal_interspace_body_list_function(level = corpectomy_level)$cranial_level
         
         statement_df <- levels_nested_df %>%
-          mutate(paragraph = glue("I confirmed that I had adequately exposed the {corpectomy_level} body, the {interspace_character} disk, and the {cranial_to_corpectomy_level} body. I then started with the diskectomy. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the diskectomy, I used a combination of a burr and rongeur to excise roughly 60% of the {corpectomy_level} vertebral body. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
+          mutate(paragraph = glue("I confirmed that I had adequately exposed the {corpectomy_level} body, the {interspace_character} disk, and the {cranial_to_corpectomy_level} body. I then started with the discectomy. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the discectomy, I used a combination of a burr and rongeur to excise roughly 60% of the {corpectomy_level} vertebral body. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
           select(paragraph) %>%
           distinct()
       }else{
@@ -222,7 +222,7 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
         caudal_to_corpectomy_level <- jh_get_cranial_caudal_interspace_body_list_function(level = corpectomy_level)$caudal_level
         
         statement_df <- levels_nested_df %>%
-          mutate(paragraph = glue("I confirmed that I had adequately exposed the {corpectomy_level} body, the {interspace_character} disk, and the {caudal_to_corpectomy_level} body. I then started with the diskectomy. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the diskectomy, I used a combination of a burr and rongeur to excise roughly 60% of the {corpectomy_level} vertebral body. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
+          mutate(paragraph = glue("I confirmed that I had adequately exposed the {corpectomy_level} body, the {interspace_character} disk, and the {caudal_to_corpectomy_level} body. I then started with the discectomy. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the discectomy, I used a combination of a burr and rongeur to excise roughly 60% of the {corpectomy_level} vertebral body. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
           select(paragraph) %>%
           distinct()
       }
@@ -230,17 +230,13 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
     }
     ####### 2 level partial corpectom #####
     if(nrow(levels_nested_df) > 1){
-      # levels_df <- levels_nested_df %>%
-      #   select(level) %>%
-      #   distinct()
-      
       corpectomy_levels <- glue_collapse(unique(levels_nested_df$level), sep = ", ", last = " and ")
       cranial_level_character <- jh_get_vertebral_level_function(number = unique(min(levels_nested_df$vertebral_number)))
       caudal_level_character <- jh_get_vertebral_level_function(number = unique(max(levels_nested_df$vertebral_number)))
       interspace_character <- jh_get_cranial_caudal_interspace_body_list_function(level = cranial_level_character)$caudal_interspace
       
       statement_df <- levels_nested_df %>%
-        mutate(paragraph = glue("I confirmed that I had adequately exposed {cranial_level_character} body, the {interspace_character} disk, and the {caudal_level_character} body. I then started with the diskectomy. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the diskectomy, I used a combination of a burr and rongeur to excise roughly 60% of the {cranial_level_character} and {caudal_level_character} vertebral bodies. I carried the corpectomies laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
+        mutate(paragraph = glue("I confirmed that I had adequately exposed {cranial_level_character} body, the {interspace_character} disk, and the {caudal_level_character} body. I then started with the discectomy. Using a combination of a knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the discectomy, I used a combination of a burr and rongeur to excise roughly 60% of the {cranial_level_character} and {caudal_level_character} vertebral bodies. I carried the corpectomies laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
         select(paragraph) %>%
         distinct()
     }
@@ -260,10 +256,6 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
     
     caudal_to_corpectomy_level <- jh_get_cranial_caudal_interspace_body_list_function(level = caudal_level_character)$caudal_level
     
-    # statement_df <- levels_nested_df %>%
-    #   mutate(paragraph = glue("I confirmed satisfactory decompression and end plate preparation. I then measured the distance from the inferior endplate of {cranial_to_corpectomy_level} to the superior endplate of {caudal_to_corpectomy_level} and selected an appropriately sized implant and inserted the implant into the corpectomy defect. The implant had a good press fit between the endplates.")) %>%
-    #   select(paragraph) %>%
-    #   distinct()
     
     statement_df <- levels_nested_df %>%
       mutate(paragraph = glue("I confirmed satisfactory decompression and bone preparation for the corpectomy endplates. I then measured the superior to inferior distance of the corpectomy defect and selected an appropriately sized implant. The implant was packed with graft and then inserted into the corpectomy defect and the implant had a good press fit. I obtained an xray to confirm final positioning in the AP and lateral view and I was satisfied with the positioning.")) %>%
@@ -288,15 +280,15 @@ distinct_anterior_procedure_paragraph_function <- function(level_input, object_i
   }
   
   if(object_input == "decompression_diskectomy_fusion"){
-    paragraph <- glue("I then proceeded with the diskectomy, decompression, and interbody fusion of the {level_input} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. The endplates were distracted and the posterior longitudinal ligament was adequately excised, fully decompressing the central canal. I worked laterally on the left and right with a Kerrison rongeur, resecting any residual disk or osteophyte and fully decompressing the left and the right exiting nerve roots to complete the bilateral foraminotomies. This completed the anterior diskectomy with decompression of the {level_input} interspace and partially completed the fusion of {level_input}.")
+    paragraph <- glue("I then proceeded with the discectomy, decompression, and interbody fusion of the {level_input} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. The endplates were distracted and the posterior longitudinal ligament was adequately excised, fully decompressing the central canal. I worked laterally on the left and right with a Kerrison rongeur, resecting any residual disk or osteophyte and fully decompressing the left and the right exiting nerve roots to complete the bilateral foraminotomies. This completed the anterior discectomy with decompression of the {level_input} interspace and partially completed the fusion of {level_input}.")
   }
   
   if(object_input == "diskectomy_fusion"){
-    paragraph <- glue("I then proceeded with the diskectomy and interbody fusion of the {level_input} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. This completed the anterior diskectomy of {level_input} interspace and partially completed the fusion of {level_input}.")
+    paragraph <- glue("I then proceeded with the discectomy and interbody fusion of the {level_input} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. This completed the anterior discectomy of {level_input} interspace and partially completed the fusion of {level_input}.")
   }
   
   if(object_input == "diskectomy_fusion_no_interbody_device"){
-    paragraph <- glue("I then proceeded with the diskectomy and interbody fusion of the {level_input} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the disc was excised. The endplates were distracted and the and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. Once I was satisfied with the endplate preparation, bone graft was placed into the disk space. This completed the anterior diskectomy and interbody fusion of the {level_input} interspace.")
+    paragraph <- glue("I then proceeded with the discectomy and interbody fusion of the {level_input} interspace. First, I smoothed the anterior disk space and resected any osteophyte using a combination of a ronguer and burr. Using a combination of knife, currette, pituitary ronguer, and Kerrison rongeurs, the anterior longitudinal ligament was incised and the disc was excised. The endplates were distracted and the and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. Once I was satisfied with the endplate preparation, bone graft was placed into the disk space. This completed the anterior discectomy and interbody fusion of the {level_input} interspace.")
   }
   
   if(object_input == "anterior_interbody_implant"){
@@ -460,13 +452,7 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
     unnest(paragraphs_combine_or_distinct)
   # mutate(paragraphs_combine_or_distinct = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) 
   
-  # paragraphs_df <- anterior_procedure_category_nested_df %>%
-  #   mutate(paragraphs = pmap(.l = list(..1 = procedure_category, 
-  #                                      ..2 = data,
-  #                                      ..3 = paragraphs_combine_or_distinct), 
-  #                            .f = ~ anterior_create_full_paragraph_statement_function(procedure_paragraph_intro = ..1, 
-  #                                                                                     df_with_levels_object_nested = ..2, 
-  #                                                                                     paragraphs_combined_or_distinct = ..3)))
+
   ########### NEW ############
   paragraphs_df <- anterior_procedure_category_nested_df %>%
     mutate(paragraphs = pmap(.l = list(..1 = procedure_category, 
@@ -642,7 +628,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   if(max(all_objects_to_add_df$vertebral_number)<11){
     approach_statement <- if_else(approach_statement == "none", "", approach_statement)
     
-    first_paragraph_list$surgical_approach <- paste(glue("A standard {anterior_approach_laterality} Smith Robinson approach was utilized to get to the anterior cervical spine. The skin, subcutaneous tissue were incised, the platysma was transected, and then blunt dissection was carried out between the sternocleidomastoid and carotid sheath laterally, and trachea and esophogus medially, down to the prevertebral fascia. Once the anterior spine was palpated, fluoroscopy was used to localize and confirm levels. "), 
+    first_paragraph_list$surgical_approach <- paste(glue("A standard {anterior_approach_laterality} Smith Robinson approach was utilized to get to the anterior cervical spine. The skin, subcutaneous tissue were incised, the platysma was transected, and then blunt dissection was carried out between the sternocleidomastoid and carotid sheath laterally, and trachea and esophagus  medially, down to the prevertebral fascia. Once the anterior spine was palpated, fluoroscopy was used to localize and confirm levels. "), 
                                                     glue("The longus coli was elevated bilaterally from {proximal_exposure_level$level[[1]]} proximally and to {distal_exposure_level$level[[1]]} distally. Once exposure was adequate, the deep retractors were placed into the anterior spine. "),
                                                     approach_statement)
   }else{
@@ -745,15 +731,14 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
                                                                     additional_procedures_performed_vector = NULL){
   
   plate_levels_df <- objects_added_df %>%
-    filter(str_detect(string = object, pattern = "anterior_plate")) %>%
+    filter(object == "anterior_plate") %>%
     mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level)) %>%
     union_all(objects_added_df %>%
-                filter(str_detect(string = object, pattern = "anterior_plate")) %>%
+                filter(object == "anterior_plate")%>%
                 mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level))) %>%
     unnest(level) %>%
     select(-vertebral_number) %>%
     mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-    # left_join(levels_numbered_df) %>%
     select(level,vertebral_number, approach, category, object, side) %>%
     distinct() %>%
     arrange(vertebral_number)
@@ -1597,7 +1582,7 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
     }else if(procedure_paragraph_intro == "incision and drainage"){
       procedure_completion <- glue("This completed the {procedure_paragraph_intro}.")
     }else{
-      procedure_completion <- glue("This completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+      procedure_completion <- glue("This completed the {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
       
       }
 
@@ -1720,6 +1705,26 @@ op_note_technique_combine_statement <- function(object,
     screw_statements_df <- tibble(screw_statement = c(" "))
   }
   
+  if(object == 'diskectomy'){
+    nerve_roots_df <- levels_side_df %>%
+      separate(col = level, into = c("exiting_root", "traversing_root")) %>%
+      mutate(exiting_root = paste(side, exiting_root), 
+             traversing_root = paste(side, traversing_root))
+    
+    nerve_roots_list <- list() 
+    if(nrow(nerve_roots_df) >1){
+      nerve_roots_list$traversing_roots <- paste(glue_collapse(nerve_roots_df$traversing_root, sep = ", ", last = " and "), "nerve roots")
+    }else{
+      nerve_roots_list$traversing_roots <- paste(glue_collapse(nerve_roots_df$traversing_root, sep = ", ", last = " and "), "nerve root")
+    }
+    if(nrow(nerve_roots_df) >1){
+      nerve_roots_list$exiting_roots <- paste(glue_collapse(nerve_roots_df$exiting_root, sep = ", ", last = " and "), "nerve roots")
+    }else{
+      nerve_roots_list$exiting_roots <- paste(glue_collapse(nerve_roots_df$exiting_root, sep = ", ", last = " and "), "nerve root")
+    }
+    
+  }
+  
   exiting_roots_df <- levels_side_df %>%
     mutate(exiting_root = map(.x = level, .f = ~jh_get_exiting_nerve_root_function(.x))) %>%
     unnest(exiting_root) %>%
@@ -1798,14 +1803,14 @@ op_note_technique_combine_statement <- function(object,
     object == 'complete_facetectomy' ~ glue("For a complete facetectomy, the inferior, superior, medial and lateral borders of the inferior and superior facet were identified. Both the superior and inferior facet were completely excised and the underlying exiting nerve root decompressed. I performed a complete facetectomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}. This effectively decompressed {glue_collapse(x = exiting_roots_df$exiting_roots_statement, sep = ', ', last = ' and ')}."),
     object == 'grade_1' ~ glue("The inferior, superior, medial and lateral borders of the inferior facet were identified. The inferior facets {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} were excised and the bone was morselized to be used as morselized autograft."),
     object == 'grade_2' ~ glue("For the posterior column osteotomy, a small rent was made in the interlaminar space to develop the plane between the ligamentum and the dura. A Kerrison rongeur was then used to excise the ligamentum. this was carried out laterally in both directions until the facets were encountered. The superior and inferior facet were both adequately resected along with any necessary lamina to fully release the posterior column. I performed posterior column (Smith-Peterson) osteotomies at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}"),
-    object == 'diskectomy' ~ glue("For a diskectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. I performed a diskectomy with partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Using a high-speed burr and Kerrison rongeurs, I first performed a foraminotomy and excised the ligamentum flavum. The dural sac was identified and traversing root was protected. The annulus was then incised and the diseased disk materal was removed. Following the decompression, the canal and foramen and lateral recess were palpated to confirm an appropriate decompression had been completed."),
+    object == 'diskectomy' ~ glue("For a discectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. Using a high-speed burr and Kerrison rongeurs, I first performed a foraminotomy and removed distal edge of the hemilamina, exposing the ligamentum flavum. I then carefully excised the ligamentum flavum, exposing the dura and exiting nerve root. The dural sac was identified and traversing root was protected. The annulus was then incised and the diseased disk materal was removed.  I performed a discectomy with partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the {nerve_roots_list$traversing_roots}. Following the decompression, the canal and foramen and lateral recess were palpated to confirm an appropriate decompression had been completed."),
     object == 'laminotomy' ~ glue("For the laminotomy, the cranial and caudal laminar edges, pars, and facet joints were used as landmarks. Once I had determined the laminotomy site, I used a combination of a high-speed burr and Kerrison rongeurs to resect the bone dorsal to the nerve root. I performed a laminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Following the decompression, the foramen was palpated to confirm an adequate decompression had been completed."),
     object == 'cervical_foraminotomy' ~ glue("For the posterior cervical foraminotomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}, the superior and inferior facet and joint line was clearly identified. I used a combination of a high-speed burr to resect roughly 50% of the overlying medial inferior facet, which exposed the superior facet. I then proceeded with the burr, resecting the superior articular facet out to the lateral border of the pedicles. Copious irrigation was used during the resection. After removing the superior facet, the exiting nerve root was identified. A Kerrison 1 was used to remove any remaining overlying tissue. I performed a posterior cervical foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Following the decompression, the hemostasis was obtained and I was able to palpate the lateral walls of the cranial and caudal pedicles, confirming adequate decompression."),
     object == 'laminectomy' ~ glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}. First, using a combination of a high-speed burr and Kerrison rongeurs, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. Following the decompression, the canal was palpated to confirm an adequate decompression had been completed."),
     object == 'laminectomy' ~ glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} in order to excise the underlying facet cyst. First, using a combination of a high-speed burr and Kerrison rongeurs, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. This allowed exposure to the underlying facet cyst, which was fully excised. Following the decompression, the canal was palpated to confirm an adequate decompression had been completed."),
     object == 'laminectomy_for_tumor' ~ glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} in order to perform an open biopsy and excise the intraspinal extradural tumor. First, using a combination of a high-speed burr and Kerrison rongeurs, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. At this point, I encountered the extradural lesion which measured roughly {length(levels_side_df$level)*3.5}cm long by ~2-3cm wide. I obtained a biopsy of the tissue and then proceeded to excise any visible tumor in order to adequately create separation between visible tumor and the dura. Following the laminectomy and excision of the lesion, the canal was palpated to confirm an adequate decompression had been completed."),
     object == 'sublaminar_decompression' ~ glue("Using a combination of a high-speed burr and Kerrison rongeurs, I performed a partial laminectomy bilaterally at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace. First, I resected the dorsal lamina and then excised the ligamentum flavum, exposing the dura. To fully decompress the exiting and traversing nerve roots within the neural foramen and lateral recess, the medial facet was partially excised and a foraminotomy performed on the left and right at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace. Following the decompression, the canal and foramen were palpated to confirm an adequate decompression had been completed."),
-    object == 'revision_diskectomy' ~ glue("For the revision diskectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. I performed a revision and reexploration with diskectomy and partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. Using a high-speed burr and Kerrison rongeurs, I performed a foraminotomy and excised the scar and ligamentum. The dural sac was identified and traversing root was protected. The annulus and disk space were identified and the diseased disk material was excised. Following the revision decompression, the canal and foramen and lateral recess were palpated to confirm an adequate decompression had been completed."),
+    object == 'revision_diskectomy' ~ glue("For the revision discectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. I performed a revision and reexploration with discectomy and partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. Using a high-speed burr and Kerrison rongeurs, I performed a foraminotomy and excised the scar and ligamentum. The dural sac was identified and traversing root was protected. The annulus and disk space were identified and the diseased disk material was excised. Following the revision decompression, the canal and foramen and lateral recess were palpated to confirm an adequate decompression had been completed."),
     object == 'revision_laminotomy' ~ glue("For the revision laminotomy, the cranial and caudal laminar edges, pars, and facet joints were used as landmarks. I carefully exposed the dorsal elements until I had identified the edges of the laminar defect. Once I determined the laminotomy site, I used a combination of a high-speed burr and Kerrison rongeurs to resect the bone dorsal to the nerve root. I performed a revision laminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Following the decompression, the foramen was palpated to confirm an adequate decompression had been completed."),
     object == 'revision_laminectomy' ~ glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a reexploration and revision laminectomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}. Using a combination of a high-speed burr, currettes and Kerrison rongeurs, I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. I removed any dorsal lamina, ligamentum flavum and scar thought to still be causing compression. The central canal was palpated to confirm full decompression of the thecal sac. Following the revision decompression, the canal was palpated to confirm an adequate decompression had been completed."),
     object == 'revision_sublaminar_decompression' ~ glue("Using a combination of a high-speed burr and Kerrison rongeurs, I performed a reexploration and revision decompression bilaterally at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace. First, I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. I proceeded with partial laminectomies and excised the scar and underlying ligamentum flavum. The medial facet was partially excised and a foraminotomy performed on the left and right at the {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')} interspace, to fully decompress the exiting and traversing nerve roots within the neural foramen and lateral recess. Following the revision decompression, the canal and foramen were palpated to confirm an adequate decompression had been completed."),
