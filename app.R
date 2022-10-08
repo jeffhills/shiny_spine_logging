@@ -39,7 +39,7 @@ source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
 source("load_icd_codes.R", local = TRUE)
 # source("no_implants_added_op_note.R", local = TRUE)
- 
+
 # jh_build_test_implant_function <- function(side_level_object_list = list("left_L3_pedicle_screw", "left_l4_pedicle_screw", "left_l5_pedicle_screw", 
 #                                                                          "right_L3_pedicle_screw", "right_l5_pedicle_screw")){
 #   
@@ -160,6 +160,18 @@ ui <- dashboardPage(skin = "black",
                 }"),
                 tags$style(
                   "#posterior_approach_objects_for_op_note_df {
+                        overflow-x: auto;
+                }"),
+                tags$style(
+                  "#full_objects_passed_to_posterior_op_note {
+                        overflow-x: auto;
+                }"),
+                tags$style(
+                  "#anterior_approach_objects_for_op_note_df {
+                        overflow-x: auto;
+                }"),
+                tags$style(
+                  "#full_objects_passed_to_anterior_op_note {
                         overflow-x: auto;
                 }"),
                 tags$style(
@@ -925,24 +937,27 @@ ui <- dashboardPage(skin = "black",
                           #             tableOutput(outputId = "interbody_details_redcap_df_sidetab")
                           #         ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All objects table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                                      tableOutput(outputId = "all_objects_table")
-                                  ),
-                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Anterior Objects Passed to Op Note:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                              tableOutput(outputId = "anterior_objects_passed_to_op_note_df")
+                              tableOutput(outputId = "all_objects_table")
                           ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Revision Implants table:"), status = "success", collapsible = TRUE,solidHeader = TRUE,
                               tableOutput(outputId = "revision_implants_table")
                           ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Posterior Approach Objects for Op Note:"), status = "success", collapsible = TRUE,solidHeader = TRUE, 
-                               tableOutput(outputId = "posterior_approach_objects_for_op_note_df")),
+                              tableOutput(outputId = "posterior_approach_objects_for_op_note_df")),
+                          
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Posterior: Objects passed to Op Note Generater:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
+                              verbatimTextOutput(outputId = "full_objects_passed_to_posterior_op_note")),
+                          
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Anterior Approach Objects for Op Note:"), status = "success", collapsible = TRUE,solidHeader = TRUE, 
+                              tableOutput(outputId = "anterior_approach_objects_for_op_note_df")),
+                          
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Anterior: Objects passed to Op Note Generater:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
+                              verbatimTextOutput(outputId = "full_objects_passed_to_anterior_op_note")),
+                          
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
                               tableOutput(outputId = "all_inputs")),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs Not Logged:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
-                              tableOutput(outputId = "all_inputs_removed")),
-                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "List of Objects passed to Posterior Op Note Generater:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
-                              verbatimTextOutput(outputId = "full_objects_passed_to_posterior_op_note"))
-                          # box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
-                          #     tableOutput(outputId = "all_inputs_printed")),
+                              tableOutput(outputId = "all_inputs_removed"))
                           #         ###########################################
                   )
                 )
@@ -974,7 +989,7 @@ server <- function(input, output, session) {
   rcon_reactive <- reactiveValues()
   
   observeEvent(input$redcap_token, {
-
+    
     rcon_reactive$rcon <- redcapConnection(url = 'https://redcap.uthscsa.edu/REDCap/api/', token = input$redcap_token)    
     
   })
@@ -1058,10 +1073,7 @@ server <- function(input, output, session) {
                        filter(object != "")
                      
                      if(length(unique(existing_patient_data$patient_df$approach))>1){
-                       # approach_to_use <- (all_implants_constructed_df %>%
-                       #                       count(approach) %>%
-                       #                       filter(n == max(n)))$approach[[1]]
-                       
+
                        approach_to_filter_by <- str_to_lower(input$spine_approach)
                        # approach_to_filter_by <- "posterior"
                        
@@ -1248,23 +1260,23 @@ server <- function(input, output, session) {
   observeEvent(list(input$spinal_regions,
                     input$diagnosis_category, 
                     input$open_diagnosis_symptoms_procedure_modal), ignoreInit = TRUE, {
-    
-    if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
-      age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-    }else{
-      age <- 999
-    }
-    
-    spine_diagnosis_choices_list <- jh_filter_icd_codes_generate_vector_function(section_input = input$diagnosis_category, spine_region_input = input$spinal_regions, age = age)
-    
-    updatePickerInput(session = session,
-                      inputId = "primary_diagnosis",
-                      label = "Diagnosis Search:", 
-                      choices = spine_diagnosis_choices_list,
-                      options = pickerOptions(liveSearch = TRUE, 
-                                              liveSearchNormalize = TRUE, 
-                                              virtualScroll = 200))
-  })
+                      
+                      if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
+                        age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+                      }else{
+                        age <- 999
+                      }
+                      
+                      spine_diagnosis_choices_list <- jh_filter_icd_codes_generate_vector_function(section_input = input$diagnosis_category, spine_region_input = input$spinal_regions, age = age)
+                      
+                      updatePickerInput(session = session,
+                                        inputId = "primary_diagnosis",
+                                        label = "Diagnosis Search:", 
+                                        choices = spine_diagnosis_choices_list,
+                                        options = pickerOptions(liveSearch = TRUE, 
+                                                                liveSearchNormalize = TRUE, 
+                                                                virtualScroll = 200))
+                    })
   
   
   
@@ -1420,142 +1432,13 @@ server <- function(input, output, session) {
                                                                      # alignment_correction_method = input$alignment_correction_method
       )
     )
-      
-      # modalDialog(title = "Confirm Fusion Levels", easyClose = TRUE, footer = modalButton(label = "Confirmed"),
-      #             box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
-      #                 conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
-      #                                  fluidRow(
-      #                                    prettyRadioButtons(
-      #                                      inputId = "approach_specified_posterior",
-      #                                      label = "Posterior approach was:", 
-      #                                      inline = TRUE,
-      #                                      choices = c("Midline",
-      #                                                  "Paraspinal or Paramedian", 
-      #                                                  "Stab"),
-      #                                      icon = icon("check"), 
-      #                                      bigger = TRUE,
-      #                                      status = "info"
-      #                                    )
-      #                                  ),
-      #                                  fluidRow(
-      #                                    prettyRadioButtons(
-      #                                      inputId = "approach_open_mis",
-      #                                      label = "The procedure was performed:", 
-      #                                      inline = TRUE,
-      #                                      choices = c("Open",
-      #                                                  "Tubular", 
-      #                                                  "Endoscopic", 
-      #                                                  "Mini Open",
-      #                                                  "Percutaneous Screw"
-      #                                      ),
-      #                                      selected = "Open",
-      #                                      icon = icon("check"), 
-      #                                      bigger = TRUE,
-      #                                      status = "success"
-      #                                    )
-      #                                  ),
-      #                                  fluidRow(
-      #                                    prettyCheckboxGroup(
-      #                                      inputId = "approach_robot_navigation",
-      #                                      label = "Select any modality used:", 
-      #                                      inline = TRUE,
-      #                                      choices = c("Microscopic", 
-      #                                                  "Navigated", 
-      #                                                  "Robotic"),
-      #                                      icon = icon("check"), 
-      #                                      bigger = TRUE,
-      #                                      status = "success"
-      #                                    )
-      #                                  )
-      #                 ),
-      #                 conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
-      #                                  prettyRadioButtons(
-      #                                    inputId = "approach_specified_anterior",
-      #                                    label = "Approach was:",
-      #                                    inline = TRUE,
-      #                                    choices = c("Left-sided", 
-      #                                                "Right-sided",
-      #                                                "Paramedian",
-      #                                                "Lateral Transpsoas",
-      #                                                "Lateral Antepsoas",
-      #                                                "Thoracoabdominal",
-      #                                                "Thoracotomy",
-      #                                                "Transperitoneal",
-      #                                                "Retroperitoneal"),
-      #                                    selected = "Left-sided",
-      #                                    icon = icon("check"),
-      #                                    bigger = TRUE,
-      #                                    status = "info"
-      #                                  )
-      #                 ),
-      #                 if(nrow(screws_selected_df_reactive())>0){
-      #                   fluidRow(
-      #                     awesomeRadio(
-      #                       inputId = "implant_start_point_method",
-      #                       label = "Method for identifying screw start point:",
-      #                       choices = c(
-      #                         "Implant start points were identified using anatomic landmarks.",
-      #                         "Intraoperative fluoroscopy and pedicle markers were used to confirm start points for screw placement.", 
-      #                         "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
-      #                         "Intraoperative navigation was used for identifying start points.",
-      #                         "NA"),
-      #                       selected = "", 
-      #                       inline = FALSE, 
-      #                       status = "success"
-      #                     )
-      #                   )
-      #                 },
-      #                 if(nrow(screws_selected_df_reactive())>0){
-      #                   fluidRow(
-      #                     awesomeRadio(
-      #                       inputId = "implant_position_confirmation_method",
-      #                       label = "Method for confirming implant position:",
-      #                       choices = c(
-      #                         "Intraoperative fluoroscopy was used to confirm position of all implants.", 
-      #                         "Intraoperative CT scan was used to confirm position of all implants.",
-      #                         "NA"), 
-      #                       selected = "Intraoperative fluoroscopy was used to confirm position of all implants.",
-      #                       inline = FALSE, 
-      #                       status = "success"
-      #                     )
-      #                   )
-      #                 },
-      #                 if(nrow(screws_selected_df_reactive())>0){
-      #                   fluidRow(
-      #                     awesomeRadio(
-      #                       inputId = "alignment_correction_method",
-      #                       label = "Method for any alignment correction:",
-      #                       choices = c(
-      #                         "The Pro-axis bed was bent to achieve the desired sagittal plane alignment", 
-      #                         "In situ rod benders were used to correct the coronal and sagittal plane",
-      #                         "NA"), 
-      #                       selected = "NA",
-      #                       inline = FALSE, 
-      #                       status = "success"
-      #                     )
-      #                   )
-      #                 },
-      #                 if(length(fusion_levels_computed_reactive_df()$level)>0){
-      #                   fluidRow(
-      #                    prettyCheckboxGroup(
-      #                            inputId = "fusion_levels_confirmed",
-      #                            label = "Please Confirm The Fusion Levels:", 
-      #                            bigger = TRUE,
-      #                            choices = interbody_levels_df$level, 
-      #                            selected = fusion_levels_computed_reactive_df()$level,
-      #                            icon = icon("check"), 
-      #                            status = "success"
-      #                          ) 
-      #                   )
-      #                   }
-      #             )
-      # )
-    # )
+    
+
   })
   
- 
+  
   observeEvent(input$implants_complete, ignoreInit = TRUE, {
-
+    
     if(input$implants_complete > 1){
       showModal(
         confirm_fusion_levels_and_technique_details_modal_box_function(screws_selected_df_reactive = screws_selected_df_reactive(), 
@@ -1568,49 +1451,16 @@ server <- function(input, output, session) {
                                                                        implant_position_confirmation_method = input$implant_position_confirmation_method, 
                                                                        alignment_correction_method = input$alignment_correction_method
         )
-
+        
       )
     }
-    }
+  }
   )
   observeEvent(input$fusion_levels_technique_details_modal_complete_button, ignoreNULL = TRUE, ignoreInit = TRUE, {
-  removeModal()
-    }
+    removeModal()
+  }
   )
-  
-  # lateral_mass_screws_after_decompression_modal <- reactive({
-  #   
-  #   lateral_mass_screw_present <- any(all_objects_to_add_list$objects_df$object == "lateral_mass_screw")
-  #   
-  #   decompression_present <- any(all_objects_to_add_list$objects_df$category == "decompression")
-  #   
-  #   if(lateral_mass_screw_present == TRUE & decompression_present == TRUE){
-  #     default_answer <- "Yes"
-  #   }else{
-  #     default_answer <- "No"
-  #   }
-  #   
-  #   modalDialog(title = "Lateral Mass Screws and Decompression", 
-  #               easyClose = TRUE, 
-  #               footer = modalButton(label = "Confirmed"),
-  #               box(width = 12,
-  #                   fluidRow(
-  #                     prettyRadioButtons(
-  #                       inputId = "lateral_mass_screws_after_decompression",
-  #                       label = "Were lateral mass screws placed AFTER the decompression?", 
-  #                       inline = TRUE,
-  #                       choices = c("No", 
-  #                                   "Yes"),
-  #                       icon = icon("check"), 
-  #                       selected =  default_answer,
-  #                       bigger = TRUE,
-  #                       status = "info"
-  #                     )
-  #                   )
-  #               )
-  #   )
-  #   
-  # })
+
   
   observeEvent(input$fusion_levels_technique_details_modal_complete_button, ignoreNULL = TRUE, ignoreInit = TRUE, {
     lateral_mass_screws_after_decompression_modal_function(implant_objects_df = all_objects_to_add_list$objects_df)
@@ -1895,7 +1745,7 @@ server <- function(input, output, session) {
     )
   })
   
-
+  
   
   observeEvent(input$additional_surgical_details_complete, ignoreInit = TRUE, {
     removeModal()
@@ -2085,9 +1935,9 @@ server <- function(input, output, session) {
     enframe(details_list, name = "Variable", value = "Input") %>%
       unnest("Input") %>%
       mutate(Input = if_else(Input == "NA", "No Value Entered", Input))
-      # replace_na(list(Input = "No Value Entered"))
+    # replace_na(list(Input = "No Value Entered"))
     
-      # replace_na(list(Input = "No Value Entered"))
+    # replace_na(list(Input = "No Value Entered"))
     
   })
   
@@ -2497,7 +2347,7 @@ server <- function(input, output, session) {
     if(nrow(left_rod_implants_df_reactive()) > 1){
       updatePickerInput(session = session, 
                         inputId = "left_main_rod_size", 
-                        selected = if_else(input$left_main_rod_size == "None", "5.5mm", input$left_main_rod_size)
+                        selected = if_else(input$left_main_rod_size == "None", "6.0mm", input$left_main_rod_size)
       )
       updateAwesomeRadio(session = session, 
                          inputId = "left_main_rod_material",
@@ -2511,7 +2361,7 @@ server <- function(input, output, session) {
     if(nrow(right_rod_implants_df_reactive()) > 1){
       updatePickerInput(session = session, 
                         inputId = "right_main_rod_size", 
-                        selected = if_else(input$right_main_rod_size == "None", "5.5mm", input$right_main_rod_size)
+                        selected = if_else(input$right_main_rod_size == "None", "6.0mm", input$right_main_rod_size)
       )
       updateAwesomeRadio(session = session, 
                          inputId = "right_main_rod_material", 
@@ -2853,10 +2703,7 @@ server <- function(input, output, session) {
     }else{
       object_currently_selected_to_add <- input$object_to_add
     }
-    # object_type_filtered_df <- implant_starts_df %>%
-    #     filter(object %in% object_currently_selected_to_add)
-    # 
-    
+
     object_type_filtered_df <- all_implants_constructed_df %>%
       filter(object %in% object_currently_selected_to_add)
     
@@ -3085,54 +2932,7 @@ server <- function(input, output, session) {
         select(level, vertebral_number, approach, object, composition, device_name, height, integrated_fixation, expandable, other, implant_statement) %>%
         mutate(across(everything(), ~ as.character(.x))) %>%
         mutate(across(everything(), ~ replace_na(.x, " ")))
-        # 
-        # mutate(composition = as.character(composition), 
-        #        other = as.character(other), 
-        #        device_name = as.character(device_name)) %>%
-        # mutate(composition = if_else(is.na(composition), " ", composition)) %>%
-        # mutate(other = if_else(is.na(other), " ", other)) %>%
-        # mutate(device_name = if_else(is.na(device_name), " ", device_name)) %>%
-        # ## attempting correction:
-        # mutate(expandable_statement = if_else(expandable == "Expandable", "expandable", " ")) %>%
-        # mutate(integrated_fixation_statement = if_else(integrated_fixation == "Integrated Fixation", "with integrated fixation", " ")) %>%
-        # mutate(integrated_fixation = if_else(integrated_fixation == "xx", "No integrated fixation", "Integrated Fixation")) %>%
-        # mutate(expandable = if_else(expandable == "xx", "Static", "Expandable")) %>%
-        # mutate(integrated_cranial_screws_statement = case_when(
-        #   integrated_cranial_screw_1 == "0" & integrated_cranial_screw_2 == "0" ~ glue("No screws were inserted through the implant cranially."),
-        #   integrated_cranial_screw_1 != "0" & integrated_cranial_screw_2 == "0" ~ glue("A {integrated_cranial_screw_1}mm screw was inserted cranially through the implant."),
-        #   integrated_cranial_screw_1 == "0" & integrated_cranial_screw_2 != "0" ~ glue("A {integrated_cranial_screw_2}mm screw was inserted cranially through the implant."),
-        #   integrated_cranial_screw_1 != "0" & integrated_cranial_screw_2 != "0" ~ glue("A {integrated_cranial_screw_1}mm and a {integrated_cranial_screw_2}mm screw were inserted cranially through the implant."),
-        # )) %>%
-        # mutate(integrated_cranial_screws_statement = as.character(integrated_cranial_screws_statement)) %>%
-        # mutate(integrated_cranial_screws_statement = if_else(integrated_fixation == "No integrated fixation", "", integrated_cranial_screws_statement)) %>%
-        # mutate(integrated_caudal_screws_statement = case_when(
-        #   integrated_caudal_screw_1 == "0" & integrated_caudal_screw_2 == "0" ~ glue("No screws were placed through the implant caudally."),
-        #   integrated_caudal_screw_1 != "0" & integrated_caudal_screw_2 == "0" ~ glue("A {integrated_caudal_screw_1}mm screw was inserted aimed caudal."),
-        #   integrated_caudal_screw_1 == "0" & integrated_caudal_screw_2 != "0" ~ glue("A {integrated_caudal_screw_2}mm screw was inserted aimed caudal."),
-        #   integrated_caudal_screw_1 != "0" & integrated_caudal_screw_2 != "0" ~ glue("A {integrated_caudal_screw_1}mm and a {integrated_caudal_screw_2}mm screw were placed caudal through the implant."),
-        # )) %>%
-        # mutate(integrated_caudal_screws_statement = as.character(integrated_caudal_screws_statement)) %>%
-        # mutate(integrated_caudal_screws_statement = if_else(integrated_fixation == "No integrated fixation", "", integrated_caudal_screws_statement)) %>%
-        # mutate(implant_statement = glue("At the {level} interspace, a {height}mm height {composition} {device_name} {other} {expandable_statement} implant {integrated_fixation_statement} was selected and placed into the {level} interspace. {integrated_cranial_screws_statement} {integrated_caudal_screws_statement}")) %>%
-        # # mutate(implant_statement = paste(glue("At the {level} interspace, a {height}mm height {composition}"), 
-        # #                                  device_name,
-        # #                                  if_else(other == "", glue(" "), glue(" ({other}) ")),
-        # #                                  if_else(expandable == "Expandable", "expandable", " "), 
-        # #                                  "implant", 
-        # #                                  if_else(integrated_fixation == "Integrated Fixation", "with integrated fixation", " "),
-        # #                                  "was selected.")) %>%
-        # mutate(implant_statement = as.character(implant_statement)) %>%
-        # mutate(implant_statement = str_replace_all(string = implant_statement, pattern = "mmmm", replacement = "mm")) %>%
-        # mutate(implant_statement = str_squish(implant_statement)) %>%
-        # mutate(implant_statement = str_remove_all(string = implant_statement, pattern = "()")) %>% 
-        # # mutate(integrated_fixation = if_else(integrated_fixation == "xx", "No integrated fixation", "Integrated Fixation")) %>%
-        # # mutate(expandable = if_else(expandable == "xx", "Static", "Expandable")) %>%
-        # select(level, vertebral_number, approach, object, composition, device_name, height, integrated_fixation, expandable, other, implant_statement) %>%
-        # mutate(across(everything(), ~ as.character(.x))) %>%
-        # mutate(across(everything(), ~ replace_na(.x, " ")))
-        
-      
-      
+
     }else{
       interbody_details_df <- tibble(level = character(), vertebral_number = double(), object = character(), approach = character(),  composition = character(), implant_statement = character())
     }
@@ -3447,9 +3247,9 @@ server <- function(input, output, session) {
   })
   
   output$revision_implants_table <- renderTable({
-      revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
-          union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
-      revision_implants_df
+    revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
+      union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
+    revision_implants_df
   })
   
   observeEvent(right_revision_implants_reactive_list(), ignoreNULL = TRUE, ignoreInit = TRUE, {
@@ -3929,7 +3729,7 @@ server <- function(input, output, session) {
     
   })
   
-
+  
   
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
@@ -4292,10 +4092,12 @@ server <- function(input, output, session) {
     
   })
   
+
+  ######################### GENERATE ALL INPUTS FOR POSTERIOR OP NOTE:
   
- ##posterior approach objects for testing 
-  
-  output$posterior_approach_objects_for_op_note_df <- renderTable({
+  posterior_op_note_inputs_list_reactive <- reactive({
+    posterior_op_note_inputs_list_reactive <- list()
+    ######
     posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
       filter(approach == "posterior")  %>%
       select(-object_constructed)
@@ -4305,29 +4107,339 @@ server <- function(input, output, session) {
         left_join(interbody_details_df_reactive() %>% select(level, approach, object, implant_statement)) %>%
         replace_na(list(implant_statement = " "))
     }else{
-      posterior_approach_objects_df %>%
+      posterior_approach_objects_df <- posterior_approach_objects_df %>%
         mutate(implant_statement = " ")
     }
     
-    posterior_screws_df <- posterior_approach_objects_df %>%
-      filter(approach == "posterior") %>%
-      filter(str_detect(object, "screw")) %>%
-      mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
-      left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
-      select(level, approach, side, object, screw_size_type) %>%
-      mutate(screw_size_type = as.character(screw_size_type)) %>%
-      replace_na(list(screw_size_type = " "))
+    if(nrow(screw_details_redcap_df_reactive()) > 0){
+      posterior_screws_df <- posterior_approach_objects_df %>%
+        filter(approach == "posterior") %>%
+        filter(str_detect(object, "screw")) %>%
+        mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
+        left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
+        select(level, approach, side, object, screw_size_type) %>%
+        mutate(screw_size_type = as.character(screw_size_type)) %>%
+        replace_na(list(screw_size_type = " "))
+      
+      posterior_approach_objects_df <- posterior_approach_objects_df%>%
+        left_join(posterior_screws_df) %>%
+        mutate(screw_size_type = as.character(screw_size_type)) %>%
+        replace_na(list(screw_size_type = " "))
+    }else{
+      posterior_approach_objects_df <- posterior_approach_objects_df%>%
+        mutate(screw_size_type = " ") 
+    }
     
-    posterior_approach_objects_df <- posterior_approach_objects_df%>%
-      left_join(posterior_screws_df) %>%
-      mutate(screw_size_type = as.character(screw_size_type)) %>%
-      replace_na(list(screw_size_type = " "))
+    posterior_op_note_inputs_list_reactive$posterior_approach_objects_df <- posterior_approach_objects_df
     
-    posterior_approach_objects_df
+    #######
     
+    if(length(input$fusion_levels_confirmed)>0){
+      fusions_df <- tibble(level = input$fusion_levels_confirmed) %>%
+        left_join(levels_numbered_df)
+    }else{
+      fusions_df <- tibble(level = character(), vertebral_number = double(), object = character())
+    }
+    
+    posterior_op_note_inputs_list_reactive$fusions_df <- fusions_df
+    
+    #######
+    posterior_op_note_inputs_list_reactive$head_positioning <- input$head_positioning
+    
+    #######
+    posterior_op_note_inputs_list_reactive$approach_specified_posterior <- input$approach_specified_posterior
+    
+    #######
+    posterior_op_note_inputs_list_reactive$approach_open_mis <- input$approach_open_mis
+    
+    #######
+    posterior_op_note_inputs_list_reactive$approach_robot_navigation <- input$approach_robot_navigation
+    
+    #######
+    neuromonitoring_input_list <- list()
+    neuromonitoring_input_list$modalities <- input$neuromonitoring
+    neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
+    
+    neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
+    
+    neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
+                                                                           as.character(input$neuromonitoring_signal_stability),
+                                                                           "")
+    
+    posterior_op_note_inputs_list_reactive$neuromonitoring_input_list <- neuromonitoring_input_list
+    
+    #######
+    if(length(input$start_point_method) == 0){
+      implant_start_point_method <- "NA"
+    }else{
+      implant_start_point_method <- input$implant_start_point_method
+    }
+    
+    posterior_op_note_inputs_list_reactive$implant_start_point_method <- implant_start_point_method
+    
+    #######
+    if(length(input$implant_position_confirmation_method) == 0){
+      implant_position_confirmation_method <- "NA"
+    }else{
+      implant_position_confirmation_method <- input$implant_position_confirmation_method
+    }
+    
+    posterior_op_note_inputs_list_reactive$implant_position_confirmation_method <- implant_position_confirmation_method
+    
+    #######
+    posterior_op_note_inputs_list_reactive$local_anesthesia <- input$local_anesthesia
+    
+    
+    #######
+    posterior_op_note_inputs_list_reactive$open_canal <- input$open_canal
+    
+    #######
+    revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
+      union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
+    
+    posterior_op_note_inputs_list_reactive$revision_implants_df <- revision_implants_df
+    
+    #######
+    posterior_op_note_inputs_list_reactive$left_main_rod_size <- input$left_main_rod_size
+    
+    #######
+    posterior_op_note_inputs_list_reactive$left_main_rod_material <- input$left_main_rod_material
+    
+    #######
+    posterior_op_note_inputs_list_reactive$right_main_rod_size <- input$right_main_rod_size
+    
+    #######
+    posterior_op_note_inputs_list_reactive$right_main_rod_material <- input$right_main_rod_material
+    
+    #######
+    posterior_op_note_inputs_list_reactive$added_rods_statement <- added_rods_statement_reactive()
+    
+    #######
+    posterior_op_note_inputs_list_reactive$preop_antibiotics <- input$preop_antibiotics
+    
+    #######
+    posterior_op_note_inputs_list_reactive$additional_procedures_vector <- additional_procedures_vector_reactive()
+    
+    #######
+    posterior_op_note_inputs_list_reactive$prior_fusion_levels <- input$prior_fusion_levels
+    
+    #######
+    posterior_op_note_inputs_list_reactive$instrumentation_removed_vector <- unique(c(input$left_revision_implants_removed, input$right_revision_implants_removed))
+    
+    #######
+    posterior_op_note_inputs_list_reactive$posterior_bmp_dose_reactive <- posterior_bmp_dose_reactive()
+    
+    #######
+    posterior_op_note_inputs_list_reactive$posterior_bone_graft <- input$posterior_bone_graft
+    
+    #######
+    posterior_op_note_inputs_list_reactive$posterior_allograft_amount <- input$posterior_allograft_amount
+    
+    #######
+    posterior_op_note_inputs_list_reactive$morselized_autograft_separate <- 0
+    
+    #######
+    posterior_op_note_inputs_list_reactive$deep_drains_posterior <- input$deep_drains_posterior
+    
+    #######
+    posterior_op_note_inputs_list_reactive$superficial_drains_posterior <- input$superficial_drains_posterior
+    
+    #######
+    posterior_op_note_inputs_list_reactive$additional_end_procedure_details <- input$additional_end_procedure_details
+    
+    #######
+    posterior_op_note_inputs_list_reactive$closure_details <- input$closure_details
+    
+    #######
+    posterior_op_note_inputs_list_reactive$dressing_details <- input$dressing_details
+    
+    #######
+    posterior_op_note_inputs_list_reactive$multiple_approach <- input$multiple_approach
+    
+    #######
+    posterior_op_note_inputs_list_reactive$alignment_correction_method <- input$alignment_correction_method 
+    
+    #######
+    posterior_op_note_inputs_list_reactive$sex <- input$sex
+    
+    #######
+    if(length(input$lateral_mass_screws_after_decompression) == 0){
+      lateral_mass_screws_after_decompression <- "No"
+    }else{
+      lateral_mass_screws_after_decompression <- paste(input$lateral_mass_screws_after_decompression)
+    }
+    
+    posterior_op_note_inputs_list_reactive$lateral_mass_screws_after_decompression <- lateral_mass_screws_after_decompression
+    
+    posterior_op_note_inputs_list_reactive
   })
   
-  ######################
+  ######################################### NOW ALL THE NECESSARY INPUTS FOR THE POSTERIOR OP NOTE ARE GENERATED
+  
+  ###################### NOW GENERATE ALL THE NECESSARY INPUTS FOR THE THE ANTERIOR OP NOTE
+  anterior_op_note_inputs_list_reactive <- reactive({
+    anterior_op_note_inputs_list_reactive <- list()
+    ######
+    
+    anterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
+      filter(approach == "anterior")  %>%
+      select(-object_constructed)
+    
+    if(any(anterior_approach_objects_df$object == "anterior_plate")){
+      anterior_plate_screws_objects_df <- anterior_approach_objects_df %>%
+        filter(object == "anterior_plate") %>%
+        select(level, vertebral_number, side, object)%>%
+        separate(col = level, into = c("cranial_level", "caudal_level"), sep = "-") %>%
+        mutate(side_left = "left", side_right = "right") %>%
+        select(-side, vertebral_number) %>%
+        pivot_longer(cols = c(cranial_level, caudal_level), names_to = "cranial_caudal", values_to = "level") %>%
+        select(level, object, side_left, side_right) %>%
+        pivot_longer(cols = c(side_left, side_right), names_to = "remove", values_to = "side") %>%
+        distinct() %>%
+        mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+        select(level, vertebral_number, side, object) %>%
+        mutate(object = "anterior_plate_screw") 
+      
+      anterior_approach_objects_df <- anterior_approach_objects_df %>%
+        union_all(anterior_plate_screws_objects_df)
+      
+      anterior_screws_df <- anterior_approach_objects_df %>%
+        filter(str_detect(object, "screw")) %>%
+        mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
+        left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
+        select(level, approach, side, object, screw_size_type) %>%
+        mutate(screw_size_type = as.character(screw_size_type)) %>%
+        replace_na(list(screw_size_type = " "))
+      
+      anterior_approach_objects_df  <- anterior_approach_objects_df%>%
+        left_join(anterior_screws_df) %>%
+        mutate(screw_size_type = as.character(screw_size_type)) %>%
+        replace_na(list(screw_size_type = " "))
+    }
+    
+    if(nrow(interbody_details_df_reactive())>0){
+      anterior_approach_objects_df <- anterior_approach_objects_df %>%
+        left_join(interbody_details_df_reactive() %>% select(level, approach, object, implant_statement)) %>%
+        replace_na(list(implant_statement = " ")) 
+    }else{
+      anterior_approach_objects_df <- anterior_approach_objects_df %>%
+        mutate(implant_statement = " ")
+    }
+    
+    anterior_op_note_inputs_list_reactive$anterior_approach_objects_df <- anterior_approach_objects_df
+    
+    #######
+    anterior_op_note_inputs_list_reactive$anterior_approach_laterality <- input$approach_specified_anterior
+    
+    
+    #######
+    anterior_cervical_approach_details <- list()
+    if(any(str_detect(str_to_lower(input$anterior_cervical_approach_details_checkbox), "caspar"))){
+      anterior_cervical_approach_details$caspar_pins <- "A small start point was created using a burr, and Caspar pins were placed into the cranial and caudal vertebrae to allow for distraction across the disc space."
+    }
+    
+    if(any(str_detect(str_to_lower(input$anterior_cervical_approach_details_checkbox), "microscop"))){
+      anterior_cervical_approach_details$microscope_use <- "The microscope was then brought into the field for the next steps in the procedure."
+    }
+    if(length(anterior_cervical_approach_details)>0){
+      anterior_cervical_approach_details <- as.character(glue_collapse(x = anterior_cervical_approach_details, sep = " "))
+    }else{
+      anterior_cervical_approach_details <- "none"
+    }
+    
+    anterior_op_note_inputs_list_reactive$approach_statement <- anterior_cervical_approach_details
+    
+    #######
+    anterior_op_note_inputs_list_reactive$antibiotics <- input$preop_antibiotics
+    
+    #######
+    anterior_op_note_inputs_list_reactive$additional_procedures_vector <- input$additional_procedures
+    
+    #######
+    neuromonitoring_input_list <- list()
+    neuromonitoring_input_list$modalities <- input$neuromonitoring
+    neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
+    
+    neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
+    
+    neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
+                                                                           as.character(input$neuromonitoring_signal_stability),
+                                                                           "")    
+    
+    anterior_op_note_inputs_list_reactive$neuromonitoring_list <- neuromonitoring_input_list
+    
+    #######
+    anterior_op_note_inputs_list_reactive$local_anesthesia <- input$local_anesthesia
+    
+    #######
+    anterior_op_note_inputs_list_reactive$bmp <- anterior_bmp_dose_reactive()
+    
+    #######
+    anterior_biologics_list <- list()
+    if(any(input$anterior_bone_graft == "Morselized Allograft")){
+      anterior_biologics_list$'Morselized Allograft' <- input$anterior_allograft_amount
+    }else{
+      anterior_biologics_list$'Morselized Allograft' <- 0
+    }
+    if(any(input$anterior_biologics == "Bone Marrow Aspirate")){
+      anterior_biologics_list$'Bone Marrow Aspirate' <- input$anterior_bone_marrow_aspirate_volume
+    }else{
+      anterior_biologics_list$'Bone Marrow Aspirate' <- 0
+    }
+    if(any(input$anterior_biologics == "Cell Based Allograft")){
+      anterior_biologics_list$'Cell Based Allograft' <- input$anterior_cell_based_allograft_volume
+    }else{
+      anterior_biologics_list$'Cell Based Allograft' <- 0
+    }
+    if(any(input$anterior_biologics == "DBM")){
+      anterior_biologics_list$'DBM' <- input$anterior_dbm_volume
+    }else{
+      anterior_biologics_list$'DBM' <- 0
+    }
+    if(any(input$anterior_biologics == "iFactor")){
+      anterior_biologics_list$'iFactor' <- input$anterior_ifactor_volume
+    }else{
+      anterior_biologics_list$'iFactor' <- 0
+    }
+    anterior_biologics_df_formatted <- enframe(anterior_biologics_list) %>%
+      unnest() %>%
+      filter(value != 0)
+    
+    anterior_op_note_inputs_list_reactive$anterior_biologics_df <- anterior_biologics_df_formatted
+    
+    #######
+    anterior_op_note_inputs_list_reactive$bone_graft_vector <- input$anterior_bone_graft
+    
+    #######
+    anterior_op_note_inputs_list_reactive$morselized_allograft <- input$anterior_allograft_amount
+    
+    #######
+    anterior_op_note_inputs_list_reactive$deep_drains_anterior <- input$deep_drains_anterior
+    
+    #######
+    anterior_op_note_inputs_list_reactive$superficial_drains_anterior <- input$superficial_drains_anterior
+    
+    #######
+    anterior_op_note_inputs_list_reactive$additional_end_procedure_details <- input$additional_end_procedure_details
+    
+    #######
+    anterior_op_note_inputs_list_reactive$closure_details <- input$closure_details
+    
+    #######
+    anterior_op_note_inputs_list_reactive$dressing_details <- input$dressing_details
+    
+    #######
+    anterior_op_note_inputs_list_reactive$multiple_approach <- input$multiple_approach
+    
+    
+    #######
+    anterior_op_note_inputs_list_reactive$sex <- input$sex
+    
+    anterior_op_note_inputs_list_reactive
+  })
+  
+
+  ########### NOW ASSEMBLE THE REACTIVE TEXT OF THE ENTIRE OP NOTE ###############
   
   op_note_text_reactive <- reactive({
     ################# COMPLICATIONS ################3
@@ -4365,14 +4477,12 @@ server <- function(input, output, session) {
       fluids_transfusions_statement <- glue_collapse(fluids_transfusions_list, sep = '\n')
     }
     
-    ################# BUILD ANTERIOR OR POSTERIOR OR COMBINED OP NOTES ############
-    
     #### NO OBJECTS ADDED OP NOTE: ###
     if(nrow(all_objects_to_add_list$objects_df) == 0){
       procedure_results_list <- list()
       revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
         union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
-
+      
       
       op_note_list <- list()
       
@@ -4390,7 +4500,6 @@ server <- function(input, output, session) {
       op_note_list$"\nFluids/Transfusions:" <- if_else(!is.na(fluids_transfusions_statement), as.character(fluids_transfusions_statement), " ")
       op_note_list$"\nIntraoperative Complications:" <- if_else(!is.na(complication_statement), as.character(complication_statement), " ")
       op_note_list$"\nSurgery Description:" <- "***"
-      # op_note_list$"\nSurgery Description:" <- if_else(!is.null(procedure_results_list$procedure_details_paragraph), as.character(procedure_results_list$procedure_details_paragraph), " ") 
       op_note_list$"\nPostop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
       
       secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
@@ -4401,254 +4510,73 @@ server <- function(input, output, session) {
       
     }else{
       
-      ####### BUILD PROCEDURE PARAGRAPHS ########
-      posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
-        filter(approach == "posterior")  %>%
-        select(-object_constructed)
-      
-      
-      if(nrow(interbody_details_df_reactive()) > 0){
-        posterior_approach_objects_df <- posterior_approach_objects_df %>%
-          left_join(interbody_details_df_reactive() %>% select(level, approach, object, implant_statement)) %>%
-          replace_na(list(implant_statement = " "))
-      }else{
-        posterior_approach_objects_df %>%
-          mutate(implant_statement = " ")
-      }
-      
-      anterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
-        filter(approach == "anterior") %>%
-        select(-object_constructed)
-      
-      if(any(anterior_approach_objects_df$object == "anterior_plate")){
-        anterior_plate_screws_objects_df <- anterior_approach_objects_df %>%
-          filter(object == "anterior_plate") %>%
-          select(level, vertebral_number, side, object)%>%
-          separate(col = level, into = c("cranial_level", "caudal_level"), sep = "-") %>%
-          mutate(side_left = "left", side_right = "right") %>%
-          select(-side, vertebral_number) %>%
-          pivot_longer(cols = c(cranial_level, caudal_level), names_to = "cranial_caudal", values_to = "level") %>%
-          select(level, object, side_left, side_right) %>%
-          pivot_longer(cols = c(side_left, side_right), names_to = "remove", values_to = "side") %>%
-          distinct() %>%
-          mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-          select(level, vertebral_number, side, object) %>%
-          mutate(object = "anterior_plate_screw") 
-        
-        anterior_approach_objects_df <- anterior_approach_objects_df %>%
-          union_all(anterior_plate_screws_objects_df)
-        
-        anterior_screws_df <- anterior_approach_objects_df %>%
-          filter(str_detect(object, "screw")) %>%
-          mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
-          left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
-          select(level, approach, side, object, screw_size_type) %>%
-          mutate(screw_size_type = as.character(screw_size_type)) %>%
-          replace_na(list(screw_size_type = " "))
-        
-        anterior_approach_objects_df  <- anterior_approach_objects_df%>%
-          left_join(anterior_screws_df) %>%
-          mutate(screw_size_type = as.character(screw_size_type)) %>%
-          replace_na(list(screw_size_type = " "))
-        
-      }
-
-
+      ################# BUILD ANTERIOR OR POSTERIOR OR COMBINED OP NOTES ############
       
       procedure_results_list <- list()
       
-      if(length(input$fusion_levels_confirmed)>0){
-        fusions_df <- tibble(level = input$fusion_levels_confirmed) %>%
-          left_join(levels_numbered_df)
-      }else{
-        fusions_df <- tibble(level = character(), vertebral_number = double(), object = character())
-      }
-      
-      if(nrow(posterior_approach_objects_df) > 0){
-        if(nrow(screw_details_redcap_df_reactive()) > 0){
-          posterior_screws_df <- posterior_approach_objects_df %>%
-            filter(approach == "posterior") %>%
-            filter(str_detect(object, "screw")) %>%
-            mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
-            left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
-            select(level, approach, side, object, screw_size_type) %>%
-            mutate(screw_size_type = as.character(screw_size_type)) %>%
-            replace_na(list(screw_size_type = " "))
-          
-          posterior_approach_objects_df <- posterior_approach_objects_df%>%
-            left_join(posterior_screws_df) %>%
-            mutate(screw_size_type = as.character(screw_size_type)) %>%
-            replace_na(list(screw_size_type = " "))
-        }else{
-          posterior_approach_objects_df <- posterior_approach_objects_df%>%
-            mutate(screw_size_type = " ") 
-        }
+      ########## POSTERIOR NOTE
+      if(nrow(posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df) > 0){
         
-        revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
-          union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
-        
-        
-        ### make neuromonitoring list
-        neuromonitoring_input_list <- list()
-        neuromonitoring_input_list$modalities <- input$neuromonitoring
-        neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
-        
-        neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
-        
-        neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
-                                                                               as.character(input$neuromonitoring_signal_stability),
-                                                                               "")
-
-        ### NOW MAKE PROCEDURES LIST
-        procedure_results_list_posterior <- list()
-        
-        # implant_start_point_method <- if_else(length(input$implant_start_point_method) == 0, "NA", input$implant_start_point_method)
-        # implant_start_point_method <- input$implant_start_point_method
-        if(length(input$start_point_method) == 0){
-          implant_start_point_method <- "NA"
-        }else{
-          implant_start_point_method <- input$implant_start_point_method
-        }
-        if(length(input$implant_position_confirmation_method) == 0){
-          implant_position_confirmation_method <- "NA"
-        }else{
-          implant_position_confirmation_method <- input$implant_position_confirmation_method
-        }
-        
-        # implant_position_confirmation_method <- if_else(is.na(input$implant_position_confirmation_method) | is.null(input$implant_position_confirmation_method), "NA", input$implant_position_confirmation_method)
-        
-        
-
-        if(length(input$lateral_mass_screws_after_decompression) == 0){
-          lateral_mass_screws_after_decompression <- "No"
-        }else{
-          lateral_mass_screws_after_decompression <- paste(input$lateral_mass_screws_after_decompression)
-        }
-
-        procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_approach_objects_df,
-                                                                       fusion_levels_df = fusions_df,
-                                                                       head_position = input$head_positioning,
-                                                                       surgical_approach = input$approach_specified_posterior, 
-                                                                       approach_mis_open = input$approach_open_mis,
-                                                                       approach_robot_nav_xray = input$approach_robot_navigation,
-                                                                       neuromonitoring_list = neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
-                                                                       implant_start_point_method_input = implant_start_point_method,
-                                                                       implant_confirmation_method = implant_position_confirmation_method,
-                                                                       local_anesthesia = input$local_anesthesia,
-                                                                       revision_decompression_vector = input$open_canal,
-                                                                       revision_implants_df = revision_implants_df,
-                                                                       left_main_rod_size = input$left_main_rod_size,
-                                                                       left_main_rod_material = input$left_main_rod_material,
-                                                                       right_main_rod_size = input$right_main_rod_size,
-                                                                       right_main_rod_material = input$right_main_rod_material,
-                                                                       additional_rods_statement = added_rods_statement_reactive(),
-                                                                       antibiotics = input$preop_antibiotics,
-                                                                       additional_procedures_vector = additional_procedures_vector_reactive(),
-                                                                       prior_fusion_levels_vector = input$prior_fusion_levels,
-                                                                       instrumentation_removal_vector = unique(c(input$left_revision_implants_removed, input$right_revision_implants_removed)),
-                                                                       bmp = posterior_bmp_dose_reactive(),
-                                                                       bone_graft_vector = input$posterior_bone_graft,
-                                                                       morselized_allograft = input$posterior_allograft_amount,
-                                                                       morselized_autograft_separate = 0,
-                                                                       deep_drains = input$deep_drains_posterior,
-                                                                       superficial_drains = input$superficial_drains_posterior,
-                                                                       end_procedure_details = input$additional_end_procedure_details,
-                                                                       closure = input$closure_details,
-                                                                       dressing = input$dressing_details, 
-                                                                       multiple_position_procedure = input$multiple_approach, 
-                                                                       alignment_correction_technique = input$alignment_correction_method,
-                                                                       sex = input$sex,
-                                                                       lateral_mass_screws_after_decompression = lateral_mass_screws_after_decompression
-                                                                       )
+        procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df,
+                                                                       fusion_levels_df = posterior_op_note_inputs_list_reactive()$fusions_df,
+                                                                       head_position = posterior_op_note_inputs_list_reactive()$head_positioning,
+                                                                       surgical_approach = posterior_op_note_inputs_list_reactive()$approach_specified_posterior,
+                                                                       approach_mis_open = posterior_op_note_inputs_list_reactive()$approach_open_mis,
+                                                                       approach_robot_nav_xray = posterior_op_note_inputs_list_reactive()$approach_robot_navigation,
+                                                                       neuromonitoring_list = posterior_op_note_inputs_list_reactive()$neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
+                                                                       implant_start_point_method_input = posterior_op_note_inputs_list_reactive()$implant_start_point_method,
+                                                                       implant_confirmation_method = posterior_op_note_inputs_list_reactive()$implant_position_confirmation_method,
+                                                                       local_anesthesia = posterior_op_note_inputs_list_reactive()$local_anesthesia,
+                                                                       revision_decompression_vector = posterior_op_note_inputs_list_reactive()$open_canal,
+                                                                       revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df,
+                                                                       left_main_rod_size = posterior_op_note_inputs_list_reactive()$left_main_rod_size,
+                                                                       left_main_rod_material = posterior_op_note_inputs_list_reactive()$left_main_rod_material,
+                                                                       right_main_rod_size = posterior_op_note_inputs_list_reactive()$right_main_rod_size,
+                                                                       right_main_rod_material = posterior_op_note_inputs_list_reactive()$right_main_rod_material,
+                                                                       additional_rods_statement = posterior_op_note_inputs_list_reactive()$added_rods_statement,
+                                                                       antibiotics = posterior_op_note_inputs_list_reactive()$preop_antibiotics,
+                                                                       additional_procedures_vector = posterior_op_note_inputs_list_reactive()$additional_procedures_vector,
+                                                                       prior_fusion_levels_vector = posterior_op_note_inputs_list_reactive()$prior_fusion_levels,
+                                                                       instrumentation_removal_vector = posterior_op_note_inputs_list_reactive()$instrumentation_removed_vector,
+                                                                       bmp = posterior_op_note_inputs_list_reactive()$posterior_bmp_dose_reactive,
+                                                                       bone_graft_vector = posterior_op_note_inputs_list_reactive()$posterior_bone_graft,
+                                                                       morselized_allograft = posterior_op_note_inputs_list_reactive()$posterior_allograft_amount,
+                                                                       morselized_autograft_separate = posterior_op_note_inputs_list_reactive()$morselized_autograft_separate,
+                                                                       deep_drains = posterior_op_note_inputs_list_reactive()$deep_drains_posterior,
+                                                                       superficial_drains = posterior_op_note_inputs_list_reactive()$superficial_drains_posterior,
+                                                                       end_procedure_details = posterior_op_note_inputs_list_reactive()$additional_end_procedure_details,
+                                                                       closure = posterior_op_note_inputs_list_reactive()$closure_details,
+                                                                       dressing = posterior_op_note_inputs_list_reactive()$dressing_details,
+                                                                       multiple_position_procedure = posterior_op_note_inputs_list_reactive()$multiple_approach, 
+                                                                       alignment_correction_technique = posterior_op_note_inputs_list_reactive()$alignment_correction_method,
+                                                                       sex = posterior_op_note_inputs_list_reactive()$sex,
+                                                                       lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression
+        )
         
         
       }
       
-      if(nrow(anterior_approach_objects_df) > 0){
+      if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df) > 0){
         
-        if(nrow(interbody_details_df_reactive())>0){
-          anterior_approach_objects_df <- anterior_approach_objects_df %>%
-            left_join(interbody_details_df_reactive() %>% select(level, approach, object, implant_statement)) %>%
-            replace_na(list(implant_statement = " ")) 
-        }else{
-          anterior_approach_objects_df <- anterior_approach_objects_df %>%
-            mutate(implant_statement = " ")
-        }
-        
-        anterior_cervical_approach_details <- list()
-        if(any(str_detect(str_to_lower(input$anterior_cervical_approach_details_checkbox), "caspar"))){
-          anterior_cervical_approach_details$caspar_pins <- "A small start point was created using a burr, and Caspar pins were placed into the cranial and caudal vertebrae to allow for distraction across the disc space."
-        }
-        
-        if(any(str_detect(str_to_lower(input$anterior_cervical_approach_details_checkbox), "microscop"))){
-          anterior_cervical_approach_details$microscope_use <- "The microscope was then brought into the field for the next steps in the procedure."
-        }
-        if(length(anterior_cervical_approach_details)>0){
-          anterior_cervical_approach_details <- as.character(glue_collapse(x = anterior_cervical_approach_details, sep = " "))
-        }else{
-          anterior_cervical_approach_details <- "none"
-        }
-        
-        #### BONE GRAFT DATAFRAME
-        anterior_biologics_list <- list()
-        if(any(input$anterior_bone_graft == "Morselized Allograft")){
-          anterior_biologics_list$'Morselized Allograft' <- input$anterior_allograft_amount
-        }else{
-          anterior_biologics_list$'Morselized Allograft' <- 0
-        }
-        if(any(input$anterior_biologics == "Bone Marrow Aspirate")){
-          anterior_biologics_list$'Bone Marrow Aspirate' <- input$anterior_bone_marrow_aspirate_volume
-        }else{
-          anterior_biologics_list$'Bone Marrow Aspirate' <- 0
-        }
-        if(any(input$anterior_biologics == "Cell Based Allograft")){
-          anterior_biologics_list$'Cell Based Allograft' <- input$anterior_cell_based_allograft_volume
-        }else{
-          anterior_biologics_list$'Cell Based Allograft' <- 0
-        }
-        if(any(input$anterior_biologics == "DBM")){
-          anterior_biologics_list$'DBM' <- input$anterior_dbm_volume
-        }else{
-          anterior_biologics_list$'DBM' <- 0
-        }
-        if(any(input$anterior_biologics == "iFactor")){
-          anterior_biologics_list$'iFactor' <- input$anterior_ifactor_volume
-        }else{
-          anterior_biologics_list$'iFactor' <- 0
-        }
-        anterior_biologics_df_formatted <- enframe(anterior_biologics_list) %>%
-          unnest() %>%
-          filter(value != 0)
-        
-        ### make neuromonitoring list
-        neuromonitoring_input_list <- list()
-        neuromonitoring_input_list$modalities <- input$neuromonitoring
-        neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
-        
-        neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
-
-        neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
-                                                                               as.character(input$neuromonitoring_signal_stability),
-                                                                               "")        
-        
-        procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_approach_objects_df,
-                                                                     anterior_approach_laterality = input$approach_specified_anterior,
-                                                                     approach_statement = anterior_cervical_approach_details, 
-                                                                     antibiotics = input$preop_antibiotics, 
-                                                                     additional_procedures_vector = input$additional_procedures, 
-                                                                     neuromonitoring_list = neuromonitoring_input_list,
-                                                                     local_anesthesia = input$local_anesthesia,
-                                                                     bmp = anterior_bmp_dose_reactive(),
-                                                                     anterior_biologics_df = anterior_biologics_df_formatted,
-                                                                     bone_graft_vector = input$anterior_bone_graft,
-                                                                     morselized_allograft = input$anterior_allograft_amount,
-                                                                     deep_drains = input$deep_drains_anterior,
-                                                                     superficial_drains = input$superficial_drains_anterior,
-                                                                     end_procedure_details = input$additional_end_procedure_details,
-                                                                     closure = input$closure_details,
-                                                                     dressing = input$dressing_details,
-                                                                     multiple_position_procedure = input$multiple_approach, 
-                                                                     sex = input$sex)
+        procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df,
+                                                                     anterior_approach_laterality = anterior_op_note_inputs_list_reactive()$anterior_approach_laterality,
+                                                                     approach_statement = anterior_op_note_inputs_list_reactive()$approach_statement,
+                                                                     antibiotics = anterior_op_note_inputs_list_reactive()$antibiotics,
+                                                                     additional_procedures_vector = anterior_op_note_inputs_list_reactive()$additional_procedures_vector,
+                                                                     neuromonitoring_list = anterior_op_note_inputs_list_reactive()$neuromonitoring_list,
+                                                                     local_anesthesia = anterior_op_note_inputs_list_reactive()$local_anesthesia,
+                                                                     bmp = anterior_op_note_inputs_list_reactive()$bmp,
+                                                                     anterior_biologics_df = anterior_op_note_inputs_list_reactive()$anterior_biologics_df,
+                                                                     bone_graft_vector = anterior_op_note_inputs_list_reactive()$bone_graft_vector,
+                                                                     morselized_allograft = anterior_op_note_inputs_list_reactive()$morselized_allograft,
+                                                                     deep_drains = anterior_op_note_inputs_list_reactive()$deep_drains_anterior,
+                                                                     superficial_drains = anterior_op_note_inputs_list_reactive()$superficial_drains_anterior,
+                                                                     end_procedure_details = anterior_op_note_inputs_list_reactive()$additional_end_procedure_details,
+                                                                     closure = anterior_op_note_inputs_list_reactive()$closure_details,
+                                                                     dressing = anterior_op_note_inputs_list_reactive()$dressing_details,
+                                                                     multiple_position_procedure = anterior_op_note_inputs_list_reactive()$multiple_approach, 
+                                                                     sex = anterior_op_note_inputs_list_reactive()$sex
+        )
         
       }
       
@@ -4658,7 +4586,7 @@ server <- function(input, output, session) {
         procedure_results_list$procedure_details_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}")
         
       }else{
-        if(input$spine_approach == "Posterior"){
+        if(nrow(posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df) > 0){
           procedure_results_list <- procedure_results_list_posterior
         }else{
           procedure_results_list <- procedure_results_list_anterior
@@ -4739,16 +4667,18 @@ server <- function(input, output, session) {
   ############### ############### FIRST, COMPILE EACH OF THE TABLES THAT WILL BE USED FOR UPLOADING TO REDCAP:    ###############     ############### 
   ############### ############### FIRST, COMPILE EACH OF THE TABLES THAT WILL BE USED FOR UPLOADING TO REDCAP:    ###############     ############### 
   ############### ############### FIRST, COMPILE EACH OF THE TABLES THAT WILL BE USED FOR UPLOADING TO REDCAP:    ###############     ############### 
+  
+  
   ###### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ALL INPUTS  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ######## 
   
   all_inputs_reactive_list <- reactive({
     all_inputs_list <- reactiveValuesToList(input, all.names = FALSE)
     
     all_inputs_list <- keep(.x = all_inputs_list, .p = ~ !is.null(.x))
-
+    
   })
   
-
+  
   all_inputs_trimmed_reactive_df <- reactive({
     
     all_inputs_to_log_df <- enframe(all_inputs_reactive_list()) %>%
@@ -4782,7 +4712,7 @@ server <- function(input, output, session) {
       filter(str_detect(string = name, pattern = "\\s", negate = TRUE) ) %>%
       filter(str_detect(string = name, pattern = "\\W", negate = TRUE)) %>%
       filter(str_detect(string = name, pattern = "\\t", negate = TRUE))
-
+    
     rods_to_keep <- all_inputs_to_log_df %>%
       filter(str_detect(name, "rod")) %>%
       filter(str_detect(name, "add")) %>%
@@ -4810,10 +4740,10 @@ server <- function(input, output, session) {
         filter(str_detect(string = name, pattern = "rod") == FALSE) %>%
         union_all(main_rod_info_to_keep_df) 
     }
- 
+    
     
     # all_inputs_to_log_df %>%
-      # filter(str_detect(measure, pattern = paste0(glue_collapse(rods_not_used$rod_type_not_used, sep = "|"))) == FALSE) 
+    # filter(str_detect(measure, pattern = paste0(glue_collapse(rods_not_used$rod_type_not_used, sep = "|"))) == FALSE) 
     
     all_inputs_to_log_df
     
@@ -4834,9 +4764,7 @@ server <- function(input, output, session) {
     
   })
   
-  # output$all_inputs_printed <- renderPrint({
-  #   paste(all_inputs_reactive_list())
-  # })
+
   
   ###### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Patient Details TABLE ('patient_details' instrument in redcap)  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ######## 
   
@@ -4865,7 +4793,8 @@ server <- function(input, output, session) {
     surgery_details_list$hospital_mrn <- as.character(input$hospital_mrn)
     
     ##########   age #############
-    surgery_details_list$age <- if_else(paste(input$date_of_birth) == "1900-01-01", "--", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0)))
+    # surgery_details_list$age <- if_else(paste(input$date_of_birth) == "1900-01-01", "--", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0)))
+    surgery_details_list$age <- if_else(paste(input$date_of_birth) == "1900-01-01", "--", as.character(trunc((input$date_of_birth %--% input$date_of_surgery) / years(1))))
     
     ##########   attending #############
     surgery_details_list$attending <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
@@ -5384,27 +5313,6 @@ server <- function(input, output, session) {
                                              all_objects_df = all_objects_to_add_list$objects_df)%>%
       mutate(side = "central")
     
-    
-    # data_wide <- all_objects_to_add_list$objects_df %>%
-    #   select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
-    #   mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
-    #   unnest() %>%
-    #   select(proc_category, everything()) %>%
-    #   union_all(fusion_df) %>%
-    #   arrange(vertebral_number) %>%
-    #   select(level, approach, category, procedure = object, side) %>%
-    #   group_by(level, side, category) %>%
-    #   mutate(redcap_repeat_instance = row_number()) %>%
-    #   pivot_wider(names_from = level, values_from = procedure) %>%
-    #   mutate(across(everything(), ~ replace_na(.x, ""))) %>%
-    #   ungroup() %>%
-    #   mutate(redcap_repeat_instance = row_number()) %>%
-    #   mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-    #   mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-    #   select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) %>%
-    #   clean_names() %>%
-    #   mutate(across(everything(), ~ replace_na(.x, " ")))
-    
     data_wide <- all_objects_to_add_list$objects_df %>%
       select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
       mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
@@ -5422,7 +5330,7 @@ server <- function(input, output, session) {
       mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
       mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
       select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) 
-  
+    
     data_wide
   })
   
@@ -5450,8 +5358,8 @@ server <- function(input, output, session) {
   
   ### NOW UPDATE THE INPUT TO HAVE THE Correct levels FOR EACH IMPLANT  implants_complete
   observeEvent(list(input$implants_complete, input$return_to_add_implant_details_tab, input$implant_details, screws_selected_df_reactive()), ignoreInit = TRUE, {
-   
-     if(nrow(screws_selected_df_reactive())>0){
+    
+    if(nrow(screws_selected_df_reactive())>0){
       updateCheckboxGroupInput(session = session, 
                                inputId = "level_object_for_screw_details",
                                choices = screws_selected_df_reactive()$level_object_label,
@@ -5584,14 +5492,14 @@ server <- function(input, output, session) {
   #################  ALL OBJECTS TABLE ##################
   output$all_objects_table <- renderTable({
     
-
-      all_objects_to_add_list$objects_df %>%
-          select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
-          mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
-          unnest() %>%
-          select(proc_category, everything())
-
-
+    
+    all_objects_to_add_list$objects_df %>%
+      select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
+      mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
+      unnest() %>%
+      select(proc_category, everything())
+    
+    
   })
   
   
@@ -5654,322 +5562,30 @@ server <- function(input, output, session) {
   # })
   # 
   
-  # ### anterior objects for op note:
-  # anterior_objects_passed_to_op_note_df_reactive <- reactive({
-  #   anterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
-  #     filter(approach == "anterior") %>%
-  #     select(-object_constructed)
-  #   
-  #   if(any(anterior_approach_objects_df$object == "anterior_plate")){
-  #     anterior_approach_objects_df <- anterior_approach_objects_df %>% 
-  #       filter(object == "anterior_plate") %>%
-  #       select(level, vertebral_number, side, object)%>%
-  #       separate(col = level, into = c("cranial_level", "caudal_level"), sep = "-") %>%
-  #       mutate(side_left = "left", side_right = "right") %>%
-  #       select(-side, vertebral_number) %>%
-  #       pivot_longer(cols = c(cranial_level, caudal_level), names_to = "cranial_caudal", values_to = "level") %>%
-  #       select(level, object, side_left, side_right) %>%
-  #       pivot_longer(cols = c(side_left, side_right), names_to = "remove", values_to = "side") %>%
-  #       distinct() %>%
-  #       mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-  #       select(level, vertebral_number, side, object) %>%
-  #       mutate(object = "anterior_plate_screw") %>%
-  #       union_all(anterior_approach_objects_df)
-  #     
-  #     anterior_screws_df <- anterior_approach_objects_df %>%
-  #       filter(str_detect(object, "screw")) %>%
-  #       mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
-  #       left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
-  #       select(level, approach, side, object, screw_size_type) %>%
-  #       mutate(screw_size_type = as.character(screw_size_type)) %>%
-  #       replace_na(list(screw_size_type = " "))
-  #     
-  #     anterior_approach_objects_df  <- anterior_approach_objects_df%>%
-  #       left_join(anterior_screws_df) %>%
-  #       mutate(screw_size_type = as.character(screw_size_type)) %>%
-  #       replace_na(list(screw_size_type = " "))
-  #     
-  #   }
-  #   
-  #   if(nrow(interbody_details_df_reactive())>0){
-  #     anterior_approach_objects_df <- anterior_approach_objects_df %>%
-  #       left_join(interbody_details_df_reactive() %>% select(level, approach, object, implant_statement)) %>%
-  #       replace_na(list(implant_statement = " ")) 
-  #   }else{
-  #     anterior_approach_objects_df <- anterior_approach_objects_df %>%
-  #       mutate(implant_statement = " ")
-  #   }
-  # })
-  # 
-  # 
-  # ######## Render "Anterior Objects Passed to Op Note:"    ######## 
-  # output$anterior_objects_passed_to_op_note_df <- renderTable({
-  #   anterior_objects_passed_to_op_note_df_reactive()
-  # })
-  # 
-  # 
-  # 
-  # ############ Render print all individual object passed to posterio op note function #########
-  # 
-  # output$all_inputs_for_posterior_op_note <- renderPrint({
-  #   
-  #   posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
-  #     filter(approach == "posterior")  %>%
-  #     select(-object_constructed)
-  # 
-  # 
-  #   if(nrow(interbody_details_df_reactive()) > 0){
-  #     posterior_approach_objects_df <- posterior_approach_objects_df %>%
-  #       left_join(interbody_details_df_reactive() %>% select(level, approach, object, implant_statement)) %>%
-  #       replace_na(list(implant_statement = " "))
-  #   }else{
-  #     posterior_approach_objects_df %>%
-  #       mutate(implant_statement = " ")
-  #   }
-  # 
-  #   procedure_results_list <- list()
-  # 
-  #   if(length(input$fusion_levels_confirmed)>0){
-  #     fusions_df <- tibble(level = input$fusion_levels_confirmed) %>%
-  #       left_join(levels_numbered_df)
-  #   }else{
-  #     fusions_df <- tibble(level = character(), vertebral_number = double(), object = character())
-  #   }
-  # 
-  #   if(nrow(posterior_approach_objects_df) > 0){
-  #     if(nrow(screw_details_redcap_df_reactive()) > 0){
-  #       posterior_screws_df <- posterior_approach_objects_df %>%
-  #         filter(approach == "posterior") %>%
-  #         filter(str_detect(object, "screw")) %>%
-  #         mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
-  #         left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
-  #         select(level, approach, side, object, screw_size_type) %>%
-  #         mutate(screw_size_type = as.character(screw_size_type)) %>%
-  #         replace_na(list(screw_size_type = " "))
-  # 
-  #       posterior_approach_objects_df <- posterior_approach_objects_df%>%
-  #         left_join(posterior_screws_df) %>%
-  #         mutate(screw_size_type = as.character(screw_size_type)) %>%
-  #         replace_na(list(screw_size_type = " "))
-  #     }
-  # 
-  #     revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
-  #       union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
-  # 
-  # 
-  #     ### make neuromonitoring list
-  #     neuromonitoring_input_list <- list()
-  #     neuromonitoring_input_list$modalities <- input$neuromonitoring
-  #     neuromonitoring_input_list$emg <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "),pattern = "EMG"), input$triggered_emg, "")
-  #     if(neuromonitoring_input_list$emg == "No"){
-  #       neuromonitoring_input_list$emg <- ""
-  #     }
-  #     neuromonitoring_input_list$pre_positioning_motors <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "tcMEP"), input$pre_positioning_motors, "")
-  #     if(neuromonitoring_input_list$pre_positioning_motors == "Pre-positioning motors not obtained"){
-  #       neuromonitoring_input_list$pre_positioning_motors <- ""
-  #     }
-  #     neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
-  #                                                                            as.character(input$neuromonitoring_signal_stability),
-  #                                                                            "")
-  # 
-  #     ### NOW MAKE PROCEDURES LIST
-  #     procedure_results_list_posterior <- list()
-  # 
-  #     implant_start_point_method <- if_else(is.na(input$implant_start_point_method) | is.null(input$implant_start_point_method), "NA", input$implant_start_point_method)
-  #     implant_position_confirmation_method <- if_else(is.na(input$implant_position_confirmation_method) | is.null(input$implant_position_confirmation_method), "NA", input$implant_position_confirmation_method)
-  # 
-  #     
-  #     all_inputs_for_posterior_op_note_list <- list()
-  #     
-  #     
-  #     
-  #     # all_inputs_for_posterior_op_note_list$all_objects_to_add_df = posterior_approach_objects_df
-  #     all_inputs_for_posterior_op_note_list$fusion_levels_df = fusions_df
-  #     all_inputs_for_posterior_op_note_list$head_position = input$head_positioning
-  #     all_inputs_for_posterior_op_note_list$neuromonitoring_list = neuromonitoring_input_list ## this is a named list with names: modalities emg and pre_positioning_motors
-  #     all_inputs_for_posterior_op_note_list$implant_start_point_method_input = input$implant_start_point_method
-  #     all_inputs_for_posterior_op_note_list$implant_confirmation_method = input$implant_position_confirmation_method
-  #     all_inputs_for_posterior_op_note_list$local_anesthesia = input$local_anesthesia
-  #     all_inputs_for_posterior_op_note_list$revision_decompression_vector = input$open_canal
-  #     all_inputs_for_posterior_op_note_list$revision_implants_df = revision_implants_df
-  #     all_inputs_for_posterior_op_note_list$left_main_rod_size = input$left_main_rod_size
-  #     all_inputs_for_posterior_op_note_list$left_main_rod_material = input$left_main_rod_material
-  #     all_inputs_for_posterior_op_note_list$right_main_rod_size = input$right_main_rod_size
-  #     all_inputs_for_posterior_op_note_list$right_main_rod_material = input$right_main_rod_material
-  #     all_inputs_for_posterior_op_note_list$additional_rods_statement = added_rods_statement_reactive()
-  #     all_inputs_for_posterior_op_note_list$antibiotics = input$preop_antibiotics
-  #     all_inputs_for_posterior_op_note_list$additional_procedures_vector = additional_procedures_vector_reactive()
-  #     all_inputs_for_posterior_op_note_list$prior_fusion_levels_vector = input$prior_fusion_levels
-  #     all_inputs_for_posterior_op_note_list$instrumentation_removal_vector = unique(c(input$left_revision_implants_removed, input$right_revision_implants_removed))
-  #     all_inputs_for_posterior_op_note_list$bmp = posterior_bmp_dose_reactive()
-  #     all_inputs_for_posterior_op_note_list$bone_graft_vector = input$posterior_bone_graft
-  #     all_inputs_for_posterior_op_note_list$morselized_allograft = input$posterior_allograft_amount
-  #     all_inputs_for_posterior_op_note_list$morselized_autograft_separate = 0
-  #     all_inputs_for_posterior_op_note_list$deep_drains = input$deep_drains_posterior
-  #     all_inputs_for_posterior_op_note_list$superficial_drains = input$superficial_drains_posterior
-  #     all_inputs_for_posterior_op_note_list$end_procedure_details = input$additional_end_procedure_details
-  #     all_inputs_for_posterior_op_note_list$closure = input$closure_details
-  #     all_inputs_for_posterior_op_note_list$dressing = input$dressing_details
-  #     all_inputs_for_posterior_op_note_list$multiple_position_procedure = input$multiple_approach
-  #     all_inputs_for_posterior_op_note_list$alignment_correction_technique = input$alignment_correction_method
-  #     all_inputs_for_posterior_op_note_list$sex = input$sex
-  #     
-  #     # print(all_inputs_for_posterior_op_note_list)
-  #     print(glue_collapse(all_inputs_for_posterior_op_note_list, sep = "\n\n"))
-  #   
-  #   }
-  #   
-  # })
-  # 
-
-  objects_passed_to_posterior_op_note_reactive_list <- reactive({
-    complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
-      filter(complication != "") %>%
-      filter(complication != " ") %>%
-      remove_empty()
-    
-    if(nrow(complication_df) > 0){
-      complication_df <- complication_df %>%
-        mutate(row_count = row_number()) %>%
-        mutate(statement = paste0(row_count, ". ", complication)) %>%
-        mutate(statement = str_replace_all(statement, pattern = "_", replacement = " "))
-      
-      complication_statement <- glue_collapse(complication_df$statement, sep = '\n')
-    }else{
-      complication_statement <- "none"
-    }
-    
-    ### FLuids/Transfusions ###if_else(is.na(input$ebl), "See anesthesia records", paste(input$ebl)),
-    fluids_transfusions_list <- list(crystalloids_statement =if_else(is.na(input$crystalloids_administered), glue("none"), glue("-Crystalloids: {input$crystalloids_administered}cc")),
-                                     colloids_statement =if_else(is.na(input$colloids_administered), glue("none"), glue("-Colloids: {input$colloids_administered}cc")) ,
-                                     cell_saver_transfused_statement =if_else(is.na(input$cell_saver_transfused) | input$cell_saver_transfused == 0, glue("none"), glue("-Cell Saver: {input$cell_saver_transfused}cc")),
-                                     prbc_transfused_statement =if_else(is.na(input$prbc_transfused)| input$prbc_transfused == 0, glue("none") , glue("-pRBC's transfused: {input$prbc_transfused} {if_else(input$prbc_transfused >1, 'units', 'unit')}")),
-                                     ffp_transfused_statement =if_else(is.na(input$ffp_transfused)| input$ffp_transfused == 0, glue("none") , glue("-FFP transfused: {input$ffp_transfused} {if_else(input$ffp_transfused >1, 'units', 'unit')}")), 
-                                     cryo_transfused_statement =if_else(is.na(input$cryoprecipitate_transfused) | input$cryoprecipitate_transfused == 0, glue("none"), glue("-Cryoprecipitate transfused: {input$cryoprecipitate_transfused} {if_else(input$cryoprecipitate_transfused >1, 'units', 'unit')}")), 
-                                     platelets_transfused_statement =if_else(is.na(input$platelets_transfused) | input$platelets_transfused == 0, glue("none"), glue("-Platelets transfused: {input$platelets_transfused} {if_else(input$platelets_transfused >1, 'units', 'unit')}")))
-    
-    
-    fluids_transfusions_list <- discard(.x = fluids_transfusions_list, .p = ~ .x == "none")
-    
-    if(length(discard(.x = fluids_transfusions_list, .p = ~ .x == "none")) == 0){
-      fluids_transfusions_statement <- "See Anesthesia Records"
-    }else{
-      fluids_transfusions_statement <- glue_collapse(fluids_transfusions_list, sep = '\n')
-    }
-    
-    
-    ####### BUILD PROCEDURE PARAGRAPHS ########
-    posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
-      filter(approach == "posterior")  %>%
-      select(-object_constructed)
-    
-    if(nrow(interbody_details_df_reactive()) > 0){
-      posterior_approach_objects_df <- posterior_approach_objects_df %>%
-        left_join(interbody_details_df_reactive() %>% select(level, approach, object, implant_statement)) %>%
-        replace_na(list(implant_statement = " "))
-    }else{
-      posterior_approach_objects_df %>%
-        mutate(implant_statement = " ")
-    }
-    
-    anterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
-      filter(approach == "anterior") %>%
-      select(-object_constructed)
-    
-    procedure_results_list <- list()
-    
-    if(length(input$fusion_levels_confirmed)>0){
-      fusions_df <- tibble(level = input$fusion_levels_confirmed) %>%
-        left_join(levels_numbered_df)
-    }else{
-      fusions_df <- tibble(level = character(), vertebral_number = double(), object = character())
-    }
-    
-    if(nrow(posterior_approach_objects_df) > 0){
-      if(nrow(screw_details_redcap_df_reactive()) > 0){
-        posterior_screws_df <- posterior_approach_objects_df %>%
-          filter(approach == "posterior") %>%
-          filter(str_detect(object, "screw")) %>%
-          mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
-          left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
-          select(level, approach, side, object, screw_size_type) %>%
-          mutate(screw_size_type = as.character(screw_size_type)) %>%
-          replace_na(list(screw_size_type = " "))
-        
-        posterior_approach_objects_df <- posterior_approach_objects_df%>%
-          left_join(posterior_screws_df) %>%
-          mutate(screw_size_type = as.character(screw_size_type)) %>%
-          replace_na(list(screw_size_type = " "))
-      }
-    }
-    
-    revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
-      union_all(right_revision_implants_reactive_list()$revision_implants_status_df)
-    
-    
-    ### make neuromonitoring list
-    neuromonitoring_input_list <- list()
-    neuromonitoring_input_list$modalities <- input$neuromonitoring
-    neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
-    
-    neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
-    
-    neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
-                                                                           as.character(input$neuromonitoring_signal_stability),
-                                                                           "")
-      
-    implant_start_point_method <- if_else(length(input$implant_start_point_method) == 0, "NA", input$implant_start_point_method)
-    implant_position_confirmation_method <- if_else(is.na(input$implant_position_confirmation_method) | is.null(input$implant_position_confirmation_method), "NA", input$implant_position_confirmation_method)
-    
-    if(length(input$lateral_mass_screws_after_decompression) == 0){
-      lateral_mass_screws_after_decompression <- "No"
-    }else{
-      lateral_mass_screws_after_decompression <- paste(input$lateral_mass_screws_after_decompression)
-    }
-    
-    ### NOW MAKE PROCEDURES LIST
-    objects_passed_to_posterior_op_note_reactive_list <- list()
-    
-    # objects_passed_to_posterior_op_note_reactive_list$posterior_approach_objects_df <- posterior_approach_objects_df
-    objects_passed_to_posterior_op_note_reactive_list$fusions_df <- fusions_df
-    objects_passed_to_posterior_op_note_reactive_list$head_positioning <- input$head_positioning
-    objects_passed_to_posterior_op_note_reactive_list$neuromonitoring_list <- neuromonitoring_input_list## this is a named list with names: modalities, emg, and pre_positioning_motors
-    objects_passed_to_posterior_op_note_reactive_list$implant_start_point_method_input = implant_start_point_method
-    objects_passed_to_posterior_op_note_reactive_list$implant_confirmation_method = implant_position_confirmation_method
-    objects_passed_to_posterior_op_note_reactive_list$local_anesthesia <- input$local_anesthesia
-    objects_passed_to_posterior_op_note_reactive_list$revision_decompression_vector <- input$open_canal
-    objects_passed_to_posterior_op_note_reactive_list$revision_implants_df <- revision_implants_df
-    objects_passed_to_posterior_op_note_reactive_list$left_main_rod_size <- input$left_main_rod_size
-    objects_passed_to_posterior_op_note_reactive_list$left_main_rod_material <- input$left_main_rod_material
-    objects_passed_to_posterior_op_note_reactive_list$right_main_rod_size <- input$right_main_rod_size
-    objects_passed_to_posterior_op_note_reactive_list$right_main_rod_material <- input$right_main_rod_material
-    objects_passed_to_posterior_op_note_reactive_list$additional_rods_statement <- added_rods_statement_reactive()
-    objects_passed_to_posterior_op_note_reactive_list$antibiotics <- input$preop_antibiotics
-    objects_passed_to_posterior_op_note_reactive_list$additional_procedures_vector <- additional_procedures_vector_reactive()
-    objects_passed_to_posterior_op_note_reactive_list$prior_fusion_levels_vector <- input$prior_fusion_levels
-    objects_passed_to_posterior_op_note_reactive_list$instrumentation_removal_vector <- unique(c(input$left_revision_implants_removed, input$right_revision_implants_removed))
-    objects_passed_to_posterior_op_note_reactive_list$bmp <- posterior_bmp_dose_reactive()
-    objects_passed_to_posterior_op_note_reactive_list$bone_graft_vector <- input$posterior_bone_graft
-    objects_passed_to_posterior_op_note_reactive_list$morselized_allograft <- input$posterior_allograft_amount
-    objects_passed_to_posterior_op_note_reactive_list$morselized_autograft_separate <- 0
-    objects_passed_to_posterior_op_note_reactive_list$deep_drains <- input$deep_drains_posterior
-    objects_passed_to_posterior_op_note_reactive_list$superficial_drains <- input$superficial_drains_posterior
-    objects_passed_to_posterior_op_note_reactive_list$end_procedure_details <- input$additional_end_procedure_details
-    objects_passed_to_posterior_op_note_reactive_list$closure <- input$closure_details
-    objects_passed_to_posterior_op_note_reactive_list$dressing <- input$dressing_details
-    objects_passed_to_posterior_op_note_reactive_list$multiple_position_procedure <- input$multiple_approach
-    objects_passed_to_posterior_op_note_reactive_list$alignment_correction_technique = input$alignment_correction_method
-    objects_passed_to_posterior_op_note_reactive_list$sex = input$sex
-    objects_passed_to_posterior_op_note_reactive_list$lateral_mass_screws_after_decompression = lateral_mass_screws_after_decompression
-    
-    objects_passed_to_posterior_op_note_reactive_list
-    
-  })
+  ################## GENERATE TABLES AND PRINTOUTS FOR SIDE TAB TO SHOW WHAT IS UPLOADED TO THE OP NOTE GENERATOR
+  output$posterior_approach_objects_for_op_note_df <- renderTable({
+    posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df
+  }
+  )
+  
   
   output$full_objects_passed_to_posterior_op_note <- renderPrint({
+    posterior_op_note_list <- posterior_op_note_inputs_list_reactive()
+    posterior_op_note_list$posterior_approach_objects_df <- "See table"
     
-    paste(map2(.x = objects_passed_to_posterior_op_note_reactive_list(), .y = names(objects_passed_to_posterior_op_note_reactive_list()), .f = ~ paste0(.y, ": ", paste(.x, sep = ", ", collapse = ", "))))
+    paste(map2(.x = posterior_op_note_list, .y = names(posterior_op_note_list), .f = ~ paste0(.y, ": ", paste(.x, sep = ", ", collapse = ", "))))
   })
+  
+  output$anterior_approach_objects_for_op_note_df <- renderTable({
+    anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df
+  }
+  )
+  
+  output$full_objects_passed_to_anterior_op_note <- renderPrint({
+    anterior_op_note_list <- anterior_op_note_inputs_list_reactive()
+    anterior_op_note_list$anterior_approach_objects_df <- "See table"
+    paste(map2(.x = anterior_op_note_list, .y = names(anterior_op_note_list), .f = ~ paste0(.y, ": ", paste(.x, sep = ", ", collapse = ", "))))
+      })
   
   ############### ############### NOW RENDER EACH OF THE TABLES FOR THE FINAL REVIEW IN THE MODAL:    ###############     ############### 
   ############### ############### NOW RENDER EACH OF THE TABLES FOR THE FINAL REVIEW IN THE MODAL:    ###############     ############### 
@@ -6077,83 +5693,91 @@ server <- function(input, output, session) {
       #   type = "error"
       # )
       showModal(modalDialog(title = "Please enter a valid Redcap Token and click the button below and then attempt to upload again", 
-                              easyClose = TRUE, 
-                              box(width = 12,
-                                  h3("PLEASE GO BACK AND ENTER A VALID REDCAP TOKEN ON FIRST PAGE, Edit Patient") 
-                                  # actionBttn(inputId = "redcap_token_confirmed_button", 
-                                  #            label = "Token Confirmed",
-                                  #            icon = icon("fas fa-user-edit"),
-                                  #            size = "sm", 
-                                  #            block = TRUE)
-                                  
-                              )
+                            easyClose = TRUE, 
+                            box(width = 12,
+                                h3("PLEASE GO BACK AND ENTER A VALID REDCAP TOKEN ON FIRST PAGE, Edit Patient") 
+                                # actionBttn(inputId = "redcap_token_confirmed_button", 
+                                #            label = "Token Confirmed",
+                                #            icon = icon("fas fa-user-edit"),
+                                #            size = "sm", 
+                                #            block = TRUE)
+                                
+                            )
       )
       )
     }else{
       
-    if(redcapAPI::exportNextRecordName(rcon = rcon_reactive$rcon)>1){
-      all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
-        type.convert() %>%
-        select(record_id, last_name, first_name, date_of_birth) %>%
-        mutate(last_name = str_to_lower(last_name),
-               first_name = str_to_lower(first_name))   
-    }else{
-      all_patient_ids_df <- tibble()
-    }
-    
-    if(nrow(all_patient_ids_df)>0){
-      joined_df <- patient_details_redcap_df_reactive() %>%
-        select(last_name, first_name, date_of_birth) %>%
-        mutate(last_name = str_to_lower(last_name),
-               first_name = str_to_lower(first_name)) %>%
-        left_join(all_patient_ids_df)
+      if(redcapAPI::exportNextRecordName(rcon = rcon_reactive$rcon)>1){
+        all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
+          type.convert() %>%
+          select(record_id, last_name, first_name, date_of_birth) %>%
+          mutate(last_name = str_to_lower(last_name),
+                 first_name = str_to_lower(first_name))   
+      }else{
+        all_patient_ids_df <- tibble()
+      }
       
-      match_found <- if_else(!is.na(joined_df$record_id[[1]]), TRUE, FALSE)
-      
-      if(match_found == TRUE){
-        record_number <- joined_df$record_id[[1]]
+      if(nrow(all_patient_ids_df)>0){
+        joined_df <- patient_details_redcap_df_reactive() %>%
+          select(last_name, first_name, date_of_birth) %>%
+          mutate(last_name = str_to_lower(last_name),
+                 first_name = str_to_lower(first_name)) %>%
+          left_join(all_patient_ids_df)
         
-        max_repeat_instances_df <- exportRecords(rcon = rcon_reactive$rcon, records = record_number) %>%
-          as_tibble() %>%
-          select(redcap_repeat_instrument, redcap_repeat_instance) %>%
-          remove_missing() %>%
-          group_by(redcap_repeat_instrument) %>%
-          filter(redcap_repeat_instance == max(redcap_repeat_instance)) %>%
-          ungroup()
+        match_found <- if_else(!is.na(joined_df$record_id[[1]]), TRUE, FALSE)
         
-        repeat_list <- as.list(deframe(max_repeat_instances_df))
-        
-        if("surgical_details" %in% max_repeat_instances_df$redcap_repeat_instrument){
-          surgical_details_instance_add <- repeat_list$surgical_details
+        if(match_found == TRUE){
+          record_number <- joined_df$record_id[[1]]
+          
+          max_repeat_instances_df <- exportRecords(rcon = rcon_reactive$rcon, records = record_number) %>%
+            as_tibble() %>%
+            select(redcap_repeat_instrument, redcap_repeat_instance) %>%
+            remove_missing() %>%
+            group_by(redcap_repeat_instrument) %>%
+            filter(redcap_repeat_instance == max(redcap_repeat_instance)) %>%
+            ungroup()
+          
+          repeat_list <- as.list(deframe(max_repeat_instances_df))
+          
+          if("surgical_details" %in% max_repeat_instances_df$redcap_repeat_instrument){
+            surgical_details_instance_add <- repeat_list$surgical_details
+          }else{
+            surgical_details_instance_add <- 0
+          }
+          if("procedures_by_level_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+            procedures_by_level_repeating_instance_add <- repeat_list$procedures_by_level_repeating
+          }else{
+            procedures_by_level_repeating_instance_add <- 0
+          }
+          if("screw_details_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+            screw_details_repeating_instance_add <- repeat_list$screw_details_repeating
+          }else{
+            screw_details_repeating_instance_add <- 0
+          }
+          if("interbody_implant_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+            interbody_implant_repeating_instance_add <- repeat_list$interbody_implant_repeating
+          }else{
+            interbody_implant_repeating_instance_add <- 0
+          }
+          
+          if("all_inputs_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+            all_inputs_repeating_instance_add <- repeat_list$all_inputs_repeating
+          }else{
+            all_inputs_repeating_instance_add <- 0
+          }
+          
+          surgical_details_instance_start <- repeat_list$surgical_details + 1
+          max_procedures_by_level_repeating <- repeat_list$procedures_by_level_repeating
+          max_screw_details_repeating <- repeat_list$screw_details_repeating
+          
         }else{
+          record_number <- exportNextRecordName(rcon = rcon_reactive$rcon)
           surgical_details_instance_add <- 0
-        }
-        if("procedures_by_level_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
-          procedures_by_level_repeating_instance_add <- repeat_list$procedures_by_level_repeating
-        }else{
           procedures_by_level_repeating_instance_add <- 0
-        }
-        if("screw_details_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
-          screw_details_repeating_instance_add <- repeat_list$screw_details_repeating
-        }else{
           screw_details_repeating_instance_add <- 0
-        }
-        if("interbody_implant_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
-          interbody_implant_repeating_instance_add <- repeat_list$interbody_implant_repeating
-        }else{
           interbody_implant_repeating_instance_add <- 0
-        }
-        
-        if("all_inputs_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
-          all_inputs_repeating_instance_add <- repeat_list$all_inputs_repeating
-        }else{
           all_inputs_repeating_instance_add <- 0
         }
-        
-        surgical_details_instance_start <- repeat_list$surgical_details + 1
-        max_procedures_by_level_repeating <- repeat_list$procedures_by_level_repeating
-        max_screw_details_repeating <- repeat_list$screw_details_repeating
-        
       }else{
         record_number <- exportNextRecordName(rcon = rcon_reactive$rcon)
         surgical_details_instance_add <- 0
@@ -6162,141 +5786,133 @@ server <- function(input, output, session) {
         interbody_implant_repeating_instance_add <- 0
         all_inputs_repeating_instance_add <- 0
       }
-    }else{
-      record_number <- exportNextRecordName(rcon = rcon_reactive$rcon)
-      surgical_details_instance_add <- 0
-      procedures_by_level_repeating_instance_add <- 0
-      screw_details_repeating_instance_add <- 0
-      interbody_implant_repeating_instance_add <- 0
-      all_inputs_repeating_instance_add <- 0
-    }
-    
-    ##### uploaded patient details #######
-    
-    withProgress(message = 'Uploading Data', value = 0, {
-      number_of_steps <- 8
-      
-      incProgress(1/number_of_steps, detail = paste("Uploading Patient Details"))
       
       ##### uploaded patient details #######
-      patient_df_for_upload <- patient_details_redcap_df_reactive() %>%
-        mutate(record_id = record_number) %>%
-        mutate(patient_details_complete = "Complete") %>%
-        select(record_id, everything())
       
-      importRecords(rcon = rcon_reactive$rcon, data = patient_df_for_upload, returnContent = "count")
-      
-      incProgress(1/number_of_steps, detail = paste("Uploading Surgical Details"))
-      
-      ##### uploaded surgical details #######
-      surgical_details_instrument <- surgical_details_redcap_df_reactive() %>%
-        pivot_wider(names_from = name, values_from = value) %>%
-        mutate(record_id = record_number) %>%
-        mutate(redcap_event_name = "surgery_arm_1") %>%
-        mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
-        mutate(redcap_repeat_instrument = "surgical_details") %>%
-        mutate(surgical_details_complete = "Complete") %>%
-        select(record_id, redcap_event_name, everything())
-      
-      importRecords(rcon = rcon_reactive$rcon, data = surgical_details_instrument, returnContent = "count")
-      
-      incProgress(1/number_of_steps, detail = paste("Uploading Intraoperative Details"))
-      
-      ###### Upload Intraoperative Details ####
-      intraoperative_details_redcap_upload_df <- intraoperative_details_redcap_df_reactive() %>%
-        pivot_wider(names_from = name, values_from = value) %>%
-        mutate(record_id = record_number) %>%
-        mutate(redcap_event_name = "surgery_arm_1") %>%
-        mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
-        mutate(redcap_repeat_instrument = "intraoperative_details") %>%
-        mutate(intraoperative_details_complete = "Complete") %>%
-        select(record_id, redcap_event_name, everything())
-      
-      importRecords(rcon = rcon_reactive$rcon, data = intraoperative_details_redcap_upload_df, returnContent = "count")
-      
-      incProgress(1/number_of_steps, detail = paste("Uploading Data per Level"))
-      
-      ###### Upload repeating objects for all levels ####
-      procedures_by_level_repeating_instrument <- procedures_by_level_redcap_df_reactive() %>%
-        mutate(record_id = record_number) %>% 
-        mutate(redcap_event_name = "surgery_arm_1") %>%
-        arrange(category) %>%
-        mutate(redcap_repeat_instance = row_number() + procedures_by_level_repeating_instance_add) %>%
-        mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-        mutate(procedures_by_level_repeating_complete = "Complete") %>%
-        select(record_id, redcap_event_name, everything())
-      
-      importRecords(rcon = rcon_reactive$rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
-      
-      incProgress(1/number_of_steps, detail = paste("Uploading Implant Data"))
-      
-      ##### uploaded screw details #######
-      if(nrow(screw_details_redcap_df_reactive())>0){
-        screw_details_repeating <- screw_details_redcap_df_reactive() %>%
+      withProgress(message = 'Uploading Data', value = 0, {
+        number_of_steps <- 8
+        
+        incProgress(1/number_of_steps, detail = paste("Uploading Patient Details"))
+        
+        ##### uploaded patient details #######
+        patient_df_for_upload <- patient_details_redcap_df_reactive() %>%
+          mutate(record_id = record_number) %>%
+          mutate(patient_details_complete = "Complete") %>%
+          select(record_id, everything())
+        
+        importRecords(rcon = rcon_reactive$rcon, data = patient_df_for_upload, returnContent = "count")
+        
+        incProgress(1/number_of_steps, detail = paste("Uploading Surgical Details"))
+        
+        ##### uploaded surgical details #######
+        surgical_details_instrument <- surgical_details_redcap_df_reactive() %>%
+          pivot_wider(names_from = name, values_from = value) %>%
           mutate(record_id = record_number) %>%
           mutate(redcap_event_name = "surgery_arm_1") %>%
-          mutate(redcap_repeat_instance = row_number() +screw_details_repeating_instance_add) %>%
-          mutate(redcap_repeat_instrument = "screw_details_repeating") %>%
-          mutate(screw_details_repeating_complete = "Complete") %>%
+          mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
+          mutate(redcap_repeat_instrument = "surgical_details") %>%
+          mutate(surgical_details_complete = "Complete") %>%
           select(record_id, redcap_event_name, everything())
         
-        importRecords(rcon = rcon_reactive$rcon, data = screw_details_repeating, returnContent = "count")
-      }
-      
-      incProgress(1/number_of_steps, detail = paste("Uploading Interbody Implant Data"))
-      
-      ##### uploaded interbody details #######
-      if(nrow(interbody_details_redcap_df_reactive())>0){
-        interbody_implant_repeating <- interbody_details_redcap_df_reactive() %>%
+        importRecords(rcon = rcon_reactive$rcon, data = surgical_details_instrument, returnContent = "count")
+        
+        incProgress(1/number_of_steps, detail = paste("Uploading Intraoperative Details"))
+        
+        ###### Upload Intraoperative Details ####
+        intraoperative_details_redcap_upload_df <- intraoperative_details_redcap_df_reactive() %>%
+          pivot_wider(names_from = name, values_from = value) %>%
           mutate(record_id = record_number) %>%
-          select(record_id, everything()) %>%
           mutate(redcap_event_name = "surgery_arm_1") %>%
-          mutate(redcap_repeat_instance = row_number() + interbody_implant_repeating_instance_add) %>%
-          mutate(redcap_repeat_instrument = "interbody_implant_repeating") %>%
-          mutate(interbody_implant_repeating_complete = "Complete") %>%
-          mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+          mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
+          mutate(redcap_repeat_instrument = "intraoperative_details") %>%
+          mutate(intraoperative_details_complete = "Complete") %>%
           select(record_id, redcap_event_name, everything())
         
-        importRecords(rcon = rcon_reactive$rcon, data = interbody_implant_repeating, returnContent = "count")
-      }
-      
-      incProgress(1/number_of_steps, detail = paste("Uploading All Data Inputs"))
-      
-      ##### upload ALL INPUTS details #######
-      if(nrow(all_inputs_trimmed_reactive_df())>0){
+        importRecords(rcon = rcon_reactive$rcon, data = intraoperative_details_redcap_upload_df, returnContent = "count")
         
-        # "record_id, redcap_event_name, redcap_repeat_instrument, redcap_repeat_instance, dos_all_inputs_repeating, variable_input_name, variable_input_result, all_inputs_complete"
-        # enframe(all_inputs_reactive_list()) %>%
-        #   mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = ";")))) %>%
-        #   select(-value) %>%
-        #   unnest(result) %>%
-        #   anti_join(all_inputs_trimmed_reactive_df())
+        incProgress(1/number_of_steps, detail = paste("Uploading Data per Level"))
         
-        all_inputs_repeating_df <- all_inputs_trimmed_reactive_df() %>%
-          mutate(record_id = record_number) %>%
-          select(record_id, everything()) %>%
-          rename(variable_input_name = name, variable_input_result = result) %>%
+        ###### Upload repeating objects for all levels ####
+        procedures_by_level_repeating_instrument <- procedures_by_level_redcap_df_reactive() %>%
+          mutate(record_id = record_number) %>% 
           mutate(redcap_event_name = "surgery_arm_1") %>%
-          mutate(redcap_repeat_instance = row_number() + all_inputs_repeating_instance_add) %>%
-          mutate(dos_all_inputs_repeating = as.character(input$date_of_surgery)) %>%
-          mutate(redcap_repeat_instrument = "all_inputs_repeating") %>%
-          mutate(all_inputs_repeating_complete = "Complete") %>%
-          mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+          arrange(category) %>%
+          mutate(redcap_repeat_instance = row_number() + procedures_by_level_repeating_instance_add) %>%
+          mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
+          mutate(procedures_by_level_repeating_complete = "Complete") %>%
           select(record_id, redcap_event_name, everything())
         
-        importRecords(rcon = rcon_reactive$rcon, data = all_inputs_repeating_df, returnContent = "count")
-      }
+        importRecords(rcon = rcon_reactive$rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
+        
+        incProgress(1/number_of_steps, detail = paste("Uploading Implant Data"))
+        
+        ##### uploaded screw details #######
+        if(nrow(screw_details_redcap_df_reactive())>0){
+          screw_details_repeating <- screw_details_redcap_df_reactive() %>%
+            mutate(record_id = record_number) %>%
+            mutate(redcap_event_name = "surgery_arm_1") %>%
+            mutate(redcap_repeat_instance = row_number() +screw_details_repeating_instance_add) %>%
+            mutate(redcap_repeat_instrument = "screw_details_repeating") %>%
+            mutate(screw_details_repeating_complete = "Complete") %>%
+            select(record_id, redcap_event_name, everything())
+          
+          importRecords(rcon = rcon_reactive$rcon, data = screw_details_repeating, returnContent = "count")
+        }
+        
+        incProgress(1/number_of_steps, detail = paste("Uploading Interbody Implant Data"))
+        
+        ##### uploaded interbody details #######
+        if(nrow(interbody_details_redcap_df_reactive())>0){
+          interbody_implant_repeating <- interbody_details_redcap_df_reactive() %>%
+            mutate(record_id = record_number) %>%
+            select(record_id, everything()) %>%
+            mutate(redcap_event_name = "surgery_arm_1") %>%
+            mutate(redcap_repeat_instance = row_number() + interbody_implant_repeating_instance_add) %>%
+            mutate(redcap_repeat_instrument = "interbody_implant_repeating") %>%
+            mutate(interbody_implant_repeating_complete = "Complete") %>%
+            mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+            select(record_id, redcap_event_name, everything())
+          
+          importRecords(rcon = rcon_reactive$rcon, data = interbody_implant_repeating, returnContent = "count")
+        }
+        
+        incProgress(1/number_of_steps, detail = paste("Uploading All Data Inputs"))
+        
+        ##### upload ALL INPUTS details #######
+        if(nrow(all_inputs_trimmed_reactive_df())>0){
+          
+          # "record_id, redcap_event_name, redcap_repeat_instrument, redcap_repeat_instance, dos_all_inputs_repeating, variable_input_name, variable_input_result, all_inputs_complete"
+          # enframe(all_inputs_reactive_list()) %>%
+          #   mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = ";")))) %>%
+          #   select(-value) %>%
+          #   unnest(result) %>%
+          #   anti_join(all_inputs_trimmed_reactive_df())
+          
+          all_inputs_repeating_df <- all_inputs_trimmed_reactive_df() %>%
+            mutate(record_id = record_number) %>%
+            select(record_id, everything()) %>%
+            rename(variable_input_name = name, variable_input_result = result) %>%
+            mutate(redcap_event_name = "surgery_arm_1") %>%
+            mutate(redcap_repeat_instance = row_number() + all_inputs_repeating_instance_add) %>%
+            mutate(dos_all_inputs_repeating = as.character(input$date_of_surgery)) %>%
+            mutate(redcap_repeat_instrument = "all_inputs_repeating") %>%
+            mutate(all_inputs_repeating_complete = "Complete") %>%
+            mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+            select(record_id, redcap_event_name, everything())
+          
+          importRecords(rcon = rcon_reactive$rcon, data = all_inputs_repeating_df, returnContent = "count")
+        }
+        
+        incProgress(1/number_of_steps, detail = paste("Complete"))
+        
+      })
       
-      incProgress(1/number_of_steps, detail = paste("Complete"))
-      
-    })
-    
-    sendSweetAlert(
-      session = session,
-      title = "Success !!",
-      text = "All in order",
-      type = "success"
-    )
+      sendSweetAlert(
+        session = session,
+        title = "Success !!",
+        text = "All in order",
+        type = "success"
+      )
     }
   })
   
