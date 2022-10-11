@@ -4864,7 +4864,6 @@ server <- function(input, output, session) {
       
       surgery_details_list$diagnosis <- glue_collapse(str_to_lower(input$primary_diagnosis), sep = "; ")
       
-      
       surgery_details_list$diagnosis_icd10_code <- glue_collapse((tibble(diagnosis = input$primary_diagnosis) %>%
                                                                     left_join(spine_codes_df) %>%
                                                                     select(icd_10_code))$icd_10_code, sep = "; ")
@@ -5354,12 +5353,11 @@ server <- function(input, output, session) {
   
   ################# MAKE THE procedures by level DATAFRAME ##################
   procedures_by_level_redcap_df_reactive <- reactive({
-    
-    fusion_df <- jh_fusion_category_function(fusion_vector = input$fusion_levels_confirmed, 
-                                             all_objects_df = all_objects_to_add_list$objects_df)%>%
-      mutate(side = "central")
-    
     if(nrow(all_objects_to_add_list$objects_df)>0){
+      fusion_df <- jh_fusion_category_function(fusion_vector = input$fusion_levels_confirmed, 
+                                               all_objects_df = all_objects_to_add_list$objects_df)%>%
+        mutate(side = "central")
+      
       data_wide <- all_objects_to_add_list$objects_df %>%
         select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
         mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
@@ -5393,8 +5391,6 @@ server <- function(input, output, session) {
   })
   
   
-  ################# PEDICLE SCREW DETAILS TABLE ##################
-  ### OLD METHOD
   ################------------------  Screw Size RESULTS  ----------------------######################  
   ################------------------  Screw Size RESULTS  ----------------------######################  
   
@@ -5891,17 +5887,19 @@ server <- function(input, output, session) {
         incProgress(1/number_of_steps, detail = paste("Uploading Data per Level"))
         
         ###### Upload repeating objects for all levels ####
-        procedures_by_level_repeating_instrument <- procedures_by_level_redcap_df_reactive() %>%
-          mutate(record_id = record_number) %>% 
-          mutate(redcap_event_name = "surgery_arm_1") %>%
-          arrange(category) %>%
-          mutate(redcap_repeat_instance = row_number() + procedures_by_level_repeating_instance_add) %>%
-          mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-          mutate(procedures_by_level_repeating_complete = "Complete") %>%
-          select(record_id, redcap_event_name, everything())
-        
-        importRecords(rcon = rcon_reactive$rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
-        
+        if(nrow(procedures_by_level_redcap_df_reactive())>0){
+          procedures_by_level_repeating_instrument <- procedures_by_level_redcap_df_reactive() %>%
+            mutate(record_id = record_number) %>% 
+            mutate(redcap_event_name = "surgery_arm_1") %>%
+            arrange(category) %>%
+            mutate(redcap_repeat_instance = row_number() + procedures_by_level_repeating_instance_add) %>%
+            mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
+            mutate(procedures_by_level_repeating_complete = "Complete") %>%
+            select(record_id, redcap_event_name, everything())
+          
+          importRecords(rcon = rcon_reactive$rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
+        }
+
         incProgress(1/number_of_steps, detail = paste("Uploading Implant Data"))
         
         ##### uploaded screw details #######
@@ -5938,13 +5936,7 @@ server <- function(input, output, session) {
         
         ##### upload ALL INPUTS details #######
         if(nrow(all_inputs_trimmed_reactive_df())>0){
-          
-          # "record_id, redcap_event_name, redcap_repeat_instrument, redcap_repeat_instance, dos_all_inputs_repeating, variable_input_name, variable_input_result, all_inputs_complete"
-          # enframe(all_inputs_reactive_list()) %>%
-          #   mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = ";")))) %>%
-          #   select(-value) %>%
-          #   unnest(result) %>%
-          #   anti_join(all_inputs_trimmed_reactive_df())
+      
           
           all_inputs_repeating_df <- all_inputs_trimmed_reactive_df() %>%
             mutate(record_id = record_number) %>%
