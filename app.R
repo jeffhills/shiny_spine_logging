@@ -1048,13 +1048,11 @@ server <- function(input, output, session) {
                  
                  if(nrow(all_patient_ids_df)>0){
                    
-                   joined_df <- patient_details_redcap_df_reactive() %>%
-                     select(last_name, first_name, date_of_birth) %>%
-                     mutate(last_name = str_to_lower(last_name), 
-                            first_name = str_to_lower(first_name)) %>%
-                     left_join(all_patient_ids_df)
+                   joined_df <- all_patient_ids_df %>%
+                     filter(last_name == str_to_lower(input$patient_last_name),  
+                            first_name == str_to_lower(input$patient_first_name),
+                            date_of_birth == paste(input$date_of_birth))
                    
-                   # match_found <- if_else(!is.na(joined_df$record_id[[1]]), TRUE, FALSE)
                    match_found <- if_else(nrow(joined_df) > 0, TRUE, FALSE)
                    
                    if(match_found == TRUE){

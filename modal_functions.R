@@ -91,7 +91,7 @@ startup_modal_box <-
               label = "Date of Birth (mm-dd-yyyy):",
               value = starting_dob,
               format = "mm-dd-yyyy",
-              max = Sys.Date() - 720
+              max = Sys.Date() - 250
             )
           ),
           column(
