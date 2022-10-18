@@ -555,7 +555,8 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(screw
                                                                            approach_specified_anterior = "Left-sided",
                                                                            implant_start_point_method = "Implant start points were identified using anatomic landmarks.",
                                                                            implant_position_confirmation_method = "Intraoperative fluoroscopy was used to confirm position of all implants.",
-                                                                           alignment_correction_method = "NA"){
+                                                                           alignment_correction_method = "NA", 
+                                                                           instruments_used_for_bony_work = "High-speed burr only"){
   
   modalDialog(title = "Confirm Fusion Levels", 
               easyClose = FALSE, 
@@ -679,6 +680,21 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(screw
                       )
                     )
                   },
+                  fluidRow(
+                    prettyCheckboxGroup(
+                      inputId = "instruments_used_for_bony_work",
+                      label = "Select any instruments used:", 
+                      inline = TRUE,
+                      choices = c("High-speed burr only",
+                                  "Bone scalpel only",
+                                  "High-speed burr and bone scalpel",
+                                  "NA"),
+                      icon = icon("check"),
+                      selected = instruments_used_for_bony_work, 
+                      bigger = TRUE,
+                      status = "success"
+                    )
+                  ),
                   if(length(fusion_levels_confirmed)>0){
                     fluidRow(
                       prettyCheckboxGroup(

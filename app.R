@@ -1447,7 +1447,8 @@ server <- function(input, output, session) {
                                                                        approach_specified_anterior = input$approach_specified_anterior,
                                                                        implant_start_point_method = input$implant_start_point_method,
                                                                        implant_position_confirmation_method = input$implant_position_confirmation_method, 
-                                                                       alignment_correction_method = input$alignment_correction_method
+                                                                       alignment_correction_method = input$alignment_correction_method,
+                                                                       instruments_used_for_bony_work = input$instruments_used_for_bony_work
         )
         
       )
@@ -4171,7 +4172,7 @@ server <- function(input, output, session) {
     posterior_op_note_inputs_list_reactive$neuromonitoring_input_list <- neuromonitoring_input_list
     
     #######
-    if(length(input$start_point_method) == 0){
+    if(length(input$implant_start_point_method) == 0){
       implant_start_point_method <- "NA"
     }else{
       implant_start_point_method <- input$implant_start_point_method
@@ -4187,6 +4188,10 @@ server <- function(input, output, session) {
     }
     
     posterior_op_note_inputs_list_reactive$implant_position_confirmation_method <- implant_position_confirmation_method
+    
+    
+    #########
+    posterior_op_note_inputs_list_reactive$instruments_used_for_bony_work <- input$instruments_used_for_bony_work
     
     #######
     posterior_op_note_inputs_list_reactive$local_anesthesia <- input$local_anesthesia
@@ -4589,7 +4594,8 @@ server <- function(input, output, session) {
                                                                        multiple_position_procedure = posterior_op_note_inputs_list_reactive()$multiple_approach, 
                                                                        alignment_correction_technique = posterior_op_note_inputs_list_reactive()$alignment_correction_method,
                                                                        sex = posterior_op_note_inputs_list_reactive()$sex,
-                                                                       lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression
+                                                                       lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression, 
+                                                                       instruments_used_for_bony_work = posterior_op_note_inputs_list_reactive()$instruments_used_for_bony_work
         )
         
         
