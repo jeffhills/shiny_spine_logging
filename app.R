@@ -900,8 +900,6 @@ ui <- dashboardPage(skin = "black",
                               actionBttn(inputId = "preview_redcap_upload", label = "Upload to Redcap Project", icon = icon("upload"), style = "jelly", color = "primary", size = "md"),
                           ),
                           box(width = 8, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Operative Note Generator:"),status = "success", solidHeader = TRUE,
-                              htmlOutput(outputId = "operative_note_formatted"),
-                              br(),
                               actionBttn(
                                 inputId = "generate_operative_note",
                                 block = TRUE,
@@ -911,55 +909,24 @@ ui <- dashboardPage(skin = "black",
                                 color = "primary"
                               ),
                               br(),
-                              fluidRow(
-                                column(width = 10, 
-                                       textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 750)), 
-                                column(width = 2, 
-                                       div(style = "font-size:16px; font-weight:bold; text-align:center", "Click to format op note:"),
-                                       actionBttn(
-                                         inputId = "format_op_note_button",
-                                         label = "Format",
-                                         style = "float", 
-                                         color = "success"
-                                       )
-                                       # dropdown(
-                                       #   htmlOutput(outputId = "operative_note_formatted"),
-                                       #   style = "unite", icon = icon("gear"),
-                                       #   status = "danger", width = "300px",
-                                       #   animate = animateOptions(
-                                       #     enter = animations$fading_entrances$fadeInLeftBig,
-                                       #     exit = animations$fading_exits$fadeOutRightBig
-                                       #   )
-                                       # )
-                                       )
-                              ),
-                              # textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 750),
+                              textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 500),
                               br(), 
+                              h3("Formatted Operative Report:"),
+                              p(em("Edits above will be automatically reflected here.")),
                               br(),
+                              htmlOutput(outputId = "operative_note_formatted"),
+                              br(), 
+                              hr(),
+                              p(em("To copy the formatted text, you must highlight the formatted text and copy, otherwise you can click below:")),
                               uiOutput("clipboard_ui")
                           )
                           ###########################################
                   ),
                   tabItem(tabName = "tables",
                           #         ###########################################
-                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Patient Details Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                          #             tableOutput(outputId = "patient_details_redcap_df_sidetab")
-                          #         ),
-                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Summary Table:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                          #             tableOutput(outputId = "surgical_details_redcap_df_sidetab")
-                          #         ),
-                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Intraoperative Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                          #             tableOutput(outputId = "intraoperative_details_redcap_df_sidetab")
-                          #         ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Specifics"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                               tableOutput(outputId = "procedures_by_level_redcap_df_sidetab")
                           ),
-                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                          #             tableOutput("screw_details_redcap_df_sidetab")
-                          #         ),
-                          #         box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody implants:"),status = "success", collapsible = TRUE, solidHeader = TRUE,
-                          #             tableOutput(outputId = "interbody_details_redcap_df_sidetab")
-                          #         ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All objects table:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                               tableOutput(outputId = "all_objects_table")
                           ),
@@ -1145,7 +1112,7 @@ server <- function(input, output, session) {
       symptoms <- NULL
       
       showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = diagnosis_category,
-                                                     primary_diagnosis_value = dx,
+                                                     # primary_diagnosis_value = dx,
                                                      symptoms_initial_value = symptoms,
                                                      stage_number_value = input$stage_number,
                                                      staged_procedure_initial_value = FALSE,
@@ -1170,13 +1137,14 @@ server <- function(input, output, session) {
   })
   
   modal_box_diagnosis_symptoms_procedure_reactive <- reactive({
-    startup_modal_box_diagnosis_symptoms(diagnosis_category_value = input$diagnosis_category,
+    startup_modal_box_diagnosis_symptoms(spinal_regions_selected = input$spinal_regions,
+                                         diagnosis_category_value = input$diagnosis_category, 
                                          primary_diagnosis_value = input$primary_diagnosis,
-                                         symptoms_initial_value = input$symptoms,
+                                         symptoms_initial_value = input$symptoms, 
+                                         symptoms_other = input$symptoms_other,
                                          stage_number_value = input$stage_number,
                                          staged_procedure_initial_value = input$staged_procedure,
                                          multiple_approach_initial_value = input$multiple_approach,
-                                         spinal_regions_selected = input$spinal_regions,
                                          ##
                                          primary_or_revision = input$primary_revision,
                                          revision_indication = input$revision_indication,
@@ -1291,13 +1259,20 @@ server <- function(input, output, session) {
                       
                       spine_diagnosis_choices_list <- jh_filter_icd_codes_generate_vector_function(section_input = input$diagnosis_category, spine_region_input = input$spinal_regions, age = age)
                       
+                      if(length(input$primary_diagnosis)>0){
+                        diagnosis_selected <- input$primary_diagnosis
+                      }else{
+                        diagnosis_selected <- NULL
+                      }
+                      
                       updatePickerInput(session = session,
                                         inputId = "primary_diagnosis",
                                         label = "Diagnosis Search:", 
                                         choices = spine_diagnosis_choices_list,
                                         options = pickerOptions(liveSearch = TRUE, 
                                                                 liveSearchNormalize = TRUE, 
-                                                                virtualScroll = 200))
+                                                                virtualScroll = 200), 
+                                        selected = diagnosis_selected)
                     })
   
   
@@ -4732,7 +4707,7 @@ server <- function(input, output, session) {
   }
   )
   
-  observeEvent(input$format_op_note_button, ignoreNULL = TRUE, {
+  observeEvent(input$operative_note_text, ignoreNULL = TRUE, {
     output$operative_note_formatted <-  renderText({
       
       op_note <- input$operative_note_text

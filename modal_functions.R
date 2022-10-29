@@ -152,6 +152,7 @@ startup_modal_box_diagnosis_symptoms <-
            primary_diagnosis_value = NULL,
            other_diagnosis = NULL,
            symptoms_initial_value = "",
+           symptoms_other = "",
            stage_number_value = 1,
            staged_procedure_initial_value = FALSE,
            multiple_approach_initial_value = FALSE,
@@ -170,6 +171,19 @@ startup_modal_box_diagnosis_symptoms <-
            right_implants_still_connected = "", 
            revision_indication = ""
   ) {
+    
+    diagnosis_section_category <- case_when(
+      diagnosis_category_value == "Degen/Inflammatory" ~ "msk",
+      diagnosis_category_value == "Deformity" ~ "deformity",
+      diagnosis_category_value == "Trauma" ~ "trauma",
+      diagnosis_category_value == "Tumor" ~ "tumor",
+      diagnosis_category_value == "Infection" ~ "infection",
+      diagnosis_category_value == "Congenital" ~ "congenital",
+      diagnosis_category_value == "Other Neurological Diseases" ~ "other_neuro_conditions" 
+  
+    )
+
+                                     
     modalDialog(
       size = "l",
       easyClose = FALSE,
@@ -225,7 +239,8 @@ startup_modal_box_diagnosis_symptoms <-
                 pickerInput(
                   inputId = "primary_diagnosis",
                   label = "Diagnosis Search:",
-                  choices = jh_filter_icd_codes_generate_vector_function(section_input = "msk", spine_region_input = "lumbar"), #spine_icd_list_by_region$Lumbar$Degenerative,
+                  choices = jh_filter_icd_codes_generate_vector_function(section_input = diagnosis_section_category, spine_region_input = spinal_regions_selected), 
+                  # choices = jh_filter_icd_codes_generate_vector_function(section_input = "msk", spine_region_input = "lumbar"), 
                   options = pickerOptions(
                     liveSearch = TRUE,
                     virtualScroll = 50,
@@ -256,7 +271,7 @@ startup_modal_box_diagnosis_symptoms <-
                 ),
                 conditionalPanel(
                   condition = "input.symptoms.indexOf('Other') > -1",
-                  textInput(inputId = "symptoms_other", label = "Other:")
+                  textInput(inputId = "symptoms_other", label = "Other:", value = symptoms_other)
                 )
               )
             ),
