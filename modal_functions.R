@@ -1458,7 +1458,7 @@ addition_surgical_details_modal_box_2_function <-
           return_as_full_table = TRUE
         ),
         br(),
-        h2("Confirm any additional Procedures Performed:"),
+        h3("Confirm any additional Procedures Performed:"),
         jh_make_shiny_table_row_function(
           left_column_label = "Additional Procedures:",
           font_size = row_label_font_size,
@@ -1483,6 +1483,7 @@ addition_surgical_details_modal_box_2_function <-
             )
           )
         ),
+        hr(),
         h2("Postop Plan:"),
         jh_make_shiny_table_row_function(
           left_column_label = "Dispo:",
@@ -1533,7 +1534,7 @@ addition_surgical_details_modal_box_2_function <-
         jh_make_shiny_table_row_function(
           left_column_label = "Postop Imaging:",
           font_size = row_label_font_size,
-          input_id = "postop_abx",
+          input_id = "postop_imaging",
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
@@ -1663,7 +1664,8 @@ addition_surgical_details_modal_box_2_function <-
           choices_vector = c("Follow-up in spine clinic in 2wks.", 
                              "Follow-up in spine clinic in 6wks.",
                              "Follow-up in spine clinic in ***wks.",
-                             "Follow-up in spine trauma clinic in 2wks."),
+                             "Follow-up in spine trauma clinic in 2wks.", 
+                             "Follow-up in ***"),
           initial_value_selected = postop_followup
         )
       )

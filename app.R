@@ -900,6 +900,8 @@ ui <- dashboardPage(skin = "black",
                               actionBttn(inputId = "preview_redcap_upload", label = "Upload to Redcap Project", icon = icon("upload"), style = "jelly", color = "primary", size = "md"),
                           ),
                           box(width = 8, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Operative Note Generator:"),status = "success", solidHeader = TRUE,
+                              htmlOutput(outputId = "operative_note_formatted"),
+                              br(),
                               actionBttn(
                                 inputId = "generate_operative_note",
                                 block = TRUE,
@@ -909,7 +911,29 @@ ui <- dashboardPage(skin = "black",
                                 color = "primary"
                               ),
                               br(),
-                              textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 750),
+                              fluidRow(
+                                column(width = 10, 
+                                       textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 750)), 
+                                column(width = 2, 
+                                       div(style = "font-size:16px; font-weight:bold; text-align:center", "Click to format op note:"),
+                                       actionBttn(
+                                         inputId = "format_op_note_button",
+                                         label = "Format",
+                                         style = "float", 
+                                         color = "success"
+                                       )
+                                       # dropdown(
+                                       #   htmlOutput(outputId = "operative_note_formatted"),
+                                       #   style = "unite", icon = icon("gear"),
+                                       #   status = "danger", width = "300px",
+                                       #   animate = animateOptions(
+                                       #     enter = animations$fading_entrances$fadeInLeftBig,
+                                       #     exit = animations$fading_exits$fadeOutRightBig
+                                       #   )
+                                       # )
+                                       )
+                              ),
+                              # textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 750),
                               br(), 
                               br(),
                               uiOutput("clipboard_ui")
@@ -4046,50 +4070,71 @@ server <- function(input, output, session) {
   
   
   postop_plan_list_reactive <- reactive({
+    format_plan_list_function <- function(plan_label, input_vector){
+      if(length(input_vector) > 1){
+        plan_formatted <- paste0("  - ", plan_label, ":", glue_collapse(prepend(x = input_vector, values = " "), sep = "\n       > "))
+      }else{
+        plan_formatted <- paste0("  - ", plan_label, ": ", input_vector)
+      }
+      plan_formatted
+    }
+    
     postop_plan <- list()
     ##########   dispo  #############
     if(length(input$postop_dispo) >0){
-      postop_plan$postop_dispo_label <- paste("  -Postop Destination: ", glue_collapse(input$postop_dispo, sep = "; ", last = "; and "))
+      postop_plan$postop_dispo_label <- paste("  - Postop Destination: ", glue_collapse(input$postop_dispo, sep = "; ", last = "; and "))
     }
+    
     ##########   postop_abx  #############
     if(length(input$postop_abx) >0){
-      postop_plan$postop_abx_label <- paste("  -Postop Abx: ", glue_collapse(input$postop_abx, sep = "; ", last = "; and "))
+      postop_plan$postop_abx_label <- format_plan_list_function(plan_label = "Postop Abx", input_vector = input$postop_abx)
+      
+      # postop_plan$postop_abx_label <- paste("  - Postop Abx: ", glue_collapse(input$postop_abx, sep = "; ", last = "; and "))
     }
+    
     ##########   postop_map_goals  #############
     if(length(input$postop_map_goals) > 0){
-      postop_plan$postop_map_goals_label <- paste("  -Postop MAP goals: ", glue_collapse(input$postop_map_goals, sep = "; ", last = "; and "))
+      postop_plan$postop_map_goals_label <- paste("  - Postop MAP goals: ", glue_collapse(input$postop_map_goals, sep = "; ", last = "; and "))
     }
+    
     ##########   postop_imaging  #############
-    if(length(input$postop_imaging) >0){
-      postop_plan$postop_imaging_label <- paste("  -Postop Imaging: ", glue_collapse(input$postop_imaging, sep = "; ", last = "; and "))
+    if(length(input$postop_imaging) > 0){
+      postop_plan$postop_imaging_label <- format_plan_list_function(plan_label = "Postop Imaging", input_vector = input$postop_imaging)
+      # postop_plan$postop_imaging_label <- paste("  - Postop Imaging: ", glue_collapse(input$postop_imaging, sep = "; ", last = "; and "))
     }
     ##########   postop_pain  #############
     if(length(input$postop_pain) >0){
-      postop_plan$postop_pain_label <- paste("  -Pain Control: ", glue_collapse(input$postop_pain, sep = "; ", last = "; and "))
+      postop_plan$postop_pain_label <- format_plan_list_function(plan_label = "Pain Control", input_vector = input$postop_pain)
+      
+      # postop_plan$postop_pain_label <- paste("  - Pain Control: ", glue_collapse(input$postop_pain, sep = "; ", last = "; and "))
     }
     ##########   postop_activity  #############
     if(length(input$postop_activity) >0){
-      postop_plan$postop_activity_label <- paste("  -Activity: ", glue_collapse(input$postop_activity, sep = "; ", last = "; and "))
+      postop_plan$postop_activity_label <- format_plan_list_function(plan_label = "Activity", input_vector = input$postop_activity)
+      # postop_plan$postop_activity_label <- paste("  - Activity: ", glue_collapse(input$postop_activity, sep = "; ", last = "; and "))
     }
     ##########   postop_brace  #############
     if(length(input$postop_brace) >0){
-      postop_plan$postop_brace_label <- paste("  -Bracing: ", glue_collapse(input$postop_brace, sep = "; ", last = "; and "))
+      postop_plan$postop_brace_label <- paste("  - Bracing: ", glue_collapse(input$postop_brace, sep = "; ", last = "; and "))
     }
     ##########   postop_diet  #############
     if(length(input$postop_diet) >0){
-      postop_plan$postop_diet_label <- paste("  -Diet: ", glue_collapse(input$postop_diet, sep = "; ", last = "; and "))
+      postop_plan$postop_diet_label <- format_plan_list_function(plan_label = "Diet/GI", input_vector = input$postop_diet)
+      # postop_plan$postop_diet_label <- paste("  - Diet/GI: ", glue_collapse(input$postop_diet, sep = "; ", last = "; and "))
     }
     ##########   postop_dvt_ppx  #############
     if(length(input$postop_dvt_ppx) >0){
-      postop_plan$postop_dvt_label <- paste("  -DVT PPX/Anticoag/Antiplatelet: ", glue_collapse(input$postop_dvt_ppx, sep = "; ", last = "; and "))
+      postop_plan$postop_dvt_label <- format_plan_list_function(plan_label = "DVT PPX/Anticoag/Antiplatelet", input_vector = input$postop_dvt_ppx)
+      # postop_plan$postop_dvt_label <- paste("  - DVT PPX/Anticoag/Antiplatelet: ", glue_collapse(input$postop_dvt_ppx, sep = "; ", last = "; and "))
     }
     ##########   postop_drains_dressing  #############
     if(length(input$postop_drains_dressing) >0){
-      postop_plan$postop_drains_dressing_label <- paste("  -Drains & Dressing: ", glue_collapse(input$postop_drains_dressing, sep = "; ", last = "; and "))
+      postop_plan$postop_drains_dressing_label <- format_plan_list_function(plan_label = "Drains & Dressing", input_vector = input$postop_drains_dressing)
+      # postop_plan$postop_drains_dressing_label <- paste("  - Drains & Dressing: ", glue_collapse(input$postop_drains_dressing, sep = "; ", last = "; and "))
     }
     ##########   postop_followup  #############
     if(length(input$postop_followup) >0){
-      postop_plan$postop_followup_label <- paste("  -Follow-up: ", glue_collapse(input$postop_followup, sep = "; ", last = "; and "))
+      postop_plan$postop_followup_label <- paste("  - Follow-up: ", glue_collapse(input$postop_followup, sep = "; ", last = "; and "))
     }
     postop_plan
     
@@ -4645,8 +4690,8 @@ server <- function(input, output, session) {
       
       
       op_note_list <- list()
-      
-      op_note_list$"\n*Patient:" <- paste(input$patient_first_name, input$patient_last_name)
+      op_note_list$"OPERATIVE REPORT" <- paste(" ")
+      op_note_list$"*Patient:" <- paste(input$patient_first_name, input$patient_last_name)
       op_note_list$"\n*Date of Surgery:" <- as.character(input$date_of_surgery)
       op_note_list$"\n*Primary Surgeon:" <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
       op_note_list$"\n*Surgical Assistants:" <- input$surgical_assistants
@@ -4686,6 +4731,54 @@ server <- function(input, output, session) {
     
   }
   )
+  
+  observeEvent(input$format_op_note_button, ignoreNULL = TRUE, {
+    output$operative_note_formatted <-  renderText({
+      
+      op_note <- input$operative_note_text
+      
+      op_note <- str_replace_all(string = op_note, pattern = "\\n\\n", replacement = "<br><br>")
+      op_note <- str_replace_all(string = op_note, pattern = "\\n", replacement = "<br>")
+      
+      op_note <- str_replace_all(string = op_note, pattern = "OPERATIVE REPORT", replacement = "<u><B>OPERATIVE REPORT</B></u>")
+      op_note <- str_replace_all(string = op_note, pattern = "Patient:", replacement = "<B>Patient:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Date of Surgery:", replacement = "<B>Date of Surgery:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Primary Surgeon:", replacement = "<B>Primary Surgeon:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Surgical Assistants:", replacement = "<B>Surgical Assistants:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Preprocedure ASA Class:", replacement = "<B>Preprocedure ASA Class:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Anesthesia:", replacement = "<B>Anesthesia:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Intraoperative Complications:", replacement = "<B>Intraoperative Complications:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Pre-operative Diagnosis:", replacement = "<B>Pre-operative Diagnosis:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Post-operative Diagnosis:", replacement = "<B>Post-operative Diagnosis:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Indications:", replacement = "<B>Indications:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Estimated Blood Loss:", replacement = "<B>Estimated Blood Loss:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Fluids/Transfusions:", replacement = "<B>Fluids/Transfusions:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Surgical Findings:", replacement = "<B>Surgical Findings:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Specimens Taken:", replacement = "<B>Specimens Taken:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Procedures Performed:", replacement = "<B>Procedures Performed:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Procedure  Description:", replacement = "<B>Procedure  Description:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Postop Plan:", replacement = "<br><u><B>POSTOP PLAN:</B></u>")
+      # op_note <- str_replace_all(string = op_note, pattern = "xxxx:", replacement = "<B>xxxxx:</B>")
+      
+      op_note <- str_replace_all(string = op_note, pattern = "Postop Destination:", replacement = "<em>Postop Destination:</em>")
+      op_note <- str_replace_all(string = op_note, pattern = "Postop Abx:", replacement = "<em>Postop Abx:</em>")
+      op_note <- str_replace_all(string = op_note, pattern = "Postop MAP goals:", replacement = "<em>Postop MAP goals:</em>")
+      op_note <- str_replace_all(string = op_note, pattern = "Postop Imaging:", replacement = "<em>Postop Imaging:</em>")
+      op_note <- str_replace_all(string = op_note, pattern = "Pain Control:", replacement = "<em>Pain Control:</em>")
+      op_note <- str_replace_all(string = op_note, pattern = "Activity:", replacement = "<em>Activity:</em>")
+      op_note <- str_replace_all(string = op_note, pattern = "Bracing:", replacement = "<em>Bracing:</em>")
+      op_note <- str_replace_all(string = op_note, pattern = "Diet/GI:", replacement = "<em>Diet/GI:</em>")
+      op_note <- str_replace_all(string = op_note, pattern = "DVT PPX/Anticoag/Antiplatelet:", replacement = "<em>DVT PPX/Anticoag/Antiplatelet:</em>")
+      op_note <- str_replace_all(string = op_note, pattern = "Drains & Dressing:", replacement = "<em>Drains & Dressing:</em>")
+      op_note <- str_replace_all(string = op_note, pattern = "Follow-up:", replacement = "<em>Follow-up:</em>")
+
+      op_note <- str_replace_all(string = op_note, pattern = "     > ", replacement = " &emsp; > ")
+      
+      # HTML(glue_collapse(op_note, sep = "<br>"))
+    })  
+    
+  })
+  
   
   observeEvent(input$generate_operative_note, {
     output$clipboard_ui <- renderUI({
