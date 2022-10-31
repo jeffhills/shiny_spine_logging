@@ -240,7 +240,6 @@ startup_modal_box_diagnosis_symptoms <-
                   inputId = "primary_diagnosis",
                   label = "Diagnosis Search:",
                   choices = jh_filter_icd_codes_generate_vector_function(section_input = diagnosis_section_category, spine_region_input = spinal_regions_selected), 
-                  # choices = jh_filter_icd_codes_generate_vector_function(section_input = "msk", spine_region_input = "lumbar"), 
                   options = pickerOptions(
                     liveSearch = TRUE,
                     virtualScroll = 50,

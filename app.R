@@ -509,7 +509,9 @@ ui <- dashboardPage(skin = "black",
                                                                                                input_type = "numeric",
                                                                                                input_id = "posterior_allograft_amount",
                                                                                                initial_value_selected = 0,
-                                                                                               min = 0, max = 500, step = 30)
+                                                                                               min = 0, 
+                                                                                               max = 500, 
+                                                                                               step = 30)
                                                             )
                                                      ),
                                                      column(6,
@@ -544,7 +546,10 @@ ui <- dashboardPage(skin = "black",
                                                                                                font_size = 16,
                                                                                                input_type = "numeric",
                                                                                                input_id = "posterior_dbm_volume",
-                                                                                               initial_value_selected = 0, min = 0, max = 500, step = 5)
+                                                                                               initial_value_selected = 0, 
+                                                                                               min = 0, 
+                                                                                               max = 500, 
+                                                                                               step = 2.5)
                                                             ),
                                                             conditionalPanel(
                                                               condition = "input.posterior_biologics.indexOf('iFactor') > -1",
@@ -553,7 +558,10 @@ ui <- dashboardPage(skin = "black",
                                                                                                font_size = 16,
                                                                                                input_type = "numeric",
                                                                                                input_id = "posterior_ifactor_volume",
-                                                                                               initial_value_selected = 0, min = 0, max = 50, step = 5)
+                                                                                               initial_value_selected = 0, 
+                                                                                               min = 0, 
+                                                                                               max = 50, 
+                                                                                               step = 1)
                                                             )
                                                      )
                                                    ),
@@ -606,7 +614,10 @@ ui <- dashboardPage(skin = "black",
                                                                                                font_size = 16,
                                                                                                input_type = "numeric",
                                                                                                input_id = "anterior_allograft_amount", 
-                                                                                               initial_value_selected = 0, min = 0, max = 500, step = 30)
+                                                                                               initial_value_selected = 0, 
+                                                                                               min = 0, 
+                                                                                               max = 500, 
+                                                                                               step = 30)
                                                             ),
                                                             conditionalPanel(
                                                               condition = "input.anterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
@@ -638,7 +649,11 @@ ui <- dashboardPage(skin = "black",
                                                                                                left_column_percent_width = 60, 
                                                                                                font_size = 16,
                                                                                                input_type = "numeric",
-                                                                                               input_id = "anterior_dbm_volume", initial_value_selected = 0, min = 0, max = 500, step = 5)
+                                                                                               input_id = "anterior_dbm_volume", 
+                                                                                               initial_value_selected = 0,
+                                                                                               min = 0, 
+                                                                                               max = 500,
+                                                                                               step = 5)
                                                             ),
                                                             conditionalPanel(
                                                               condition = "input.anterior_biologics.indexOf('iFactor') > -1",
@@ -647,7 +662,10 @@ ui <- dashboardPage(skin = "black",
                                                                                                font_size = 16,
                                                                                                input_type = "numeric",
                                                                                                input_id = "anterior_ifactor_volume",
-                                                                                               initial_value_selected = 0, min = 0, max = 50, step = 5)
+                                                                                               initial_value_selected = 0, 
+                                                                                               min = 0, 
+                                                                                               max = 50,
+                                                                                               step = 1)
                                                             )
                                                      )
                                                    ),
@@ -4403,28 +4421,31 @@ server <- function(input, output, session) {
     
     #######
     anterior_biologics_list <- list()
+    
+    number_of_fusion_levels <- length(input$fusion_levels_confirmed)
+    
     if(any(input$anterior_bone_graft == "Morselized Allograft")){
-      anterior_biologics_list$'Morselized Allograft' <- input$anterior_allograft_amount
+      anterior_biologics_list$'Morselized Allograft' <- round(input$anterior_allograft_amount/number_of_fusion_levels, 1)
     }else{
       anterior_biologics_list$'Morselized Allograft' <- 0
     }
     if(any(input$anterior_biologics == "Bone Marrow Aspirate")){
-      anterior_biologics_list$'Bone Marrow Aspirate' <- input$anterior_bone_marrow_aspirate_volume
+      anterior_biologics_list$'Bone Marrow Aspirate' <- round(input$anterior_bone_marrow_aspirate_volume/number_of_fusion_levels, 1) 
     }else{
       anterior_biologics_list$'Bone Marrow Aspirate' <- 0
     }
     if(any(input$anterior_biologics == "Cell Based Allograft")){
-      anterior_biologics_list$'Cell Based Allograft' <- input$anterior_cell_based_allograft_volume
+      anterior_biologics_list$'Cell Based Allograft' <- round(input$anterior_cell_based_allograft_volume/number_of_fusion_levels, 1)
     }else{
       anterior_biologics_list$'Cell Based Allograft' <- 0
     }
     if(any(input$anterior_biologics == "DBM")){
-      anterior_biologics_list$'DBM' <- input$anterior_dbm_volume
+      anterior_biologics_list$'DBM' <- round(input$anterior_dbm_volume/number_of_fusion_levels, 1) 
     }else{
       anterior_biologics_list$'DBM' <- 0
     }
     if(any(input$anterior_biologics == "iFactor")){
-      anterior_biologics_list$'iFactor' <- input$anterior_ifactor_volume
+      anterior_biologics_list$'iFactor' <-  round(input$anterior_ifactor_volume/number_of_fusion_levels, 1) 
     }else{
       anterior_biologics_list$'iFactor' <- 0
     }
