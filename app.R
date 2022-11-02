@@ -421,55 +421,15 @@ ui <- dashboardPage(skin = "black",
                   tabItem(tabName = "implant_details",   
                           ###########################################
                           box(width = 7, status = "info", title = div(style = "font-size:22px; font-weight:bold; text-align:left", "Implant & Fusion Details:"),
-                              fluidRow(
-                                column(width = 4, 
-                                       dropdownButton(size = "xs", label = NULL, 
-                                                      switchInput(
-                                                        inputId = "fusion_procedure_performed",
-                                                        width = '100%',
-                                                        inline = TRUE,
-                                                        label = "Fusion:",
-                                                        onLabel = "Yes",
-                                                        offLabel = "No",
-                                                        value = FALSE,
-                                                        size = "mini"
-                                                      ),
-                                                      switchInput(
-                                                        inputId = "anterior_fusion_performed",
-                                                        width = '100%',
-                                                        inline = TRUE,
-                                                        label = "Fusion:",
-                                                        onLabel = "Yes",
-                                                        offLabel = "No",
-                                                        value = FALSE,
-                                                        size = "mini"
-                                                      ),
-                                                      switchInput(
-                                                        inputId = "posterior_fusion_performed",
-                                                        width = '100%',
-                                                        inline = TRUE,
-                                                        label = "Fusion:",
-                                                        onLabel = "Yes",
-                                                        offLabel = "No",
-                                                        value = FALSE,
-                                                        size = "mini"
-                                                      ),
-                                                      switchInput(label = "Left Supplemental Rods Eligible:",
-                                                                  inputId = "left_supplemental_rods_eligible",
-                                                                  size = "mini",
-                                                                  onLabel = "Yes",
-                                                                  offLabel = "No", 
-                                                                  value = FALSE
-                                                      ),
-                                                      switchInput(label = "Right Supplemental Rods Eligible:",
-                                                                  inputId = "right_supplemental_rods_eligible",
-                                                                  size = "mini",
-                                                                  onLabel = "Yes",
-                                                                  offLabel = "No", 
-                                                                  value = FALSE
-                                                      )
-                                       )
-                                ),
+                              switchInput(
+                                inputId = "posterior_fusion_performed",
+                                width = '100%',
+                                inline = TRUE,
+                                label = "Posterior Fusion:",
+                                onLabel = "Yes",
+                                offLabel = "No",
+                                value = FALSE,
+                                size = "mini"
                               ),
                               conditionalPanel(condition = "input.posterior_fusion_performed == true",
                                                box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "POSTERIOR Bone Graft & Biologics:"),
@@ -567,6 +527,16 @@ ui <- dashboardPage(skin = "black",
                                                    ),
                                                    jh_make_bmp_ui_function(anterior_posterior = "posterior"),
                                                )
+                              ),
+                              switchInput(
+                                inputId = "anterior_fusion_performed",
+                                width = '100%',
+                                inline = TRUE,
+                                label = "Anterior Fusion:",
+                                onLabel = "Yes",
+                                offLabel = "No",
+                                value = FALSE,
+                                size = "mini"
                               ),
                               conditionalPanel(condition = "input.anterior_fusion_performed == true",
                                                box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "ANTERIOR Bone Graft & Biologics:"),
@@ -672,8 +642,39 @@ ui <- dashboardPage(skin = "black",
                                                    jh_make_bmp_ui_function(anterior_posterior = "anterior")
                                                )
                               ),
+                              switchInput(
+                                inputId = "fusion_procedure_performed",
+                                width = '100%',
+                                inline = TRUE,
+                                label = "Fusion Performed:",
+                                onLabel = "Yes",
+                                offLabel = "No",
+                                value = FALSE,
+                                size = "mini"
+                              ),
                               conditionalPanel(condition = "input.fusion_procedure_performed == true",
                                                uiOutput(outputId = "interbody_implants_ui")
+                              ),
+                              fluidRow(
+                                column(width = 4, 
+                                       dropdownButton(size = "xs", 
+                                                      label = NULL, 
+                                                      switchInput(label = "Left Supplemental Rods Eligible:",
+                                                                  inputId = "left_supplemental_rods_eligible",
+                                                                  size = "mini",
+                                                                  onLabel = "Yes",
+                                                                  offLabel = "No", 
+                                                                  value = FALSE
+                                                      ),
+                                                      switchInput(label = "Right Supplemental Rods Eligible:",
+                                                                  inputId = "right_supplemental_rods_eligible",
+                                                                  size = "mini",
+                                                                  onLabel = "Yes",
+                                                                  offLabel = "No", 
+                                                                  value = FALSE
+                                                      )
+                                       )
+                                ),
                               ),
                               conditionalPanel(condition = "input.fusion_procedure_performed == true & input.spine_approach.indexOf('Posterior') > -1",
                                                box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "Rod Details:"), collapsible = TRUE,
@@ -1154,13 +1155,13 @@ server <- function(input, output, session) {
                                                      prior_fusion_levels = input$prior_fusion_levels,
                                                      prior_instrumentation = input$prior_instrumentation,
                                                      left_prior_implants = input$left_revision_implants,
-                                                     left_prior_implants_removed = input$left_revision_implants_removed,
+                                                     # left_prior_implants_removed = input$left_revision_implants_removed,
                                                      right_prior_implants = input$right_revision_implants,
-                                                     right_prior_implants_removed = input$right_revision_implants_removed,
+                                                     # right_prior_implants_removed = input$right_revision_implants_removed,
                                                      left_rod_status = input$left_revision_rod_status,
-                                                     left_implants_still_connected = input$left_revision_implants_connected_to_prior_rod,
-                                                     right_rod_status = input$right_revision_rod_status,
-                                                     right_implants_still_connected = input$right_revision_implants_connected_to_prior_rod
+                                                     # left_implants_still_connected = input$left_revision_implants_connected_to_prior_rod,
+                                                     right_rod_status = input$right_revision_rod_status
+                                                     # right_implants_still_connected = input$right_revision_implants_connected_to_prior_rod
       ))
     }
   })
@@ -3208,12 +3209,6 @@ server <- function(input, output, session) {
       )
     }
     
-    if(input$left_revision_rod_status == "partially_retained_connected"){
-      updatePickerInput(session = session, inputId = "left_revision_implants_connected_to_prior_rod", 
-                        choices = left_revision_implants_reactive_list()$retained_df$level, 
-                        selected = left_revision_implants_reactive_list()$retained_df$level
-      )
-    }
   })
   
   ####### RIGHT REVISION IMPLANTS ----
@@ -3298,12 +3293,7 @@ server <- function(input, output, session) {
       )
     }
     
-    if(input$right_revision_rod_status == "partially_retained_connected"){
-      updatePickerInput(session = session, inputId = "right_revision_implants_connected_to_prior_rod", 
-                        choices = right_revision_implants_reactive_list()$retained_df$level, 
-                        selected = right_revision_implants_reactive_list()$retained_df$level
-      )
-    }
+ 
   })
   
   
@@ -4005,16 +3995,17 @@ server <- function(input, output, session) {
   
   ################------------------  FIRST UPDATE THE OPTIONS USING THE DETAILS ALREADY INPUTTED    ----------------------######################  
   
-  observeEvent(list(input$left_revision_implants, input$left_revision_implants_removed), {
-    
-    if(length(input$left_revision_implants)>0){
-      revision_implants_removed_vector <- discard(.x = input$left_revision_implants_removed, .p = ~ .x %in% input$left_revision_implants == FALSE)
-      
-      updateAwesomeCheckboxGroup(session = session, 
-                                 inputId = "left_revision_implants_removed", 
-                                 selected = revision_implants_removed_vector)
-    }
-  })
+  # observeEvent(list(input$left_revision_implants, input$left_revision_implants_removed), {
+  #   
+  #   if(length(input$left_revision_implants)>0){
+  #     revision_implants_removed_vector <- discard(.x = input$left_revision_implants_removed, .p = ~ .x %in% input$left_revision_implants == FALSE)
+  #     
+  #     updateAwesomeCheckboxGroup(session = session, 
+  #                                inputId = "left_revision_implants_removed", 
+  #                                selected = revision_implants_removed_vector)
+  #   }
+  # })
+  
   
   observeEvent(input$fusion_procedure_performed, {
     if(input$fusion_procedure_performed == TRUE){
