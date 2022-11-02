@@ -929,6 +929,7 @@ ui <- dashboardPage(skin = "black",
                               br(),
                               textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 500),
                               br(), 
+                              hr(),
                               h3("Formatted Operative Report:"),
                               p(em("Edits above will be automatically reflected here.")),
                               br(),
@@ -1062,20 +1063,30 @@ server <- function(input, output, session) {
                             first_name == str_to_lower(input$patient_first_name),
                             date_of_birth == paste(input$date_of_birth))
                    
-                   match_found <- if_else(nrow(joined_df) > 0, TRUE, FALSE)
+                   if(nrow(joined_df)>0){
+                     match_found <- TRUE
+                   }else{
+                     match_found <- FALSE
+                   }
                    
                    if(match_found == TRUE){
                      record_number <- joined_df$record_id[[1]]
                      
                      existing_patient_data$patient_df <- exportRecords(rcon = rcon_reactive$rcon, records = record_number, fields = append(c("record_id", "dos_surg_repeating", "approach_repeating", "side", "object"), str_to_lower(str_replace_all(levels_vector, pattern = "-", replacement = "_")))) %>%                    as_tibble()  %>%
+                       as_tibble() %>%
                        filter(redcap_repeat_instrument == "procedures_by_level_repeating")  %>%
-                       type.convert() %>%
-                       select(record_id, dos_surg_repeating, approach_repeating, side, str_replace_all(string = str_to_lower(levels_numbered_df$level), pattern = "-", replacement = "_")) %>%
-                       pivot_longer(cols = str_replace_all(string = str_to_lower(levels_numbered_df$level), pattern = "-", replacement = "_"), names_to = "level", values_to = "object") %>%
+                       mutate(across(.cols = everything(), .fns = ~ as.character(.x))) %>%
+                       select(-redcap_event_name,
+                              -redcap_repeat_instrument,
+                              -redcap_repeat_instance, 
+                              -redcap_survey_identifier,
+                              -patient_details_complete, 
+                              -patient_details_timestamp, 
+                              -procedures_by_level_repeating_complete) %>%
+                       pivot_longer(cols = c(-record_id, -approach_repeating, -side, -dos_surg_repeating), names_to = "level", values_to = "object") %>%
                        filter(!is.na(object)) %>%
-                       rename(approach = approach_repeating) %>%
+                       rename(date_of_surgery = dos_surg_repeating)%>%
                        mutate(level = str_to_title(str_replace_all(string = level, pattern = "_", replacement = "-"))) %>%
-                       rename(date_of_surgery = dos_surg_repeating) %>%
                        filter(object != " ") %>%
                        filter(object != "")
                      
@@ -4176,13 +4187,11 @@ server <- function(input, output, session) {
     #######
     
     if(length(input$fusion_levels_confirmed)>0){
-      fusions_df <- tibble(level = input$fusion_levels_confirmed) %>%
+      posterior_op_note_inputs_list_reactive$fusions_df <- tibble(level = input$fusion_levels_confirmed) %>%
         left_join(levels_numbered_df)
     }else{
-      fusions_df <- tibble(level = character(), vertebral_number = double(), object = character())
+      posterior_op_note_inputs_list_reactive$fusions_df <- tibble(level = character(), vertebral_number = double(), object = character())
     }
-    
-    posterior_op_note_inputs_list_reactive$fusions_df <- fusions_df
     
     #######
     posterior_op_note_inputs_list_reactive$head_positioning <- input$head_positioning
@@ -4600,7 +4609,9 @@ server <- function(input, output, session) {
       procedure_results_list <- list()
       
       ########## POSTERIOR NOTE
-      if(nrow(posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df) > 0 | nrow(posterior_op_note_inputs_list_reactive()$revision_implants_df) > 0){
+      posterior_procedures_count <- nrow(posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df) + nrow(posterior_op_note_inputs_list_reactive()$revision_implants_df)
+      
+      if(posterior_procedures_count>0){
         
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df,
                                                                        fusion_levels_df = posterior_op_note_inputs_list_reactive()$fusions_df,

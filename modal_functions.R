@@ -344,7 +344,22 @@ startup_modal_box_diagnosis_symptoms <-
                   initial_value_selected = revision_indication,
                   left_column_percent_width = 60,
                   font_size = 14,
-                  choices_vector = c("acute infection", "wound complication", "chronic infection", "early radiculopathy", "malpositioned implant", "pseudarthrosis", "rod fracture", "proximal junction failure", "distal junctional failure", "adjacent segment disease", "recurrent symptoms", "sagittal imbalance", "coronal imbalance", "other")
+                  choices_vector = c("acute infection", 
+                                     "wound complication", 
+                                     "chronic infection", 
+                                     "early radiculopathy",
+                                     "malpositioned implant",
+                                     "painful implant",
+                                     "pseudarthrosis", 
+                                     "rod fracture", 
+                                     "proximal junction failure", 
+                                     "distal junctional failure",
+                                     "adjacent segment disease",
+                                     "recurrent symptoms", 
+                                     "sagittal imbalance", 
+                                     "coronal imbalance",
+                                     "other implant-related complication",
+                                     "other")
                 ),
                 jh_make_shiny_table_row_function(
                   left_column_label = "Select Levels with Prior Decompression:",
@@ -572,7 +587,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(screw
                                                                            alignment_correction_method = "NA", 
                                                                            instruments_used_for_bony_work = "High-speed burr only"){
   
-  modalDialog(title = "Confirm Fusion Levels", 
+  modalDialog(title = "Confirm Surgical Details:", 
               easyClose = FALSE, 
               # easyClose = TRUE,
               # footer = modalButton(label = "Confirmed"), 
@@ -709,7 +724,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(screw
                       status = "success"
                     )
                   ),
-                  if(length(fusion_levels_confirmed)>0){
+                  # if(length(fusion_levels_confirmed)>0){
                     fluidRow(
                       prettyCheckboxGroup(
                         inputId = "fusion_levels_confirmed",
@@ -721,7 +736,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(screw
                         status = "success"
                       ) 
                     )
-                  }
+                  # }
               )
   )
   
