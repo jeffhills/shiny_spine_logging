@@ -5448,6 +5448,43 @@ server <- function(input, output, session) {
   
   ################# MAKE THE procedures by level DATAFRAME ##################
   procedures_by_level_redcap_df_reactive <- reactive({
+    
+    if(length(input$left_revision_implants_removed)>0){
+    left_implants_removed_df <- tibble(level = input$left_revision_implants_removed,
+                                       object = "implant_removal", 
+                                       category = "implant_removal",
+                                       approach = "posterior",
+                                       side = "left")
+    }else{
+      left_implants_removed_df <-tibble(level = character())
+    }
+    if(length(input$right_revision_implants_removed)>0){
+      right_implants_removed_df <- tibble(level = input$right_revision_implants_removed,
+                                         object = "implant_removal", 
+                                         category = "implant_removal",
+                                         approach = "posterior",
+                                         side = "right")
+    }else{
+      right_implants_removed_df <-tibble(level = character())
+    }
+    implants_removed_df <-  left_implants_removed_df %>%
+      union_all(right_implants_removed_df)
+    
+    if(nrow(implants_removed_df)>0){
+      implants_removed_df <- implants_removed_df %>%
+        group_by(level, category, side) %>%
+        mutate(repeat_count = row_number()) %>%
+        ungroup() %>%
+        pivot_wider(names_from = level, values_from = object) %>%
+        select(-repeat_count) %>%
+        clean_names() %>%
+        mutate(across(everything(), ~ replace_na(.x, " "))) %>%
+        mutate(redcap_repeat_instance = row_number()) %>%
+        mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
+        mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
+        select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything())
+    }
+    
     if(nrow(all_objects_to_add_list$objects_df)>0){
       fusion_df <- jh_fusion_category_function(fusion_vector = input$fusion_levels_confirmed, 
                                                all_objects_df = all_objects_to_add_list$objects_df)%>%
@@ -5458,6 +5495,7 @@ server <- function(input, output, session) {
         mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
         unnest(proc_category) %>%
         union_all(fusion_df) %>%
+        # union_all(implants_removed_df) %>%
         select(level, approach, category, object, side) %>%
         group_by(level, category, side) %>%
         mutate(repeat_count = row_number()) %>%
@@ -5469,16 +5507,18 @@ server <- function(input, output, session) {
         mutate(redcap_repeat_instance = row_number()) %>%
         mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
         mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-        select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) 
+        select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything())  %>%
+        union_all(implants_removed_df)
     }else{
       data_wide <- tibble(redcap_repeat_instrument = character(), 
-                          redcap_repeat_instance = character(),
+                          redcap_repeat_instance = integer(),
                           dos_surg_repeating = character(),
                           approach_repeating = character(),
                           level = character(),
                           object = character(),
                           side = character()
-                          )
+                          ) %>%
+        union_all(implants_removed_df)
     }
 
     

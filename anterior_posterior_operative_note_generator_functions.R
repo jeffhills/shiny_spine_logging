@@ -1737,13 +1737,7 @@ op_note_technique_combine_statement <- function(object,
     
   }
   
-  # if(object == "tether"){
-  #   levels_side_df <- levels_side_df %>%
-  #     union_all(tibble(level = map(.x = levels_side_df$level, .f =  ~ jh_get_cranial_caudal_interspace_body_list_function(.x)$caudal_level)) %>%
-  #                 unnest(level)) %>%
-  #     mutate(side = "central") %>%
-  #     distinct()
-  # }
+
   
   if(str_detect(string = object, pattern = "screw")){
     screw_statements_wide_df <- levels_side_df %>%
@@ -1867,7 +1861,7 @@ op_note_technique_combine_statement <- function(object,
     object == "pelvic_screw_1" ~ pelvic_screw_statement,
     object == "pelvic_screw_2" ~ pelvic_screw_statement,
     object == "sublaminar_wire" ~ glue("For sublaminar wiring, the doubled-up sublaminar was was bent into a hook shape and and passed under the inferior lamina from a caudal to cranial direction. Once the wire was safely passed, the tip of the wire was cut and the two strands were directed in opposite directions of the midline to be attached to the rods on the left and right side. Wires were passed under {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
-    object == "tether" ~ glue("For spinous process tethering/wiring, a hole was drilled in the spinous process over the lamina. A band was then threaded through the hole and tied in a figure-8 fashion, tethering {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
+    object == "tether" ~ glue("For spinous process tethering/wiring, a hole was drilled in the spinous processes over the lamina. A band was then threaded through the hole and appropriately tensioned and secured in place, tethering {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
     object == 'complete_facetectomy' ~ glue("For a complete facetectomy, the inferior, superior, medial and lateral borders of the inferior and superior facet were identified. Both the superior and inferior facet were completely excised and the underlying exiting nerve root decompressed. I performed a complete facetectomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}. This effectively decompressed {glue_collapse(x = exiting_roots_df$exiting_roots_statement, sep = ', ', last = ' and ')}."),
     object == 'grade_1' ~ glue("The inferior, superior, medial and lateral borders of the inferior facet were identified. The inferior facets {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} were excised and the bone was morselized to be used as morselized autograft."),
     object == 'grade_2' ~ glue("For the posterior column osteotomy, a small rent was made in the interlaminar space to develop the plane between the ligamentum and the dura. A Kerrison rongeur was then used to excise the ligamentum. This was carried out laterally in both directions until the facets were encountered. The superior and inferior facet were both adequately resected along with any necessary lamina to fully release the posterior column. I performed posterior column (Smith-Peterson) osteotomies at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."),
