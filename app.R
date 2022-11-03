@@ -5514,8 +5514,8 @@ server <- function(input, output, session) {
                           redcap_repeat_instance = integer(),
                           dos_surg_repeating = character(),
                           approach_repeating = character(),
-                          level = character(),
-                          object = character(),
+                          # level = character(),
+                          # object = character(),
                           side = character()
                           ) %>%
         union_all(implants_removed_df)
