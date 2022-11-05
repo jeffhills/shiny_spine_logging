@@ -1216,8 +1216,10 @@ jh_fusion_category_function <- function(fusion_vector, all_objects_df){
     mutate(fusion_rank = if_else(str_detect(string = fusion_category, pattern = "interbody"), 1, 2)) 
   
   if(length(fusion_vector)>0){
-    fusion_df <- tibble(level = fusion_vector) %>%
-      left_join(fusions_ranked_df) %>%
+    # fusion_df <- tibble(level = fusion_vector) %>%
+    #   left_join(fusions_ranked_df) %>%
+    fusion_df <- fusions_ranked_df %>%
+      filter(level %in% fusion_vector) %>%
       mutate(fusion_rank = if_else(is.na(fusion_rank), 9, fusion_rank)) %>%
       group_by(level, approach) %>%
       filter(fusion_rank == min(fusion_rank)) %>%
@@ -1603,7 +1605,7 @@ jh_cranial_and_caudal_list_for_supplementary_rods_function <- function(all_objec
     
     osteotomy_df <- tibble(level = osteotomy_site) %>%
       mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))
-    # left_join(levels_numbered_df)
+
     
     cranial_intercalary_df <- implant_df %>%
       mutate(intercalary_cranial_number = min(osteotomy_df$vertebral_number) - 1) %>%
@@ -1722,8 +1724,10 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
     }
     
     if(satellite_rods_vector[1] %in% implant_levels_vector & satellite_rods_vector[2] %in% implant_levels_vector){
-      satellite_rods_vector_df <- tibble(level = satellite_rods_vector) %>%
-        left_join(unilateral_full_implant_df) %>%
+      # satellite_rods_vector_df <- tibble(level = satellite_rods_vector) %>%
+      #   left_join(unilateral_full_implant_df) %>%
+      satellite_rods_vector_df <- unilateral_full_implant_df %>%
+        filter(level %in% satellite_rods_vector) %>%
         select(x, y) %>%
         arrange(rev(y)) %>%
         distinct()

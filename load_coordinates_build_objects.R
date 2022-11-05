@@ -10,6 +10,17 @@
 
 spine_png <- image_read(path = "spine_posterior.png")
 
+posterior_spine_plot <- ggdraw() +
+  draw_image(
+    spine_png,
+    scale = 1,
+    y = 0,
+    valign = 0,
+    x = 0,
+    height = 1
+    # width = 1
+  ) 
+
 anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
 
 implant_starts_df <- read_csv(file = "full_coordinates_df.csv") %>%
@@ -533,9 +544,15 @@ all_points_all_implants_constructed_df <- implants_constructed_df %>%
 #   filter(y == max(y)) %>%
 #   ungroup() %>%
 #   select(-ends_with("_x"), -ends_with("_y"))
-
+ 
 all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
-  select(-ends_with("_x"), -ends_with("_y"))
+  select(-ends_with("_x"), -ends_with("_y")) %>%
+  mutate(object_id = paste0(level, "_", side, "_", object)) %>%
+  group_by(object_id) %>%
+  mutate(n = row_number()) %>%
+  mutate(object_id = paste0(object_id, "_", n)) %>%
+  select(-n) %>%
+  ungroup() 
 
 all_objects_y_range_df <- all_implants_constructed_df %>%
   select(object, y) %>%

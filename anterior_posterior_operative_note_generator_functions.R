@@ -941,9 +941,10 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                        instrumentation_removal_vector = vector(),
                                        additional_procedures_vector = NULL,
                                        bmp = 0,
-                                       bone_graft_vector = NULL,
-                                       morselized_allograft = 0,
-                                       morselized_autograft_separate = 0,
+                                       biologics_list = list(),
+                                       # bone_graft_vector = NULL,
+                                       # morselized_allograft = 0,
+                                       morselized_autograft_separate = FALSE,
                                        # structural_allograft_location = NULL,
                                        # structural_autograft_harvest = NULL,
                                        # structural_autograft_location = NULL,
@@ -1021,12 +1022,22 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     filter(object != "crosslink") %>%
     filter(object != "structural_allograft")
   
-  additional_procedures_for_numbered_list <- c(as.character(glue("Application of {glue_collapse(bone_graft_vector, sep = ', ', last = ', and ')}")))
+  additional_procedures_for_numbered_list <- as.list(additional_procedures_vector)
   
-  additional_procedures_for_numbered_list <- append(additional_procedures_for_numbered_list, additional_procedures_vector)
+  if(length(biologics_list)>0){
+    additional_procedures_for_numbered_list$bone_grafting <- "Application of bone graft/osteopromotive material"
+  }
+  
+  # additional_procedures_for_numbered_list <- append(additional_procedures_for_numbered_list, additional_procedures_vector)
   
   if(nrow(structural_allograft_df) > 0 ){
-    additional_procedures_for_numbered_list <- append(additional_procedures_for_numbered_list, c(as.character(glue("Application of strucural allograft strut at {glue_collapse(structural_allograft_df$level, sep = ', ', last = ', and ')}"))))
+    
+    additional_procedures_for_numbered_list$structural_allograft <- paste(glue("Application of strucural allograft strut at {glue_collapse(structural_allograft_df$level, sep = ', ', last = ', and ')}"))
+    
+    # additional_procedures_for_numbered_list <- append(additional_procedures_for_numbered_list, c(as.character(glue("Application of strucural allograft strut at {glue_collapse(structural_allograft_df$level, sep = ', ', last = ', and ')}"))))
+  }
+  if(morselized_autograft_separate == TRUE){
+    additional_procedures_for_numbered_list$morselized_autograft_separate <- "Application of morselized autograft obtained through a separate fascial incision"
   }
   
   procedures_numbered_list$primary_procedures <- op_note_procedures_performed_numbered_function(objects_added_df = all_objects_to_add_df, 
@@ -1309,26 +1320,20 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     
     fusion_statement_list$fusion_begin_statement <- glue("I then proceeded with the spinal fusion portion of the procedure. The posterior elements of {glue_collapse(fusion_segments_df$level, sep = ', ', last = ', and ')} were decorticated.")
     
+    if(length(biologics_list)>0){
+      fusion_statement_list$biologics <- paste("After the fusion bed was prepared,", glue_collapse(x = biologics_list, sep = ", ", last = " and "), "was impacted into the fusion bed.")
+    }
+    
     if(bmp > 0){
       fusion_statement_list$bmp_statement <- glue("To improve the odds of a successful fusion, {bmp}mg of BMP was placed into the posterior fusion bed. ")
     }
     
-    if(any(str_detect(string = bone_graft_vector, pattern = "Morselized"))){
-      
-      morselized_graft_df <- tibble(graft_type = discard(.x = bone_graft_vector, .p = ~ str_detect(string = .x, pattern =  "Structural"))) %>%
-        mutate(morselized_allo_amount = morselized_allograft) %>%
-        mutate(graft_type = if_else(morselized_allo_amount > 0 & graft_type == "Morselized Allograft", 
-                                    paste0("A total of ", morselized_allo_amount, "cc of morselized allograft"), 
-                                    graft_type))
-      
-      graft_statement <- str_to_sentence(glue_collapse(morselized_graft_df$graft_type, sep = ', ', last = ' and '))
-      
-      fusion_statement_list$morselized_allograft_statement <- glue("{graft_statement} was then impacted into the lateral gutters and into the facet joints.")
-    }else{
-      fusion_statement_list$morselized_allograft_statement <- glue("Allograft chips and and local autograft was then impacted into the lateral gutters and into the facet joints of {glue_collapse(fusion_levels_df$level, sep = ', ', last = ', and ')}.")
+    if(morselized_autograft_separate == TRUE){
+      fusion_statement_list$morselized_autograft_separate <- "A separate fascial incision was made to obtain additional morselized autograft and this was placed into the fusion bed. "
     }
     
-    fusion_statement_list$complete <- glue("This completed the posterior spinal fusion procedure of {glue_collapse(fusion_levels_df$level, sep = ', ', last = ', and ')}.")
+    
+    fusion_statement_list$complete <- glue("This completed the posterior spinal fusion of {glue_collapse(fusion_levels_df$level, sep = ', ', last = ', and ')}.")
     
     procedure_details_list$posterior_fusion_details <- glue_collapse(fusion_statement_list, sep = " ")
   }
@@ -1811,21 +1816,7 @@ op_note_technique_combine_statement <- function(object,
     mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
     arrange(vertebral_number)   
   
-  
-  # implant_start_point_identification
-  # "Implant start points were identified using anatomic landmarks.",
-  # "Intraoperative fluoroscopy and pedicle markers were used to confirm start points for screw placement.", 
-  # "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
-  # "Intraoperative navigation was used for identifying start points.",
-  # 
-  # inputId = "approach_robot_navigation",
-  # label = "Select any modality used:", 
-  # inline = TRUE,
-  # choices = c("Microscopic",
-  #             "Fluoroscopy-guided",
-  #             "Navigated", 
-  #             "Robotic", 
-  #             "NA"),
+
   
   start_point_identification_text <- case_when(
     str_detect(implant_start_point_identification, "NA") ~ "",
@@ -1939,7 +1930,8 @@ op_note_procedures_present_listed_function <- function(objects_added_df,
                                                        fusion_levels_vector = c(),
                                                        additional_procedures_performed_vector = NULL){
   
-  additional_procedures_performed_vector <- keep(.x = additional_procedures_performed_vector, .p = ~ str_detect(.x, "Biopsy") | 
+  additional_procedures_performed_vector <- keep(.x = additional_procedures_performed_vector, 
+                                                 .p = ~ str_detect(.x, "Biopsy") | 
                                                    str_detect(.x, "Repair of dura")  | 
                                                    str_detect(.x, "Dural")  | 
                                                    str_detect(.x, "Removal of spinal") | 
@@ -2171,7 +2163,8 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
         unnest(procedure_class) %>%
         # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) %>%
         mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
-        unnest(procedures_per_line) 
+        unnest(procedures_per_line) %>%
+        mutate(across(everything(), .fns = ~ as.character(.)))
     }else{
       summary_nested_df <- objects_added_df %>%
         select(level, object, vertebral_number) %>%
@@ -2180,7 +2173,8 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
         unnest(procedure_class) %>%
         # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
         mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
-        unnest(procedures_per_line)
+        unnest(procedures_per_line)%>%
+        mutate(across(everything(), .fns = ~ as.character(.)))
     }
   }else{
     summary_nested_df <- objects_added_df %>%
@@ -2190,14 +2184,16 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
       unnest(procedure_class) %>%
       # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
       mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
-      unnest(procedures_per_line)
+      unnest(procedures_per_line)%>%
+      mutate(across(everything(), .fns = ~ as.character(.)))
   }
   
   
   summary_single_statements <- summary_nested_df %>%
     filter(procedures_per_line == "distinct") %>%
     mutate(procedure_performed_statement = glue("{procedure_class} at {level}"))%>%
-    select(procedure_class, procedure_performed_statement)
+    select(procedure_class, procedure_performed_statement) %>%
+    mutate(across(everything(), .fns = ~ as.character(.)))
   
   summary_multiple_nested <- summary_nested_df %>%
     filter(procedures_per_line == "combine") %>%
@@ -2210,9 +2206,11 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     unnest(levels) %>%
     mutate(procedure_performed_statement = glue("{procedure_class} at {levels}")) %>%
     mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation", paste("Instrumentation of the Pelvis with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
-    select(procedure_class, procedure_performed_statement)
+    select(procedure_class, procedure_performed_statement)%>%
+    mutate(across(everything(), .fns = ~ as.character(.)))
   
-  added_procedures_df <- tibble(procedure_performed_statement = additional_procedures_performed_vector) 
+  added_procedures_df <- tibble(procedure_performed_statement = additional_procedures_performed_vector)%>%
+    mutate(across(everything(), .fns = ~ as.character(.))) 
   
   procedures_numbered_df <- summary_nested_df %>%
     select(procedure_class) %>%
@@ -2226,7 +2224,8 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     filter(procedure_performed_statement !="xx") %>%
     mutate(count = row_number()) %>%
     mutate(procedures_performed_numbered = glue("{count}. {procedure_performed_statement}")) %>%
-    select(procedures_performed_numbered)
+    select(procedures_performed_numbered)%>%
+    mutate(across(everything(), .fns = ~ as.character(.)))
   
   glue_collapse(procedures_numbered_df$procedures_performed_numbered, sep = "\n")
 }
