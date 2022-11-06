@@ -423,7 +423,7 @@ ui <- dashboardPage(skin = "black",
                           box(width = 7, status = "info", title = div(style = "font-size:22px; font-weight:bold; text-align:left", "Implant & Fusion Details:"),
                               switchInput(
                                 inputId = "posterior_fusion_performed",
-                                width = '100%',
+                                width = '200%',
                                 inline = TRUE,
                                 label = "Posterior Fusion:",
                                 onLabel = "Yes",
@@ -646,7 +646,7 @@ ui <- dashboardPage(skin = "black",
                                 inputId = "fusion_procedure_performed",
                                 width = '100%',
                                 inline = TRUE,
-                                label = "Fusion Performed:",
+                                label = "Implants:",
                                 onLabel = "Yes",
                                 offLabel = "No",
                                 value = FALSE,
@@ -680,11 +680,13 @@ ui <- dashboardPage(skin = "black",
                                                box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "Rod Details:"), collapsible = TRUE,
                                                    fluidRow(column(4), 
                                                             column(4, 
-                                                                   dropdown(icon = icon("link"),
-                                                                            width = "60%",
+                                                                   dropdown(icon = icon("link"), 
+                                                                            # inputId = "add_crosslink_button",
+                                                                            width = "100%",
                                                                             label = "Add Crosslink",
                                                                             style = "unite",
-                                                                            checkboxGroupButtons(inputId = "crosslink_connectors",
+                                                                            column(6, 
+                                                                                   checkboxGroupButtons(inputId = "crosslink_connectors",
                                                                                                  label = "Add crosslinks at:",
                                                                                                  choices = vertebral_bodies_vector,
                                                                                                  individual = FALSE,
@@ -695,10 +697,22 @@ ui <- dashboardPage(skin = "black",
                                                                                                                 style = "color: steelblue"),
                                                                                                    no = tags$i(class = "fa fa-square-o",
                                                                                                                style = "color: steelblue"))
-                                                                            )
+                                                                            )),
+                                                                            column(6, 
+                                                                                   actionBttn(
+                                                                                     inputId = "remove_all_crosslinks",
+                                                                                     label = "Remove All",
+                                                                                     style = "simple", 
+                                                                                     size = "xs",
+                                                                                     color = "danger", 
+                                                                                     icon = icon("undo-alt")
+                                                                                   )
+                                                                                   )
+                                                                            
                                                                    )
                                                             ),
-                                                            column(4)
+                                                            column(4
+                                                                   )
                                                    ),
                                                    jh_make_shiny_table_column_function(input_type = "title", 
                                                                                        left_label = "Left Rod(s):",
@@ -782,7 +796,8 @@ ui <- dashboardPage(skin = "black",
                                                                                     input_type = "checkbox",
                                                                                     font_size = 16,
                                                                                     checkboxes_inline = TRUE,
-                                                                                    input_id = "implant_manufacturer", choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
+                                                                                    input_id = "implant_manufacturer",
+                                                                                    choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
                                                    ),
                                                    h4("Screw Sizes:"),
                                                    fluidRow(
@@ -1196,6 +1211,8 @@ server <- function(input, output, session) {
     showModal(modal_box_diagnosis_symptoms_procedure_reactive())
   })
   
+
+
   
   #################~~~~~~~~ UPDATE FIELDS BASED ON PRIOR PATIENT FOUND #############
   observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), {
@@ -1440,9 +1457,7 @@ server <- function(input, output, session) {
   observeEvent(input$implants_complete, ignoreNULL = TRUE, ignoreInit = TRUE, once = TRUE, {
     
     if(length(fusion_levels_computed_reactive_df()$level)>0){
-      
       fusion_levels_computed_reactive_input <- fusion_levels_computed_reactive_df()$level
-      
     }else{
       fusion_levels_computed_reactive_input <- c()
     }
@@ -1459,8 +1474,13 @@ server <- function(input, output, session) {
                                                                      # alignment_correction_method = input$alignment_correction_method
       )
     )
-    
-
+  })
+  
+  observeEvent(input$implants_complete, ignoreInit = TRUE, {
+    updatePrettyCheckboxGroup(session = session, 
+                    inputId = "fusion_levels_confirmed", 
+                    selected = fusion_levels_computed_reactive_df()$level 
+                    )
   })
   
   
@@ -2374,6 +2394,30 @@ server <- function(input, output, session) {
     }
   })
   
+  observeEvent(input$remove_all_crosslinks, ignoreInit = TRUE, {
+    all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df %>%
+      filter(object != "crosslink")
+
+  })
+  observeEvent(input$remove_all_crosslinks, ignoreInit = TRUE, {
+    implants_df <- all_objects_to_add_list$objects_df %>%
+      filter(str_detect(object, "screw") | str_detect(object, "hook") | str_detect(object, "wire"))
+    level_options_vector <- jh_get_level_range_vector_function(object_df = implants_df, interspace_or_body_or_all = "body")
+    
+    updateCheckboxGroupButtons(session = session, 
+                               inputId = "crosslink_connectors", 
+                               choices = level_options_vector,
+                               label = "Add crosslink at:",
+                               selected = c(""),
+                               checkIcon = list(
+                                 yes = tags$i(class = "fa fa-check-square",
+                                              style = "color: steelblue"),
+                                 no = tags$i(class = "fa fa-square-o",
+                                             style = "color: steelblue"))
+    )
+  })
+  
+  
   ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
   observeEvent(left_rod_implants_df_reactive(),ignoreNULL = TRUE, ignoreInit = TRUE, {
     if(nrow(left_rod_implants_df_reactive()) > 1){
@@ -2774,36 +2818,6 @@ server <- function(input, output, session) {
   #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
   
   observeEvent(input$plot_click, {
-    # if(input$object_to_add == "pelvic_screw"){
-    #   object_currently_selected_to_add <- c("pelvic_screw_1", "pelvic_screw_2")
-    # }else{
-    #   object_currently_selected_to_add <- input$object_to_add
-    # }
-    # 
-    # object_type_filtered_df <- all_implants_constructed_df %>%
-    #   filter(object %in% object_currently_selected_to_add)
-    # 
-    # implant_df <- nearPoints(
-    #   df = object_type_filtered_df,
-    #   coordinfo = input$plot_click,
-    #   xvar = "x",
-    #   yvar = "y",
-    #   maxpoints = 1,
-    #   threshold = 45
-    # )
-    # 
-    # if(input$object_to_add == "decompression_diskectomy_fusion" | input$object_to_add == "diskectomy_fusion"){
-    #   anterior_interbody_df <- implant_df %>%
-    #     select(level, vertebral_number, side, object) %>%
-    #     mutate(object = "anterior_interbody_implant") %>%
-    #     left_join(all_implants_constructed_df)
-    #   
-    #   implant_df <- implant_df %>%
-    #     union_all(anterior_interbody_df)
-    # }
-    
-    ############# NOW YOU HAVE A DF WITH THE NEW OBJECT TO ADD ################
-    
     all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
       union_all(object_added_reactive_df()) %>%
       distinct()
@@ -2831,22 +2845,31 @@ server <- function(input, output, session) {
       anti_join(implant_to_remove_df)
   })
   
-  observeEvent(input$crosslink_connectors, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    
-    all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-      filter(object != "crosslink") %>%
-      union_all(tibble(level = input$crosslink_connectors, object = "crosslink") %>%
-                  left_join(all_implants_constructed_df)) %>%
-      distinct()
-    
-    
+  crosslink_connector_vector <- reactive({
+    input$crosslink_connectors
   })
+  
+  observeEvent(crosslink_connector_vector(),  ignoreInit = TRUE, {
+    if(length(crosslink_connector_vector()) == 0){
+      all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
+        filter(object != "crosslink")
+    }else{
+      all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
+        filter(object != "crosslink") %>%
+        union_all(tibble(level = crosslink_connector_vector(), 
+                         object = "crosslink") %>%
+                    left_join(all_implants_constructed_df)) %>%
+        distinct()
+    }
+  })
+  
   
   ########################################### Build REACTIVE DATAFRAMES FOR IMPLANTS CONNECTING TO THE RODS ###########################################
   #################### FUSION LEVELS ########################
   fusion_levels_computed_reactive_df <- reactive({
     fusion_levels_estimated_df <- fusion_levels_df_function(all_objects_to_add_df = all_objects_to_add_list$objects_df) %>%
       filter(level != "Sacro-iliac")
+    
     fusion_levels_estimated_df
   })
   
@@ -3074,6 +3097,7 @@ server <- function(input, output, session) {
     HTML(kit_statement)
   })
   
+  
   posterior_bmp_dose_reactive <- reactive({
     Reduce("+", reactiveValuesToList(posterior_bmp_dose_list))
   })
@@ -3166,7 +3190,7 @@ server <- function(input, output, session) {
          as.character(anterior_dose_statement)))
   })
   
-  
+   
   #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE REVISION IMPLANTS DF   #############~~~~~~~~~~~~~~~~~~~ ##################### 
   #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE REVISION IMPLANTS DF   #############~~~~~~~~~~~~~~~~~~~ ##################### 
   
@@ -3707,6 +3731,9 @@ server <- function(input, output, session) {
   observeEvent(input$crosslink_connectors, ignoreNULL = TRUE, ignoreInit = TRUE, {
     rods_list$crosslinks <- geom_sf(data = st_multipolygon((all_objects_to_add_list$objects_df %>% filter(object == "crosslink"))$object_constructed), alpha = 0.75, fill = "gold") 
   })
+  observeEvent(input$remove_all_crosslinks, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    rods_list$crosslinks <- NULL 
+  })
   
   ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS     ######### ~~~~~~~~~~~~~~  ############# 
   ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS    ######### ~~~~~~~~~~~~~~  ############# 
@@ -3861,16 +3888,6 @@ server <- function(input, output, session) {
                        x_right = max(labels_posterior_df$x_right) + 0.03, 
                        y = max(labels_posterior_df$y) + 0.03))
     
-    # ggdraw() +
-    #   draw_image(
-    #     spine_png,
-    #     scale = 1,
-    #     y = 0,
-    #     valign = 0,
-    #     x = 0,
-    #     height = 1
-    #     # width = 1
-    #   ) +
     posterior_spine_plot +
       reactiveValuesToList(geoms_list_revision_posterior) +
       reactiveValuesToList(geoms_list_posterior) +
@@ -3890,7 +3907,11 @@ server <- function(input, output, session) {
         fontface = "bold"
       ) +
       plan_table_geom +
-      annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement) 
+      annotate("text", x = 0.5, 
+               y = input$crop_y[1] + 0.01, 
+               label = l6_statement) +
+      coord_sf(xlim = c(x_left_limit, x_right_limit),
+               ylim = input$crop_y)
   })
   
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
@@ -3904,82 +3925,7 @@ server <- function(input, output, session) {
     }
   }
   )
-  
-  # output$spine_plan <- renderPlot({
-  #   if(input$spine_approach == "Anterior"){
-  #     spine_plan_plot_anterior() 
-  #   }else{
-  #     x_left_limit <- 0.3 - input$label_text_offset/100
-  #     x_right_limit <- 1-x_left_limit
-  #     plot_top_y <- input$crop_y[2]
-  #     y_spacing <- 0.025*input$crop_y[2]
-  #     
-  #     if(input$plot_summary_table == TRUE){
-  #       y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
-  #       plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
-  #       
-  #       plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
-  #     }else{
-  #       y_start_with_text <- plot_top_y
-  #       plan_table_geom <- geom_sf(data = NULL)
-  #     }
-  #     
-  #     if(input$lumbar_vertebrae_count == "6"){
-  #       l6_statement <- "Note: 6 Lumbar Vertebrae"
-  #     }else{
-  #       l6_statement <- " "
-  #     }
-  #     ### POSTERIOR
-  #     labels_posterior_df <- labels_df %>%
-  #       filter(between(y, input$crop_y[1], y_start_with_text)) %>%
-  #       mutate(x_left = x_left_limit + 0.05) %>%
-  #       mutate(x_right = x_right_limit - 0.05) %>%
-  #       select(-vertebral_number)
-  #     
-  #     labels_posterior_df <- labels_posterior_df %>%
-  #       union_all(tibble(level = " ", 
-  #                        x_left = min(labels_posterior_df$x_left) - 0.03,
-  #                        x_right = max(labels_posterior_df$x_right) + 0.03, 
-  #                        y = min(labels_posterior_df$y) - 0.03)) %>%
-  #       union_all(tibble(level = " ", 
-  #                        x_left = min(labels_posterior_df$x_left) - 0.03,
-  #                        x_right = max(labels_posterior_df$x_right) + 0.03, 
-  #                        y = max(labels_posterior_df$y) + 0.03))
-  #     
-  #     ggdraw() +
-  #       draw_image(
-  #         spine_png,
-  #         scale = 1,
-  #         y = 0,
-  #         valign = 0,
-  #         x = 0,
-  #         height = 1
-  #         # width = 1
-  #       ) +
-  #       reactiveValuesToList(geoms_list_revision_posterior) +
-  #       reactiveValuesToList(geoms_list_posterior) +
-  #       reactiveValuesToList(rods_list) +
-  #       draw_text(
-  #         text = labels_posterior_df$level,
-  #         x = labels_posterior_df$x_left,
-  #         y = labels_posterior_df$y,
-  #         size = input$label_text_size,
-  #         fontface = "bold"
-  #       ) +
-  #       draw_text(
-  #         text = labels_posterior_df$level,
-  #         x = labels_posterior_df$x_right,
-  #         y = labels_posterior_df$y,
-  #         size = input$label_text_size,
-  #         fontface = "bold"
-  #       ) +
-  #       plan_table_geom +
-  #       annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement) 
-  # 
-  #   }
-  #   
-  # })
-  
+
   
   observeEvent(input$lumbar_vertebrae_count, {
     if(input$spine_approach == "Anterior"){
@@ -4063,73 +4009,30 @@ server <- function(input, output, session) {
       if(input$spine_approach == "Anterior"){
         spine_plan_plot_anterior() 
       }else{
-        x_left_limit <- 0.3 - input$label_text_offset/100
-        x_right_limit <- 1-x_left_limit
-        plot_top_y <- input$crop_y[2]
-        y_spacing <- 0.025*input$crop_y[2]
-        
-        if(input$plot_summary_table == TRUE){
-          y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
-          plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
-          
-          plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
-        }else{
-          y_start_with_text <- plot_top_y
-          plan_table_geom <- geom_sf(data = NULL)
-        }
-        
-        if(input$lumbar_vertebrae_count == "6"){
-          l6_statement <- "Note: 6 Lumbar Vertebrae"
-        }else{
-          l6_statement <- " "
-        }
+        # x_left_limit <- 0.3 - input$label_text_offset/100
+        # x_right_limit <- 1-x_left_limit
+        # plot_top_y <- input$crop_y[2]
+        # y_spacing <- 0.025*input$crop_y[2]
+        # 
+        # if(input$plot_summary_table == TRUE){
+        #   y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
+        #   plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+        #   
+        #   plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
+        # }else{
+        #   y_start_with_text <- plot_top_y
+        #   plan_table_geom <- geom_sf(data = NULL)
+        # }
+        # 
+        # if(input$lumbar_vertebrae_count == "6"){
+        #   l6_statement <- "Note: 6 Lumbar Vertebrae"
+        # }else{
+        #   l6_statement <- " "
+        # }
         ### POSTERIOR
-        # labels_posterior_df <- labels_df %>%
-        #   filter(between(y, input$crop_y[1], y_start_with_text)) %>%
-        #   mutate(x_left = x_left_limit + 0.05) %>%
-        #   mutate(x_right = x_right_limit - 0.05) %>%
-        #   select(-vertebral_number)
-        # 
-        # labels_posterior_df <- labels_posterior_df %>%
-        #   union_all(tibble(level = " ", 
-        #                    x_left = min(labels_posterior_df$x_left) - 0.03,
-        #                    x_right = max(labels_posterior_df$x_right) + 0.03, 
-        #                    y = min(labels_posterior_df$y) - 0.03)) %>%
-        #   union_all(tibble(level = " ", 
-        #                    x_left = min(labels_posterior_df$x_left) - 0.03,
-        #                    x_right = max(labels_posterior_df$x_right) + 0.03, 
-        #                    y = max(labels_posterior_df$y) + 0.03))
-        # 
-        # ggdraw() +
-        #   draw_image(
-        #     spine_png,
-        #     scale = 1,
-        #     y = 0,
-        #     valign = 0,
-        #     x = 0,
-        #     height = 1
-        #     # width = 1
-        #   ) +
-        #   reactiveValuesToList(geoms_list_revision_posterior) +
-        #   reactiveValuesToList(geoms_list_posterior) +
-        #   reactiveValuesToList(rods_list) +
-        #   draw_text(
-        #     text = labels_posterior_df$level,
-        #     x = labels_posterior_df$x_left,
-        #     y = labels_posterior_df$y,
-        #     size = input$label_text_size,
-        #     fontface = "bold"
-        #   ) +
-        #   draw_text(
-        #     text = labels_posterior_df$level,
-        #     x = labels_posterior_df$x_right,
-        #     y = labels_posterior_df$y,
-        #     size = input$label_text_size,
-        #     fontface = "bold"
-        #   ) +
-        #   plan_table_geom +
-        #   annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement) 
         spine_plan_plot_posterior_reactive()
+
+        
       }
     }
     
@@ -4146,16 +4049,7 @@ server <- function(input, output, session) {
   
   ################------------------  FIRST UPDATE THE OPTIONS USING THE DETAILS ALREADY INPUTTED    ----------------------######################  
   
-  
-  # observeEvent(input$fusion_procedure_performed, {
-  #   if(input$fusion_procedure_performed == TRUE){
-  #     updateAwesomeCheckboxGroup(session = session,
-  #                                inputId = "posterior_bone_graft", 
-  #                                selected = append(input$posterior_bone_graft, "Morselized Allograft"))
-  #   }
-  # })
-  
-  
+
   added_rods_statement_reactive <- reactive({
     additional_rods_list <- list()
     
@@ -4224,7 +4118,6 @@ server <- function(input, output, session) {
     if(length(input$postop_abx) >0){
       postop_plan$postop_abx_label <- format_plan_list_function(plan_label = "Postop Abx", input_vector = input$postop_abx)
       
-      # postop_plan$postop_abx_label <- paste("  - Postop Abx: ", glue_collapse(input$postop_abx, sep = "; ", last = "; and "))
     }
     
     ##########   postop_map_goals  #############
@@ -4241,12 +4134,10 @@ server <- function(input, output, session) {
     if(length(input$postop_pain) >0){
       postop_plan$postop_pain_label <- format_plan_list_function(plan_label = "Pain Control", input_vector = input$postop_pain)
       
-      # postop_plan$postop_pain_label <- paste("  - Pain Control: ", glue_collapse(input$postop_pain, sep = "; ", last = "; and "))
     }
     ##########   postop_activity  #############
     if(length(input$postop_activity) >0){
       postop_plan$postop_activity_label <- format_plan_list_function(plan_label = "Activity", input_vector = input$postop_activity)
-      # postop_plan$postop_activity_label <- paste("  - Activity: ", glue_collapse(input$postop_activity, sep = "; ", last = "; and "))
     }
     ##########   postop_brace  #############
     if(length(input$postop_brace) >0){
@@ -4255,17 +4146,14 @@ server <- function(input, output, session) {
     ##########   postop_diet  #############
     if(length(input$postop_diet) >0){
       postop_plan$postop_diet_label <- format_plan_list_function(plan_label = "Diet/GI", input_vector = input$postop_diet)
-      # postop_plan$postop_diet_label <- paste("  - Diet/GI: ", glue_collapse(input$postop_diet, sep = "; ", last = "; and "))
     }
     ##########   postop_dvt_ppx  #############
     if(length(input$postop_dvt_ppx) >0){
       postop_plan$postop_dvt_label <- format_plan_list_function(plan_label = "DVT PPX/Anticoag/Antiplatelet", input_vector = input$postop_dvt_ppx)
-      # postop_plan$postop_dvt_label <- paste("  - DVT PPX/Anticoag/Antiplatelet: ", glue_collapse(input$postop_dvt_ppx, sep = "; ", last = "; and "))
     }
     ##########   postop_drains_dressing  #############
     if(length(input$postop_drains_dressing) >0){
       postop_plan$postop_drains_dressing_label <- format_plan_list_function(plan_label = "Drains & Dressing", input_vector = input$postop_drains_dressing)
-      # postop_plan$postop_drains_dressing_label <- paste("  - Drains & Dressing: ", glue_collapse(input$postop_drains_dressing, sep = "; ", last = "; and "))
     }
     ##########   postop_followup  #############
     if(length(input$postop_followup) >0){
@@ -4435,12 +4323,7 @@ server <- function(input, output, session) {
     }
     
     posterior_op_note_inputs_list_reactive$posterior_biologics_list <- posterior_biologics_list
-    
-    # posterior_op_note_inputs_list_reactive$posterior_bone_graft <- input$posterior_bone_graft
-    
-    #######
-    # posterior_op_note_inputs_list_reactive$posterior_allograft_amount <- input$posterior_allograft_amount
-    
+
     #######
     if(any(input$posterior_bone_graft == "Morselized Autograft (separate fascial incision)")){
       posterior_op_note_inputs_list_reactive$morselized_autograft_separate <- TRUE
@@ -4698,41 +4581,6 @@ server <- function(input, output, session) {
       procedure_results_list <- list()
       
       op_note_list <- list()
-      # procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df,
-      #                                                                fusion_levels_df = posterior_op_note_inputs_list_reactive()$fusions_df,
-      #                                                                head_position = posterior_op_note_inputs_list_reactive()$head_positioning,
-      #                                                                surgical_approach = posterior_op_note_inputs_list_reactive()$approach_specified_posterior,
-      #                                                                approach_mis_open = posterior_op_note_inputs_list_reactive()$approach_open_mis,
-      #                                                                approach_robot_nav_xray = posterior_op_note_inputs_list_reactive()$approach_robot_navigation,
-      #                                                                neuromonitoring_list = posterior_op_note_inputs_list_reactive()$neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
-      #                                                                implant_start_point_method_input = posterior_op_note_inputs_list_reactive()$implant_start_point_method,
-      #                                                                implant_confirmation_method = posterior_op_note_inputs_list_reactive()$implant_position_confirmation_method,
-      #                                                                local_anesthesia = posterior_op_note_inputs_list_reactive()$local_anesthesia,
-      #                                                                revision_decompression_vector = posterior_op_note_inputs_list_reactive()$open_canal,
-      #                                                                revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df,
-      #                                                                left_main_rod_size = posterior_op_note_inputs_list_reactive()$left_main_rod_size,
-      #                                                                left_main_rod_material = posterior_op_note_inputs_list_reactive()$left_main_rod_material,
-      #                                                                right_main_rod_size = posterior_op_note_inputs_list_reactive()$right_main_rod_size,
-      #                                                                right_main_rod_material = posterior_op_note_inputs_list_reactive()$right_main_rod_material,
-      #                                                                additional_rods_statement = posterior_op_note_inputs_list_reactive()$added_rods_statement,
-      #                                                                antibiotics = posterior_op_note_inputs_list_reactive()$preop_antibiotics,
-      #                                                                additional_procedures_vector = posterior_op_note_inputs_list_reactive()$additional_procedures_vector,
-      #                                                                prior_fusion_levels_vector = posterior_op_note_inputs_list_reactive()$prior_fusion_levels,
-      #                                                                instrumentation_removal_vector = posterior_op_note_inputs_list_reactive()$instrumentation_removed_vector,
-      #                                                                bmp = posterior_op_note_inputs_list_reactive()$posterior_bmp_dose_reactive,
-      #                                                                bone_graft_vector = posterior_op_note_inputs_list_reactive()$posterior_bone_graft,
-      #                                                                morselized_allograft = posterior_op_note_inputs_list_reactive()$posterior_allograft_amount,
-      #                                                                morselized_autograft_separate = posterior_op_note_inputs_list_reactive()$morselized_autograft_separate,
-      #                                                                deep_drains = posterior_op_note_inputs_list_reactive()$deep_drains_posterior,
-      #                                                                superficial_drains = posterior_op_note_inputs_list_reactive()$superficial_drains_posterior,
-      #                                                                end_procedure_details = posterior_op_note_inputs_list_reactive()$additional_end_procedure_details,
-      #                                                                closure = posterior_op_note_inputs_list_reactive()$closure_details,
-      #                                                                dressing = posterior_op_note_inputs_list_reactive()$dressing_details,
-      #                                                                multiple_position_procedure = posterior_op_note_inputs_list_reactive()$multiple_approach, 
-      #                                                                alignment_correction_technique = posterior_op_note_inputs_list_reactive()$alignment_correction_method,
-      #                                                                sex = posterior_op_note_inputs_list_reactive()$sex,
-      #                                                                lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression
-      # )
       
       op_note_list$"\nPatient:" <- paste(input$patient_first_name, input$patient_last_name)
       op_note_list$"\nDate of Surgery:" <- as.character(input$date_of_surgery)
@@ -4741,7 +4589,6 @@ server <- function(input, output, session) {
       op_note_list$"\nPre-operative Diagnosis:" <- if_else(!is.null(input$preoperative_diagnosis), paste0("-", as.character(input$preoperative_diagnosis)), " ")
       op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), glue_collapse(x = unlist(str_split(input$postoperative_diagnosis, pattern = "; ")), sep = "\n"), " ")
       op_note_list$"\nIndications:" <- if_else(!is.null(input$indications), as.character(input$indications), " ") 
-      # op_note_list$"\nProcedures Performed:" <- if_else(!is.null(procedure_results_list$procedures_numbered_paragraph), as.character(procedure_results_list$procedures_numbered_paragraph), " ")
       op_note_list$"\nSurgical Findings:" <- if_else(!is.na(input$surgical_finding), as.character(input$surgical_finding), " ") 
       op_note_list$"\nSpecimens Removed:" <- if_else(!is.na(input$specimens_removed), as.character(input$specimens_removed), " ") 
       op_note_list$"\nEstimated Blood Loss:" <- if_else(!is.na(input$ebl), as.character(input$ebl), " ") 
@@ -4757,8 +4604,6 @@ server <- function(input, output, session) {
         select(row, full_text_vector)
       
     }else{
-      
-
       
       ################# BUILD ANTERIOR OR POSTERIOR OR COMBINED OP NOTES ############
       
@@ -4845,11 +4690,6 @@ server <- function(input, output, session) {
         }else{
           procedure_results_list <- procedure_results_list_anterior
         }
-        # if(nrow(posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df) > 0){
-        #   procedure_results_list <- procedure_results_list_posterior
-        # }else{
-        #   procedure_results_list <- procedure_results_list_anterior
-        # }
       }
       
       
@@ -4870,6 +4710,11 @@ server <- function(input, output, session) {
       op_note_list$"\n*Surgical Findings:" <- if_else(input$surgical_findings == "", "none", input$surgical_findings)
       op_note_list$"\n*Specimens Taken:" <- if_else(input$specimens_removed == "", "none", input$specimens_removed)
       op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
+      
+      if(length(input$implant_manufacturer)>0){
+        op_note_list$"\n*Implant Manufacturer:" <- paste(glue_collapse(x = input$implant_manufacturer, sep = ", ", last = " and "))
+      }
+      
       op_note_list$"\n*Procedure  Description:" <- procedure_results_list$procedure_details_paragraph
       op_note_list$"\n*Postop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
       
@@ -4919,6 +4764,7 @@ server <- function(input, output, session) {
       op_note <- str_replace_all(string = op_note, pattern = "Fluids/Transfusions:", replacement = "<B>Fluids/Transfusions:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Surgical Findings:", replacement = "<B>Surgical Findings:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Specimens Taken:", replacement = "<B>Specimens Taken:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Implant Manufacturer:", replacement = "<B>Implant Manufacturer:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Procedures Performed:", replacement = "<B>Procedures Performed:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Procedure  Description:", replacement = "<B>Procedure  Description:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Postop Plan:", replacement = "<br><u><B>POSTOP PLAN:</B></u>")
