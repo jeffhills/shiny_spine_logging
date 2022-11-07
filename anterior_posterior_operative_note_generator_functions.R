@@ -1098,7 +1098,12 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   }
   
   if(nrow(all_objects_to_add_df)>0){
+    
     proximal_exposure_level <- all_objects_to_add_df %>%
+      select(level, vertebral_number) %>%
+      union_all(revision_implants_df %>%
+                  filter(remove_retain == "remove") %>% 
+                  select(level, vertebral_number)) %>%
       filter(vertebral_number == min(vertebral_number)) %>%
       mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
       mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
@@ -1109,6 +1114,10 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       distinct()
     
     distal_exposure_level <- all_objects_to_add_df %>%
+      select(level, vertebral_number) %>%
+      union_all(revision_implants_df %>%
+                  filter(remove_retain == "remove") %>% 
+                  select(level, vertebral_number)) %>%
       filter(vertebral_number == max(vertebral_number)) %>%
       mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
       mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
@@ -1136,28 +1145,55 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     
   }else{
     if(nrow(revision_implants_df)>0){
-      proximal_exposure_level <- revision_implants_df %>%
-        filter(vertebral_number == min(vertebral_number)) %>%
-        mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
-        mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
-        select(vertebral_number) %>%
-        distinct() %>%
-        mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
-        select(level) %>%
-        distinct()
-      
-      distal_exposure_level <- revision_implants_df %>%
-        filter(vertebral_number == max(vertebral_number)) %>%
-        mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
-        mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
-        select(vertebral_number) %>%
-        distinct() %>%
-        mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
-        select(level) %>%
-        distinct() %>%
-        mutate(level = if_else(level == "S2AI", "S1", 
-                               if_else(level == "Iliac", "S1", 
-                                       level)))  
+      if(any(revision_implants_df$remove_retain == "remove")){
+        proximal_exposure_level <- revision_implants_df %>%
+          filter(remove_retain == "remove") %>%
+          filter(vertebral_number == min(vertebral_number)) %>%
+          mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
+          mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
+          select(vertebral_number) %>%
+          distinct() %>%
+          mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+          select(level) %>%
+          distinct()
+        
+        distal_exposure_level <- revision_implants_df %>%
+          filter(remove_retain == "remove") %>%
+          filter(vertebral_number == max(vertebral_number)) %>%
+          mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
+          mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
+          select(vertebral_number) %>%
+          distinct() %>%
+          mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+          select(level) %>%
+          distinct() %>%
+          mutate(level = if_else(level == "S2AI", "S1", 
+                                 if_else(level == "Iliac", "S1", 
+                                         level)))  
+      }else{
+        proximal_exposure_level <- revision_implants_df %>%
+          filter(vertebral_number == min(vertebral_number)) %>%
+          mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
+          mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
+          select(vertebral_number) %>%
+          distinct() %>%
+          mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+          select(level) %>%
+          distinct()
+        
+        distal_exposure_level <- revision_implants_df %>%
+          filter(vertebral_number == max(vertebral_number)) %>%
+          mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
+          mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
+          select(vertebral_number) %>%
+          distinct() %>%
+          mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+          select(level) %>%
+          distinct() %>%
+          mutate(level = if_else(level == "S2AI", "S1", 
+                                 if_else(level == "Iliac", "S1", 
+                                         level)))   
+      }
       
       first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, exposing proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
     }else{

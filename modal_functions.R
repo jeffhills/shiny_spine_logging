@@ -466,7 +466,7 @@ startup_modal_box_diagnosis_symptoms <-
                             "Removed" = "removed",
                             "Retained" = "retained",
                             "Retained & Connected" = "retained_connected",
-                            "Partially Retained & Connected" = "partially_retained_connected"
+                            "Partially Retained" = "partially_retained_connected"
                           ),
                           selected = left_rod_status,
                           inline = FALSE,
@@ -498,7 +498,7 @@ startup_modal_box_diagnosis_symptoms <-
                             "Removed" = "removed",
                             "Retained" = "retained",
                             "Retained & Connected" = "retained_connected",
-                            "Partially Retained & Connected" = "partially_retained_connected"
+                            "Partially Retained" = "partially_retained_connected"
                           ),
                           selected = right_rod_status,
                           inline = FALSE,
@@ -1071,6 +1071,7 @@ addition_surgical_details_modal_box_2_function <-
            postop_dispo = c(""),
            postop_abx = c("Ancef x 24hrs"),
            postop_map_goals = " ",
+           postop_transfusion_threshold = " ",
            postop_imaging = c(""),
            postop_pain = c(""),
            postop_activity = c("PT/OT daily",
@@ -1558,6 +1559,18 @@ addition_surgical_details_modal_box_2_function <-
                              "Please maintain MAPs 85-90 for a total of 2 days post-injury",
                              "***"),
           initial_value_selected = postop_map_goals
+        ),
+        br(),
+        jh_make_shiny_table_row_function(
+          left_column_label = "Acute Blood Loss Anemia:",
+          font_size = row_label_font_size,
+          input_id = "postop_transfusion_threshold",
+          left_column_percent_width = 20,
+          checkboxes_inline = FALSE,
+          input_type = "checkbox",
+          choices_vector = c("Please check daily CBC & transfuse for Hgb < 10 for first 48hrs",
+                             "***"),
+          initial_value_selected = postop_transfusion_threshold
         ),
         br(),
         jh_make_shiny_table_row_function(
