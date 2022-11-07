@@ -143,6 +143,17 @@ l6_jh_get_vertebral_level_function <- function(number) {
 
 l6_spine_png <- image_read(path = "spine_posterior_6_lumbar_vert.png")
 
+posterior_spine_plot_l6 <- ggdraw() +
+  draw_image(
+    l6_spine_png,
+    scale = 1,
+    y = 0,
+    valign = 0,
+    x = 0,
+    height = 1
+    # width = 1
+  ) 
+
 l6_anterior_spine_png <- image_read(path = "spine_anterior_6_lumbar_vert.png")
 
 l6_implant_starts_lower_only_df <- read_csv(file = "full_coordinates_df.csv") %>%

@@ -2073,6 +2073,7 @@ server <- function(input, output, session) {
       l5_open_canal_df <<- open_canal_df
       l5_labels_anterior_df <<- labels_anterior_df
       
+      
       labels_anterior_df <<- labels_anterior_df  %>%
         add_row(level = "L6", x = 0.5, y = 0.14)
       
@@ -2082,6 +2083,8 @@ server <- function(input, output, session) {
       
       labels_df <<- l6_labels_df
       levels_numbered_df <<- l6_levels_numbered_df
+      interbody_levels_df <<- l6_levels_numbered_df %>%
+        filter(str_detect(level, "-"))
       
       all_implants_constructed_df <<- all_implants_constructed_df %>%
         filter(vertebral_number < 23.9) %>%
@@ -3759,17 +3762,9 @@ server <- function(input, output, session) {
                       }else{
                         all_posterior_df <- all_objects_to_add_list$objects_df %>%
                           filter(approach == "posterior")
+                        
                         geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_posterior_df, plot_with_patterns = input$plot_with_patterns_true)
                         
-                        # if(length(geoms_list_posterior) == 0){
-                        #   geoms_list_posterior$geoms <- jh_make_single_posterior_geom_function(posterior_object_df = object_added_reactive_df(), plot_with_patterns = input$plot_with_patterns_true)
-                        #   
-                        # }else{
-                        # added_geom <- jh_make_single_posterior_geom_function(posterior_object_df = object_added_reactive_df(), plot_with_patterns = input$plot_with_patterns_true)
-                        # 
-                        # geoms_list_posterior$geoms <- append(x = geoms_list_posterior$geoms, values = added_geom)
-                        #   
-                        # }
                         }
                     })
   
@@ -3790,7 +3785,7 @@ server <- function(input, output, session) {
         plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
       }else{
         y_start_with_text <- plot_top_y
-        # plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+        
         plan_table_geom <- geom_sf(data = NULL)
       }
       
@@ -3865,8 +3860,13 @@ server <- function(input, output, session) {
       plan_table_geom <- geom_sf(data = NULL)
     }
     
+    if(input$lumbar_vertebrae_count == "5"){
+      posterior_spine_ggdraw <- posterior_spine_plot
+    }
+    
     if(input$lumbar_vertebrae_count == "6"){
       l6_statement <- "Note: 6 Lumbar Vertebrae"
+      posterior_spine_ggdraw <- posterior_spine_plot_l6
     }else{
       l6_statement <- " "
     }
@@ -3888,7 +3888,7 @@ server <- function(input, output, session) {
                        x_right = max(labels_posterior_df$x_right) + 0.03, 
                        y = max(labels_posterior_df$y) + 0.03))
     
-    posterior_spine_plot +
+    posterior_spine_ggdraw +
       reactiveValuesToList(geoms_list_revision_posterior) +
       reactiveValuesToList(geoms_list_posterior) +
       reactiveValuesToList(rods_list) +
