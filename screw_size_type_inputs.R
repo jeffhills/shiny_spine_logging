@@ -188,6 +188,7 @@ jh_generate_df_for_screening_screw_inputs_function <- function(all_implants_df){
   
   level_objects_wide_df %>%
     select(level, level_object_label, left_object, right_object) %>%
+    mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI")) %>%
     replace_na() %>%
     replace_na(list(left_object = "no_screw", right_object = "no_screw"))
   

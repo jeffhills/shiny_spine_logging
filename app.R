@@ -5650,22 +5650,20 @@ server <- function(input, output, session) {
   ################------------------  Screw Size RESULTS  ----------------------######################  
   
   ### first update the bilaterality input for the conditional panel
+  
   screws_selected_df_reactive <- reactive({
     if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw") | str_detect(object, "anterior_plate")))>0){
-      
-      # implants_added_df <- jh_generate_df_for_screening_screw_inputs_function(all_objects_to_add_list$objects_df) %>%
-      #   left_join(all_screw_size_type_inputs_df %>% select(implant_row_id, level_object_label)) %>%
-      #   arrange(implant_row_id) %>%
-      #   select(implant_row_id, level, level_object_label, left_object, right_object)
-      implants_added_df <- all_screw_size_type_inputs_df %>%  
-        filter(level_object_label %in% jh_generate_df_for_screening_screw_inputs_function(all_objects_to_add_list$objects_df)$level_object_label) %>%
+
+      implants_added_df <- jh_generate_df_for_screening_screw_inputs_function(all_objects_to_add_list$objects_df) %>%
+        left_join(all_screw_size_type_inputs_df %>% select(implant_row_id, level_object_label)) %>%
+        arrange(implant_row_id) %>%
         select(implant_row_id, level, level_object_label, left_object, right_object)
-      
+
     }else{
       implants_added_df <- tibble(level_object_label = character(), level = character(), left_object = character(), right_object =  character(), implant_row_id = integer())
     }
     implants_added_df
-    
+
   })
   
   ### NOW UPDATE THE INPUT TO HAVE THE Correct levels FOR EACH IMPLANT  implants_complete
