@@ -512,6 +512,8 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
 #############-----------------------  FULL ANTERIOR OPERATIVE NOTE BODY GENERATOR ----------------------###############
 
 op_note_anterior_function <- function(all_objects_to_add_df,
+                                      anterior_plate_revision_df = tibble(level = character(), 
+                                                                          prior_plate_status = character()),
                                       anterior_approach_laterality = "left-sided",
                                       approach_statement = "none",
                                       antibiotics = vector(),
@@ -589,11 +591,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$pre_positioning_motors <- neuromonitoring_list$pre_positioning_motors 
   }
   
-  # if(any(str_detect(additional_procedures_vector, "Spinal Cord Monitoring"))){
-  #   first_paragraph_list$spinal_cord_monitoring <- "Spinal Cord Monitoring needles were inserted by the neurophysiology technologist."
-  # }
-  
-  
+
   if(str_detect(anterior_approach_laterality, "Lateral Retroperitoneal")){
     first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned in the lateral position on the OR table and all bony prominences were appropriately padded. After prepping and draping in the standard fashion, a surgical timeout was performed."))
     
@@ -601,29 +599,63 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned Supine on the OR table and all bony prominences were appropriately padded. After prepping and draping in the standard fashion, a surgical timeout was performed."))
   }
   
+  # tibble(prior_plate_present_levels = character(), level = character(), prior_plate_status = character()) 
   
-  proximal_exposure_level <- all_objects_to_add_df %>%
-    filter(vertebral_number == min(vertebral_number)) %>%
-    mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
-    mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
-    select(vertebral_number) %>%
-    distinct() %>%
-    mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
-    select(level) %>%
-    distinct()
-  
-  distal_exposure_level <- all_objects_to_add_df %>%
-    filter(vertebral_number == max(vertebral_number)) %>%
-    mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
-    mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
-    select(vertebral_number) %>%
-    distinct() %>%
-    mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
-    select(level) %>%
-    distinct() %>%
-    mutate(level = if_else(level == "S2AI", "S1", 
-                           if_else(level == "Iliac", "S1", 
-                                   level)))
+  if(any(anterior_plate_revision_df$prior_plate_status == "removed")){
+    anterior_plate_revision_levels_df <- anterior_plate_revision_df %>%
+      filter(prior_plate_status == "removed") %>%
+      select(level) %>%
+      mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))
+    
+    proximal_exposure_level <- all_objects_to_add_df %>%
+      union_all(anterior_plate_revision_levels_df) %>%
+      filter(vertebral_number == min(vertebral_number)) %>%
+      mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
+      mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
+      select(vertebral_number) %>%
+      distinct() %>%
+      mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+      select(level) %>%
+      distinct()
+    
+    distal_exposure_level <- all_objects_to_add_df %>%
+      union_all(anterior_plate_revision_levels_df) %>%
+      filter(vertebral_number == max(vertebral_number)) %>%
+      mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
+      mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
+      select(vertebral_number) %>%
+      distinct() %>%
+      mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+      select(level) %>%
+      distinct() %>%
+      mutate(level = if_else(level == "S2AI", "S1", 
+                             if_else(level == "Iliac", "S1", 
+                                     level)))
+    
+  }else{
+    proximal_exposure_level <- all_objects_to_add_df %>%
+      filter(vertebral_number == min(vertebral_number)) %>%
+      mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
+      mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
+      select(vertebral_number) %>%
+      distinct() %>%
+      mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+      select(level) %>%
+      distinct()
+    
+    distal_exposure_level <- all_objects_to_add_df %>%
+      filter(vertebral_number == max(vertebral_number)) %>%
+      mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
+      mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
+      select(vertebral_number) %>%
+      distinct() %>%
+      mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+      select(level) %>%
+      distinct() %>%
+      mutate(level = if_else(level == "S2AI", "S1", 
+                             if_else(level == "Iliac", "S1", 
+                                     level)))
+  }
   
   ## Approach for cervical vs thoracic/lumbar
   if(max(all_objects_to_add_df$vertebral_number)<11){
@@ -652,6 +684,43 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   }
   
   procedure_details_list$approach_statement <- glue_collapse(x = first_paragraph_list, sep = " ")
+  
+  ################## PROCEDURE PARAGRAPHS ##################
+  
+  if(nrow(anterior_plate_revision_df)>0){
+    
+    if(any(anterior_plate_revision_df$prior_plate_status == "removed")){
+      plate_removed_vertebral_bodies_vector <- anterior_plate_revision_df %>%
+        filter(prior_plate_status == "removed") %>%
+        select(level) %>%
+        separate(level, into = c("proximal", "distal")) %>%
+        pivot_longer(cols = c(proximal, distal), names_to = "region", values_to = "level") %>%
+        select(level) %>%
+        distinct()%>%
+        as_vector()
+      
+      plate_removed_levels <- (anterior_plate_revision_df %>%
+                                 filter(prior_plate_status == "removed"))$level
+      
+      plate_removal_statement <- glue("I then proceeded with the removal of the prior instrumentation. Once the plate was fully exposed, the screws were removed from the {glue_collapse(x = plate_removed_vertebral_bodies_vector, sep = ', ', last = ' and ')} bodies without difficulty. The plate spanning {glue_collapse(x = plate_removed_levels, sep = ', ', last = ' and ')} was then removed. ")
+    
+    }else{
+      plate_removal_statement <- " "
+    }
+    
+    if(any(anterior_plate_revision_df$prior_plate_status == "retained")){
+      plate_retained_levels <- (anterior_plate_revision_df %>%
+                                 filter(prior_plate_status == "retained"))$level
+      
+      plate_retained_statement <- glue("The plate spanning {glue_collapse(x = plate_retained_levels, sep = ', ', last = ' and ')} was left in place. ")
+    }else{
+      plate_retained_statement <- " "
+      }
+
+    
+    procedure_details_list$revision_paragraph <- glue("{plate_removal_statement} {plate_retained_statement}")
+    
+  }
   
   ################### PROCEDURE PARAGRAPHS ##################
   

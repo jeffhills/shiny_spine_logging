@@ -132,6 +132,11 @@ startup_modal_box <-
           )
         ),
         uiOutput(outputId = "prior_patient_match")
+        # column(12, 
+        #        textOutput(outputId = "match_found_result"),
+        #        tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", "xxxx"),
+        #        tableOutput(outputId = "patient_prior_data")
+        #        )
       )
     )
   }
@@ -161,6 +166,9 @@ startup_modal_box_diagnosis_symptoms <-
            levels_with_prior_decompression = "",
            prior_fusion_levels = "",
            prior_instrumentation = FALSE,
+           revision_approach = "none",
+           prior_anterior_plate_levels = c(),
+           prior_anterior_plate_removed_levels = c(),
            left_prior_implants = "",
            left_prior_implants_removed = "",
            right_prior_implants = "",
@@ -180,10 +188,10 @@ startup_modal_box_diagnosis_symptoms <-
       diagnosis_category_value == "Infection" ~ "infection",
       diagnosis_category_value == "Congenital" ~ "congenital",
       diagnosis_category_value == "Other Neurological Diseases" ~ "other_neuro_conditions" 
-  
+      
     )
-
-                                     
+    
+    
     modalDialog(
       size = "l",
       easyClose = FALSE,
@@ -335,6 +343,23 @@ startup_modal_box_diagnosis_symptoms <-
                 checkboxes_inline = TRUE,
                 individual_buttons = TRUE
               ), 
+              conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
+                               fluidRow(column(
+                                 width = 12,
+                                 jh_make_shiny_table_row_function(
+                                   left_column_label = "Anterior or Posterior Revision?",
+                                   input_type = "awesomeRadio",
+                                   input_id = "revision_approach",
+                                   left_column_percent_width = 50,
+                                   font_size = 16,
+                                   choices =  c("Anterior" = "anterior", "Posterior" = "posterior", "NA" = "none"), 
+                                   initial_value_selected = revision_approach,
+                                   checkboxes_inline = TRUE,
+                                   individual_buttons = TRUE
+                                 )
+                               )
+                               )
+              ),
               conditionalPanel(
                 "input.primary_revision.indexOf('Revision') > -1",
                 jh_make_shiny_table_row_function(
@@ -392,134 +417,166 @@ startup_modal_box_diagnosis_symptoms <-
                     initial_value_selected = prior_instrumentation
                   )
                 ),
-                conditionalPanel(
-                  condition = "input.prior_instrumentation == true",
-                  box(
-                    title = tags$div(style = "font-size:22px; font-weight:bold; text-align:center", "Prior Instrumentation"),
-                    width = 12,
-                    collapsible = TRUE,
-                    fluidRow(column(
-                      6,
-                      tags$div(style = "font-size:18px; font-weight:bold; text-align:center", "LEFT Implants")
-                    ),
-                    column(
-                      6,
-                      tags$div(style = "font-size:18px; font-weight:bold; text-align:center", "RIGHT Implants")
-                    )),
-                    fluidRow(
-                      column(
-                        5,
-                        column(
-                          6,
-                          awesomeCheckboxGroup(
-                            inputId = "left_revision_implants",
-                            label = "Present:",
-                            selected = left_prior_implants,
-                            choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
-                          )
-                        ),
-                        column(
-                          6,
-                          awesomeCheckboxGroup(
-                            inputId = "left_revision_implants_removed",
-                            label = "Removed:",
-                            status = "danger",
-                            selected = left_prior_implants_removed,
-                            choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
-                          )
-                        )
-                      ),
-                      column(1,),
-                      column(
-                        5,
-                        column(
-                          6,
-                          awesomeCheckboxGroup(
-                            inputId = "right_revision_implants",
-                            label = "Present:",
-                            selected = right_prior_implants,
-                            choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
-                          )
-                        ),
-                        column(
-                          6,
-                          awesomeCheckboxGroup(
-                            inputId = "right_revision_implants_removed",
-                            label = "Removed:",
-                            status = "danger",
-                            selected = right_prior_implants_removed,
-                            choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
-                          )
-                        )
-                      )
-                    )
-                  ),
-                  fluidRow(
-                    column(
-                      4,
-                      conditionalPanel(
-                        condition = "input.left_revision_implants.length > 1",
-                        awesomeRadio(
-                          inputId = "left_revision_rod_status",
-                          label = "Prior Left Rod was:",
-                          choices = c(
-                            "Removed" = "removed",
-                            "Retained" = "retained",
-                            "Retained & Connected" = "retained_connected",
-                            "Partially Retained" = "partially_retained_connected"
-                          ),
-                          selected = left_rod_status,
-                          inline = FALSE,
-                          status = "success"
-                        )
-                      )
-                    ),
-                    column(
-                      2,
-                      conditionalPanel(
-                        condition = "input.left_revision_rod_status.indexOf('partially_retained_connected') > -1",
-                        pickerInput(
-                          inputId = "left_revision_implants_connected_to_prior_rod",
-                          label = "Select screws connected to the old rod:",
-                          choices = c(""),
-                          selected = left_implants_still_connected,
-                          multiple = TRUE
-                        )
-                      )
-                    ),
-                    column(
-                      4,
-                      conditionalPanel(
-                        condition = "input.right_revision_implants.length > 1",
-                        awesomeRadio(
-                          inputId = "right_revision_rod_status",
-                          label = "Prior Right Rod was:",
-                          choices = c(
-                            "Removed" = "removed",
-                            "Retained" = "retained",
-                            "Retained & Connected" = "retained_connected",
-                            "Partially Retained" = "partially_retained_connected"
-                          ),
-                          selected = right_rod_status,
-                          inline = FALSE,
-                          status = "success"
-                        )
-                      )
-                    ),
-                    column(
-                      2,
-                      conditionalPanel(
-                        condition = "input.right_revision_rod_status.indexOf('partially_retained_connected') > -1",
-                        pickerInput(
-                          inputId = "right_revision_implants_connected_to_prior_rod",
-                          label = "Select screws connected to the old rod:",
-                          choices = c(""),
-                          selected = right_implants_still_connected,
-                          multiple = TRUE
-                        )
-                      )
-                    )
-                  )
+                conditionalPanel(condition = "input.prior_instrumentation == true", 
+                                 conditionalPanel(
+                                   condition = "input.revision_approach.indexOf('anterior') > -1",
+                                   box(
+                                     title = tags$div(style = "font-size:22px; font-weight:bold; text-align:center", "Prior Anterior Instrumentation"),
+                                     width = 12,
+                                     collapsible = TRUE,
+                                     fluidRow(
+                                       column(
+                                         6,
+                                         tags$div(style = "font-size:18px; font-weight:bold; text-align:center", "Plate Present:"),
+                                         awesomeCheckboxGroup(
+                                           inputId = "prior_anterior_plate_levels",
+                                           label = "Prior Anterior Plate Levels:",
+                                           selected = prior_anterior_plate_levels,
+                                           choices = revision_anterior_plate_df$level
+                                         )
+                                       ),
+                                       column(
+                                         6,
+                                         tags$div(style = "font-size:18px; font-weight:bold; text-align:center", "Plate Removed"),
+                                         awesomeCheckboxGroup(
+                                           inputId = "prior_anterior_plate_removed_levels",
+                                           label = "Prior Anterior Plate Removed:",
+                                           selected = prior_anterior_plate_removed_levels,
+                                           choices = revision_anterior_plate_df$level
+                                         )
+                                       )
+                                     )
+                                   )
+                                 ),
+                                 conditionalPanel(
+                                   condition = "input.revision_approach.indexOf('posterior') > -1",
+                                   box(
+                                     title = tags$div(style = "font-size:22px; font-weight:bold; text-align:center", "Prior Posterior Instrumentation"),
+                                     width = 12,
+                                     collapsible = TRUE,
+                                     fluidRow(column(
+                                       6,
+                                       tags$div(style = "font-size:18px; font-weight:bold; text-align:center", "LEFT Implants")
+                                     ),
+                                     column(
+                                       6,
+                                       tags$div(style = "font-size:18px; font-weight:bold; text-align:center", "RIGHT Implants")
+                                     )),
+                                     fluidRow(
+                                       column(
+                                         5,
+                                         column(
+                                           6,
+                                           awesomeCheckboxGroup(
+                                             inputId = "left_revision_implants",
+                                             label = "Present:",
+                                             selected = left_prior_implants,
+                                             choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                           )
+                                         ),
+                                         column(
+                                           6,
+                                           awesomeCheckboxGroup(
+                                             inputId = "left_revision_implants_removed",
+                                             label = "Removed:",
+                                             status = "danger",
+                                             selected = left_prior_implants_removed,
+                                             choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                           )
+                                         )
+                                       ),
+                                       column(1,),
+                                       column(
+                                         5,
+                                         column(
+                                           6,
+                                           awesomeCheckboxGroup(
+                                             inputId = "right_revision_implants",
+                                             label = "Present:",
+                                             selected = right_prior_implants,
+                                             choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                           )
+                                         ),
+                                         column(
+                                           6,
+                                           awesomeCheckboxGroup(
+                                             inputId = "right_revision_implants_removed",
+                                             label = "Removed:",
+                                             status = "danger",
+                                             selected = right_prior_implants_removed,
+                                             choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                           )
+                                         )
+                                       )
+                                     )
+                                   ),
+                                   fluidRow(
+                                     column(
+                                       4,
+                                       conditionalPanel(
+                                         condition = "input.left_revision_implants.length > 1",
+                                         awesomeRadio(
+                                           inputId = "left_revision_rod_status",
+                                           label = "Prior Left Rod was:",
+                                           choices = c(
+                                             "Removed" = "removed",
+                                             "Retained" = "retained",
+                                             "Retained & Connected" = "retained_connected",
+                                             "Partially Retained" = "partially_retained_connected"
+                                           ),
+                                           selected = left_rod_status,
+                                           inline = FALSE,
+                                           status = "success"
+                                         )
+                                       )
+                                     ),
+                                     column(
+                                       2,
+                                       conditionalPanel(
+                                         condition = "input.left_revision_rod_status.indexOf('partially_retained_connected') > -1",
+                                         pickerInput(
+                                           inputId = "left_revision_implants_connected_to_prior_rod",
+                                           label = "Select screws connected to the old rod:",
+                                           choices = c(""),
+                                           selected = left_implants_still_connected,
+                                           multiple = TRUE
+                                         )
+                                       )
+                                     ),
+                                     column(
+                                       4,
+                                       conditionalPanel(
+                                         condition = "input.right_revision_implants.length > 1",
+                                         awesomeRadio(
+                                           inputId = "right_revision_rod_status",
+                                           label = "Prior Right Rod was:",
+                                           choices = c(
+                                             "Removed" = "removed",
+                                             "Retained" = "retained",
+                                             "Retained & Connected" = "retained_connected",
+                                             "Partially Retained" = "partially_retained_connected"
+                                           ),
+                                           selected = right_rod_status,
+                                           inline = FALSE,
+                                           status = "success"
+                                         )
+                                       )
+                                     ),
+                                     column(
+                                       2,
+                                       conditionalPanel(
+                                         condition = "input.right_revision_rod_status.indexOf('partially_retained_connected') > -1",
+                                         pickerInput(
+                                           inputId = "right_revision_implants_connected_to_prior_rod",
+                                           label = "Select screws connected to the old rod:",
+                                           choices = c(""),
+                                           selected = right_implants_still_connected,
+                                           multiple = TRUE
+                                         )
+                                       )
+                                     )
+                                   )
+                                 )
                 )
               )
             )
@@ -570,7 +627,7 @@ lateral_mass_screws_after_decompression_modal_function <- function(implant_objec
     )
   }
 }
-                                   
+
 ################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 ################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 ################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
@@ -725,17 +782,17 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(screw
                     )
                   ),
                   # if(length(fusion_levels_confirmed)>0){
-                    fluidRow(
-                      prettyCheckboxGroup(
-                        inputId = "fusion_levels_confirmed",
-                        label = "Please Confirm The Fusion Levels:", 
-                        bigger = TRUE,
-                        choices = interbody_levels_df$level, 
-                        selected = fusion_levels_confirmed,
-                        icon = icon("check"), 
-                        status = "success"
-                      ) 
-                    )
+                  fluidRow(
+                    prettyCheckboxGroup(
+                      inputId = "fusion_levels_confirmed",
+                      label = "Please Confirm The Fusion Levels:", 
+                      bigger = TRUE,
+                      choices = interbody_levels_df$level, 
+                      selected = fusion_levels_confirmed,
+                      icon = icon("check"), 
+                      status = "success"
+                    ) 
+                  )
                   # }
               )
   )
@@ -773,7 +830,7 @@ addition_surgical_details_modal_box_function <-
            txa_loading = 20,
            txa_maintenance = 5,
            anterior_cervical_approach_details_checkbox = c()
-           ) {
+  ) {
     
     if(editing_the_details == FALSE){
       footer_button <- actionBttn(
@@ -878,10 +935,10 @@ addition_surgical_details_modal_box_function <-
           font_size = row_label_font_size,
           input_type = "awesomeRadio",
           choices_vector = c("None",
-            "During the EXPOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
-            "During the CLOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
-            "During the EXPOSURE, a liposomal Bupivicaine mixure was injected into the subcutaneous and deep tissues.",
-            "During CLOSURE, a liposomal Bupivicaine mixure was injected into the subcutaneous and deep tissues."
+                             "During the EXPOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
+                             "During the CLOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
+                             "During the EXPOSURE, a liposomal Bupivicaine mixure was injected into the subcutaneous and deep tissues.",
+                             "During CLOSURE, a liposomal Bupivicaine mixure was injected into the subcutaneous and deep tissues."
           ),
           input_id = "local_anesthesia", 
           checkboxes_inline = FALSE,
@@ -931,7 +988,7 @@ addition_surgical_details_modal_box_function <-
                            checkboxes_inline = FALSE,
                            initial_value_selected = pre_positioning_motors
                          )
-                         ),
+        ),
         br(),
         conditionalPanel(condition = "input.neuromonitoring.indexOf('SSEP') > -1",
                          jh_make_shiny_table_row_function(

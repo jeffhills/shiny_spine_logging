@@ -101,6 +101,16 @@ revision_implants_df <- implant_starts_df %>%
   ungroup() %>%
   select(-ends_with("_x"), -ends_with("_y"))
 
+revision_screws_df <- revision_implants_df %>%
+  filter(str_detect(object, "hook") == FALSE) %>%
+  filter((str_detect(string = level, pattern = "C1|C2|C3|C4|C5|C6") & object == "pedicle_screw") == FALSE) %>%
+  group_by(level, side) %>%
+  filter(y == max(y)) %>%
+  ungroup() %>%
+  union_all(revision_implants_df %>% filter(level == "Iliac"))%>%
+  filter(object != "pelvic_screw_2") 
+
+
 #############-----------------------   Build Implants  ----------------------###############
 construct_objects_live_function <- function(all_procedures_selected_df){
   
@@ -553,6 +563,9 @@ all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
   mutate(object_id = paste0(object_id, "_", n)) %>%
   select(-n) %>%
   ungroup() 
+
+revision_anterior_plate_df <- all_implants_constructed_df %>%
+  filter(object == "anterior_plate")
 
 all_objects_y_range_df <- all_implants_constructed_df %>%
   select(object, y) %>%
