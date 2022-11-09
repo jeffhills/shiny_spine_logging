@@ -6460,7 +6460,7 @@ server <- function(input, output, session) {
                    everything())
           
           
-          importRecords(rcon = rcon, data = posterior_revision_implants_df, returnContent = "count") 
+          importRecords(rcon = rcon_reactive$rcon, data = posterior_revision_implants_df, returnContent = "count") 
           
           incProgress(1/number_of_steps, detail = paste("Complete"))
           
