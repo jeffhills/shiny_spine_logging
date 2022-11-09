@@ -565,7 +565,8 @@ all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
   ungroup() 
 
 revision_anterior_plate_df <- all_implants_constructed_df %>%
-  filter(object == "anterior_plate")
+  filter(object == "anterior_plate") %>%
+  select(level, vertebral_number, object, object_constructed)
 
 all_objects_y_range_df <- all_implants_constructed_df %>%
   select(object, y) %>%

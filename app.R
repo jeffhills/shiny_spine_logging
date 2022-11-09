@@ -3294,8 +3294,9 @@ server <- function(input, output, session) {
             select(record_id, side, level, object) %>%
             filter(side == "left") %>%
             filter(str_detect(object, "hook|screw")) %>%
-            filter(level %in% input$left_revision_implants_removed) %>%
-            left_join(revision_implants_df) ## this is generated in Load coordinates
+            filter(level %in% input$left_revision_implants_removed) %>%   ## this is generated in Load coordinates 
+            left_join(revision_implants_df) %>%
+            distinct()
         }else{
           removed_df <- tibble(level = input$left_revision_implants_removed, side = "left") %>%
             left_join(revision_screws_df) %>%
@@ -3314,12 +3315,14 @@ server <- function(input, output, session) {
             filter(side == "left") %>%
             filter(str_detect(object, "hook|screw")) %>%
             filter(level %in% input$left_revision_implants_removed == FALSE) %>%
-            left_join(revision_implants_df)
+            left_join(revision_implants_df) %>%
+            distinct()
         }else{
           retained_df <- tibble(level = input$left_revision_implants, side = "left") %>%
             filter(level %in% input$left_revision_implants_removed == FALSE) %>%
             left_join(revision_screws_df) %>% ## this is generated in Load coordinates
-            filter(object != "pelvic_screw_2") 
+            filter(object != "pelvic_screw_2")  %>%
+            distinct()
         }
         
         ### create full summary table describing what is happening with the revision implants and rods
@@ -3331,12 +3334,14 @@ server <- function(input, output, session) {
               filter(side == "left") %>%
               mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
               left_join(revision_implants_df) %>%
-              select(-object_constructed)
+              select(-object_constructed) %>%
+              distinct()
           }else{
             revision_implants_status_df <- tibble(level = input$left_revision_implants, side = "left") %>%
               mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
               left_join(revision_screws_df) %>%
-              select(-object_constructed)  
+              select(-object_constructed)  %>%
+              distinct() 
           }
           
           
@@ -3347,12 +3352,14 @@ server <- function(input, output, session) {
               filter(side == "left") %>%
               mutate(remove_retain = "retain") %>%
               left_join(revision_implants_df) %>%
-              select(-object_constructed)
+              select(-object_constructed) %>%
+              distinct()
           }else{
             revision_implants_status_df <- tibble(level = input$left_revision_implants, side = "left") %>%
               mutate(remove_retain = "retain") %>%
               left_join(revision_screws_df)%>%
-              select(-object_constructed) 
+              select(-object_constructed)  %>%
+              distinct()
           }
         }
         
@@ -3391,6 +3398,12 @@ server <- function(input, output, session) {
       revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
       
     }
+    retained_df <- retained_df %>%
+      distinct()
+    removed_df <- removed_df %>%
+      distinct()
+    revision_implants_status_df <- revision_implants_status_df %>%
+      distinct()
     
     list(retained_df = retained_df,
          removed_df = removed_df, 
@@ -3519,6 +3532,12 @@ server <- function(input, output, session) {
       revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
       
     }
+    retained_df <- retained_df %>%
+      distinct()
+    removed_df <- removed_df %>%
+      distinct()
+    revision_implants_status_df <- revision_implants_status_df %>%
+      distinct()
     
     list(retained_df = retained_df,
          removed_df = removed_df, 
@@ -3533,10 +3552,12 @@ server <- function(input, output, session) {
   })
   
   output$anterior_revision_implants_table <- renderTable({
-    # anterior_plate_revision_implants_df_reactive() 
-    tibble(prior_plate_present_levels = input$prior_anterior_plate_levels) %>%
-      mutate(level = prior_plate_present_levels) %>%
-      mutate(prior_plate_status = if_else(level %in% input$prior_anterior_plate_removed_levels, "removed", "retained"))
+    anterior_plate_revision_implants_df_reactive() %>%
+      select(level, prior_plate_present_levels, prior_plate_status)
+    
+    # tibble(prior_plate_present_levels = input$prior_anterior_plate_levels) %>%
+    #   mutate(level = prior_plate_present_levels) %>%
+    #   mutate(prior_plate_status = if_else(level %in% input$prior_anterior_plate_removed_levels, "removed", "retained"))
    
   })
 
@@ -3662,24 +3683,37 @@ server <- function(input, output, session) {
   ######## ~~~~~~~~~~~ PRIOR Implants ---
   
   #### ANTERIOR ####
-  observeEvent(anterior_plate_revision_implants_df_reactive(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+  observeEvent(list(anterior_plate_revision_implants_df_reactive(), input$prior_anterior_plate_removed_levels, input$prior_anterior_plate_levels), ignoreInit = TRUE, ignoreNULL = TRUE, {
     # prior_plate_present_levels
     # prior_plate_status
-    if(nrow(anterior_plate_revision_implants_df_reactive())>0){
-      prior_plate_retained_df <- anterior_plate_revision_implants_df_reactive() %>%
-        filter(prior_plate_status == "retained")
-      
-      prior_plate_removed_df <- anterior_plate_revision_implants_df_reactive() %>%
-        filter(prior_plate_status == "removed")
     
-      if(nrow(prior_plate_removed_df) > 0){
-        geoms_list_revision_anterior$anterior_plate_removed <- geom_sf(data = st_multipolygon(prior_plate_removed_df$object_constructed), color = "grey65", fill = "grey99", alpha = 0.5)
+    
+    if(nrow(anterior_plate_revision_implants_df_reactive())>0){
+      if(any(anterior_plate_revision_implants_df_reactive()$prior_plate_status == "retained")){
+
+        geoms_list_revision_anterior$anterior_plate_retained <- geom_sf(data = st_multipolygon((anterior_plate_revision_implants_df_reactive() %>%
+                                                                                                  filter(prior_plate_status == "retained"))$object_constructed), color = "black", fill = "grey95", alpha = 0.9)
+      }else{
+        geoms_list_revision_anterior$anterior_plate_retained <- NULL
       }
       
-      if(nrow(prior_plate_retained_df) > 0){
-        geoms_list_revision_anterior$anterior_plate_retained <- geom_sf(data = st_multipolygon(prior_plate_retained_df$object_constructed), color = "black", fill = "grey65")
+      if(any(anterior_plate_revision_implants_df_reactive()$prior_plate_status == "removed")){
+        geoms_list_revision_anterior$anterior_plate_removed <- geom_sf(data = st_multipolygon((anterior_plate_revision_implants_df_reactive() %>%
+                                                                                                  filter(prior_plate_status == "removed"))$object_constructed), color = "grey80", fill = "grey65", alpha = 0.5)
+      }else{
+        geoms_list_revision_anterior$anterior_plate_removed <-NULL
       }
-
+      
+      # prior_plate_removed_df <- anterior_plate_revision_implants_df_reactive() %>%
+      #   filter(prior_plate_status == "removed")
+      # 
+      # if(nrow(prior_plate_removed_df) > 0){
+      #   geoms_list_revision_anterior$anterior_plate_removed <- geom_sf(data = st_multipolygon(prior_plate_removed_df$object_constructed), color = "grey65", fill = "grey99", alpha = 0.5)
+      # }
+      
+    }else{
+      geoms_list_revision_anterior$anterior_plate_retained <- NULL
+      geoms_list_revision_anterior$anterior_plate_removed <- NULL
       }
 
   })
@@ -5815,138 +5849,7 @@ server <- function(input, output, session) {
     }
     data_wide
   })
-  
-  # procedures_by_level_redcap_df_reactive <- reactive({
-  #   anterior_plate_removed_df <- tibble(category = character(),
-  #                                       approach = character(),
-  #                                       side = character()
-  #   )
-  #   implants_removed_df <- tibble(category = character(),
-  #                                 approach = character(),
-  #                                 side = character()
-  #   )
-  #   
-  #   if(input$revision_approach == "anterior"){
-  #     if(length(input$prior_anterior_plate_removed_levels)>0){
-  #      anterior_plate_removed_df <- tibble(level = input$prior_anterior_plate_removed_levels,
-  #                                     object = "anterior_plate_removal", 
-  #                                     category = "anterior_implant_removal",
-  #                                     approach = "anterior",
-  #                                     side = "central") %>%
-  #        group_by(level, category, side) %>%
-  #        mutate(repeat_count = row_number()) %>%
-  #        ungroup() %>%
-  #        pivot_wider(names_from = level, values_from = object) %>%
-  #        select(-repeat_count) %>%
-  #        clean_names() %>%
-  #        mutate(across(everything(), ~ replace_na(.x, " "))) %>%
-  #        mutate(redcap_repeat_instance = row_number()) %>%
-  #        mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-  #        mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-  #        select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything())
-  #      
-  #     }else{
-  #       anterior_plate_removed_df <- tibble(category = character(),
-  #                                           approach = character(),
-  #                                           side = character()
-  #                                           )
-  #     }
-  #     
-  #   }
-  #   if(input$revision_approach == "posterior"){
-  #     if(length(input$left_revision_implants_removed)>0){
-  #       left_implants_removed_df <- tibble(level = input$left_revision_implants_removed,
-  #                                          object = "implant_removal", 
-  #                                          category = "implant_removal",
-  #                                          approach = "posterior",
-  #                                          side = "left")
-  #     }else{
-  #       left_implants_removed_df <-tibble(category = character(),
-  #                                         approach = character(),
-  #                                         side = character()
-  #       )
-  #     }
-  #     
-  #     if(length(input$right_revision_implants_removed)>0){
-  #       right_implants_removed_df <- tibble(level = input$right_revision_implants_removed,
-  #                                           object = "implant_removal", 
-  #                                           category = "implant_removal",
-  #                                           approach = "posterior",
-  #                                           side = "right")
-  #     }else{
-  #       right_implants_removed_df <-tibble(category = character(),
-  #                                          approach = character(),
-  #                                          side = character()
-  #       )
-  #     }
-  #     
-  #     implants_removed_df <-  left_implants_removed_df %>%
-  #       union_all(right_implants_removed_df)
-  #     
-  #     if(nrow(implants_removed_df)>0){
-  #       implants_removed_df <- implants_removed_df %>%
-  #         group_by(level, category, side) %>%
-  #         mutate(repeat_count = row_number()) %>%
-  #         ungroup() %>%
-  #         pivot_wider(names_from = level, values_from = object) %>%
-  #         select(-repeat_count) %>%
-  #         clean_names() %>%
-  #         mutate(across(everything(), ~ replace_na(.x, " "))) %>%
-  #         mutate(redcap_repeat_instance = row_number()) %>%
-  #         mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-  #         mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-  #         select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything())
-  #     } 
-  #   }else{
-  #     implants_removed_df <- tibble(category = character(),
-  #                                   approach = character(),
-  #                                   side = character()
-  #     )
-  #   }
-  #   
-  #   if(nrow(all_objects_to_add_list$objects_df)>0){
-  #     fusion_df <- jh_fusion_category_function(fusion_vector = input$fusion_levels_confirmed, 
-  #                                              all_objects_df = all_objects_to_add_list$objects_df)%>%
-  #       mutate(side = "central")
-  #     
-  #     data_wide <- all_objects_to_add_list$objects_df %>%
-  #       select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
-  #       mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
-  #       unnest(proc_category) %>%
-  #       union_all(fusion_df) %>%
-  #       select(level, approach, category, object, side) %>%
-  #       group_by(level, category, side) %>%
-  #       mutate(repeat_count = row_number()) %>%
-  #       ungroup() %>%
-  #       pivot_wider(names_from = level, values_from = object) %>%
-  #       select(-repeat_count) %>%
-  #       clean_names() %>%
-  #       union_all(implants_removed_df)  %>%
-  #       union_all(anterior_plate_removed_df) %>%
-  #       # mutate(across(everything(), ~ replace_na(.x, " "))) %>%
-  #       mutate(redcap_repeat_instance = row_number()) %>%
-  #       mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-  #       mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-  #       select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) 
-  #   }else{
-  #     data_wide <- tibble(redcap_repeat_instrument = character(), 
-  #                         redcap_repeat_instance = integer(),
-  #                         dos_surg_repeating = character(),
-  #                         approach = character(),
-  #                         side = character()
-  #                         ) %>%
-  #       union_all(implants_removed_df) %>%
-  #       union_all(anterior_plate_removed_df) %>%
-  #       # mutate(across(everything(), ~ replace_na(.x, " "))) %>%
-  #       mutate(redcap_repeat_instance = row_number()) %>%
-  #       mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-  #       mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-  #       select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) 
-  #   }
-  # 
-  #   
-  #   data_wide
-  # })
+
   
   
   ################------------------  Screw Size RESULTS  ----------------------######################  
@@ -6102,6 +6005,14 @@ server <- function(input, output, session) {
   
   
   
+
+  
+  
+  ############### ############### NOW RENDER EACH OF THE TABLES FOR THE SIDE TABULAR VIEW:    ###############     ############### 
+  ############### ############### NOW RENDER EACH OF THE TABLES FOR THE SIDE TABULAR VIEW:    ###############     ############### 
+  ############### ############### NOW RENDER EACH OF THE TABLES FOR THE SIDE TABULAR VIEW:    ###############     ############### 
+  
+  ########################
   #################  ALL OBJECTS TABLE ##################
   output$all_objects_table <- renderTable({
     
@@ -6115,14 +6026,6 @@ server <- function(input, output, session) {
     
   })
   
-  
-  
-  
-  ############### ############### NOW RENDER EACH OF THE TABLES FOR THE SIDE TABULAR VIEW:    ###############     ############### 
-  ############### ############### NOW RENDER EACH OF THE TABLES FOR THE SIDE TABULAR VIEW:    ###############     ############### 
-  ############### ############### NOW RENDER EACH OF THE TABLES FOR THE SIDE TABULAR VIEW:    ###############     ############### 
-  
-  ########################
   
   ######## Render "Patient Details Table for side tab:"    ######## 
   # output$patient_details_redcap_df_sidetab <- renderTable({
@@ -6380,6 +6283,14 @@ server <- function(input, output, session) {
             all_inputs_repeating_instance_add <- 0
           }
           
+          if("posterior_implant_removal" %in% max_repeat_instances_df$redcap_repeat_instrument){
+            posterior_implant_removal_instance_add <- repeat_list$posterior_implant_removal
+          }else{
+            posterior_implant_removal_instance_add <- 0
+          }
+          
+          
+          
           surgical_details_instance_start <- repeat_list$surgical_details + 1
           max_procedures_by_level_repeating <- repeat_list$procedures_by_level_repeating
           max_screw_details_repeating <- repeat_list$screw_details_repeating
@@ -6391,6 +6302,7 @@ server <- function(input, output, session) {
           screw_details_repeating_instance_add <- 0
           interbody_implant_repeating_instance_add <- 0
           all_inputs_repeating_instance_add <- 0
+          posterior_implant_removal_instance_add <- 0
         }
       }else{
         record_number <- exportNextRecordName(rcon = rcon_reactive$rcon)
@@ -6399,12 +6311,13 @@ server <- function(input, output, session) {
         screw_details_repeating_instance_add <- 0
         interbody_implant_repeating_instance_add <- 0
         all_inputs_repeating_instance_add <- 0
+        posterior_implant_removal_instance_add <- 0
       }
       
       ##### uploaded patient details #######
       
       withProgress(message = 'Uploading Data', value = 0, {
-        number_of_steps <- 8
+        number_of_steps <- 9
         
         incProgress(1/number_of_steps, detail = paste("Uploading Patient Details"))
         
@@ -6513,7 +6426,49 @@ server <- function(input, output, session) {
           importRecords(rcon = rcon_reactive$rcon, data = all_inputs_repeating_df, returnContent = "count")
         }
         
-        incProgress(1/number_of_steps, detail = paste("Complete"))
+        
+        if(nrow(left_revision_implants_reactive_list()$revision_implants_status_df %>%
+                union_all(right_revision_implants_reactive_list()$revision_implants_status_df))>0){
+          
+          incProgress(1/number_of_steps, detail = paste("Complete"))
+          
+          posterior_revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
+            union_all(right_revision_implants_reactive_list()$revision_implants_status_df) %>%
+            select(level, side, object, remove_retain) %>%
+            filter(remove_retain == "remove") %>%
+            mutate(implant_status = paste0(object, "_removed")) %>%
+            select(level, side, implant_status) %>%
+            mutate(level = paste0(level, "_removal")) %>%
+            pivot_wider(names_from = level, values_from = implant_status) %>%
+            mutate(across(everything(), .fns =  ~ replace_na(.x, replace = " "))) %>%
+            clean_names() %>%
+            mutate(record_id = record_number) %>%
+            mutate(redcap_repeat_instance = row_number() + posterior_implant_removal_instance_add) %>%
+            mutate(redcap_event_name = "surgery_arm_1") %>%
+            mutate(redcap_repeat_instrument = "posterior_implant_removal") %>%
+            mutate(dos_surg_repeating_removal = as.character(input$date_of_surgery)) %>%
+            mutate(category_removal = "implant_removal") %>%
+            mutate(posterior_implant_removal_complete = "Complete") %>%
+            rename(side_removal = side) %>%
+            select(record_id,
+                   redcap_repeat_instance,
+                   redcap_event_name,
+                   redcap_repeat_instrument,
+                   dos_surg_repeating_removal,
+                   category_removal,
+                   side_removal,
+                   everything())
+          
+          
+          importRecords(rcon = rcon, data = posterior_revision_implants_df, returnContent = "count") 
+          
+          incProgress(1/number_of_steps, detail = paste("Complete"))
+          
+        }else{
+          
+          incProgress(1/number_of_steps, detail = paste("Complete"))
+          
+        }
         
       })
       
