@@ -4,6 +4,7 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'vertebral_cement_augmentation', 'Vertebral body augmentation', 'combine',
                                         'laminar_downgoing_hook', 'Posterior spinal instrumentation', 'combine',
                                         'laminar_upgoing_hook', 'Posterior spinal instrumentation', 'combine',
+                                        'c1_lateral_mass_screw', 'Posterior spinal instrumentation', 'combine',
                                         'lateral_mass_screw', 'Posterior spinal instrumentation', 'combine',
                                         'occipital_screw', 'Occiput instrumentation', 'combine',
                                         'pars_screw', 'Posterior spinal instrumentation', 'combine',
@@ -1565,6 +1566,7 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
   if(length(revision_decompression_vector) > 0){
     if(nrow(objects_added_df)>0){
       df_for_paragraphs <- objects_added_df %>%
+        # mutate(object = if_else(level == "C1", paste0("c1_", object), object)) %>%
         mutate(revision_levels_vector = list(revision_decompression_vector)) %>%
         select(level, vertebral_number, approach, category, object, side, revision_levels_vector, implant_statement, screw_size_type) %>%
         mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
@@ -1590,6 +1592,7 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
         select(-data)  
     }else{
       df_for_paragraphs <- objects_added_df %>%
+        # mutate(object = if_else(level == "C1", paste0("c1_", object), object)) %>%
         mutate(procedure_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
         unnest(procedure_category) %>%
         mutate(procedure_category = str_to_lower(procedure_category)) %>%
@@ -1947,6 +1950,7 @@ op_note_technique_combine_statement <- function(object,
     object == "laminar_downgoing_hook" ~ glue("For downgoing laminar hooks, the ligamentum flavum was removed at the site of the hook insertion. A hook was then inserted securely under the lamina {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
     object == "laminar_upgoing_hook" ~ glue("For upgoing laminar hooks, the inferior edge of the cranial lamina was identified and the plane between the lamina and ligamentum was developed and the upgoing hook is then placed within this plane, secured to the lamina aimed cranially {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
     object == "tp_hook" ~ glue("For transverse process hooks, the cranial edge of the transverse process was identified. A transverse process finder was used to develop the plane and a transverse process hook was placed securely into position along the superior edge of the transverse process. A transverse process hook was placed {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),  
+    object == "c1_lateral_mass_screw" ~ glue("For C1 lateral mass screw placement, the posterior C1 arch was first identified and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered. At this point, to allow full exposure of the C1-C2 joint and to safely place the C1 screw, a C2 nerve root rhizotomy/neurotomy was performed medial to the dorsal root ganglia. After. This allowed full exposure of the C1 lateral mass. The medial and lateral edges were identified, and then a burr was used to create a start point in the center of the lateral mass. The path was then drilled incrementally to the anterior cortex. Xray was used to confirm the drill was just up to the posterior cortex of the C1 tubercle on the lateral xray, and the path was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
     object == "lateral_mass_screw" ~ glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a burr and the screw path drilled incrementally to the far cortex and the dorsal cortex was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
     object == "occipital_screw" ~ glue("An appropriately sized occipital plate was selected and was placed centered in the midline and just caudal to the external occipital protuberance, but cranial to the foramen magnum. The plate was held in place to identify the appropriate start points for the occipital screws. The occipital screws were drilled incrementally until the anterior cortex was penetrated. The length of the path was measured to acheive bicortical fixation. The screw paths were then tapped and the screws placed, securing the plate to the occiput."), 
     object == "pars_screw" ~ glue("For pars screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. {start_point_identification_text} Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming as dorsal as possible while not perforating the dorsal cortex of the pars. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 

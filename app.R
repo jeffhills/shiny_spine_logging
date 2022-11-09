@@ -4438,7 +4438,8 @@ server <- function(input, output, session) {
     ######
     posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
       filter(approach == "posterior")  %>%
-      select(-object_constructed)
+      select(-object_constructed) %>%
+      mutate(object = if_else(level == "C1" & object == "lateral_mass_screw", "c1_lateral_mass_screw", object))
     
     if(nrow(interbody_details_df_reactive()) > 0){
       posterior_approach_objects_df <- posterior_approach_objects_df %>%
