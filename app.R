@@ -6435,8 +6435,8 @@ server <- function(input, output, session) {
           posterior_revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
             union_all(right_revision_implants_reactive_list()$revision_implants_status_df) %>%
             select(level, side, object, remove_retain) %>%
-            filter(remove_retain == "remove") %>%
-            mutate(implant_status = paste0(object, "_removed")) %>%
+            # filter(remove_retain == "remove") %>%
+            mutate(implant_status = paste0(object, "_", remove_retain)) %>%
             select(level, side, implant_status) %>%
             mutate(level = paste0(level, "_removal")) %>%
             pivot_wider(names_from = level, values_from = implant_status) %>%
