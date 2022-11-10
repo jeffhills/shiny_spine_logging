@@ -545,15 +545,6 @@ all_points_all_implants_constructed_df <- implants_constructed_df %>%
   union_all(all_interbody_df) %>%
   select(level, vertebral_number, everything())
 
-# revision_implants_df <- all_points_all_implants_constructed_df %>%
-#   filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw") %>%
-#   filter(approach == "posterior") %>%
-#   arrange(vertebral_number) %>%
-#   distinct() %>%
-#   group_by(level, object, side) %>%
-#   filter(y == max(y)) %>%
-#   ungroup() %>%
-#   select(-ends_with("_x"), -ends_with("_y"))
  
 all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
   select(-ends_with("_x"), -ends_with("_y")) %>%

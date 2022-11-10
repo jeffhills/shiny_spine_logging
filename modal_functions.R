@@ -631,7 +631,7 @@ lateral_mass_screws_after_decompression_modal_function <- function(implant_objec
 ################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 ################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 ################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
-################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
+###############################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 
 confirm_fusion_levels_and_technique_details_modal_box_function <- function(screws_selected_df_reactive = tibble(),
                                                                            fusion_levels_confirmed = c(),
@@ -642,162 +642,335 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(screw
                                                                            implant_start_point_method = "Implant start points were identified using anatomic landmarks.",
                                                                            implant_position_confirmation_method = "Intraoperative fluoroscopy was used to confirm position of all implants.",
                                                                            alignment_correction_method = "NA", 
-                                                                           instruments_used_for_bony_work = "High-speed burr only"){
+                                                                           instruments_used_for_bony_work = "High-speed burr only", 
+                                                                           row_label_font_size = 16, 
+                                                                           question_label_column_width = 25, 
+                                                                           question_text_align = "right"){
   
   modalDialog(title = "Confirm Surgical Details:", 
-              easyClose = FALSE, 
-              # easyClose = TRUE,
-              # footer = modalButton(label = "Confirmed"), 
+              size = "l",
+              easyClose = FALSE,
               footer = actionButton(inputId = "fusion_levels_technique_details_modal_complete_button", label = "Confirmed"),
-              box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
+              box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
                   conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
-                                   fluidRow(
-                                     prettyRadioButtons(
-                                       inputId = "approach_specified_posterior",
-                                       label = "Posterior approach was:", 
-                                       inline = TRUE,
-                                       choices = c("Midline",
-                                                   "Paraspinal (Wiltse)", 
-                                                   "Stab"),
-                                       icon = icon("check"), 
-                                       selected =  approach_specified_posterior,
-                                       bigger = TRUE,
-                                       status = "info"
-                                     )
+                                   jh_make_shiny_table_row_function(
+                                     left_column_label = "Posterior approach was:",
+                                     input_type = "prettyRadioButtons",
+                                     text_align = question_text_align,
+                                     input_id = "approach_specified_posterior",
+                                     left_column_percent_width = question_label_column_width,
+                                     font_size = row_label_font_size,
+                                     checkboxes_inline = TRUE,
+                                     choices_vector = c("Midline",
+                                                                  "Paraspinal (Wiltse)", 
+                                                                  "Stab"),
+                                     initial_value_selected = approach_specified_posterior
                                    ),
-                                   fluidRow(
-                                     prettyRadioButtons(
-                                       inputId = "approach_open_mis",
-                                       label = "The procedure was performed:", 
-                                       inline = TRUE,
-                                       choices = c("Open",
-                                                   "Tubular", 
-                                                   "Endoscopic", 
-                                                   "Mini Open",
-                                                   "Percutaneous Screw"
-                                       ),
-                                       selected = approach_open_mis,
-                                       icon = icon("check"), 
-                                       bigger = TRUE,
-                                       status = "success"
-                                     )
+                                   hr(),
+                                   jh_make_shiny_table_row_function(
+                                     left_column_label = "The procedure was performed:",
+                                     input_type = "prettyRadioButtons",
+                                     text_align = question_text_align,
+                                     input_id = "approach_open_mis",
+                                     left_column_percent_width = question_label_column_width,
+                                     font_size = row_label_font_size,
+                                     checkboxes_inline = TRUE,
+                                     choices_vector = c("Open",
+                                                        "Tubular", 
+                                                        "Endoscopic", 
+                                                        "Mini Open",
+                                                        "Percutaneous Screw"
+                                     ),
+                                     initial_value_selected = approach_open_mis
                                    ),
-                                   fluidRow(
-                                     prettyCheckboxGroup(
-                                       inputId = "approach_robot_navigation",
-                                       label = "Select any modality used:", 
-                                       inline = TRUE,
-                                       choices = c("Microscopic",
-                                                   "Fluoroscopy-guided",
-                                                   "Navigated", 
-                                                   "Robotic", 
-                                                   "NA"),
-                                       icon = icon("check"),
-                                       selected = approach_robot_navigation, 
-                                       bigger = TRUE,
-                                       status = "success"
-                                     )
+                                   hr(),
+                                   jh_make_shiny_table_row_function(
+                                     left_column_label = "Select any modality used:",
+                                     input_type = "prettyCheckboxGroup",
+                                     text_align = question_text_align,
+                                     input_id = "approach_robot_navigation",
+                                     left_column_percent_width = question_label_column_width,
+                                     font_size = row_label_font_size,
+                                     checkboxes_inline = TRUE,
+                                     choices_vector = c("Microscopic",
+                                                        "Fluoroscopy-guided",
+                                                        "Navigated", 
+                                                        "Robotic", 
+                                                        "NA"),
+                                     initial_value_selected = approach_robot_navigation
                                    )
                   ),
+                  hr(),
                   conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
-                                   prettyRadioButtons(
-                                     inputId = "approach_specified_anterior",
-                                     label = "Approach was:",
-                                     inline = TRUE,
-                                     choices = c("Left-sided", 
-                                                 "Right-sided",
-                                                 "Paramedian",
-                                                 "Lateral Transpsoas",
-                                                 "Lateral Antepsoas",
-                                                 "Thoracoabdominal",
-                                                 "Thoracotomy",
-                                                 "Transperitoneal",
-                                                 "Retroperitoneal"),
-                                     selected = approach_specified_anterior,
-                                     icon = icon("check"),
-                                     bigger = TRUE,
-                                     status = "info"
+                                   jh_make_shiny_table_row_function(
+                                     left_column_label = "Approach was:",
+                                     input_type = "prettyRadioButtons",
+                                     text_align = question_text_align,
+                                     input_id = "approach_specified_anterior",
+                                     left_column_percent_width = question_label_column_width,
+                                     font_size = row_label_font_size,
+                                     checkboxes_inline = TRUE,
+                                     choices_vector = c("Left-sided", 
+                                                        "Right-sided",
+                                                        "Paramedian",
+                                                        "Lateral Transpsoas",
+                                                        "Lateral Antepsoas",
+                                                        "Thoracoabdominal",
+                                                        "Thoracotomy",
+                                                        "Transperitoneal",
+                                                        "Retroperitoneal"),
+                                     initial_value_selected = approach_specified_anterior
                                    )
                   ),
+                  hr(),
                   if(nrow(screws_selected_df_reactive)>0){
-                    fluidRow(
-                      awesomeRadio(
-                        inputId = "implant_start_point_method",
-                        label = "Method for identifying screw start point:",
-                        choices = c(
-                          "Implant start points were identified using anatomic landmarks.",
-                          "Intraoperative fluoroscopy and pedicle markers were used to confirm start points for screw placement.", 
-                          "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
-                          "Intraoperative navigation was used for identifying start points.",
-                          "NA"),
-                        selected = implant_start_point_method, 
-                        inline = FALSE, 
-                        status = "success"
+                    jh_make_shiny_table_row_function(
+                      input_type = "awesomeRadio",
+                      left_column_label = "Method for identifying screw start point:",
+                      text_align = question_text_align,
+                      input_id = "implant_start_point_method",
+                      left_column_percent_width = question_label_column_width,
+                      font_size = row_label_font_size,
+                      checkboxes_inline = FALSE,
+                      choices_vector = c(
+                        "Implant start points were identified using anatomic landmarks.",
+                        "Intraoperative fluoroscopy and pedicle markers were used to confirm screw start points..", 
+                        "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
+                        "Intraoperative navigation was used for identifying start points.",
+                        "NA"),
+                      initial_value_selected = implant_start_point_method
                       )
+                  },
+                  hr(),
+                  if(nrow(screws_selected_df_reactive)>0){
+                    jh_make_shiny_table_row_function(
+                      input_type = "awesomeRadio",
+                      left_column_label = "Method for confirming implant position:",
+                      text_align = question_text_align,
+                      input_id = "implant_position_confirmation_method",
+                      left_column_percent_width = question_label_column_width,
+                      font_size = row_label_font_size,
+                      checkboxes_inline = FALSE,
+                      choices_vector = c(
+                        "Intraoperative fluoroscopy was used to confirm position of all implants.", 
+                        "Intraoperative CT scan was used to confirm position of all implants.",
+                        "NA"),
+                      initial_value_selected = implant_position_confirmation_method
                     )
                   },
+                  hr(),
                   if(nrow(screws_selected_df_reactive)>0){
-                    fluidRow(
-                      awesomeRadio(
-                        inputId = "implant_position_confirmation_method",
-                        label = "Method for confirming implant position:",
-                        choices = c(
-                          "Intraoperative fluoroscopy was used to confirm position of all implants.", 
-                          "Intraoperative CT scan was used to confirm position of all implants.",
-                          "NA"), 
-                        selected = implant_position_confirmation_method,
-                        inline = FALSE, 
-                        status = "success"
-                      )
+                    jh_make_shiny_table_row_function(
+                      input_type = "awesomeRadio",
+                      left_column_label = "Method for any alignment correction:",
+                      text_align = question_text_align,
+                      input_id = "alignment_correction_method",
+                      left_column_percent_width = question_label_column_width,
+                      font_size = row_label_font_size,
+                      checkboxes_inline = FALSE,
+                      choices_vector = c(
+                        "The Pro-axis bed was bent to achieve the desired sagittal plane alignment", 
+                        "In situ rod benders were used to correct the coronal and sagittal plane",
+                        "NA"),
+                      initial_value_selected = alignment_correction_method
                     )
                   },
-                  if(nrow(screws_selected_df_reactive)>0){
-                    fluidRow(
-                      awesomeRadio(
-                        inputId = "alignment_correction_method",
-                        label = "Method for any alignment correction:",
-                        choices = c(
-                          "The Pro-axis bed was bent to achieve the desired sagittal plane alignment", 
-                          "In situ rod benders were used to correct the coronal and sagittal plane",
-                          "NA"), 
-                        selected = alignment_correction_method,
-                        inline = FALSE, 
-                        status = "success"
-                      )
-                    )
-                  },
-                  fluidRow(
-                    prettyCheckboxGroup(
-                      inputId = "instruments_used_for_bony_work",
-                      label = "Select any instruments used:", 
-                      inline = TRUE,
-                      choices = c("High-speed burr only",
-                                  "Bone scalpel only",
-                                  "High-speed burr and bone scalpel",
-                                  "NA"),
-                      icon = icon("check"),
-                      selected = instruments_used_for_bony_work, 
-                      bigger = TRUE,
-                      status = "success"
-                    )
+                  hr(),
+                  jh_make_shiny_table_row_function(
+                    input_type = "prettyCheckboxGroup",
+                    left_column_label = "Select any instruments used:",
+                    text_align = question_text_align,
+                    input_id = "instruments_used_for_bony_work",
+                    left_column_percent_width = question_label_column_width,
+                    font_size = row_label_font_size,
+                    checkboxes_inline = TRUE,  
+                    status_color = "info",
+                    choices_vector = c("High-speed burr only",
+                                       "Bone scalpel only",
+                                       "High-speed burr and bone scalpel",
+                                       "NA"),
+                    initial_value_selected = instruments_used_for_bony_work
                   ),
-                  # if(length(fusion_levels_confirmed)>0){
-                  fluidRow(
-                    prettyCheckboxGroup(
-                      inputId = "fusion_levels_confirmed",
-                      label = "Please Confirm The Fusion Levels:", 
-                      bigger = TRUE,
-                      choices = interbody_levels_df$level, 
-                      selected = fusion_levels_confirmed,
-                      icon = icon("check"), 
-                      status = "success"
-                    ) 
+                  hr(),
+                  jh_make_shiny_table_row_function(
+                    input_type = "prettyCheckboxGroup",
+                    left_column_label = "Please Confirm the Fusion Levels:",
+                    text_align = question_text_align,
+                    input_id = "fusion_levels_confirmed",
+                    left_column_percent_width = question_label_column_width,
+                    font_size = row_label_font_size,
+                    checkboxes_inline = FALSE,
+                    choices_vector = interbody_levels_df$level,
+                    initial_value_selected = interbody_levels_df$level,
+                    status_color = "success",
                   )
-                  # }
               )
   )
-  
 }
+# confirm_fusion_levels_and_technique_details_modal_box_function <- function(screws_selected_df_reactive = tibble(),
+#                                                                            fusion_levels_confirmed = c(),
+#                                                                            approach_specified_posterior = "Midline",
+#                                                                            approach_open_mis = "Open",
+#                                                                            approach_robot_navigation = "NA",
+#                                                                            approach_specified_anterior = "Left-sided",
+#                                                                            implant_start_point_method = "Implant start points were identified using anatomic landmarks.",
+#                                                                            implant_position_confirmation_method = "Intraoperative fluoroscopy was used to confirm position of all implants.",
+#                                                                            alignment_correction_method = "NA", 
+#                                                                            instruments_used_for_bony_work = "High-speed burr only"){
+#   
+#   modalDialog(title = "Confirm Surgical Details:", 
+#               size = "l",
+#               easyClose = FALSE,
+#               footer = actionButton(inputId = "fusion_levels_technique_details_modal_complete_button", label = "Confirmed"),
+#               box(width = 12, title = div(style = "font-size:16px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
+#                   conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
+#                                    fluidRow(
+#                                      prettyRadioButtons(
+#                                        inputId = "approach_specified_posterior",
+#                                        label = "Posterior approach was:", 
+#                                        inline = TRUE,
+#                                        choices = c("Midline",
+#                                                    "Paraspinal (Wiltse)", 
+#                                                    "Stab"),
+#                                        icon = icon("check"), 
+#                                        selected =  approach_specified_posterior,
+#                                        bigger = TRUE,
+#                                        status = "info"
+#                                      )
+#                                    ),
+#                                    fluidRow(
+#                                      prettyRadioButtons(
+#                                        inputId = "approach_open_mis",
+#                                        label = "The procedure was performed:", 
+#                                        inline = TRUE,
+#                                        choices = c("Open",
+#                                                    "Tubular", 
+#                                                    "Endoscopic", 
+#                                                    "Mini Open",
+#                                                    "Percutaneous Screw"
+#                                        ),
+#                                        selected = approach_open_mis,
+#                                        icon = icon("check"), 
+#                                        bigger = TRUE,
+#                                        status = "success"
+#                                      )
+#                                    ),
+#                                    fluidRow(
+#                                      prettyCheckboxGroup(
+#                                        inputId = "approach_robot_navigation",
+#                                        label = "Select any modality used:", 
+#                                        inline = TRUE,
+#                                        choices = c("Microscopic",
+#                                                    "Fluoroscopy-guided",
+#                                                    "Navigated", 
+#                                                    "Robotic", 
+#                                                    "NA"),
+#                                        icon = icon("check"),
+#                                        selected = approach_robot_navigation, 
+#                                        bigger = TRUE,
+#                                        status = "success"
+#                                      )
+#                                    )
+#                   ),
+#                   conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
+#                                    prettyRadioButtons(
+#                                      inputId = "approach_specified_anterior",
+#                                      label = "Approach was:",
+#                                      inline = TRUE,
+#                                      choices = c("Left-sided", 
+#                                                  "Right-sided",
+#                                                  "Paramedian",
+#                                                  "Lateral Transpsoas",
+#                                                  "Lateral Antepsoas",
+#                                                  "Thoracoabdominal",
+#                                                  "Thoracotomy",
+#                                                  "Transperitoneal",
+#                                                  "Retroperitoneal"),
+#                                      selected = approach_specified_anterior,
+#                                      icon = icon("check"),
+#                                      bigger = TRUE,
+#                                      status = "info"
+#                                    )
+#                   ),
+#                   if(nrow(screws_selected_df_reactive)>0){
+#                     fluidRow(
+#                       awesomeRadio(
+#                         inputId = "implant_start_point_method",
+#                         label = "Method for identifying screw start point:",
+#                         choices = c(
+#                           "Implant start points were identified using anatomic landmarks.",
+#                           "Intraoperative fluoroscopy and pedicle markers were used to confirm start points for screw placement.", 
+#                           "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
+#                           "Intraoperative navigation was used for identifying start points.",
+#                           "NA"),
+#                         selected = implant_start_point_method, 
+#                         inline = FALSE, 
+#                         status = "success"
+#                       )
+#                     )
+#                   },
+#                   if(nrow(screws_selected_df_reactive)>0){
+#                     fluidRow(
+#                       awesomeRadio(
+#                         inputId = "implant_position_confirmation_method",
+#                         label = "Method for confirming implant position:",
+#                         choices = c(
+#                           "Intraoperative fluoroscopy was used to confirm position of all implants.", 
+#                           "Intraoperative CT scan was used to confirm position of all implants.",
+#                           "NA"), 
+#                         selected = implant_position_confirmation_method,
+#                         inline = FALSE, 
+#                         status = "success"
+#                       )
+#                     )
+#                   },
+#                   if(nrow(screws_selected_df_reactive)>0){
+#                     fluidRow(
+#                       awesomeRadio(
+#                         inputId = "alignment_correction_method",
+#                         label = "Method for any alignment correction:",
+#                         choices = c(
+#                           "The Pro-axis bed was bent to achieve the desired sagittal plane alignment", 
+#                           "In situ rod benders were used to correct the coronal and sagittal plane",
+#                           "NA"), 
+#                         selected = alignment_correction_method,
+#                         inline = FALSE, 
+#                         status = "success"
+#                       )
+#                     )
+#                   },
+#                   fluidRow(
+#                     prettyCheckboxGroup(
+#                       inputId = "instruments_used_for_bony_work",
+#                       label = "Select any instruments used:", 
+#                       inline = TRUE,
+#                       choices = c("High-speed burr only",
+#                                   "Bone scalpel only",
+#                                   "High-speed burr and bone scalpel",
+#                                   "NA"),
+#                       icon = icon("check"),
+#                       selected = instruments_used_for_bony_work, 
+#                       bigger = TRUE,
+#                       status = "success"
+#                     )
+#                   ),
+#                   # if(length(fusion_levels_confirmed)>0){
+#                   fluidRow(
+#                     prettyCheckboxGroup(
+#                       inputId = "fusion_levels_confirmed",
+#                       label = "Please Confirm The Fusion Levels:", 
+#                       bigger = TRUE,
+#                       choices = interbody_levels_df$level, 
+#                       selected = fusion_levels_confirmed,
+#                       icon = icon("check"), 
+#                       status = "success"
+#                     ) 
+#                   )
+#                   # }
+#               )
+#   )
+#   
+# }
 
 
 ###################~~~~~~~~~~~~~~~~#############################    SURGICAL DETAILS MODAL  ##########~~~~~~~~~~~~~############################
@@ -811,6 +984,7 @@ addition_surgical_details_modal_box_function <-
   function(required_options_missing = FALSE,
            editing_the_details = FALSE,
            row_label_font_size = 16,
+           left_column_percent_width = 25,
            fade_appearance = TRUE,
            primary_surgeon_first_name_input = "",
            primary_surgeon_last_name_input = "",
@@ -865,13 +1039,13 @@ addition_surgical_details_modal_box_function <-
         },
         tags$table(width = "100%",
                    tags$tr(width = "100%",
-                           tags$td(width = paste0(30, "%"), tags$div(style = "font-size:16px; font-weight:bold; text-align:left; margin-top:auto; margin-bottom:auto", "Primary Surgeon:")),
-                           tags$td(width = paste0(70/2, "%"), textInput(inputId = "primary_surgeon_first_name", label = NULL, value = primary_surgeon_first_name_input, placeholder = "First Name", width = "80%")),
-                           tags$td(width = paste0(70/2, "%"), textInput(inputId = "primary_surgeon_last_name", label = NULL, value = primary_surgeon_last_name_input, placeholder = "Last Name", width = "80%"))
+                           tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = "font-size:16px; font-weight:bold; text-align:left; margin-top:auto; margin-bottom:auto", "Primary Surgeon:")),
+                           tags$td(width = paste0(left_column_percent_width/3, "%"), textInput(inputId = "primary_surgeon_first_name", label = NULL, value = primary_surgeon_first_name_input, placeholder = "First Name", width = "80%")),
+                           tags$td(width = paste0(left_column_percent_width/3, "%"), textInput(inputId = "primary_surgeon_last_name", label = NULL, value = primary_surgeon_last_name_input, placeholder = "Last Name", width = "80%"))
                    ) 
         ),
         jh_make_shiny_table_row_function(
-          left_column_percent_width = 30,
+          left_column_percent_width = left_column_percent_width,
           left_column_label = "Assistants:",
           font_size = row_label_font_size,
           input_type = "text",
@@ -879,7 +1053,7 @@ addition_surgical_details_modal_box_function <-
           initial_value_selected = surgical_assistants
         ),
         jh_make_shiny_table_row_function(
-          left_column_percent_width = 30,
+          left_column_percent_width = left_column_percent_width,
           left_column_label = "Preoperative Diagnosis:",
           font_size = row_label_font_size,
           input_type = "text",
@@ -887,7 +1061,7 @@ addition_surgical_details_modal_box_function <-
           initial_value_selected = preoperative_diagnosis
         ),
         jh_make_shiny_table_row_function(
-          left_column_percent_width = 30,
+          left_column_percent_width = left_column_percent_width,
           left_column_label = "Postoperative Diagnosis:",
           font_size = row_label_font_size,
           input_type = "text",
@@ -895,7 +1069,7 @@ addition_surgical_details_modal_box_function <-
           initial_value_selected = postoperative_diagnosis
         ),
         jh_make_shiny_table_row_function(
-          left_column_percent_width = 30,
+          left_column_percent_width = left_column_percent_width,
           left_column_label = "Surgical Indications:",
           font_size = row_label_font_size,
           input_type = "textAreaInput",
@@ -904,8 +1078,8 @@ addition_surgical_details_modal_box_function <-
         ),
         hr(),
         jh_make_shiny_table_row_function(
-          left_column_percent_width = 30,
-          left_column_label = "Preprocedure ASA Classification",
+          left_column_percent_width = left_column_percent_width,
+          left_column_label = "Preprocedure ASA Classification:",
           font_size = row_label_font_size,
           input_type = "awesomeRadio",
           choices_vector = c("ASA I", "ASA II", "ASA III", "ASA IV", "ASA V", "ASA VI", "Emergent Surgery"),
@@ -914,7 +1088,7 @@ addition_surgical_details_modal_box_function <-
           initial_value_selected = asa_class
         ),
         jh_make_shiny_table_row_function(
-          left_column_percent_width = 30,
+          left_column_percent_width = left_column_percent_width,
           left_column_label = "Anesthesia Type:",
           font_size = row_label_font_size,
           input_type = "checkbox",
@@ -930,7 +1104,7 @@ addition_surgical_details_modal_box_function <-
         ),
         hr(),
         jh_make_shiny_table_row_function(
-          left_column_percent_width = 30,
+          left_column_percent_width = left_column_percent_width,
           left_column_label = "Local Anesthesia:",
           font_size = row_label_font_size,
           input_type = "awesomeRadio",
@@ -946,7 +1120,7 @@ addition_surgical_details_modal_box_function <-
         ),
         hr(),
         jh_make_shiny_table_row_function(
-          left_column_percent_width = 30,
+          left_column_percent_width = left_column_percent_width,
           left_column_label = "Neuromonitoring used:",
           font_size = row_label_font_size,
           input_type = "checkbox",
@@ -958,7 +1132,7 @@ addition_surgical_details_modal_box_function <-
         br(),
         conditionalPanel(condition = "input.neuromonitoring.indexOf('EMG') > -1",
                          jh_make_shiny_table_row_function(
-                           left_column_percent_width = 30,
+                           left_column_percent_width = left_column_percent_width,
                            left_column_label = "Did you test screws with triggered EMG?",
                            font_size = row_label_font_size,
                            input_type = "awesomeRadio",
@@ -973,7 +1147,7 @@ addition_surgical_details_modal_box_function <-
         br(),
         conditionalPanel(condition = "input.neuromonitoring.indexOf('tcMEP') > -1",
                          jh_make_shiny_table_row_function(
-                           left_column_percent_width = 30,
+                           left_column_percent_width = left_column_percent_width,
                            left_column_label = "Pre-positioning motor signals:",
                            font_size = row_label_font_size,
                            input_type = "awesomeRadio",
@@ -992,7 +1166,7 @@ addition_surgical_details_modal_box_function <-
         br(),
         conditionalPanel(condition = "input.neuromonitoring.indexOf('SSEP') > -1",
                          jh_make_shiny_table_row_function(
-                           left_column_percent_width = 30,
+                           left_column_percent_width = left_column_percent_width,
                            left_column_label = "During the case:",
                            font_size = row_label_font_size,
                            input_type = "awesomeRadio",
@@ -1011,7 +1185,7 @@ addition_surgical_details_modal_box_function <-
           left_column_label = "Preop Antibiotics:",
           input_type = "checkbox",
           input_id = "preop_antibiotics",
-          left_column_percent_width = 30,
+          left_column_percent_width = left_column_percent_width,
           font_size = row_label_font_size,
           choices_vector = c(
             "None (Antibiotics were held)",
@@ -1032,7 +1206,7 @@ addition_surgical_details_modal_box_function <-
           left_column_label = "Antifibrinolytic:",
           input_type = "checkbox",
           input_id = "anti_fibrinolytic",
-          left_column_percent_width = 30,
+          left_column_percent_width = left_column_percent_width,
           font_size = row_label_font_size,
           choices_vector = c(
             "None",
@@ -1077,7 +1251,7 @@ addition_surgical_details_modal_box_function <-
           left_column_label = "Microscope",
           input_type = "checkbox",
           input_id = "anterior_cervical_approach_details_checkbox",
-          left_column_percent_width = 30,
+          left_column_percent_width = left_column_percent_width,
           font_size = row_label_font_size,
           choices_vector = c(
             "Microscope was utilized",
@@ -1363,7 +1537,8 @@ addition_surgical_details_modal_box_2_function <-
                                          font_size = row_label_font_size, 
                                          input_type = "radioGroupButtons",
                                          input_id = "intraoperative_complications_yes_no", 
-                                         initial_value_selected = intraoperative_complications_yes_no,  justified_radio_buttons = TRUE, 
+                                         initial_value_selected = intraoperative_complications_yes_no,  
+                                         justified_radio_buttons = TRUE, 
                                          choices_vector = c("No", "Yes"), 
                                          status_color = "danger",
                                          # justified_radio_buttons = TRUE, 

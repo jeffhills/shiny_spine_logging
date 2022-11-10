@@ -637,6 +637,8 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
   
   label_style <- glue("font-size:{paste(font_size)}px; font-weight:bold; text-align:{text_align}; margin-top:{top_margin}; margin-bottom:{bottom_margin}")
   
+  middle_column_spacer <- tags$td(width = "5%", tags$div(style = label_style, "   "))
+  
   if(required_option == TRUE){
     left_column_percent_width <- left_column_percent_width - 3
     required_label_style <- glue("font-size:{paste(font_size)}px; color:red; font-weight:bold; text-align:{text_align}; margin-top:{top_margin}; margin-bottom:{bottom_margin}")
@@ -701,6 +703,7 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                      tags$td(width = "3%", tags$div(style = required_label_style, "***"))
                    },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   if(text_align == "right"){middle_column_spacer},
                    tags$td(width = paste0(right_column_percent_width, "%"), awesomeCheckboxGroup(inputId = input_id,
                                                                                                  label = NULL, 
                                                                                                  choices = choices_vector, 
@@ -714,6 +717,7 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                      tags$td(width = "3%", tags$div(style = required_label_style, "***"))
                    },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   if(text_align == "right"){middle_column_spacer},
                    tags$td(width = paste0(right_column_percent_width, "%"), checkboxGroupButtons(inputId = input_id,
                                                                                                  label = NULL, 
                                                                                                  justified = TRUE, 
@@ -726,23 +730,45 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
     )  
   }
   
+  if(input_type == "prettyCheckboxGroup"){
+    row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   if(text_align == "right"){middle_column_spacer},
+                   tags$td(width = paste0(right_column_percent_width, "%"), prettyCheckboxGroup(inputId = input_id,
+                                                                                                 label = NULL, 
+                                                                                                 choices = choices_vector,
+                                                                                                status = status_color,
+                                                                                                 selected = initial_value_selected, 
+                                                                                                icon = icon("check"), 
+                                                                                                bigger = TRUE, 
+                                                                                                 inline = checkboxes_inline))
+    )  
+  }
+  
+  
   if(input_type == "radioGroupButtons"){
     row <- tags$tr(width = "100%",
                    if(required_option == TRUE){
                      tags$td(width = "3%", tags$div(style = required_label_style, "***"))
                    },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   if(text_align == "right"){middle_column_spacer},
                    tags$td(width = paste0(right_column_percent_width, "%"), 
                            radioGroupButtons(inputId = input_id, label = NULL, choices = choices_vector, selected = initial_value_selected, direction = if_else(checkboxes_inline == TRUE, "horizontal", "vertical"), checkIcon = check_icon_for_radiogroupbuttons,
                                              individual = individual_buttons))
     )  
   }
+
   if(input_type == "awesomeRadio"){
     row <- tags$tr(width = "100%",
                    if(required_option == TRUE){
                      tags$td(width = "3%", tags$div(style = required_label_style, "***"))
                    },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   if(text_align == "right"){middle_column_spacer},
                    tags$td(width = paste0(right_column_percent_width, "%"), awesomeRadio(inputId = input_id, 
                                                                                          label = NULL,
                                                                                          choices = choices_vector, 
@@ -751,6 +777,25 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                                                                                          status = status_color))
     )  
   }
+  
+  if(input_type == "prettyRadioButtons"){
+    row <- tags$tr(width = "100%",
+                   if(required_option == TRUE){
+                     tags$td(width = "3%", tags$div(style = required_label_style, "***"))
+                   },
+                   tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
+                   if(text_align == "right"){middle_column_spacer},
+                   tags$td(width = paste0(right_column_percent_width, "%"), prettyRadioButtons(inputId = input_id, 
+                                                                                         label = NULL,
+                                                                                         choices = choices_vector, 
+                                                                                         selected = initial_value_selected,
+                                                                                         inline = checkboxes_inline, 
+                                                                                         icon = icon("check"), 
+                                                                                         bigger = TRUE,
+                                                                                         status = status_color))
+    )  
+  }
+
   if(input_type == "date"){
     row <- tags$tr(width = "100%",
                    if(required_option == TRUE){
@@ -776,7 +821,7 @@ jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
   left_input_identifier <- as.character(glue("add_left_{rod_type}"))
   right_input_identifier <- as.character(glue("add_right_{rod_type}"))
   rod_material_vector <- c("NA", "Titanium", "Cobalt Chrome", "Stainless Steel")
-  rod_size_vector <- c("NA", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/quarter in")
+  rod_size_vector <- c("NA", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/0.25 in")
   
   left_table <- tags$table(
     tags$tr(

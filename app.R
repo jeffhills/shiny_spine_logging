@@ -681,7 +681,6 @@ ui <- dashboardPage(skin = "black",
                                                    fluidRow(column(4), 
                                                             column(4, 
                                                                    dropdown(icon = icon("link"), 
-                                                                            # inputId = "add_crosslink_button",
                                                                             width = "100%",
                                                                             label = "Add Crosslink",
                                                                             style = "unite",
@@ -2490,9 +2489,14 @@ server <- function(input, output, session) {
   ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
   observeEvent(left_rod_implants_df_reactive(),ignoreNULL = TRUE, ignoreInit = TRUE, {
     if(nrow(left_rod_implants_df_reactive()) > 1){
+      if(max(left_rod_implants_df_reactive()$vertebral_number) < 11){
+        rod_size <- "4.0mm"  
+      }else{
+        rod_size <- "6.0mm"  
+      }
       updatePickerInput(session = session, 
                         inputId = "left_main_rod_size", 
-                        selected = if_else(input$left_main_rod_size == "None", "6.0mm", input$left_main_rod_size)
+                        selected = if_else(input$left_main_rod_size == "None", rod_size, input$left_main_rod_size)
       )
       updateAwesomeRadio(session = session, 
                          inputId = "left_main_rod_material",
@@ -2502,11 +2506,18 @@ server <- function(input, output, session) {
       )
     }
   })
+  
+  
   observeEvent(right_rod_implants_df_reactive(),ignoreNULL = TRUE, ignoreInit = TRUE, {
     if(nrow(right_rod_implants_df_reactive()) > 1){
+      if(max(left_rod_implants_df_reactive()$vertebral_number) < 11){
+        rod_size <- "4.0mm"  
+      }else{
+        rod_size <- "6.0mm"  
+      }
       updatePickerInput(session = session, 
                         inputId = "right_main_rod_size", 
-                        selected = if_else(input$right_main_rod_size == "None", "6.0mm", input$right_main_rod_size)
+                        selected = if_else(input$right_main_rod_size == "None", rod_size, input$right_main_rod_size)
       )
       updateAwesomeRadio(session = session, 
                          inputId = "right_main_rod_material", 
