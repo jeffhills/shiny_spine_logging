@@ -1120,14 +1120,7 @@ server <- function(input, output, session) {
                        mutate(level = str_replace_all(string = level, pattern = "S2ai", replacement = "S2AI")) %>%
                        rename(approach = approach_repeating)
                      
-                     # if(length(unique(existing_patient_data$patient_df$approach))>1){
-                     # 
-                     #   approach_to_filter_by <- str_to_lower(input$spine_approach)
-                     #   # approach_to_filter_by <- "posterior"
-                     # 
-                     #   existing_patient_data$patient_df <- existing_patient_data$patient_df %>%
-                     #     filter(approach == approach_to_filter_by)
-                     # }
+ 
                      
                      existing_patient_data$patient_df <- existing_patient_data$patient_df_full
                      
@@ -1725,7 +1718,14 @@ server <- function(input, output, session) {
   
   
   additional_procedures_vector_reactive <- reactive({
+    
     additional_procedures_list <- as.list(input$additional_procedures)
+    
+    if(nrow(all_objects_to_add_list$objects_df %>% filter(level == "C1", object == "lateral_mass_screw"))>0){
+      if(input$left_c2_nerve_root_transection == "Yes" | input$right_c2_nerve_root_transection == "Yes"){
+        additional_procedures_list$c2_nerve_root_transection <- "Transection of C2 Nerve Root/Greater Occipital Nerve (CPT = 64744)"
+      } 
+    }
     
     if("Other" %in% input$additional_procedures){
       additional_procedures_list$other <- input$additional_procedures_other
@@ -1735,6 +1735,7 @@ server <- function(input, output, session) {
     if(any(input$dressing_details == "Wound Vac")){
       additional_procedures_list$wound_vac <- "Application of Wound Vac (negative pressure wound therapy; CPT = 97605)"    
     }
+
     
     unlist(additional_procedures_list, use.names = FALSE)
   })
@@ -2895,8 +2896,39 @@ server <- function(input, output, session) {
         all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
       }
     }
+  })
+  
+  observeEvent(input$plot_click, ignoreInit = TRUE, {
     
-    
+    if(object_added_reactive_df()$object == "lateral_mass_screw" & object_added_reactive_df()$level == "C1"){
+      if(object_added_reactive_df()$side == "left"){
+        showModal(
+          modalDialog(
+            size = "m",
+            easyClose = FALSE,
+            awesomeRadio(inputId = "left_c2_nerve_root_transection",
+                         label = "Was the left C2 nerve root sacrificed?", 
+                         choices = c("No", "Yes"), 
+                         inline = TRUE,
+                         width = "100%")
+          )
+        ) 
+      }
+      if(object_added_reactive_df()$side == "right"){
+        showModal(
+          modalDialog(
+            size = "m",
+            easyClose = FALSE,
+            awesomeRadio(inputId = "right_c2_nerve_root_transection",
+                         label = "Was the right C2 nerve root sacrificed?", 
+                         choices = c("No", "Yes"), 
+                         inline = TRUE,
+                         width = "100%")
+          )
+        ) 
+      }
+      
+    }
     
   })
   
@@ -3848,6 +3880,8 @@ server <- function(input, output, session) {
     
   })
   
+
+  
   observeEvent(list(
     input$plot_click,
                     input$plot_double_click,
@@ -4438,8 +4472,7 @@ server <- function(input, output, session) {
     ######
     posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
       filter(approach == "posterior")  %>%
-      select(-object_constructed) %>%
-      mutate(object = if_else(level == "C1" & object == "lateral_mass_screw", "c1_lateral_mass_screw", object))
+      select(-object_constructed) 
     
     if(nrow(interbody_details_df_reactive()) > 0){
       posterior_approach_objects_df <- posterior_approach_objects_df %>%
@@ -4465,19 +4498,43 @@ server <- function(input, output, session) {
         mutate(screw_size_type = as.character(screw_size_type)) %>%
         replace_na(list(screw_size_type = " "))
     }else{
-      posterior_approach_objects_df <- posterior_approach_objects_df%>%
+      posterior_approach_objects_df <- posterior_approach_objects_df %>%
         mutate(screw_size_type = " ") 
     }
     
+    posterior_approach_objects_df <- posterior_approach_objects_df %>%
+      mutate(object = if_else(level == "C1" & object == "lateral_mass_screw", "c1_lateral_mass_screw", object)) 
+    
+    
     posterior_op_note_inputs_list_reactive$posterior_approach_objects_df <- posterior_approach_objects_df
     
-    #######
+    ####### fusion levels 
     
     if(length(input$fusion_levels_confirmed)>0){
       posterior_op_note_inputs_list_reactive$fusions_df <- tibble(level = input$fusion_levels_confirmed) %>%
         left_join(levels_numbered_df)
     }else{
       posterior_op_note_inputs_list_reactive$fusions_df <- tibble(level = character(), vertebral_number = double(), object = character())
+    }
+    
+    ####### C2 nerve transection
+    
+    
+    if(any(posterior_approach_objects_df$object == "c1_lateral_mass_screw")){
+      if(input$left_c2_nerve_root_transection == "Yes" & input$left_c2_nerve_root_transection == "Yes"){
+        posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "bilateral_transection"  
+      } 
+      if(input$left_c2_nerve_root_transection == "Yes" & input$left_c2_nerve_root_transection == "No"){
+        posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "left"  
+      } 
+      if(input$left_c2_nerve_root_transection == "No" & input$left_c2_nerve_root_transection == "Yes"){
+        posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "right"  
+      } 
+      if(input$left_c2_nerve_root_transection == "No" & input$left_c2_nerve_root_transection == "No"){
+        posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "bilateral_preserved"  
+      } 
+    }else{
+      posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "na"
     }
     
     #######
@@ -4891,7 +4948,8 @@ server <- function(input, output, session) {
       if(posterior_procedures_count>0){
         
         procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df,
-                                                                       fusion_levels_df = posterior_op_note_inputs_list_reactive()$fusions_df,
+                                                                       fusion_levels_df = posterior_op_note_inputs_list_reactive()$fusions_df, 
+                                                                       c2_nerve_transection = posterior_op_note_inputs_list_reactive()$c2_nerve_transection,
                                                                        head_position = posterior_op_note_inputs_list_reactive()$head_positioning,
                                                                        surgical_approach = posterior_op_note_inputs_list_reactive()$approach_specified_posterior,
                                                                        approach_mis_open = posterior_op_note_inputs_list_reactive()$approach_open_mis,
