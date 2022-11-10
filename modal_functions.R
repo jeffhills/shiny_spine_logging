@@ -1040,8 +1040,8 @@ addition_surgical_details_modal_box_function <-
         tags$table(width = "100%",
                    tags$tr(width = "100%",
                            tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = "font-size:16px; font-weight:bold; text-align:left; margin-top:auto; margin-bottom:auto", "Primary Surgeon:")),
-                           tags$td(width = paste0(left_column_percent_width/3, "%"), textInput(inputId = "primary_surgeon_first_name", label = NULL, value = primary_surgeon_first_name_input, placeholder = "First Name", width = "80%")),
-                           tags$td(width = paste0(left_column_percent_width/3, "%"), textInput(inputId = "primary_surgeon_last_name", label = NULL, value = primary_surgeon_last_name_input, placeholder = "Last Name", width = "80%"))
+                           tags$td(width = paste0((100-left_column_percent_width)/2, "%"), textInput(inputId = "primary_surgeon_first_name", label = NULL, value = primary_surgeon_first_name_input, placeholder = "First Name", width = "80%")),
+                           tags$td(width = paste0((100-left_column_percent_width)/2, "%"), textInput(inputId = "primary_surgeon_last_name", label = NULL, value = primary_surgeon_last_name_input, placeholder = "Last Name", width = "80%"))
                    ) 
         ),
         jh_make_shiny_table_row_function(
@@ -1111,8 +1111,8 @@ addition_surgical_details_modal_box_function <-
           choices_vector = c("None",
                              "During the EXPOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
                              "During the CLOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
-                             "During the EXPOSURE, a liposomal Bupivicaine mixure was injected into the subcutaneous and deep tissues.",
-                             "During CLOSURE, a liposomal Bupivicaine mixure was injected into the subcutaneous and deep tissues."
+                             "During the EXPOSURE, liposomal Bupivicaine was injected into the subcutaneous and deep tissues.",
+                             "During CLOSURE,liposomal Bupivicaine was injected into the subcutaneous and deep tissues."
           ),
           input_id = "local_anesthesia", 
           checkboxes_inline = FALSE,

@@ -6271,28 +6271,27 @@ server <- function(input, output, session) {
   # }
   # )
   
+  final_upload_reactive_count <- reactiveValues()
+  final_upload_reactive_count$count <- 0
   observeEvent(input$confirm_upload_final, {
+    final_upload_reactive_count$count <- final_upload_reactive_count$count + 1
+  }
+  )
+  
+  observeEvent(input$confirm_upload_final, {
+
     if(str_length(input$redcap_token) < 5){
-      # show_alert(
-      #   session = session,
-      #   title = "No Redcap Token",
-      #   text = "PLEASE GO BACK AND ENTER A VALID REDCAP TOKEN ON FIRST PAGE, Edit Patient",
-      #   type = "error"
-      # )
+
+      final_upload_reactive_count$count <- 0
       showModal(modalDialog(title = "Please enter a valid Redcap Token and click the button below and then attempt to upload again", 
                             easyClose = TRUE, 
                             box(width = 12,
                                 h3("PLEASE GO BACK AND ENTER A VALID REDCAP TOKEN ON FIRST PAGE, Edit Patient") 
-                                # actionBttn(inputId = "redcap_token_confirmed_button", 
-                                #            label = "Token Confirmed",
-                                #            icon = icon("fas fa-user-edit"),
-                                #            size = "sm", 
-                                #            block = TRUE)
-                                
                             )
       )
       )
-    }else{
+    }else if(final_upload_reactive_count$count == 1){
+      
       
       if(redcapAPI::exportNextRecordName(rcon = rcon_reactive$rcon)>1){
         all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
@@ -6547,6 +6546,13 @@ server <- function(input, output, session) {
         title = "Success !!",
         text = "All in order",
         type = "success"
+      )
+    }else{
+      sendSweetAlert(
+        session = session,
+        title = "Upload Already Attempted",
+        text = "You have already attempted to upload. Please check your redcap to confirm the data was uploaded. You will not be able to upload again during this session.",
+        type = "info"
       )
     }
   })
