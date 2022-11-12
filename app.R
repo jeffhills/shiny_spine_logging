@@ -18,6 +18,8 @@ library(rclipboard)
 library(nngeo)
 library(shinydashboard)
 
+library(profvis)
+
 # packageList <- c("shiny", "shinyWidgets", "sf", "tidyverse", "shinyBS", "cowplot", "magick", "ggpattern", "glue", "rlist",
 #                  "janitor", "lubridate", "redcapAPI", "ggpmisc", "rclipboard", "nngeo", "shinydashboard")
 # for(package in packageList){
@@ -65,6 +67,8 @@ source("load_icd_codes.R", local = TRUE)
 
 #Dashboards:
 rclipboardSetup()
+
+
 
 ui <- dashboardPage(skin = "black",
                     dashboardHeader(title = "Spine Operative Logging and Automated Report Generation", titleWidth = 650,
@@ -1517,8 +1521,16 @@ server <- function(input, output, session) {
       fusion_levels_computed_reactive_input <- c()
     }
     
+    if(nrow(all_objects_to_add_list$objects_df %>% 
+      filter(str_detect(object, "screw") | str_detect(object, "anterior_plate")))>0){
+      implants_placed_yes_no <- "yes" 
+    }else{
+      implants_placed_yes_no <- "no" 
+    }
+    
+    
     showModal(
-      confirm_fusion_levels_and_technique_details_modal_box_function(screws_selected_df_reactive = screws_selected_df_reactive(), 
+      confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
                                                                      fusion_levels_confirmed = fusion_levels_computed_reactive_input
                                                                      # approach_specified_posterior = input$approach_specified_posterior,
                                                                      # approach_open_mis = input$approach_open_mis,
@@ -1540,10 +1552,19 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$implants_complete, ignoreInit = TRUE, {
+
+    if(nrow(all_objects_to_add_list$objects_df %>% 
+            filter(str_detect(object, "screw") | str_detect(object, "anterior_plate")))>0){
+      implants_placed_yes_no <- "yes" 
+    }else{
+      implants_placed_yes_no <- "no" 
+    }
     
     if(input$implants_complete > 1){
       showModal(
-        confirm_fusion_levels_and_technique_details_modal_box_function(screws_selected_df_reactive = screws_selected_df_reactive(), 
+        
+        confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
+          # screws_selected_df_reactive = screws_selected_df_reactive(), 
                                                                        fusion_levels_confirmed = input$fusion_levels_confirmed,
                                                                        approach_specified_posterior = input$approach_specified_posterior,
                                                                        approach_open_mis = input$approach_open_mis,
@@ -3013,62 +3034,66 @@ server <- function(input, output, session) {
   ################------------------  Interbody Details (and generating results)    ----------------------######################  
   
   interbody_df_reactive <- reactive({
-    if(sum(str_count(string = all_objects_to_add_list$objects_df$object, pattern = "intervertebral_cage"))>0){
-      cages_df <- all_objects_to_add_list$objects_df %>%
-        filter(object == "intervertebral_cage") %>%
-        arrange(vertebral_number)
+    # if(input$tabs == "implant_details"){
+      if(sum(str_count(string = all_objects_to_add_list$objects_df$object, pattern = "intervertebral_cage"))>0){
+        cages_df <- all_objects_to_add_list$objects_df %>%
+          filter(object == "intervertebral_cage") %>%
+          arrange(vertebral_number)
+        
+        intervertebral_cage_df <- cages_df %>%
+          filter(vertebral_number == min(vertebral_number)) %>%
+          mutate(level = as.character(glue_collapse(x = cages_df$level, sep = "-"))) %>%
+          select(level, vertebral_number, object, approach)
+      }else{
+        intervertebral_cage_df <- tibble(level = character(), vertebral_number = double(), object = character(), approach = character())
+      }
       
-      intervertebral_cage_df <- cages_df %>%
-        filter(vertebral_number == min(vertebral_number)) %>%
-        mutate(level = as.character(glue_collapse(x = cages_df$level, sep = "-"))) %>%
-        select(level, vertebral_number, object, approach)
-    }else{
-      intervertebral_cage_df <- tibble(level = character(), vertebral_number = double(), object = character(), approach = character())
-    }
-    
-    interbody_implants_df <- all_objects_to_add_list$objects_df %>%
-      filter(
-        object == "anterior_interbody_implant" |
+      interbody_implants_df <- all_objects_to_add_list$objects_df %>%
+        filter(
           object == "anterior_interbody_implant" |
-          object == "tlif" |
-          object == "plif" |
-          object == "llif" |
-          object == "anterior_disc_arthroplasty" |
-          object == "corpectomy_cage") %>%
-      select(level, vertebral_number, object, approach) %>%
-      union_all(intervertebral_cage_df) %>%
-      distinct() %>%
-      arrange(vertebral_number)
+            object == "anterior_interbody_implant" |
+            object == "tlif" |
+            object == "plif" |
+            object == "llif" |
+            object == "anterior_disc_arthroplasty" |
+            object == "corpectomy_cage") %>%
+        select(level, vertebral_number, object, approach) %>%
+        union_all(intervertebral_cage_df) %>%
+        distinct() %>%
+        arrange(vertebral_number) 
+    # }
   })
   
   
   output$interbody_implants_ui <- renderUI({
-    interbody_implants_df <- interbody_df_reactive()
-    if(nrow(interbody_implants_df) >0){
-      box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody Implant Details:"), collapsible = TRUE, 
-          fixedRow(
-            column(width = 12, 
-                   column(width = 3,
-                          h4(strong("Level:"))
-                   ),
-                   column(width = 9, 
-                          fixedRow(
-                            column(width = 5, 
-                                   h4(strong("Composition:")), 
-                            ), 
-                            column(width = 4,
-                                   h4(strong("Device Name:"))
-                            ), 
-                            column(width = 3, 
-                                   h4(strong("Height(mm):"))
+    # if(input$tabs == "implant_details"){
+      # interbody_implants_df <- interbody_df_reactive()
+      if(nrow(interbody_df_reactive()) >0){
+        box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody Implant Details:"), collapsible = TRUE, 
+            fixedRow(
+              column(width = 12, 
+                     column(width = 3,
+                            h4(strong("Level:"))
+                     ),
+                     column(width = 9, 
+                            fixedRow(
+                              column(width = 5, 
+                                     h4(strong("Composition:")), 
+                              ), 
+                              column(width = 4,
+                                     h4(strong("Device Name:"))
+                              ), 
+                              column(width = 3, 
+                                     h4(strong("Height(mm):"))
+                              )
                             )
-                          )
-                   )
-            ),
-            map(.x = interbody_implants_df$level, .f = ~make_interbody_ui_function(level = .x))
-          )
-      )
-    }
+                     )
+              ),
+              map(.x = interbody_df_reactive()$level, .f = ~make_interbody_ui_function(level = .x))
+            )
+        )
+      }
+    # }
   })
   
   interbody_details_df_reactive <- reactive({
@@ -3308,8 +3333,6 @@ server <- function(input, output, session) {
   anterior_plate_revision_implants_df_reactive <- reactive({
     if(req(input$revision_approach) == "anterior"){
       if(length(input$prior_anterior_plate_levels)>0){
-        
-        
 
         anterior_plate_revision_implants_df <- tibble(prior_plate_present_levels = input$prior_anterior_plate_levels) %>%
           mutate(level = prior_plate_present_levels) %>%
@@ -3634,43 +3657,46 @@ server <- function(input, output, session) {
   
   ############# ~~~~~~~~~~~~~~ ################## MAKE THE SUMMARY TABLE FOR THE PLOT    ############# ~~~~~~~~~~~~~~ ################## 
   plan_reactive_df <- reactive({
-    
-    anti_fibrinolytic <- case_when(
-      length(input$anti_fibrinolytic) == 0 ~ "--",
-      length(input$anti_fibrinolytic) == 1 & "Tranexamic Acid (TXA)" %in% input$anti_fibrinolytic ~ paste(glue("TXA (Load: {input$txa_loading}mg/kg, Maint: {input$txa_maintenance}mg/kg/hr)")),
-      length(input$anti_fibrinolytic) > 1 & "Tranexamic Acid (TXA)" %in% input$anti_fibrinolytic ~ paste(glue("{toString(setdiff(x = input$anti_fibrinolytic,
-                                                                                                                       y = 'Tranexamic Acid (TXA)'))}, 
+    if(input$plot_summary_table == TRUE){
+      anti_fibrinolytic <- case_when(
+        length(input$anti_fibrinolytic) == 0 ~ "--",
+        length(input$anti_fibrinolytic) == 1 & "Tranexamic Acid (TXA)" %in% input$anti_fibrinolytic ~ paste(glue("TXA (Load: {input$txa_loading}mg/kg, Maint: {input$txa_maintenance}mg/kg/hr)")),
+        length(input$anti_fibrinolytic) > 1 & "Tranexamic Acid (TXA)" %in% input$anti_fibrinolytic ~ paste(glue("{toString(setdiff(x = input$anti_fibrinolytic,
+                                                                                                                       y = 'Tranexamic Acid (TXA)'))},
                                                                                                                        TXA (Load: {input$txa_loading}mg/kg, Maint: {input$txa_maintenance}mg/kg/hr)")),
-      length(input$anti_fibrinolytic) > 0 & ("Tranexamic Acid (TXA)" %in% input$anti_fibrinolytic) == FALSE ~ toString(input$anti_fibrinolytic)
-    )
-    
-    age <- if_else(paste(input$date_of_birth) == "1900-01-01", "", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0)))
-    
-    allograft_statement <- if(input$spine_approach == "Anterior"){
-      if_else(input$anterior_allograft_amount == 0, "--", paste(input$anterior_allograft_amount, "cc", sep = ""))
+        length(input$anti_fibrinolytic) > 0 & ("Tranexamic Acid (TXA)" %in% input$anti_fibrinolytic) == FALSE ~ toString(input$anti_fibrinolytic)
+      )
+      
+      age <- if_else(paste(input$date_of_birth) == "1900-01-01", "", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0)))
+      
+      allograft_statement <- if(input$spine_approach == "Anterior"){
+        if_else(input$anterior_allograft_amount == 0, "--", paste(input$anterior_allograft_amount, "cc", sep = ""))
+      }else{
+        if_else(input$posterior_allograft_amount == 0, "--", paste(input$posterior_allograft_amount, "cc", sep = ""))
+      }
+      
+      plan_vector <- c("Patient:" = paste(input$patient_first_name, ",", input$patient_last_name, if_else(age == "", "", paste(age, "yo"), input$sex)),
+                       "Symptoms:" = toString(input$symptoms),
+                       "Relevant Hx:" = input$relevant_history,
+                       "---" = "---",
+                       "Preop Abx:" = toString(input$preop_antibiotics),
+                       "Antifibrinolytic:" = anti_fibrinolytic,
+                       "Allograft" = allograft_statement,
+                       # "BMP:" = bmp_text,
+                       "Left Rod:" = if_else(nrow(left_rod_implants_df_reactive()) > 1, paste(input$left_main_rod_size, input$left_main_rod_material, sep = " "), "--"),
+                       "Right Rod:" = if_else(nrow(right_rod_implants_df_reactive()) > 1, paste(input$right_main_rod_size, input$right_main_rod_material, sep = " "), "--"))
+      
+      enframe(plan_vector, name = "descriptor", value = "value") %>%
+        filter(!is.null(value)) %>%
+        filter(value != "--") %>%
+        mutate(value = str_squish(string = value)) %>%
+        filter(value != "")
     }else{
-      if_else(input$posterior_allograft_amount == 0, "--", paste(input$posterior_allograft_amount, "cc", sep = ""))
-    }
-    
-    plan_vector <- c("Patient:" = paste(input$patient_first_name, ",", input$patient_last_name, if_else(age == "", "", paste(age, "yo"), input$sex)), 
-                     "Symptoms:" = toString(input$symptoms),
-                     "Relevant Hx:" = input$relevant_history, 
-                     "---" = "---",
-                     "Preop Abx:" = toString(input$preop_antibiotics), 
-                     "Antifibrinolytic:" = anti_fibrinolytic,
-                     "Allograft" = allograft_statement,
-                     # "BMP:" = bmp_text, 
-                     "Left Rod:" = if_else(nrow(left_rod_implants_df_reactive()) > 1, paste(input$left_main_rod_size, input$left_main_rod_material, sep = " "), "--"), 
-                     "Right Rod:" = if_else(nrow(right_rod_implants_df_reactive()) > 1, paste(input$right_main_rod_size, input$right_main_rod_material, sep = " "), "--"))
-    
-    enframe(plan_vector, name = "descriptor", value = "value") %>%
-      filter(!is.null(value)) %>%
-      filter(value != "--") %>%
-      mutate(value = str_squish(string = value)) %>%
-      filter(value != "")
-    
+        tibble(descriptor = character(), value = character())
+      }
+
   })
-  
+  # 
   ######### ~~~~~~~~~~~~~~  ############# POSTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
   ######### ~~~~~~~~~~~~~~  ############# POSTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
   
@@ -3682,9 +3708,6 @@ server <- function(input, output, session) {
   observeEvent(input$open_canal, ignoreNULL = TRUE, ignoreInit = TRUE, {
     
     if(length(input$open_canal) > 0){
-      # open_df <- open_canal_df %>%
-      #     filter(level %in% input$open_canal)
-      
       open_df <- implant_starts_df %>%
         filter(object == "laminectomy") %>%
         filter(level %in% input$open_canal) %>%
@@ -3746,13 +3769,6 @@ server <- function(input, output, session) {
       }else{
         geoms_list_revision_anterior$anterior_plate_removed <-NULL
       }
-      
-      # prior_plate_removed_df <- anterior_plate_revision_implants_df_reactive() %>%
-      #   filter(prior_plate_status == "removed")
-      # 
-      # if(nrow(prior_plate_removed_df) > 0){
-      #   geoms_list_revision_anterior$anterior_plate_removed <- geom_sf(data = st_multipolygon(prior_plate_removed_df$object_constructed), color = "grey65", fill = "grey99", alpha = 0.5)
-      # }
       
     }else{
       geoms_list_revision_anterior$anterior_plate_retained <- NULL
@@ -3883,7 +3899,6 @@ server <- function(input, output, session) {
         select(x, y) %>%
         as.matrix()
       
-      # left_main_rod_sf <- st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND")
       rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
       
       # rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND")), alpha = 0.75)
@@ -3894,10 +3909,10 @@ server <- function(input, output, session) {
 
   
   observeEvent(list(
-    input$plot_click,
-                    input$plot_double_click,
-                    input$reset_all,
-                    left_rod_implants_df_reactive(),
+    # input$plot_click,
+                    # input$plot_double_click,
+                    # input$reset_all,
+                    # left_rod_implants_df_reactive(),
                     input$add_left_accessory_rod,
                     input$left_accessory_rod,
                     input$add_left_satellite_rod,
@@ -3908,7 +3923,8 @@ server <- function(input, output, session) {
                     input$add_left_linked_rods,
                     input$left_linked_rods,
                     input$left_revision_rod_status,
-                    left_revision_implants_reactive_list()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+                    left_revision_implants_reactive_list()
+    ), ignoreInit = TRUE, ignoreNULL = TRUE,{
                       ##########RODS ############
                       ############# Left ROD #################
                       left_rods_connectors_list <- list()
@@ -4234,80 +4250,80 @@ server <- function(input, output, session) {
   )
 
   
-  observeEvent(input$lumbar_vertebrae_count, {
-    if(input$spine_approach == "Anterior"){
-      spine_plan_plot_anterior() 
-    }else{
-      x_left_limit <- 0.3 - input$label_text_offset/100
-      x_right_limit <- 1-x_left_limit
-      plot_top_y <- input$crop_y[2]
-      y_spacing <- 0.025*input$crop_y[2]
-      
-      if(input$plot_summary_table == TRUE){
-        y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
-        plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
-        
-        plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
-      }else{
-        y_start_with_text <- plot_top_y
-        plan_table_geom <- geom_sf(data = NULL)
-      }
-      
-      if(input$lumbar_vertebrae_count == "6"){
-        l6_statement <- "Note: 6 Lumbar Vertebrae"
-      }else{
-        l6_statement <- " "
-      }
-      ### POSTERIOR
-      labels_posterior_df <- labels_df %>%
-        filter(between(y, input$crop_y[1], y_start_with_text)) %>%
-        mutate(x_left = x_left_limit + 0.05) %>%
-        mutate(x_right = x_right_limit - 0.05) %>%
-        select(-vertebral_number)
-      
-      labels_posterior_df <- labels_posterior_df %>%
-        union_all(tibble(level = " ", 
-                         x_left = min(labels_posterior_df$x_left) - 0.03,
-                         x_right = max(labels_posterior_df$x_right) + 0.03, 
-                         y = min(labels_posterior_df$y) - 0.03)) %>%
-        union_all(tibble(level = " ", 
-                         x_left = min(labels_posterior_df$x_left) - 0.03,
-                         x_right = max(labels_posterior_df$x_right) + 0.03, 
-                         y = max(labels_posterior_df$y) + 0.03))
-      
-      ggdraw() +
-        draw_image(
-          spine_png,
-          scale = 1,
-          y = 0,
-          valign = 0,
-          x = 0,
-          height = 1
-          # width = 1
-        ) +
-        reactiveValuesToList(geoms_list_revision_posterior) +
-        reactiveValuesToList(geoms_list_posterior) +
-        reactiveValuesToList(rods_list) +
-        draw_text(
-          text = labels_posterior_df$level,
-          x = labels_posterior_df$x_left,
-          y = labels_posterior_df$y,
-          size = input$label_text_size,
-          fontface = "bold"
-        ) +
-        draw_text(
-          text = labels_posterior_df$level,
-          x = labels_posterior_df$x_right,
-          y = labels_posterior_df$y,
-          size = input$label_text_size,
-          fontface = "bold"
-        ) +
-        plan_table_geom +
-        annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement)
-      # spine_plan_plot_posterior() 
-    }
-    
-  })
+  # observeEvent(input$lumbar_vertebrae_count, {
+  #   if(input$spine_approach == "Anterior"){
+  #     spine_plan_plot_anterior() 
+  #   }else{
+  #     x_left_limit <- 0.3 - input$label_text_offset/100
+  #     x_right_limit <- 1-x_left_limit
+  #     plot_top_y <- input$crop_y[2]
+  #     y_spacing <- 0.025*input$crop_y[2]
+  #     
+  #     if(input$plot_summary_table == TRUE){
+  #       y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
+  #       plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
+  #       
+  #       plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
+  #     }else{
+  #       y_start_with_text <- plot_top_y
+  #       plan_table_geom <- geom_sf(data = NULL)
+  #     }
+  #     
+  #     if(input$lumbar_vertebrae_count == "6"){
+  #       l6_statement <- "Note: 6 Lumbar Vertebrae"
+  #     }else{
+  #       l6_statement <- " "
+  #     }
+  #     ### POSTERIOR
+  #     labels_posterior_df <- labels_df %>%
+  #       filter(between(y, input$crop_y[1], y_start_with_text)) %>%
+  #       mutate(x_left = x_left_limit + 0.05) %>%
+  #       mutate(x_right = x_right_limit - 0.05) %>%
+  #       select(-vertebral_number)
+  #     
+  #     labels_posterior_df <- labels_posterior_df %>%
+  #       union_all(tibble(level = " ", 
+  #                        x_left = min(labels_posterior_df$x_left) - 0.03,
+  #                        x_right = max(labels_posterior_df$x_right) + 0.03, 
+  #                        y = min(labels_posterior_df$y) - 0.03)) %>%
+  #       union_all(tibble(level = " ", 
+  #                        x_left = min(labels_posterior_df$x_left) - 0.03,
+  #                        x_right = max(labels_posterior_df$x_right) + 0.03, 
+  #                        y = max(labels_posterior_df$y) + 0.03))
+  #     
+  #     ggdraw() +
+  #       draw_image(
+  #         spine_png,
+  #         scale = 1,
+  #         y = 0,
+  #         valign = 0,
+  #         x = 0,
+  #         height = 1
+  #         # width = 1
+  #       ) +
+  #       reactiveValuesToList(geoms_list_revision_posterior) +
+  #       reactiveValuesToList(geoms_list_posterior) +
+  #       reactiveValuesToList(rods_list) +
+  #       draw_text(
+  #         text = labels_posterior_df$level,
+  #         x = labels_posterior_df$x_left,
+  #         y = labels_posterior_df$y,
+  #         size = input$label_text_size,
+  #         fontface = "bold"
+  #       ) +
+  #       draw_text(
+  #         text = labels_posterior_df$level,
+  #         x = labels_posterior_df$x_right,
+  #         y = labels_posterior_df$y,
+  #         size = input$label_text_size,
+  #         fontface = "bold"
+  #       ) +
+  #       plan_table_geom +
+  #       annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement)
+  #     # spine_plan_plot_posterior() 
+  #   }
+  #   
+  # })
   
   output$spine_plot_for_implants_tab <- renderPlot({
     if(input$multiple_approach == TRUE){
@@ -4359,6 +4375,9 @@ server <- function(input, output, session) {
 
   added_rods_statement_reactive <- reactive({
     additional_rods_list <- list()
+    added_rods_statement <- ""
+    
+    # if(input$tabs != "patient_details_procedures"){
     
     if(input$add_left_accessory_rod == TRUE){
       proximal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$left_accessory_rod[[1]])$caudal_interspace
@@ -4401,11 +4420,16 @@ server <- function(input, output, session) {
     }else{
       added_rods_statement
     }
+    
     added_rods_statement
+    
   })
   
   
   postop_plan_list_reactive <- reactive({
+    postop_plan <- list()
+    
+    # if(input$tabs != "patient_details_procedures"){
     format_plan_list_function <- function(plan_label, input_vector){
       if(length(input_vector) > 1){
         plan_formatted <- paste0("  - ", plan_label, ":", glue_collapse(prepend(x = input_vector, values = " "), sep = "\n       > "))
@@ -4414,8 +4438,7 @@ server <- function(input, output, session) {
       }
       plan_formatted
     }
-    
-    postop_plan <- list()
+  
     ##########   dispo  #############
     if(length(input$postop_dispo) >0){
       postop_plan$postop_dispo_label <- paste("  - Postop Destination: ", glue_collapse(input$postop_dispo, sep = "; ", last = "; and "))
@@ -4471,7 +4494,9 @@ server <- function(input, output, session) {
     if(length(input$postop_followup) >0){
       postop_plan$postop_followup_label <- paste("  - Follow-up: ", glue_collapse(input$postop_followup, sep = "; ", last = "; and "))
     }
+    # }
     postop_plan
+    
     
   })
   
@@ -4480,6 +4505,8 @@ server <- function(input, output, session) {
   
   posterior_op_note_inputs_list_reactive <- reactive({
     posterior_op_note_inputs_list_reactive <- list()
+    
+    # if(input$tabs != "patient_details_procedures"){
     ######
     posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
       filter(approach == "posterior")  %>%
@@ -4700,6 +4727,7 @@ server <- function(input, output, session) {
     
     posterior_op_note_inputs_list_reactive$lateral_mass_screws_after_decompression <- lateral_mass_screws_after_decompression
     
+    
     posterior_op_note_inputs_list_reactive
   })
   
@@ -4708,6 +4736,7 @@ server <- function(input, output, session) {
   ###################### NOW GENERATE ALL THE NECESSARY INPUTS FOR THE THE ANTERIOR OP NOTE
   anterior_op_note_inputs_list_reactive <- reactive({
     anterior_op_note_inputs_list_reactive <- list()
+
     ######
     
     anterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
@@ -4875,12 +4904,14 @@ server <- function(input, output, session) {
     #######
     anterior_op_note_inputs_list_reactive$sex <- input$sex
     
+    
     anterior_op_note_inputs_list_reactive
   })
   
 
   ########### NOW ASSEMBLE THE REACTIVE TEXT OF THE ENTIRE OP NOTE ###############
   
+#
   op_note_text_reactive <- reactive({
     ################# COMPLICATIONS ################3
     complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
@@ -4954,7 +4985,8 @@ server <- function(input, output, session) {
       procedure_results_list <- list()
       
       ########## POSTERIOR NOTE
-      posterior_procedures_count <- nrow(posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df) + nrow(posterior_op_note_inputs_list_reactive()$revision_implants_df)
+
+        posterior_procedures_count <- nrow(posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df) + nrow(posterior_op_note_inputs_list_reactive()$revision_implants_df)
       
       if(posterior_procedures_count>0){
         
@@ -5000,6 +5032,7 @@ server <- function(input, output, session) {
         
       }
       
+
       if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df) > 0){
         
         procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df,
@@ -5078,6 +5111,8 @@ server <- function(input, output, session) {
     
   })
   
+
+  
   
   observeEvent(input$generate_operative_note, {
     updateTextAreaInput(session = session, 
@@ -5088,6 +5123,7 @@ server <- function(input, output, session) {
   )
   
   observeEvent(input$operative_note_text, ignoreNULL = TRUE, {
+    
     output$operative_note_formatted <-  renderText({
       
       op_note <- input$operative_note_text
@@ -5171,15 +5207,16 @@ server <- function(input, output, session) {
   ###### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ALL INPUTS  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ######## 
   
   all_inputs_reactive_list <- reactive({
+    # if(input$tabs != "patient_details_procedures"){
     all_inputs_list <- reactiveValuesToList(input, all.names = FALSE)
     
     all_inputs_list <- keep(.x = all_inputs_list, .p = ~ !is.null(.x))
-    
+    # }
   })
   
   
   all_inputs_trimmed_reactive_df <- reactive({
-    
+    # if(input$tabs != "patient_details_procedures"){
     all_inputs_to_log_df <- enframe(all_inputs_reactive_list()) %>%
       mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = "-AND-")))) %>%
       select(-value) %>%
@@ -5245,11 +5282,14 @@ server <- function(input, output, session) {
     # filter(str_detect(measure, pattern = paste0(glue_collapse(rods_not_used$rod_type_not_used, sep = "|"))) == FALSE) 
     
     all_inputs_to_log_df
+    # }
     
   })
   
   output$all_inputs <- renderTable({
+    # if(input$tabs != "patient_details_procedures"){
     all_inputs_trimmed_reactive_df()
+    # }
     
   })
   
@@ -5927,20 +5967,27 @@ server <- function(input, output, session) {
   
   ### first update the bilaterality input for the conditional panel
   
-  screws_selected_df_reactive <- reactive({
-    if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw") | str_detect(object, "anterior_plate")))>0){
-
-      implants_added_df <- jh_generate_df_for_screening_screw_inputs_function(all_objects_to_add_list$objects_df) %>%
-        left_join(all_screw_size_type_inputs_df %>% select(implant_row_id, level_object_label)) %>%
-        arrange(implant_row_id) %>%
-        select(implant_row_id, level, level_object_label, left_object, right_object)
-
-    }else{
-      implants_added_df <- tibble(level_object_label = character(), level = character(), left_object = character(), right_object =  character(), implant_row_id = integer())
-    }
-    implants_added_df
-
-  })
+ 
+    screws_selected_df_reactive <- reactive({
+      
+      if(input$implants_complete > 0){
+        if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw") | str_detect(object, "anterior_plate")))>0){
+          
+          implants_added_df <- jh_generate_df_for_screening_screw_inputs_function(all_objects_to_add_list$objects_df) %>%
+            left_join(all_screw_size_type_inputs_df %>% select(implant_row_id, level_object_label)) %>%
+            arrange(implant_row_id) %>%
+            select(implant_row_id, level, level_object_label, left_object, right_object)
+          
+        }else{
+          implants_added_df <- tibble(level_object_label = character(), level = character(), left_object = character(), right_object =  character(), implant_row_id = integer())
+        }
+        
+        implants_added_df 
+      }
+      
+    })
+    
+  
   
   ### NOW UPDATE THE INPUT TO HAVE THE Correct levels FOR EACH IMPLANT  implants_complete
   observeEvent(list(input$implants_complete, input$return_to_add_implant_details_tab, input$implant_details, screws_selected_df_reactive()), ignoreInit = TRUE, {
@@ -5974,6 +6021,7 @@ server <- function(input, output, session) {
   
   ## NEW
   screw_details_redcap_df_reactive <- reactive({
+    # if(input$tabs != "patient_details_procedures"){
     
     if(nrow(screws_selected_df_reactive())>0){
       screw_details_full_df <- screws_selected_df_reactive() %>%
@@ -6042,6 +6090,7 @@ server <- function(input, output, session) {
                                       screw_size = character(), 
                                       screw_size_type = character())
     }
+
     screw_details_full_df
     
   })
@@ -6050,6 +6099,7 @@ server <- function(input, output, session) {
   ################# INTERBODY  DETAILS TABLE ##################
   
   interbody_details_redcap_df_reactive <- reactive({
+    
     if(nrow(interbody_details_df_reactive())>0){
       interbody_df <- interbody_details_df_reactive() %>%
         mutate(dos_interbody_repeating = as.character(input$date_of_surgery)) %>%
@@ -6151,16 +6201,18 @@ server <- function(input, output, session) {
   
   ################## GENERATE TABLES AND PRINTOUTS FOR SIDE TAB TO SHOW WHAT IS UPLOADED TO THE OP NOTE GENERATOR
   output$posterior_approach_objects_for_op_note_df <- renderTable({
-    posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df
+      posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df
+  
   }
   )
   
   
   output$full_objects_passed_to_posterior_op_note <- renderPrint({
-    posterior_op_note_list <- posterior_op_note_inputs_list_reactive()
-    posterior_op_note_list$posterior_approach_objects_df <- "See table"
-    
-    paste(map2(.x = posterior_op_note_list, .y = names(posterior_op_note_list), .f = ~ paste0(.y, ": ", paste(.x, sep = ", ", collapse = ", "))))
+      # posterior_op_note_list <- posterior_op_note_inputs_list_reactive()
+      posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df <- "See table"
+      
+      paste(map2(.x = posterior_op_note_list, .y = names(posterior_op_note_inputs_list_reactive()), .f = ~ paste0(.y, ": ", paste(.x, sep = ", ", collapse = ", ")))
+            )
   })
   
   output$anterior_approach_objects_for_op_note_df <- renderTable({
@@ -6258,18 +6310,7 @@ server <- function(input, output, session) {
     )
   })
   
-  # observeEvent(input$redcap_token_confirmed_button, {
-  #   
-  #   updateTextInput(session = session, 
-  #                   inputId = "redcap_token", 
-  #                   value = paste(input$redcap_token_input_2))
-  # }
-  # )
-  # 
-  # observeEvent(input$redcap_token_confirmed_button, {
-  #   removeModal()
-  # }
-  # )
+
   
   final_upload_reactive_count <- reactiveValues()
   final_upload_reactive_count$count <- 0
@@ -6578,6 +6619,7 @@ server <- function(input, output, session) {
                           value = task_items_reactive_list$upload_to_redcap))
   })
 }
+
 
 # Run the application 
 shinyApp(ui = ui, server = server)

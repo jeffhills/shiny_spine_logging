@@ -1709,7 +1709,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
                                                 linked_rods_vector = c("a", "b"),
                                                 revision_rods_retained_df = tibble(level = character(), vertebral_number = double(), x = double(), y = double()),
                                                 unilateral_full_implant_df, 
-                                                intercalary_rod_junction){
+                                                intercalary_rod_junction = "T12"){
   
   if(!is.null(unilateral_full_implant_df) && nrow(unilateral_full_implant_df)>0){
     rods_list <- list()
