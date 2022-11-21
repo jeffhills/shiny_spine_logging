@@ -18,6 +18,7 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'pelvic_screw', 'Pelvic instrumentation', 'combine',
                                         'pelvic_screw_1', 'Pelvic instrumentation', 'combine',
                                         'pelvic_screw_2', 'Pelvic instrumentation', 'combine',
+                                        'reinsertion_instrumentation', 'Reinsertion of spinal fixation', 'combine',
                                         'tether', 'Spinous process posterior tethering/wiring', 'combine',
                                         'costovertebral_approach', 'Costovertebral approach with decompression of the spinal cord', 'distinct',
                                         'revision_costovertebral_approach', 'Reexploration and revision decompression using a costovertebral approach', 'distinct',
@@ -1112,6 +1113,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   }
   
   procedures_numbered_list$primary_procedures <- op_note_procedures_performed_numbered_function(objects_added_df = all_objects_to_add_df, 
+                                                                                                revision_implants_df = revision_implants_df, 
                                                                                                 revision_decompression_vector = revision_decompression_vector, 
                                                                                                 fusion_levels_vector = fusion_levels_df$level, 
                                                                                                 additional_procedures_performed_vector = additional_procedures_for_numbered_list)
@@ -2266,9 +2268,29 @@ revision_implants_paragraph_function <- function(revision_implants_details_df){
 #############-----------------------   PROCEDURES PERFORMED NUMBERED SECTION  ----------------------###############
 
 op_note_procedures_performed_numbered_function <- function(objects_added_df,
+                                                           revision_implants_df = tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character()),
                                                            revision_decompression_vector = NULL,
                                                            fusion_levels_vector = NULL,
                                                            additional_procedures_performed_vector = NULL){
+  
+  if(nrow(revision_implants_df)>0 & nrow(objects_added_df)>0){
+    implant_removal_df <- revision_implants_df %>%
+      filter(remove_retain == "remove") %>%
+      select(level, remove_retain) %>%
+      distinct()
+    
+    re_inserted_df <- objects_added_df %>%
+      filter(str_detect(object, "screw|hook|")) %>%
+      left_join(implant_removal_df) %>%
+      filter(remove_retain == "remove")
+    
+    objects_added_df <- objects_added_df %>%
+      anti_join(re_inserted_df %>% select(-remove_retain)) %>%
+      union_all((re_inserted_df %>%
+                   mutate(object = "reinsertion_instrumentation")))
+    
+  } 
+  
   if(length(revision_decompression_vector) > 0){
     if(nrow(objects_added_df)>0){
       summary_nested_df <- objects_added_df %>%
