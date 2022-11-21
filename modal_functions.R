@@ -361,7 +361,8 @@ startup_modal_box_diagnosis_symptoms <-
                                )
               ),
               conditionalPanel(
-                "input.primary_revision.indexOf('Revision') > -1",
+                "input.revision_approach.indexOf('anterior') > -1 || input.revision_approach.indexOf('posterior') > -1 ",
+                # "input.primary_revision.indexOf('Revision') > -1",
                 jh_make_shiny_table_row_function(
                   left_column_label = "Revision for (select all that apply):",
                   input_type = "picker",
@@ -1400,18 +1401,22 @@ addition_surgical_details_modal_box_2_function <-
                          "Durotomy",
                          "Nerve Root Injury",
                          "Loss of Neuromonitoring Data with Return",
-                         "Loss of Neuromonitoring Data without Return"
+                         "Loss of Neuromonitoring Data without Return", 
+                         "Other"
                        ),
                        initial_value_selected = intraoperative_complications_vector
                      ),
-                     jh_make_shiny_table_row_function(
-                       left_column_percent_width = 40,
-                       left_column_label = "Other Intraoperative Complications:",
-                       font_size = row_label_font_size,
-                       input_type = "text",
-                       input_id = "other_intraoperative_complications",
-                       initial_value_selected = other_intraoperative_complications
-                     )
+                     conditionalPanel(
+                       condition = "input.intraoperative_complications_vector.indexOf('Other') > -1",
+                       jh_make_shiny_table_row_function(
+                         left_column_percent_width = 40,
+                         left_column_label = "Other Intraoperative Complications:",
+                         font_size = row_label_font_size,
+                         input_type = "text",
+                         input_id = "other_intraoperative_complications",
+                         initial_value_selected = other_intraoperative_complications
+                       )
+                       ),
                    ),
                    conditionalPanel(
                      condition = "input.intraoperative_complications_vector.indexOf('Durotomy') > -1",
@@ -1438,7 +1443,7 @@ addition_surgical_details_modal_box_2_function <-
                          input_id = "durotomy_instrument",
                          left_column_percent_width = 45,
                          font_size = 18,
-                         choices_vector = c("Burr", "Kerrison", "Rongeur", "Electrocautery", "Other"),
+                         choices_vector = c("Burr", "Kerrison", "Rongeur", "Bovie", "Other"),
                          initial_value_selected = durotomy_instrument_input,
                          checkboxes_inline = FALSE,
                          return_as_full_table = TRUE
@@ -1455,7 +1460,7 @@ addition_surgical_details_modal_box_2_function <-
                            "Tachosil",
                            "Dural Graft",
                            "No Repair Performed",
-                           "Other"
+                           "Other Repair"
                          ),
                          initial_value_selected = durotomy_repair_method_input,
                          checkboxes_inline = FALSE,
@@ -1782,3 +1787,4 @@ addition_surgical_details_modal_box_2_function <-
       )
     )
   }
+

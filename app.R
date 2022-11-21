@@ -37,6 +37,7 @@ source("make_geoms_functions.R", local = TRUE)
 source("build_spine_objects_functions.R", local = TRUE)
 source("load_coordinates_build_objects.R", local = TRUE)
 source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
+source("operative_note_paragraph_functions.R", local = TRUE)
 source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
 source("load_icd_codes.R", local = TRUE)
@@ -71,9 +72,7 @@ rclipboardSetup()
 
 
 ui <- dashboardPage(skin = "black",
-                    dashboardHeader(title = "Spine Operative Logging and Automated Report Generation", titleWidth = 650,
-                                    dropdownMenuOutput(outputId = "upload_to_redcap_task")
-                                    
+                    dashboardHeader(title = "Spine Operative Logging and Automated Report Generation", titleWidth = 650
                     ),
                     dashboardSidebar(width = 350,collapsed = TRUE,
                                      sidebarMenu(id = "tabs", 
@@ -4626,6 +4625,34 @@ server <- function(input, output, session) {
     posterior_op_note_inputs_list_reactive$local_anesthesia <- input$local_anesthesia
     
     
+    # INTRAOP COMPLICATIONS STATEMENT
+    #######
+    complications_list <- list()
+
+    if(length(input$intraoperative_complications_vector)> 0){
+      
+      complication_text <- paste(glue_collapse(x = str_to_lower(input$intraoperative_complications_vector), sep = ","))
+      
+      if(str_detect(complication_text, pattern = "durotomy") & !is.na(input$durotomy_timing) & !is.na(input$durotomy_repair_method)){
+        
+          if(str_to_lower(input$durotomy_timing) == "other"){
+            durotomy_timing_instrument_statement <- glue("An incidental durotomy was created during the procedure, which caused a CSF leak.")
+          }else{
+            durotomy_timing_instrument_statement <- glue("During the {str_to_lower(input$durotomy_timing)}, an incidental durotomy was created, which caused a CSF leak.")
+          }
+        
+          if(any(input$durotomy_repair_method == "No Repair Performed")){
+            durotomy_repair_statement <- glue("No dural repair was performed.")
+          }else{
+            durotomy_repair_statement <- glue("The dura was repaired using {glue_collapse(input$durotomy_repair_method, sep = ', ', last = ' and ')}.")
+          }
+        complications_list$durotomy <- paste(durotomy_timing_instrument_statement, str_remove_all(string = str_to_lower(durotomy_repair_statement), pattern = "primarily repaired using ")) 
+        }
+    }
+    
+    posterior_op_note_inputs_list_reactive$complications_list <- complications_list
+    
+    
     #######
     posterior_op_note_inputs_list_reactive$open_canal <- input$open_canal
     
@@ -5001,6 +5028,7 @@ server <- function(input, output, session) {
                                                                        implant_start_point_method_input = posterior_op_note_inputs_list_reactive()$implant_start_point_method,
                                                                        implant_confirmation_method = posterior_op_note_inputs_list_reactive()$implant_position_confirmation_method,
                                                                        local_anesthesia = posterior_op_note_inputs_list_reactive()$local_anesthesia,
+                                                                       complications_list = posterior_op_note_inputs_list_reactive()$complications_list,
                                                                        revision_decompression_vector = posterior_op_note_inputs_list_reactive()$open_canal,
                                                                        revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df,
                                                                        left_main_rod_size = posterior_op_note_inputs_list_reactive()$left_main_rod_size,
@@ -5014,8 +5042,6 @@ server <- function(input, output, session) {
                                                                        instrumentation_removal_vector = posterior_op_note_inputs_list_reactive()$instrumentation_removed_vector,
                                                                        bmp = posterior_op_note_inputs_list_reactive()$posterior_bmp_dose_reactive,
                                                                        biologics_list = posterior_op_note_inputs_list_reactive()$posterior_biologics_list,
-                                                                       # bone_graft_vector = posterior_op_note_inputs_list_reactive()$posterior_bone_graft,
-                                                                       # morselized_allograft = posterior_op_note_inputs_list_reactive()$posterior_allograft_amount,
                                                                        morselized_autograft_separate = posterior_op_note_inputs_list_reactive()$morselized_autograft_separate,
                                                                        deep_drains = posterior_op_note_inputs_list_reactive()$deep_drains_posterior,
                                                                        superficial_drains = posterior_op_note_inputs_list_reactive()$superficial_drains_posterior,
@@ -5876,11 +5902,7 @@ server <- function(input, output, session) {
                           approach_repeating = character(),
                           side = character()
       ) 
-        # mutate(across(everything(), ~ replace_na(.x, " "))) %>%
-        # mutate(redcap_repeat_instance = row_number()) %>%
-        # mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-        # mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-        # select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach) 
+
     }
     
     ### ADD THE REVISION DETAILS
@@ -6208,10 +6230,10 @@ server <- function(input, output, session) {
   
   
   output$full_objects_passed_to_posterior_op_note <- renderPrint({
-      # posterior_op_note_list <- posterior_op_note_inputs_list_reactive()
-      posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df <- "See table"
+      posterior_op_note_list <- posterior_op_note_inputs_list_reactive()
+      posterior_op_note_list$posterior_approach_objects_df <- "See table"
       
-      paste(map2(.x = posterior_op_note_list, .y = names(posterior_op_note_inputs_list_reactive()), .f = ~ paste0(.y, ": ", paste(.x, sep = ", ", collapse = ", ")))
+      paste(map2(.x = posterior_op_note_list, .y = names(posterior_op_note_list), .f = ~ paste0(.y, ": ", paste(.x, sep = ", ", collapse = ", ")))
             )
   })
   
@@ -6603,23 +6625,23 @@ server <- function(input, output, session) {
   
   ############################################    ##    ############################################    ############################################    ############################################    ############################################
   
-  task_items_reactive_list <- reactiveValues()
+  # task_items_reactive_list <- reactiveValues()
+  # 
+  # task_items_reactive_list$upload_to_redcap <- 0
+  # 
+  # observeEvent(input$confirm_upload_final, {
+  #   task_items_reactive_list$upload_to_redcap <- 100
+  # })
   
-  task_items_reactive_list$upload_to_redcap <- 0
   
-  observeEvent(input$confirm_upload_final, {
-    task_items_reactive_list$upload_to_redcap <- 100
-  })
+#   output$upload_to_redcap_task <- renderMenu({
+#     dropdownMenu(type = "tasks", 
+#                  badgeStatus = if_else(task_items_reactive_list$upload_to_redcap == 100, "success", "warning"), 
+#                  taskItem(text = "Upload Data to Redcap", 
+#                           value = task_items_reactive_list$upload_to_redcap))
+#   })
   
-  
-  output$upload_to_redcap_task <- renderMenu({
-    dropdownMenu(type = "tasks", 
-                 badgeStatus = if_else(task_items_reactive_list$upload_to_redcap == 100, "success", "warning"), 
-                 taskItem(text = "Upload Data to Redcap", 
-                          value = task_items_reactive_list$upload_to_redcap))
-  })
 }
-
 
 # Run the application 
 shinyApp(ui = ui, server = server)

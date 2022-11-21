@@ -177,54 +177,6 @@ jh_get_exiting_nerve_root_function <- function(interspace){
   return(exiting_root)
 }
 
-# jh_get_exiting_nerve_root_function <- function(interspace){
-#   if(str_detect(string = interspace, pattern = "-") == FALSE){
-#     exiting_root <- case_when(
-#       str_starts(string = interspace, pattern = "O") ~ "C1",
-#       interspace == "C1" ~ "C2",
-#       interspace == "C2" ~ "C3",
-#       interspace == "C3" ~ "C4",
-#       interspace == "C4" ~ "C5",
-#       interspace == "C5" ~ "C6",
-#       interspace == "C6" ~ "C7",
-#       interspace == "C7" ~ "C8",
-#       str_starts(string = interspace, pattern = "T") ~ interspace,
-#       str_starts(string = interspace, pattern = "L") ~ interspace,
-#       str_starts(string = interspace, pattern = "S1") ~ interspace,
-#       interspace == "S2AI" ~ "none",
-#       interspace == "Iliac" ~ "none"
-#     )
-#   }else{
-#     exiting_root <- case_when(
-#       interspace == 'O-C1' ~ "C1",
-#       interspace ==  'C1-C2' ~ 'C2', 
-#       interspace == 'C2-C3' ~ 'C3', 
-#       interspace == 'C3-C4' ~ 'C4', 
-#       interspace == 'C4-C5' ~ 'C5', 
-#       interspace == 'C5-C6' ~ 'C6', 
-#       interspace == 'C6-C7' ~ 'C7', 
-#       interspace == 'C7-T1' ~ 'C8', 
-#       interspace == 'T1-T2' ~ 'T1', 
-#       interspace == 'T2-T3' ~ 'T2', 
-#       interspace == 'T3-T4' ~ 'T3', 
-#       interspace == 'T4-T5' ~ 'T4', 
-#       interspace == 'T5-T6' ~ 'T5', 
-#       interspace == 'T6-T7' ~ 'T6', 
-#       interspace == 'T7-T8' ~ 'T7', 
-#       interspace == 'T8-T9' ~ 'T8', 
-#       interspace == 'T9-T10' ~ 'T9', 
-#       interspace == 'T10-T11' ~ 'T10', 
-#       interspace == 'T11-T12' ~ 'T11', 
-#       interspace == 'T12-L1' ~ 'T12', 
-#       interspace == 'L1-L2' ~ 'L1', 
-#       interspace == 'L2-L3' ~ 'L2', 
-#       interspace == 'L3-L4' ~ 'L3', 
-#       interspace == 'L4-L5' ~ 'L4', 
-#       interspace == 'L5-S1' ~ 'L5'
-#     )
-#   }
-#   return(exiting_root)
-# }
 #################################
 jh_get_vertebral_number_function <- function(level_to_get_number){
   vert_number <-
