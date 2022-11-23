@@ -950,7 +950,7 @@ addition_surgical_details_modal_box_function <-
                              "During the EXPOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
                              "During the CLOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
                              "During the EXPOSURE, liposomal Bupivicaine was injected into the subcutaneous and deep tissues.",
-                             "During CLOSURE,liposomal Bupivicaine was injected into the subcutaneous and deep tissues."
+                             "During CLOSURE, liposomal Bupivicaine was injected into the subcutaneous and deep tissues."
           ),
           input_id = "local_anesthesia", 
           checkboxes_inline = FALSE,

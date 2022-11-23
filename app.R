@@ -4633,8 +4633,7 @@ server <- function(input, output, session) {
       
       complication_text <- paste(glue_collapse(x = str_to_lower(input$intraoperative_complications_vector), sep = ","))
       
-      if(str_detect(complication_text, pattern = "durotomy") & !is.na(input$durotomy_timing) & !is.na(input$durotomy_repair_method)){
-        
+      if(str_detect(complication_text, pattern = "durotomy")){
           if(str_to_lower(input$durotomy_timing) == "other"){
             durotomy_timing_instrument_statement <- glue("An incidental durotomy was created during the procedure, which caused a CSF leak.")
           }else{
@@ -4647,7 +4646,15 @@ server <- function(input, output, session) {
             durotomy_repair_statement <- glue("The dura was repaired using {glue_collapse(input$durotomy_repair_method, sep = ', ', last = ' and ')}.")
           }
         complications_list$durotomy <- paste(durotomy_timing_instrument_statement, str_remove_all(string = str_to_lower(durotomy_repair_statement), pattern = "primarily repaired using ")) 
-        }
+      }
+      
+      if(str_detect(complication_text, pattern = "other")){
+        complications_list$other <- glue("During the case, the procedure was complicated by {input$other_intraoperative_complications}.")
+      }
+      
+      other_predefined_complications_vector <- discard(.x = input$intraoperative_complications_vector, .p = ~ str_detect(.x, "Other|Durotomy"))
+      
+      complications_list$other_predifined_complications <- glue("The procedure was complicated by {glue_collapse(other_predefined_complications_vector, sep = ', ', last = ' and ')}")
     }
     
     posterior_op_note_inputs_list_reactive$complications_list <- complications_list
