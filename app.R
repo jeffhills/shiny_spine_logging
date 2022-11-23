@@ -4645,7 +4645,7 @@ server <- function(input, output, session) {
           }else{
             durotomy_repair_statement <- glue("The dura was repaired using {glue_collapse(input$durotomy_repair_method, sep = ', ', last = ' and ')}.")
           }
-        complications_list$durotomy <- paste(durotomy_timing_instrument_statement, str_remove_all(string = str_to_lower(durotomy_repair_statement), pattern = "primarily repaired using ")) 
+        complications_list$durotomy <- paste(durotomy_timing_instrument_statement, str_remove_all(string = str_to_sentence(durotomy_repair_statement), pattern = "primarily repaired using ")) 
       }
       
       if(str_detect(complication_text, pattern = "other")){
@@ -4951,6 +4951,7 @@ server <- function(input, output, session) {
     complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
       filter(complication != "") %>%
       filter(complication != " ") %>%
+      filter(complication != "Other") %>%
       remove_empty()
     
     if(nrow(complication_df) > 0){
