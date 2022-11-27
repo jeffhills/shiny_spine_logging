@@ -2848,7 +2848,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$implants_complete, ignoreInit = TRUE, ignoreNULL = TRUE, {
     
-    if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(opject, "screw|hook|plate"))) > 0 | nrow(fusion_levels_computed_reactive_df()) > 0){
+    if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw|hook|plate"))) > 0 | nrow(fusion_levels_computed_reactive_df()) > 0){
       updateSwitchInput(session = session, 
                         inputId = "fusion_procedure_performed", 
                         value = TRUE)
