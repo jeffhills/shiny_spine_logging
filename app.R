@@ -2815,6 +2815,30 @@ server <- function(input, output, session) {
       NULL
     }
   })
+  
+  # output$transverse_custom_rods_ui <- renderUI({
+  #   if(input$add_right_custom_rods == TRUE){
+  #     transverse_implants_df  <- all_objects_to_add_list$objects_df %>%
+  #       select(level, side, object, x, y) %>%
+  #       filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
+  #       mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
+  #     
+  #     if(input$right_custom_rods_number > 1){
+  #       column(12,
+  #              pickerInput(inputId = "transverse_custom_rod_1",label = "Rod 1 Connects to:",
+  #                          choices = transverse_implants_df$implant_label,
+  #                          multiple = TRUE,
+  #                          options = list(`actions-box` = TRUE)),
+  #              pickerInput(inputId = "transverse_custom_rod_2",label = "Rod 2 Connects to:",
+  #                          choices = transverse_implants_df$implant_label,
+  #                          multiple = TRUE,
+  #                          options = list(`actions-box` = TRUE))
+  #       )
+  #     }
+  #   }else{
+  #     NULL
+  #   }
+  # })
   ################----------  UPDATE ROD OPTIONS END  ------------######################  
   ################----------  UPDATE ROD OPTIONS END  ------------######################  
   ################----------  UPDATE ROD OPTIONS END  ------------######################  
@@ -2823,11 +2847,18 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$implants_complete, ignoreInit = TRUE, ignoreNULL = TRUE, {
-    if(nrow(fusion_levels_computed_reactive_df()) > 0){
+    
+    if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(opject, "screw|hook|plate"))) > 0 | nrow(fusion_levels_computed_reactive_df()) > 0){
       updateSwitchInput(session = session, 
                         inputId = "fusion_procedure_performed", 
                         value = TRUE)
     }
+
+    # if(nrow(fusion_levels_computed_reactive_df()) > 0){
+    #   updateSwitchInput(session = session, 
+    #                     inputId = "fusion_procedure_performed", 
+    #                     value = TRUE)
+    # }
   })
   
   observeEvent(input$implants_complete, ignoreInit = TRUE, ignoreNULL = TRUE, {
