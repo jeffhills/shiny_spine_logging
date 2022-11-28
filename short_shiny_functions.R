@@ -1676,30 +1676,31 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
         arrange(y)
       
       revision_implants_retained_df <- revision_rods_retained_df %>% 
-        filter(prior_rod_connected == "yes")
+        filter(prior_rod_connected == "yes")  
       
-      if(nrow(revision_implants_retained_df)>0){
-        if(min(unilateral_full_implant_df$y) > max(revision_implants_retained_df$y)){
-          connector_matrix <- revision_implants_retained_df %>%
-            select(x, y) %>%
-            filter(y == max(y)) %>%
-            union_all(unilateral_full_implant_df %>% select(x, y) %>% filter(y == min(y))) %>% 
-            as.matrix()
-          
-          connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
-          
-        }else{
-          connector_matrix <- revision_implants_retained_df %>%
-            select(x, y) %>%
-            filter(y == min(y)) %>%
-            union_all(unilateral_full_implant_df %>% select(x, y) %>% filter(y == max(y))) %>% 
-            as.matrix()
-          
-          connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
-        }
+      if(any(revision_implants_retained_df$old_rod_connected_to_new_rod == "yes")){
+        if(nrow(revision_implants_retained_df)>0){
+          if(min(unilateral_full_implant_df$y) > max(revision_implants_retained_df$y)){
+            connector_matrix <- revision_implants_retained_df %>%
+              select(x, y) %>%
+              filter(y == max(y)) %>%
+              union_all(unilateral_full_implant_df %>% select(x, y) %>% filter(y == min(y))) %>% 
+              as.matrix()
+            
+            connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
+            
+          }else{
+            connector_matrix <- revision_implants_retained_df %>%
+              select(x, y) %>%
+              filter(y == min(y)) %>%
+              union_all(unilateral_full_implant_df %>% select(x, y) %>% filter(y == max(y))) %>% 
+              as.matrix()
+            
+            connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
+          }
+        } 
       }
-      
-      
+    
     }
     
     implant_levels_vector <- unilateral_full_implant_df$level

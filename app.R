@@ -18,7 +18,7 @@ library(rclipboard)
 library(nngeo)
 library(shinydashboard)
 
-library(profvis)
+# library(profvis)
 
 # packageList <- c("shiny", "shinyWidgets", "sf", "tidyverse", "shinyBS", "cowplot", "magick", "ggpattern", "glue", "rlist",
 #                  "janitor", "lubridate", "redcapAPI", "ggpmisc", "rclipboard", "nngeo", "shinydashboard")
@@ -2962,8 +2962,11 @@ server <- function(input, output, session) {
   
   observeEvent(input$plot_click, ignoreInit = TRUE, {
     
-    if(object_added_reactive_df()$object == "lateral_mass_screw" & object_added_reactive_df()$level == "C1"){
-      if(object_added_reactive_df()$side == "left"){
+    object_added <- object_added_reactive_df()$object[1]
+    level_added <- object_added_reactive_df()$level[1]
+    
+    if(object_added == "lateral_mass_screw" & level_added == "C1"){
+      if(unique(object_added_reactive_df()$side) == "left"){
         showModal(
           modalDialog(
             size = "m",
@@ -3466,19 +3469,39 @@ server <- function(input, output, session) {
           revision_implants_status_df <- revision_implants_status_df %>%
             mutate(prior_rod_connected = if_else(level %in% input$left_revision_implants_connected_to_prior_rod, "yes", "no"))
         }
-        if(input$left_revision_rod_status == "retained" | input$left_revision_rod_status == "retained_connected"){
+        if(input$left_revision_rod_status == "retained"){
           retained_df <- retained_df %>%
-            mutate(prior_rod_connected = "yes")
+            mutate(prior_rod_connected = "yes") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
           
           revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "yes")
+            mutate(prior_rod_connected = "yes") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
         }
+        if(input$left_revision_rod_status == "retained_connected"){
+          retained_df <- retained_df %>%
+            mutate(prior_rod_connected = "yes") %>%
+            mutate(old_rod_connected_to_new_rod = "yes")
+          
+          revision_implants_status_df <- revision_implants_status_df%>%
+            mutate(prior_rod_connected = "yes")%>%
+            mutate(old_rod_connected_to_new_rod = "yes")
+        }
+        # if(input$left_revision_rod_status == "retained" | input$left_revision_rod_status == "retained_connected"){
+        #   retained_df <- retained_df %>%
+        #     mutate(prior_rod_connected = "yes")
+        #   
+        #   revision_implants_status_df <- revision_implants_status_df%>%
+        #     mutate(prior_rod_connected = "yes")
+        # }
         if(input$left_revision_rod_status == "removed"){
           retained_df <- retained_df %>%
-            mutate(prior_rod_connected = "no")
+            mutate(prior_rod_connected = "no") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
           
           revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "no")
+            mutate(prior_rod_connected = "no") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
         }
         
         revision_implants_status_df <- revision_implants_status_df %>%
@@ -3593,6 +3616,7 @@ server <- function(input, output, session) {
           }
           
         }
+        
         if(input$right_revision_rod_status == "partially_retained_connected"){
           retained_df <- retained_df %>%
             mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
@@ -3600,20 +3624,59 @@ server <- function(input, output, session) {
           revision_implants_status_df <- revision_implants_status_df %>%
             mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
         }
-        if(input$right_revision_rod_status == "retained" | input$right_revision_rod_status == "retained_connected"){
+        if(input$right_revision_rod_status == "retained"){
           retained_df <- retained_df %>%
-            mutate(prior_rod_connected = "yes")
+            mutate(prior_rod_connected = "yes") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
           
           revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "yes")
+            mutate(prior_rod_connected = "yes") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
         }
+        if(input$right_revision_rod_status == "retained_connected"){
+          retained_df <- retained_df %>%
+            mutate(prior_rod_connected = "yes") %>%
+            mutate(old_rod_connected_to_new_rod = "yes")
+          
+          revision_implants_status_df <- revision_implants_status_df%>%
+            mutate(prior_rod_connected = "yes")%>%
+            mutate(old_rod_connected_to_new_rod = "yes")
+        }
+
         if(input$right_revision_rod_status == "removed"){
           retained_df <- retained_df %>%
-            mutate(prior_rod_connected = "no")
+            mutate(prior_rod_connected = "no") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
           
           revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "no")
+            mutate(prior_rod_connected = "no") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
         }
+        
+        # if(input$right_revision_rod_status == "partially_retained_connected"){
+        #   retained_df <- retained_df %>%
+        #     mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
+        #   
+        #   revision_implants_status_df <- revision_implants_status_df %>%
+        #     mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
+        # }
+        # 
+        # 
+        # 
+        # if(input$right_revision_rod_status == "retained" | input$right_revision_rod_status == "retained_connected"){
+        #   retained_df <- retained_df %>%
+        #     mutate(prior_rod_connected = "yes")
+        #   
+        #   revision_implants_status_df <- revision_implants_status_df%>%
+        #     mutate(prior_rod_connected = "yes")
+        # }
+        # if(input$right_revision_rod_status == "removed"){
+        #   retained_df <- retained_df %>%
+        #     mutate(prior_rod_connected = "no")
+        #   
+        #   revision_implants_status_df <- revision_implants_status_df%>%
+        #     mutate(prior_rod_connected = "no")
+        # }
         
         revision_implants_status_df <- revision_implants_status_df %>%
           select(level, vertebral_number, side, remove_retain, prior_rod_connected, object, x, y)
@@ -3931,7 +3994,6 @@ server <- function(input, output, session) {
       
       rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
       
-      # rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND")), alpha = 0.75)
     }
     
   })
