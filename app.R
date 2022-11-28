@@ -1783,7 +1783,9 @@ server <- function(input, output, session) {
       symptoms <- " "
     }
     
-    age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+    # age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+    
+    age <- trunc((input$date_of_birth %--% input$date_of_surgery) / years(1))
     
     indications_list <- list()
     indications_list$opening <- glue("This is a {age} year-old {input$sex} that presented with")
@@ -1842,6 +1844,8 @@ server <- function(input, output, session) {
     addition_surgical_details_modal_box_function(editing_the_details = TRUE, ## this shows a different button at the footer
                                                  primary_surgeon_first_name_input = input$primary_surgeon_first_name,
                                                  primary_surgeon_last_name_input = input$primary_surgeon_last_name,
+                                                 cosurgeon_yes_no = input$cosurgeon_yes_no, 
+                                                 cosurgeon = input$cosurgeon,
                                                  surgical_assistants = input$surgical_assistants,
                                                  preoperative_diagnosis = input$preoperative_diagnosis,
                                                  postoperative_diagnosis = input$postoperative_diagnosis, 
@@ -1923,6 +1927,7 @@ server <- function(input, output, session) {
                                                                     postop_dispo = input$postop_dispo,
                                                                     postop_abx = input$postop_abx,
                                                                     postop_map_goals = input$postop_map_goals,
+                                                                    postop_transfusion_threshold = input$postop_transfusion_threshold,
                                                                     postop_imaging = input$postop_imaging,
                                                                     postop_pain = input$postop_pain,
                                                                     postop_activity = input$postop_activity,
@@ -1970,6 +1975,7 @@ server <- function(input, output, session) {
       postop_dispo = input$postop_dispo,
       postop_abx = input$postop_abx,
       postop_map_goals = input$postop_map_goals,
+      postop_transfusion_threshold = input$postop_transfusion_threshold,
       postop_imaging = input$postop_imaging,
       postop_pain = input$postop_pain,
       postop_activity = input$postop_activity,
@@ -2004,8 +2010,13 @@ server <- function(input, output, session) {
   additional_surgical_details_reactive_table <- reactive({
     details_list <- list()
     
-    details_list$'Primary Surgeon' <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
-    details_list$'Assistants' <- input$surgical_assistants
+    details_list$'Primary Surgeon:' <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
+    details_list$'Assistants:' <- input$surgical_assistants
+    
+    if(input$cosurgeon_yes_no == TRUE){
+      details_list$'Co-Surgeon:' <- input$cosurgeon 
+    }
+    
     details_list$'Preoperative Diagnosis:' <- input$preoperative_diagnosis
     details_list$'Postoperative Diagnosis:' <- input$postoperative_diagnosis
     details_list$'Surgical Indications:' <- input$indications
@@ -3905,6 +3916,7 @@ server <- function(input, output, session) {
           # filter(!is.na(y)) %>%
           mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
           mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+          mutate(x = x + 0.01) %>%
           arrange(rev(y)) %>%
           distinct() %>%
           as.matrix()
@@ -3919,6 +3931,7 @@ server <- function(input, output, session) {
             # filter(!is.na(y)) %>%
             mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
             mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+            mutate(x = x + 0.01) %>%
             arrange(rev(y)) %>%
             distinct() %>%
             as.matrix() 
@@ -3946,6 +3959,7 @@ server <- function(input, output, session) {
           select(x, y) %>%
           mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
           mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+          mutate(x = x - 0.01) %>%
           arrange(rev(y)) %>%
           distinct() %>%
           as.matrix()
@@ -3960,6 +3974,7 @@ server <- function(input, output, session) {
             select(x, y) %>%
             mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
             mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+            mutate(x = x - 0.01) %>%
             arrange(rev(y)) %>%
             distinct() %>%
             as.matrix() 
@@ -5088,6 +5103,9 @@ server <- function(input, output, session) {
       op_note_list$"\nPatient:" <- paste(input$patient_first_name, input$patient_last_name)
       op_note_list$"\nDate of Surgery:" <- as.character(input$date_of_surgery)
       op_note_list$"\nPrimary Surgeon:" <- if_else(!is.null(input$primary_surgeon_last_name), as.character(paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)), " ")
+      if(input$cosurgeon_yes_no == TRUE){
+        op_note_list$'\n*Co-Surgeon:' <- input$cosurgeon 
+      }
       op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
       op_note_list$"\nPre-operative Diagnosis:" <- if_else(!is.null(input$preoperative_diagnosis), paste0("-", as.character(input$preoperative_diagnosis)), " ")
       op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), glue_collapse(x = unlist(str_split(input$postoperative_diagnosis, pattern = "; ")), sep = "\n"), " ")
@@ -5204,6 +5222,9 @@ server <- function(input, output, session) {
       op_note_list$"*Patient:" <- paste(input$patient_first_name, input$patient_last_name)
       op_note_list$"\n*Date of Surgery:" <- as.character(input$date_of_surgery)
       op_note_list$"\n*Primary Surgeon:" <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
+      if(input$cosurgeon_yes_no == TRUE){
+        op_note_list$'\n*Co-Surgeon:' <- input$cosurgeon 
+      }
       op_note_list$"\n*Surgical Assistants:" <- input$surgical_assistants
       op_note_list$"\n*Preprocedure ASA Class:" <- input$asa_class
       op_note_list$"\n*Anesthesia:" <- input$anesthesia
@@ -5262,6 +5283,7 @@ server <- function(input, output, session) {
       op_note <- str_replace_all(string = op_note, pattern = "Patient:", replacement = "<B>Patient:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Date of Surgery:", replacement = "<B>Date of Surgery:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Primary Surgeon:", replacement = "<B>Primary Surgeon:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Co-Surgeon:", replacement = "<B>Co-Surgeon:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Surgical Assistants:", replacement = "<B>Surgical Assistants:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Preprocedure ASA Class:", replacement = "<B>Preprocedure ASA Class:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Anesthesia:", replacement = "<B>Anesthesia:</B>")

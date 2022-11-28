@@ -826,6 +826,8 @@ addition_surgical_details_modal_box_function <-
            fade_appearance = TRUE,
            primary_surgeon_first_name_input = "",
            primary_surgeon_last_name_input = "",
+           cosurgeon_yes_no = FALSE,
+           cosurgeon = "",
            surgical_assistants = "",
            preoperative_diagnosis = " ",
            postoperative_diagnosis = " ",
@@ -882,6 +884,23 @@ addition_surgical_details_modal_box_function <-
                            tags$td(width = paste0((100-left_column_percent_width)/2, "%"), textInput(inputId = "primary_surgeon_last_name", label = NULL, value = primary_surgeon_last_name_input, placeholder = "Last Name", width = "80%"))
                    ) 
         ),
+        jh_make_shiny_table_row_function(
+          left_column_percent_width = left_column_percent_width,
+          left_column_label = "Was there a Co-surgeon?",
+          font_size = row_label_font_size,
+          input_type = "switch",
+          input_id = "cosurgeon_yes_no",
+          initial_value_selected = cosurgeon_yes_no
+        ),
+        conditionalPanel(condition = "input.cosurgeon_yes_no == true",
+                         jh_make_shiny_table_row_function(
+                           left_column_percent_width = left_column_percent_width,
+                           left_column_label = "Co-surgeon:",
+                           font_size = row_label_font_size,
+                           input_type = "text",
+                           input_id = "cosurgeon", 
+                           initial_value_selected = cosurgeon
+                         )),
         jh_make_shiny_table_row_function(
           left_column_percent_width = left_column_percent_width,
           left_column_label = "Assistants:",
@@ -1735,6 +1754,7 @@ addition_surgical_details_modal_box_2_function <-
           input_type = "checkbox",
           choices_vector = c("OK to resume normal diet", 
                              "Start with clear liquid diet and advance as tolerated", 
+                             "Start with clear liquid diet and advance when passing flatus",
                              "NPO until return of bowel sounds",
                              "Please place Nutrition Consult",
                              "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
@@ -1783,6 +1803,7 @@ addition_surgical_details_modal_box_2_function <-
           choices_vector = c("Follow-up in spine clinic in 2wks.", 
                              "Follow-up in spine clinic in 6wks.",
                              "Follow-up in spine clinic in ***wks.",
+                             "Follow-up in spine clinic on ***.",
                              "Follow-up in spine trauma clinic in 2wks.", 
                              "Follow-up in ***"),
           initial_value_selected = postop_followup
