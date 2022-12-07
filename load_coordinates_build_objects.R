@@ -39,7 +39,20 @@ labels_df <- levels_numbered_df %>%
 labels_anterior_df <- implant_starts_df %>%
   filter(object == "corpectomy") %>%
   select(level, x, y) %>%
-  distinct() 
+  distinct()  %>%
+  mutate(y = case_when(
+    level == "C3" ~ y + 0.005,
+    level == "C4" ~ y + 0.01,
+    level == "C5" ~ y + 0.01,
+    level == "C6" ~ y + 0.01,
+    level == "C7" ~ y + 0.01,
+    level == "T1" ~ y + 0.01,
+    level == "T2" ~ y + 0.01,
+    level == "T3" ~ y + 0.01,
+    level == "T4" ~ y + 0.01,
+    level == "T5" ~ y + 0.01,
+    TRUE ~ y
+  ))
 
 
 interbody_levels_df <- levels_numbered_df %>%

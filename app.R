@@ -1783,8 +1783,7 @@ server <- function(input, output, session) {
       symptoms <- " "
     }
     
-    # age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-    
+
     age <- trunc((input$date_of_birth %--% input$date_of_surgery) / years(1))
     
     indications_list <- list()
@@ -4885,38 +4884,25 @@ server <- function(input, output, session) {
       filter(approach == "anterior")  %>%
       select(-object_constructed)
     
-    if(any(anterior_approach_objects_df$object == "anterior_plate")){
-      anterior_plate_screws_objects_df <- anterior_approach_objects_df %>%
-        filter(object == "anterior_plate") %>%
-        select(level, vertebral_number, side, object)%>%
-        separate(col = level, into = c("cranial_level", "caudal_level"), sep = "-") %>%
-        mutate(side_left = "left", side_right = "right") %>%
-        select(-side, vertebral_number) %>%
-        pivot_longer(cols = c(cranial_level, caudal_level), names_to = "cranial_caudal", values_to = "level") %>%
-        select(level, object, side_left, side_right) %>%
-        pivot_longer(cols = c(side_left, side_right), names_to = "remove", values_to = "side") %>%
-        distinct() %>%
-        mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-        select(level, vertebral_number, side, object) %>%
-        mutate(object = "anterior_plate_screw") 
+    if(any(str_detect(screw_details_redcap_df_reactive()$screw_size_type, "Anterior"))){
+     
+      # names include: screw_level, screw_implant, screw_side, screw_diameter, screw_length, screw_type, screw_size_type
       
+      anterior_plate_screws_objects_df <- screw_details_redcap_df_reactive() %>%
+        filter(str_detect(screw_size_type, "Anterior")) %>%
+        mutate(object = "anterior_plate_screw", 
+               approach = "anterior", 
+               category = "anterior_disc", 
+               implant = "yes") %>%
+        mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = screw_level))  %>%
+        select(level = screw_level, approach, category, vertebral_number, implant, object, side = screw_side, screw_size_type)
+       
       anterior_approach_objects_df <- anterior_approach_objects_df %>%
-        union_all(anterior_plate_screws_objects_df)
-      
-      anterior_screws_df <- anterior_approach_objects_df %>%
-        filter(str_detect(object, "screw")) %>%
-        mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
-        left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
-        select(level, approach, side, object, screw_size_type) %>%
-        mutate(screw_size_type = as.character(screw_size_type)) %>%
-        replace_na(list(screw_size_type = " "))
-      
-      anterior_approach_objects_df  <- anterior_approach_objects_df%>%
-        left_join(anterior_screws_df) %>%
-        mutate(screw_size_type = as.character(screw_size_type)) %>%
+        union_all(anterior_plate_screws_objects_df) %>%
         replace_na(list(screw_size_type = " "))
     }
     
+
     if(nrow(interbody_details_df_reactive())>0){
       anterior_approach_objects_df <- anterior_approach_objects_df %>%
         left_join(interbody_details_df_reactive() %>% select(level, approach, object, implant_statement)) %>%
@@ -6166,7 +6152,6 @@ server <- function(input, output, session) {
   
   ## NEW
   screw_details_redcap_df_reactive <- reactive({
-    # if(input$tabs != "patient_details_procedures"){
     
     if(nrow(screws_selected_df_reactive())>0){
       screw_details_full_df <- screws_selected_df_reactive() %>%
@@ -6191,11 +6176,13 @@ server <- function(input, output, session) {
           screw_type == "Offset" ~ "Offset",
           screw_type == "Anterior" ~ "Anterior"
         )) %>%
+        mutate(remove_unused_anterior_screws = if_else(screw_type == "Anterior" & (is.na(screw_length) | screw_length == "" | screw_length == screw_diameter), "remove", "keep")) %>%
+        filter(remove_unused_anterior_screws == "keep") %>%
+        select(-remove_unused_anterior_screws) %>%
         mutate(screw_diameter = as.character(screw_diameter)) %>%
         mutate(screw_length = as.character(screw_length)) %>%
         mutate(screw_diameter = if_else(is.na(screw_diameter), "na", screw_diameter)) %>%
         mutate(screw_length = if_else(is.na(screw_length), "na", screw_length)) %>%
-        # replace_na(list(screw_diameter = "na", screw_length = "na")) %>%
         mutate(screw_size = case_when(
           screw_diameter == "na" & screw_length == "na" ~ "",
           screw_diameter != "na" & screw_length == "na" ~ paste0(screw_diameter, "mm"),
@@ -6635,7 +6622,7 @@ server <- function(input, output, session) {
           screw_details_repeating <- screw_details_redcap_df_reactive() %>%
             mutate(record_id = record_number) %>%
             mutate(redcap_event_name = "surgery_arm_1") %>%
-            mutate(redcap_repeat_instance = row_number() +screw_details_repeating_instance_add) %>%
+            mutate(redcap_repeat_instance = row_number() + screw_details_repeating_instance_add) %>%
             mutate(redcap_repeat_instrument = "screw_details_repeating") %>%
             mutate(screw_details_repeating_complete = "Complete") %>%
             select(record_id, redcap_event_name, everything())

@@ -137,30 +137,23 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df){
       arrange(vertebral_number) %>%
       distinct()
     
-    statement <- glue("I placed an anterior plate spanning {glue_collapse(levels_df$level, sep = ', ', last = ' and ')}. After selecting an appropriately sized plate, I held the plate into position and drilled and tapped the path for the screws. The screws were then inserted sequentially into the vertebral body of {glue_collapse(levels_df$level, sep = ', ', last = ' and ')} to hold the plate into position.")
+    statement <- glue("I placed an anterior plate spanning {glue_collapse(levels_df$level, sep = ', ', last = ' and ')}. After selecting an appropriately sized plate, I held the plate into position and drilled and tapped the path for the screws. The screws were then inserted sequentially to hold the plate into position.")
   }
   
   if(object == "anterior_plate_screw"){
-    levels_df <- levels_nested_df %>%
-      mutate(level = if_else(level == "Iliac" | level =="S2AI", "S1", level)) %>%
-      arrange(vertebral_number) %>%
-      distinct() %>%
-      mutate(screw_size_type = str_remove_all(string = screw_size_type, pattern = " Anterior")) %>%
-      pivot_wider(names_from = side, values_from = screw_size_type) %>%
-      mutate(left = if_else(is.na(left), "", left)) %>%
-      mutate(right = if_else(is.na(right), "", right)) %>%
-      mutate(left_statement = if_else(str_count(string = left) > 1, 
-                                      paste("a", left, "screw on the left"), 
-                                      "")) %>%
-      mutate(right_statement = if_else(str_count(string = right) > 1, 
-                                       if_else(str_count(string = left) > 1, 
-                                               paste("and a", right, "screw on the right"), 
-                                               paste("a", right, "screw on the right")), 
-                                       "")
-      ) %>%
-      mutate(screw_statement = glue("At {level}, I placed {paste(left_statement, right_statement)}."))
     
-    statement <- as.character(glue_collapse(levels_df$screw_statement, sep = " "))
+    screw_statement_df <- levels_nested_df %>% 
+      arrange(vertebral_number) %>%
+      mutate(screw_size_type = str_remove_all(screw_size_type, " Anterior")) %>%
+      mutate(screw_statement = glue("a {screw_size_type} screw on the {side}")) %>%
+      group_by(level) %>%
+      mutate(full_statement = paste0("At ", level, ", I placed ", glue_collapse(x = screw_statement, sep = ", ", last = " and "), ".")) %>%
+      ungroup() %>%
+      select(full_statement) %>% 
+      distinct()
+    # 
+ 
+    statement <- as.character(glue_collapse(screw_statement_df$full_statement, sep = " "))
     
   }
   
@@ -345,23 +338,10 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
   
   if(paragraphs_combined_or_distinct == "combine"){
     
-    if(procedure_paragraph_intro == "anterior spinal instrumentation (distinct from an interbody implant)"){
-      
-      levels_df <- df_with_levels_object_nested %>%
-        separate(col = level, into = c("cranial", "caudal"), sep = "-") %>%
-        pivot_longer(cols = c(cranial, caudal)) %>%
-        select(level = value) %>%
-        filter(!is.na(level)) %>%
-        mutate(level = if_else(level == "Iliac" | level == "S2AI", "S1", level)) %>%
-        mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-        arrange(vertebral_number) %>%
-        distinct()
-    }else{
-      levels_df <- df_with_levels_object_nested %>%
-        select(level, vertebral_number) %>%
-        distinct() %>%
-        arrange(vertebral_number)
-    }
+    levels_df <- df_with_levels_object_nested %>%
+      select(level, vertebral_number) %>%
+      distinct() %>%
+      arrange(vertebral_number)
     
     start_statement <- glue("I then proceeded with the {procedure_paragraph_intro} at {glue_collapse(levels_df$level, sep = (', '), last = ' and ')}.")
     
@@ -421,25 +401,46 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
   }
   
   anterior_df <- all_objects_to_add_df %>%
-    select(level, vertebral_number, object, side, contains("screw_size_type"), contains("implant_statement"), direction) %>%
-    mutate(order_number = row_number())
+    select(level, vertebral_number, object, side, contains("screw_size_type"), contains("implant_statement"), direction)
+  
+  
+  anterior_order_of_operations_df <- tibble(object =  c("decompression_diskectomy_fusion",
+                                                            "diskectomy_fusion",
+                                                            "diskectomy_fusion_no_interbody_device",
+                                                            "anterior_disc_arthroplasty",
+                                                            "diskectomy_only",
+                                                            "corpectomy",
+                                                            "partial_corpectomy",
+                                                            "anterior_interbody_implant", 
+                                                            "corpectomy_cage",
+                                                            "screw_washer",
+                                                            "anterior_buttress_plate",
+                                                            "anterior_plate", 
+                                                            "anterior_plate_screw")) %>%
+    mutate(order_of_operation = row_number())
+  
   
   anterior_df <- anterior_df %>%
-    mutate(object = as_factor(object)) %>%
-    mutate(object = fct_relevel(object, c("decompression_diskectomy_fusion",
-                                          "diskectomy_fusion",
-                                          "diskectomy_fusion_no_interbody_device",
-                                          "anterior_disc_arthroplasty",
-                                          "corpectomy",
-                                          "partial_corpectomy",
-                                          "anterior_interbody_implant", 
-                                          "corpectomy_cage",
-                                          "screw_washer",
-                                          "anterior_buttress_plate",
-                                          "anterior_plate", 
-                                          "anterior_plate_screw"))) %>%
-    mutate(object = fct_drop(object)) %>%
-    arrange(object)
+    left_join(anterior_order_of_operations_df) %>%
+    arrange(order_of_operation) %>%
+    mutate(object = fct_inorder(object)) %>%
+    select(-order_of_operation)
+    # mutate(object = as_factor(object)) %>%
+    # mutate(object = fct_relevel(object, c("decomprfession_diskectomy_fusion",
+    #                                       "diskectomy_fusion",
+    #                                       "diskectomy_fusion_no_interbody_device",
+    #                                       "anterior_disc_arthroplasty",
+    #                                       "diskectomy_only",
+    #                                       "corpectomy",
+    #                                       "partial_corpectomy",
+    #                                       "anterior_interbody_implant", 
+    #                                       "corpectomy_cage",
+    #                                       "screw_washer",
+    #                                       "anterior_buttress_plate",
+    #                                       "anterior_plate", 
+    #                                       "anterior_plate_screw"))) %>%
+    # mutate(object = fct_drop(object)) %>%
+    # arrange(object)
   
   
   anterior_procedure_category_nested_df <- anterior_df %>%
@@ -468,39 +469,39 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
                                                                                       paragraphs_combined_or_distinct = ..3))) %>%
     select(-data)
   
-  procedure_order_df <- anterior_df %>%
-    select(level, object, order_number) %>%
-    mutate(procedure_category = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
-    unnest(procedure_category) %>%
-    mutate(procedure_category = str_to_lower(procedure_category)) %>%
-    select(order_number, level, procedure_category)
+  # procedure_order_df <- anterior_df %>%
+  #   select(level, object, order_number) %>%
+  #   mutate(procedure_category = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
+  #   unnest(procedure_category) %>%
+  #   mutate(procedure_category = str_to_lower(procedure_category)) %>%
+  #   select(order_number, level, procedure_category)
+  # 
+  # 
+  # distinct_unnested_df <- paragraphs_df %>%
+  #   filter(paragraphs_combine_or_distinct == "distinct") %>%
+  #   unnest(paragraphs) %>%
+  #   rename(paragraphs = paragraph) %>%
+  #   left_join(procedure_order_df) %>%
+  #   select(order_number, everything())%>%
+  #   select(order_number, procedure_category, paragraphs) 
+  # 
+  # combine_unnested_df <- paragraphs_df %>%
+  #   filter(paragraphs_combine_or_distinct == "combine") %>%
+  #   unnest(paragraphs)%>%
+  #   left_join(procedure_order_df) %>%
+  #   select(order_number, procedure_category, paragraphs) 
+  # 
+  # full_paragraphs_unnested_df <- distinct_unnested_df %>%
+  #   union_all(combine_unnested_df) %>%
+  #   ungroup() %>%
+  #   arrange(order_number) %>%
+  #   select(paragraphs) %>%
+  #   distinct()
   
-  
-  distinct_unnested_df <- paragraphs_df %>%
-    filter(paragraphs_combine_or_distinct == "distinct") %>%
-    unnest(paragraphs) %>%
-    rename(paragraphs = paragraph) %>%
-    left_join(procedure_order_df) %>%
-    select(order_number, everything())%>%
-    select(order_number, procedure_category, paragraphs) 
-  
-  combine_unnested_df <- paragraphs_df %>%
-    filter(paragraphs_combine_or_distinct == "combine") %>%
-    unnest(paragraphs)%>%
-    left_join(procedure_order_df) %>%
-    select(order_number, procedure_category, paragraphs) 
-  
-  full_paragraphs_unnested_df <- distinct_unnested_df %>%
-    union_all(combine_unnested_df) %>%
-    ungroup() %>%
-    arrange(order_number) %>%
-    select(paragraphs) %>%
-    distinct()
-  
-  procedure_paragraphs <- glue_collapse(x = full_paragraphs_unnested_df$paragraphs, sep = "\n\n")
+  # procedure_paragraphs <- glue_collapse(x = full_paragraphs_unnested_df$paragraphs, sep = "\n\n")
   
   ##################
-  # procedure_paragraphs <- glue_collapse(x = paragraphs_df$paragraphs, sep = "\n\n")
+  procedure_paragraphs <- glue_collapse(x = paragraphs_df$paragraphs, sep = "\n\n")
   
   
   if(nrow(bone_graft_df)>0){
