@@ -338,10 +338,24 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
   
   if(paragraphs_combined_or_distinct == "combine"){
     
-    levels_df <- df_with_levels_object_nested %>%
-      select(level, vertebral_number) %>%
-      distinct() %>%
-      arrange(vertebral_number)
+    ### need to do this because screw implants and plate have disc or vertebral levels listed
+    if(procedure_paragraph_intro == "anterior spinal instrumentation (distinct from an interbody implant)"){
+      levels_df <- df_with_levels_object_nested %>%
+        select(level, vertebral_number) %>%
+        separate(level, into = c("cranial", "caudal"), sep = "-") %>%
+        pivot_longer(cols = -vertebral_number, names_to = "region", values_to = "level") %>%
+        select(level) %>%
+        filter(!is.na(level)) %>%
+        distinct() %>%
+        mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+        arrange(vertebral_number) 
+      
+    }else{
+      levels_df <- df_with_levels_object_nested %>%
+        select(level, vertebral_number) %>%
+        distinct() %>%
+        arrange(vertebral_number) 
+    }
     
     start_statement <- glue("I then proceeded with the {procedure_paragraph_intro} at {glue_collapse(levels_df$level, sep = (', '), last = ' and ')}.")
     
@@ -425,22 +439,6 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
     arrange(order_of_operation) %>%
     mutate(object = fct_inorder(object)) %>%
     select(-order_of_operation)
-    # mutate(object = as_factor(object)) %>%
-    # mutate(object = fct_relevel(object, c("decomprfession_diskectomy_fusion",
-    #                                       "diskectomy_fusion",
-    #                                       "diskectomy_fusion_no_interbody_device",
-    #                                       "anterior_disc_arthroplasty",
-    #                                       "diskectomy_only",
-    #                                       "corpectomy",
-    #                                       "partial_corpectomy",
-    #                                       "anterior_interbody_implant", 
-    #                                       "corpectomy_cage",
-    #                                       "screw_washer",
-    #                                       "anterior_buttress_plate",
-    #                                       "anterior_plate", 
-    #                                       "anterior_plate_screw"))) %>%
-    # mutate(object = fct_drop(object)) %>%
-    # arrange(object)
   
   
   anterior_procedure_category_nested_df <- anterior_df %>%
@@ -456,6 +454,7 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df, b
     nest() %>%
     mutate(paragraphs_combine_or_distinct = map(.x = procedure_category, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
     unnest(paragraphs_combine_or_distinct)
+  
   # mutate(paragraphs_combine_or_distinct = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_category)) 
   
   
@@ -1317,6 +1316,24 @@ op_note_procedures_present_listed_function <- function(objects_added_df,
       unnest(procedure_class) %>%
       mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
       unnest(procedures_per_line)
+  }
+  
+  if(any(summary_nested_df$procedure_class == "Anterior spinal instrumentation (distinct from an interbody implant)")){
+    ant_instrumentation_df <- summary_nested_df %>%
+      filter(procedure_class == "Anterior spinal instrumentation (distinct from an interbody implant)") %>%
+      separate(level, into = c("cranial", "caudal"), sep = "-") %>%
+      pivot_longer(cols = c("cranial", "caudal"), names_to = "region", values_to = "level") %>%
+      # select(level) %>%
+      filter(!is.na(level)) %>%
+      distinct() %>%
+      mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+      arrange(vertebral_number) %>%
+      select(level, object, vertebral_number, procedure_class, procedures_per_line) 
+    
+    summary_nested_df <- summary_nested_df %>%
+      filter(procedure_class != "Anterior spinal instrumentation (distinct from an interbody implant)") %>%
+      union_all(ant_instrumentation_df)
+    
   }
   
   
