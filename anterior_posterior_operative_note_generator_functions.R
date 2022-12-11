@@ -395,7 +395,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   if(multiple_position_procedure == TRUE){
     procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and we prepared for the next portion of the procedure. I was personally present for the entirety of the {procedures_listed}.")
   }else{
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was transferred to the hospital bed, and awoke uneventfully. I was personally present for the entirety of the {procedures_listed}.")
+    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was transferred to the hospital bed. I was personally present for the entirety of the {procedures_listed}.")
   }
   
   procedure_paragraphs <- glue_collapse(x = procedure_details_list, sep = "\n\n")
@@ -975,7 +975,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       rod_statements_list$alignment_and_rod_placement <-  case_when(
         str_detect(string = alignment_correction_technique, pattern = "rod benders") ~ glue("The rods were set into place, secured with set screws and {alignment_correction_technique}."), 
         str_detect(string = str_to_lower(alignment_correction_technique), pattern = "pro-axis") ~ glue("{alignment_correction_technique} and the rods were set into place and secured with set screws."), 
-        TRUE ~ glue("The rods placed into position and secured with set screws. "))
+        TRUE ~ glue("The rods were placed into position and secured with set screws. "))
       
       if(nrow(revision_implants_df) > 0){
         if(any(revision_implants_df$prior_rod_connected == "yes")){
