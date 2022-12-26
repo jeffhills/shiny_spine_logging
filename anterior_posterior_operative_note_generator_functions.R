@@ -187,8 +187,8 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   }else if(any(antibiotics == "None (Antibiotics were held)")){
     first_paragraph_list$antibiotic_statement <- "Preoperative antibiotics were held until tissue cultures could be obtained."
   }else{
-    first_paragraph_list$antibiotic_statement <- paste(glue("Preoperative antibiotics were administered including {glue_collapse(antibiotics, sep = ',', last = ' and ')}."))
-  }
+    first_paragraph_list$antibiotic_statement <- paste0(glue_collapse(antibiotics, sep = ", ", last = " and "), " was administered for preoperative antibiotics.")
+    }
   
   
   if(any(str_detect(additional_procedures_vector, "Halo"))){
@@ -198,8 +198,8 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$head_statement <- paste(glue("Cranial tongs were applied to {his_or_her} skull for positioning and an appropriate weight was selected for cranial traction."))
   }
   
-  if(length(neuromonitoring_list$modalities) > 0){
-    first_paragraph_list$spinal_cord_monitoring <- glue("Spinal cord monitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
+  if(length(neuromonitoring_list$modalities) > 0 & (any(neuromonitoring_list$modalities == "None") == FALSE)){
+    first_paragraph_list$spinal_cord_monitoring <- glue("Neuromonitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
   }
   
   if(length(neuromonitoring_list$pre_positioning_motors) > 0){
@@ -707,11 +707,11 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   }else if(any(antibiotics == "None (Antibiotics were held)")){
     first_paragraph_list$antibiotic_statement <- "Preoperative antibiotics were held until tissue cultures could be obtained."
   }else{
-    first_paragraph_list$antibiotic_statement <- paste0("Preoperative Antibiotics were administered including ", glue_collapse(antibiotics, sep = ", ", last = " and "), ".")
+    first_paragraph_list$antibiotic_statement <- paste0(glue_collapse(antibiotics, sep = ", ", last = " and "), " was administered for preoperative antibiotics.")
   }
   
-  if(length(neuromonitoring_list$modalities) > 0){
-    first_paragraph_list$spinal_cord_monitoring <- glue("Spinal cord monitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
+  if(length(neuromonitoring_list$modalities) > 0 & (any(neuromonitoring_list$modalities == "None") == FALSE)){
+    first_paragraph_list$spinal_cord_monitoring <- glue("Neuromonitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
   }
   
   if(length(neuromonitoring_list$pre_positioning_motors) > 0){
