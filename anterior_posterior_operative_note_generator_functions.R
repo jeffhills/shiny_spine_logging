@@ -281,11 +281,11 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                                     approach_statement)
   }else{
     
-    if(anterior_approach_laterality == "Lateral Retroperitoneal Antepsoas"){
-      first_paragraph_list$surgical_approach <- glue("Fluoroscopy was used to obtain a perfect AP and lateral xray and mark the levels. The skin and subcutaneous fat was incised in line with the disk space. The aponeurosis of the external obliques were incised and the muscle fibers divided. The internal obliques were divided, and the transversus abdominis was then divided. I then bluntly dissected the plane between the retroperitoneal fat and the psoas fascia, and the peritoneal cavity was retracted medially. The surface of the psoas was identified and followed down to the vertebral body and I remained anterior to the psoas. Once I was down to the spine, a pin was placed to confirm levels using xray. The dilators were then inserted sequentially and EMG was used to test each dilator. Once the largest dilator had been placed, the retractors were inserted. ")
+    if(anterior_approach_laterality == "Lateral Antepsoas"){
+      first_paragraph_list$surgical_approach <- glue("Fluoroscopy was used to obtain a perfect AP and lateral xray and mark the levels. The skin and subcutaneous fat was incised in line with the disk space. The aponeurosis of the external obliques were incised and the muscle fibers divided. The internal obliques were divided, and the transversus abdominis was then divided. I then bluntly dissected the plane between the retroperitoneal fat and the psoas fascia, and the peritoneal cavity was retracted anteriorly. The surface of the psoas was identified and followed down to the vertebral body and I remained anterior to the psoas. Once I was down to the spine, a pin was placed to confirm levels using xray. The dilators were then inserted sequentially and EMG was used to test each dilator. Once the largest dilator had been placed, the retractors were inserted. ")
       
-    }else if(anterior_approach_laterality == "Lateral Retroperitoneal Transpsoas"){
-      first_paragraph_list$surgical_approach <- glue("Fluoroscopy was used to obtain a perfect AP and lateral xrays and mark the levels. The skin and subcutaneous fat was incised in line with the disk space. The aponeurosis of the external obliques were incised and the muscle fibers divided. The internal obliques were divided, and the transversus abdominis was then divided. I then bluntly dissected the plane between the retroperitoneal fat and the psoas fascia, and the peritoneal cavity was retracted medially. The surface of the psoas was identified and followed down to the vertebral body. Once I was down to the spine, a pin was placed to confirm levels using xray. The dilators were then inserted sequentially and EMG was used to test each dilator. Once the largest dilator had been placed, the retractors were inserted. ")
+    }else if(anterior_approach_laterality == "Lateral Transpsoas"){
+      first_paragraph_list$surgical_approach <- glue("Fluoroscopy was used to obtain a perfect AP and lateral xrays and mark the levels. The skin and subcutaneous fat was incised in line with the disk space. The aponeurosis of the external obliques were incised and the muscle fibers divided. The internal obliques were divided, and the transversus abdominis was then divided. I then bluntly dissected the plane between the retroperitoneal fat and the psoas fascia, and the peritoneal cavity was retracted anteriorly. The surface of the psoas was identified and followed down to the vertebral body. Once I was down to the spine, a pin was placed to confirm levels using xray. The dilators were then inserted sequentially and EMG was used to test each dilator to confirm I was not impinging the lumbar plexus. Once the largest dilator had been placed, the retractor was inserted and I used triggered EMG and direct visualization to confirm I had not trapped any of the lumbar plexus. ")
       
     }else{
       first_paragraph_list$surgical_approach <- glue("The anterior approach to the spine was carried out with assistance from the vascular surgeon. A {anterior_approach_laterality} approach was carried out down toward the spine. Once the approach was complete, retractors were placed and the surgical levels were confirmed using fluoroscopy. ")
@@ -340,7 +340,8 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   ################### PROCEDURE PARAGRAPHS ##################
   
   procedure_details_list$procedures <- all_anterior_procedures_paragraphs_function(all_objects_to_add_df = all_objects_to_add_df, 
-                                                                                   bone_graft_df = anterior_biologics_df)
+                                                                                   bone_graft_df = anterior_biologics_df, 
+                                                                                   approach = anterior_approach_laterality)
   
   ############################# CLOSURE #########################
   

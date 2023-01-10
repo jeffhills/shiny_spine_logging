@@ -646,83 +646,156 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                                                                            instruments_used_for_bony_work = "High-speed burr only", 
                                                                            row_label_font_size = 16, 
                                                                            question_label_column_width = 25, 
-                                                                           question_text_align = "right"){
+                                                                           question_text_align = "right", 
+                                                                           anterior_approach = "yes", 
+                                                                           posterior_approach = "yes"){
   
   modalDialog(title = "Confirm Surgical Details:", 
               size = "l",
               easyClose = FALSE,
               footer = actionButton(inputId = "fusion_levels_technique_details_modal_complete_button", label = "Confirmed"),
               box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
-                  conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
-                                   jh_make_shiny_table_row_function(
-                                     left_column_label = "Posterior approach was:",
-                                     input_type = "prettyRadioButtons",
-                                     text_align = question_text_align,
-                                     input_id = "approach_specified_posterior",
-                                     left_column_percent_width = question_label_column_width,
-                                     font_size = row_label_font_size,
-                                     checkboxes_inline = TRUE,
-                                     choices_vector = c("Midline",
-                                                                  "Paraspinal (Wiltse)", 
-                                                                  "Stab"),
-                                     initial_value_selected = approach_specified_posterior
-                                   ),
-                                   hr(),
-                                   jh_make_shiny_table_row_function(
-                                     left_column_label = "The procedure was performed:",
-                                     input_type = "prettyRadioButtons",
-                                     text_align = question_text_align,
-                                     input_id = "approach_open_mis",
-                                     left_column_percent_width = question_label_column_width,
-                                     font_size = row_label_font_size,
-                                     checkboxes_inline = TRUE,
-                                     choices_vector = c("Open",
-                                                        "Tubular", 
-                                                        "Endoscopic", 
-                                                        "Mini Open",
-                                                        "Percutaneous Screw"
-                                     ),
-                                     initial_value_selected = approach_open_mis
-                                   ),
-                                   hr(),
-                                   jh_make_shiny_table_row_function(
-                                     left_column_label = "Select any modality used:",
-                                     input_type = "prettyCheckboxGroup",
-                                     text_align = question_text_align,
-                                     input_id = "approach_robot_navigation",
-                                     left_column_percent_width = question_label_column_width,
-                                     font_size = row_label_font_size,
-                                     checkboxes_inline = TRUE,
-                                     choices_vector = c("Microscopic",
-                                                        "Fluoroscopy-guided",
-                                                        "Navigated", 
-                                                        "Robotic", 
-                                                        "NA"),
-                                     initial_value_selected = approach_robot_navigation
-                                   )
-                  ),
+                  if(posterior_approach == "yes"){
+                    jh_make_shiny_table_row_function(
+                      left_column_label = "POSTERIOR approach was:",
+                      input_type = "prettyRadioButtons",
+                      text_align = question_text_align,
+                      input_id = "approach_specified_posterior",
+                      left_column_percent_width = question_label_column_width,
+                      font_size = row_label_font_size,
+                      checkboxes_inline = TRUE,
+                      choices_vector = c("Midline",
+                                         "Paraspinal (Wiltse)", 
+                                         "Stab"),
+                      initial_value_selected = approach_specified_posterior
+                    )
+                    },
+                    if(posterior_approach == "yes"){
+                    jh_make_shiny_table_row_function(
+                      left_column_label = "The procedure was performed:",
+                      input_type = "prettyRadioButtons",
+                      text_align = question_text_align,
+                      input_id = "approach_open_mis",
+                      left_column_percent_width = question_label_column_width,
+                      font_size = row_label_font_size,
+                      checkboxes_inline = TRUE,
+                      choices_vector = c("Open",
+                                         "Tubular", 
+                                         "Endoscopic", 
+                                         "Mini Open",
+                                         "Percutaneous Screw"
+                      ),
+                      initial_value_selected = approach_open_mis
+                    )
+                    },
+                    if(posterior_approach == "yes"){
+                      jh_make_shiny_table_row_function(
+                        left_column_label = "Select any modality used:",
+                        input_type = "prettyCheckboxGroup",
+                        text_align = question_text_align,
+                        input_id = "approach_robot_navigation",
+                        left_column_percent_width = question_label_column_width,
+                        font_size = row_label_font_size,
+                        checkboxes_inline = TRUE,
+                        choices_vector = c("Microscopic",
+                                           "Fluoroscopy-guided",
+                                           "Navigated", 
+                                           "Robotic", 
+                                           "NA"),
+                        initial_value_selected = approach_robot_navigation
+                      )
+                      },
+                  # conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
+                                   # jh_make_shiny_table_row_function(
+                                   #   left_column_label = "Posterior approach was:",
+                                   #   input_type = "prettyRadioButtons",
+                                   #   text_align = question_text_align,
+                                   #   input_id = "approach_specified_posterior",
+                                   #   left_column_percent_width = question_label_column_width,
+                                   #   font_size = row_label_font_size,
+                                   #   checkboxes_inline = TRUE,
+                                   #   choices_vector = c("Midline",
+                                   #                                "Paraspinal (Wiltse)", 
+                                   #                                "Stab"),
+                                   #   initial_value_selected = approach_specified_posterior
+                                   # ),
+                                   # hr(),
+                                   # jh_make_shiny_table_row_function(
+                                   #   left_column_label = "The procedure was performed:",
+                                   #   input_type = "prettyRadioButtons",
+                                   #   text_align = question_text_align,
+                                   #   input_id = "approach_open_mis",
+                                   #   left_column_percent_width = question_label_column_width,
+                                   #   font_size = row_label_font_size,
+                                   #   checkboxes_inline = TRUE,
+                                   #   choices_vector = c("Open",
+                                   #                      "Tubular", 
+                                   #                      "Endoscopic", 
+                                   #                      "Mini Open",
+                                   #                      "Percutaneous Screw"
+                                   #   ),
+                                   #   initial_value_selected = approach_open_mis
+                                   # ),
+                                   # hr(),
+                                   # jh_make_shiny_table_row_function(
+                                   #   left_column_label = "Select any modality used:",
+                                   #   input_type = "prettyCheckboxGroup",
+                                   #   text_align = question_text_align,
+                                   #   input_id = "approach_robot_navigation",
+                                   #   left_column_percent_width = question_label_column_width,
+                                   #   font_size = row_label_font_size,
+                                   #   checkboxes_inline = TRUE,
+                                   #   choices_vector = c("Microscopic",
+                                   #                      "Fluoroscopy-guided",
+                                   #                      "Navigated", 
+                                   #                      "Robotic", 
+                                   #                      "NA"),
+                                   #   initial_value_selected = approach_robot_navigation
+                                   # )
+                  # ),
                   hr(),
-                  conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
-                                   jh_make_shiny_table_row_function(
-                                     left_column_label = "Approach was:",
-                                     input_type = "prettyRadioButtons",
-                                     text_align = question_text_align,
-                                     input_id = "approach_specified_anterior",
-                                     left_column_percent_width = question_label_column_width,
-                                     font_size = row_label_font_size,
-                                     checkboxes_inline = TRUE,
-                                     choices_vector = c("Left-sided", 
-                                                        "Right-sided",
-                                                        "Paramedian",
-                                                        "Lateral Transpsoas",
-                                                        "Lateral Antepsoas",
-                                                        "Thoracoabdominal",
-                                                        "Thoracotomy",
-                                                        "Transperitoneal",
-                                                        "Retroperitoneal"),
-                                     initial_value_selected = approach_specified_anterior
-                                   )
-                  ),
+                  if(anterior_approach == "yes"){
+                    jh_make_shiny_table_row_function(
+                      left_column_label = "ANTERIOR Approach was:",
+                      input_type = "prettyRadioButtons",
+                      text_align = question_text_align,
+                      input_id = "approach_specified_anterior",
+                      left_column_percent_width = question_label_column_width,
+                      font_size = row_label_font_size,
+                      checkboxes_inline = TRUE,
+                      choices_vector = c("Left-sided", 
+                                         "Right-sided",
+                                         "Paramedian",
+                                         "Lateral Transpsoas",
+                                         "Lateral Antepsoas",
+                                         "Thoracoabdominal",
+                                         "Thoracotomy",
+                                         "Transperitoneal",
+                                         "Retroperitoneal"),
+                      initial_value_selected = approach_specified_anterior
+                    )
+                  },
+                  # conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
+                  #                  jh_make_shiny_table_row_function(
+                  #                    left_column_label = "Approach was:",
+                  #                    input_type = "prettyRadioButtons",
+                  #                    text_align = question_text_align,
+                  #                    input_id = "approach_specified_anterior",
+                  #                    left_column_percent_width = question_label_column_width,
+                  #                    font_size = row_label_font_size,
+                  #                    checkboxes_inline = TRUE,
+                  #                    choices_vector = c("Left-sided", 
+                  #                                       "Right-sided",
+                  #                                       "Paramedian",
+                  #                                       "Lateral Transpsoas",
+                  #                                       "Lateral Antepsoas",
+                  #                                       "Thoracoabdominal",
+                  #                                       "Thoracotomy",
+                  #                                       "Transperitoneal",
+                  #                                       "Retroperitoneal"),
+                  #                    initial_value_selected = approach_specified_anterior
+                  #                  )
+                  # ),
                   hr(),
                   if(implants_placed == "yes"){
                     jh_make_shiny_table_row_function(

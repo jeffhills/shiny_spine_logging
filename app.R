@@ -1527,10 +1527,25 @@ server <- function(input, output, session) {
       implants_placed_yes_no <- "no" 
     }
     
+    if(nrow(all_objects_to_add_list$objects_df %>%
+                                        filter(approach == "anterior"))>0){
+      anterior_approach_yes_no <- "yes"  
+    }else{
+      anterior_approach_yes_no <- "no" 
+    }
+    if(nrow(all_objects_to_add_list$objects_df %>%
+            filter(approach == "posterior"))>0){
+      posterior_approach_yes_no <- "yes"  
+    }else{
+      posterior_approach_yes_no <- "no" 
+    }
+    
     
     showModal(
       confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
-                                                                     fusion_levels_confirmed = fusion_levels_computed_reactive_input
+                                                                     fusion_levels_confirmed = fusion_levels_computed_reactive_input, 
+                                                                     anterior_approach = posterior_approach_yes_no,
+                                                                     posterior_approach = posterior_approach_yes_no
                                                                      # approach_specified_posterior = input$approach_specified_posterior,
                                                                      # approach_open_mis = input$approach_open_mis,
                                                                      # approach_robot_navigation = input$approach_robot_navigation, 
@@ -1559,11 +1574,24 @@ server <- function(input, output, session) {
       implants_placed_yes_no <- "no" 
     }
     
+    if(nrow(all_objects_to_add_list$objects_df %>%
+            filter(approach == "anterior"))>0){
+      anterior_approach_yes_no <- "yes"  
+    }else{
+      anterior_approach_yes_no <- "no" 
+    }
+    if(nrow(all_objects_to_add_list$objects_df %>%
+            filter(approach == "posterior"))>0){
+      posterior_approach_yes_no <- "yes"  
+    }else{
+      posterior_approach_yes_no <- "no" 
+    }
+    
     if(input$implants_complete > 1){
       showModal(
         
         confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
-          # screws_selected_df_reactive = screws_selected_df_reactive(), 
+                                                                       # screws_selected_df_reactive = screws_selected_df_reactive(), 
                                                                        fusion_levels_confirmed = input$fusion_levels_confirmed,
                                                                        approach_specified_posterior = input$approach_specified_posterior,
                                                                        approach_open_mis = input$approach_open_mis,
@@ -1572,7 +1600,9 @@ server <- function(input, output, session) {
                                                                        implant_start_point_method = input$implant_start_point_method,
                                                                        implant_position_confirmation_method = input$implant_position_confirmation_method, 
                                                                        alignment_correction_method = input$alignment_correction_method,
-                                                                       instruments_used_for_bony_work = input$instruments_used_for_bony_work
+                                                                       instruments_used_for_bony_work = input$instruments_used_for_bony_work,
+                                                                       anterior_approach = posterior_approach_yes_no,
+                                                                       posterior_approach = posterior_approach_yes_no
         )
         
       )
