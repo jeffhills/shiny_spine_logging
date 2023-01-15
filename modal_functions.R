@@ -647,8 +647,8 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                                                                            row_label_font_size = 16, 
                                                                            question_label_column_width = 25, 
                                                                            question_text_align = "right", 
-                                                                           anterior_approach = "yes", 
-                                                                           posterior_approach = "yes"){
+                                                                           anterior_approach, 
+                                                                           posterior_approach){
   
   modalDialog(title = "Confirm Surgical Details:", 
               size = "l",

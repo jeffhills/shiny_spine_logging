@@ -1527,14 +1527,13 @@ server <- function(input, output, session) {
       implants_placed_yes_no <- "no" 
     }
     
-    if(nrow(all_objects_to_add_list$objects_df %>%
-                                        filter(approach == "anterior"))>0){
+    if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
       anterior_approach_yes_no <- "yes"  
     }else{
       anterior_approach_yes_no <- "no" 
     }
-    if(nrow(all_objects_to_add_list$objects_df %>%
-            filter(approach == "posterior"))>0){
+    
+    if(any(all_objects_to_add_list$objects_df$approach == "posterior")){
       posterior_approach_yes_no <- "yes"  
     }else{
       posterior_approach_yes_no <- "no" 
@@ -1544,7 +1543,7 @@ server <- function(input, output, session) {
     showModal(
       confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
                                                                      fusion_levels_confirmed = fusion_levels_computed_reactive_input, 
-                                                                     anterior_approach = posterior_approach_yes_no,
+                                                                     anterior_approach = anterior_approach_yes_no,
                                                                      posterior_approach = posterior_approach_yes_no
                                                                      # approach_specified_posterior = input$approach_specified_posterior,
                                                                      # approach_open_mis = input$approach_open_mis,
@@ -1574,14 +1573,13 @@ server <- function(input, output, session) {
       implants_placed_yes_no <- "no" 
     }
     
-    if(nrow(all_objects_to_add_list$objects_df %>%
-            filter(approach == "anterior"))>0){
+    if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
       anterior_approach_yes_no <- "yes"  
     }else{
       anterior_approach_yes_no <- "no" 
     }
-    if(nrow(all_objects_to_add_list$objects_df %>%
-            filter(approach == "posterior"))>0){
+    
+    if(any(all_objects_to_add_list$objects_df$approach == "posterior")){
       posterior_approach_yes_no <- "yes"  
     }else{
       posterior_approach_yes_no <- "no" 
@@ -1601,7 +1599,7 @@ server <- function(input, output, session) {
                                                                        implant_position_confirmation_method = input$implant_position_confirmation_method, 
                                                                        alignment_correction_method = input$alignment_correction_method,
                                                                        instruments_used_for_bony_work = input$instruments_used_for_bony_work,
-                                                                       anterior_approach = posterior_approach_yes_no,
+                                                                       anterior_approach = anterior_approach_yes_no,
                                                                        posterior_approach = posterior_approach_yes_no
         )
         
@@ -2058,10 +2056,10 @@ server <- function(input, output, session) {
     details_list$'Findings:' <- input$surgical_findings
     details_list$'Specimens:' <- input$specimens_removed
     details_list$'--' <- "--"
-    details_list$'Estimated Blood Loss:' <- paste(input$ebl)     
-    details_list$'Urine Output:' <- paste(input$urine_output)
-    details_list$'Crystalloids:' <- paste(input$crystalloids_administered)
-    details_list$'Colloids:' <- paste(input$colloids_administered)
+    details_list$'Estimated Blood Loss:' <- paste0(input$ebl, "cc")     
+    details_list$'Urine Output:' <- paste0(input$urine_output, "cc")
+    details_list$'Crystalloids:' <- paste0(input$crystalloids_administered, "cc")
+    details_list$'Colloids:' <- paste0(input$colloids_administered, "cc")
     details_list$'Transfusions/Cell Saver:' <- if_else(input$transfusion == TRUE, "Yes", "No")
     
     if(!is.null(input$cell_saver_transfused) && input$cell_saver_transfused > 0){
@@ -5248,7 +5246,7 @@ server <- function(input, output, session) {
       op_note_list$"\n*Pre-operative Diagnosis:" <- glue_collapse(unlist(str_split(paste0("  -", input$preoperative_diagnosis), pattern = "; ")), sep = "\n  -")
       op_note_list$"\n*Post-operative Diagnosis:" <- glue_collapse(unlist(str_split(paste0("  -", input$postoperative_diagnosis), pattern = "; ")), sep = "\n  -")
       op_note_list$"\n*Indications:" <- input$indications
-      op_note_list$"\n*Estimated Blood Loss:" <- if_else(is.na(input$ebl), "See anesthesia records", paste(input$ebl))
+      op_note_list$"\n*Estimated Blood Loss:" <- if_else(is.na(input$ebl), "See anesthesia records", paste0(input$ebl, "cc"))
       op_note_list$"\n*Fluids/Transfusions:" <- fluids_transfusions_statement
       op_note_list$"\n*Surgical Findings:" <- if_else(input$surgical_findings == "", "none", input$surgical_findings)
       op_note_list$"\n*Specimens Taken:" <- if_else(input$specimens_removed == "", "none", input$specimens_removed)
