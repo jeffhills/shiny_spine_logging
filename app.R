@@ -40,7 +40,6 @@ source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
 source("operative_note_paragraph_functions.R", local = TRUE)
 source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
-source("load_icd_codes.R", local = TRUE)
 # source("no_implants_added_op_note.R", local = TRUE)
 
 # jh_build_test_implant_function <- function(side_level_object_list = list("left_L3_pedicle_screw", "left_l4_pedicle_screw", "left_l5_pedicle_screw", 
@@ -1135,17 +1134,7 @@ server <- function(input, output, session) {
                })
   
 
-  
-  observeEvent(list(existing_patient_data$patient_df_full, input$prior_instrumentation), ignoreInit = TRUE,{
-    if(existing_patient_data$match_found == TRUE){
-      if(length(unique(existing_patient_data$patient_df_full$approach))==1){
-        updateAwesomeRadio(session = session,
-                           inputId = "revision_approach",
-                           selected = unique(existing_patient_data$patient_df_full$approach))
-      }
-    }
-  })
-  
+
   output$patient_prior_data <- renderTable({
     if(existing_patient_data$match_found == TRUE){
       existing_patient_data$patient_df
@@ -1206,6 +1195,17 @@ server <- function(input, output, session) {
     }
   })
   
+  # observeEvent(list(input$close_startup_modal, input$prior_instrumentation), ignoreInit = TRUE,{
+  observeEvent(list(existing_patient_data$patient_df_full, input$prior_instrumentation), ignoreInit = TRUE,{
+    if(existing_patient_data$match_found == TRUE){
+      if(length(unique(existing_patient_data$patient_df_full$approach))==1){
+        updateAwesomeRadio(session = session,
+                           inputId = "revision_approach",
+                           selected = unique(existing_patient_data$patient_df_full$approach))
+      }
+    }
+  })
+  
   modal_box_diagnosis_symptoms_procedure_reactive <- reactive({
     startup_modal_box_diagnosis_symptoms(spinal_regions_selected = input$spinal_regions,
                                          diagnosis_category_value = input$diagnosis_category, 
@@ -1239,7 +1239,9 @@ server <- function(input, output, session) {
     showModal(modal_box_diagnosis_symptoms_procedure_reactive())
   })
   
-
+  observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, {
+    removeModal()
+  })
 
   
   #################~~~~~~~~ UPDATE FIELDS BASED ON PRIOR PATIENT FOUND #############
@@ -1293,7 +1295,9 @@ server <- function(input, output, session) {
         mutate(level = if_else(level == "S2ai", "S2AI", level))
       
       if(nrow(left_prior_implants_df)>0){
-        updateAwesomeCheckboxGroup(session = session, inputId = "left_revision_implants", selected = left_prior_implants_df$level)
+        updateAwesomeCheckboxGroup(session = session,
+                                   inputId = "left_revision_implants", 
+                                   selected = left_prior_implants_df$level)
       }
     }
   })
@@ -1612,7 +1616,6 @@ server <- function(input, output, session) {
   }
   )
 
-  
   observeEvent(input$fusion_levels_technique_details_modal_complete_button, ignoreNULL = TRUE, ignoreInit = TRUE, {
     lateral_mass_screws_after_decompression_modal_function(implant_objects_df = all_objects_to_add_list$objects_df)
   }
@@ -1829,7 +1832,9 @@ server <- function(input, output, session) {
       indications_list$diagnosis <- "***."
     }
     
-    indications_list$risks <- "Risks and benefits of operative and nonoperative interventions were considered and discussed in detail and the patient has elected to proceed with surgery. I believe adequate informed consent was obtained."
+    title_name <- if_else(input$sex == "Male", glue("Mr. {patient_last_name}"), glue("Ms. {patient_last_name}"))
+    
+    indications_list$risks <- glue("Risks and benefits of operative and nonoperative interventions were considered and discussed in detail and {title_name} has elected to proceed with surgery. I believe adequate informed consent was obtained.")
     
     procedure_indications <- str_remove_all(str_remove_all(string = str_to_sentence(glue_collapse(indications_list, sep = " ")), 
                                                            pattern = " initial encounter"), 
@@ -2877,6 +2882,7 @@ server <- function(input, output, session) {
   #     NULL
   #   }
   # })
+  
   ################----------  UPDATE ROD OPTIONS END  ------------######################  
   ################----------  UPDATE ROD OPTIONS END  ------------######################  
   ################----------  UPDATE ROD OPTIONS END  ------------######################  
@@ -2998,6 +3004,7 @@ server <- function(input, output, session) {
     }
   })
   
+  ##### Modal to select whether the C2 nerve root was spared or transected.
   observeEvent(input$plot_click, ignoreInit = TRUE, {
     
     object_added <- object_added_reactive_df()$object[1]
@@ -3030,9 +3037,120 @@ server <- function(input, output, session) {
           )
         ) 
       }
-      
     }
-    
+  })
+  
+  ##### Modal to report whether the PLL was taken down
+  observeEvent(input$plot_click, ignoreInit = TRUE, {
+    object_added <- object_added_reactive_df()$object[1]
+    level_added <- object_added_reactive_df()$level[1]
+    if(object_added == "decompression_diskectomy_fusion" & level_added %in% c("C2-C3", "C3-C4", "C4-C5", "C5-C6", "C6-C7", "C7-T1", "T1-T2", "T2-T3")){
+      
+      if(level_added == "C2-C3"){
+        showModal(
+          modalDialog(
+            size = "l",
+            easyClose = FALSE,
+            awesomeRadio(inputId = "c2_c3_pll",
+                         label = "Was the PLL taken down?", 
+                         choices = c("No", "Yes"), 
+                         inline = TRUE,
+                         width = "100%")
+          )
+        ) 
+      }
+      if(level_added == "C3-C4"){
+        showModal(
+          modalDialog(
+            size = "l",
+            easyClose = FALSE,
+            awesomeRadio(inputId = "c3_c4_pll",
+                         label = "Was the PLL taken down?", 
+                         choices = c("No", "Yes"), 
+                         inline = TRUE,
+                         width = "100%")
+          )
+        ) 
+      }
+      if(level_added == "C4-C5"){
+        showModal(
+          modalDialog(
+            size = "l",
+            easyClose = FALSE,
+            awesomeRadio(inputId = "c4_c5_pll",
+                         label = "Was the PLL taken down?", 
+                         choices = c("No", "Yes"), 
+                         inline = TRUE,
+                         width = "100%")
+          )
+        ) 
+      }
+      if(level_added == "C5-C6"){
+        showModal(
+          modalDialog(
+            size = "l",
+            easyClose = FALSE,
+            awesomeRadio(inputId = "c5_c6_pll",
+                         label = "Was the PLL taken down?", 
+                         choices = c("No", "Yes"), 
+                         inline = TRUE,
+                         width = "100%")
+          )
+        ) 
+      }
+      if(level_added == "C6-C7"){
+        showModal(
+          modalDialog(
+            size = "l",
+            easyClose = FALSE,
+            awesomeRadio(inputId = "c6_c7_pll",
+                         label = "Was the PLL taken down?", 
+                         choices = c("No", "Yes"), 
+                         inline = TRUE,
+                         width = "100%")
+          )
+        ) 
+      }
+      if(level_added == "C7-T1"){
+        showModal(
+          modalDialog(
+            size = "l",
+            easyClose = FALSE,
+            awesomeRadio(inputId = "c7_t1_pll",
+                         label = "Was the PLL taken down?", 
+                         choices = c("No", "Yes"), 
+                         inline = TRUE,
+                         width = "100%")
+          )
+        ) 
+      }
+      if(level_added == "T1-T2"){
+        showModal(
+          modalDialog(
+            size = "l",
+            easyClose = FALSE,
+            awesomeRadio(inputId = "t1_t2_pll",
+                         label = "Was the PLL taken down?", 
+                         choices = c("No", "Yes"), 
+                         inline = TRUE,
+                         width = "100%")
+          )
+        ) 
+      }
+      if(level_added == "T2-T3"){
+        showModal(
+          modalDialog(
+            size = "l",
+            easyClose = FALSE,
+            awesomeRadio(inputId = "t2_t3_pll",
+                         label = "Was the PLL taken down?", 
+                         choices = c("No", "Yes"), 
+                         inline = TRUE,
+                         width = "100%")
+          )
+        ) 
+      }
+    }
   })
   
   observeEvent(input$plot_double_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
@@ -3077,22 +3195,40 @@ server <- function(input, output, session) {
   })
   
   left_rod_implants_df_reactive <- reactive({
-    all_objects_to_add_list$objects_df %>%
+    left_main_rod_df <- all_objects_to_add_list$objects_df %>%
       filter(side == "left") %>%
       filter(approach == "posterior") %>%
-      filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
+      filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
       select(level, vertebral_number, x, y, side, object) %>%
       arrange(vertebral_number) 
+    
+    if(nrow(left_revision_implants_reactive_list()$retained_df) > 0){
+      left_main_rod_df <- left_main_rod_df %>%
+        union_all(left_revision_implants_reactive_list()$retained_df) %>%
+        select(level, vertebral_number, x, y, side, object) %>%
+        arrange(vertebral_number) %>%
+        distinct()
+    }
+    left_main_rod_df
   })
   
   right_rod_implants_df_reactive <- reactive({
-    all_objects_to_add_list$objects_df %>%
+    right_main_rod_df <- all_objects_to_add_list$objects_df %>%
       filter(side == "right") %>%
       filter(approach == "posterior") %>%
-      filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
+      filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
       select(level, vertebral_number, x, y, side, object) %>%
       distinct() %>%
       arrange(vertebral_number)
+    
+    if(nrow(right_revision_implants_reactive_list()$retained_df) > 0){
+      right_main_rod_df <- right_main_rod_df %>%
+        union_all(right_revision_implants_reactive_list()$retained_df) %>%
+        select(level, vertebral_number, x, y, side, object) %>%
+        arrange(vertebral_number) %>%
+        distinct()
+    }
+    right_main_rod_df
   })
   
   
@@ -3432,7 +3568,9 @@ server <- function(input, output, session) {
             filter(side == "left") %>%
             filter(str_detect(object, "hook|screw")) %>%
             filter(level %in% input$left_revision_implants_removed) %>%   ## this is generated in Load coordinates 
-            left_join(revision_implants_df) %>%
+            # left_join(revision_implants_df) %>%
+            left_join(all_implants_constructed_df %>%
+                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
             distinct()
         }else{
           removed_df <- tibble(level = input$left_revision_implants_removed, side = "left") %>%
@@ -3452,7 +3590,9 @@ server <- function(input, output, session) {
             filter(side == "left") %>%
             filter(str_detect(object, "hook|screw")) %>%
             filter(level %in% input$left_revision_implants_removed == FALSE) %>%
-            left_join(revision_implants_df) %>%
+            # left_join(revision_implants_df) %>%
+            left_join(all_implants_constructed_df %>%
+                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
             distinct()
         }else{
           retained_df <- tibble(level = input$left_revision_implants, side = "left") %>%
@@ -3470,7 +3610,9 @@ server <- function(input, output, session) {
               select(side, level, object) %>%
               filter(side == "left") %>%
               mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
-              left_join(revision_implants_df) %>%
+              # left_join(revision_implants_df) %>%
+              left_join(all_implants_constructed_df %>%
+                          select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
               select(-object_constructed) %>%
               distinct()
           }else{
@@ -3488,7 +3630,9 @@ server <- function(input, output, session) {
               select(side, level, object) %>%
               filter(side == "left") %>%
               mutate(remove_retain = "retain") %>%
-              left_join(revision_implants_df) %>%
+              # left_join(revision_implants_df) %>%
+              left_join(all_implants_constructed_df %>%
+                          select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
               select(-object_constructed) %>%
               distinct()
           }else{
@@ -3525,13 +3669,8 @@ server <- function(input, output, session) {
             mutate(prior_rod_connected = "yes")%>%
             mutate(old_rod_connected_to_new_rod = "yes")
         }
-        # if(input$left_revision_rod_status == "retained" | input$left_revision_rod_status == "retained_connected"){
-        #   retained_df <- retained_df %>%
-        #     mutate(prior_rod_connected = "yes")
-        #   
-        #   revision_implants_status_df <- revision_implants_status_df%>%
-        #     mutate(prior_rod_connected = "yes")
-        # }
+
+        
         if(input$left_revision_rod_status == "removed"){
           retained_df <- retained_df %>%
             mutate(prior_rod_connected = "no") %>%
@@ -3597,7 +3736,7 @@ server <- function(input, output, session) {
             filter(side == "right") %>%
             filter(str_detect(object, "hook|screw")) %>%
             filter(level %in% input$right_revision_implants_removed) %>%
-            left_join(revision_implants_df) 
+            left_join(all_implants_constructed_df %>%                           select(level, side, object, object_constructed, vertebral_number, approach, x, y))  
         }else{
           removed_df <- tibble(level = input$right_revision_implants_removed, side = "right") %>%
             left_join(revision_screws_df) %>%
@@ -3615,7 +3754,9 @@ server <- function(input, output, session) {
             filter(side == "right") %>%
             filter(str_detect(object, "hook|screw")) %>%
             filter(level %in% input$right_revision_implants_removed == FALSE) %>%
-            left_join(revision_implants_df)
+            left_join(all_implants_constructed_df %>%      
+                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
+            distinct()
         }else{
           retained_df <- tibble(level = input$right_revision_implants, side = "right") %>%
             filter(level %in% input$right_revision_implants_removed == FALSE) %>%
@@ -3630,8 +3771,10 @@ server <- function(input, output, session) {
               select(side, level, object) %>%
               filter(side == "right") %>%
               mutate(remove_retain = if_else(level %in% input$right_revision_implants_removed, "remove", "retain")) %>%
-              left_join(revision_implants_df) %>%
-              select(-object_constructed)
+              left_join(all_implants_constructed_df %>%                        
+                          select(level, side, object, object_constructed, vertebral_number, approach, x, y))  %>%
+              select(-object_constructed) %>%
+              distinct()
           }else{
             revision_implants_status_df <- tibble(level = input$right_revision_implants, side = "right") %>%
               mutate(remove_retain = if_else(level %in% input$right_revision_implants_removed, "remove", "retain")) %>%
@@ -3644,8 +3787,10 @@ server <- function(input, output, session) {
               select(side, level, object) %>%
               filter(side == "right") %>%
               mutate(remove_retain = "retain") %>%
-              left_join(revision_implants_df) %>%
-              select(-object_constructed)
+              left_join(all_implants_constructed_df %>%                 
+                          select(level, side, object, object_constructed, vertebral_number, approach, x, y))  %>%
+              select(-object_constructed)%>%
+              distinct()
           }else{
             revision_implants_status_df <- tibble(level = input$right_revision_implants, side = "right") %>%
               mutate(remove_retain = "retain") %>%
@@ -3690,31 +3835,7 @@ server <- function(input, output, session) {
             mutate(prior_rod_connected = "no") %>%
             mutate(old_rod_connected_to_new_rod = "no")
         }
-        
-        # if(input$right_revision_rod_status == "partially_retained_connected"){
-        #   retained_df <- retained_df %>%
-        #     mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
-        #   
-        #   revision_implants_status_df <- revision_implants_status_df %>%
-        #     mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
-        # }
-        # 
-        # 
-        # 
-        # if(input$right_revision_rod_status == "retained" | input$right_revision_rod_status == "retained_connected"){
-        #   retained_df <- retained_df %>%
-        #     mutate(prior_rod_connected = "yes")
-        #   
-        #   revision_implants_status_df <- revision_implants_status_df%>%
-        #     mutate(prior_rod_connected = "yes")
-        # }
-        # if(input$right_revision_rod_status == "removed"){
-        #   retained_df <- retained_df %>%
-        #     mutate(prior_rod_connected = "no")
-        #   
-        #   revision_implants_status_df <- revision_implants_status_df%>%
-        #     mutate(prior_rod_connected = "no")
-        # }
+
         
         revision_implants_status_df <- revision_implants_status_df %>%
           select(level, vertebral_number, side, remove_retain, prior_rod_connected, object, x, y)
@@ -3751,10 +3872,7 @@ server <- function(input, output, session) {
   output$anterior_revision_implants_table <- renderTable({
     anterior_plate_revision_implants_df_reactive() %>%
       select(level, prior_plate_present_levels, prior_plate_status)
-    
-    # tibble(prior_plate_present_levels = input$prior_anterior_plate_levels) %>%
-    #   mutate(level = prior_plate_present_levels) %>%
-    #   mutate(prior_plate_status = if_else(level %in% input$prior_anterior_plate_removed_levels, "removed", "retained"))
+
    
   })
 
@@ -3837,7 +3955,7 @@ server <- function(input, output, session) {
   
   ######## ~~~~~~~~~~~ PRIOR DECOMPRESSIONS ---
   observeEvent(input$open_canal, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    
+
     if(length(input$open_canal) > 0){
       open_df <- implant_starts_df %>%
         filter(object == "laminectomy") %>%
@@ -3847,25 +3965,25 @@ server <- function(input, output, session) {
                                               ..2 = superior_y,
                                               ..3 = right_x,
                                               ..4 = inferior_y,
-                                              ..5 = width, 
-                                              ..6 = object, 
+                                              ..5 = width,
+                                              ..6 = object,
                                               ..7 = lateral_pars_x,
                                               ..8 = superior_tp_y,
-                                              ..9 = side, 
+                                              ..9 = side,
                                               ..10 = inferior_pedicle_y,
-                                              ..11 = inferior_facet_superior_border_y), 
+                                              ..11 = inferior_facet_superior_border_y),
                                          .f = ~ build_decompression_function(left_x = ..1,
                                                                              superior_y = ..2,
-                                                                             right_x = ..3, 
-                                                                             inferior_y = ..4, 
-                                                                             top_width = ..5, 
-                                                                             object = ..6, 
-                                                                             x_lateral_pars = ..7, 
+                                                                             right_x = ..3,
+                                                                             inferior_y = ..4,
+                                                                             top_width = ..5,
+                                                                             object = ..6,
+                                                                             x_lateral_pars = ..7,
                                                                              y_inferior_tp = ..8,
-                                                                             side = ..9, 
+                                                                             side = ..9,
                                                                              inferior_pedicle_y = ..10,
                                                                              inferior_facet_superior_border_y = ..11)))
-      
+
       geoms_list_revision_posterior$open_canal_sf <- ggpattern::geom_sf_pattern(
         data =  st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
         pattern_orientation = "radial",
@@ -3876,15 +3994,15 @@ server <- function(input, output, session) {
     }
   }
   )
-  
-  ######## ~~~~~~~~~~~ PRIOR Implants ---
-  
-  #### ANTERIOR ####
+
+  # ######## ~~~~~~~~~~~ PRIOR Implants ---
+  # 
+  # #### ANTERIOR ####
   observeEvent(list(anterior_plate_revision_implants_df_reactive(), input$prior_anterior_plate_removed_levels, input$prior_anterior_plate_levels), ignoreInit = TRUE, ignoreNULL = TRUE, {
     # prior_plate_present_levels
     # prior_plate_status
-    
-    
+
+
     if(nrow(anterior_plate_revision_implants_df_reactive())>0){
       if(any(anterior_plate_revision_implants_df_reactive()$prior_plate_status == "retained")){
 
@@ -3893,25 +4011,27 @@ server <- function(input, output, session) {
       }else{
         geoms_list_revision_anterior$anterior_plate_retained <- NULL
       }
-      
+
       if(any(anterior_plate_revision_implants_df_reactive()$prior_plate_status == "removed")){
         geoms_list_revision_anterior$anterior_plate_removed <- geom_sf(data = st_multipolygon((anterior_plate_revision_implants_df_reactive() %>%
                                                                                                   filter(prior_plate_status == "removed"))$object_constructed), color = "grey80", fill = "grey65", alpha = 0.5)
       }else{
         geoms_list_revision_anterior$anterior_plate_removed <-NULL
       }
-      
+
     }else{
       geoms_list_revision_anterior$anterior_plate_retained <- NULL
       geoms_list_revision_anterior$anterior_plate_removed <- NULL
       }
 
   })
-  #### POSTERIOR ####
   
-  observeEvent(left_revision_implants_reactive_list(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+  # #### POSTERIOR ####
+  observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(left_revision_implants_reactive_list()$removed_df)>0){
-      geoms_list_revision_posterior$left_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(left_revision_implants_reactive_list()$removed_df$object_constructed), color = "black", fill = "grey99")
+      geoms_list_revision_posterior$left_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(left_revision_implants_reactive_list()$removed_df$object_constructed), 
+                                                                                      color = "black",
+                                                                                      fill = "grey99")
     }
     
     if(nrow(left_revision_implants_reactive_list()$retained_df)>0){
@@ -3919,7 +4039,7 @@ server <- function(input, output, session) {
     }
   })
   
-  observeEvent(right_revision_implants_reactive_list(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+  observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(right_revision_implants_reactive_list()$removed_df)>0){
       geoms_list_revision_posterior$right_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(right_revision_implants_reactive_list()$removed_df$object_constructed), color = "black", fill = "grey99")
     }
@@ -3929,15 +4049,17 @@ server <- function(input, output, session) {
     }
   })
   
+
+
   ###### REVISION RODS ---
   observeEvent(list(left_revision_implants_reactive_list(), req(input$left_revision_rod_status), input$left_revision_implants_connected_to_prior_rod), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    
+
     if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
       if(input$left_revision_rod_status == "removed"){
         geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
       }else if(input$left_revision_rod_status == "retained_connected" | input$left_revision_rod_status == "retained"){
         # if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
-         
+
         left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
           select(x, y) %>%
           # filter(!is.na(y)) %>%
@@ -3947,10 +4069,11 @@ server <- function(input, output, session) {
           arrange(rev(y)) %>%
           distinct() %>%
           as.matrix()
-        
+
         geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-      }else if(input$left_revision_rod_status == "partially_retained_connected"){
-        
+     
+         }else if(input$left_revision_rod_status == "partially_retained_connected"){
+
         if(nrow(left_revision_implants_reactive_list()$retained_df %>% filter(prior_rod_connected == "yes"))>1){
           left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
             filter(prior_rod_connected == "yes") %>%
@@ -3961,12 +4084,12 @@ server <- function(input, output, session) {
             mutate(x = x + 0.01) %>%
             arrange(rev(y)) %>%
             distinct() %>%
-            as.matrix() 
-          geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")   
+            as.matrix()
+          geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
         }else{
           geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
         }
-        
+
       } else{
         geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
       }
@@ -3974,9 +4097,9 @@ server <- function(input, output, session) {
       geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
     }
   })
-  
+
   observeEvent(list(right_revision_implants_reactive_list(), req(input$right_revision_rod_status), input$right_revision_implants_connected_to_prior_rod), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    
+
     if(nrow(right_revision_implants_reactive_list()$retained_df)>1){
       if(input$right_revision_rod_status == "removed"){
         geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
@@ -3990,11 +4113,11 @@ server <- function(input, output, session) {
           arrange(rev(y)) %>%
           distinct() %>%
           as.matrix()
-        
+
         geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-        
+
       }else if(input$right_revision_rod_status == "partially_retained_connected"){
-        
+
         if(nrow(right_revision_implants_reactive_list()$retained_df %>% filter(prior_rod_connected == "yes"))>1){
           right_revision_rod_matrix <- right_revision_implants_reactive_list()$retained_df %>%
             filter(prior_rod_connected == "yes") %>%
@@ -4004,12 +4127,12 @@ server <- function(input, output, session) {
             mutate(x = x - 0.01) %>%
             arrange(rev(y)) %>%
             distinct() %>%
-            as.matrix() 
-          geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")   
+            as.matrix()
+          geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
         }else{
           geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
         }
-        
+
       } else{
         geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
       }
@@ -4017,10 +4140,10 @@ server <- function(input, output, session) {
       geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
     }
   })
-  
-  
+
+
   rods_list <- reactiveValues()
-  
+
   observeEvent(input$plot_click, ignoreInit = TRUE, ignoreNULL = TRUE, {
 
     if(nrow(left_rod_implants_df_reactive()) >1){
@@ -4033,15 +4156,15 @@ server <- function(input, output, session) {
         remove_missing() %>%
         select(x, y) %>%
         as.matrix()
-      
-      rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
-      
-    }
-    
-  })
-  
 
-  
+      rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
+
+    }
+
+  })
+
+
+
   observeEvent(list(
     # input$plot_click,
                     # input$plot_double_click,
@@ -4384,81 +4507,6 @@ server <- function(input, output, session) {
   )
 
   
-  # observeEvent(input$lumbar_vertebrae_count, {
-  #   if(input$spine_approach == "Anterior"){
-  #     spine_plan_plot_anterior() 
-  #   }else{
-  #     x_left_limit <- 0.3 - input$label_text_offset/100
-  #     x_right_limit <- 1-x_left_limit
-  #     plot_top_y <- input$crop_y[2]
-  #     y_spacing <- 0.025*input$crop_y[2]
-  #     
-  #     if(input$plot_summary_table == TRUE){
-  #       y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
-  #       plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
-  #       
-  #       plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
-  #     }else{
-  #       y_start_with_text <- plot_top_y
-  #       plan_table_geom <- geom_sf(data = NULL)
-  #     }
-  #     
-  #     if(input$lumbar_vertebrae_count == "6"){
-  #       l6_statement <- "Note: 6 Lumbar Vertebrae"
-  #     }else{
-  #       l6_statement <- " "
-  #     }
-  #     ### POSTERIOR
-  #     labels_posterior_df <- labels_df %>%
-  #       filter(between(y, input$crop_y[1], y_start_with_text)) %>%
-  #       mutate(x_left = x_left_limit + 0.05) %>%
-  #       mutate(x_right = x_right_limit - 0.05) %>%
-  #       select(-vertebral_number)
-  #     
-  #     labels_posterior_df <- labels_posterior_df %>%
-  #       union_all(tibble(level = " ", 
-  #                        x_left = min(labels_posterior_df$x_left) - 0.03,
-  #                        x_right = max(labels_posterior_df$x_right) + 0.03, 
-  #                        y = min(labels_posterior_df$y) - 0.03)) %>%
-  #       union_all(tibble(level = " ", 
-  #                        x_left = min(labels_posterior_df$x_left) - 0.03,
-  #                        x_right = max(labels_posterior_df$x_right) + 0.03, 
-  #                        y = max(labels_posterior_df$y) + 0.03))
-  #     
-  #     ggdraw() +
-  #       draw_image(
-  #         spine_png,
-  #         scale = 1,
-  #         y = 0,
-  #         valign = 0,
-  #         x = 0,
-  #         height = 1
-  #         # width = 1
-  #       ) +
-  #       reactiveValuesToList(geoms_list_revision_posterior) +
-  #       reactiveValuesToList(geoms_list_posterior) +
-  #       reactiveValuesToList(rods_list) +
-  #       draw_text(
-  #         text = labels_posterior_df$level,
-  #         x = labels_posterior_df$x_left,
-  #         y = labels_posterior_df$y,
-  #         size = input$label_text_size,
-  #         fontface = "bold"
-  #       ) +
-  #       draw_text(
-  #         text = labels_posterior_df$level,
-  #         x = labels_posterior_df$x_right,
-  #         y = labels_posterior_df$y,
-  #         size = input$label_text_size,
-  #         fontface = "bold"
-  #       ) +
-  #       plan_table_geom +
-  #       annotate("text", x = 0.5, y = input$crop_y[1] + 0.01, label = l6_statement)
-  #     # spine_plan_plot_posterior() 
-  #   }
-  #   
-  # })
-  
   output$spine_plot_for_implants_tab <- renderPlot({
     if(input$multiple_approach == TRUE){
       plot_grid(spine_plan_plot_anterior(), NULL, spine_plan_plot_posterior_reactive(), nrow = 1, rel_widths = c(1, -.1, 1))
@@ -4466,26 +4514,6 @@ server <- function(input, output, session) {
       if(input$spine_approach == "Anterior"){
         spine_plan_plot_anterior() 
       }else{
-        # x_left_limit <- 0.3 - input$label_text_offset/100
-        # x_right_limit <- 1-x_left_limit
-        # plot_top_y <- input$crop_y[2]
-        # y_spacing <- 0.025*input$crop_y[2]
-        # 
-        # if(input$plot_summary_table == TRUE){
-        #   y_start_with_text <- plot_top_y + nrow(plan_reactive_df())*y_spacing
-        #   plan_table <- tibble(x = 0.5, y = y_start_with_text, tb = list(plan_reactive_df()))
-        #   
-        #   plan_table_geom <- geom_table(data = plan_table, aes(label = tb, x = x, y = y), size = (input$label_text_size - 3)/2.85, table.colnames = FALSE) 
-        # }else{
-        #   y_start_with_text <- plot_top_y
-        #   plan_table_geom <- geom_sf(data = NULL)
-        # }
-        # 
-        # if(input$lumbar_vertebrae_count == "6"){
-        #   l6_statement <- "Note: 6 Lumbar Vertebrae"
-        # }else{
-        #   l6_statement <- " "
-        # }
         ### POSTERIOR
         spine_plan_plot_posterior_reactive()
 

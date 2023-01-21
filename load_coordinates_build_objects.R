@@ -83,7 +83,7 @@ all_objects_y_range_df <- implant_starts_df %>%
 #############-----------------------   Build Revision Implants  ----------------------###############
 revision_implants_df <- implant_starts_df %>%
   filter(category == "implant") %>%
-  filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw" | str_detect(object, "hook")) %>%
+  filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw" | object == "pars_screw" | str_detect(object, "hook")) %>%
   filter(approach == "posterior") %>%
   mutate(sublaminar_band_length = length) %>%
   mutate(length_for_tether = length) %>%
@@ -116,7 +116,7 @@ revision_implants_df <- implant_starts_df %>%
 
 revision_screws_df <- revision_implants_df %>%
   filter(str_detect(object, "hook") == FALSE) %>%
-  filter((str_detect(string = level, pattern = "C1|C2|C3|C4|C5|C6") & object == "pedicle_screw") == FALSE) %>%
+  filter((str_detect(string = level, pattern = "C1|C3|C4|C5|C6") & object == "pedicle_screw") == FALSE) %>%
   group_by(level, side) %>%
   filter(y == max(y)) %>%
   ungroup() %>%
