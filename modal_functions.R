@@ -672,12 +672,13 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                       font_size = row_label_font_size,
                       checkboxes_inline = TRUE,
                       choices_vector = c("Midline",
-                                         "Paraspinal (Wiltse)", 
-                                         "Stab"),
+                                         "Paraspinal (Wiltse)"
+                                         ),
                       initial_value_selected = approach_specified_posterior
                     )
                     },
-                    if(posterior_approach == "yes"){
+                  hr(),
+                  if(posterior_approach == "yes"){
                     jh_make_shiny_table_row_function(
                       left_column_label = "The procedure was performed:",
                       input_type = "prettyRadioButtons",
@@ -839,6 +840,8 @@ addition_surgical_details_modal_box_function <-
            primary_surgeon_last_name_input = "",
            cosurgeon_yes_no = FALSE,
            cosurgeon = "",
+           attending_assistant_yes_no  = FALSE,
+           attending_assistant = "", 
            surgical_assistants = "",
            preoperative_diagnosis = " ",
            postoperative_diagnosis = " ",
@@ -848,7 +851,7 @@ addition_surgical_details_modal_box_function <-
            local_anesthesia = "None",
            neuromonitoring = c("SSEP", "tcMEP"),
            triggered_emg = "No",
-           pre_positioning_motors = "Pre-positioning motors not obtained",
+           pre_positioning_motors = "Not obtained",
            neuromonitoring_signal_stability = "Neuromonitoring signals were stable throughout the case.",
            preop_antibiotics = c("Cefazolin (Ancef)"),
            anti_fibrinolytic = "",
@@ -895,13 +898,31 @@ addition_surgical_details_modal_box_function <-
                            tags$td(width = paste0((100-left_column_percent_width)/2, "%"), textInput(inputId = "primary_surgeon_last_name", label = NULL, value = primary_surgeon_last_name_input, placeholder = "Last Name", width = "80%"))
                    ) 
         ),
-        jh_make_shiny_table_row_function(
-          left_column_percent_width = left_column_percent_width,
-          left_column_label = "Was there a Co-surgeon?",
-          font_size = row_label_font_size,
-          input_type = "switch",
-          input_id = "cosurgeon_yes_no",
-          initial_value_selected = cosurgeon_yes_no
+        tags$table(width = "100%",
+                   tags$tr(width = "100%",
+                           tags$td(width = "30%",
+                                   tags$div(style = "font-size:16px; font-weight:bold; text-align:right; margin-top:auto; margin-bottom:auto", "Was there a Co-Surgeon?")
+                                   ),
+                           tags$td(width = "10%", 
+                                   switchInput(inputId = "cosurgeon_yes_no",
+                                               label = NULL,
+                                               onLabel = "Yes", 
+                                               offLabel = "No",
+                                               inline = TRUE, 
+                                               value = cosurgeon_yes_no)
+                                   ),
+                           tags$td(width = "30%",
+                                   tags$div(style = "font-size:16px; font-weight:bold; text-align:right; margin-top:auto; margin-bottom:auto", "Did an Attending Surgeon assist?")
+                           ),
+                           tags$td(width = "10%", 
+                                   switchInput(inputId = "attending_assistant_yes_no",
+                                               label = NULL,
+                                               onLabel = "Yes", 
+                                               offLabel = "No",
+                                               inline = TRUE, 
+                                               value = attending_assistant_yes_no)
+                           )
+                           )
         ),
         conditionalPanel(condition = "input.cosurgeon_yes_no == true",
                          jh_make_shiny_table_row_function(
@@ -911,7 +932,18 @@ addition_surgical_details_modal_box_function <-
                            input_type = "text",
                            input_id = "cosurgeon", 
                            initial_value_selected = cosurgeon
-                         )),
+                         )
+                         ),
+        conditionalPanel(condition = "input.attending_assistant_yes_no == true",
+                         jh_make_shiny_table_row_function(
+                           left_column_percent_width = left_column_percent_width,
+                           left_column_label = "Attending Assistant:",
+                           font_size = row_label_font_size,
+                           input_type = "text",
+                           input_id = "attending_assistant", 
+                           initial_value_selected = attending_assistant
+                         )
+        ),
         jh_make_shiny_table_row_function(
           left_column_percent_width = left_column_percent_width,
           left_column_label = "Assistants:",
@@ -1013,22 +1045,43 @@ addition_surgical_details_modal_box_function <-
                            initial_value_selected = triggered_emg
                          )),
         br(),
+        # conditionalPanel(condition = "input.neuromonitoring.indexOf('tcMEP') > -1",
+        #                  jh_make_shiny_table_row_function(
+        #                    left_column_percent_width = left_column_percent_width,
+        #                    left_column_label = "Pre-positioning motor signals:",
+        #                    font_size = row_label_font_size,
+        #                    input_type = "awesomeRadio",
+        #                    input_id = "pre_positioning_motors", 
+        #                    choices_vector = c("Pre-positioning motors not obtained", 
+        #                                       "Pre-positioning motor signals were obtained and were present in the upper and lower extremities.",
+        #                                       "Pre-positioning motor signals were poor in the upper extremities.",
+        #                                       "Pre-positioning motor signals were not detected in the upper extremities.",
+        #                                       "Pre-positioning motor signals were poor in the lower extremities.",
+        #                                       "Pre-positioning motor signals were not detected in the lower extremities.",
+        #                                       "Pre-positioning motor signals were poor in the upper and lower extremities.",
+        #                                       "Pre-positioning motor signals were not detected/unreliable in the upper and lower extremities.",
+        #                                       "Pre-positioning motor signals were not detected.", 
+        #                                       "***"),
+        #                    checkboxes_inline = FALSE,
+        #                    initial_value_selected = pre_positioning_motors
+        #                  )
+        # ),
         conditionalPanel(condition = "input.neuromonitoring.indexOf('tcMEP') > -1",
                          jh_make_shiny_table_row_function(
                            left_column_percent_width = left_column_percent_width,
-                           left_column_label = "Pre-positioning motor signals:",
+                           left_column_label = "Pre-positioning motor signals were:",
                            font_size = row_label_font_size,
-                           input_type = "awesomeRadio",
+                           input_type = "checkbox",
                            input_id = "pre_positioning_motors", 
-                           choices_vector = c("Pre-positioning motors not obtained", 
-                                              "Pre-positioning motor signals were obtained and were present in the upper and lower extremities.",
-                                              "Pre-positioning motor signals were poor in the upper extremities.",
-                                              "Pre-positioning motor signals were not detected in the upper extremities.",
-                                              "Pre-positioning motor signals were poor in the lower extremities.",
-                                              "Pre-positioning motor signals were not detected in the lower extremities.",
-                                              "Pre-positioning motor signals were poor in the upper and lower extremities.",
-                                              "Pre-positioning motor signals were not detected/unreliable in the upper and lower extremities.",
-                                              "Pre-positioning motor signals were not detected.", 
+                           choices_vector = c("Not obtained", 
+                                              "Present in the upper extremities",
+                                              "Poor in the upper extremities",
+                                              "Unreliable in the upper extremities",
+                                              "Not detected in the upper extremities",
+                                              "Present in the lower extremities",
+                                              "Poor in the lower extremities",
+                                              "Unreliable in the lower extremities",
+                                              "Not detected in the lower extremities",
                                               "***"),
                            checkboxes_inline = FALSE,
                            initial_value_selected = pre_positioning_motors
@@ -1812,6 +1865,7 @@ addition_surgical_details_modal_box_2_function <-
           checkboxes_inline = FALSE,
           input_type = "awesomeRadio",
           choices_vector = c("Follow-up in spine clinic in 2wks.", 
+                             "Follow-up in spine clinic in 3wks.", 
                              "Follow-up in spine clinic in 6wks.",
                              "Follow-up in spine clinic in ***wks.",
                              "Follow-up in spine clinic on ***.",

@@ -1549,13 +1549,6 @@ server <- function(input, output, session) {
                                                                      fusion_levels_confirmed = fusion_levels_computed_reactive_input, 
                                                                      anterior_approach = anterior_approach_yes_no,
                                                                      posterior_approach = posterior_approach_yes_no
-                                                                     # approach_specified_posterior = input$approach_specified_posterior,
-                                                                     # approach_open_mis = input$approach_open_mis,
-                                                                     # approach_robot_navigation = input$approach_robot_navigation, 
-                                                                     # approach_specified_anterior = input$approach_specified_anterior,
-                                                                     # implant_start_point_method = input$implant_start_point_method,
-                                                                     # implant_position_confirmation_method = input$implant_position_confirmation_method, 
-                                                                     # alignment_correction_method = input$alignment_correction_method
       )
     )
   })
@@ -1620,6 +1613,21 @@ server <- function(input, output, session) {
     lateral_mass_screws_after_decompression_modal_function(implant_objects_df = all_objects_to_add_list$objects_df)
   }
   )
+  
+  observeEvent(input$approach_robot_navigation, ignoreInit = TRUE, {
+    if(input$approach_robot_navigation == "Fluoroscopy-guided"){
+      updateAwesomeRadio(session = session, 
+                         inputId = "implant_start_point_method", 
+                         selected = "Intraoperative fluoroscopy was used to identify and confirm implant start points." 
+      )  
+    }
+    if(input$approach_robot_navigation == "Navigated" | input$approach_robot_navigation == "Robotic" ){
+      updateAwesomeRadio(session = session, 
+                         inputId = "implant_start_point_method", 
+                         selected = "Intraoperative navigation was used for identifying start points."
+      )  
+    }
+  })
   
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   COMPLETED CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   COMPLETED CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
@@ -1798,6 +1806,8 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$implant_details_complete, ignoreInit = TRUE, once = TRUE, {
+    indications_list <- list()
+    
     if(length(input$primary_diagnosis) >0){
       preop_dx <- glue_collapse(x = jh_add_codes_to_diagnosis_function(input$primary_diagnosis), sep = "; ")
       postop_dx <- glue_collapse(x = jh_add_codes_to_diagnosis_function(input$primary_diagnosis), sep = "; ")
@@ -1807,38 +1817,29 @@ server <- function(input, output, session) {
     }
     
     if(length(input$symptoms) >0){
-      symptoms <- glue_collapse(x = map(.x = input$symptoms, 
-                                        .f = ~ if_else(.x == "Other", input$symptoms_other, .x)),
-                                sep = ", ", last = " and ")
+      symptoms <- str_to_lower(glue_collapse(x = map(.x = input$symptoms, 
+                                                     .f = ~ if_else(.x == "Other", input$symptoms_other, .x)),
+                                             sep = ", ", last = " and "))
     }else{
-      symptoms <- " "
+      symptoms <- "***"
     }
     
-
     age <- trunc((input$date_of_birth %--% input$date_of_surgery) / years(1))
     
-    indications_list <- list()
-    indications_list$opening <- glue("This is a {age} year-old {input$sex} that presented with")
-    
-    if(symptoms != " "){
-      indications_list$symptoms <- glue("{glue_collapse(x = symptoms, sep = ', ', last = ' and ')}")
-    }else{
-      indications_list$symptoms <- "***"
-    }
-    
-    if(preop_dx != " "){
-      indications_list$diagnosis <- glue("related to {preop_dx}.")
-    }else{
-      indications_list$diagnosis <- "***."
-    }
+    indications_list$opening <- glue("This is a {age} year-old {input$sex} that presented with {symptoms} related to {str_to_lower(glue_collapse(input$primary_diagnosis, sep = ', ', last = ' and'))}.")
     
     title_name <- if_else(input$sex == "Male", glue("Mr. {input$patient_last_name}"), glue("Ms. {input$patient_last_name}"))
     
     indications_list$risks <- glue("Risks and benefits of operative and nonoperative interventions were considered and discussed in detail and {title_name} has elected to proceed with surgery. I believe adequate informed consent was obtained.")
     
-    procedure_indications <- str_remove_all(str_remove_all(string = str_to_sentence(glue_collapse(indications_list, sep = " ")), 
-                                                           pattern = " initial encounter"), 
-                                            pattern = " initial encounter for")
+    # procedure_indications <- str_remove_all(str_remove_all(string = str_to_sentence(glue_collapse(indications_list, sep = " ")), 
+    #                                                        pattern = " initial encounter"), 
+    #                                         pattern = " initial encounter for")
+    
+    # procedure_indications <- str_replace_all(procedure_indications, "ms.", "Ms.")
+    # procedure_indications <- str_replace_all(procedure_indications, "mr.", "Mr.")
+    
+    procedure_indications <- paste(indications_list$opening, indications_list$risks)
     
     showModal(
       addition_surgical_details_modal_box_function(preoperative_diagnosis = preop_dx, 
@@ -1878,6 +1879,8 @@ server <- function(input, output, session) {
                                                  primary_surgeon_last_name_input = input$primary_surgeon_last_name,
                                                  cosurgeon_yes_no = input$cosurgeon_yes_no, 
                                                  cosurgeon = input$cosurgeon,
+                                                 attending_assistant_yes_no = input$attending_assistant_yes_no, 
+                                                 attending_assistant = input$attending_assistant,
                                                  surgical_assistants = input$surgical_assistants,
                                                  preoperative_diagnosis = input$preoperative_diagnosis,
                                                  postoperative_diagnosis = input$postoperative_diagnosis, 
@@ -4754,7 +4757,11 @@ server <- function(input, output, session) {
     neuromonitoring_input_list$modalities <- input$neuromonitoring
     neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
     
-    neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
+    if(any(input$pre_positioning_motors == "Not obtained")){
+      neuromonitoring_input_list$pre_positioning_motors <- " "
+    }else{
+      neuromonitoring_input_list$pre_positioning_motors <-  paste0("Pre-positioning motors were ", str_to_lower(glue_collapse(input$pre_positioning_motors, sep = ", ", last = " and ")), ".")
+    }
     
     neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
                                                                            as.character(input$neuromonitoring_signal_stability),
@@ -4850,6 +4857,16 @@ server <- function(input, output, session) {
     #######
     posterior_op_note_inputs_list_reactive$preop_antibiotics <- input$preop_antibiotics
     
+    ####### Antifibrinolytic
+    if(any(input$anti_fibrinolytic == "Tranexamic Acid (TXA)")){
+      if(input$txa_maintenance > 0){
+        maintenance_gtt <- glue(" with a {input$txa_maintenance}mg/kg/hr maintenance drip.")
+      }else{
+        maintenance_gtt <- "."
+      }
+      posterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered for an antifibrinolytic{maintenance_gtt}")
+    }
+    
     #######
     posterior_op_note_inputs_list_reactive$additional_procedures_vector <- additional_procedures_vector_reactive()
     
@@ -4924,6 +4941,12 @@ server <- function(input, output, session) {
     
     posterior_op_note_inputs_list_reactive$lateral_mass_screws_after_decompression <- lateral_mass_screws_after_decompression
     
+    #### attending assistant
+    if(input$attending_assistant_yes_no == TRUE){
+      posterior_op_note_inputs_list_reactive$attending_assistant <- input$attending_assistant
+    }else{
+      posterior_op_note_inputs_list_reactive$attending_assistant <- " "
+    }
     
     posterior_op_note_inputs_list_reactive
   })
@@ -5002,6 +5025,16 @@ server <- function(input, output, session) {
     #######
     anterior_op_note_inputs_list_reactive$antibiotics <- input$preop_antibiotics
     
+    ####### Antifibrinolytic
+    if(any(input$anti_fibrinolytic == "Tranexamic Acid (TXA)")){
+      if(input$txa_maintenance > 0){
+        maintenance_gtt <- glue(" with a {input$txa_maintenance}mg/kg/hr maintenance drip.")
+      }else{
+        maintenance_gtt <- "."
+      }
+      anterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered for an antifibrinolytic{maintenance_gtt}")
+    }
+    
     #######
     anterior_op_note_inputs_list_reactive$additional_procedures_vector <- input$additional_procedures
     
@@ -5010,7 +5043,12 @@ server <- function(input, output, session) {
     neuromonitoring_input_list$modalities <- input$neuromonitoring
     neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
     
-    neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
+    # neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
+    if(any(input$pre_positioning_motors == "Not obtained")){
+      neuromonitoring_input_list$pre_positioning_motors <- " "
+    }else{
+      neuromonitoring_input_list$pre_positioning_motors <-  paste0("Pre-positioning motors were ", str_to_lower(glue_collapse(input$pre_positioning_motors, sep = ", ", last = " and ")), ".")
+    }
     
     neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
                                                                            as.character(input$neuromonitoring_signal_stability),
@@ -5148,7 +5186,15 @@ server <- function(input, output, session) {
       if(input$cosurgeon_yes_no == TRUE){
         op_note_list$'\n*Co-Surgeon:' <- input$cosurgeon 
       }
-      op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
+      if(input$attending_assistant_yes_no == TRUE){
+        op_note_list$'\nSurgical Assistants:' <- paste(as.character(input$attending_assistant), 
+                                                       if_else(!is.null(input$surgical_assistants), 
+                                                               as.character(input$surgical_assistants),
+                                                               " "),
+                                                       sep = "; ")
+      }else{
+        op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
+      }
       op_note_list$"\nPre-operative Diagnosis:" <- if_else(!is.null(input$preoperative_diagnosis), paste0("-", as.character(input$preoperative_diagnosis)), " ")
       op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), glue_collapse(x = unlist(str_split(input$postoperative_diagnosis, pattern = "; ")), sep = "\n"), " ")
       op_note_list$"\nIndications:" <- if_else(!is.null(input$indications), as.character(input$indications), " ") 
@@ -5198,6 +5244,7 @@ server <- function(input, output, session) {
                                                                        right_main_rod_material = posterior_op_note_inputs_list_reactive()$right_main_rod_material,
                                                                        additional_rods_statement = posterior_op_note_inputs_list_reactive()$added_rods_statement,
                                                                        antibiotics = posterior_op_note_inputs_list_reactive()$preop_antibiotics,
+                                                                       antifibrinolytic = posterior_op_note_inputs_list_reactive()$antifibrinolytic,
                                                                        additional_procedures_vector = posterior_op_note_inputs_list_reactive()$additional_procedures_vector,
                                                                        prior_fusion_levels_vector = posterior_op_note_inputs_list_reactive()$prior_fusion_levels,
                                                                        instrumentation_removal_vector = posterior_op_note_inputs_list_reactive()$instrumentation_removed_vector,
@@ -5213,7 +5260,8 @@ server <- function(input, output, session) {
                                                                        alignment_correction_technique = posterior_op_note_inputs_list_reactive()$alignment_correction_method,
                                                                        sex = posterior_op_note_inputs_list_reactive()$sex,
                                                                        lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression, 
-                                                                       instruments_used_for_bony_work = posterior_op_note_inputs_list_reactive()$instruments_used_for_bony_work
+                                                                       instruments_used_for_bony_work = posterior_op_note_inputs_list_reactive()$instruments_used_for_bony_work, 
+                                                                       attending_assistant = posterior_op_note_inputs_list_reactive()$attending_assistant
         )
         
         
@@ -5227,6 +5275,7 @@ server <- function(input, output, session) {
                                                                      anterior_approach_laterality = anterior_op_note_inputs_list_reactive()$anterior_approach_laterality,
                                                                      approach_statement = anterior_op_note_inputs_list_reactive()$approach_statement,
                                                                      antibiotics = anterior_op_note_inputs_list_reactive()$antibiotics,
+                                                                     antifibrinolytic = anterior_op_note_inputs_list_reactive()$antifibrinolytic,
                                                                      additional_procedures_vector = anterior_op_note_inputs_list_reactive()$additional_procedures_vector,
                                                                      neuromonitoring_list = anterior_op_note_inputs_list_reactive()$neuromonitoring_list,
                                                                      local_anesthesia = anterior_op_note_inputs_list_reactive()$local_anesthesia,
@@ -5267,7 +5316,16 @@ server <- function(input, output, session) {
       if(input$cosurgeon_yes_no == TRUE){
         op_note_list$'\n*Co-Surgeon:' <- input$cosurgeon 
       }
-      op_note_list$"\n*Surgical Assistants:" <- input$surgical_assistants
+      if(input$attending_assistant_yes_no == TRUE){
+        op_note_list$'\nSurgical Assistants:' <- paste(as.character(input$attending_assistant), 
+                                                       if_else(!is.null(input$surgical_assistants), 
+                                                               as.character(input$surgical_assistants),
+                                                               " "),
+                                                       sep = "; ")
+      }else{
+        op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
+      }
+      # op_note_list$"\n*Surgical Assistants:" <- input$surgical_assistants
       op_note_list$"\n*Preprocedure ASA Class:" <- input$asa_class
       op_note_list$"\n*Anesthesia:" <- input$anesthesia
       op_note_list$"\n*Intraoperative Complications:" <- complication_statement

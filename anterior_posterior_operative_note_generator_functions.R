@@ -132,6 +132,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                       anterior_approach_laterality = "left-sided",
                                       approach_statement = "none",
                                       antibiotics = vector(),
+                                      antifibrinolytic = "",
                                       additional_procedures_vector = NULL,
                                       neuromonitoring_list = list(),
                                       local_anesthesia = "",
@@ -190,6 +191,9 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$antibiotic_statement <- paste0(glue_collapse(antibiotics, sep = ", ", last = " and "), " was administered for preoperative antibiotics.")
     }
   
+  if(antifibrinolytic != ""){
+    first_paragraph_list$antifibrinolytic <- antifibrinolytic
+  }
   
   if(any(str_detect(additional_procedures_vector, "Halo"))){
     first_paragraph_list$head_statement <- paste(glue("A Halo was applied to {his_or_her} skull for positioning and the pins were sequentially tightened to the appropriate torque."))
@@ -575,6 +579,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                        right_main_rod_material = "Titanium",
                                        additional_rods_statement = NULL,
                                        antibiotics = vector(),
+                                       antifibrinolytic = "",
                                        prior_fusion_levels_vector = vector(),
                                        instrumentation_removal_vector = vector(),
                                        additional_procedures_vector = NULL,
@@ -590,7 +595,8 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                        alignment_correction_technique = " ",
                                        sex = "The patient", 
                                        lateral_mass_screws_after_decompression = "No", 
-                                       instruments_used_for_bony_work = "High-speed burr only"){
+                                       instruments_used_for_bony_work = "High-speed burr only", 
+                                       attending_assistant = ""){
   
   he_or_she <- case_when(str_to_lower(sex) == "male" ~ "he", 
                          str_to_lower(sex) == "female" ~ "she", 
@@ -709,6 +715,10 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     first_paragraph_list$antibiotic_statement <- "Preoperative antibiotics were held until tissue cultures could be obtained."
   }else{
     first_paragraph_list$antibiotic_statement <- paste0(glue_collapse(antibiotics, sep = ", ", last = " and "), " was administered for preoperative antibiotics.")
+  }
+  
+  if(antifibrinolytic != ""){
+    first_paragraph_list$antifibrinolytic <- antifibrinolytic
   }
   
   if(length(neuromonitoring_list$modalities) > 0 & (any(neuromonitoring_list$modalities == "None") == FALSE)){
@@ -1120,11 +1130,16 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                                                   fusion_levels_vector = fusion_levels_df$level, 
                                                                   additional_procedures_performed_vector = additional_procedures_for_numbered_list)
   
+  if(str_length(attending_assistant)>2){
+    attending_assistant_statement <- glue("Due to the complexity of the case and no immediately available qualified resident, Dr. {attending_assistant} assisted in all portions of the procedure, including {procedures_listed}. Dr. {attending_assistant}'s assistance was critical to move the procedure along quicker and with less blood loss, and therefore safer.")
+  }else{
+    attending_assistant_statement <- ""
+  }
   
   if(multiple_position_procedure == TRUE){
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the entirety of this portion of the case, including {procedures_listed}.")
+    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the entirety of this portion of the case, including {procedures_listed}. {attending_assistant_statement}")
   }else{
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned onto the hospital bed, and awoke uneventfully. I was personally present for the entirety of the case, including {procedures_listed}.")
+    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned onto the hospital bed uneventfully. I was personally present for the entirety of the case, including {procedures_listed}. {attending_assistant_statement}")
   }
   
   
