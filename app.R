@@ -1832,7 +1832,7 @@ server <- function(input, output, session) {
       indications_list$diagnosis <- "***."
     }
     
-    title_name <- if_else(input$sex == "Male", glue("Mr. {patient_last_name}"), glue("Ms. {patient_last_name}"))
+    title_name <- if_else(input$sex == "Male", glue("Mr. {input$patient_last_name}"), glue("Ms. {input$patient_last_name}"))
     
     indications_list$risks <- glue("Risks and benefits of operative and nonoperative interventions were considered and discussed in detail and {title_name} has elected to proceed with surgery. I believe adequate informed consent was obtained.")
     
