@@ -1123,6 +1123,9 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   procedure_details_list <- map(.x = procedure_details_list, .f = ~str_replace_all(string = .x, pattern = "a 8", replacement = "an 8"))
   
+  procedure_details_list <- map(.x = procedure_details_list, .f = ~ str_squish(.x)) 
+  
+  
   ### FINAL PARAGRAPH ####
   
   procedures_listed <- op_note_procedures_present_listed_function(objects_added_df = all_objects_to_add_df, 

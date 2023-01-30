@@ -1757,7 +1757,7 @@ addition_surgical_details_modal_box_2_function <-
           checkboxes_inline = FALSE,
           input_type = "checkbox",
           choices_vector = c("Ice pack to affected area, PRN",
-                             "PCA with plan to dc on POD 1 (in addition to all other pain medication orders)", 
+                             "Dilaudid PCA (in addition to all other pain medication orders) - DISCONTINUE on POD 1", 
                              "Oxycodone 5mg q4h, ok to give additional dose if needed", 
                              "Oxycodone 10mg q4h, ok to give additional dose if needed",
                              "Tylenol 1000mg q8h scheduled.", 
