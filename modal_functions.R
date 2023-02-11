@@ -529,9 +529,8 @@ startup_modal_box_diagnosis_symptoms <-
                                            choices = c(
                                              "Removed" = "removed",
                                              "Retained" = "retained",
-                                             "Retained & Connected" = "retained_connected",
-                                             "Partially Retained" = "partially_retained_connected"
-                                           ),
+                                             "Cut and Partially Retained" = "retained_cut"
+                                             ),
                                            selected = left_rod_status,
                                            inline = FALSE,
                                            status = "success"
@@ -541,12 +540,22 @@ startup_modal_box_diagnosis_symptoms <-
                                      column(
                                        2,
                                        conditionalPanel(
-                                         condition = "input.left_revision_rod_status.indexOf('partially_retained_connected') > -1",
+                                         condition = "input.left_revision_rod_status.indexOf('retained_cut') > -1",
                                          pickerInput(
                                            inputId = "left_revision_implants_connected_to_prior_rod",
                                            label = "Select screws connected to the old rod:",
                                            choices = c(""),
                                            selected = left_implants_still_connected,
+                                           multiple = TRUE
+                                         )
+                                       ),
+                                       conditionalPanel(
+                                         condition = "input.left_revision_rod_status.indexOf('retained_cut') > -1 || input.left_revision_rod_status.indexOf('retained') > -1",
+                                         pickerInput(
+                                           inputId = "left_revision_implants_rod_connectors",
+                                           label = "Select the levels where rod connectors were placed below (if any)",
+                                           choices = c(""),
+                                           selected = c(""),
                                            multiple = TRUE
                                          )
                                        )
@@ -561,8 +570,7 @@ startup_modal_box_diagnosis_symptoms <-
                                            choices = c(
                                              "Removed" = "removed",
                                              "Retained" = "retained",
-                                             "Retained & Connected" = "retained_connected",
-                                             "Partially Retained" = "partially_retained_connected"
+                                             "Cut and Partially Retained" = "retained_cut"
                                            ),
                                            selected = right_rod_status,
                                            inline = FALSE,
@@ -573,12 +581,22 @@ startup_modal_box_diagnosis_symptoms <-
                                      column(
                                        2,
                                        conditionalPanel(
-                                         condition = "input.right_revision_rod_status.indexOf('partially_retained_connected') > -1",
+                                         condition = "input.right_revision_rod_status.indexOf('retained_cut') > -1",
                                          pickerInput(
                                            inputId = "right_revision_implants_connected_to_prior_rod",
                                            label = "Select screws connected to the old rod:",
                                            choices = c(""),
                                            selected = right_implants_still_connected,
+                                           multiple = TRUE
+                                         )
+                                       ),
+                                       conditionalPanel(
+                                         condition = "input.right_revision_rod_status.indexOf('retained_cut') > -1 || input.right_revision_rod_status.indexOf('retained') > -1",
+                                         pickerInput(
+                                           inputId = "right_revision_implants_rod_connectors",
+                                           label = "Select the levels where rod connectors were placed below (if any)",
+                                           choices = c(""),
+                                           selected = c(""),
                                            multiple = TRUE
                                          )
                                        )

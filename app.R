@@ -1077,8 +1077,8 @@ server <- function(input, output, session) {
                                              side = character(),
                                              level = character(), 
                                              object = character())
-  observeEvent(input$search_for_prior_patient, ignoreInit = TRUE,
-               {
+  observeEvent(input$search_for_prior_patient, ignoreInit = TRUE, {
+    
                  all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
                    type.convert() %>%
                    select(record_id, last_name, first_name, date_of_birth) %>%
@@ -3190,13 +3190,13 @@ server <- function(input, output, session) {
       select(level, vertebral_number, x, y, side, object) %>%
       arrange(vertebral_number) 
     
-    if(nrow(left_revision_implants_reactive_list()$retained_df) > 0){
-      left_main_rod_df <- left_main_rod_df %>%
-        union_all(left_revision_implants_reactive_list()$retained_df) %>%
-        select(level, vertebral_number, x, y, side, object) %>%
-        arrange(vertebral_number) %>%
-        distinct()
-    }
+    # if(nrow(left_revision_implants_reactive_list()$retained_df) > 0){
+    #   left_main_rod_df <- left_main_rod_df %>%
+    #     union_all(left_revision_implants_reactive_list()$retained_df) %>%
+    #     select(level, vertebral_number, x, y, side, object) %>%
+    #     arrange(vertebral_number) %>%
+    #     distinct()
+    # }
     left_main_rod_df
   })
   
@@ -3209,13 +3209,13 @@ server <- function(input, output, session) {
       distinct() %>%
       arrange(vertebral_number)
     
-    if(nrow(right_revision_implants_reactive_list()$retained_df) > 0){
-      right_main_rod_df <- right_main_rod_df %>%
-        union_all(right_revision_implants_reactive_list()$retained_df) %>%
-        select(level, vertebral_number, x, y, side, object) %>%
-        arrange(vertebral_number) %>%
-        distinct()
-    }
+    # if(nrow(right_revision_implants_reactive_list()$retained_df) > 0){
+    #   right_main_rod_df <- right_main_rod_df %>%
+    #     union_all(right_revision_implants_reactive_list()$retained_df) %>%
+    #     select(level, vertebral_number, x, y, side, object) %>%
+    #     arrange(vertebral_number) %>%
+    #     distinct()
+    # }
     right_main_rod_df
   })
   
@@ -3629,7 +3629,7 @@ server <- function(input, output, session) {
           }
         }
         
-        if(input$left_revision_rod_status == "partially_retained_connected"){
+        if(input$left_revision_rod_status == "retained_cut"){
           retained_df <- retained_df %>%
             mutate(prior_rod_connected = if_else(level %in% input$left_revision_implants_connected_to_prior_rod, "yes", "no"))
           
@@ -3645,15 +3645,15 @@ server <- function(input, output, session) {
             mutate(prior_rod_connected = "yes") %>%
             mutate(old_rod_connected_to_new_rod = "no")
         }
-        if(input$left_revision_rod_status == "retained_connected"){
-          retained_df <- retained_df %>%
-            mutate(prior_rod_connected = "yes") %>%
-            mutate(old_rod_connected_to_new_rod = "yes")
-          
-          revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "yes")%>%
-            mutate(old_rod_connected_to_new_rod = "yes")
-        }
+        # if(input$left_revision_rod_status == "retained_connected"){
+        #   retained_df <- retained_df %>%
+        #     mutate(prior_rod_connected = "yes") %>%
+        #     mutate(old_rod_connected_to_new_rod = "yes")
+        #   
+        #   revision_implants_status_df <- revision_implants_status_df%>%
+        #     mutate(prior_rod_connected = "yes")%>%
+        #     mutate(old_rod_connected_to_new_rod = "yes")
+        # }
 
         
         if(input$left_revision_rod_status == "removed"){
@@ -3690,7 +3690,8 @@ server <- function(input, output, session) {
          removed_df = removed_df, 
          revision_implants_status_df = revision_implants_status_df)
     
-  })
+  }
+  )
   
   observeEvent(left_revision_implants_reactive_list(), ignoreNULL = TRUE, ignoreInit = TRUE, {
     if(nrow(left_revision_implants_reactive_list()$retained_df) < 2){
@@ -3700,13 +3701,21 @@ server <- function(input, output, session) {
   
   observeEvent(input$left_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
     
-    if(input$left_revision_rod_status == "partially_retained_connected"){
+    if(input$left_revision_rod_status == "retained_cut"){
       updatePickerInput(session = session, inputId = "left_revision_implants_connected_to_prior_rod", 
                         choices = left_revision_implants_reactive_list()$retained_df$level, 
                         selected = left_revision_implants_reactive_list()$retained_df$level
       )
     }
-    
+  })
+  
+  observeEvent(input$left_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    if(input$left_revision_rod_status == "retained" | input$left_revision_rod_status == "retained_cut"){
+      updatePickerInput(session = session,
+                        inputId = "left_revision_implants_rod_connectors", 
+                        choices = left_revision_implants_reactive_list()$retained_df$level
+      )
+    }
   })
   
   ####### RIGHT REVISION IMPLANTS ----
@@ -3793,7 +3802,7 @@ server <- function(input, output, session) {
           }
         }
         
-        if(input$right_revision_rod_status == "partially_retained_connected"){
+        if(input$right_revision_rod_status == "retained_cut"){
           retained_df <- retained_df %>%
             mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
           
@@ -3809,15 +3818,15 @@ server <- function(input, output, session) {
             mutate(prior_rod_connected = "yes") %>%
             mutate(old_rod_connected_to_new_rod = "no")
         }
-        if(input$right_revision_rod_status == "retained_connected"){
-          retained_df <- retained_df %>%
-            mutate(prior_rod_connected = "yes") %>%
-            mutate(old_rod_connected_to_new_rod = "yes")
-          
-          revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "yes")%>%
-            mutate(old_rod_connected_to_new_rod = "yes")
-        }
+        # if(input$right_revision_rod_status == "retained_connected"){
+        #   retained_df <- retained_df %>%
+        #     mutate(prior_rod_connected = "yes") %>%
+        #     mutate(old_rod_connected_to_new_rod = "yes")
+        #   
+        #   revision_implants_status_df <- revision_implants_status_df%>%
+        #     mutate(prior_rod_connected = "yes")%>%
+        #     mutate(old_rod_connected_to_new_rod = "yes")
+        # }
         
         
         if(input$right_revision_rod_status == "removed"){
@@ -3863,16 +3872,22 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$right_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    
-    if(input$right_revision_rod_status == "partially_retained_connected"){
+    if(input$right_revision_rod_status == "retained_cut"){
       updatePickerInput(session = session, inputId = "right_revision_implants_connected_to_prior_rod", 
                         choices = right_revision_implants_reactive_list()$retained_df$level, 
                         selected = right_revision_implants_reactive_list()$retained_df$level
       )
     }
-    
   })
   
+  observeEvent(input$right_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    if(input$right_revision_rod_status == "retained" | input$right_revision_rod_status == "retained_cut"){
+      updatePickerInput(session = session,
+                        inputId = "right_revision_implants_rod_connectors", 
+                        choices = right_revision_implants_reactive_list()$retained_df$level
+      )
+    }
+  })
   
   ###### COMBINE 
   
@@ -4052,15 +4067,14 @@ server <- function(input, output, session) {
 
 
   ###### REVISION RODS ---
-  # observeEvent(list(left_revision_implants_reactive_list(), req(input$left_revision_rod_status), input$left_revision_implants_connected_to_prior_rod), ignoreInit = TRUE, ignoreNULL = TRUE, {
   observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
     
     if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
       if(input$left_revision_rod_status == "removed"){
         geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
-      }else if(input$left_revision_rod_status == "retained_connected" | input$left_revision_rod_status == "retained"){
-        # if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
-
+        
+      }else if(input$left_revision_rod_status == "retained_cut" | input$left_revision_rod_status == "retained"){
+        
         left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
           select(x, y) %>%
           # filter(!is.na(y)) %>%
@@ -4073,29 +4087,30 @@ server <- function(input, output, session) {
 
         geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
      
-         }else if(input$left_revision_rod_status == "partially_retained_connected"){
-
-        if(nrow(left_revision_implants_reactive_list()$retained_df %>% filter(prior_rod_connected == "yes"))>1){
-          left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
-            filter(prior_rod_connected == "yes") %>%
-            select(x, y) %>%
-            # filter(!is.na(y)) %>%
-            mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-            mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-            mutate(x = x + 0.01) %>%
-            arrange(rev(y)) %>%
-            distinct() %>%
-            as.matrix()
-          geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-        }else{
-          geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
-        }
-
-      } else{
+        #  }else if(input$left_revision_rod_status == "retained_cut"){
+        # 
+        # if(nrow(left_revision_implants_reactive_list()$retained_df %>% filter(prior_rod_connected == "yes"))>1){
+        #   left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
+        #     filter(prior_rod_connected == "yes") %>%
+        #     select(x, y) %>%
+        #     # filter(!is.na(y)) %>%
+        #     mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+        #     mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+        #     mutate(x = x + 0.01) %>%
+        #     arrange(rev(y)) %>%
+        #     distinct() %>%
+        #     as.matrix()
+        #   geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
+        # }else{
+        #   geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+        # }
+# 
+#       } else{
+#         geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+#       }
+      }else{
         geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
       }
-    }else{
-      geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
     }
   })
 
@@ -4106,9 +4121,8 @@ server <- function(input, output, session) {
     if(nrow(right_revision_implants_reactive_list()$retained_df)>1){
       if(input$right_revision_rod_status == "removed"){
         geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
-      }else if(input$right_revision_rod_status == "retained_connected" | input$right_revision_rod_status == "retained"){
-        # if(nrow(right_revision_implants_reactive_list()$retained_df)>1){
         
+      }else if(input$right_revision_rod_status == "retained_cut" | input$right_revision_rod_status == "retained"){
         right_revision_rod_matrix <- right_revision_implants_reactive_list()$retained_df %>%
           select(x, y) %>%
           # filter(!is.na(y)) %>%
@@ -4121,41 +4135,55 @@ server <- function(input, output, session) {
         
         geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
         
-      }else if(input$right_revision_rod_status == "partially_retained_connected"){
-        
-        if(nrow(right_revision_implants_reactive_list()$retained_df %>% filter(prior_rod_connected == "yes"))>1){
-          right_revision_rod_matrix <- right_revision_implants_reactive_list()$retained_df %>%
-            filter(prior_rod_connected == "yes") %>%
-            select(x, y) %>%
-            # filter(!is.na(y)) %>%
-            mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-            mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-            mutate(x = x - 0.01) %>%
-            arrange(rev(y)) %>%
-            distinct() %>%
-            as.matrix()
-          geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-        }else{
-          geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
-        }
-        
-      } else{
+      # }else if(input$right_revision_rod_status == "retained_cut"){
+      #   
+      #   if(nrow(right_revision_implants_reactive_list()$retained_df %>% filter(prior_rod_connected == "yes"))>1){
+      #     right_revision_rod_matrix <- right_revision_implants_reactive_list()$retained_df %>%
+      #       filter(prior_rod_connected == "yes") %>%
+      #       select(x, y) %>%
+      #       # filter(!is.na(y)) %>%
+      #       mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+      #       mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+      #       mutate(x = x - 0.01) %>%
+      #       arrange(rev(y)) %>%
+      #       distinct() %>%
+      #       as.matrix()
+      #     geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
+      #   }else{
+      #     geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
+      #   }
+      #   
+      # } else{
+      #   geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
+      # }
+      }else{
         geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
       }
-    }else{
-      geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
     }
   })
 
   rods_list <- reactiveValues()
 
-  observeEvent(list(input$plot_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-
+  # observeEvent(list(input$plot_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
+  observeEvent(list(left_rod_implants_df_reactive(), input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(left_rod_implants_df_reactive()) >1){
+      if(length(input$left_revision_implants_rod_connectors)>0){
+        left_revision_rod_overlap <- all_implants_constructed_df %>%
+          filter(level %in% input$left_revision_implants_rod_connectors, 
+                 object == "pedicle_screw", 
+                 side == "left") %>%
+          select(x, y) %>%
+          mutate(y = y - 0.01)
+      }else{
+        left_revision_rod_overlap <- tibble(x = double(), 
+                                       y = double())
+      }
+      
       left_main_rod_matrix <- left_rod_implants_df_reactive() %>%
         mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
         mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
         select(x, y) %>%
+        union_all(left_revision_rod_overlap) %>%
         arrange(rev(y)) %>%
         distinct() %>%
         remove_missing() %>%
@@ -4163,18 +4191,30 @@ server <- function(input, output, session) {
         as.matrix()
 
       rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
-
     }
-
+    
   })
   
-  observeEvent(list(input$plot_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
+  # observeEvent(list(input$plot_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
+  observeEvent(list(right_rod_implants_df_reactive(), input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
     
     if(nrow(right_rod_implants_df_reactive()) >1){
+      if(length(input$right_revision_implants_rod_connectors)>0){
+        right_revision_rod_overlap <- all_implants_constructed_df %>%
+          filter(level %in% input$right_revision_implants_rod_connectors, 
+                 object == "pedicle_screw", 
+                 side == "right") %>%
+          select(x, y) %>%
+          mutate(y = y - 0.01)
+      }else{
+        right_revision_rod_overlap <- tibble(x = double(), 
+                                       y = double())
+      }
       right_main_rod_matrix <- right_rod_implants_df_reactive() %>%
         mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
         mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
         select(x, y) %>%
+        union_all(right_revision_rod_overlap) %>%
         arrange(rev(y)) %>%
         distinct() %>%
         remove_missing() %>%
@@ -4186,12 +4226,11 @@ server <- function(input, output, session) {
   })
 
 
-
   observeEvent(list(
     # input$plot_click,
                     # input$plot_double_click,
-                    # input$reset_all,
-                    # left_rod_implants_df_reactive(),
+                    input$reset_all,
+                    left_rod_implants_df_reactive(),
                     input$add_left_accessory_rod,
                     input$left_accessory_rod,
                     input$add_left_satellite_rod,
@@ -4238,7 +4277,9 @@ server <- function(input, output, session) {
                                                                                        intercalary_rod_junction = junction,
                                                                                        linked_rods_vector = linked_vector,
                                                                                        revision_rods_retained_df = left_revision_implants_reactive_list()$retained_df,
-                                                                                       unilateral_full_implant_df = left_rod_implants_df_reactive())
+                                                                                       unilateral_full_implant_df = left_rod_implants_df_reactive(), 
+                                                                                       prior_rod_overlap_connectors = input$left_revision_implants_rod_connectors, 
+                                                                                       rod_side = "left")
                       if(length(left_rods_connectors_list$rod_list) > 0){
                         rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$rod_list), alpha = 0.75)
                       }else{
@@ -4246,7 +4287,7 @@ server <- function(input, output, session) {
                       }
 
                       if(length(left_rods_connectors_list$connector_list) > 0){
-                        rods_list$left_connector_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$connector_list), alpha = 0.75)
+                        rods_list$left_connector_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.75)
                       }else{
                         rods_list$left_connector_list_sf_geom <- NULL
                       }
@@ -4259,8 +4300,8 @@ server <- function(input, output, session) {
   observeEvent(list(
     # input$plot_click,
     # input$plot_double_click,
-    # input$reset_all,
-    # right_rod_implants_df_reactive(),
+    input$reset_all,
+    right_rod_implants_df_reactive(),
     input$add_right_accessory_rod,
     input$right_accessory_rod,
     input$add_right_satellite_rod,
@@ -4307,7 +4348,9 @@ server <- function(input, output, session) {
                                                                      intercalary_rod_junction = junction,
                                                                      linked_rods_vector = linked_vector,
                                                                      revision_rods_retained_df = right_revision_implants_reactive_list()$retained_df,
-                                                                     unilateral_full_implant_df = right_rod_implants_df_reactive())
+                                                                     unilateral_full_implant_df = right_rod_implants_df_reactive(),
+                                                                     prior_rod_overlap_connectors = input$right_revision_implants_rod_connectors, 
+                                                                     rod_side = "right")
     if(length(right_rods_connectors_list$rod_list) > 0){
       rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.75)
     }else{
@@ -4315,7 +4358,7 @@ server <- function(input, output, session) {
     }
     
     if(length(right_rods_connectors_list$connector_list) > 0){
-      rods_list$right_connector_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$connector_list), alpha = 0.75)
+      rods_list$right_connector_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.75)
     }else{
       rods_list$right_connector_list_sf_geom <- NULL
     }

@@ -1661,7 +1661,9 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
                                                 linked_rods_vector = c("a", "b"),
                                                 revision_rods_retained_df = tibble(level = character(), vertebral_number = double(), x = double(), y = double()),
                                                 unilateral_full_implant_df, 
-                                                intercalary_rod_junction = "T12"){
+                                                intercalary_rod_junction = "T12", 
+                                                prior_rod_overlap_connectors = c(""), 
+                                                rod_side = "left"){
   
   if(!is.null(unilateral_full_implant_df) && nrow(unilateral_full_implant_df)>0){
     rods_list <- list()
@@ -1677,34 +1679,86 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
       
       revision_implants_retained_df <- revision_rods_retained_df %>% 
         filter(prior_rod_connected == "yes")  
+
+      # if(any(revision_implants_retained_df$old_rod_connected_to_new_rod == "yes")){
+      #   if(nrow(revision_implants_retained_df)>0){
+      #     if(min(unilateral_full_implant_df$y) > max(revision_implants_retained_df$y)){
+      #       connector_matrix <- revision_implants_retained_df %>%
+      #         select(x, y) %>%
+      #         filter(y == max(y)) %>%
+      #         union_all(unilateral_full_implant_df %>% select(x, y) %>% filter(y == min(y))) %>%
+      #         as.matrix()
+      # 
+      #       connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
+      # 
+      #     }else{
+      #       connector_matrix <- revision_implants_retained_df %>%
+      #         select(x, y) %>%
+      #         filter(y == min(y)) %>%
+      #         union_all(unilateral_full_implant_df %>% select(x, y) %>% filter(y == max(y))) %>%
+      #         as.matrix()
+      # 
+      #       connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
+      #     }
+      #   }
+      # }
       
-      if(any(revision_implants_retained_df$old_rod_connected_to_new_rod == "yes")){
-        if(nrow(revision_implants_retained_df)>0){
-          if(min(unilateral_full_implant_df$y) > max(revision_implants_retained_df$y)){
-            connector_matrix <- revision_implants_retained_df %>%
-              select(x, y) %>%
-              filter(y == max(y)) %>%
-              union_all(unilateral_full_implant_df %>% select(x, y) %>% filter(y == min(y))) %>% 
-              as.matrix()
-            
-            connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
-            
-          }else{
-            connector_matrix <- revision_implants_retained_df %>%
-              select(x, y) %>%
-              filter(y == min(y)) %>%
-              union_all(unilateral_full_implant_df %>% select(x, y) %>% filter(y == max(y))) %>% 
-              as.matrix()
-            
-            connector_list$prior_rod_connector <- st_buffer(st_linestring(connector_matrix), dist = 0.0045, endCapStyle = "FLAT")
-          }
+      if(length(prior_rod_overlap_connectors)>0){
+        revision_rod_overlap <- all_implants_constructed_df %>%
+          filter(level %in% prior_rod_overlap_connectors, 
+                 object == "pedicle_screw", 
+                 side == rod_side) %>%
+          mutate(connector_count = row_number()) %>%
+          select(connector_count, x, y) %>%
+          mutate(y = y - 0.005)
+        
+        prior_rod_connector_matrix_list <-  map(.x = revision_rod_overlap$connector_count, .f =  ~ revision_rod_overlap %>%
+                                        filter(connector_count == .x) %>%
+                                        union_all(revision_rod_overlap %>%
+                                                    filter(connector_count == .x) %>%
+                                                    mutate(x = if_else(x < 0.5, x + 0.01, x - 0.01))) %>%
+                                        select(x, y) %>%
+                                        remove_missing() %>%
+                                        as.matrix())
+        
+        if(length(prior_rod_connector_matrix_list) == 1){
+          connector_list$connector_1 <-  st_buffer(st_linestring(prior_rod_connector_matrix_list[[1]]), dist = 0.0045, endCapStyle = "FLAT")
         } 
+        if(length(prior_rod_connector_matrix_list) == 2){
+          connector_list$connector_1 <-  st_buffer(st_linestring(prior_rod_connector_matrix_list[[1]]), dist = 0.0045, endCapStyle = "FLAT")
+          connector_list$connector_2 <-  st_buffer(st_linestring(prior_rod_connector_matrix_list[[2]]), dist = 0.0045, endCapStyle = "FLAT")
+        }
+        if(length(prior_rod_connector_matrix_list) == 3){
+          connector_list$connector_1 <-  st_buffer(st_linestring(prior_rod_connector_matrix_list[[1]]), dist = 0.0045, endCapStyle = "FLAT")
+          connector_list$connector_2 <-  st_buffer(st_linestring(prior_rod_connector_matrix_list[[2]]), dist = 0.0045, endCapStyle = "FLAT")
+          connector_list$connector_3 <-  st_buffer(st_linestring(prior_rod_connector_matrix_list[[3]]), dist = 0.0045, endCapStyle = "FLAT")
+        }
+        if(length(prior_rod_connector_matrix_list) == 4){
+          connector_list$connector_1 <-  st_buffer(st_linestring(prior_rod_connector_matrix_list[[1]]), dist = 0.0045, endCapStyle = "FLAT")
+          connector_list$connector_2 <-  st_buffer(st_linestring(prior_rod_connector_matrix_list[[2]]), dist = 0.0045, endCapStyle = "FLAT")
+          connector_list$connector_3 <-  st_buffer(st_linestring(prior_rod_connector_matrix_list[[3]]), dist = 0.0045, endCapStyle = "FLAT")
+          connector_list$connector_4 <-  st_buffer(st_linestring(prior_rod_connector_matrix_list[[4]]), dist = 0.0045, endCapStyle = "FLAT")
+        }
       }
     
     }
     
     implant_levels_vector <- unilateral_full_implant_df$level
     
+    if(length(prior_rod_overlap_connectors)>0){
+      revision_rod_overlap <- all_implants_constructed_df %>%
+        filter(level %in% prior_rod_overlap_connectors, 
+               object == "pedicle_screw", 
+               side == rod_side) %>%
+        select(x, y) %>%
+        mutate(y = y - 0.01)
+      
+    }else{
+      revision_rod_overlap <- tibble(x = double(), 
+                                     y = double())
+    }
+    
+
     if(nrow(unilateral_full_implant_df) >1){
       main_rod_df <- unilateral_full_implant_df %>%
         mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
@@ -1712,6 +1766,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
       
       main_rod_matrix <- main_rod_df %>%
         select(x, y) %>%
+        union_all(revision_rod_overlap) %>%
         arrange(rev(y)) %>%
         distinct() %>%
         remove_missing() %>%
