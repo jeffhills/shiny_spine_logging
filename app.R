@@ -1041,6 +1041,10 @@ server <- function(input, output, session) {
     updateDateInput(session = session, inputId = "date_of_birth", value = date("1970-01-05"))
     updateDateInput(session = session, inputId = "date_of_surgery", value = Sys.Date())
     updateAwesomeRadio(session = session, inputId = "sex", selected = "Male")
+    updateRadioGroupButtons(session = session, inputId = "head_positioning", selected = "Cranial Tongs")
+    updateRadioGroupButtons(session = session, inputId = "intraoperative_complications_yes_no", selected = "No")
+    updateAwesomeCheckboxGroup(session = session, inputId = "closure_details", selected = "Staples")
+    updateAwesomeCheckboxGroup(session = session, inputId = "dressing_details", selected = "Steristrips")
   })
   
   

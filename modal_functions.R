@@ -717,14 +717,13 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                     if(posterior_approach == "yes"){
                       jh_make_shiny_table_row_function(
                         left_column_label = "Select any modality used:",
-                        input_type = "prettyCheckboxGroup",
+                        input_type = "prettyRadioButtons",
                         text_align = question_text_align,
                         input_id = "approach_robot_navigation",
                         left_column_percent_width = question_label_column_width,
                         font_size = row_label_font_size,
                         checkboxes_inline = TRUE,
-                        choices_vector = c("Microscopic",
-                                           "Fluoroscopy-guided",
+                        choices_vector = c("Fluoroscopy-guided",
                                            "Navigated", 
                                            "Robotic", 
                                            "NA"),

@@ -682,6 +682,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   additional_procedures_for_numbered_list <- as.list(additional_procedures_vector)
   
+
   if(length(biologics_list)>0){
     additional_procedures_for_numbered_list$bone_grafting <- "Application of bone graft/osteopromotive material"
   }
@@ -995,14 +996,23 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       }
       
       rod_statements_list$additional_rods_statement <- additional_rods_statement
-      rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
-
+      if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
+        rod_statements_list$set_screws <- glue("The rod was used to correct the alignment due to the fracture. Set screws were then tightened with a final tightener to the appropriate torque.")
+      }else{
+        rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
+      }
+      
       if(nrow(crosslink_df) > 0){
         rod_statements_list$crosslink <- glue("To increase the rigidity of the construct, a crosslink connector was applied at the level of {glue_collapse(crosslink_df$level, sep = ', ', last = ' and ')}.")
       }
+      
+      rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants and to confirm appropriate alignment had been acheived.")
     
-      rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants.")
-      rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}.")
+      if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
+        rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}, and the open treatment of the vertebral fracture.")
+      }else{
+        rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}.") 
+      }
       
       procedure_details_list$posterior_instrumentation_rods <- glue_collapse(rod_statements_list, sep = " ")
       
@@ -1123,7 +1133,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   procedure_details_list <- map(.x = procedure_details_list, .f = ~str_replace_all(string = .x, pattern = "a 8", replacement = "an 8"))
   
-  procedure_details_list <- map(.x = procedure_details_list, .f = ~ str_squish(.x)) 
+  procedure_details_list <- map(.x = procedure_details_list, .f = ~str_replace_all(string = .x, pattern = "  |   |    ", replacement = " "))
   
   
   ### FINAL PARAGRAPH ####
