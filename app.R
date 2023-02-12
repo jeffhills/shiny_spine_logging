@@ -6703,6 +6703,12 @@ server <- function(input, output, session) {
             posterior_implant_removal_instance_add <- 0
           }
           
+          if("implant_removal_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+            implant_removal_repeating_instance_add <- repeat_list$posterior_implant_removal
+          }else{
+            implant_removal_repeating_instance_add <- 0
+          }
+          
           
           
           surgical_details_instance_start <- repeat_list$surgical_details + 1
@@ -6717,6 +6723,7 @@ server <- function(input, output, session) {
           interbody_implant_repeating_instance_add <- 0
           all_inputs_repeating_instance_add <- 0
           posterior_implant_removal_instance_add <- 0
+          implant_removal_repeating_instance_add <- 0
         }
       }else{
         record_number <- exportNextRecordName(rcon = rcon_reactive$rcon)
@@ -6726,6 +6733,7 @@ server <- function(input, output, session) {
         interbody_implant_repeating_instance_add <- 0
         all_inputs_repeating_instance_add <- 0
         posterior_implant_removal_instance_add <- 0
+        implant_removal_repeating_instance_add <- 0
       }
       
       ##### uploaded patient details #######
@@ -6846,35 +6854,61 @@ server <- function(input, output, session) {
           
           incProgress(1/number_of_steps, detail = paste("Complete"))
           
-          posterior_revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
+          # posterior_revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
+          #   union_all(right_revision_implants_reactive_list()$revision_implants_status_df) %>%
+          #   select(level, side, object, remove_retain) %>%
+          #   filter(remove_retain == "remove") %>%
+          #   # mutate(implant_status = paste0(object, "_", remove_retain)) %>%
+          #   select(level, side, remove_retain) %>%
+          #   mutate(level = paste0(level, "_removal")) %>%
+          #   pivot_wider(names_from = level, values_from = remove_retain) %>%
+          #   # mutate(across(everything(), .fns =  ~ replace_na(.x, replace = " "))) %>%
+          #   clean_names() %>%
+          #   mutate(record_id = record_number) %>%
+          #   mutate(redcap_repeat_instance = 1 + posterior_implant_removal_instance_add) %>%
+          #   mutate(redcap_event_name = "surgery_arm_1") %>%
+          #   mutate(redcap_repeat_instrument = "posterior_implant_removal") %>%
+          #   mutate(dos_surg_repeating_removal = as.character(input$date_of_surgery)) %>%
+          #   mutate(category_removal = "implant_removal") %>%
+          #   mutate(posterior_implant_removal_complete = "Complete") %>%
+          #   rename(side_removal = side) %>%
+          #   select(record_id,
+          #          redcap_repeat_instance,
+          #          redcap_event_name,
+          #          redcap_repeat_instrument,
+          #          dos_surg_repeating_removal,
+          #          category_removal,
+          #          side_removal,
+          #          contains("removal"))
+          
+         implant_removal_repeating_df <-  left_revision_implants_reactive_list()$revision_implants_status_df %>%
             union_all(right_revision_implants_reactive_list()$revision_implants_status_df) %>%
             select(level, side, object, remove_retain) %>%
-            # filter(remove_retain == "remove") %>%
-            mutate(implant_status = paste0(object, "_", remove_retain)) %>%
-            select(level, side, implant_status) %>%
-            mutate(level = paste0(level, "_removal")) %>%
-            pivot_wider(names_from = level, values_from = implant_status) %>%
-            mutate(across(everything(), .fns =  ~ replace_na(.x, replace = " "))) %>%
+            filter(remove_retain == "remove") %>%
+            select(level, side, remove_retain, object) %>%
             clean_names() %>%
+            mutate(dos_implant_removal_repeating = as.character(input$date_of_surgery)) %>%
             mutate(record_id = record_number) %>%
-            mutate(redcap_repeat_instance = row_number() + posterior_implant_removal_instance_add) %>%
+            mutate(redcap_repeat_instance = row_number() + implant_removal_repeating_instance_add) %>%
             mutate(redcap_event_name = "surgery_arm_1") %>%
-            mutate(redcap_repeat_instrument = "posterior_implant_removal") %>%
-            mutate(dos_surg_repeating_removal = as.character(input$date_of_surgery)) %>%
-            mutate(category_removal = "implant_removal") %>%
-            mutate(posterior_implant_removal_complete = "Complete") %>%
-            rename(side_removal = side) %>%
-            select(record_id,
-                   redcap_repeat_instance,
-                   redcap_event_name,
-                   redcap_repeat_instrument,
-                   dos_surg_repeating_removal,
-                   category_removal,
-                   side_removal,
-                   everything())
+            mutate(redcap_repeat_instrument = "implant_removal_repeating")%>%
+            mutate(implant_removal_repeating_complete = "Complete") %>%
+            rename(level_implant_removal_repeating = level, 
+                   side_implant_removal_repeating = side,
+                   removed_implant_removal_repeating = object) %>%
+            select(
+              record_id,
+              redcap_repeat_instance,
+              redcap_event_name,
+              redcap_repeat_instrument,
+              dos_implant_removal_repeating,
+              level_implant_removal_repeating,
+              side_implant_removal_repeating,
+              removed_implant_removal_repeating,
+              implant_removal_repeating_complete)
           
           
-          importRecords(rcon = rcon_reactive$rcon, data = posterior_revision_implants_df, returnContent = "count") 
+          importRecords(rcon = rcon_reactive$rcon, data = implant_removal_repeating_df, returnContent = "count") 
           
           incProgress(1/number_of_steps, detail = paste("Complete"))
           
