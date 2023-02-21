@@ -140,6 +140,109 @@ startup_modal_box <-
       )
     )
   }
+#############~~~~~~~~~~~~~~~~~~~~###################################    COMPLICATION MODAL 2 ##############~~~~~~~~~~~~~########################
+#############~~~~~~~~~~~~~~~~~~~~###################################    COMPLICATION MODAL 2 ##############~~~~~~~~~~~~~########################
+#############~~~~~~~~~~~~~~~~~~~~###################################    COMPLICATION MODAL 2 ##############~~~~~~~~~~~~~########################
+#############~~~~~~~~~~~~~~~~~~~~###################################    COMPLICATION MODAL 2 ##############~~~~~~~~~~~~~####################
+
+complication_modal_function <-   function(date_of_surgery_vector = NULL
+) {
+  
+  modalDialog(
+    size = "l", 
+    easyClose = FALSE,
+    # footer = modalButton("Proceed"),
+    footer = actionBttn(
+      inputId = "complication_done_button",
+      label = "Done with Complications",
+      style = "simple",
+      color = "primary",
+      icon = icon("arrow-right")
+    ),
+    box(
+      width = 12,
+      title = "Record Complication::",
+      solidHeader = TRUE,
+      status = "info",
+      column(
+        12,
+        jh_make_shiny_table_row_function(left_column_label = "Date of Surgery", 
+                                         input_type = "prettyRadioButtons", 
+                                         input_id = "complication_date_of_surgery", 
+                                         choices_vector = date_of_surgery_vector, 
+                                         initial_value_selected = tail(date_of_surgery_vector, 1)),
+        hr(),
+        dateInput(
+          inputId = "complication_date",
+          label = "Date Complication First Observed: (mm-dd-yyyy):",
+          value = "",
+          format = "mm-dd-yyyy",
+          min = head(date_of_surgery_vector, 1),
+          max = Sys.Date() 
+        ),
+        hr(),
+        jh_make_shiny_table_row_function(left_column_label = "Complication:",
+                                         input_type = "radioGroupButtons", 
+                                         input_id = "complication_description", 
+                                         choices_vector = c("Ileus",
+                                                            "Neurologic Deficit",
+                                                            "New Leg Pain",
+                                                            "Wound Infection", 
+                                                            "Wound Dehiscence",
+                                                            "Deep Vein Thrombosis", 
+                                                            "Urinary tract Infection",
+                                                            "Delirium", 
+                                                            "CSF Leak", 
+                                                            "Arrhythmia or tachycardia",
+                                                            "Pleural effusion",
+                                                            "Pneumothorax",
+                                                            "Pulmonary Congestion",
+                                                            "Hemothorax",
+                                                            "Hypotension",
+                                                            "Medication Reaction",
+                                                            "---",
+                                                            "Pseudarthrosis", 
+                                                            "Implant Failure",
+                                                            "Proximal Junctional Kyphosis", 
+                                                            "Proximal Junctional Failure", 
+                                                            "Distal Junctional Kyphosis",
+                                                            "Adjacent segment Degeneration",
+                                                            "Symptomatic Prominent Hardware",
+                                                            "Painful SI joint following S2AI instrumentation", 
+                                                            "Symptomatic Prominent Iliac Screw",
+                                                            "Vertebral Compression Fracture",
+                                                            "Permanent Neurologic Deficit",
+                                                            "Death", 
+                                                            "Other")),
+        conditionalPanel(condition = "input.complication_description.indexOf('Other') > -1", 
+                         fluidRow(
+                           jh_make_shiny_table_row_function(left_column_label = "Explain Other:", 
+                                                          input_id = "complication_other", 
+                                                          input_type = "text",
+                                                          initial_value_selected = "")
+                         )
+                         ), 
+        conditionalPanel(condition = "input.complication_description.indexOf('Neurologic Deficit') > -1",
+                         fluidRow(
+                           jh_make_shiny_table_row_function(left_column_label = "Side, Distribution, and Severity of Neurologic Deficit:", 
+                                                          input_id = "complication_neuro_deficit", 
+                                                          input_type = "text")
+                         )
+                         ), 
+        hr(),
+        jh_make_shiny_table_row_function(left_column_label = "Additional Comments:", 
+                                         input_id = "complication_comment", 
+                                         input_type = "text", 
+                                         initial_value_selected = ""),
+        hr(),
+        tableOutput(outputId = "complication_for_redcap_upload_table"),
+        hr(),
+        actionBttn(inputId = "complication_submit_to_redcap", label = "Submit Complication to Redcap & Reset", color = "success", size = "lg")
+      )
+    )
+  )
+}
+
 
 
 #############~~~~~~~~~~~~~~~~~~~~###################################    STARTUP MODAL 2 ##############~~~~~~~~~~~~~########################

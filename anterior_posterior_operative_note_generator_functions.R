@@ -211,7 +211,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   }
   
 
-  if(str_detect(anterior_approach_laterality, "Lateral Retroperitoneal")){
+  if(str_detect(anterior_approach_laterality, "Lateral")){
     first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned in the lateral position on the OR table and all bony prominences were appropriately padded. After prepping and draping in the standard fashion, a surgical timeout was performed."))
     
   }else{

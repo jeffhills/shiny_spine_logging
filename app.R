@@ -137,6 +137,10 @@ ui <- dashboardPage(skin = "black",
                 border-color: burlywood;
                         }"),
                 tags$style(
+                  "#complication_for_redcap_upload_table {
+                  overflow-x: auto;
+                  }"),
+                tags$style(
                   "#surgical_details_redcap_df_modal_tab {
                         overflow-x: auto;
                 }"),
@@ -1130,6 +1134,19 @@ server <- function(input, output, session) {
                      existing_patient_data$patient_df <- existing_patient_data$patient_df_full
                      
                      existing_patient_data$match_found <- match_found
+                     
+                     existing_patient_data$record_id <- record_number
+                     
+                     existing_patient_data$surgical_dates_df <- exportRecords(rcon = rcon_reactive$rcon, 
+                                                        records = existing_patient_data$record_id) %>%
+                       type.convert() %>%
+                       mutate(last_name = str_to_lower(last_name),
+                              first_name = str_to_lower(first_name)) %>%
+                       select(record_id, date_of_surgery, stage_number) %>%
+                       filter(!is.na(date_of_surgery)) %>%
+                       mutate(stage_number = as.double(stage_number)) %>%
+                       mutate(stage_number = if_else(is.na(stage_number), 1, stage_number)) %>%
+                       filter(stage_number == 1)
                    }
                  }else{
                    existing_patient_data$match_found <- FALSE
@@ -1149,19 +1166,104 @@ server <- function(input, output, session) {
   output$prior_patient_match <- renderUI({
     if(existing_patient_data$match_found == TRUE){
       column(12,
-             tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", "Match found!"),
+             tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", "Match found:"),
+             br(),
+             actionBttn(inputId = "record_complication_button", label = "Record Postop Complication", color = "warning", size = "md"),
+             br(),
              tableOutput(outputId = "patient_prior_data"))
     }else{
       tags$div(style = "font-size:12px; font-weight:bold; color:darkblue; font-family:sans-serif;", "No Prior Data Loaded")
     }
   })
   
+  ################################################  COMPLICATION RECORDING  MODAL BOX ######################################
+  ################################################  COMPLICATION RECORDING  MODAL BOX ######################################
+  ################################################  COMPLICATION RECORDING  MODAL BOX ######################################
+  ################################################  COMPLICATION RECORDING  MODAL BOX ######################################
+
+    
+  observeEvent(input$record_complication_button, ignoreInit = TRUE, {
+    
+    removeModal()
+    
+    showModal(complication_modal_function(date_of_surgery_vector = existing_patient_data$surgical_dates_df$date_of_surgery))
+    
+  }
+  )
+  
+  complication_recording_reactive_df <- reactive({
+    
+    if(input$complication_description == "Other"){
+      complication_description <- input$complication_other
+    }else{
+      complication_description <- input$complication_description
+    }
+    
+    if(complication_description == "Neurologic Deficit"){
+      complication_neuro <- input$complication_neuro_deficit
+    }else{
+      complication_neuro <- "NA"
+    }
+    
+    complication_count_df <- exportRecords(rcon = rcon_reactive$rcon, 
+                                           records = existing_patient_data$record_id) %>%
+      type.convert() %>%
+      filter(redcap_event_name == "complication_arm_1")
+    
+    if(nrow(complication_count_df)>0){
+      complication_repeat_instance <- max(complication_count_df$redcap_repeat_instance) + 1
+    }else{
+      complication_repeat_instance <- 1
+    }
+    
+    redcap_complication_df <- tibble(record_id = existing_patient_data$record_id,
+                                     redcap_event_name = "complication_arm_1",
+                                     redcap_repeat_instrument = "complications",
+                                     redcap_repeat_instance = complication_repeat_instance,
+                                     complication_date_of_surgery = input$complication_date_of_surgery, 
+                                     complication_date = paste(as.character(input$complication_date)), 
+                                     complication_description = complication_description, 
+                                     complication_neuro = complication_neuro,
+                                     complication_comment = input$complication_comment, 
+                                     complications_complete = "Complete")
+    
+    redcap_complication_df
+    
+  })
+  
+  output$complication_for_redcap_upload_table <- renderTable({
+    if(length(input$complication_description)>0){
+      complication_recording_reactive_df()
+    }else{
+      tibble(complication = character())
+    }
+  })
+  
+  observeEvent(input$complication_submit_to_redcap, {
+    withProgress(message = 'Uploading Data', value = 0, {
+
+      incProgress(1/2, detail = paste("Uploading Complication Data"))
+      importRecords(rcon = rcon_reactive$rcon, data = complication_recording_reactive_df(), returnContent = "count")
+      
+      incProgress(1/2, detail = paste("Upload Complete"))
+    }
+    )
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!!",
+      text = "The complication has been recorded.",
+      type = "success"
+    )
+  }
+  )
+  
+  
   
   ################################################    MODAL BOX 2 ######################################
   ################################################    MODAL BOX 2 ######################################
   ################################################    MODAL BOX 2 ######################################
-  
-  observeEvent(input$close_startup_modal, ignoreInit = TRUE, {
+  observeEvent(input$close_startup_modal, ignoreInit = TRUE, ignoreNULL = TRUE,{
     if(length(input$date_of_birth) == 0 | length(input$date_of_surgery) == 0 | is.null(input$sex)){
       
       showModal(modal_box_patient_details_reactive())
@@ -1199,8 +1301,48 @@ server <- function(input, output, session) {
     }
   })
   
-  # observeEvent(list(input$close_startup_modal, input$prior_instrumentation), ignoreInit = TRUE,{
-  observeEvent(list(existing_patient_data$patient_df_full, input$prior_instrumentation), ignoreInit = TRUE,{
+  
+  observeEvent(input$complication_done_button, ignoreInit = TRUE, ignoreNULL = TRUE,{
+    if(length(input$date_of_birth) == 0 | length(input$date_of_surgery) == 0 | is.null(input$sex)){
+      
+      showModal(modal_box_patient_details_reactive())
+
+    }else{
+      removeModal()
+      
+      spine_region <- NULL
+      diagnosis_category <- NULL
+      dx <- NULL
+      symptoms <- NULL
+      
+      showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = diagnosis_category,
+                                                     # primary_diagnosis_value = dx,
+                                                     symptoms_initial_value = symptoms,
+                                                     stage_number_value = input$stage_number,
+                                                     staged_procedure_initial_value = FALSE,
+                                                     multiple_approach_initial_value = FALSE,
+                                                     spinal_regions_selected = spine_region,
+                                                     ##
+                                                     primary_or_revision = input$primary_revision,
+                                                     revision_indication = input$revision_indication,
+                                                     levels_with_prior_decompression = input$open_canal,
+                                                     prior_fusion_levels = input$prior_fusion_levels,
+                                                     prior_instrumentation = input$prior_instrumentation,
+                                                     left_prior_implants = input$left_revision_implants,
+                                                     # left_prior_implants_removed = input$left_revision_implants_removed,
+                                                     right_prior_implants = input$right_revision_implants,
+                                                     # right_prior_implants_removed = input$right_revision_implants_removed,
+                                                     left_rod_status = input$left_revision_rod_status,
+                                                     # left_implants_still_connected = input$left_revision_implants_connected_to_prior_rod,
+                                                     right_rod_status = input$right_revision_rod_status
+                                                     # right_implants_still_connected = input$right_revision_implants_connected_to_prior_rod
+      ))
+    }
+  })
+  
+
+  
+    observeEvent(list(existing_patient_data$patient_df_full, input$prior_instrumentation), ignoreInit = TRUE,{
     if(existing_patient_data$match_found == TRUE){
       if(length(unique(existing_patient_data$patient_df_full$approach))==1){
         updateAwesomeRadio(session = session,
