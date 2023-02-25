@@ -147,7 +147,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                       end_procedure_details = NULL,
                                       closure = NULL,
                                       dressing = NULL,
-                                      multiple_position_procedure = FALSE, 
+                                      multiple_position_procedure = "NA", 
                                       sex = "The patient"){
   
   he_or_she <- case_when(str_to_lower(sex) == "male" ~ "he", 
@@ -198,6 +198,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   if(any(str_detect(additional_procedures_vector, "Halo"))){
     first_paragraph_list$head_statement <- paste(glue("A Halo was applied to {his_or_her} skull for positioning and the pins were sequentially tightened to the appropriate torque."))
   }
+  
   if(any(str_detect(additional_procedures_vector, "Tongs"))){
     first_paragraph_list$head_statement <- paste(glue("Cranial tongs were applied to {his_or_her} skull for positioning and an appropriate weight was selected for cranial traction."))
   }
@@ -210,16 +211,23 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$pre_positioning_motors <- neuromonitoring_list$pre_positioning_motors 
   }
   
-
   if(str_detect(anterior_approach_laterality, "Lateral")){
-    first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned in the lateral position on the OR table and all bony prominences were appropriately padded. After prepping and draping in the standard fashion, a surgical timeout was performed."))
-    
+    first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned in the lateral position on the OR table and all bony prominences were appropriately padded."))
   }else{
-    first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned Supine on the OR table and all bony prominences were appropriately padded. After prepping and draping in the standard fashion, a surgical timeout was performed."))
+    first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned supine on the OR table and all bony prominences were appropriately padded."))
   }
   
-  # tibble(prior_plate_present_levels = character(), level = character(), prior_plate_status = character()) 
+  first_paragraph_list$timeout <- "After prepping and draping in the standard fashion, a surgical timeout was performed."
   
+  if(multiple_position_procedure == "posterior_first"){
+    first_paragraph_list <- list()
+    if(str_detect(anterior_approach_laterality, "Lateral")){
+      first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned in the lateral position on the OR table and all bony prominences were appropriately padded."))
+    }else{
+      first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned supine on the OR table and all bony prominences were appropriately padded."))
+    }
+  }
+
   if(any(anterior_plate_revision_df$prior_plate_status == "removed")){
     anterior_plate_revision_levels_df <- anterior_plate_revision_df %>%
       filter(prior_plate_status == "removed") %>%
@@ -297,11 +305,11 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     }
   }
   
-  ###### LOCAL ANESTHESIA
-  if(str_detect(string = str_to_lower(local_anesthesia), pattern = "exposure")){ 
-    first_paragraph_list$local_anesthesia <- glue("{str_to_sentence(local_anesthesia)}")
-  }
-  
+  # ###### LOCAL ANESTHESIA
+  # if(str_detect(string = str_to_lower(local_anesthesia), pattern = "exposure")){ 
+  #   first_paragraph_list$local_anesthesia <- glue("{str_to_sentence(local_anesthesia)}")
+  # }
+   
   procedure_details_list$approach_statement <- glue_collapse(x = first_paragraph_list, sep = " ")
   
   ################## PROCEDURE PARAGRAPHS ##################
@@ -397,8 +405,8 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                                                   additional_procedures_performed_vector = additional_procedures_for_numbered_list)
   
   
-  if(multiple_position_procedure == TRUE){
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and we prepared for the next portion of the procedure. I was personally present for the entirety of the {procedures_listed}.")
+  if(multiple_position_procedure == "anterior_first"){
+    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} I was personally present for the entirety of the anterior portion, including the {procedures_listed}.")
   }else{
     procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was transferred to the hospital bed. I was personally present for the entirety of the {procedures_listed}.")
   }
@@ -591,7 +599,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                        end_procedure_details = NULL,
                                        closure = NULL,
                                        dressing = NULL, 
-                                       multiple_position_procedure = FALSE,
+                                       multiple_position_procedure = "NA",
                                        alignment_correction_technique = " ",
                                        sex = "The patient", 
                                        lateral_mass_screws_after_decompression = "No", 
@@ -744,7 +752,8 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   
   ############### JUST START OVER AT THIS POINT IF IT IS A MULTIPLE POSITION CASE
-  if(multiple_position_procedure == TRUE){
+  if(multiple_position_procedure == "anterior_first"){
+    
     first_paragraph_list <- list()
     first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned prone on the OR table and all bony prominences were appropriately padded."))
     
@@ -1006,7 +1015,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
         rod_statements_list$crosslink <- glue("To increase the rigidity of the construct, a crosslink connector was applied at the level of {glue_collapse(crosslink_df$level, sep = ', ', last = ' and ')}.")
       }
       
-      rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants and to confirm appropriate alignment had been acheived.")
+      rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants and to confirm appropriate alignment had been achieved.")
     
       if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
         rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}, and the open treatment of the vertebral fracture.")
@@ -1149,11 +1158,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     attending_assistant_statement <- ""
   }
   
-  if(multiple_position_procedure == TRUE){
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the entirety of this portion of the case, including {procedures_listed}. {attending_assistant_statement}")
-  }else{
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned onto the hospital bed uneventfully. I was personally present for the entirety of the case, including {procedures_listed}. {attending_assistant_statement}")
-  }
+  procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the entirety of this portion of the case, including {procedures_listed}. {attending_assistant_statement}")
   
   
   if(lateral_mass_screws_after_decompression == "Yes"){

@@ -1592,10 +1592,12 @@ server <- function(input, output, session) {
     }
     
     if(!is.null(input$multiple_approach)){
-      if(input$multiple_approach == TRUE){
+      if(input$multiple_approach == TRUE && input$staged_procedure == FALSE){
         staged_procedure_text <- "Multiple Approach, Single Stage"   
       }else if(input$staged_procedure == FALSE && input$multiple_approach == FALSE){
         staged_procedure_text <- "Single Stage"   
+      }else if(input$staged_procedure == TRUE && input$multiple_approach == TRUE){
+        staged_procedure_text <- paste("Multi-approach, multi-stage, Stage", input$stage_number)
       }else{
         staged_procedure_text <- paste("Stage", input$stage_number)
       }
@@ -5127,8 +5129,21 @@ server <- function(input, output, session) {
     #######
     posterior_op_note_inputs_list_reactive$dressing_details <- input$dressing_details
     
-    #######
-    posterior_op_note_inputs_list_reactive$multiple_approach <- input$multiple_approach
+    ####### MULTIPLE APPROACH
+    if(input$multiple_approach == TRUE){
+      
+      approach_order_df <- all_objects_to_add_list$objects_df %>%
+        select(approach) %>%
+        distinct()
+      
+      if(approach_order_df$approach[[1]] == "posterior"){
+        posterior_op_note_inputs_list_reactive$multiple_approach <- "posterior_first"
+      }else{
+        posterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
+      }
+    }else{
+      posterior_op_note_inputs_list_reactive$multiple_approach <- "NA"
+    }
     
     #######
     posterior_op_note_inputs_list_reactive$alignment_correction_method <- input$alignment_correction_method 
@@ -5237,6 +5252,8 @@ server <- function(input, output, session) {
         maintenance_gtt <- "."
       }
       anterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered for an antifibrinolytic{maintenance_gtt}")
+    }else{
+      anterior_op_note_inputs_list_reactive$antifibrinolytic <- ""
     }
     
     #######
@@ -5324,7 +5341,22 @@ server <- function(input, output, session) {
     anterior_op_note_inputs_list_reactive$dressing_details <- input$dressing_details
     
     #######
-    anterior_op_note_inputs_list_reactive$multiple_approach <- input$multiple_approach
+    ####### MULTIPLE APPROACH
+    if(input$multiple_approach == TRUE){
+      approach_order_df <- all_objects_to_add_list$objects_df %>%
+        select(approach) %>%
+        distinct()
+      
+      if(approach_order_df$approach[[1]] == "posterior"){
+        anterior_op_note_inputs_list_reactive$multiple_approach <- "posterior_first"
+      }else{
+        anterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
+      }
+    }else{
+      anterior_op_note_inputs_list_reactive$multiple_approach <- "NA"
+    }
+    
+    # anterior_op_note_inputs_list_reactive$multiple_approach <- input$multiple_approach
     
     
     #######
@@ -5499,10 +5531,25 @@ server <- function(input, output, session) {
       }
       
       if(input$multiple_approach == TRUE){
-        procedure_results_list$procedures_numbered_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}") 
         
-        procedure_results_list$procedure_details_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}")
+        approach_order_df <- all_objects_to_add_list$objects_df %>%
+          select(approach) %>%
+          distinct()
         
+        if(approach_order_df$approach[[1]] == "posterior"){
+          
+          procedure_results_list$procedures_numbered_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}") 
+          
+          procedure_results_list$procedure_details_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
+          
+          
+        }else{
+          procedure_results_list$procedures_numbered_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}") 
+          
+          procedure_results_list$procedure_details_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}")
+          
+        }
+
       }else{
         if(str_to_lower(input$spine_approach) == "posterior"){
           procedure_results_list <- procedure_results_list_posterior
