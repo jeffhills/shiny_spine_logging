@@ -188,7 +188,9 @@ complication_modal_function <-   function(date_of_surgery_vector = NULL
                                                             "Neurologic Deficit",
                                                             "New Leg Pain",
                                                             "Wound Infection", 
-                                                            "Wound Dehiscence",
+                                                            "Wound Complication",
+                                                            "Postoperative Epidural Hematoma",
+                                                            "Cauda Equina Syndrome",
                                                             "Deep Vein Thrombosis", 
                                                             "Urinary tract Infection",
                                                             "Delirium", 
@@ -203,6 +205,7 @@ complication_modal_function <-   function(date_of_surgery_vector = NULL
                                                             "---",
                                                             "Pseudarthrosis", 
                                                             "Implant Failure",
+                                                            "Malpositioned implant",
                                                             "Proximal Junctional Kyphosis", 
                                                             "Proximal Junctional Failure", 
                                                             "Distal Junctional Kyphosis",
@@ -234,8 +237,8 @@ complication_modal_function <-   function(date_of_surgery_vector = NULL
                                          input_id = "complication_comment", 
                                          input_type = "text", 
                                          initial_value_selected = ""),
-        hr(),
-        tableOutput(outputId = "complication_for_redcap_upload_table"),
+        # hr(),
+        # tableOutput(outputId = "complication_for_redcap_upload_table"),
         hr(),
         actionBttn(inputId = "complication_submit_to_redcap", label = "Submit Complication to Redcap & Reset", color = "success", size = "lg")
       )
@@ -910,7 +913,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                   },
                   hr(),
                   jh_make_shiny_table_row_function(
-                    input_type = "prettyCheckboxGroup",
+                    input_type = "prettyRadioButtons",
                     left_column_label = "Select any instruments used:",
                     text_align = question_text_align,
                     input_id = "instruments_used_for_bony_work",

@@ -1231,13 +1231,13 @@ server <- function(input, output, session) {
     
   })
   
-  output$complication_for_redcap_upload_table <- renderTable({
-    if(length(input$complication_description)>0){
-      complication_recording_reactive_df()
-    }else{
-      tibble(complication = character())
-    }
-  })
+  # output$complication_for_redcap_upload_table <- renderTable({
+  #   if(length(input$complication_description)>0){
+  #     complication_recording_reactive_df()
+  #   }else{
+  #     tibble(complication = character())
+  #   }
+  # })
   
   observeEvent(input$complication_submit_to_redcap, {
     withProgress(message = 'Uploading Data', value = 0, {
