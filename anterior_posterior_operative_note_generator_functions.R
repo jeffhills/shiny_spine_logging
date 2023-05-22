@@ -808,7 +808,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       
     }
     if(surgical_approach == "Paraspinal (Wiltse)"){
-      first_paragraph_list$surgical_approach <- glue("A paraspinal (Wiltse) posterior approach to the spine was performed. Skin was incised with a knife and cautery was used to control any skin bleeding. I dissected down until I identifed the muscle layer and bluntly dissected between the multifidus and longissimus intermuscular plane. I exposed proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level. I manually palpated the transverse process and confirmed the level with xray. ")
+      first_paragraph_list$surgical_approach <- glue("A paraspinal (Wiltse) posterior approach to the spine was performed. Skin was incised with a knife and cautery was used to control any skin bleeding. I dissected down until I identified the muscle layer and bluntly dissected between the multifidus and longissimus intermuscular plane. I exposed proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level. I manually palpated the transverse process and confirmed the level with xray. ")
       
     }
     if(surgical_approach == "Stab"){
@@ -892,6 +892,10 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   ################### Revision Procedures PARAGRAPHS ##################
   revision_statements_list <- list()
   
+  if(nrow(revision_implants_df) > 0){
+    procedure_details_list$revision_implants <- revision_implants_paragraph_function(revision_implants_details_df = revision_implants_df)
+  }
+  
   
   if(any(additional_procedures_vector == "Exploration of prior spinal fusion")){
     if(length(prior_fusion_levels_vector) > 0){
@@ -904,14 +908,14 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   } 
   
   if(length(revision_statements_list)>0){
-    procedure_details_list$exploration <- paste("Once the exposure was completed, ",
-                                                glue_collapse(revision_statements_list, sep = " "))
+    if(nrow(revision_implants_df) > 0){
+      procedure_details_list$exploration <- paste("Once the implants were removed and exposure was completed, ",
+                                                  glue_collapse(revision_statements_list, sep = " "))
+    }else{
+      procedure_details_list$exploration <- paste(glue_collapse(revision_statements_list, sep = " "))
+      }
   }
   
-  
-  if(nrow(revision_implants_df) > 0){
-    procedure_details_list$revision_implants <- revision_implants_paragraph_function(revision_implants_details_df = revision_implants_df)
-  }
   
   ################# C2 nerve transection
   if(c2_nerve_transection == "bilateral_transection"){

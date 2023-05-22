@@ -1993,7 +1993,8 @@ addition_surgical_details_modal_box_2_function <-
                              "Follow-up in spine clinic in ***wks.",
                              "Follow-up in spine clinic on ***.",
                              "Follow-up in spine trauma clinic in 2wks.", 
-                             "Follow-up in ***"),
+                             "Follow-up in ***", 
+                             "Plan to return to the OR on ***"),
           initial_value_selected = postop_followup
         )
       )

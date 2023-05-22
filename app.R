@@ -4861,7 +4861,11 @@ server <- function(input, output, session) {
     }
     ##########   postop_followup  #############
     if(length(input$postop_followup) >0){
-      postop_plan$postop_followup_label <- paste("  - Follow-up: ", glue_collapse(input$postop_followup, sep = "; ", last = "; and "))
+      if(str_detect(str_to_lower(input$postop_followup), "return to")){
+        postop_plan$postop_followup_label <- paste(glue_collapse(input$postop_followup, sep = "; ", last = "; and "))
+      }else{
+        postop_plan$postop_followup_label <- paste("  - Follow-up: ", glue_collapse(input$postop_followup, sep = "; ", last = "; and "))
+      }
     }
     # }
     postop_plan
