@@ -1045,10 +1045,10 @@ server <- function(input, output, session) {
     updateDateInput(session = session, inputId = "date_of_birth", value = date("1970-01-05"))
     updateDateInput(session = session, inputId = "date_of_surgery", value = Sys.Date())
     updateAwesomeRadio(session = session, inputId = "sex", selected = "Male")
-    updateRadioGroupButtons(session = session, inputId = "head_positioning", selected = "Cranial Tongs")
+    updateRadioGroupButtons(session = session, inputId = "head_positioning_posterior", selected = "Cranial Tongs")
     updateRadioGroupButtons(session = session, inputId = "intraoperative_complications_yes_no", selected = "No")
-    updateAwesomeCheckboxGroup(session = session, inputId = "closure_details", selected = "Staples")
-    updateAwesomeCheckboxGroup(session = session, inputId = "dressing_details", selected = "Steristrips")
+    updateAwesomeCheckboxGroup(session = session, inputId = "closure_details_posterior", selected = "Staples")
+    updateAwesomeCheckboxGroup(session = session, inputId = "dressing_details_posterior", selected = "Steristrips")
   })
   
   
@@ -1282,6 +1282,7 @@ server <- function(input, output, session) {
                                                      stage_number_value = input$stage_number,
                                                      staged_procedure_initial_value = FALSE,
                                                      multiple_approach_initial_value = FALSE,
+                                                     multi_approach_starting_position = input$multi_approach_starting_position,
                                                      spinal_regions_selected = spine_region,
                                                      ##
                                                      primary_or_revision = input$primary_revision,
@@ -1321,6 +1322,7 @@ server <- function(input, output, session) {
                                                      stage_number_value = input$stage_number,
                                                      staged_procedure_initial_value = FALSE,
                                                      multiple_approach_initial_value = FALSE,
+                                                     multi_approach_starting_position = input$multi_approach_starting_position,
                                                      spinal_regions_selected = spine_region,
                                                      ##
                                                      primary_or_revision = input$primary_revision,
@@ -1361,6 +1363,7 @@ server <- function(input, output, session) {
                                          stage_number_value = input$stage_number,
                                          staged_procedure_initial_value = input$staged_procedure,
                                          multiple_approach_initial_value = input$multiple_approach,
+                                         multi_approach_starting_position = input$multi_approach_starting_position,
                                          ##
                                          primary_or_revision = input$primary_revision,
                                          revision_approach = input$revision_approach, 
@@ -1827,24 +1830,46 @@ server <- function(input, output, session) {
       additional_procedures_choices$navigation <- "Use of stereotactic navigation system for screw placement"
     }
     
-    additional_procedures_choices$head_positioning <- "Application of Cranial Tongs"
+    # additional_procedures_choices$head_positioning <- "Application of Cranial Tongs"
     
     ##nonsense
-    if(any(str_detect(string = input$head_positioning, pattern = "Tongs"))){
-      additional_procedures_choices$head_positioning <- "Application of Cranial Tongs"
-    }
-    if(any(str_detect(string = input$head_positioning, pattern = "Mayfield"))){
-      additional_procedures_choices$head_positioning <- "Application of Cranial Tongs using Mayfield head holder"
-    }
-    
-    if(any(str_detect(string = input$head_positioning, pattern = "Halo"))){
-      age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
-      if(age < 18 & age > 0){
-        additional_procedures_choices$head_positioning <- "Application of Halo for thin skull osteology (pediatric)"
-      }else{
-        additional_procedures_choices$head_positioning <- "Application of Halo"
+    if(procedure_approach_reactive() == "anterior" | procedure_approach_reactive() == "combined"){   
+      if(any(str_detect(string = input$head_positioning_anterior, pattern = "Tongs"))){
+        additional_procedures_choices$head_positioning_anterior <- "Application of Cranial Tongs"
+      }
+      if(any(str_detect(string = input$head_positioning_anterior, pattern = "Mayfield"))){
+        additional_procedures_choices$head_positioning_anterior <- "Application of Cranial Tongs using Mayfield head holder"
+      }
+      
+      if(any(str_detect(string = input$head_positioning_anterior, pattern = "Halo"))){
+        age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
+        if(age < 18 & age > 0){
+          additional_procedures_choices$head_positioning_anterior <- "Application of Halo for thin skull osteology (pediatric)"
+        }else{
+          additional_procedures_choices$head_positioning_anterior <- "Application of Halo"
+        }
       }
     }
+    
+    if(procedure_approach_reactive() == "posterior" | procedure_approach_reactive() == "combined"){
+      if(any(str_detect(string = input$head_positioning_posterior, pattern = "Tongs"))){
+        additional_procedures_choices$head_positioning_posterior <- "Application of Cranial Tongs"
+      }
+      if(any(str_detect(string = input$head_positioning_posterior, pattern = "Mayfield"))){
+        additional_procedures_choices$head_positioning_posterior <- "Application of Cranial Tongs using Mayfield head holder"
+      }
+      
+      if(any(str_detect(string = input$head_positioning_posterior, pattern = "Halo"))){
+        age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
+        if(age < 18 & age > 0){
+          additional_procedures_choices$head_positioning_posterior <- "Application of Halo for thin skull osteology (pediatric)"
+        }else{
+          additional_procedures_choices$head_positioning_posterior <- "Application of Halo"
+        }
+      }
+    }
+    
+
     
     additional_procedures_choices$halo_removal <- "Removal of tongs or Halo applied by another inidividual"
     additional_procedures_choices$neuromonitoring <- "Spinal Cord Monitoring"
@@ -1853,97 +1878,273 @@ server <- function(input, output, session) {
     unlist(additional_procedures_choices, use.names = FALSE)
   })
   
-  observeEvent(list(input$left_revision_implants_removed, 
-                    input$right_revision_implants_removed, 
-                    input$prior_fusion_levels, 
-                    input$head_positioning, 
-                    input$approach_robot_navigation,
-                    input$durotomy_repair_method,
-                    input$primary_diganosis), ignoreInit = TRUE, {
-                      
-                      additional_procedures_list <- as.list(input$additional_procedures)
-                      
-                      if("Robotic" %in% input$approach_robot_navigation){
-                        additional_procedures_list$robot <- "Robotic Assisted Spine Surgery"
-                      }
-                      if("Navigated" %in% input$approach_robot_navigation){
-                        additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
-                      }
-                      
-                      if("Microscopic" %in% input$approach_robot_navigation){
-                        additional_procedures_list$microscope <- "Intraoperative use of microscope for microdissection"
-                      }
-                      
-                      if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0 | length(input$prior_anterior_plate_removed_levels)>0){
-                        additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
-                      }
-                      
-                    
-                      if(length(input$prior_fusion_levels)>0){
-                        additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
-                      }
-                      
-                      if(any(str_detect(string = input$head_positioning, pattern = "Tongs"))){
-                        additional_procedures_list$head_positioning <- "Application of Cranial Tongs"
-                      }
-                      if(any(str_detect(string = input$head_positioning, pattern = "Mayfield"))){
-                        additional_procedures_list$head_positioning <- "Application of Cranial Tongs using Mayfield head holder"
-                      }
-                      
-                      if(any(str_detect(string = input$head_positioning, pattern = "Halo"))){
-                        age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
-                        if(age < 18 & age > 0){
-                          additional_procedures_list$head_positioning <- "Application of Halo for thin skull osteology (pediatric)"
-                        }else{
-                          additional_procedures_list$head_positioning <- "Application of Halo"
-                        }
-                      }
-                      
-                      if(length(input$durotomy_repair_method)>0){
-                        if(str_detect(string = toString(input$durotomy_repair_method), pattern = "No Repair") == FALSE){
-                          additional_procedures_list$dural_repair <- "Repair of dural/CSF leak"
-                        }
-                      }
-                      
-                      if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
-                        additional_procedures_list$fracture <- "Open treatment of vertebral fracture"
-                      }
-                      if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
-                        additional_procedures_list$incision_drainage <- "Incision and Drainage"
-                      }
-                      if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
-                        additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
-                      }
-                      
-                      updateAwesomeCheckboxGroup(session = session, 
-                                                 inputId = "additional_procedures", 
-                                                 choices = additional_procedures_options_reactive_vector(),
-                                                 selected = unlist(additional_procedures_list, use.names = FALSE))
-                    })
+  # observeEvent(list(input$left_revision_implants_removed, 
+  #                   input$right_revision_implants_removed, 
+  #                   input$prior_fusion_levels, 
+  #                   input$head_positioning_posterior, 
+  #                   input$head_positioning_anterior, 
+  #                   input$approach_robot_navigation,
+  #                   input$durotomy_repair_method,
+  #                   input$primary_diganosis), ignoreInit = TRUE, {
+  #                     
+  #                     additional_procedures_list <- as.list(input$additional_procedures_posterior)
+  #                     
+  #                     if("Robotic" %in% input$approach_robot_navigation){
+  #                       additional_procedures_list$robot <- "Robotic Assisted Spine Surgery"
+  #                     }
+  #                     if("Navigated" %in% input$approach_robot_navigation){
+  #                       additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
+  #                     }
+  #                     
+  #                     if("Microscopic" %in% input$approach_robot_navigation){
+  #                       additional_procedures_list$microscope <- "Intraoperative use of microscope for microdissection"
+  #                     }
+  #                     
+  #                     if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0 | length(input$prior_anterior_plate_removed_levels)>0){
+  #                       additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
+  #                     }
+  #                     
+  #                   
+  #                     if(length(input$prior_fusion_levels)>0){
+  #                       additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
+  #                     }
+  #                     
+  #                     if(any(str_detect(string = input$head_positioning_posterior, pattern = "Tongs"))){
+  #                       additional_procedures_list$head_positioning_posterior <- "Application of Cranial Tongs"
+  #                     }
+  #                     if(any(str_detect(string = input$head_positioning_posterior, pattern = "Mayfield"))){
+  #                       additional_procedures_list$head_positioning_posterior <- "Application of Cranial Tongs using Mayfield head holder"
+  #                     }
+  #                     
+  #                     if(any(str_detect(string = input$head_positioning_posterior, pattern = "Halo"))){
+  #                       age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
+  #                       if(age < 18 & age > 0){
+  #                         additional_procedures_list$head_positioning_posterior <- "Application of Halo for thin skull osteology (pediatric)"
+  #                       }else{
+  #                         additional_procedures_list$head_positioning_posterior <- "Application of Halo"
+  #                       }
+  #                     }
+  #                     
+  #                     if(any(str_detect(string = input$head_positioning_anterior, pattern = "Tongs"))){
+  #                       additional_procedures_list$head_positioning_anterior <- "Application of Cranial Tongs"
+  #                     }
+  #                     if(any(str_detect(string = input$head_positioning_anterior, pattern = "Mayfield"))){
+  #                       additional_procedures_list$head_positioning_anterior <- "Application of Cranial Tongs using Mayfield head holder"
+  #                     }
+  #                     
+  #                     if(any(str_detect(string = input$head_positioning_anterior, pattern = "Halo"))){
+  #                       age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
+  #                       if(age < 18 & age > 0){
+  #                         additional_procedures_list$head_positioning_anterior <- "Application of Halo for thin skull osteology (pediatric)"
+  #                       }else{
+  #                         additional_procedures_list$head_positioning_anterior <- "Application of Halo"
+  #                       }
+  #                     }
+  #                     
+  #                     if(length(input$durotomy_repair_method)>0){
+  #                       if(str_detect(string = toString(input$durotomy_repair_method), pattern = "No Repair") == FALSE){
+  #                         additional_procedures_list$dural_repair <- "Repair of dural/CSF leak"
+  #                       }
+  #                     }
+  #                     
+  #                     if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
+  #                       additional_procedures_list$fracture <- "Open treatment of vertebral fracture"
+  #                     }
+  #                     if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
+  #                       additional_procedures_list$incision_drainage <- "Incision and Drainage"
+  #                     }
+  #                     if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
+  #                       additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
+  #                     }
+  #                     
+  #                     updateAwesomeCheckboxGroup(session = session, 
+  #                                                inputId = "additional_procedures_anterior", 
+  #                                                choices = additional_procedures_options_reactive_vector(),
+  #                                                selected = unlist(additional_procedures_list, use.names = FALSE))
+  #                   })
   
-  
-  
-  additional_procedures_vector_reactive <- reactive({
+  additional_procedures_performed_anterior_reactive <- reactive({
+    additional_procedures_list <- list()
+    if(procedure_approach_reactive() == "anterior" | procedure_approach_reactive() == "combined"){
+      additional_procedures_list <- as.list(input$additional_procedures_anterior)
+      
+      if("Robotic" %in% input$approach_robot_navigation){
+        additional_procedures_list$robot <- "Robotic Assisted Spine Surgery"
+      }
+      if("Navigated" %in% input$approach_robot_navigation){
+        additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
+      }
+      
+      if("Microscopic" %in% input$approach_robot_navigation){
+        additional_procedures_list$microscope <- "Intraoperative use of microscope for microdissection"
+      }
+      
+      if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0 | length(input$prior_anterior_plate_removed_levels)>0){
+        additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
+      }
+      
+      if(length(input$prior_fusion_levels)>0){
+        additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
+      }
+      
+      if(any(str_detect(string = input$head_positioning_anterior, pattern = "Tongs"))){
+        additional_procedures_list$head_positioning_anterior <- "Application of Cranial Tongs"
+      }
+      if(any(str_detect(string = input$head_positioning_anterior, pattern = "Mayfield"))){
+        additional_procedures_list$head_positioning_anterior <- "Application of Cranial Tongs using Mayfield head holder"
+      }
+      
+      if(any(str_detect(string = input$head_positioning_anterior, pattern = "Halo"))){
+        age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
+        if(age < 18 & age > 0){
+          additional_procedures_list$head_positioning_anterior <- "Application of Halo for thin skull osteology (pediatric)"
+        }else{
+          additional_procedures_list$head_positioning_anterior <- "Application of Halo"
+        }
+      }
+      
+      if(length(input$durotomy_repair_method)>0){
+        if(str_detect(string = toString(input$durotomy_repair_method), pattern = "No Repair") == FALSE){
+          additional_procedures_list$dural_repair <- "Repair of dural/CSF leak"
+        }
+      }
+      
+      if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
+        additional_procedures_list$fracture <- "Open treatment of vertebral fracture"
+      }
+      if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
+        additional_procedures_list$incision_drainage <- "Incision and Drainage"
+      }
+      if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
+        additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
+      }
+      }
+
+    additional_procedures_list
     
-    additional_procedures_list <- as.list(input$additional_procedures)
+  })
+  
+  observeEvent(additional_procedures_performed_anterior_reactive(), ignoreInit = TRUE, {
+                        updateAwesomeCheckboxGroup(session = session,
+                                                   inputId = "additional_procedures_anterior",
+                                                   choices = additional_procedures_options_reactive_vector(),
+                                                   selected = unlist(additional_procedures_performed_anterior_reactive(), use.names = FALSE))
+  })
+  
+  additional_procedures_performed_posterior_reactive <- reactive({
+    additional_procedures_list <- list()
+    if(procedure_approach_reactive() == "anterior" | procedure_approach_reactive() == "combined"){
+          additional_procedures_list <- as.list(input$additional_procedures_posterior)
     
-    if(nrow(all_objects_to_add_list$objects_df %>% filter(level == "C1", object == "lateral_mass_screw"))>0){
-      if(input$left_c2_nerve_root_transection == "Yes" | input$right_c2_nerve_root_transection == "Yes"){
-        additional_procedures_list$c2_nerve_root_transection <- "Transection of C2 Nerve Root/Greater Occipital Nerve (CPT = 64744)"
-      } 
+    if("Robotic" %in% input$approach_robot_navigation){
+      additional_procedures_list$robot <- "Robotic Assisted Spine Surgery"
+    }
+    if("Navigated" %in% input$approach_robot_navigation){
+      additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
     }
     
-    if("Other" %in% input$additional_procedures){
-      additional_procedures_list$other <- input$additional_procedures_other
+    if("Microscopic" %in% input$approach_robot_navigation){
+      additional_procedures_list$microscope <- "Intraoperative use of microscope for microdissection"
     }
-    additional_procedures_list <- discard(additional_procedures_list, .p = ~ (.x == "Other"))
     
-    if(any(input$dressing_details == "Wound Vac")){
-      additional_procedures_list$wound_vac <- "Application of Wound Vac (negative pressure wound therapy; CPT = 97605)"    
+    if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0 | length(input$prior_anterior_plate_removed_levels)>0){
+      additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
+    }
+    
+    if(length(input$prior_fusion_levels)>0){
+      additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
+    }
+    
+    if(any(str_detect(string = input$head_positioning_posterior, pattern = "Tongs"))){
+      additional_procedures_list$head_positioning_posterior <- "Application of Cranial Tongs"
+    }
+    if(any(str_detect(string = input$head_positioning_posterior, pattern = "Mayfield"))){
+      additional_procedures_list$head_positioning_posterior <- "Application of Cranial Tongs using Mayfield head holder"
+    }
+    
+    if(any(str_detect(string = input$head_positioning_posterior, pattern = "Halo"))){
+      age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
+      if(age < 18 & age > 0){
+        additional_procedures_list$head_positioning_posterior <- "Application of Halo for thin skull osteology (pediatric)"
+      }else{
+        additional_procedures_list$head_positioning_posterior <- "Application of Halo"
+      }
+    }
+  
+    if(length(input$durotomy_repair_method)>0){
+      if(str_detect(string = toString(input$durotomy_repair_method), pattern = "No Repair") == FALSE){
+        additional_procedures_list$dural_repair <- "Repair of dural/CSF leak"
+      }
+    }
+    
+    if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
+      additional_procedures_list$fracture <- "Open treatment of vertebral fracture"
+    }
+    if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
+      additional_procedures_list$incision_drainage <- "Incision and Drainage"
+    }
+    if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
+      additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
+    }
     }
 
     
-    unlist(additional_procedures_list, use.names = FALSE)
+    additional_procedures_list
+    
+  })
+  
+  observeEvent(additional_procedures_performed_posterior_reactive(), ignoreInit = TRUE, {
+    updateAwesomeCheckboxGroup(session = session,
+                               inputId = "additional_procedures_posterior",
+                               choices = additional_procedures_options_reactive_vector(),
+                               selected = unlist(additional_procedures_performed_posterior_reactive(), use.names = FALSE))
+  })
+  
+
+  
+  
+  additional_procedures_vector_anterior_reactive <- reactive({
+    
+    
+    if(procedure_approach_reactive() == "anterior" | procedure_approach_reactive() == "combined"){
+      additional_procedures_list <- as.list(input$additional_procedures_anterior)
+      if("Other" %in% input$additional_procedures_anterior){
+        additional_procedures_list$other_anterior <- input$additional_procedures_anterior
+      }
+      
+      additional_procedures_list <- discard(additional_procedures_list, .p = ~ (.x == "Other"))
+      
+      if(any(input$dressing_details_anterior == "Wound Vac")){
+        additional_procedures_list$wound_vac_anterior <- "Application of Wound Vac (negative pressure wound therapy; CPT = 97605)"    
+      }
+      unlist(additional_procedures_list, use.names = FALSE) 
+    }
+  })
+  
+  
+  additional_procedures_vector_posterior_reactive <- reactive({
+    
+    if(procedure_approach_reactive() == "posterior" | procedure_approach_reactive() == "combined"){
+      additional_procedures_list <- as.list(input$additional_procedures_posterior)
+      
+      if(nrow(all_objects_to_add_list$objects_df %>% filter(level == "C1", object == "lateral_mass_screw"))>0){
+        if(input$left_c2_nerve_root_transection == "Yes" | input$right_c2_nerve_root_transection == "Yes"){
+          additional_procedures_list$c2_nerve_root_transection <- "Transection of C2 Nerve Root/Greater Occipital Nerve (CPT = 64744)"
+        } 
+      }
+      
+      if("Other" %in% input$additional_procedures_posterior){
+        additional_procedures_list$other_posterior <- input$additional_procedures_posterior
+      }
+      
+      additional_procedures_list <- discard(additional_procedures_list, .p = ~ (.x == "Other"))
+      
+      if(any(input$dressing_details_posterior == "Wound Vac")){
+        additional_procedures_list$wound_vac_posterior <- "Application of Wound Vac (negative pressure wound therapy; CPT = 97605)"    
+      }
+      
+      unlist(additional_procedures_list, use.names = FALSE)
+      }
   })
   
   ######################################## RUN ADDITIONAL SURGICAL DETAILS MODAL AFTER ADVANCING TO NEXT TAB ###############################
@@ -2054,13 +2255,36 @@ server <- function(input, output, session) {
       add_procedures_list$irrigation_debridement <- "Irrigation and Debridement"
     }
     
-    showModal(
-      addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
-                                                     additional_procedures_choices = additional_procedures_options_reactive_vector(),
-                                                     additional_procedures = unlist(add_procedures_list, use.names = FALSE), 
-                                                     procedure_approach = procedure_approach_reactive()
-                                                     )
-    )
+    if(procedure_approach_reactive() == "anterior"){
+      showModal(
+        addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
+                                                       additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
+                                                       additional_procedures_anterior = unlist(add_procedures_list, use.names = FALSE), 
+                                                       procedure_approach = procedure_approach_reactive()
+        )
+      )
+    }
+    if(procedure_approach_reactive() == "posterior"){
+      showModal(
+        addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
+                                                       additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
+                                                       additional_procedures_posterior = unlist(add_procedures_list, use.names = FALSE), 
+                                                       procedure_approach = procedure_approach_reactive()
+        )
+      )  
+    }
+    if(procedure_approach_reactive() == "combined"){
+      showModal(
+        addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
+                                                       additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
+                                                       additional_procedures_posterior = unlist(add_procedures_list, use.names = FALSE), 
+                                                       additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
+                                                       additional_procedures_anterior = unlist(add_procedures_list, use.names = FALSE), 
+                                                       procedure_approach = procedure_approach_reactive()
+        )
+      )  
+    }
+    
   })
   
   
@@ -2069,54 +2293,88 @@ server <- function(input, output, session) {
     removeModal()
   })
   
-  ### NOW SHOW MODAL 2 IF THERE ARE INCOMPLETE VALUES ###
-  observeEvent(input$additional_surgical_details_complete, ignoreInit = TRUE,
-               {
-                 if(length(input$head_positioning) == 0 | length(input$closure_details) == 0 | length(input$dressing_details) == 0 | length(input$intraoperative_complications_yes_no) == 0){
-                   showModal(
-                     addition_surgical_details_modal_box_2_function(required_options_missing = TRUE,
-                                                                    procedure_approach = procedure_approach_reactive(),
-                                                                    head_positioning = input$head_positioning,
-                                                                    surgical_findings = input$surgical_findings,
-                                                                    specimens_removed = input$specimens_removed,
-                                                                    ebl = input$ebl,
-                                                                    urine_output = input$urine_output,
-                                                                    crystalloids_administered = input$crystalloids_administered,
-                                                                    colloids_administered = input$colloids_administered,
-                                                                    transfusion = input$transfusion,
-                                                                    cell_saver_transfused = input$cell_saver_transfused,
-                                                                    prbc_transfused = input$prbc_transfused,
-                                                                    ffp_transfused = input$ffp_transfused,
-                                                                    cryoprecipitate_transfused = input$cryoprecipitate_transfused,
-                                                                    platelets_transfused = input$platelets_transfused,
-                                                                    intraoperative_complications_yes_no = input$intraoperative_complications_yes_no,
-                                                                    intraoperative_complications_vector = input$intraoperative_complications_vector,
-                                                                    other_intraoperative_complications = input$other_intraoperative_complications,
-                                                                    durotomy_timing_input = input$durotomy_timing,
-                                                                    durotomy_instrument_input = input$durotomy_instrument,
-                                                                    durotomy_repair_method_input = input$durotomy_repair_method,
-                                                                    additional_procedures_choices = additional_procedures_options_reactive_vector(),
-                                                                    additional_procedures = input$additional_procedures,
-                                                                    additional_procedures_other = input$additional_procedures_other,
-                                                                    additional_end_procedure_details = input$additional_end_procedure_details,
-                                                                    closure_details = input$closure_details,
-                                                                    dressing_details = input$dressing_details,
-                                                                    postop_dispo = input$postop_dispo,
-                                                                    postop_abx = input$postop_abx,
-                                                                    postop_map_goals = input$postop_map_goals,
-                                                                    postop_transfusion_threshold = input$postop_transfusion_threshold,
-                                                                    postop_imaging = input$postop_imaging,
-                                                                    postop_pain = input$postop_pain,
-                                                                    postop_activity = input$postop_activity,
-                                                                    postop_brace = input$postop_brace,
-                                                                    postop_diet = input$postop_diet,
-                                                                    postop_dvt_ppx = input$postop_dvt_ppx,
-                                                                    postop_drains_dressing = input$postop_drains_dressing,
-                                                                    postop_followup = input$postop_followup
-                     )
-                   )
-                 }
-               })
+  # ### NOW SHOW MODAL 2 IF THERE ARE INCOMPLETE VALUES ###
+  # observeEvent(input$additional_surgical_details_complete, ignoreInit = TRUE,
+  #              {
+  #                if(procedure_approach_reactive() == "anterior"){
+  #                  if(length(head_positioning_anterior) == 0 | length(input$closure_details_anterior) == 0 | length(input$dressing_details_anterior) == 0 | length(input$intraoperative_complications_yes_no) == 0){
+  #                    show_again <- TRUE
+  #                  }else{
+  #                    show_again <- FALSE 
+  #                  } 
+  #                }
+  #                
+  #                if(procedure_approach_reactive() == "posterior"){
+  #                  if(length(head_positioning_posterior) == 0 | length(input$closure_details_posterior) == 0 | length(input$dressing_details_posterior) == 0 | length(input$intraoperative_complications_yes_no) == 0){
+  #                    show_again <- TRUE
+  #                  }else{
+  #                    show_again <- FALSE 
+  #                  } 
+  #                }
+  #                
+  #                if(procedure_approach_reactive() == "combined"){
+  #                  if(length(head_positioning_anterior) == 0 | length(input$closure_details_anterior) == 0 | length(input$dressing_details_anterior) == 0 | length(input$intraoperative_complications_yes_no) == 0 | length(head_positioning_posterior) == 0 | length(input$closure_details_posterior) == 0 | length(input$dressing_details_posterior) == 0 | length(input$intraoperative_complications_yes_no) == 0){
+  #                    show_again <- TRUE
+  #                  }else{
+  #                    show_again <- FALSE 
+  #                  } 
+  #                }
+  #                
+  #                if(show_again == TRUE){
+  #                  showModal(
+  #                    addition_surgical_details_modal_box_2_function(required_options_missing = TRUE,
+  #                                                                   procedure_approach = procedure_approach_reactive(),
+  #                                                                   head_positioning_posterior = input$head_positioning_posterior,
+  #                                                                   head_positioning_anterior = input$head_positioning_anterior,
+  #                                                                   surgical_findings = input$surgical_findings,
+  #                                                                   specimens_removed = input$specimens_removed,
+  #                                                                   ebl = input$ebl,
+  #                                                                   urine_output = input$urine_output,
+  #                                                                   crystalloids_administered = input$crystalloids_administered,
+  #                                                                   colloids_administered = input$colloids_administered,
+  #                                                                   transfusion = input$transfusion,
+  #                                                                   cell_saver_transfused = input$cell_saver_transfused,
+  #                                                                   prbc_transfused = input$prbc_transfused,
+  #                                                                   ffp_transfused = input$ffp_transfused,
+  #                                                                   cryoprecipitate_transfused = input$cryoprecipitate_transfused,
+  #                                                                   platelets_transfused = input$platelets_transfused,
+  #                                                                   intraoperative_complications_yes_no = input$intraoperative_complications_yes_no,
+  #                                                                   intraoperative_complications_vector = input$intraoperative_complications_vector,
+  #                                                                   other_intraoperative_complications = input$other_intraoperative_complications,
+  #                                                                   durotomy_timing_input = input$durotomy_timing,
+  #                                                                   durotomy_instrument_input = input$durotomy_instrument,
+  #                                                                   durotomy_repair_method_input = input$durotomy_repair_method,
+  #                                                                   
+  #                                                                   additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
+  #                                                                   additional_procedures_anterior = input$additional_procedures_anterior,
+  #                                                                   additional_procedures_other_anterior = input$additional_procedures_other_anterior,
+  #                                                                   additional_end_procedure_details_anterior = input$additional_end_procedure_details_anterior,
+  #                                                                   closure_details_anterior = input$closure_details_anterior,
+  #                                                                   dressing_details_anterior = input$dressing_details_anterior,
+  #                                                                   
+  #                                                                   additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
+  #                                                                   additional_procedures_posterior = input$additional_procedures_posterior,
+  #                                                                   additional_procedures_other_posterior = input$additional_procedures_other_posterior,
+  #                                                                   additional_end_procedure_details_posterior = input$additional_end_procedure_details_posterior,
+  #                                                                   closure_details_posterior = input$closure_details_posterior,
+  #                                                                   dressing_details_posterior = input$dressing_details_posterior,
+  #                                                                   
+  #                                                                   postop_dispo = input$postop_dispo,
+  #                                                                   postop_abx = input$postop_abx,
+  #                                                                   postop_map_goals = input$postop_map_goals,
+  #                                                                   postop_transfusion_threshold = input$postop_transfusion_threshold,
+  #                                                                   postop_imaging = input$postop_imaging,
+  #                                                                   postop_pain = input$postop_pain,
+  #                                                                   postop_activity = input$postop_activity,
+  #                                                                   postop_brace = input$postop_brace,
+  #                                                                   postop_diet = input$postop_diet,
+  #                                                                   postop_dvt_ppx = input$postop_dvt_ppx,
+  #                                                                   postop_drains_dressing = input$postop_drains_dressing,
+  #                                                                   postop_followup = input$postop_followup
+  #                    )
+  #                  )
+  #                }
+  #              })
   
   
   ## NOW make a reactive modal for editing the info if needed ###
@@ -2142,13 +2400,23 @@ server <- function(input, output, session) {
       durotomy_timing_input = input$durotomy_timing,
       durotomy_instrument_input = input$durotomy_instrument,
       durotomy_repair_method_input = input$durotomy_repair_method,
-      head_positioning = input$head_positioning,
-      additional_procedures_choices = additional_procedures_options_reactive_vector(),
-      additional_procedures = input$additional_procedures,
-      additional_procedures_other = input$additional_procedures_other,
-      additional_end_procedure_details = input$additional_end_procedure_details,
-      closure_details = input$closure_details,
-      dressing_details = input$dressing_details, 
+      head_positioning_posterior = input$head_positioning_posterior,
+      head_positioning_anterior = input$head_positioning_anterior,
+
+      additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
+      additional_procedures_anterior = input$additional_procedures_anterior,
+      additional_procedures_other_anterior = input$additional_procedures_other_anterior,
+      additional_end_procedure_details_anterior = input$additional_end_procedure_details_anterior,
+      closure_details_anterior = input$closure_details_anterior,
+      dressing_details_anterior = input$dressing_details_anterior,
+
+      additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
+      additional_procedures_posterior = input$additional_procedures_posterior,
+      additional_procedures_other_posterior = input$additional_procedures_other_posterior,
+      additional_end_procedure_details_posterior = input$additional_end_procedure_details_posterior,
+      closure_details_posterior = input$closure_details_posterior,
+      dressing_details_posterior = input$dressing_details_posterior,
+      
       postop_dispo = input$postop_dispo,
       postop_abx = input$postop_abx,
       postop_map_goals = input$postop_map_goals,
@@ -2233,8 +2501,11 @@ server <- function(input, output, session) {
       details_list$'Intraoperative Complications:' <- as.character(glue_collapse(x = input$intraoperative_complications_vector, sep = "; "))
     }
     
-    details_list$'Head Position:' <- paste(input$head_positioning)
-    details_list$'Additional Procedures:' <- as.character(glue_collapse(x = additional_procedures_vector_reactive(), sep = "; "))
+    details_list$'Posterior Head Position:' <- paste(input$head_positioning_posterior)
+    details_list$'Anterior Head Position:' <- paste(input$head_positioning_anterior)
+    
+    details_list$'Additional Anterior Procedures:' <- as.character(glue_collapse(x = additional_procedures_vector_anterior_reactive(), sep = "; "))
+    details_list$'Additional Posterior Procedures:' <- as.character(glue_collapse(x = additional_procedures_vector_posterior_reactive(), sep = "; "))
     details_list$'End of Procedure & Closure Details:' <- "---"
     
     if(!is.null(input$deep_drains_anterior) && input$deep_drains_anterior > 0){
@@ -2251,9 +2522,13 @@ server <- function(input, output, session) {
       details_list$'Posterior Superficial Drains:' <- paste(input$superficial_drains_posterior)
     }
     
-    details_list$'Used During Closure:' <- toString(input$additional_end_procedure_details)
-    details_list$'Skin Closure:' <- toString(input$closure_details)
-    details_list$'Skin/Dressing:' <- toString(input$dressing_details)
+    details_list$'Used During Anterior Closure:' <- toString(input$additional_end_procedure_details_anterior)
+    details_list$'Anterior Skin Closure:' <- toString(input$closure_details_anterior)
+    details_list$'Anterior Skin/Dressing:' <- toString(input$dressing_details_anterior)
+    
+    details_list$'Used During Posterior Closure:' <- toString(input$additional_end_procedure_details_posterior)
+    details_list$'Posterior Skin Closure:' <- toString(input$closure_details_posterior)
+    details_list$'Posterior Skin/Dressing:' <- toString(input$dressing_details_posterior)
     
     details_list <- map(details_list, .f = ~ as.character(.x)) 
     
@@ -4701,6 +4976,26 @@ server <- function(input, output, session) {
                ylim = input$crop_y)
   })
   
+  observeEvent(input$multi_approach_starting_position, {
+    if(input$multi_approach_starting_position == "Anterior" | input$multi_approach_starting_position == "Lateral"){
+      
+      updateRadioGroupButtons(session = session, inputId = "spine_approach", selected = "Anterior")
+      # radioGroupButtons(inputId = "spine_approach", 
+      #                   label = NULL,
+      #                   choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior or Lateral")),
+      #                                      tags$span(icon("fas fa-user", style = "color: steelblue"), strong("Posterior"))),
+      #                   choiceValues = list("Anterior", "Posterior"),
+      #                   selected = "Posterior", 
+      #                   direction = "horizontal",
+      #                   checkIcon = list(yes = icon("check")),
+      #                   justified = TRUE
+      # )
+    }else{
+      updateRadioGroupButtons(session = session, inputId = "spine_approach", selected = "Posterior")
+    }
+  }
+  )
+  
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
@@ -4948,8 +5243,8 @@ server <- function(input, output, session) {
       posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "na"
     }
     
-    #######
-    posterior_op_note_inputs_list_reactive$head_positioning <- input$head_positioning
+    ####### Head Positioning
+    posterior_op_note_inputs_list_reactive$head_positioning_posterior <- input$head_positioning_posterior
     
     #######
     posterior_op_note_inputs_list_reactive$approach_specified_posterior <- input$approach_specified_posterior
@@ -5078,7 +5373,7 @@ server <- function(input, output, session) {
     }
     
     #######
-    posterior_op_note_inputs_list_reactive$additional_procedures_vector <- additional_procedures_vector_reactive()
+    posterior_op_note_inputs_list_reactive$additional_procedures_vector <- additional_procedures_vector_posterior_reactive()
     
     #######
     posterior_op_note_inputs_list_reactive$prior_fusion_levels <- input$prior_fusion_levels
@@ -5125,13 +5420,13 @@ server <- function(input, output, session) {
     posterior_op_note_inputs_list_reactive$superficial_drains_posterior <- input$superficial_drains_posterior
     
     #######
-    posterior_op_note_inputs_list_reactive$additional_end_procedure_details <- input$additional_end_procedure_details
+    posterior_op_note_inputs_list_reactive$additional_end_procedure_details <- input$additional_end_procedure_details_posterior
     
     #######
-    posterior_op_note_inputs_list_reactive$closure_details <- input$closure_details
+    posterior_op_note_inputs_list_reactive$closure_details <- input$closure_details_posterior
     
     #######
-    posterior_op_note_inputs_list_reactive$dressing_details <- input$dressing_details
+    posterior_op_note_inputs_list_reactive$dressing_details <- input$dressing_details_posterior
     
     ####### MULTIPLE APPROACH
     if(input$multiple_approach == TRUE){
@@ -5225,6 +5520,9 @@ server <- function(input, output, session) {
     }
     
     #######
+    anterior_op_note_inputs_list_reactive$head_positioning_anterior <- input$head_positioning_anterior
+    
+    #######
     anterior_op_note_inputs_list_reactive$anterior_approach_laterality <- input$approach_specified_anterior
     
     
@@ -5261,7 +5559,7 @@ server <- function(input, output, session) {
     }
     
     #######
-    anterior_op_note_inputs_list_reactive$additional_procedures_vector <- input$additional_procedures
+    anterior_op_note_inputs_list_reactive$additional_procedures_vector <- additional_procedures_vector_anterior_reactive() #input$additional_procedures_anterior
     
     #######
     neuromonitoring_input_list <- list()
@@ -5336,13 +5634,13 @@ server <- function(input, output, session) {
     anterior_op_note_inputs_list_reactive$superficial_drains_anterior <- input$superficial_drains_anterior
     
     #######
-    anterior_op_note_inputs_list_reactive$additional_end_procedure_details <- input$additional_end_procedure_details
+    anterior_op_note_inputs_list_reactive$additional_end_procedure_details <- input$additional_end_procedure_details_anterior
     
     #######
-    anterior_op_note_inputs_list_reactive$closure_details <- input$closure_details
+    anterior_op_note_inputs_list_reactive$closure_details <- input$closure_details_anterior
     
     #######
-    anterior_op_note_inputs_list_reactive$dressing_details <- input$dressing_details
+    anterior_op_note_inputs_list_reactive$dressing_details <- input$dressing_details_anterior
     
     #######
     ####### MULTIPLE APPROACH
@@ -5464,10 +5762,10 @@ server <- function(input, output, session) {
       
       if(posterior_procedures_count>0){
         
-        procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df,
+        procedure_results_list_posterior <- try(op_note_posterior_function(all_objects_to_add_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df,
                                                                        fusion_levels_df = posterior_op_note_inputs_list_reactive()$fusions_df, 
                                                                        c2_nerve_transection = posterior_op_note_inputs_list_reactive()$c2_nerve_transection,
-                                                                       head_position = posterior_op_note_inputs_list_reactive()$head_positioning,
+                                                                       head_position = posterior_op_note_inputs_list_reactive()$head_positioning_posterior,
                                                                        surgical_approach = posterior_op_note_inputs_list_reactive()$approach_specified_posterior,
                                                                        approach_mis_open = posterior_op_note_inputs_list_reactive()$approach_open_mis,
                                                                        approach_robot_nav_xray = posterior_op_note_inputs_list_reactive()$approach_robot_navigation,
@@ -5502,7 +5800,7 @@ server <- function(input, output, session) {
                                                                        lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression, 
                                                                        instruments_used_for_bony_work = posterior_op_note_inputs_list_reactive()$instruments_used_for_bony_work, 
                                                                        attending_assistant = posterior_op_note_inputs_list_reactive()$attending_assistant
-        )
+        ), silent = TRUE)
         
         
       }
@@ -5510,9 +5808,10 @@ server <- function(input, output, session) {
 
       if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df) > 0){
         
-        procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df,
+        procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df, 
                                                                      anterior_plate_revision_df = anterior_op_note_inputs_list_reactive()$anterior_plate_revision_df,
                                                                      anterior_approach_laterality = anterior_op_note_inputs_list_reactive()$anterior_approach_laterality,
+                                                                     head_position = anterior_op_note_inputs_list_reactive()$head_positioning_anterior,
                                                                      approach_statement = anterior_op_note_inputs_list_reactive()$approach_statement,
                                                                      antibiotics = anterior_op_note_inputs_list_reactive()$antibiotics,
                                                                      antifibrinolytic = anterior_op_note_inputs_list_reactive()$antifibrinolytic,
@@ -6328,13 +6627,22 @@ server <- function(input, output, session) {
       intraop_details_list$superficial_drains_posterior <- paste(input$superficial_drains_posterior) 
     }
     
-    if(length(input$additional_end_procedure_details)>0){
-      intraop_details_list$end_procedure_details <- glue_collapse(input$additional_end_procedure_details, sep = "; ")
+    if(length(input$additional_end_procedure_details_anterior)>0){
+      intraop_details_list$end_procedure_details_anterior <- glue_collapse(input$additional_end_procedure_details_anterior, sep = "; ")
     }else{
-      intraop_details_list$end_procedure_details <- " "
+      intraop_details_list$end_procedure_details_anterior <- " "
     }
-    intraop_details_list$closure_details <- glue_collapse(input$closure_details, sep = "; ")
-    intraop_details_list$dressing_details <- glue_collapse(input$dressing_details, sep = "; ")
+    if(length(input$additional_end_procedure_details_posterior)>0){
+      intraop_details_list$end_procedure_details_posterior <- glue_collapse(input$additional_end_procedure_details_posterior, sep = "; ")
+    }else{
+      intraop_details_list$end_procedure_details_posterior <- " "
+    }
+    
+    intraop_details_list$closure_details_anterior <- glue_collapse(input$closure_details_anterior, sep = "; ")
+    intraop_details_list$dressing_details_anterior <- glue_collapse(input$dressing_details_anterior, sep = "; ")
+    
+    intraop_details_list$closure_details_posterior <- glue_collapse(input$closure_details_posterior, sep = "; ")
+    intraop_details_list$dressing_details_posterior <- glue_collapse(input$dressing_details_posterior, sep = "; ")
     
     ####### GENERATE DATAFRAME #####
     

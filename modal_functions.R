@@ -267,6 +267,7 @@ startup_modal_box_diagnosis_symptoms <-
            stage_number_value = 1,
            staged_procedure_initial_value = FALSE,
            multiple_approach_initial_value = FALSE,
+           multi_approach_starting_position = "Posterior",
            spinal_regions_selected = c("Lumbar"),
            primary_or_revision = "Primary",
            levels_with_prior_decompression = "",
@@ -441,6 +442,18 @@ startup_modal_box_diagnosis_symptoms <-
             switch_input_on_label = "Yes",
             switch_input_off_label = "No",
             initial_value_selected = multiple_approach_initial_value
+          ),
+          conditionalPanel(condition = "input.multiple_approach == true",
+                           jh_make_shiny_table_row_function(
+                             left_column_label = "Starting Position:",
+                             input_type = "awesomeRadio",
+                             input_id = "multi_approach_starting_position",
+                             left_column_percent_width = 50,
+                             font_size = 14,
+                             choices_vector = c("Posterior", "Anterior", "Lateral"),
+                             checkboxes_inline = TRUE,
+                             initial_value_selected = multi_approach_starting_position
+                           )
           ),
           fluidRow(
             column(
@@ -1335,17 +1348,27 @@ addition_surgical_details_modal_box_2_function <-
            durotomy_timing_input = "",
            durotomy_instrument_input = "",
            durotomy_repair_method_input = "",
-           head_positioning = "",
-           additional_procedures_choices = c(""),
-           additional_procedures = NULL,
-           additional_procedures_other = "",
-           additional_end_procedure_details = NULL,
-           superficial_drains_anterior = 0,
+           
+           head_positioning_anterior = "",
            deep_drains_anterior = 0,
-           superficial_drains_posterior = 0,
+           superficial_drains_anterior = 0,
+           additional_end_procedure_details_anterior = NULL,
+           closure_details_anterior = NULL,
+           dressing_details_anterior = NULL,
+           additional_procedures_choices_anterior = c(""),
+           additional_procedures_anterior = NULL,
+           additional_procedures_other_anterior = "",
+           
+           head_positioning_posterior = "",
            deep_drains_posterior = 1,
-           closure_details = NULL,
-           dressing_details = NULL, 
+           superficial_drains_posterior = 0,
+           additional_end_procedure_details_posterior = NULL,
+           closure_details_posterior = NULL,
+           dressing_details_posterior = NULL,
+           additional_procedures_choices_posterior = c(""),
+           additional_procedures_posterior = NULL,
+           additional_procedures_other_posterior = "",
+
            postop_dispo = c(""),
            postop_abx = c("Ancef x 24hrs"),
            postop_map_goals = " ",
@@ -1380,70 +1403,29 @@ addition_surgical_details_modal_box_2_function <-
         if (required_options_missing == TRUE) {
           div(style = "font-size:22px; font-weight:bold; font-style:italic; text-align:center; color:red", "*** Please Make/Confirm Selections for Required Fields***")
         },
-        if(procedure_approach == "anterior"){
-          jh_make_shiny_table_row_function(
-            left_column_percent_width = 20,
-            left_column_label = "Head Positioning:",
-            font_size = row_label_font_size,
-            input_type = "radioGroupButtons",
-            input_id = "head_positioning",
-            required_option = TRUE,
-            individual_buttons = TRUE,
-            button_size = "xs",
-            checkboxes_inline = TRUE,
-            choices_vector = c(
-              "Supine/Lateral",
-              "C-flex head positioner",
-              "Cranial Tongs",
-              "Halo",
-              "Mayfield"
-            ),
-            initial_value_selected = head_positioning
-          )
-        },
-        if(procedure_approach == "posterior"){
-          jh_make_shiny_table_row_function(
-            left_column_percent_width = 20,
-            left_column_label = "Head Positioning:",
-            font_size = row_label_font_size,
-            input_type = "radioGroupButtons",
-            input_id = "head_positioning",
-            individual_buttons = TRUE,
-            required_option = TRUE,
-            button_size = "xs",
-            checkboxes_inline = TRUE,
-            choices_vector = c(
-              "Proneview Faceplate",
-              "C-flex head positioner",
-              "Cranial Tongs",
-              "Halo",
-              "Mayfield"
-            ),
-            initial_value_selected = head_positioning
-          )
-        },
-        if(procedure_approach == "combined"){
-          jh_make_shiny_table_row_function(
-            left_column_percent_width = 20,
-            left_column_label = "Head Positioning:",
-            font_size = row_label_font_size,
-            input_type = "radioGroupButtons",
-            input_id = "head_positioning", 
-            individual_buttons = TRUE,
-            required_option = TRUE,
-            button_size = "xs",
-            checkboxes_inline = TRUE,
-            choices_vector = c(
-              "Supine/Lateral",
-              "Proneview Faceplate",
-              "C-flex head positioner",
-              "Cranial Tongs",
-              "Halo",
-              "Mayfield"
-            ),
-            initial_value_selected = head_positioning
-          )
-        },
+        # if(procedure_approach == "combined"){
+        #   jh_make_shiny_table_row_function(
+        #     left_column_percent_width = 20,
+        #     left_column_label = "Head Positioning:",
+        #     font_size = row_label_font_size,
+        #     input_type = "radioGroupButtons",
+        #     input_id = "head_positioning", 
+        #     individual_buttons = TRUE,
+        #     required_option = TRUE,
+        #     button_size = "xs",
+        #     checkboxes_inline = TRUE,
+        #     choices_vector = c(
+        #       "Supine/Lateral",
+        #       "Proneview Faceplate",
+        #       "C-flex head positioner",
+        #       "Cranial Tongs",
+        #       "Halo",
+        #       "Mayfield"
+        #     ),
+        #     initial_value_selected = head_positioning
+        #   )
+        # },
+        div(style = "font-size:20px; font-weight:bold; text-align:center", "Additional Procedure & Closure Details:"),
         hr(),
         jh_make_shiny_table_row_function(
           left_column_percent_width = 30,
@@ -1683,7 +1665,35 @@ addition_surgical_details_modal_box_2_function <-
         ),
         br(),
         hr(),
-        div(style = "font-size:20px; font-weight:bold; text-align:center", "End of Procedure & Closure Details:"),
+        ############# ANTERIOR ############# ############# ANTERIOR ############# ############# ANTERIOR #############
+        
+        ############# ANTERIOR ############# ############# ANTERIOR ############# ############# ANTERIOR #############
+
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+          div(style = "font-size:20px; font-weight:bold; text-align:left", "ANTERIOR Details:")
+          },
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+          jh_make_shiny_table_row_function(
+            left_column_percent_width = 20,
+            left_column_label = "Anterior Head Positioning:",
+            font_size = row_label_font_size,
+            input_type = "radioGroupButtons",
+            input_id = "head_positioning_anterior",
+            required_option = TRUE,
+            individual_buttons = TRUE,
+            button_size = "xs",
+            checkboxes_inline = TRUE,
+            choices_vector = c(
+              "Supine/Lateral",
+              "C-flex head positioner",
+              "Cranial Tongs",
+              "Halo",
+              "Mayfield"
+            ),
+            initial_value_selected = head_positioning_anterior
+          )
+        },
+        br(),
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
                                            input_type = "awesomeRadio",
@@ -1694,6 +1704,7 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
+        br(),
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
                                            input_type = "awesomeRadio",
@@ -1704,6 +1715,119 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
+        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+          jh_make_shiny_table_row_function(
+            left_column_label = "Select any used during anterior closure:",
+            input_type = "checkbox",
+            input_id = "additional_end_procedure_details_anterior",
+            left_column_percent_width = 45,
+            font_size = row_label_font_size,
+            choices_vector = c("Vancomycin Powder",
+                               "Antibiotic Beads"),
+            initial_value_selected = additional_end_procedure_details_anterior,
+            return_as_full_table = TRUE
+          )
+        },
+        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+          jh_make_shiny_table_row_function(
+            left_column_label = "Anterior Skin Closure:",
+            input_type = "checkbox",
+            input_id = "closure_details_anterior",
+            left_column_percent_width = 45,
+            font_size = row_label_font_size,
+            required_option = TRUE,
+            choices_vector = c("Subcutaneous suture",
+                               "Nylon",
+                               "Staples", 
+                               "left open"),
+            initial_value_selected = closure_details_anterior,
+            return_as_full_table = TRUE
+          )
+        },
+        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+          jh_make_shiny_table_row_function(
+            left_column_label = "Anterior Skin/Dressing:",
+            input_type = "checkbox",
+            input_id = "dressing_details_anterior",
+            required_option = TRUE,
+            left_column_percent_width = 45,
+            font_size = row_label_font_size,
+            choices_vector = c(
+              "Steristrips",
+              "Dermabond",
+              "Prineo",
+              "an Incisional Wound Vac",
+              "Wound Vac",
+              "a water tight dressing"
+            ),
+            initial_value_selected = dressing_details_anterior,
+            return_as_full_table = TRUE
+          )
+        },
+        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){h4("Confirm Any Additional Anterior Procedures Performed:")},
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+          jh_make_shiny_table_row_function(
+            left_column_label = "Additional Anterior Procedures:",
+            font_size = row_label_font_size,
+            input_id = "additional_procedures_anterior",
+            left_column_percent_width = 35,
+            checkboxes_inline = FALSE,
+            input_type = "checkbox",
+            choices_vector = additional_procedures_choices_anterior,
+            initial_value_selected = additional_procedures_anterior
+          )
+        },
+        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+          conditionalPanel(
+            condition = "input.additional_procedures_anterior.indexOf('Other') > -1",
+            tags$table(
+              width = "90%" ,
+              jh_make_shiny_table_row_function(
+                left_column_label = "Other Procedures:",
+                font_size = row_label_font_size - 1,
+                input_type = "text",
+                input_id = "additional_procedures_other_anterior",
+                left_column_percent_width = 30,
+                initial_value_selected = additional_procedures_other_anterior,
+              )
+            )
+          )
+        },
+        ############# POSTERIOR ############# ############# POSTERIOR ############# ############# POSTERIOR #############
+        
+        ############# POSTERIOR ############# ############# POSTERIOR ############# ############# POSTERIOR #############
+        
+        hr(),
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+          div(style = "font-size:20px; font-weight:bold; text-align:left", "POSTERIOR Details:")
+        },
+        if(procedure_approach == "posterior"  | procedure_approach == "combined"){
+          jh_make_shiny_table_row_function(
+            left_column_percent_width = 20,
+            left_column_label = "Posterior Head Positioning:",
+            font_size = row_label_font_size,
+            input_type = "radioGroupButtons",
+            input_id = "head_positioning_posterior",
+            individual_buttons = TRUE,
+            required_option = TRUE,
+            button_size = "xs",
+            checkboxes_inline = TRUE,
+            choices_vector = c(
+              "Proneview Faceplate",
+              "C-flex head positioner",
+              "Cranial Tongs",
+              "Halo",
+              "Mayfield"
+            ),
+            initial_value_selected = head_positioning_posterior
+          )
+        },
+        br(),
         if(procedure_approach == "posterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
                                            input_type = "awesomeRadio",
@@ -1724,78 +1848,91 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        hr(),
-        jh_make_shiny_table_row_function(
-          left_column_label = "Select any used during closure:",
-          input_type = "checkbox",
-          input_id = "additional_end_procedure_details",
-          left_column_percent_width = 45,
-          font_size = row_label_font_size,
-          choices_vector = c("Vancomycin Powder",
-                             "Antibiotic Beads"),
-          initial_value_selected = additional_end_procedure_details,
-          return_as_full_table = TRUE
-        ),
-        hr(),
-        jh_make_shiny_table_row_function(
-          left_column_label = "Skin Closure:",
-          input_type = "checkbox",
-          input_id = "closure_details",
-          left_column_percent_width = 45,
-          font_size = row_label_font_size,
-          required_option = TRUE,
-          choices_vector = c("Subcutaneous suture",
-                             "Nylon",
-                             "Staples", 
-                             "left open"),
-          initial_value_selected = closure_details,
-          return_as_full_table = TRUE
-        ),
-        hr(),
-        jh_make_shiny_table_row_function(
-          left_column_label = "Skin/Dressing:",
-          input_type = "checkbox",
-          input_id = "dressing_details",
-          required_option = TRUE,
-          left_column_percent_width = 45,
-          font_size = row_label_font_size,
-          choices_vector = c(
-            "Steristrips",
-            "Dermabond",
-            "Prineo",
-            "an Incisional Wound Vac",
-            "Wound Vac",
-            "a water tight dressing"
-          ),
-          initial_value_selected = dressing_details,
-          return_as_full_table = TRUE
-        ),
         br(),
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+          jh_make_shiny_table_row_function(
+            left_column_label = "Select any used during posterior closure:",
+            input_type = "checkbox",
+            input_id = "additional_end_procedure_details_posterior",
+            left_column_percent_width = 45,
+            font_size = row_label_font_size,
+            choices_vector = c("Vancomycin Powder",
+                               "Antibiotic Beads"),
+            initial_value_selected = additional_end_procedure_details_posterior,
+            return_as_full_table = TRUE
+          )
+        },
+        br(),
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+          jh_make_shiny_table_row_function(
+            left_column_label = "Posterior Skin Closure:",
+            input_type = "checkbox",
+            input_id = "closure_details_posterior",
+            left_column_percent_width = 45,
+            font_size = row_label_font_size,
+            required_option = TRUE,
+            choices_vector = c("Subcutaneous suture",
+                               "Nylon",
+                               "Staples", 
+                               "left open"),
+            initial_value_selected = closure_details_posterior,
+            return_as_full_table = TRUE
+          )
+        },
+        br(),
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+          jh_make_shiny_table_row_function(
+            left_column_label = "Posterior Skin/Dressing:",
+            input_type = "checkbox",
+            input_id = "dressing_details_posterior",
+            required_option = TRUE,
+            left_column_percent_width = 45,
+            font_size = row_label_font_size,
+            choices_vector = c(
+              "Steristrips",
+              "Dermabond",
+              "Prineo",
+              "an Incisional Wound Vac",
+              "Wound Vac",
+              "a water tight dressing"
+            ),
+            initial_value_selected = dressing_details_posterior,
+            return_as_full_table = TRUE
+          )
+        },
+        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){h4("Confirm Any Additional Posterior Procedures Performed:")},
         h3("Confirm any additional Procedures Performed:"),
-        jh_make_shiny_table_row_function(
-          left_column_label = "Additional Procedures:",
-          font_size = row_label_font_size,
-          input_id = "additional_procedures",
-          left_column_percent_width = 20,
-          checkboxes_inline = FALSE,
-          input_type = "checkbox",
-          choices_vector = additional_procedures_choices,
-          initial_value_selected = additional_procedures
-        ),
-        conditionalPanel(
-          condition = "input.additional_procedures.indexOf('Other') > -1",
-          tags$table(
-            width = "90%" ,
-            jh_make_shiny_table_row_function(
-              left_column_label = "Other Procedures:",
-              font_size = row_label_font_size - 1,
-              input_type = "text",
-              input_id = "additional_procedures_other",
-              left_column_percent_width = 30,
-              initial_value_selected = additional_procedures_other,
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+          jh_make_shiny_table_row_function(
+            left_column_label = "Additional Posterior Procedures:",
+            font_size = row_label_font_size,
+            input_id = "additional_procedures_posterior",
+            left_column_percent_width = 20,
+            checkboxes_inline = FALSE,
+            input_type = "checkbox",
+            choices_vector = additional_procedures_choices_posterior,
+            initial_value_selected = additional_procedures_posterior
+          )
+        },
+        br(),
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+          conditionalPanel(
+            condition = "input.additional_procedures_posterior.indexOf('Other') > -1",
+            tags$table(
+              width = "90%" ,
+              jh_make_shiny_table_row_function(
+                left_column_label = "Other Procedures:",
+                font_size = row_label_font_size - 1,
+                input_type = "text",
+                input_id = "additional_procedures_other_posterior",
+                left_column_percent_width = 30,
+                initial_value_selected = additional_procedures_other_posterior,
+              )
             )
           )
-        ),
+        },
+        br(),
         hr(),
         h2("Postop Plan:"),
         jh_make_shiny_table_row_function(

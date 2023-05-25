@@ -130,6 +130,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                       anterior_plate_revision_df = tibble(level = character(), 
                                                                           prior_plate_status = character()),
                                       anterior_approach_laterality = "left-sided",
+                                      head_position = "Supine/Lateral",
                                       approach_statement = "none",
                                       antibiotics = vector(),
                                       antifibrinolytic = "",
@@ -195,14 +196,15 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$antifibrinolytic <- antifibrinolytic
   }
   
-  if(any(str_detect(additional_procedures_vector, "Halo"))){
-    first_paragraph_list$head_statement <- paste(glue("A Halo was applied to {his_or_her} skull for positioning and the pins were sequentially tightened to the appropriate torque."))
-  }
+  first_paragraph_list$head_statement <- as.character(case_when(
+    head_position == "Supine/Lateral" ~ glue("{str_to_title(his_or_her)} head rested in a position of comfort, securely on the bed."),
+    head_position == "C-flex head positioner" ~ glue("The C-flex head positioner was used to pad and secure {his_or_her} head during surgery."), 
+    head_position == "Cranial Tongs" ~ glue("Cranial tongs were applied to {his_or_her} skull for intraoperative traction and an appropriate weight was selected for cranial traction."),
+    head_position == "Halo" ~ glue("A Halo was applied to {his_or_her} skull for positioning and the pins were sequentially tightened to the appropriate torque."),
+    head_position == "Mayfield" ~ glue("A Mayfield head holder was applied to {his_or_her} skull for positioning and secured to the bed.")
+  ))
   
-  if(any(str_detect(additional_procedures_vector, "Tongs"))){
-    first_paragraph_list$head_statement <- paste(glue("Cranial tongs were applied to {his_or_her} skull for positioning and an appropriate weight was selected for cranial traction."))
-  }
-  
+
   if(length(neuromonitoring_list$modalities) > 0 & (any(neuromonitoring_list$modalities == "None") == FALSE)){
     first_paragraph_list$spinal_cord_monitoring <- glue("Neuromonitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
   }
