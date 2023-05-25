@@ -585,8 +585,10 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                        revision_implants_df = tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character()),
                                        left_main_rod_size = "5.5",
                                        left_main_rod_material = "Titanium",
+                                       left_main_rod_contour = "rod was cut to the appropriate length and contoured",
                                        right_main_rod_size = "5.5",
                                        right_main_rod_material = "Titanium",
+                                       right_main_rod_contour = "rod was cut to the appropriate length and contoured",
                                        additional_rods_statement = NULL,
                                        antibiotics = vector(),
                                        antifibrinolytic = "",
@@ -998,7 +1000,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
 
     if(any(str_detect(posterior_implant_df$side, "bilateral"))){
 
-      rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} rod was contoured for the left and a {right_main_rod_size} {right_main_rod_material} rod was contoured for the right. ") 
+      rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} {left_main_rod_contour} for the left and a {right_main_rod_size} {right_main_rod_material} {right_main_rod_contour} for the right. ") 
       rod_statements_list$alignment_and_rod_placement <-  case_when(
         str_detect(string = alignment_correction_technique, pattern = "rod benders") ~ glue("The rods were set into place, secured with set screws and {alignment_correction_technique}."), 
         str_detect(string = str_to_lower(alignment_correction_technique), pattern = "pro-axis") ~ glue("{alignment_correction_technique} and the rods were set into place and secured with set screws."), 
@@ -1033,7 +1035,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       
     }else{
       if(any(str_detect(posterior_implant_df$side, "left"))){
-        rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} rod was contoured for the left and the rod was placed into position and secured with set screws.")
+        rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} {left_main_rod_contour} for the left and the rod was placed into position and secured with set screws.")
         rod_statements_list$additional_rods_statement <- additional_rods_statement
         rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
         rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants.")
@@ -1042,7 +1044,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
         procedure_details_list$posterior_instrumentation_rods <- glue_collapse(rod_statements_list, sep = " ")
         
       }else{
-        rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {right_main_rod_size} {right_main_rod_material} rod was contoured for the right and the rod was placed into position and secured with set screws.")
+        rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {right_main_rod_size} {right_main_rod_material} {right_main_rod_contour} for the right and the rod was placed into position and secured with set screws.")
         rod_statements_list$additional_rods_statement <- additional_rods_statement
         rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
         rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants.")

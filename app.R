@@ -746,6 +746,18 @@ ui <- dashboardPage(skin = "black",
                                                                                        choices_vector = c("Non-instrumented", "Titanium", "Cobalt Chrome", "Stainless Steel"),
                                                                                        initial_value_selected = "Non-instrumented",
                                                                                        picker_choose_multiple = FALSE),
+                                                   jh_make_shiny_table_column_function(input_type = "awesomeRadio", 
+                                                                                       left_input_id = "left_main_rod_contour", 
+                                                                                       left_label = "Rod was:",
+                                                                                       right_input_id = "right_main_rod_contour", 
+                                                                                       right_label = "Material:",
+                                                                                       left_column_percent_width = 50,
+                                                                                       right_column_percent_width = 50,
+                                                                                       checkboxes_inline = TRUE,
+                                                                                       button_size = "normal",
+                                                                                       choices_vector = c("Cut to length and contoured", "Pre-contoured"),
+                                                                                       initial_value_selected = "Cut to length and contoured",
+                                                                                       picker_choose_multiple = FALSE),
                                                    jh_make_supplemental_rod_ui_function(rod_type = "accessory_rod", input_label = "Accessory Rod"),
                                                    jh_make_supplemental_rod_ui_function(rod_type = "satellite_rod", input_label = "Satellite Rod"),
                                                    jh_make_supplemental_rod_ui_function(rod_type = "intercalary_rod", input_label = "Intercalary Rod"),
@@ -5342,17 +5354,33 @@ server <- function(input, output, session) {
     
     posterior_op_note_inputs_list_reactive$revision_implants_df <- revision_implants_df
     
-    #######
+    # RODS
+    ####### Left
     posterior_op_note_inputs_list_reactive$left_main_rod_size <- input$left_main_rod_size
-    
-    #######
     posterior_op_note_inputs_list_reactive$left_main_rod_material <- input$left_main_rod_material
     
-    #######
+    if(length(input$left_main_rod_contour)>0){
+      posterior_op_note_inputs_list_reactive$left_main_rod_contour <- case_when(
+        input$left_main_rod_contour == "Pre-contoured" ~ "pre-contoured rod was selected",
+        input$left_main_rod_contour == "Cut to length and contoured" ~ "rod was cut to the appropriate length and contoured",
+      )
+    }else{
+      posterior_op_note_inputs_list_reactive$left_main_rod_contour <- ""
+    }
+    
+    ####### Right
+    posterior_op_note_inputs_list_reactive$right_main_rod_material <- input$right_main_rod_material
     posterior_op_note_inputs_list_reactive$right_main_rod_size <- input$right_main_rod_size
     
-    #######
-    posterior_op_note_inputs_list_reactive$right_main_rod_material <- input$right_main_rod_material
+    if(length(input$right_main_rod_contour)>0){
+      posterior_op_note_inputs_list_reactive$right_main_rod_contour <- case_when(
+        input$right_main_rod_contour == "Pre-contoured" ~ "pre-contoured rod was selected",
+        input$right_main_rod_contour == "Cut to length and contoured" ~ "rod was cut to the appropriate length and contoured",
+      )
+    }else{
+      posterior_op_note_inputs_list_reactive$right_main_rod_contour <- ""
+    }
+    
     
     #######
     posterior_op_note_inputs_list_reactive$added_rods_statement <- added_rods_statement_reactive()
@@ -5778,8 +5806,10 @@ server <- function(input, output, session) {
                                                                        revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df,
                                                                        left_main_rod_size = posterior_op_note_inputs_list_reactive()$left_main_rod_size,
                                                                        left_main_rod_material = posterior_op_note_inputs_list_reactive()$left_main_rod_material,
+                                                                       left_main_rod_contour = posterior_op_note_inputs_list_reactive()$left_main_rod_contour,
                                                                        right_main_rod_size = posterior_op_note_inputs_list_reactive()$right_main_rod_size,
                                                                        right_main_rod_material = posterior_op_note_inputs_list_reactive()$right_main_rod_material,
+                                                                       right_main_rod_contour = posterior_op_note_inputs_list_reactive()$right_main_rod_contour,
                                                                        additional_rods_statement = posterior_op_note_inputs_list_reactive()$added_rods_statement,
                                                                        antibiotics = posterior_op_note_inputs_list_reactive()$preop_antibiotics,
                                                                        antifibrinolytic = posterior_op_note_inputs_list_reactive()$antifibrinolytic,

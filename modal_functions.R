@@ -1693,7 +1693,7 @@ addition_surgical_details_modal_box_2_function <-
             initial_value_selected = head_positioning_anterior
           )
         },
-        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
                                            input_type = "awesomeRadio",
@@ -1704,7 +1704,7 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
                                            input_type = "awesomeRadio",
@@ -1715,7 +1715,7 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Select any used during anterior closure:",
@@ -1729,7 +1729,7 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Anterior Skin Closure:",
@@ -1746,7 +1746,7 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Anterior Skin/Dressing:",
@@ -1767,7 +1767,7 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "anterior" | procedure_approach == "combined"){h4("Confirm Any Additional Anterior Procedures Performed:")},
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
@@ -1781,7 +1781,7 @@ addition_surgical_details_modal_box_2_function <-
             initial_value_selected = additional_procedures_anterior
           )
         },
-        br(),
+        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
           conditionalPanel(
             condition = "input.additional_procedures_anterior.indexOf('Other') > -1",
@@ -1827,7 +1827,7 @@ addition_surgical_details_modal_box_2_function <-
             initial_value_selected = head_positioning_posterior
           )
         },
-        br(),
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "posterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
                                            input_type = "awesomeRadio",
@@ -1848,7 +1848,7 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        br(),
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "posterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Select any used during posterior closure:",
@@ -1862,7 +1862,7 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        br(),
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "posterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Posterior Skin Closure:",
@@ -1879,7 +1879,7 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        br(),
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "posterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Posterior Skin/Dressing:",
@@ -1900,8 +1900,8 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        br(),
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){h4("Confirm Any Additional Posterior Procedures Performed:")},
+        if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
+        if(procedure_approach == "Posterior" | procedure_approach == "combined"){h4("Confirm Any Additional Posterior Procedures Performed:")},
         h3("Confirm any additional Procedures Performed:"),
         if(procedure_approach == "posterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
