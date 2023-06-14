@@ -1709,6 +1709,7 @@ server <- function(input, output, session) {
     
     showModal(
       confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
+                                                                     procedure_approach = procedure_approach_reactive(),
                                                                      fusion_levels_confirmed = fusion_levels_computed_reactive_input, 
                                                                      anterior_approach = anterior_approach_yes_no,
                                                                      posterior_approach = posterior_approach_yes_no
@@ -1749,6 +1750,7 @@ server <- function(input, output, session) {
       showModal(
         
         confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
+                                                                       procedure_approach = procedure_approach_reactive(),
                                                                        # screws_selected_df_reactive = screws_selected_df_reactive(), 
                                                                        fusion_levels_confirmed = input$fusion_levels_confirmed,
                                                                        approach_specified_posterior = input$approach_specified_posterior,

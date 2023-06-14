@@ -779,6 +779,7 @@ lateral_mass_screws_after_decompression_modal_function <- function(implant_objec
 ###############################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 
 confirm_fusion_levels_and_technique_details_modal_box_function <- function(implants_placed = "no",
+                                                                           procedure_approach = "",
                                                                            fusion_levels_confirmed = c(),
                                                                            approach_specified_posterior = "Midline",
                                                                            approach_open_mis = "Open",
@@ -873,6 +874,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                   },
                   hr(),
                   if(implants_placed == "yes"){
+                    if(procedure_approach == "posterior" | procedure_approach == "combined"){
                     jh_make_shiny_table_row_function(
                       input_type = "awesomeRadio",
                       left_column_label = "Method for identifying screw start point:",
@@ -888,7 +890,8 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                         "Intraoperative navigation was used for identifying start points.",
                         "NA"),
                       initial_value_selected = implant_start_point_method
-                      )
+                    )
+                    }
                   },
                   hr(),
                   if(implants_placed == "yes"){
@@ -909,6 +912,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                   },
                   hr(),
                   if(implants_placed == "yes"){
+                    if(procedure_approach == "posterior" | procedure_approach == "combined"){
                     jh_make_shiny_table_row_function(
                       input_type = "awesomeRadio",
                       left_column_label = "Method for any alignment correction:",
@@ -923,6 +927,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                         "NA"),
                       initial_value_selected = alignment_correction_method
                     )
+                    }
                   },
                   hr(),
                   jh_make_shiny_table_row_function(
@@ -1902,7 +1907,6 @@ addition_surgical_details_modal_box_2_function <-
         },
         if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
         if(procedure_approach == "Posterior" | procedure_approach == "combined"){h4("Confirm Any Additional Posterior Procedures Performed:")},
-        h3("Confirm any additional Procedures Performed:"),
         if(procedure_approach == "posterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Additional Posterior Procedures:",
