@@ -4,7 +4,8 @@
 
 anterior_plate_screws_df <- implant_starts_df %>%
   filter(vertebral_number < 23.9) %>%
-  union_all(l6_all_implants_constructed_df) %>%
+  # union_all(l6_all_implants_constructed_df) %>%
+  bind_rows(l6_all_implants_constructed_df) %>%
   select(level, vertebral_number, side, object) %>%
   filter(str_detect(object, "screw")) %>%
   filter(side == "left" | side == "right") %>%
@@ -15,14 +16,14 @@ anterior_plate_screws_df <- implant_starts_df %>%
 
 all_screw_size_type_inputs_df <- implant_starts_df %>%
   filter(vertebral_number < 23.9) %>%
-  union_all(l6_all_implants_constructed_df) %>%
+  bind_rows(l6_all_implants_constructed_df) %>%
   select(level, vertebral_number, side, object) %>%
   filter(str_detect(object, "screw")) %>%
   filter(side == "left" | side == "right") %>%
   arrange(vertebral_number) %>%
   select(-vertebral_number) %>%
   group_by(level, side, object) %>%
-  union_all(anterior_plate_screws_df) %>% ### added this NEW for ANTERIOR PLATE SCREWS
+  bind_rows(anterior_plate_screws_df) %>% ### added this NEW for ANTERIOR PLATE SCREWS
   mutate(count = row_number()) %>%
   ungroup() %>%
   mutate(level_object = str_to_lower(paste(level, object, sep = "_"))) %>%
@@ -107,7 +108,7 @@ all_screw_size_type_inputs_df <- implant_starts_df %>%
   
   all_screw_size_type_inputs_df <- all_screw_size_type_inputs_df %>%
     filter(str_detect(string = left_object, pattern = "anterior_plate", negate = TRUE)) %>%
-    union_all(anterior_plate_screws_all_df) %>%
+    bind_rows(anterior_plate_screws_all_df) %>%
     separate(col = level_object_label, into = c("level"), remove = FALSE)
 
 
@@ -163,7 +164,7 @@ jh_generate_df_for_screening_screw_inputs_function <- function(all_implants_df){
   level_object_df <- all_implants_df %>%
     filter(object != "anterior_plate") %>%
     select(level, vertebral_number, side, object) %>%
-    union_all(anterior_plate_df) %>% ### NEW
+    bind_rows(anterior_plate_df) %>% ### NEW
     mutate(level_object_label = str_to_title(str_replace_all(paste(level, object), "_", " "))) %>%
     mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI"))
   

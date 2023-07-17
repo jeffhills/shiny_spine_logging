@@ -551,11 +551,12 @@ anterior_objects_df <- anterior_df %>%
 #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
 
 all_points_all_implants_constructed_df <- implants_constructed_df %>%
-  union_all(osteotomy_df) %>%
-  union_all(decompression_df) %>%
-  union_all(incision_drainage_df) %>%
-  union_all(anterior_objects_df) %>%
-  union_all(all_interbody_df) %>%
+  # select(-sublaminar_band_length, -length_for_tether) %>%
+  bind_rows(osteotomy_df) %>%
+  bind_rows(decompression_df) %>%
+  bind_rows(incision_drainage_df) %>%
+  bind_rows(anterior_objects_df) %>%
+  bind_rows(all_interbody_df) %>%
   select(level, vertebral_number, everything())
 
  

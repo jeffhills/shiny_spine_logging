@@ -524,7 +524,7 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
   plate_levels_df <- objects_added_df %>%
     filter(object == "anterior_plate") %>%
     mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level)) %>%
-    union_all(objects_added_df %>%
+    bind_rows(objects_added_df %>%
                 filter(object == "anterior_plate")%>%
                 mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level))) %>%
     unnest(level) %>%
@@ -536,7 +536,7 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
   
   objects_added_df <- objects_added_df %>%
     filter(str_detect(string = object, pattern = "anterior_plate") == FALSE) %>%
-    union_all(plate_levels_df)
+    bind_rows(plate_levels_df)
   
   if(length(revision_decompression_vector) > 0){
     
@@ -599,10 +599,10 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
     select(procedure_class) %>%
     distinct() %>%
     left_join(summary_single_statements %>%
-                union_all(summary_multiple_nested)) %>%
+                bind_rows(summary_multiple_nested)) %>%
     select(procedure_performed_statement) %>%
     add_row(procedure_performed_statement = if_else(is.null(fusion_levels_vector), "", paste("Posterior Spinal Fusion at", glue_collapse(fusion_levels_vector, sep = ", ", last = " and ")))) %>%
-    union_all(added_procedures_df) %>%
+    bind_rows(added_procedures_df) %>%
     filter(procedure_performed_statement !="") %>%
     mutate(count = row_number()) %>%
     mutate(procedures_performed_numbered = glue("{count}. {procedure_performed_statement}")) %>%
@@ -683,15 +683,15 @@ jh_make_lateral_mass_screws_after_decompression_op_note_function <- function(pro
   
   new_procedures_separated_df <- paragraph_string_split_df %>%
     filter(str_detect(string = procedure_text, pattern = "I then proceeded with the posterior spinal instrumentation") == FALSE) %>%
-    union_all(instrumentation_not_lateral_mass_df) %>%
-    union_all(lateral_mass_screws_text_df) %>%
+    bind_rows(instrumentation_not_lateral_mass_df) %>%
+    bind_rows(lateral_mass_screws_text_df) %>%
     arrange(sequence_of_procedures)
   
   
   final_revised_all_paragraphs_df <- op_note_df %>%
     filter(name == "procedures") %>%
     mutate(value = glue_collapse(x = new_procedures_separated_df$procedure_text, sep = "\n\n")) %>%
-    union_all(op_note_df %>% filter(name != "procedures")) %>%
+    bind_rows(op_note_df %>% filter(name != "procedures")) %>%
     arrange(order)
   
   glue_collapse(x = final_revised_all_paragraphs_df$value, sep = "\n\n")
@@ -763,15 +763,15 @@ jh_make_lateral_mass_screws_after_decompression_op_note_function <- function(pro
   
   new_procedures_separated_df <- paragraph_string_split_df %>%
     filter(str_detect(string = procedure_text, pattern = "I then proceeded with the posterior spinal instrumentation") == FALSE) %>%
-    union_all(instrumentation_not_lateral_mass_df) %>%
-    union_all(lateral_mass_screws_text_df) %>%
+    bind_rows(instrumentation_not_lateral_mass_df) %>%
+    bind_rows(lateral_mass_screws_text_df) %>%
     arrange(sequence_of_procedures)
   
   
   final_revised_all_paragraphs_df <- op_note_df %>%
     filter(name == "procedures") %>%
     mutate(value = glue_collapse(x = new_procedures_separated_df$procedure_text, sep = "\n\n")) %>%
-    union_all(op_note_df %>% filter(name != "procedures")) %>%
+    bind_rows(op_note_df %>% filter(name != "procedures")) %>%
     arrange(order)
   
   glue_collapse(x = final_revised_all_paragraphs_df$value, sep = "\n\n")
@@ -1101,7 +1101,7 @@ op_note_technique_combine_statement <- function(object,
       unnest(everything()) 
     
     screw_statements_df <- tibble(level = character(), left = character(), right = character(), unilateral_screw_statement = character()) %>%
-      union_all(screw_statements_wide_df) %>%
+      bind_rows(screw_statements_wide_df) %>%
       mutate(left = if_else(is.na(left), "xx", left)) %>%
       mutate(right = if_else(is.na(right), "xx", right)) %>%
       # replace_na(replace = list(left = "xx", right = "xx")) %>%
@@ -1334,7 +1334,7 @@ op_note_procedures_present_listed_function <- function(objects_added_df,
     
     summary_nested_df <- summary_nested_df %>%
       filter(procedure_class != "Anterior spinal instrumentation (distinct from an interbody implant)") %>%
-      union_all(ant_instrumentation_df)
+      bind_rows(ant_instrumentation_df)
     
   }
   
@@ -1365,10 +1365,10 @@ op_note_procedures_present_listed_function <- function(objects_added_df,
     select(procedure_class) %>%
     distinct() %>%
     left_join(summary_single_statements %>%
-                union_all(summary_multiple_nested)) %>%
+                bind_rows(summary_multiple_nested)) %>%
     select(procedure_performed_statement) %>%
     add_row(procedure_performed_statement = if_else(length(fusion_levels_vector) == 0, "xx", paste("posterior spinal fusion at", glue_collapse(fusion_levels_vector, sep = ", ", last = " and ")))) %>%
-    union_all(added_procedures_df) %>%
+    bind_rows(added_procedures_df) %>%
     filter(procedure_performed_statement !="xx")
   
   as.character(glue_collapse(procedures_listed_df$procedure_performed_statement, sep = ", ", last = ", and the "))
@@ -1515,23 +1515,24 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
                                                            fusion_levels_vector = NULL,
                                                            additional_procedures_performed_vector = NULL){
   
-  if(nrow(revision_implants_df)>0 & nrow(objects_added_df)>0){
-    implant_removal_df <- revision_implants_df %>%
-      filter(remove_retain == "remove") %>%
-      select(level, remove_retain) %>%
-      distinct()
-    
-    re_inserted_df <- objects_added_df %>%
-      filter(str_detect(object, "screw")) %>%
-      left_join(implant_removal_df) %>%
-      filter(remove_retain == "remove")
-    
-    objects_added_df <- objects_added_df %>%
-      anti_join(re_inserted_df %>% select(-remove_retain)) %>%
-      union_all((re_inserted_df %>%
-                   mutate(object = "reinsertion_screw")))
-    
-  } 
+  ##### THIS IS WHAT CREATES the "REINSERTION OF SPINAL FIXATION" procedure
+  # if(nrow(revision_implants_df)>0 & nrow(objects_added_df)>0){
+  #   implant_removal_df <- revision_implants_df %>%
+  #     filter(remove_retain == "remove") %>%
+  #     select(level, remove_retain) %>%
+  #     distinct()
+  #   
+  #   re_inserted_df <- objects_added_df %>%
+  #     filter(str_detect(object, "screw")) %>%
+  #     left_join(implant_removal_df) %>%
+  #     filter(remove_retain == "remove")
+  #   
+  #   objects_added_df <- objects_added_df %>%
+  #     anti_join(re_inserted_df %>% select(-remove_retain)) %>%
+  #     bind_rows((re_inserted_df %>%
+  #                  mutate(object = "reinsertion_screw")))
+  #   
+  # } 
   
   if(length(revision_decompression_vector) > 0){
     if(nrow(objects_added_df)>0){
@@ -1605,10 +1606,10 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     filter(str_detect(string = procedure_class, pattern = "Inferior facetectom") == FALSE) %>%
     distinct() %>%
     left_join(summary_single_statements %>%
-                union_all(summary_multiple_nested)) %>%
+                bind_rows(summary_multiple_nested)) %>%
     select(procedure_performed_statement) %>%
     add_row(procedure_performed_statement = if_else(length(fusion_levels_vector) == 0, "xx", paste("Posterior Spinal Fusion at", glue_collapse(fusion_levels_vector, sep = ", ", last = " and ")))) %>%
-    union_all(added_procedures_df) %>%
+    bind_rows(added_procedures_df) %>%
     filter(procedure_performed_statement !="xx") %>%
     mutate(count = row_number()) %>%
     mutate(procedures_performed_numbered = glue("{count}. {procedure_performed_statement}")) %>%

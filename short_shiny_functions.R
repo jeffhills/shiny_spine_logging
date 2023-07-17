@@ -391,7 +391,7 @@ jh_filter_objects_by_y_range_function <- function(y_min = 0, y_max = 1, object_v
 #################################
 jh_filter_osteotomies_function <- function(full_df_to_filter){
   objects_in_sequence_df <- full_df_to_filter %>%
-    union_all(tibble(level = "x", object = c("grade_1", "grade_2", "grade_3", "grade_4", "grade_5"))) %>%
+    bind_rows(tibble(level = "x", object = c("grade_1", "grade_2", "grade_3", "grade_4", "grade_5"))) %>%
     mutate(order_number = row_number())
   
   grade_5_osteotomy_df <- objects_in_sequence_df %>%
@@ -458,10 +458,10 @@ jh_filter_osteotomies_function <- function(full_df_to_filter){
   
   
   all_grades_df <- grade_1_osteotomy_df %>%
-    union_all(grade_2_osteotomy_df) %>%
-    union_all(grade_3_osteotomy_df) %>%
-    union_all(grade_4_osteotomy_df) %>%
-    union_all(grade_5_osteotomy_df) %>%
+    bind_rows(grade_2_osteotomy_df) %>%
+    bind_rows(grade_3_osteotomy_df) %>%
+    bind_rows(grade_4_osteotomy_df) %>%
+    bind_rows(grade_5_osteotomy_df) %>%
     select(level, order_number, side, object, keep_remove)
   
   final_filtered_full_df <- objects_in_sequence_df %>%
@@ -1165,7 +1165,7 @@ fusion_levels_df_function <- function(all_objects_to_add_df){
       
       fusions_levels_df <- tibble(vertebral_number = seq(from = min(fusion_bodies_df$vertebral_number), to = max(fusion_bodies_df$vertebral_number), by = 1)) %>%
         mutate(level = jh_get_vertebral_level_function(number = vertebral_number))  %>%
-        union_all(fusion_range_df %>%
+        bind_rows(fusion_range_df %>%
                     filter(body_interspace == "interspace") %>%
                     select(level, vertebral_number) %>%
                     distinct()) %>%
@@ -1194,7 +1194,7 @@ jh_fusion_category_function <- function(fusion_vector, all_objects_df){
     select(vertebral_number, approach, object) %>%
     distinct() %>%
     mutate(vertebral_number = vertebral_number - 0.5) %>%
-    union_all(all_objects_df %>%
+    bind_rows(all_objects_df %>%
                 filter(body_interspace == "body") %>%
                 select(vertebral_number, approach, object) %>%
                 distinct() %>%
@@ -1202,7 +1202,7 @@ jh_fusion_category_function <- function(fusion_vector, all_objects_df){
     mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
     filter(!is.na(level)) %>%
     distinct() %>%
-    union_all(all_objects_df %>% filter(body_interspace == "interspace")) %>%
+    bind_rows(all_objects_df %>% filter(body_interspace == "interspace")) %>%
     arrange(vertebral_number) %>%
     select(level, vertebral_number, approach, object) %>%
     mutate(fusion_category = if_else(approach == "anterior", "anterior_interbody_fusion",
@@ -1674,7 +1674,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
       unilateral_full_implant_df <- revision_rods_retained_df %>% 
         filter(prior_rod_connected == "no") %>%
         select(level, vertebral_number, x, y) %>%
-        union_all(unilateral_full_implant_df)%>%
+        bind_rows(unilateral_full_implant_df)%>%
         arrange(y)
       
       revision_implants_retained_df <- revision_rods_retained_df %>% 
@@ -1714,7 +1714,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
         
         prior_rod_connector_matrix_list <-  map(.x = revision_rod_overlap$connector_count, .f =  ~ revision_rod_overlap %>%
                                         filter(connector_count == .x) %>%
-                                        union_all(revision_rod_overlap %>%
+                                        bind_rows(revision_rod_overlap %>%
                                                     filter(connector_count == .x) %>%
                                                     mutate(x = if_else(x < 0.5, x + 0.01, x - 0.01))) %>%
                                         select(x, y) %>%
@@ -1766,7 +1766,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
       
       main_rod_matrix <- main_rod_df %>%
         select(x, y) %>%
-        union_all(revision_rod_overlap) %>%
+        bind_rows(revision_rod_overlap) %>%
         arrange(rev(y)) %>%
         distinct() %>%
         remove_missing() %>%
@@ -1861,7 +1861,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
         select(x, y) %>%
         distinct() %>%
         mutate(x = if_else(x < 0.5, x - 0.004, x + 0.004)) %>%
-        union_all(top_left_connect_df) %>%
+        bind_rows(top_left_connect_df) %>%
         select(x, y) %>%
         distinct() %>%
         as.matrix()
@@ -1878,7 +1878,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
         select(x, y) %>%
         distinct() %>%
         mutate(x = if_else(x < 0.5, x - 0.004, x + 0.004)) %>%
-        union_all(bottom_left_connect_df) %>%
+        bind_rows(bottom_left_connect_df) %>%
         select(x, y) %>%
         distinct() %>%
         as.matrix()
@@ -1903,7 +1903,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
       top_connector_matrix <- intercalary_rod_df %>%
         filter(y == max(y)) %>%
         mutate(x = if_else(x < 0.5, x + 0.012, x - 0.012)) %>%
-        union_all(intercalary_rod_df %>%
+        bind_rows(intercalary_rod_df %>%
                     filter(y == max(y))) %>%
         mutate(y = y - 0.01) %>%
         remove_missing() %>%
@@ -1913,7 +1913,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
       bottom_connector_matrix <- intercalary_rod_df %>%
         filter(y == min(y)) %>%
         mutate(x = if_else(x < 0.5, x + 0.012, x - 0.012)) %>%
-        union_all(intercalary_rod_df %>%
+        bind_rows(intercalary_rod_df %>%
                     filter(y == min(y))) %>%
         mutate(y = y + 0.01) %>%
         remove_missing() %>%
@@ -1963,7 +1963,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
         distinct()
       
       top_connector_matrix <- accessory_rod_connections_df %>%
-        union_all(accessory_rod_df) %>%
+        bind_rows(accessory_rod_df) %>%
         filter(y == max(y)) %>%
         mutate(y = y - 0.01) %>%
         remove_missing() %>%
@@ -1971,7 +1971,7 @@ build_unilateral_rods_list_function <- function(accessory_rod_vector = c("a", "b
         as.matrix()
       
       bottom_connector_matrix <- accessory_rod_connections_df %>%
-        union_all(accessory_rod_df) %>%
+        bind_rows(accessory_rod_df) %>%
         filter(y == min(y)) %>%
         mutate(y = y + 0.01) %>%
         remove_missing() %>%

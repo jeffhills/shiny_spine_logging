@@ -237,7 +237,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
       mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))
     
     proximal_exposure_level <- all_objects_to_add_df %>%
-      union_all(anterior_plate_revision_levels_df) %>%
+      bind_rows(anterior_plate_revision_levels_df) %>%
       filter(vertebral_number == min(vertebral_number)) %>%
       mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
       mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
@@ -248,7 +248,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
       distinct()
     
     distal_exposure_level <- all_objects_to_add_df %>%
-      union_all(anterior_plate_revision_levels_df) %>%
+      bind_rows(anterior_plate_revision_levels_df) %>%
       filter(vertebral_number == max(vertebral_number)) %>%
       mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
       mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
@@ -433,7 +433,7 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
   plate_levels_df <- objects_added_df %>%
     filter(object == "anterior_plate") %>%
     mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level)) %>%
-    union_all(objects_added_df %>%
+    bind_rows(objects_added_df %>%
                 filter(object == "anterior_plate")%>%
                 mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level))) %>%
     unnest(level) %>%
@@ -445,7 +445,7 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
   
   objects_added_df <- objects_added_df %>%
     filter(str_detect(string = object, pattern = "anterior_plate") == FALSE) %>%
-    union_all(plate_levels_df)
+    bind_rows(plate_levels_df)
   
   if(length(revision_decompression_vector) > 0){
     
@@ -508,10 +508,10 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
     select(procedure_class) %>%
     distinct() %>%
     left_join(summary_single_statements %>%
-                union_all(summary_multiple_nested)) %>%
+                bind_rows(summary_multiple_nested)) %>%
     select(procedure_performed_statement) %>%
     add_row(procedure_performed_statement = if_else(is.null(fusion_levels_vector), "", paste("Posterior Spinal Fusion at", glue_collapse(fusion_levels_vector, sep = ", ", last = " and ")))) %>%
-    union_all(added_procedures_df) %>%
+    bind_rows(added_procedures_df) %>%
     filter(procedure_performed_statement !="") %>%
     mutate(count = row_number()) %>%
     mutate(procedures_performed_numbered = glue("{count}. {procedure_performed_statement}")) %>%
@@ -617,24 +617,27 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                          str_to_lower(sex) == "female" ~ "her", 
                          TRUE ~ "the patient's")
   
-  if(nrow(revision_implants_df)>0 & nrow(all_objects_to_add_df)>0){
-    implant_removal_df <- revision_implants_df %>%
-      filter(remove_retain == "remove") %>%
-      select(level, remove_retain) %>%
-      distinct()
-    
-    re_inserted_df <- all_objects_to_add_df %>%
-      filter(str_detect(object, "screw")) %>%
-      left_join(implant_removal_df) %>%
-      filter(remove_retain == "remove")
-    
-    all_objects_to_add_df <- all_objects_to_add_df %>%
-      anti_join(re_inserted_df %>% select(-remove_retain)) %>%
-      union_all((re_inserted_df %>%
-                   mutate(object = "reinsertion_screw")))
-    
-  } 
   
+  
+  ### This is what creates the 'reinsertion' 
+  # if(nrow(revision_implants_df)>0 & nrow(all_objects_to_add_df)>0){
+  #   implant_removal_df <- revision_implants_df %>%
+  #     filter(remove_retain == "remove") %>%
+  #     select(level, remove_retain) %>%
+  #     distinct()
+  #   
+  #   re_inserted_df <- all_objects_to_add_df %>%
+  #     filter(str_detect(object, "screw")) %>%
+  #     left_join(implant_removal_df) %>%
+  #     filter(remove_retain == "remove")
+  #   
+  #   all_objects_to_add_df <- all_objects_to_add_df %>%
+  #     anti_join(re_inserted_df %>% select(-remove_retain)) %>%
+  #     bind_rows((re_inserted_df %>%
+  #                  mutate(object = "reinsertion_screw")))
+  #   
+  # } 
+  # 
   
   procedure_details_list <- list()
   
@@ -778,7 +781,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     
     proximal_exposure_level <- all_objects_to_add_df %>%
       select(level, vertebral_number) %>%
-      union_all(revision_implants_df %>%
+      bind_rows(revision_implants_df %>%
                   filter(remove_retain == "remove") %>% 
                   select(level, vertebral_number)) %>%
       filter(vertebral_number == min(vertebral_number)) %>%
@@ -792,7 +795,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     
     distal_exposure_level <- all_objects_to_add_df %>%
       select(level, vertebral_number) %>%
-      union_all(revision_implants_df %>%
+      bind_rows(revision_implants_df %>%
                   filter(remove_retain == "remove") %>% 
                   select(level, vertebral_number)) %>%
       filter(vertebral_number == max(vertebral_number)) %>%
