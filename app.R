@@ -1159,6 +1159,15 @@ server <- function(input, output, session) {
           mutate(stage_number = as.double(stage_number)) %>%
           mutate(stage_number = if_else(is.na(stage_number), 1, stage_number)) %>%
           filter(stage_number == 1)
+        
+        existing_patient_data$prior_surgical_summary <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
+                                  records = existing_patient_data$record_id, 
+                                  fields = c("record_id", "redcap_repeat_instance", "date_of_surgery", "main_approach", "fusion", "uiv", "upper_treated_vertebrae", "liv", "lower_treated_vertebrae", "pelvic_fixation")) %>%      
+          as_tibble() %>%
+          remove_empty() %>%
+          mutate(date_of_surgery = ymd(date_of_surgery))
+        
+        
       }
     }else{
       existing_patient_data$match_found <- FALSE
@@ -1578,7 +1587,8 @@ server <- function(input, output, session) {
     symptom_option_list$'Urgent' = c("Loss of bladder control", 
                                      "Bowel Incontinence", 
                                      "Complete Loss of Motor & Sensory Function (Spinal Cord Injury)", 
-                                     "Incomplete Loss of Motor & Sensory Function (Spinal Cord Injury)")
+                                     "Incomplete Loss of Motor & Sensory Function (Spinal Cord Injury)", 
+                                     "Wound Drainage and concern for infection")
     
     symptom_option_list$'Other' = c("Other")
     
@@ -2187,9 +2197,32 @@ server <- function(input, output, session) {
       symptoms <- "***"
     }
     
+    he_she <- if_else(str_to_lower(input$sex) == "female", "She", "He")
+    
     age <- trunc((input$date_of_birth %--% input$date_of_surgery) / years(1))
     
-    indications_list$opening <- glue("This is a {age} year-old {input$sex} that presented with {symptoms} related to {str_to_lower(glue_collapse(input$primary_diagnosis, sep = ', ', last = ' and'))}.")
+    if(existing_patient_data$match_found == TRUE){
+      if(str_to_lower(input$primary_revision) == "revision"){
+        
+        most_recent_surgery_df <- existing_patient_data$prior_surgical_summary %>%
+          filter(main_approach == input$revision_approach) %>%
+          filter(date_of_surgery == max(date_of_surgery))
+        
+        most_recent_surgery <- format(most_recent_surgery_df$date_of_surgery, "%m/%d/%y")
+        
+        prior_surgery_for_revision_statement <- glue(" that underwent surgery on {most_recent_surgery} from {most_recent_surgery_df$upper_treated_vertebrae} to {most_recent_surgery_df$lower_treated_vertebrae}")
+
+      }else{
+        prior_surgery_for_revision_statement <- ""
+      }
+    }else{
+      prior_surgery_for_revision_statement <- ""
+    }
+    
+    # indications_list$opening <- glue("This is a {age} year-old {str_to_lower(input$sex)} that presented with {symptoms} related to {str_to_lower(glue_collapse(input$primary_diagnosis, sep = ', ', last = ' and'))}.")
+    
+    indications_list$opening <- glue("This is a {age} year-old {str_to_lower(input$sex)}{prior_surgery_for_revision_statement} that presented with {symptoms} and imaging findings correlating with these symptoms. {he_she} has exhausted conservate measures.")
+    
     
     title_name <- if_else(input$sex == "Male", glue("Mr. {input$patient_last_name}"), glue("Ms. {input$patient_last_name}"))
     

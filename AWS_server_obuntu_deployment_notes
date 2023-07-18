@@ -1,0 +1,69 @@
+## to upload new app from GitHub within obuntu:
+1. cd /srv/shiny-server/
+ >> to confirm that this is where the current version is:
+2. dir
+>> now remove the current version:
+3. sudo rm -r shiny_spine_logging
+ >> now pull new version:
+4. sudo git clone https://github.com/jeffhills/shiny_spine_logging.git
+
+>> can reload server but I don't think you need to:
+sudo service shiny-server restart
+
+## VIEW ERROR LOG:
+>>first go to the directory for the error log:
+1. cd /var/log/shiny-server/
+>> now view the log file name:
+2. dir
+>> open the log file by typing:
+3. sudo nano shiny_spine_logging-shiny-20220724-145459-35571.log (BUT THIS IS THE ERROR LOG OF THE LAST RUN INSTANCE)
+
+### to ssh in: command prompt ->
+cd C:\Windows\System32\OpenSSH
+
+ssh -i "shiny-key.pem" ubuntu@ec2-3-84-28-4.compute-1.amazonaws.com
+
+### to locate the main page file:
+cd /var/www/html
+then
+sudo nano index.nginx-debian.html
+
+#### LOCATE THE CONFIG FILE:
+cd /etc/shiny-server
+
+sudo nano shiny-server.conf
+
+'plotting_and_prescribing_alignment'
+
+
+TO INSTALL ALL THE APPS … DO THIS IN ORDER:
+sudo apt update -qq
+
+sudo apt install --no-install-recommends software-properties-common dirmngr
+
+wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
+
+sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+
+sudo apt install --no-install-recommends r-base
+
+sudo add-apt-repository ppa:c2d4u.team/c2d4u4.0+
+
+sudo apt install --no-install-recommends r-cran-rstan
+
+sudo apt-get build-dep r-cran-foo
+
+sudo wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
+
+sudo gpg --show-keys /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
+
+
+sudo apt-get -y install libcurl4-gnutls-dev libxml2-dev libssl-dev
+
+sudo su - -c "R -e \"install.packages('devtools', repos='http://cran.rstudio.com/')\""
+
+sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+sudo apt-get update
+sudo apt-get install libudunits2-dev libgdal-dev libgeos-dev libproj-dev 
+
+sudo su - -c "R -e \"install.packages('shiny')\""
