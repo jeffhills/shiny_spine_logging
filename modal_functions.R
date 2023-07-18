@@ -2040,7 +2040,7 @@ addition_surgical_details_modal_box_2_function <-
                              "Diazepam 2.5mg q8h prn for muscle spasms",
                              "Pain team consult",
                              "Per Primary",
-                             "Continue home pain medications: ***",
+                             "Continue home pain medications ***",
                              "***"
           ),
           initial_value_selected = postop_pain
