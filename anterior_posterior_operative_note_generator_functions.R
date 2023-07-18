@@ -156,8 +156,8 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                          TRUE ~ "the patient")
   
   his_or_her <- case_when(str_to_lower(sex) == "male" ~ "his", 
-                         str_to_lower(sex) == "female" ~ "her", 
-                         TRUE ~ "the patient's")
+                          str_to_lower(sex) == "female" ~ "her", 
+                          TRUE ~ "the patient's")
   
   if(any(names(all_objects_to_add_df) == "implant_statement")== FALSE){
     all_objects_to_add_df <- all_objects_to_add_df %>%
@@ -190,7 +190,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     first_paragraph_list$antibiotic_statement <- "Preoperative antibiotics were held until tissue cultures could be obtained."
   }else{
     first_paragraph_list$antibiotic_statement <- paste0(glue_collapse(antibiotics, sep = ", ", last = " and "), " was administered for preoperative antibiotics.")
-    }
+  }
   
   if(antifibrinolytic != ""){
     first_paragraph_list$antifibrinolytic <- antifibrinolytic
@@ -204,7 +204,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     head_position == "Mayfield" ~ glue("A Mayfield head holder was applied to {his_or_her} skull for positioning and secured to the bed.")
   ))
   
-
+  
   if(length(neuromonitoring_list$modalities) > 0 & (any(neuromonitoring_list$modalities == "None") == FALSE)){
     first_paragraph_list$spinal_cord_monitoring <- glue("Neuromonitoring needles were inserted by the neurophysiology technologist for monitoring using {glue_collapse(x = neuromonitoring_list$modalities, sep = ', ', last = ' and ')}. ")
   }
@@ -229,7 +229,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
       first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned supine on the OR table and all bony prominences were appropriately padded."))
     }
   }
-
+  
   if(any(anterior_plate_revision_df$prior_plate_status == "removed")){
     anterior_plate_revision_levels_df <- anterior_plate_revision_df %>%
       filter(prior_plate_status == "removed") %>%
@@ -311,7 +311,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   # if(str_detect(string = str_to_lower(local_anesthesia), pattern = "exposure")){ 
   #   first_paragraph_list$local_anesthesia <- glue("{str_to_sentence(local_anesthesia)}")
   # }
-   
+  
   procedure_details_list$approach_statement <- glue_collapse(x = first_paragraph_list, sep = " ")
   
   ################## PROCEDURE PARAGRAPHS ##################
@@ -332,20 +332,20 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                  filter(prior_plate_status == "removed"))$level
       
       plate_removal_statement <- glue("I then proceeded with the removal of the prior instrumentation. Once the plate was fully exposed, the screws were removed from the {glue_collapse(x = plate_removed_vertebral_bodies_vector, sep = ', ', last = ' and ')} bodies without difficulty. The plate spanning {glue_collapse(x = plate_removed_levels, sep = ', ', last = ' and ')} was then removed. ")
-    
+      
     }else{
       plate_removal_statement <- " "
     }
     
     if(any(anterior_plate_revision_df$prior_plate_status == "retained")){
       plate_retained_levels <- (anterior_plate_revision_df %>%
-                                 filter(prior_plate_status == "retained"))$level
+                                  filter(prior_plate_status == "retained"))$level
       
       plate_retained_statement <- glue("The plate spanning {glue_collapse(x = plate_retained_levels, sep = ', ', last = ' and ')} was left in place. ")
     }else{
       plate_retained_statement <- " "
-      }
-
+    }
+    
     
     procedure_details_list$revision_paragraph <- glue("{plate_removal_statement} {plate_retained_statement}")
     
@@ -355,7 +355,8 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   
   procedure_details_list$procedures <- all_anterior_procedures_paragraphs_function(all_objects_to_add_df = all_objects_to_add_df, 
                                                                                    bone_graft_df = anterior_biologics_df, 
-                                                                                   approach = anterior_approach_laterality)
+                                                                                   approach = anterior_approach_laterality, 
+                                                                                   anterior_bmp = bmp)
   
   ############################# CLOSURE #########################
   
@@ -614,8 +615,8 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                          str_to_lower(sex) == "female" ~ "she", 
                          TRUE ~ "the patient")
   his_or_her <- case_when(str_to_lower(sex) == "male" ~ "his", 
-                         str_to_lower(sex) == "female" ~ "her", 
-                         TRUE ~ "the patient's")
+                          str_to_lower(sex) == "female" ~ "her", 
+                          TRUE ~ "the patient's")
   
   
   
@@ -697,7 +698,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   additional_procedures_for_numbered_list <- as.list(additional_procedures_vector)
   
-
+  
   if(length(biologics_list)>0){
     additional_procedures_for_numbered_list$bone_grafting <- "Application of bone graft/osteopromotive material"
   }
@@ -721,7 +722,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                                                                                 additional_procedures_performed_vector = additional_procedures_for_numbered_list)
   
   first_paragraph_list <- list()
-
+  
   
   first_paragraph_list$transport_anesthesia <- paste(glue("The patient was brought to the operating room and after obtaining appropriate IV access, {he_or_she} underwent general anesthesia."))
   
@@ -745,7 +746,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     first_paragraph_list$pre_positioning_motors <- neuromonitoring_list$pre_positioning_motors 
   }
   
-
+  
   first_paragraph_list$head_statement <- as.character(case_when(
     head_position == "Supine/Lateral" ~ glue("{str_to_title(his_or_her)} head rested in a position of comfort, securely on the bed."),
     head_position == "Proneview Faceplate" ~ glue("The proneview faceplate was used to pad and secure {his_or_her} head and face during surgery."),
@@ -920,7 +921,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                                   glue_collapse(revision_statements_list, sep = " "))
     }else{
       procedure_details_list$exploration <- paste(glue_collapse(revision_statements_list, sep = " "))
-      }
+    }
   }
   
   
@@ -968,41 +969,41 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   ################### COMPLETING INSTRUMENTATION ##################
   if(nrow(all_objects_to_add_df)>0){
-  posterior_implants_all_df <- all_objects_to_add_df %>%
-    mutate(procedure_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
-    unnest(procedure_category) %>%
-    mutate(procedure_category = str_to_lower(procedure_category)) %>%
-    filter(str_detect(string = procedure_category, pattern = "instrumentation")) %>%
-    left_join(levels_numbered_df) %>%
-    select(level, vertebral_number, procedure_category, object, side) %>%
-    arrange(vertebral_number) %>%
-    remove_missing() %>%
-    group_by(level, object) %>%
-    mutate(object = if_else(str_detect(object, "pelvic_screw"), "pelvic_screw", object)) %>%
-    add_tally(name = "total_per_level") %>%
-    mutate(side = if_else(total_per_level == 2, "bilateral", side)) %>%
-    ungroup() %>%
-    distinct() 
-  
-  posterior_implant_df <- posterior_implants_all_df %>%
-    filter(procedure_category != "pelvic instrumentation") %>%
-    mutate(level = if_else(level == "Iliac", "Pelvis", level)) %>%
-    mutate(level = if_else(level == "S2AI", "Pelvis", level))
-  
-  instrumented_levels_vector <- unique((posterior_implants_all_df %>% 
-                                          mutate(level = if_else(level == "Iliac", "the pelvis", level)) %>%
-                                          mutate(level = if_else(level == "S2AI", "the pelvis", level)) %>%
-                                          distinct())$level)
+    posterior_implants_all_df <- all_objects_to_add_df %>%
+      mutate(procedure_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
+      unnest(procedure_category) %>%
+      mutate(procedure_category = str_to_lower(procedure_category)) %>%
+      filter(str_detect(string = procedure_category, pattern = "instrumentation")) %>%
+      left_join(levels_numbered_df) %>%
+      select(level, vertebral_number, procedure_category, object, side) %>%
+      arrange(vertebral_number) %>%
+      remove_missing() %>%
+      group_by(level, object) %>%
+      mutate(object = if_else(str_detect(object, "pelvic_screw"), "pelvic_screw", object)) %>%
+      add_tally(name = "total_per_level") %>%
+      mutate(side = if_else(total_per_level == 2, "bilateral", side)) %>%
+      ungroup() %>%
+      distinct() 
+    
+    posterior_implant_df <- posterior_implants_all_df %>%
+      filter(procedure_category != "pelvic instrumentation") %>%
+      mutate(level = if_else(level == "Iliac", "Pelvis", level)) %>%
+      mutate(level = if_else(level == "S2AI", "Pelvis", level))
+    
+    instrumented_levels_vector <- unique((posterior_implants_all_df %>% 
+                                            mutate(level = if_else(level == "Iliac", "the pelvis", level)) %>%
+                                            mutate(level = if_else(level == "S2AI", "the pelvis", level)) %>%
+                                            distinct())$level)
   }else{
     posterior_implant_df <- tibble(level = character(), side = character(), object = character())
   }
-
-
+  
+  
   if(nrow(posterior_implant_df) > 0){ 
     rod_statements_list <- list()
-
+    
     if(any(str_detect(posterior_implant_df$side, "bilateral"))){
-
+      
       rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} {left_main_rod_contour} for the left and a {right_main_rod_size} {right_main_rod_material} {right_main_rod_contour} for the right. ") 
       rod_statements_list$alignment_and_rod_placement <-  case_when(
         str_detect(string = alignment_correction_technique, pattern = "rod benders") ~ glue("The rods were set into place, secured with set screws and {alignment_correction_technique}."), 
@@ -1027,7 +1028,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       }
       
       rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants and to confirm appropriate alignment had been achieved.")
-    
+      
       if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
         rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}, and the open treatment of the vertebral fracture.")
       }else{
@@ -1178,7 +1179,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   }else{
     procedure_paragraphs <- glue_collapse(x = procedure_details_list, sep = "\n\n")
   }
-
+  
   procedure_paragraphs <- str_replace_all(procedure_paragraphs, "a  ", "a ")
   
   if(instruments_used_for_bony_work == "Bone scalpel only"){
@@ -1193,12 +1194,10 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   return(list(procedure_details_paragraph = procedure_paragraphs, 
               procedures_numbered_paragraph = procedures_numbered_list[[1]] 
               # procedure_details_list = procedure_details_list
-              ))
+  ))
   
 }
 
 
 
 #############-----------------------               End              ----------------------###############
-
-

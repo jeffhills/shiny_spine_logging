@@ -1312,15 +1312,22 @@ make_interbody_ui_function <-  function(level = NULL){
                               width = "100%")
              ),
              column(width = 3, 
-                    prettyCheckboxGroup(
+                    awesomeCheckbox(
                       inputId = glue("{level_input_id}_interbody_integrated_fixation"),
-                      label = NULL, choices = c("Integrated Fixation"),
-                      outline = TRUE,
-                      # value = FALSE,
-                      status = "danger",
-                      shape = "curve"
-                    ), 
-                    conditionalPanel(condition = glue("input.{level_input_id}_interbody_integrated_fixation.indexOf('Integrated Fixation')>-1"),
+                      label = "Integrated Fixation",
+                      value = FALSE,
+                      status = "danger"
+                    ),
+                    # prettyCheckboxGroup(
+                    #   inputId = glue("{level_input_id}_interbody_integrated_fixation"),
+                    #   label = NULL, choices = c("Integrated Fixation"),
+                    #   outline = TRUE,
+                    #   # value = FALSE,
+                    #   status = "danger",
+                    #   shape = "curve"
+                    # ), 
+                    # conditionalPanel(condition = glue("input.{level_input_id}_interbody_integrated_fixation.indexOf('Integrated Fixation')>-1"),
+                    conditionalPanel(condition = glue("input.{level_input_id}_interbody_integrated_fixation"),
                                      h4("Leave 0 for no screw"), 
                                      textInput(inputId = glue("{level_input_id}_interbody_cranial_screw_1_size"), 
                                                label = "Cranial Screw 1 size:", 
@@ -1343,13 +1350,19 @@ make_interbody_ui_function <-  function(level = NULL){
                                                placeholder = "W x L"
                                      )
                     ),
-                    prettyCheckboxGroup(
+                    # prettyCheckboxGroup(
+                    #   inputId = glue("{level_input_id}_interbody_expandable"),
+                    #   label = NULL,
+                    #   choices = c("Expandable"),
+                    #   outline = TRUE,
+                    #   status = "danger",
+                    #   shape = "curve"
+                    # )
+                    awesomeCheckbox(
                       inputId = glue("{level_input_id}_interbody_expandable"),
-                      label = NULL,
-                      choices = c("Expandable"),
-                      outline = TRUE,
-                      status = "danger",
-                      shape = "curve"
+                      label = "Expandable",
+                      value = FALSE,
+                      status = "danger"
                     )
              )
            )

@@ -1385,6 +1385,7 @@ addition_surgical_details_modal_box_2_function <-
                                "No bending, twisting, lifting > 10lbs"),
            postop_brace = c(""),
            postop_diet = c("Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
+           postop_foley = c("Discontinue foley once mobilizing with PT"),
            postop_dvt_ppx = c("SCD's while in bed", "Hold any chemical dvt ppx for minimum 72hrs"),
            postop_drains_dressing = c(""),
            postop_followup = c("")) {
@@ -2039,6 +2040,7 @@ addition_surgical_details_modal_box_2_function <-
                              "Diazepam 2.5mg q8h prn for muscle spasms",
                              "Pain team consult",
                              "Per Primary",
+                             "Continue home pain medications: ***",
                              "***"
           ),
           initial_value_selected = postop_pain
@@ -2090,6 +2092,20 @@ addition_surgical_details_modal_box_2_function <-
         ),
         br(),
         jh_make_shiny_table_row_function(
+          left_column_label = "Foley:",
+          font_size = row_label_font_size,
+          input_id = "postop_foley",
+          left_column_percent_width = 20,
+          checkboxes_inline = FALSE,
+          input_type = "checkbox",
+          choices_vector = c("Discontinue foley when able",
+                             "Discontinue foley once mobilizing with PT",
+                             "***"
+                             ),
+          initial_value_selected = postop_foley
+        ),
+        br(),
+        jh_make_shiny_table_row_function(
           left_column_label = "DVT ppx & anticoag/antiplatelet:",
           font_size = row_label_font_size,
           input_id = "postop_dvt_ppx",
@@ -2116,6 +2132,7 @@ addition_surgical_details_modal_box_2_function <-
                              "Incisional wound vac continuous therapy",
                              "Wound vac to continuous therapy",
                              "Please keep a watertight dressing in place over wound and reinforce as needed with tegaderms",
+                             "Please change to Silverlon dressing prior to discharge from hospital",
                              "Please change surgical dressing prior to discharge from hospital",
                              "***"),
           initial_value_selected = postop_drains_dressing
@@ -2141,4 +2158,20 @@ addition_surgical_details_modal_box_2_function <-
       )
     )
   }
+
+### postop plan sections
+postop_plan_sections_list <- list("Postop Destination",
+                                  "Postop Abx",
+                                  "Postop MAP goals", 
+                                  "Postop Anemia", 
+                                  "Postop Imaging", 
+                                  "Pain Control", 
+                                  "Activity", 
+                                  "Bracing", 
+                                  "Diet/GI", 
+                                  "Foley",
+                                  "DVT PPX/Anticoag/Antiplatelet",
+                                  "Drains & Dressing",
+                                  "Follow-up")
+
 
