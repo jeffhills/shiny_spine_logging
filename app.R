@@ -1162,8 +1162,16 @@ server <- function(input, output, session) {
         
         existing_patient_data$prior_surgical_summary <- exportRecords(rcon = rcon_reactive$rcon, 
                                   records = existing_patient_data$record_id, 
-                                  fields = c("record_id", "redcap_repeat_instance", "date_of_surgery", "main_approach", "fusion", "uiv", "upper_treated_vertebrae", "liv", "lower_treated_vertebrae", "pelvic_fixation")) %>%      
+                                  fields = c("record_id", 
+                                             "date_of_surgery", 
+                                             "main_approach", 
+                                             "fusion", 
+                                             "uiv",
+                                             "upper_treated_vertebrae",
+                                             "liv", "lower_treated_vertebrae",
+                                             "pelvic_fixation")) %>%      
           as_tibble() %>%
+          filter(redcap_repeat_instrument == "surgical_details") %>%
           remove_empty() %>%
           mutate(date_of_surgery = ymd(date_of_surgery))
         
