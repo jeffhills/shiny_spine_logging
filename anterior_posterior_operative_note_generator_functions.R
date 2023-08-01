@@ -1170,7 +1170,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     attending_assistant_statement <- ""
   }
   
-  procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the entirety of this portion of the case, including {procedures_listed}. {attending_assistant_statement}")
+  procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the entirety of the procedure, including {procedures_listed}. {attending_assistant_statement}")
   
   
   if(lateral_mass_screws_after_decompression == "Yes"){
