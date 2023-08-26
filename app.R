@@ -7375,7 +7375,7 @@ server <- function(input, output, session) {
             mutate(redcap_repeat_instance = row_number() + implant_removal_repeating_instance_add) %>%
             mutate(redcap_event_name = "surgery_arm_1") %>%
             mutate(redcap_repeat_instrument = "implant_removal_repeating")%>%
-            mutate(implant_removal_repeating_complete = "Complete") %>%2A930AE845C92CBF95467E59ADBA0D202A930AE845C92CBF95467E59ADBA0D202A930AE845C92CBF95467E59ADBA0D20
+            mutate(implant_removal_repeating_complete = "Complete") %>% 
             rename(level_implant_removal_repeating = level, 
                    side_implant_removal_repeating = side,
                    removed_implant_removal_repeating = object) %>%
