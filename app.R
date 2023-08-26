@@ -5488,7 +5488,12 @@ server <- function(input, output, session) {
     if(any(input$alignment_correction_method == "Other")){
       posterior_op_note_inputs_list_reactive$alignment_correction_method <- gsub("Other", input$alignment_correction_method_other, input$alignment_correction_method, ignore.case = TRUE)
     }else{
-      posterior_op_note_inputs_list_reactive$alignment_correction_method <- input$alignment_correction_method
+      if(length(input$alignment_correction_method)>0){
+        posterior_op_note_inputs_list_reactive$alignment_correction_method <- input$alignment_correction_method
+      }else{
+        posterior_op_note_inputs_list_reactive$alignment_correction_method <- "The rods were set into place and secured with set screws. "
+      }
+      
     }
     
     #######
