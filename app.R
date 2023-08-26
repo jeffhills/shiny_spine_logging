@@ -1905,95 +1905,13 @@ server <- function(input, output, session) {
     
     additional_procedures_choices$halo_removal <- "Removal of tongs or Halo applied by another inidividual"
     additional_procedures_choices$neuromonitoring <- "Spinal Cord Monitoring"
+    additional_procedures_choices$incision_drainage <- "Secondary Closure of complex surgical wound"
     additional_procedures_choices$other <- "Other"
     
     unlist(additional_procedures_choices, use.names = FALSE)
   })
   
-  # observeEvent(list(input$left_revision_implants_removed, 
-  #                   input$right_revision_implants_removed, 
-  #                   input$prior_fusion_levels, 
-  #                   input$head_positioning_posterior, 
-  #                   input$head_positioning_anterior, 
-  #                   input$approach_robot_navigation,
-  #                   input$durotomy_repair_method,
-  #                   input$primary_diganosis), ignoreInit = TRUE, {
-  #                     
-  #                     additional_procedures_list <- as.list(input$additional_procedures_posterior)
-  #                     
-  #                     if("Robotic" %in% input$approach_robot_navigation){
-  #                       additional_procedures_list$robot <- "Robotic Assisted Spine Surgery"
-  #                     }
-  #                     if("Navigated" %in% input$approach_robot_navigation){
-  #                       additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
-  #                     }
-  #                     
-  #                     if("Microscopic" %in% input$approach_robot_navigation){
-  #                       additional_procedures_list$microscope <- "Intraoperative use of microscope for microdissection"
-  #                     }
-  #                     
-  #                     if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0 | length(input$prior_anterior_plate_removed_levels)>0){
-  #                       additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
-  #                     }
-  #                     
-  #                   
-  #                     if(length(input$prior_fusion_levels)>0){
-  #                       additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
-  #                     }
-  #                     
-  #                     if(any(str_detect(string = input$head_positioning_posterior, pattern = "Tongs"))){
-  #                       additional_procedures_list$head_positioning_posterior <- "Application of Cranial Tongs"
-  #                     }
-  #                     if(any(str_detect(string = input$head_positioning_posterior, pattern = "Mayfield"))){
-  #                       additional_procedures_list$head_positioning_posterior <- "Application of Cranial Tongs using Mayfield head holder"
-  #                     }
-  #                     
-  #                     if(any(str_detect(string = input$head_positioning_posterior, pattern = "Halo"))){
-  #                       age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
-  #                       if(age < 18 & age > 0){
-  #                         additional_procedures_list$head_positioning_posterior <- "Application of Halo for thin skull osteology (pediatric)"
-  #                       }else{
-  #                         additional_procedures_list$head_positioning_posterior <- "Application of Halo"
-  #                       }
-  #                     }
-  #                     
-  #                     if(any(str_detect(string = input$head_positioning_anterior, pattern = "Tongs"))){
-  #                       additional_procedures_list$head_positioning_anterior <- "Application of Cranial Tongs"
-  #                     }
-  #                     if(any(str_detect(string = input$head_positioning_anterior, pattern = "Mayfield"))){
-  #                       additional_procedures_list$head_positioning_anterior <- "Application of Cranial Tongs using Mayfield head holder"
-  #                     }
-  #                     
-  #                     if(any(str_detect(string = input$head_positioning_anterior, pattern = "Halo"))){
-  #                       age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
-  #                       if(age < 18 & age > 0){
-  #                         additional_procedures_list$head_positioning_anterior <- "Application of Halo for thin skull osteology (pediatric)"
-  #                       }else{
-  #                         additional_procedures_list$head_positioning_anterior <- "Application of Halo"
-  #                       }
-  #                     }
-  #                     
-  #                     if(length(input$durotomy_repair_method)>0){
-  #                       if(str_detect(string = toString(input$durotomy_repair_method), pattern = "No Repair") == FALSE){
-  #                         additional_procedures_list$dural_repair <- "Repair of dural/CSF leak"
-  #                       }
-  #                     }
-  #                     
-  #                     if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
-  #                       additional_procedures_list$fracture <- "Open treatment of vertebral fracture"
-  #                     }
-  #                     if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
-  #                       additional_procedures_list$incision_drainage <- "Incision and Drainage"
-  #                     }
-  #                     if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
-  #                       additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
-  #                     }
-  #                     
-  #                     updateAwesomeCheckboxGroup(session = session, 
-  #                                                inputId = "additional_procedures_anterior", 
-  #                                                choices = additional_procedures_options_reactive_vector(),
-  #                                                selected = unlist(additional_procedures_list, use.names = FALSE))
-  #                   })
+
   
   additional_procedures_performed_anterior_reactive <- reactive({
     additional_procedures_list <- list()
@@ -2115,6 +2033,7 @@ server <- function(input, output, session) {
       if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
         additional_procedures_list$incision_drainage <- "Incision and Drainage"
       }
+      
       if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
         additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
       }
@@ -7456,7 +7375,7 @@ server <- function(input, output, session) {
             mutate(redcap_repeat_instance = row_number() + implant_removal_repeating_instance_add) %>%
             mutate(redcap_event_name = "surgery_arm_1") %>%
             mutate(redcap_repeat_instrument = "implant_removal_repeating")%>%
-            mutate(implant_removal_repeating_complete = "Complete") %>%
+            mutate(implant_removal_repeating_complete = "Complete") %>%2A930AE845C92CBF95467E59ADBA0D202A930AE845C92CBF95467E59ADBA0D202A930AE845C92CBF95467E59ADBA0D20
             rename(level_implant_removal_repeating = level, 
                    side_implant_removal_repeating = side,
                    removed_implant_removal_repeating = object) %>%
