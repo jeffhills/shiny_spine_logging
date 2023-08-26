@@ -779,6 +779,7 @@ lateral_mass_screws_after_decompression_modal_function <- function(implant_objec
 ###############################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 
 confirm_fusion_levels_and_technique_details_modal_box_function <- function(implants_placed = "no",
+                                                                           deformity_correction_choices = c("NA"),
                                                                            procedure_approach = "",
                                                                            fusion_levels_confirmed = c(),
                                                                            approach_specified_posterior = "Midline",
@@ -913,21 +914,28 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                   hr(),
                   if(implants_placed == "yes"){
                     if(procedure_approach == "posterior" | procedure_approach == "combined"){
-                    jh_make_shiny_table_row_function(
-                      input_type = "awesomeRadio",
-                      left_column_label = "Method for any alignment correction:",
-                      text_align = question_text_align,
-                      input_id = "alignment_correction_method",
-                      left_column_percent_width = question_label_column_width,
-                      font_size = row_label_font_size,
-                      checkboxes_inline = FALSE,
-                      choices_vector = c(
-                        "The Pro-axis bed was bent to achieve the desired sagittal plane alignment", 
-                        "In situ rod benders were used to correct the coronal and sagittal plane",
-                        "NA"),
-                      initial_value_selected = alignment_correction_method
-                    )
+                      prettyCheckboxGroup(inputId = "alignment_correction_method", 
+                                          label = "Select any techniques for alignment correction:", 
+                                          choices = deformity_correction_choices,
+                                          # choices = c(
+                                          #   "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place. ",
+                                          #   "The rods were secured into place with set screws. ",
+                                          #   "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
+                                          #   "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
+                                          #   "In situ rod benders were then used to correct the coronal and sagittal plane. ",
+                                          #   "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
+                                          #   "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
+                                          #   "Other",
+                                          #   "NA"), 
+                                          selected = alignment_correction_method, 
+                                          status = "primary",
+                                          inline = TRUE)
                     }
+                  },
+                  if(implants_placed == "yes" && (procedure_approach == "posterior" | procedure_approach == "combined")){
+                    conditionalPanel(condition = "input.alignment_correction_method.indexOf('Other') > -1",
+                                     textInput(inputId = "alignment_correction_method_other", 
+                                               label = "Enter 'Other' Method as a full sentence:"))
                   },
                   hr(),
                   jh_make_shiny_table_row_function(

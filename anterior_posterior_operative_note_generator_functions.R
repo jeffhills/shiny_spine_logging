@@ -605,7 +605,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                        closure = NULL,
                                        dressing = NULL, 
                                        multiple_position_procedure = "NA",
-                                       alignment_correction_technique = " ",
+                                       alignment_correction_technique = c(" "),
                                        sex = "The patient", 
                                        lateral_mass_screws_after_decompression = "No", 
                                        instruments_used_for_bony_work = "High-speed burr only", 
@@ -1005,11 +1005,17 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     if(any(str_detect(posterior_implant_df$side, "bilateral"))){
       
       rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} {left_main_rod_contour} for the left and a {right_main_rod_size} {right_main_rod_material} {right_main_rod_contour} for the right. ") 
-      rod_statements_list$alignment_and_rod_placement <-  case_when(
-        str_detect(string = alignment_correction_technique, pattern = "rod benders") ~ glue("The rods were set into place, secured with set screws and {alignment_correction_technique}."), 
-        str_detect(string = str_to_lower(alignment_correction_technique), pattern = "pro-axis") ~ glue("{alignment_correction_technique} and the rods were set into place and secured with set screws."), 
-        TRUE ~ glue("The rods were placed into position and secured with set screws. "))
+      # rod_statements_list$alignment_and_rod_placement <-  case_when(
+      #   str_detect(string = alignment_correction_technique, pattern = "rod benders") ~ glue("The rods were set into place, secured with set screws and {alignment_correction_technique}."), 
+      #   str_detect(string = str_to_lower(alignment_correction_technique), pattern = "pro-axis") ~ glue("{alignment_correction_technique} and the rods were set into place and secured with set screws."), 
+      #   TRUE ~ glue("The rods were placed into position and secured with set screws. "))
       
+      rod_statements_list$alignment_and_rod_placement <-  case_when(
+        length(alignment_correction_technique) == 0 ~ paste("The rods were placed into position and secured with set screws."),
+        alignment_correction_technique[1] == "NA" ~ paste("The rods were placed into position and secured with set screws."),
+        length(alignment_correction_technique) > 0 ~ paste(glue_collapse(alignment_correction_technique, sep = " "))
+      )
+        
       if(nrow(revision_implants_df) > 0){
         if(any(revision_implants_df$prior_rod_connected == "yes")){
           rod_statements_list$revision_rod_connector <- paste("Rod connectors were used to connect the new rod to the previously placed construct that was left in place.")

@@ -96,6 +96,11 @@ ui <- dashboardPage(skin = "black",
                     ),
                     dashboardBody(
                       tags$head(
+                #         tags$style(HTML(
+                #           "#alignment_correction_method {
+                #           inline-size: 250px;
+                #           overflow-wrap: break-word;
+                # }")),
                         tags$style(
                           "#posterior_bmp_size {
                 font-size: small;
@@ -1724,9 +1729,28 @@ server <- function(input, output, session) {
       posterior_approach_yes_no <- "no" 
     }
     
+    if(any(input$diagnosis_category == "deformity")){
+      deformity_correction_techniques_vector <- c(
+        "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place. ",
+        "The rods were secured into place with set screws. ",
+        "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
+        "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
+        "In situ rod benders were then used to correct the coronal and sagittal plane. ",
+        "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
+        "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
+        "Other",
+        "NA")
+    }else{
+      deformity_correction_techniques_vector <- c(
+        "The rods were secured into place with set screws. ",
+        "In situ rod benders were then used to correct the coronal and sagittal plane. ",
+        "Other",
+        "NA")
+    }
     
     showModal(
       confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
+                                                                     deformity_correction_choices = deformity_correction_techniques_vector, 
                                                                      procedure_approach = procedure_approach_reactive(),
                                                                      fusion_levels_confirmed = fusion_levels_computed_reactive_input, 
                                                                      anterior_approach = anterior_approach_yes_no,
@@ -1763,11 +1787,30 @@ server <- function(input, output, session) {
     }else{
       posterior_approach_yes_no <- "no" 
     }
+    if(any(input$diagnosis_category == "deformity")){
+      deformity_correction_techniques_vector <- c(
+        "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place. ",
+        "The rods were secured into place with set screws. ",
+        "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
+        "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
+        "In situ rod benders were then used to correct the coronal and sagittal plane. ",
+        "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
+        "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
+        "Other",
+        "NA")
+    }else{
+      deformity_correction_techniques_vector <- c(
+        "The rods were secured into place with set screws. ",
+        "In situ rod benders were then used to correct the coronal and sagittal plane. ",
+        "Other",
+        "NA")
+    }
     
     if(input$implants_complete > 1){
       showModal(
         
         confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
+                                                                       deformity_correction_choices = deformity_correction_techniques_vector,
                                                                        procedure_approach = procedure_approach_reactive(),
                                                                        # screws_selected_df_reactive = screws_selected_df_reactive(), 
                                                                        fusion_levels_confirmed = input$fusion_levels_confirmed,
@@ -5434,7 +5477,7 @@ server <- function(input, output, session) {
       
       if(approach_order_df$approach[[1]] == "posterior"){
         posterior_op_note_inputs_list_reactive$multiple_approach <- "posterior_first"
-      }else{
+      }else{   
         posterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
       }
     }else{
@@ -5442,7 +5485,11 @@ server <- function(input, output, session) {
     }
     
     #######
-    posterior_op_note_inputs_list_reactive$alignment_correction_method <- input$alignment_correction_method 
+    if(any(input$alignment_correction_method == "Other")){
+      posterior_op_note_inputs_list_reactive$alignment_correction_method <- gsub("Other", input$alignment_correction_method_other, input$alignment_correction_method, ignore.case = TRUE)
+    }else{
+      posterior_op_note_inputs_list_reactive$alignment_correction_method <- input$alignment_correction_method
+    }
     
     #######
     posterior_op_note_inputs_list_reactive$sex <- input$sex
