@@ -1972,13 +1972,13 @@ server <- function(input, output, session) {
         additional_procedures_list$microscope <- "Intraoperative use of microscope for microdissection"
       }
       
-      if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0 | length(input$prior_anterior_plate_removed_levels)>0){
-        additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
+      if(length(input$prior_anterior_plate_removed_levels)>0){
+        additional_procedures_list$removal_instrumentation <- "Removal of anterior spinal instrumentation"
       }
       
-      if(length(input$prior_fusion_levels)>0){
-        additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
-      }
+      # if(length(input$prior_fusion_levels)>0){
+      #   additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
+      # }
       
       if(any(str_detect(string = input$head_positioning_anterior, pattern = "Tongs"))){
         additional_procedures_list$head_positioning_anterior <- "Application of Cranial Tongs"
@@ -2026,7 +2026,7 @@ server <- function(input, output, session) {
   
   additional_procedures_performed_posterior_reactive <- reactive({
     additional_procedures_list <- list()
-    if(procedure_approach_reactive() == "anterior" | procedure_approach_reactive() == "combined"){
+    if(procedure_approach_reactive() == "posterior" | procedure_approach_reactive() == "combined"){
       additional_procedures_list <- as.list(input$additional_procedures_posterior)
       
       if("Robotic" %in% input$approach_robot_navigation){
@@ -2040,7 +2040,7 @@ server <- function(input, output, session) {
         additional_procedures_list$microscope <- "Intraoperative use of microscope for microdissection"
       }
       
-      if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0 | length(input$prior_anterior_plate_removed_levels)>0){
+      if(length(input$left_revision_implants_removed) > 0 | length(input$right_revision_implants_removed) > 0){
         additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
       }
       
