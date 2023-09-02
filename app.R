@@ -69,7 +69,6 @@ source("screw_size_type_inputs.R", local = TRUE)
 rclipboardSetup()
 
 
-
 ui <- dashboardPage(skin = "black",
                     dashboardHeader(title = "Spine Operative Logging and Automated Report Generation", titleWidth = 650
                     ),
@@ -956,6 +955,26 @@ ui <- dashboardPage(skin = "black",
                               actionBttn(inputId = "preview_redcap_upload", label = "Upload to Redcap Project", icon = icon("upload"), style = "jelly", color = "primary", size = "md"),
                           ),
                           box(width = 8, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Operative Note Generator:"),status = "success", solidHeader = TRUE,
+                              conditionalPanel(condition = "input.approach_sequence == 'posterior' || input.approach_sequence == 'posterior-anterior' || input.approach_sequence == 'posterior-anterior-posterior' || input.approach_sequence == 'anterior-posterior'", 
+                                               jh_make_shiny_table_row_function(
+                                                 left_column_percent_width = 25,
+                                                 left_column_label = "Confirm & Edit POSTERIOR Procedures Performed:",
+                                                 font_size = 14,
+                                                 input_type = "textAreaInput",
+                                                 input_id = "procedures_numbered_confirm_edit_posterior",
+                                                 initial_value_selected = "***"
+                                               )
+                                               ),
+                              conditionalPanel(condition = "input.approach_sequence == 'anterior' || input.approach_sequence == 'posterior-anterior' || input.approach_sequence == 'posterior-anterior-posterior' || input.approach_sequence == 'anterior-posterior'", 
+                                               jh_make_shiny_table_row_function(
+                                                 left_column_percent_width = 25,
+                                                 left_column_label = "Confirm & Edit ANTERIOR Procedures Performed:",
+                                                 font_size = 14,
+                                                 input_type = "textAreaInput",
+                                                 input_id = "procedures_numbered_confirm_edit_anterior",
+                                                 initial_value_selected = "***"
+                                               )
+                              ),
                               actionBttn(
                                 inputId = "generate_operative_note",
                                 block = TRUE,
@@ -966,6 +985,7 @@ ui <- dashboardPage(skin = "black",
                               ),
                               br(),
                               textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 500),
+                              uiOutput("clipboard_ui"),
                               br(), 
                               hr(),
                               h3("Formatted Operative Report:"),
@@ -974,13 +994,29 @@ ui <- dashboardPage(skin = "black",
                               htmlOutput(outputId = "operative_note_formatted"),
                               br(), 
                               hr(),
-                              p(em("To copy the formatted text, you must highlight the formatted text and copy, otherwise you can click below:")),
-                              uiOutput("clipboard_ui")
+                              p(em("To copy the formatted text, you must highlight the formatted text and copy, otherwise you can click below:"))
                           )
                           ###########################################
                   ),
                   tabItem(tabName = "tables",
                           #         ###########################################
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Approach/Sequence:"), status = "success", collapsible = TRUE,solidHeader = TRUE,
+                              radioGroupButtons(inputId = "approach_sequence", 
+                                                label = "Spine Approach/Sequence:", 
+                                                choices = list("Posterior" = "posterior", 
+                                                               "Anterior/Lateral" = "anterior", 
+                                                               "Posterior-Anterior/Lateral" = "posterior-anterior",
+                                                               "Anterior/Lateral-Posterior" = "anterior-posterior",
+                                                               "Posterior-Anterior/Lateral-Posterior" = "posterior-anterior-posterior" 
+                                                ), 
+                                                selected = " ", 
+                                                justified = TRUE,
+                                                checkIcon = list(
+                                                  yes = icon("ok", 
+                                                             lib = "glyphicon")
+                                                )
+                              )
+                          ), 
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Specifics"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                               tableOutput(outputId = "procedures_by_level_redcap_df_sidetab")
                           ),
@@ -5029,19 +5065,31 @@ server <- function(input, output, session) {
   
   
   output$spine_plot_for_implants_tab <- renderPlot({
-    if(input$multiple_approach == TRUE){
-      plot_grid(spine_plan_plot_anterior(), NULL, spine_plan_plot_posterior_reactive(), nrow = 1, rel_widths = c(1, -.1, 1))
-    }else{
-      if(input$spine_approach == "Anterior"){
-        spine_plan_plot_anterior() 
-      }else{
-        ### POSTERIOR
-        spine_plan_plot_posterior_reactive()
-        
-        
-      }
+    # if(input$multiple_approach == TRUE){
+    #   plot_grid(spine_plan_plot_anterior(), NULL, spine_plan_plot_posterior_reactive(), nrow = 1, rel_widths = c(1, -.1, 1))
+    # }else{
+    #   if(input$spine_approach == "Anterior"){
+    #     spine_plan_plot_anterior() 
+    #   }else{
+    #     ### POSTERIOR
+    #     spine_plan_plot_posterior_reactive()
+    #   }
+    # }
+    if(input$approach_sequence == "posterior"){
+      spine_plan_plot_posterior_reactive()
     }
-    
+    if(input$approach_sequence == "anterior"){
+      spine_plan_plot_anterior()
+    }
+    if(input$approach_sequence == "posterior-anterior"){
+      plot_grid(spine_plan_plot_posterior_reactive(), NULL, spine_plan_plot_anterior(), nrow = 1, rel_widths = c(1, -.1, 1))
+    }
+    if(input$approach_sequence == "anterior-posterior"){
+      plot_grid(spine_plan_plot_anterior(), NULL, spine_plan_plot_posterior_reactive(), nrow = 1, rel_widths = c(1, -.1, 1))
+    }
+    if(input$approach_sequence == "posterior-anterior-posterior"){
+      plot_grid(spine_plan_plot_posterior_reactive(), NULL, spine_plan_plot_anterior(), nrow = 1, rel_widths = c(1, -.1, 1))
+    }
   })
   
   
@@ -5469,20 +5517,29 @@ server <- function(input, output, session) {
     posterior_op_note_inputs_list_reactive$dressing_details <- input$dressing_details_posterior
     
     ####### MULTIPLE APPROACH
-    if(input$multiple_approach == TRUE){
-      
-      approach_order_df <- all_objects_to_add_list$objects_df %>%
-        select(approach) %>%
-        distinct()
-      
-      if(approach_order_df$approach[[1]] == "posterior"){
-        posterior_op_note_inputs_list_reactive$multiple_approach <- "posterior_first"
-      }else{   
-        posterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
-      }
-    }else{
+    if(input$approach_sequence == "anterior" | input$approach_sequence == "posterior"){
       posterior_op_note_inputs_list_reactive$multiple_approach <- "NA"
     }
+    if(input$approach_sequence == "posterior-anterior" | input$approach_sequence == "posterior-anterior-posterior"){
+      posterior_op_note_inputs_list_reactive$multiple_approach <- "posterior_first"
+    }
+    if(input$approach_sequence == "anterior-posterior"){
+      posterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
+    }
+    # if(input$multiple_approach == TRUE){
+    #   
+    #   approach_order_df <- all_objects_to_add_list$objects_df %>%
+    #     select(approach) %>%
+    #     distinct()
+    #   
+    #   if(approach_order_df$approach[[1]] == "posterior"){
+    #     posterior_op_note_inputs_list_reactive$multiple_approach <- "posterior_first"
+    #   }else{   
+    #     posterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
+    #   }
+    # }else{
+    #   posterior_op_note_inputs_list_reactive$multiple_approach <- "NA"
+    # }
     
     #######
     if(any(input$alignment_correction_method == "Other")){
@@ -5514,6 +5571,10 @@ server <- function(input, output, session) {
     }else{
       posterior_op_note_inputs_list_reactive$attending_assistant <- " "
     }
+    
+    ### PROCEDURES PERFORMED 
+    posterior_op_note_inputs_list_reactive$procedures_performed_sentence <- glue_collapse(str_to_lower(gsub("^\\d+\\.\\s+", "", str_split(input$procedures_numbered_confirm_edit_posterior, pattern = "\n")[[1]])), sep = ", ", last = ", and ")
+  
     
     posterior_op_note_inputs_list_reactive
   })
@@ -5693,21 +5754,35 @@ server <- function(input, output, session) {
     
     #######
     ####### MULTIPLE APPROACH
-    if(input$multiple_approach == TRUE){
-      approach_order_df <- all_objects_to_add_list$objects_df %>%
-        select(approach) %>%
-        distinct()
-      
-      if(approach_order_df$approach[[1]] == "posterior"){
-        anterior_op_note_inputs_list_reactive$multiple_approach <- "posterior_first"
-      }else{
-        anterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
-      }
-    }else{
+    if(input$approach_sequence == "anterior" | input$approach_sequence == "posterior"){
       anterior_op_note_inputs_list_reactive$multiple_approach <- "NA"
     }
+    if(input$approach_sequence == "posterior-anterior" | input$approach_sequence == "posterior-anterior-posterior"){
+      anterior_op_note_inputs_list_reactive$multiple_approach <- "posterior_first"
+    }
+    if(input$approach_sequence == "anterior-posterior"){
+      anterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
+    }
+    
+    # if(input$multiple_approach == TRUE){
+    #   approach_order_df <- all_objects_to_add_list$objects_df %>%
+    #     select(approach) %>%
+    #     distinct()
+    #   
+    #   if(approach_order_df$approach[[1]] == "posterior"){
+    #     anterior_op_note_inputs_list_reactive$multiple_approach <- "posterior_first"
+    #   }else{
+    #     anterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
+    #   }
+    # }else{
+    #   anterior_op_note_inputs_list_reactive$multiple_approach <- "NA"
+    # }
     
     # anterior_op_note_inputs_list_reactive$multiple_approach <- input$multiple_approach
+    
+    ### PROCEDURES PERFORMED 
+    anterior_op_note_inputs_list_reactive$procedures_performed_sentence <- glue_collapse(str_to_lower(gsub("^\\d+\\.\\s+", "", str_split(input$procedures_numbered_confirm_edit_anterior, pattern = "\n")[[1]])), sep = ", ", last = ", and ")
+    
     
     
     #######
@@ -5717,10 +5792,110 @@ server <- function(input, output, session) {
     anterior_op_note_inputs_list_reactive
   })
   
-  
+
   ########### NOW ASSEMBLE THE REACTIVE TEXT OF THE ENTIRE OP NOTE ###############
   
-  #
+  approach_sequence_reactive <- reactive({
+    if(nrow(all_objects_to_add_list$objects_df)>0){
+      approach_order_df <- all_objects_to_add_list$objects_df %>%
+        select(approach) %>%
+        distinct()
+      approach_sequence <- glue_collapse(approach_order_df$approach, sep = "-")
+    }else{
+      approach_sequence <- " "
+    }
+    approach_sequence
+    
+  })
+
+  observe(
+    updateRadioGroupButtons(session = session, inputId = "approach_sequence", selected = paste0(approach_sequence_reactive()))
+  )%>%
+    bindEvent(approach_sequence_reactive(),
+              ignoreInit = TRUE,
+              ignoreNULL = TRUE
+    )
+
+  ##### Assemble and update the procedures performed section for POSTERIOR #########
+  updateTextAreaInput(session = session, 
+                      inputId = "procedures_numbered_confirm_edit_posterior", 
+                      value = "***")
+  
+  op_note_procedures_numbered_posterior_reactive <- reactive({
+    if(input$procedures_numbered_confirm_edit_posterior == "***"){
+      primary_procedures_numbered_paragraph <- op_note_procedures_performed_numbered_function(objects_added_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df, 
+                                                                                              revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df, 
+                                                                                              revision_decompression_vector = posterior_op_note_inputs_list_reactive()$open_canal, 
+                                                                                              fusion_levels_vector = posterior_op_note_inputs_list_reactive()$fusions_df$level, 
+                                                                                              additional_procedures_performed_vector = posterior_op_note_inputs_list_reactive()$additional_procedures_vector
+      )
+    }else if(is.null(input$procedures_numbered_confirm_edit_posterior)){
+      primary_procedures_numbered_paragraph <- "***"
+    }else{
+      primary_procedures_numbered_paragraph <- input$procedures_numbered_confirm_edit_posterior
+    }
+    primary_procedures_numbered_paragraph
+  }) %>%
+    bindEvent(input$editing_additional_surgical_details_1_complete,
+              input$additional_surgical_details_complete, 
+              input$operative_note,
+              input$additional_procedures_posterior, 
+              ignoreInit = TRUE,
+              ignoreNULL = TRUE)
+  
+  observe(
+    updateTextAreaInput(session = session, 
+                        inputId = "procedures_numbered_confirm_edit_posterior", 
+                        value = paste(op_note_procedures_numbered_posterior_reactive())
+    )
+  ) %>%
+    bindEvent(input$editing_additional_surgical_details_1_complete,
+                input$additional_surgical_details_complete, 
+                input$operative_note,
+                input$additional_procedures_posterior,
+              ignoreInit = TRUE,
+              ignoreNULL = TRUE
+    )
+  
+  ##### Assemble and update the procedures performed section for ANTERIOR #########
+  updateTextAreaInput(session = session, 
+                      inputId = "procedures_numbered_confirm_edit_anterior", 
+                      value = "***")
+  
+  op_note_procedures_numbered_anterior_reactive <- reactive({
+    if(input$procedures_numbered_confirm_edit_anterior == "***"){
+      primary_procedures_numbered_paragraph_anterior <- anterior_op_note_procedures_performed_numbered_function(objects_added_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df, 
+                                                              additional_procedures_performed_vector = anterior_op_note_inputs_list_reactive()$additional_procedures_vector)
+    }else if(is.null(input$procedures_numbered_confirm_edit_anterior)){
+      primary_procedures_numbered_paragraph_anterior <- "***"
+    }else{
+      primary_procedures_numbered_paragraph_anterior <- input$procedures_numbered_confirm_edit_anterior
+    }
+    primary_procedures_numbered_paragraph_anterior
+  }) %>%
+    bindEvent(input$editing_additional_surgical_details_1_complete,
+              input$additional_surgical_details_complete, 
+              input$operative_note,
+              input$additional_procedures_anterior, 
+              ignoreInit = TRUE,
+              ignoreNULL = TRUE)
+  
+  observe(
+    updateTextAreaInput(session = session, 
+                        inputId = "procedures_numbered_confirm_edit_anterior", 
+                        value = paste(op_note_procedures_numbered_anterior_reactive())
+    )
+  ) %>%
+    bindEvent(input$editing_additional_surgical_details_1_complete,
+              input$additional_surgical_details_complete, 
+              input$operative_note,
+              input$additional_procedures_anterior,
+              ignoreInit = TRUE,
+              ignoreNULL = TRUE
+    )
+  
+  
+  ### ASSEMBLE THE REACTIVE OP NOTE TEXT
   op_note_text_reactive <- reactive({
     ################# COMPLICATIONS ################3
     complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
@@ -5850,10 +6025,11 @@ server <- function(input, output, session) {
                                                                            sex = posterior_op_note_inputs_list_reactive()$sex,
                                                                            lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression, 
                                                                            instruments_used_for_bony_work = posterior_op_note_inputs_list_reactive()$instruments_used_for_bony_work, 
-                                                                           attending_assistant = posterior_op_note_inputs_list_reactive()$attending_assistant
+                                                                           attending_assistant = posterior_op_note_inputs_list_reactive()$attending_assistant,
+                                                                           procedures_performed_sentence =  posterior_op_note_inputs_list_reactive()$procedures_performed_sentence
         ), silent = TRUE)
         
-        
+        procedure_results_list_posterior$procedures_numbered_paragraph <- input$procedures_numbered_confirm_edit_posterior
       }
       
       
@@ -5879,38 +6055,62 @@ server <- function(input, output, session) {
                                                                      closure = anterior_op_note_inputs_list_reactive()$closure_details,
                                                                      dressing = anterior_op_note_inputs_list_reactive()$dressing_details,
                                                                      multiple_position_procedure = anterior_op_note_inputs_list_reactive()$multiple_approach, 
-                                                                     sex = anterior_op_note_inputs_list_reactive()$sex
+                                                                     sex = anterior_op_note_inputs_list_reactive()$sex,
+                                                                     procedures_performed_sentence = anterior_op_note_inputs_list_reactive()$procedures_performed_sentence
         )
-        
+        procedure_results_list_anterior$procedures_numbered_paragraph <- input$procedures_numbered_confirm_edit_anterior
       }
       
-      if(input$multiple_approach == TRUE){
-        
-        approach_order_df <- all_objects_to_add_list$objects_df %>%
-          select(approach) %>%
-          distinct()
-        
-        if(approach_order_df$approach[[1]] == "posterior"){
-          
-          procedure_results_list$procedures_numbered_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}") 
-          
-          procedure_results_list$procedure_details_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
-          
-          
-        }else{
-          procedure_results_list$procedures_numbered_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}") 
-          
-          procedure_results_list$procedure_details_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}")
-          
-        }
-        
-      }else{
-        if(str_to_lower(input$spine_approach) == "posterior"){
-          procedure_results_list <- procedure_results_list_posterior
-        }else{
-          procedure_results_list <- procedure_results_list_anterior
-        }
+      if(input$approach_sequence == "posterior"){
+        procedure_results_list <- procedure_results_list_posterior
       }
+      if(input$approach_sequence == "anterior"){
+        procedure_results_list <- procedure_results_list_anterior
+      }
+      if(input$approach_sequence == "posterior-anterior"){
+        procedure_results_list$procedures_numbered_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}") 
+        
+        procedure_results_list$procedure_details_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
+      }
+      if(input$approach_sequence == "anterior-posterior"){
+        procedure_results_list$procedures_numbered_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}") 
+        
+        procedure_results_list$procedure_details_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}")
+        
+      }
+      if(input$approach_sequence == "posterior-anterior-posterior"){
+        procedure_results_list$procedures_numbered_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}") 
+        
+        procedure_results_list$procedure_details_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
+      }
+      
+      # if(input$multiple_approach == TRUE){
+      #   
+      #   approach_order_df <- all_objects_to_add_list$objects_df %>%
+      #     select(approach) %>%
+      #     distinct()
+      #   
+      #   if(approach_order_df$approach[[1]] == "posterior"){
+      #     
+      #     procedure_results_list$procedures_numbered_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}") 
+      #     
+      #     procedure_results_list$procedure_details_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
+      #     
+      #     
+      #   }else{
+      #     procedure_results_list$procedures_numbered_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}") 
+      #     
+      #     procedure_results_list$procedure_details_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}")
+      #     
+      #   }
+      #   
+      # }else{
+      #   if(str_to_lower(input$spine_approach) == "posterior"){
+      #     procedure_results_list <- procedure_results_list_posterior
+      #   }else{
+      #     procedure_results_list <- procedure_results_list_anterior
+      #   }
+      # }
       
       
       op_note_list <- list()
@@ -5942,6 +6142,7 @@ server <- function(input, output, session) {
       op_note_list$"\n*Surgical Findings:" <- if_else(input$surgical_findings == "", "none", input$surgical_findings)
       op_note_list$"\n*Specimens Taken:" <- if_else(input$specimens_removed == "", "none", input$specimens_removed)
       op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
+      # op_note_list$"\n*Procedures Performed:" <- input$procedures_numbered_confirm_edit_posterior
       
       if(length(input$implant_manufacturer)>0){
         op_note_list$"\n*Implant Manufacturer:" <- paste(glue_collapse(x = input$implant_manufacturer, sep = ", ", last = " and "))
@@ -7257,12 +7458,6 @@ server <- function(input, output, session) {
           }else{
             all_inputs_repeating_instance_add <- 0
           }
-          
-          # if("implant_removal_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
-          #   implant_removal_repeating_instance_add <- repeat_list$posterior_implant_removal
-          # }else{
-          #   implant_removal_repeating_instance_add <- 0
-          # }
           
           if("implant_removal_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
             implant_removal_repeating_instance_add <- repeat_list$implant_removal_repeating

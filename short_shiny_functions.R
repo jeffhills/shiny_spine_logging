@@ -575,6 +575,7 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                                              return_as_full_table = TRUE,
                                              text_align = "left", 
                                              top_margin = "auto",
+                                             initial_height = 100,
                                              bottom_margin = "auto", 
                                              status_color = "success",
                                              individual_buttons = FALSE,
@@ -624,7 +625,7 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    tags$td(width = paste0(right_column_percent_width, "%"), textAreaInput(inputId = input_id, label = NULL, 
                                                                                           value = initial_value_selected,
-                                                                                          width = "100%", height = 200))
+                                                                                          width = "100%", height = initial_height))
     )  
   }
   

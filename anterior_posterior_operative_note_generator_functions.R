@@ -115,6 +115,18 @@ extract_levels_function <- function(input_df){
   
 }
 
+jh_capitalize_spine_levels_function <- function(sentence_text = "xxx"){
+  statement_as_vector <- unlist(strsplit(sentence_text, " "))
+  
+  for (i in seq_along(statement_as_vector)) {
+    if (toupper(str_remove(statement_as_vector, ",")[i]) %in% levels_numbered_df$level) {
+      statement_as_vector[i] <- toupper(statement_as_vector[i])
+    }
+  }
+  
+  glue_collapse(statement_as_vector, sep = " ")
+}
+
 ################-------------------------#################### -------- ANTERIOR -----------################-------------------------#################### 
 ################-------------------------#################### -------- ANTERIOR -----------################-------------------------#################### 
 ################-------------------------#################### -------- ANTERIOR -----------################-------------------------#################### 
@@ -149,7 +161,8 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                       closure = NULL,
                                       dressing = NULL,
                                       multiple_position_procedure = "NA", 
-                                      sex = "The patient"){
+                                      sex = "The patient", 
+                                      procedures_performed_sentence = " "){
   
   he_or_she <- case_when(str_to_lower(sex) == "male" ~ "he", 
                          str_to_lower(sex) == "female" ~ "she", 
@@ -380,9 +393,10 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   }
   
   if(length(closure > 0)){
+    skin_closure_string <- str_to_lower(glue_collapse(closure, sep = ', ', last = ' and '))
     closure_statements_list$superficial_closure <- paste("The subdermal layer was closed and",
-                                                         str_to_lower(glue_collapse(closure, sep = ', ', last = ' and ')),
-                                                         if_else(length(closure) == 1, "was", "were"),
+                                                         skin_closure_string,
+                                                         if_else(length(closure) > 1 | skin_closure_string == "staples", "were", "was"),
                                                          "used to close the skin layer."
     )
   }else{
@@ -403,15 +417,18 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   
   ### FINAL PARAGRAPH ####
   
-  procedures_listed <- op_note_procedures_present_listed_function(objects_added_df = all_objects_to_add_df,
-                                                                  # revision_decompression_vector = revision_decompression_vector,
-                                                                  additional_procedures_performed_vector = additional_procedures_for_numbered_list)
+  # procedures_listed <- op_note_procedures_present_listed_function(objects_added_df = all_objects_to_add_df,
+  #                                                                 # revision_decompression_vector = revision_decompression_vector,
+  #                                                                 additional_procedures_performed_vector = additional_procedures_for_numbered_list)
+  
+  # procedures_performed_sentence
+  procedures_listed <- jh_capitalize_spine_levels_function(procedures_performed_sentence)
   
   
   if(multiple_position_procedure == "anterior_first"){
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} I was personally present for the entirety of the anterior portion, including the {procedures_listed}.")
+    procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} I was personally present for the entirety of the anterior portion, including the {procedures_listed}.")
   }else{
-    procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was transferred to the hospital bed. I was personally present for the entirety of the {procedures_listed}.")
+    procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was transferred to the hospital bed. I was personally present for the entirety of the {procedures_listed}.")
   }
   
   procedure_paragraphs <- glue_collapse(x = procedure_details_list, sep = "\n\n")
@@ -609,7 +626,14 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                        sex = "The patient", 
                                        lateral_mass_screws_after_decompression = "No", 
                                        instruments_used_for_bony_work = "High-speed burr only", 
-                                       attending_assistant = ""){
+                                       attending_assistant = "",
+                                       procedures_performed_sentence = " "){
+  
+  # procedures_numbered_list$primary_procedures <- op_note_procedures_performed_numbered_function(objects_added_df = all_objects_to_add_df, 
+  #                                                                                               revision_implants_df = revision_implants_df, 
+  #                                                                                               revision_decompression_vector = revision_decompression_vector, 
+  #                                                                                               fusion_levels_vector = fusion_levels_df$level, 
+  #                                                                                               additional_procedures_performed_vector = additional_procedures_for_numbered_list)
   
   he_or_she <- case_when(str_to_lower(sex) == "male" ~ "he", 
                          str_to_lower(sex) == "female" ~ "she", 
@@ -1165,18 +1189,22 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   ### FINAL PARAGRAPH ####
   
-  procedures_listed <- op_note_procedures_present_listed_function(objects_added_df = all_objects_to_add_df, 
-                                                                  revision_decompression_vector = revision_decompression_vector, 
-                                                                  fusion_levels_vector = fusion_levels_df$level, 
-                                                                  additional_procedures_performed_vector = additional_procedures_for_numbered_list)
+  # procedures_listed <- op_note_procedures_present_listed_function(objects_added_df = all_objects_to_add_df, 
+  #                                                                 revision_decompression_vector = revision_decompression_vector, 
+  #                                                                 fusion_levels_vector = fusion_levels_df$level, 
+  #                                                                 additional_procedures_performed_vector = additional_procedures_for_numbered_list)
+  
+  # procedures_performed_sentence
+  procedures_listed <- jh_capitalize_spine_levels_function(procedures_performed_sentence)
   
   if(str_length(attending_assistant)>2){
-    attending_assistant_statement <- glue("Due to the complexity of the case and no immediately available qualified resident, Dr. {attending_assistant} assisted in all portions of the procedure, including {procedures_listed}. Dr. {attending_assistant}'s assistance was critical to move the procedure along quicker and with less blood loss, and therefore safer.")
+    attending_assistant_statement <- glue("Due to the complexity of the case and no immediately available qualified resident, Dr. {str_remove(attending_assistant, 'Dr. ')} assisted in all portions of the procedure, including the {procedures_listed}. Dr. {str_remove(attending_assistant, 'Dr. ')}'s assistance was critical to move the procedure along quicker and with less blood loss, and therefore safer.")
   }else{
     attending_assistant_statement <- ""
   }
   
-  procedure_details_list$final_paragraph <- glue("At the conclusion of the case, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the entirety of the procedure, including {procedures_listed}. {attending_assistant_statement}")
+  
+  procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the {procedures_listed}. {attending_assistant_statement}")
   
   
   if(lateral_mass_screws_after_decompression == "Yes"){
