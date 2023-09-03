@@ -779,7 +779,6 @@ lateral_mass_screws_after_decompression_modal_function <- function(implant_objec
 ###############################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 
 confirm_fusion_levels_and_technique_details_modal_box_function <- function(implants_placed = "no",
-                                                                           deformity_correction_choices = c("NA"),
                                                                            procedure_approach = "",
                                                                            fusion_levels_confirmed = c(),
                                                                            approach_specified_posterior = "Midline",
@@ -788,7 +787,8 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                                                                            approach_specified_anterior = "Left-sided",
                                                                            implant_start_point_method = "Implant start points were identified using anatomic landmarks.",
                                                                            implant_position_confirmation_method = "Intraoperative fluoroscopy was used to confirm position of all implants.",
-                                                                           alignment_correction_method = "NA", 
+                                                                           deformity_correction_choices = c("The rods were secured into place with set screws. "), 
+                                                                           alignment_correction_method = c("The rods were secured into place with set screws. "), 
                                                                            instruments_used_for_bony_work = "High-speed burr only", 
                                                                            row_label_font_size = 16, 
                                                                            question_label_column_width = 25, 
@@ -917,19 +917,9 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                       prettyCheckboxGroup(inputId = "alignment_correction_method", 
                                           label = "Select any techniques for alignment correction:", 
                                           choices = deformity_correction_choices,
-                                          # choices = c(
-                                          #   "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place. ",
-                                          #   "The rods were secured into place with set screws. ",
-                                          #   "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
-                                          #   "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
-                                          #   "In-situ rod benders were then used to correct the coronal and sagittal plane. ",
-                                          #   "The set screws at the neutral vertebrae were tightened, and the adjacent vertebrae were sequentially de-rotated. ",
-                                          #   "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
-                                          #   "Other",
-                                          #   "NA"), 
                                           selected = alignment_correction_method, 
                                           status = "primary",
-                                          inline = TRUE)
+                                          inline = FALSE)
                     }
                   },
                   if(implants_placed == "yes" && (procedure_approach == "posterior" | procedure_approach == "combined")){
@@ -1003,6 +993,7 @@ addition_surgical_details_modal_box_function <-
            pre_positioning_motors = "Not obtained",
            neuromonitoring_signal_stability = "Neuromonitoring signals were stable throughout the case.",
            preop_antibiotics = c("Cefazolin (Ancef)"),
+           preop_antibiotics_other = " ",
            anti_fibrinolytic = "",
            txa_loading = 20,
            txa_maintenance = 5,
@@ -1194,27 +1185,6 @@ addition_surgical_details_modal_box_function <-
                            initial_value_selected = triggered_emg
                          )),
         br(),
-        # conditionalPanel(condition = "input.neuromonitoring.indexOf('tcMEP') > -1",
-        #                  jh_make_shiny_table_row_function(
-        #                    left_column_percent_width = left_column_percent_width,
-        #                    left_column_label = "Pre-positioning motor signals:",
-        #                    font_size = row_label_font_size,
-        #                    input_type = "awesomeRadio",
-        #                    input_id = "pre_positioning_motors", 
-        #                    choices_vector = c("Pre-positioning motors not obtained", 
-        #                                       "Pre-positioning motor signals were obtained and were present in the upper and lower extremities.",
-        #                                       "Pre-positioning motor signals were poor in the upper extremities.",
-        #                                       "Pre-positioning motor signals were not detected in the upper extremities.",
-        #                                       "Pre-positioning motor signals were poor in the lower extremities.",
-        #                                       "Pre-positioning motor signals were not detected in the lower extremities.",
-        #                                       "Pre-positioning motor signals were poor in the upper and lower extremities.",
-        #                                       "Pre-positioning motor signals were not detected/unreliable in the upper and lower extremities.",
-        #                                       "Pre-positioning motor signals were not detected.", 
-        #                                       "***"),
-        #                    checkboxes_inline = FALSE,
-        #                    initial_value_selected = pre_positioning_motors
-        #                  )
-        # ),
         conditionalPanel(condition = "input.neuromonitoring.indexOf('tcMEP') > -1",
                          jh_make_shiny_table_row_function(
                            left_column_percent_width = left_column_percent_width,
@@ -1273,6 +1243,17 @@ addition_surgical_details_modal_box_function <-
             "Other"
           ),
           initial_value_selected = preop_antibiotics
+        ),
+        conditionalPanel(
+          condition = "input.preop_antibiotics.indexOf('Other') > -1",
+          jh_make_shiny_table_row_function(
+            left_column_percent_width = 40,
+            left_column_label = "Other Preop Antibiotics:",
+            font_size = row_label_font_size,
+            input_type = "text",
+            input_id = "preop_antibiotics_other",
+            initial_value_selected = preop_antibiotics_other
+          )
         ),
         hr(),
         jh_make_shiny_table_row_function(
@@ -1684,7 +1665,7 @@ addition_surgical_details_modal_box_2_function <-
         ############# ANTERIOR ############# ############# ANTERIOR ############# ############# ANTERIOR #############
 
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
-          div(style = "font-size:20px; font-weight:bold; text-align:left", "ANTERIOR Details:")
+          div(style = "font-size:20px; font-weight:bold; text-align:center", "ANTERIOR Details:")
           },
         if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
@@ -1818,7 +1799,7 @@ addition_surgical_details_modal_box_2_function <-
         
         hr(),
         if(procedure_approach == "posterior" | procedure_approach == "combined"){
-          div(style = "font-size:20px; font-weight:bold; text-align:left", "POSTERIOR Details:")
+          div(style = "font-size:20px; font-weight:bold; text-align:center", "POSTERIOR Details:")
         },
         if(procedure_approach == "posterior"  | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(

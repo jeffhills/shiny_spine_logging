@@ -1,3 +1,10 @@
+#### ADDING AN OBJECT: you must do the following:
+# - add the object to the "op_note_procedure_performed_summary_classifier_function"
+# - add the object to the "op_note_number_of_paragraphs_for_procedure_category"
+# - add the revision objects if needed
+# - add the geom
+
+
 procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragraph_type, 
                                         'incision_drainage', 'Incision and drainage', 'combine',
                                         'vertebroplasty', 'Vertebroplasty', 'combine',
@@ -66,11 +73,6 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'anterior_buttress_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'screw_washer', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine')
 
-#### ADDING AN OBJECT: you must do the following:
-# - add the object to the "op_note_procedure_performed_summary_classifier_function"
-# - add the object to the "op_note_number_of_paragraphs_for_procedure_category"
-# - add the revision objects if needed
-# - add the geom
 
 
 ################-------------------------#################### -------- ANTERIOR & POSTERIOR FUNCTIONS  -----------################-------------------------#################### 
@@ -195,15 +197,15 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                                                                                          additional_procedures_performed_vector = additional_procedures_for_numbered_list)
   first_paragraph_list <- list()
   
-  first_paragraph_list$transport_anesthesia <- paste(glue("The patient was brought to the operating room and after obtaining appropriate IV access, {he_or_she} underwent general anesthesia."))
+  first_paragraph_list$transport_anesthesia <- paste(glue("The patient was brought to the operating room and after confirming appropriate IV access, {he_or_she} underwent general anesthesia."))
   
   if(length(antibiotics) == 0){
     first_paragraph_list$antibiotic_statement <- "Preoperative antibiotics were administered."
   }else if(any(antibiotics == "None (Antibiotics were held)")){
     first_paragraph_list$antibiotic_statement <- "Preoperative antibiotics were held until tissue cultures could be obtained."
   }else{
-    first_paragraph_list$antibiotic_statement <- paste0(glue_collapse(antibiotics, sep = ", ", last = " and "), " was administered for preoperative antibiotics.")
-  }
+    first_paragraph_list$antibiotic_statement <- paste0(glue_collapse(antibiotics, sep = ", ", last = " and "), if_else(length(antibiotics) > 1, " were ", " was ") , "administered for preoperative antibiotics.")
+    }
   
   if(antifibrinolytic != ""){
     first_paragraph_list$antifibrinolytic <- antifibrinolytic
@@ -393,10 +395,9 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   }
   
   if(length(closure > 0)){
-    skin_closure_string <- str_to_lower(glue_collapse(closure, sep = ', ', last = ' and '))
     closure_statements_list$superficial_closure <- paste("The subdermal layer was closed and",
-                                                         skin_closure_string,
-                                                         if_else(length(closure) > 1 | skin_closure_string == "staples", "were", "was"),
+                                                         str_to_lower(glue_collapse(closure, sep = ', ', last = ' and ')),
+                                                         if_else(length(closure) > 1 | any(str_to_lower(closure) == "staples"), "were", "was"),
                                                          "used to close the skin layer."
     )
   }else{
@@ -1153,13 +1154,17 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   if(length(closure > 0)){
     if(any(closure == "left open")){
       closure_statements_list$superficial_closure <- paste("After the fascial layer was closed, the subdermal and skin layers were left open.")
-      
     }else{
       closure_statements_list$superficial_closure <- paste("The subdermal layer was closed and",
                                                            str_to_lower(glue_collapse(closure, sep = ', ', last = ' and ')),
-                                                           if_else(length(closure) == 1, "was", "were"),
+                                                           if_else(length(closure) > 1 | any(str_to_lower(closure) == "staples"), "were", "was"),
                                                            "used to close the skin layer."
       )
+      # closure_statements_list$superficial_closure <- paste("The subdermal layer was closed and",
+      #                                                      str_to_lower(glue_collapse(closure, sep = ', ', last = ' and ')),
+      #                                                      if_else(length(closure) == 1, "was", "were"),
+      #                                                      "used to close the skin layer."
+      # )
       
     }
     

@@ -1,3 +1,19 @@
+jh_replace_checkbox_other_with_text_function <- function(input_vector = c(" "), 
+                                                         text_to_replace = "Other",
+                                                         replacement_text = " "){
+  if(length(input_vector)>0){
+    if(text_to_replace %in% input_vector){
+      new_vector <- input_vector
+      new_vector[new_vector == text_to_replace] <- replacement_text
+    }else{
+      new_vector <- input_vector
+    }
+  }else{
+    new_vector <- ""
+  }
+  new_vector
+}
+
 jh_make_op_note_test_df_function <- function(posterior_or_anterior = "posterior", object = c("pre_selected"), spine_region = "lumbar"){
   
   surgical_objects <- as_vector(object)
@@ -11,7 +27,6 @@ jh_make_op_note_test_df_function <- function(posterior_or_anterior = "posterior"
   }
   
   if(surgical_objects[[1]] == "pre_selected"){
-    
     testing_df <- all_implants_constructed_df %>%
       filter(object %in% object_list) %>%
       filter(approach == posterior_or_anterior) %>%
@@ -32,6 +47,10 @@ jh_make_op_note_test_df_function <- function(posterior_or_anterior = "posterior"
     mutate(screw_size_type = "", implant_statement = "") %>%
     select(level, vertebral_number, body_interspace, approach, category, implant, object, side, screw_size_type, implant_statement)
   
+  if(posterior_or_anterior == "anterior"){
+    testing_df <- testing_df %>%
+      mutate(direction = " ")
+  }
   return(testing_df)
 }
 

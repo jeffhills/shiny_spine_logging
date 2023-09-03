@@ -368,7 +368,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
     geoms_list_posterior$incision_drainage_sf_geom <- ggpattern::geom_sf_pattern(
       data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "incision_drainage"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
       pattern = "stripe",
-      pattern_colour = "red",
+      pattern_colour = "lightblue",
       alpha = 0.1,
       pattern_spacing = 0.03
     )

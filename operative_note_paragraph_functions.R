@@ -301,7 +301,7 @@ distinct_anterior_procedure_paragraph_function <- function(level_input, object_i
   }
   
   if(object_input == "anterior_interbody_implant"){
-    paragraph <- glue("I then proceeded with the insertion of the interbody implant into the {level_input} interspace. I again confirmed that the endplates were adequately decorticated and appropriately level. Once I was fully satisfied with the preparation of the endplates, I used trials and measured the disk space to determine the appropriate size of the interbody implant. ANTERIOR_INTERBODY_BIOLOGIC_STATEMENT {implant_statement_input} The final position was confirmed using intraoperative X-ray. This completed the anterior interbody implant at {level_input}.")
+    paragraph <- glue("I then proceeded with the insertion of the interbody implant into the {level_input} interspace. I again confirmed that the endplates were adequately decorticated and appropriately level. Once I was fully satisfied with the preparation of the endplates, I used trials and measured the disk space to determine the appropriate size of the interbody implant. {implant_statement_input} ANTERIOR_INTERBODY_BIOLOGIC_STATEMENT The final position was confirmed using intraoperative X-ray. This completed the anterior interbody implant at {level_input}.")
   }
   
   
@@ -423,13 +423,24 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df,
                                                         anterior_bmp = 0){
   
   if(nrow(bone_graft_df)>0){
-    
+    if(any(bone_graft_df$name == "Other")){
+      other_bone_graft <- (bone_graft_df %>%
+        filter(value == 999))$name
+      if(length(unique(all_objects_to_add_df$level)) > 1){
+        other_bone_graft_statement <- glue("Additionally, {other_bone_graft} was evenly divided and added to increase the odds of fusion.") 
+      }else{
+        other_bone_graft_statement <- glue("Additionally, {other_bone_graft} was added to increase the odds of fusion.")
+      }
+      }else{
+        other_bone_graft_statement <- ""
+    }
     bone_graft_statement_df <- bone_graft_df %>%
+      filter(value != 999) %>%
       mutate(statement = as.character(glue("{value}cc of {name}")))
     
     all_statements <- glue_collapse(x = bone_graft_statement_df$statement, sep = ", ", last = " and ")
     
-    fusion_graft_statement <- as.character(glue("I placed a total of {all_statements} into the fusion bed"))
+    fusion_graft_statement <- as.character(glue("I placed a total of {all_statements} into the fusion bed. {other_bone_graft_statement}"))
     
   }else{
     fusion_graft_statement <- " "
@@ -473,7 +484,6 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df,
   
   anterior_procedure_category_nested_df <- anterior_df %>%
     mutate(screw_size_type = if_else(is.na(screw_size_type), " ", screw_size_type)) %>%
-    # mutate(procedure_category = str_to_lower(op_note_procedure_performed_summary_classifier_function(object = object))) %>%
     mutate(procedure_category = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
     unnest(procedure_category) %>%
     mutate(procedure_category = str_to_lower(procedure_category)) %>%
@@ -505,13 +515,13 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df,
   procedure_paragraphs <- glue_collapse(x = paragraphs_df$paragraphs, sep = "\n\n")
   
   
-  # if(nrow(bone_graft_df)>0){
-  #   procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = ". The final position was ", replacement = as.character(glue(". {fusion_graft_statement}. The final position was ")))
-  # }
-  if(anterior_bmp > 0 ){
+
+  if(!is.null(anterior_bmp) && anterior_bmp > 0){
     anterior_bmp_dose_per_level <- round(anterior_bmp/str_count(string = procedure_paragraphs, pattern = "ANTERIOR_INTERBODY_BIOLOGIC_STATEMENT"), 1)
     
-    fusion_graft_statement <- str_replace_all(fusion_graft_statement, pattern = "into the fusion bed", replacement = glue("and to improve the odds of successful fusion, I placed {anterior_bmp_dose_per_level}mg of BMP into the fusion bed"))
+    # fusion_graft_statement <- str_replace_all(fusion_graft_statement, pattern = "into the fusion bed", replacement = glue("and to improve the odds of successful fusion, I placed {anterior_bmp_dose_per_level}mg of BMP into the fusion bed"))
+    
+    fusion_graft_statement <- glue("{fusion_graft_statement} Additionally, I placed {anterior_bmp_dose_per_level}mg of BMP into the fusion bed to improve the odds of successful fusion")
  
   }
   
