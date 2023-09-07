@@ -111,6 +111,21 @@ startup_modal_box <-
           )
         ),
         fluidRow(
+          radioGroupButtons(
+            inputId = "redcap_institution",
+            label = "Institution:",
+            choices = c("UTHSCSA", 
+                        "UCSD"),
+            individual = TRUE,
+            selected = "UTHSCSA",
+            checkIcon = list(
+              yes = tags$i(class = "fa fa-circle", 
+                           style = "color: steelblue"),
+              no = tags$i(class = "fa fa-circle-o", 
+                          style = "color: steelblue"))
+          )
+        ),
+        fluidRow(
           column(
             6,
             textInput(inputId = "redcap_token", 
