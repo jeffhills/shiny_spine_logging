@@ -5382,16 +5382,24 @@ server <- function(input, output, session) {
       complication_text <- paste(glue_collapse(x = str_to_lower(input$intraoperative_complications_vector), sep = ","))
       
       if(str_detect(complication_text, pattern = "durotomy")){
-        if(str_to_lower(input$durotomy_timing) == "other"){
-          durotomy_timing_instrument_statement <- glue("An incidental durotomy was created during the procedure, which caused a CSF leak.")
+        if(length(input$durotomy_timing)>0){
+          if(str_to_lower(input$durotomy_timing) == "other"){
+            durotomy_timing_instrument_statement <- glue("An incidental durotomy was created during the procedure, which caused a CSF leak.")
+          }else{
+            durotomy_timing_instrument_statement <- glue("During the {str_to_lower(input$durotomy_timing)}, an incidental durotomy was created, which caused a CSF leak.")
+          }
         }else{
-          durotomy_timing_instrument_statement <- glue("During the {str_to_lower(input$durotomy_timing)}, an incidental durotomy was created, which caused a CSF leak.")
+          durotomy_timing_instrument_statement <- glue("An incidental durotomy was created during the procedure, which caused a CSF leak.")
         }
         
-        if(any(input$durotomy_repair_method == "No Repair Performed")){
-          durotomy_repair_statement <- glue("No dural repair was performed.")
+        if(length(input$durotomy_repair_method)>0){
+          if(any(input$durotomy_repair_method == "No Repair Performed")){
+            durotomy_repair_statement <- glue("No dural repair was performed.")
+          }else{
+            durotomy_repair_statement <- glue("The dura was repaired using {glue_collapse(input$durotomy_repair_method, sep = ', ', last = ' and ')}.")
+          }
         }else{
-          durotomy_repair_statement <- glue("The dura was repaired using {glue_collapse(input$durotomy_repair_method, sep = ', ', last = ' and ')}.")
+          durotomy_repair_statement <- " "
         }
         complications_list$durotomy <- paste(durotomy_timing_instrument_statement, str_remove_all(string = str_to_sentence(durotomy_repair_statement), pattern = "primarily repaired using ")) 
       }
