@@ -5054,16 +5054,6 @@ server <- function(input, output, session) {
     if(input$multi_approach_starting_position == "Anterior" | input$multi_approach_starting_position == "Lateral"){
       
       updateRadioGroupButtons(session = session, inputId = "spine_approach", selected = "Anterior")
-      # radioGroupButtons(inputId = "spine_approach", 
-      #                   label = NULL,
-      #                   choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior or Lateral")),
-      #                                      tags$span(icon("fas fa-user", style = "color: steelblue"), strong("Posterior"))),
-      #                   choiceValues = list("Anterior", "Posterior"),
-      #                   selected = "Posterior", 
-      #                   direction = "horizontal",
-      #                   checkIcon = list(yes = icon("check")),
-      #                   justified = TRUE
-      # )
     }else{
       updateRadioGroupButtons(session = session, inputId = "spine_approach", selected = "Posterior")
     }
@@ -5102,7 +5092,8 @@ server <- function(input, output, session) {
     }else {
       plot_grid(spine_plan_plot_anterior(), NULL, spine_plan_plot_posterior_reactive(), nrow = 1, rel_widths = c(1, -.1, 1))
     }
-  })
+  }) %>%
+    bindEvent(input$implants_complete)
   
   
   ########################################################  OPERATIVE NOTE GENERATOR    ########################################################  

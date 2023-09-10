@@ -6,45 +6,52 @@
 
 #############---------------------   Build: screws  --------------------###############
 
-screw_function <- function(screw_start_x, screw_start_y, angle, screw_length_modifier = 1, screw_width_modifier = 1){
-  
+pelvic_screw_function <- function(screw_start_x, screw_start_y, angle, screw_length_modifier = 1, screw_width_modifier = 1){
+
   rot = function(a) matrix(c(cos(a), sin(a), -sin(a), cos(a)), 2, 2)
-  
+
   screw_length <- 0.02*screw_length_modifier
-  
+
   screw_width <- 0.007*screw_width_modifier
-  
+
   if(screw_start_x < 0.5){
     mid_screw_head <- st_point(c(screw_start_x, screw_start_y))
     top_screw_head <- st_point(c(mid_screw_head[1], mid_screw_head[2] + screw_width*.5))
     bottom_screw_head <- st_point(c(mid_screw_head[1], mid_screw_head[2] - screw_width*.5))
     screw_tip <- st_point(c(mid_screw_head[1] + screw_length, mid_screw_head[2]))
-    
+
     screw <- st_polygon(list(rbind(top_screw_head, mid_screw_head, bottom_screw_head, screw_tip, top_screw_head)))
-    
+
     screw_rotated <- (screw - mid_screw_head)*rot(angle*-1*pi/180) + mid_screw_head
   }
-  
+
   if(screw_start_x > 0.5){
     mid_screw_head <- st_point(c(screw_start_x, screw_start_y))
     top_screw_head <- st_point(c(mid_screw_head[1], mid_screw_head[2] + screw_width*.5))
     bottom_screw_head <- st_point(c(mid_screw_head[1], mid_screw_head[2] - screw_width*.5))
     screw_tip <- st_point(c(mid_screw_head[1] - screw_length, mid_screw_head[2]))
-    
+
     screw <- st_polygon(list(rbind(top_screw_head, mid_screw_head, bottom_screw_head, screw_tip, top_screw_head)))
-    
+
     screw_rotated <- (screw - mid_screw_head)*rot(angle*pi/180) + mid_screw_head
   }
-  
+
   screw_sf <- st_buffer(x = screw_rotated, dist = 0.001, endCapStyle = "SQUARE")
-  
+
   screw_sf <- st_buffer(x = screw_sf, dist = 0.00075, endCapStyle = "ROUND")
-  
+
   screw_head <- mid_screw_head
-  
+
   return(screw_sf)
 }
 
+screw_function <- function(screw_start_x, screw_start_y, angle, screw_length_modifier = 1, screw_width_modifier = 1){
+  if(screw_start_x < 0.5){
+    st_buffer(st_point(x = c(screw_start_x+0.005, screw_start_y)), dist = 0.006)
+  }else{
+    st_buffer(st_point(x = c(screw_start_x - 0.005, screw_start_y)), dist = 0.006)
+  }
+}
 
 #############-----------------------   Build: TP HOOKS  ----------------------###############
 
@@ -325,7 +332,11 @@ screw_hook_implant_function <- function(implant_type,
 
   
   if(str_detect(string = implant_type, pattern = "screw")){
-    object <- screw_function(screw_start_x = start_x, screw_start_y = y, angle = angle, screw_length_modifier = screw_length_mod, screw_width_modifier = screw_width_mod)
+    if(str_detect(string = implant_type, pattern = "pelvic_screw")){
+      object <- pelvic_screw_function(screw_start_x = start_x, screw_start_y = y, angle = angle, screw_length_modifier = screw_length_mod, screw_width_modifier = screw_width_mod)
+    }else{
+      object <- screw_function(screw_start_x = start_x, screw_start_y = y, angle = angle, screw_length_modifier = screw_length_mod, screw_width_modifier = screw_width_mod)
+    }
   }
   
   if(implant_type == "tp_hook"){
