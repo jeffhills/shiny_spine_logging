@@ -5316,307 +5316,9 @@ server <- function(input, output, session) {
   
   
   
-  ###### REVISION RODS ---
-  observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
-    
-    if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
-      if(input$left_revision_rod_status == "removed"){
-        geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
-        
-      }else if(input$left_revision_rod_status == "retained_cut" | input$left_revision_rod_status == "retained"){
-        
-        left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
-          select(x, y) %>%
-          # filter(!is.na(y)) %>%
-          mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-          mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-          mutate(x = x + 0.01) %>%
-          arrange(rev(y)) %>%
-          distinct() %>%
-          as.matrix()
-        
-        geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-        
-        #  }else if(input$left_revision_rod_status == "retained_cut"){
-        # 
-        # if(nrow(left_revision_implants_reactive_list()$retained_df %>% filter(prior_rod_connected == "yes"))>1){
-        #   left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
-        #     filter(prior_rod_connected == "yes") %>%
-        #     select(x, y) %>%
-        #     # filter(!is.na(y)) %>%
-        #     mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-        #     mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-        #     mutate(x = x + 0.01) %>%
-        #     arrange(rev(y)) %>%
-        #     distinct() %>%
-        #     as.matrix()
-        #   geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-        # }else{
-        #   geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
-        # }
-        # 
-        #       } else{
-        #         geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
-        #       }
-      }else{
-        geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
-      }
-    }
-  })
+
+ 
   
-  
-  
-  observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
-    
-    if(nrow(right_revision_implants_reactive_list()$retained_df)>1){
-      if(input$right_revision_rod_status == "removed"){
-        geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
-        
-      }else if(input$right_revision_rod_status == "retained_cut" | input$right_revision_rod_status == "retained"){
-        right_revision_rod_matrix <- right_revision_implants_reactive_list()$retained_df %>%
-          select(x, y) %>%
-          # filter(!is.na(y)) %>%
-          mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-          mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-          mutate(x = x - 0.01) %>%
-          arrange(rev(y)) %>%
-          distinct() %>%
-          as.matrix()
-        
-        geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-        
-        # }else if(input$right_revision_rod_status == "retained_cut"){
-        #   
-        #   if(nrow(right_revision_implants_reactive_list()$retained_df %>% filter(prior_rod_connected == "yes"))>1){
-        #     right_revision_rod_matrix <- right_revision_implants_reactive_list()$retained_df %>%
-        #       filter(prior_rod_connected == "yes") %>%
-        #       select(x, y) %>%
-        #       # filter(!is.na(y)) %>%
-        #       mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-        #       mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-        #       mutate(x = x - 0.01) %>%
-        #       arrange(rev(y)) %>%
-        #       distinct() %>%
-        #       as.matrix()
-        #     geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-        #   }else{
-        #     geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
-        #   }
-        #   
-        # } else{
-        #   geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
-        # }
-      }else{
-        geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
-      }
-    }
-  })
-  
-  
-  
-  # observeEvent(list(input$plot_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-  # observeEvent(list(left_rod_implants_df_reactive(), input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-  #   if(nrow(left_rod_implants_df_reactive()) >1){
-  #     if(length(input$left_revision_implants_rod_connectors)>0){
-  #       left_revision_rod_overlap <- all_implants_constructed_df %>%
-  #         filter(level %in% input$left_revision_implants_rod_connectors, 
-  #                object == "pedicle_screw", 
-  #                side == "left") %>%
-  #         select(x, y) %>%
-  #         mutate(y = y - 0.01)
-  #     }else{
-  #       left_revision_rod_overlap <- tibble(x = double(), 
-  #                                           y = double())
-  #     }
-  #     
-  #     left_main_rod_matrix <- left_rod_implants_df_reactive() %>%
-  #       mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-  #       mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
-  #       select(x, y) %>%
-  #       bind_rows(left_revision_rod_overlap) %>%
-  #       arrange(rev(y)) %>%
-  #       distinct() %>%
-  #       remove_missing() %>%
-  #       select(x, y) %>%
-  #       as.matrix()
-  #     
-  #     rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
-  #   }
-  #   
-  # })
-  # 
-  # # observeEvent(list(input$plot_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-  # observeEvent(list(right_rod_implants_df_reactive(), input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-  #   
-  #   if(nrow(right_rod_implants_df_reactive()) >1){
-  #     if(length(input$right_revision_implants_rod_connectors)>0){
-  #       right_revision_rod_overlap <- all_implants_constructed_df %>%
-  #         filter(level %in% input$right_revision_implants_rod_connectors, 
-  #                object == "pedicle_screw", 
-  #                side == "right") %>%
-  #         select(x, y) %>%
-  #         mutate(y = y - 0.01)
-  #     }else{
-  #       right_revision_rod_overlap <- tibble(x = double(), 
-  #                                            y = double())
-  #     }
-  #     right_main_rod_matrix <- right_rod_implants_df_reactive() %>%
-  #       mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-  #       mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
-  #       select(x, y) %>%
-  #       bind_rows(right_revision_rod_overlap) %>%
-  #       arrange(rev(y)) %>%
-  #       distinct() %>%
-  #       remove_missing() %>%
-  #       select(x, y) %>%
-  #       as.matrix()
-  #     
-  #     rods_list$right_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(right_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
-  #   }
-  # })
-  
-  
-  observeEvent(list(
-    # input$plot_click,
-    # input$plot_double_click,
-    input$reset_all,
-    left_rod_implants_df_reactive(),
-    input$add_left_accessory_rod,
-    input$left_accessory_rod,
-    input$add_left_satellite_rod,
-    input$left_satellite_rod,
-    input$add_left_intercalary_rod,
-    input$left_intercalary_rod,
-    input$left_intercalary_rod_junction,
-    input$add_left_linked_rods,
-    input$left_linked_rods,
-    input$left_revision_rod_status
-    # left_revision_implants_reactive_list()
-  ), ignoreInit = TRUE, ignoreNULL = TRUE,{
-    ##########RODS ############
-    ############# Left ROD #################
-    left_rods_connectors_list <- list()
-    
-    if(input$add_left_accessory_rod == TRUE){
-      accessory_vector <- input$left_accessory_rod
-    }else{
-      accessory_vector <- c("a", "b")
-    }
-    if(input$add_left_satellite_rod == TRUE){
-      satellite_vector <- input$left_satellite_rod
-    }else{
-      satellite_vector <- c("a", "b")
-    }
-    if(input$add_left_intercalary_rod == TRUE){
-      intercalary_vector <- input$left_intercalary_rod
-      junction <- input$left_intercalary_rod_junction
-    }else{
-      intercalary_vector <- c("a", "b")
-      junction <- NULL
-    }
-    if(input$add_left_linked_rods == TRUE){
-      linked_vector <- input$left_linked_rods
-    }else{
-      linked_vector <- c("a", "b")
-    }
-    
-    ############# MAKE THE RODS #############
-    left_rods_connectors_list <- build_unilateral_rods_list_function(accessory_rod_vector = accessory_vector,
-                                                                     satellite_rods_vector = satellite_vector,
-                                                                     intercalary_rods_vector = intercalary_vector,
-                                                                     intercalary_rod_junction = junction,
-                                                                     linked_rods_vector = linked_vector,
-                                                                     revision_rods_retained_df = left_revision_implants_reactive_list()$retained_df,
-                                                                     unilateral_full_implant_df = left_rod_implants_df_reactive(), 
-                                                                     prior_rod_overlap_connectors = input$left_revision_implants_rod_connectors, 
-                                                                     rod_side = "left")
-    if(length(left_rods_connectors_list$rod_list) > 0){
-      rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$rod_list), alpha = 0.75)
-    }else{
-      rods_list$left_rod_list_sf_geom <- NULL
-    }
-    
-    if(length(left_rods_connectors_list$connector_list) > 0){
-      rods_list$left_connector_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.75)
-    }else{
-      rods_list$left_connector_list_sf_geom <- NULL
-    }
-    if(nrow(left_rod_implants_df_reactive()) == 0){
-      rods_list$left_connector_list_sf_geom <- NULL
-      rods_list$left_rod_list_sf_geom <- NULL
-    }
-  })
-  
-  observeEvent(list(
-    # input$plot_click,
-    # input$plot_double_click,
-    input$reset_all,
-    right_rod_implants_df_reactive(),
-    input$add_right_accessory_rod,
-    input$right_accessory_rod,
-    input$add_right_satellite_rod,
-    input$right_satellite_rod,
-    input$add_right_intercalary_rod,
-    input$right_intercalary_rod,
-    input$right_intercalary_rod_junction,
-    input$add_right_linked_rods,
-    input$right_linked_rods,
-    input$right_revision_rod_status
-    # right_revision_implants_reactive_list()
-  ), ignoreInit = TRUE, ignoreNULL = TRUE,{
-    ##########RODS ############
-    ############# right ROD #################
-    right_rods_connectors_list <- list()
-    
-    if(input$add_right_accessory_rod == TRUE){
-      accessory_vector <- input$right_accessory_rod
-    }else{
-      accessory_vector <- c("a", "b")
-    }
-    if(input$add_right_satellite_rod == TRUE){
-      satellite_vector <- input$right_satellite_rod
-    }else{
-      satellite_vector <- c("a", "b")
-    }
-    if(input$add_right_intercalary_rod == TRUE){
-      intercalary_vector <- input$right_intercalary_rod
-      junction <- input$right_intercalary_rod_junction
-    }else{
-      intercalary_vector <- c("a", "b")
-      junction <- NULL
-    }
-    if(input$add_right_linked_rods == TRUE){
-      linked_vector <- input$right_linked_rods
-    }else{
-      linked_vector <- c("a", "b")
-    }
-    
-    ############# MAKE THE RODS #############
-    right_rods_connectors_list <- build_unilateral_rods_list_function(accessory_rod_vector = accessory_vector,
-                                                                      satellite_rods_vector = satellite_vector,
-                                                                      intercalary_rods_vector = intercalary_vector,
-                                                                      intercalary_rod_junction = junction,
-                                                                      linked_rods_vector = linked_vector,
-                                                                      revision_rods_retained_df = right_revision_implants_reactive_list()$retained_df,
-                                                                      unilateral_full_implant_df = right_rod_implants_df_reactive(),
-                                                                      prior_rod_overlap_connectors = input$right_revision_implants_rod_connectors, 
-                                                                      rod_side = "right")
-    if(length(right_rods_connectors_list$rod_list) > 0){
-      rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.75)
-    }else{
-      rods_list$right_rod_list_sf_geom <- NULL
-    }
-    
-    if(length(right_rods_connectors_list$connector_list) > 0){
-      rods_list$right_connector_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.75)
-    }else{
-      rods_list$right_connector_list_sf_geom <- NULL
-    }
-    if(nrow(right_rod_implants_df_reactive()) == 0){
-      rods_list$right_connector_list_sf_geom <- NULL
-      rods_list$right_rod_list_sf_geom <- NULL
-    }
-  })
   
   
   observeEvent(input$crosslink_connectors, ignoreNULL = TRUE, ignoreInit = TRUE, {
@@ -5877,42 +5579,78 @@ server <- function(input, output, session) {
     
     #LEFT#
     if(input$add_left_accessory_rod == TRUE){
-      proximal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$left_accessory_rod[[1]])$caudal_interspace
-      distal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$left_accessory_rod[[2]])$cranial_interspace
-      
-      additional_rods_list$left_accessory <- glue("To increase the overall stiffness of the construct, an accessory rod was connected to the left main rod using side-to-side connectors at the {proximal_junction} junction down to the {distal_junction} junction.")
-    }
+      additional_rods_list$left_accessory <-  jh_generate_supplemental_rod_statement_function(rod_type = "accessory",
+                                                      rod_side = "left",
+                                                      rod_size = input$left_accessory_rod_size,
+                                                      rod_material = input$left_accessory_rod_material,
+                                                      rod_vector = input$left_accessory_rod)
+          }
     if(input$add_left_satellite_rod == TRUE){
-      additional_rods_list$left_satellite <- glue("On the left side, a satellite rod construct was utilized, with the satellite rod spanning {input$left_satellite_rod[[1]]} to {input$left_satellite_rod[[2]]}.")
+      additional_rods_list$left_satellite <-  jh_generate_supplemental_rod_statement_function(rod_type = "satellite",
+                                                                                              rod_side = "left",
+                                                                                              rod_size = input$left_satellite_rod_size,
+                                                                                              rod_material = input$left_satellite_rod_material,
+                                                                                              rod_vector = input$left_satellite_rod)
     }
     if(input$add_left_intercalary_rod == TRUE){
-      additional_rods_list$left_intercalary <- glue("On the left side, an intercalary rod construct was utilized, with the intercalary rod spanning {input$left_intercalary_rod[[1]]} to {input$left_intercalary_rod[[2]]}.")
+      additional_rods_list$left_intercalary <-  jh_generate_supplemental_rod_statement_function(rod_type = "intercalary",
+                                                                                              rod_side = "left",
+                                                                                              rod_size = input$left_intercalary_rod_size,
+                                                                                              rod_material = input$left_intercalary_rod_material,
+                                                                                              rod_vector = input$left_intercalary_rod, 
+                                                                                              intercalary_rod_junction = input$left_intercalary_rod_junction)
     }
     if(input$add_left_linked_rods == TRUE){
-      additional_rods_list$left_linked <- glue("On the left side, a linked-rods construct was used, with the rods overlapping from {input$left_linked_rods[[1]]} to {input$left_linked_rods[[2]]}.")
+      additional_rods_list$left_linked <-  jh_generate_supplemental_rod_statement_function(rod_type = "linked",
+                                                                                              rod_side = "left",
+                                                                                              rod_size = input$left_linked_rod_size,
+                                                                                              rod_material = input$left_linked_rod_material,
+                                                                                              rod_vector = input$left_linked_rod)
     }
     if(input$add_left_kickstand_rod == TRUE){
-      additional_rods_list$left_kickstand <- glue("A kickstand rod construct was used on the left. The kickstand rod was anchored to the left ilium and fixed proximally to the {input$left_linked_rods[[1]]} level.")
+      additional_rods_list$left_kickstand <-  jh_generate_supplemental_rod_statement_function(rod_type = "kickstand",
+                                                                                           rod_side = "left",
+                                                                                           rod_size = input$left_kickstand_rod_size,
+                                                                                           rod_material = input$left_kickstand_rod_material,
+                                                                                           rod_vector = input$left_kickstand_rod)
     }
     
     #RIGHT#
     if(input$add_right_accessory_rod == TRUE){
-      proximal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$right_accessory_rod[[1]])$caudal_interspace
-      distal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$right_accessory_rod[[2]])$cranial_interspace
-      
-      additional_rods_list$right_accessory <- glue("To increase the overall stiffness of the construct, an accessory rod was connected to the right main rod using side-to-side connectors at the {proximal_junction} junction down to the {distal_junction} junction.")
+      additional_rods_list$right_accessory <-  jh_generate_supplemental_rod_statement_function(rod_type = "accessory",
+                                                                                              rod_side = "right",
+                                                                                              rod_size = input$right_accessory_rod_size,
+                                                                                              rod_material = input$right_accessory_rod_material,
+                                                                                              rod_vector = input$right_accessory_rod)
     }
     if(input$add_right_satellite_rod == TRUE){
-      additional_rods_list$right_satellite <- glue("On the right side, a satellite rod construct was utilized, with the satellite rod spanning {input$right_satellite_rod[[1]]} to {input$right_satellite_rod[[2]]}.")
+      additional_rods_list$right_satellite <-  jh_generate_supplemental_rod_statement_function(rod_type = "satellite",
+                                                                                              rod_side = "right",
+                                                                                              rod_size = input$right_satellite_rod_size,
+                                                                                              rod_material = input$right_satellite_rod_material,
+                                                                                              rod_vector = input$right_satellite_rod)
     }
     if(input$add_right_intercalary_rod == TRUE){
-      additional_rods_list$right_intercalary <- glue("On the right side, an intercalary rod construct was utilized, with the intercalary rod spanning {input$right_intercalary_rod[[1]]} to {input$right_intercalary_rod[[2]]}.")
+      additional_rods_list$right_intercalary <-  jh_generate_supplemental_rod_statement_function(rod_type = "intercalary",
+                                                                                                rod_side = "right",
+                                                                                                rod_size = input$right_intercalary_rod_size,
+                                                                                                rod_material = input$right_intercalary_rod_material,
+                                                                                                rod_vector = input$right_intercalary_rod, 
+                                                                                                intercalary_rod_junction = input$right_intercalary_rod_junction)
     }
     if(input$add_right_linked_rods == TRUE){
-      additional_rods_list$right_linked <- glue("On the right side, a linked-rods construct was used, with the rods overlapping from {input$right_linked_rods[[1]]} to {input$right_linked_rods[[2]]}.")
+      additional_rods_list$right_linked <-  jh_generate_supplemental_rod_statement_function(rod_type = "linked",
+                                                                                           rod_side = "right",
+                                                                                           rod_size = input$right_linked_rod_size,
+                                                                                           rod_material = input$right_linked_rod_material,
+                                                                                           rod_vector = input$right_linked_rod)
     }
     if(input$add_right_kickstand_rod == TRUE){
-      additional_rods_list$right_kickstand <- glue("A kickstand rod construct was used on the right. The kickstand rod was anchored to the right ilium and fixed proximally to the {input$right_linked_rods[1]} level.")
+      additional_rods_list$right_kickstand <-  jh_generate_supplemental_rod_statement_function(rod_type = "kickstand",
+                                                                                              rod_side = "right",
+                                                                                              rod_size = input$right_kickstand_rod_size,
+                                                                                              rod_material = input$right_kickstand_rod_material,
+                                                                                              rod_vector = input$right_kickstand_rod)
     }
     
     if(length(additional_rods_list) > 0){

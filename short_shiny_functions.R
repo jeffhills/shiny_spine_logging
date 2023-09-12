@@ -1794,7 +1794,9 @@ jh_rod_construct_connector_matrices_function <- function(full_rod_matrix, x_nudg
     filter(y == max(y)) 
   
   matrix_list$top_connector_matrix <- proximal_connector_point_df %>%
-    mutate(x = if_else(x < 0.5, x - 0.01 + x_nudge, x + 0.01 + x_nudge)) %>%
+    mutate(x = if_else(x < 0.5, 
+                       x - 0.01 + x_nudge, 
+                       x + 0.01 + x_nudge)) %>%
     union_all(proximal_connector_point_df) %>%
     mutate(y = y - 0.007) %>%
     # remove_missing() %>%
@@ -1942,6 +1944,9 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         select(x, y) %>%
         as.matrix()
       
+      kickstand_connector_matrix_list <- jh_rod_construct_connector_matrices_function(kickstand_rod_matrix, x_nudge = if_else(rod_side == "right", -0.01, 0))
+      
+      connector_list$kickstand_rod_top_connector <- jh_sf_rod_object_from_matrix_function(kickstand_connector_matrix_list$top_connector_matrix)
       
       rods_list$kickstand_rod <- jh_sf_rod_object_from_matrix_function(kickstand_rod_matrix) 
       
@@ -2054,7 +2059,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         arrange(rev(y)) %>%
         as.matrix()
       
-      connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rods_overlap_matrix)
+      connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rods_overlap_matrix, x_nudge = if_else(rod_side == "right", -0.01, 0))
       
       connector_list$linked_rod_top_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$top_connector_matrix)
       connector_list$linked_rod_bottom_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$bottom_connector_matrix)
@@ -2099,10 +2104,23 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         distinct() %>%
         as.matrix()
       
-      connector_matrix_list <- jh_rod_construct_connector_matrices_function(intercalary_rod_connector_matrix)
+      proximal_connector_matrix_list <- jh_rod_construct_connector_matrices_function(proximal_intercalary_rod_matrix)
       
-      connector_list$intercalary_rod_top_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$top_connector_matrix)
-      connector_list$intercalary_rod_bottom_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$bottom_connector_matrix)
+      
+      intercalary_connector_matrix_list <- jh_rod_construct_connector_matrices_function(intercalary_rod_connector_matrix)
+      
+      
+      distal_connector_matrix_list <- jh_rod_construct_connector_matrices_function(distal_intercalary_rod_matrix)
+      
+      connector_list$intercalary_proximal_rod_top_connector <- jh_sf_rod_object_from_matrix_function(intercalary_connector_matrix_list$top_connector_matrix)
+      connector_list$intercalary_proximal_rod_bottom_connector <- jh_sf_rod_object_from_matrix_function(proximal_connector_matrix_list$bottom_connector_matrix)
+      
+      connector_list$intercalary_distal_rod_top_connector <- jh_sf_rod_object_from_matrix_function(distal_connector_matrix_list$top_connector_matrix)
+      connector_list$intercalary_distal_rod_bottom_connector <- jh_sf_rod_object_from_matrix_function(intercalary_connector_matrix_list$bottom_connector_matrix)
+      # connector_matrix_list <- jh_rod_construct_connector_matrices_function(intercalary_rod_connector_matrix)
+      
+      # connector_list$intercalary_rod_top_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$top_connector_matrix)
+      # connector_list$intercalary_rod_bottom_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$bottom_connector_matrix)
       
       rods_list$intercalary_rod_sf <- jh_sf_rod_object_from_matrix_function(intercalary_rod_matrix)
       rods_list$intercalary_distal_rod_sf <- jh_sf_rod_object_from_matrix_function(distal_intercalary_rod_matrix)
@@ -2173,6 +2191,50 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
 
 
 
+jh_generate_supplemental_rod_statement_function <- function(rod_type = "accessory_rod",
+                                                            rod_side = "left", 
+                                                            rod_size = "5.5", 
+                                                            rod_material = "Titanium", 
+                                                            rod_vector = "a", 
+                                                            intercalary_rod_junction = "a"){
+  
+  if(!is.null(rod_type) && rod_side %in% c("left", "right") && (length(rod_vector) == 2 && rod_vector[1] %in% all_screw_coordinates_df$level)){
+    
+    rod_size <- if_else((!is.null(rod_size) && rod_size != "NA"), rod_size, "")
+    rod_material <- if_else((!is.null(rod_material) && rod_material != "NA"), rod_material, "")      
+    
+    if(str_detect(rod_type, "accessory")){
+      rod_statement <- str_squish(glue("To increase the overall stiffness of the construct, a {rod_size} {rod_material} accessory rod was connected to the {rod_side} main rod using side-to-side connectors spanning from {rod_vector[1]} down to {rod_vector[2]}."))
+      rod_statement <- str_replace_all(rod_statement, "a accessory", "an accessory")
+    }
+    
+    if(str_detect(rod_type, "satellite")){
+      rod_statement <- str_squish(glue("On the {rod_side} side, a {rod_size} {rod_material} rod was used in a satellite rod configuration. The satellite rod was connected proximally to {rod_vector[1]} and distally to the {rod_vector[2]} implant."))
+    }
+    
+    if(str_detect(rod_type, "intercalary")){
+      if(!is.null(intercalary_rod_junction) && (intercalary_rod_junction[1] %in% all_screw_coordinates_df$level)){
+        junction_statement <- glue("connected the proximal and distal primary rods over the {intercalary_rod_junction} level")
+      }else{
+        junction_statement <- glue("connected the proximal and distal primary rods")
+      }
+      rod_statement <- str_squish(glue("On the {rod_side} side, a {rod_size} {rod_material} rod was used in an intercalary rod configuration. The intercalary rod spanned from {rod_vector[1]} to {rod_vector[2]}, and {junction_statement}."))
+    }
+    
+    if(str_detect(rod_type, "linked_rod")){
+      rod_statement <- str_squish(glue("On the {rod_side} side, a {rod_size} {rod_material} linked rod configuration was used, with rods overlapping from the {rod_vector[1]} to the {rod_vector[2]} levels."))
+    }
+    
+    if(str_detect(rod_type, "kickstand")){
+      rod_statement <- str_squish(glue("On the {rod_side}, a {rod_size} {rod_material} kickstand rod was used to aide in coronal correction. The rod was anchored to the ilium distally and connected proximally at the {rod_vector[2]} level."))
+    }
+    
+  }else{
+    rod_statement <- NULL
+  }
+  
+  return(rod_statement)
+}
 
 
 
