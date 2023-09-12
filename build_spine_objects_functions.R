@@ -6,7 +6,7 @@
 
 #############---------------------   Build: screws  --------------------###############
 
-pelvic_screw_function <- function(screw_start_x, screw_start_y, angle, screw_length_modifier = 1, screw_width_modifier = 1){
+screw_function <- function(screw_start_x, screw_start_y, angle, screw_length_modifier = 1, screw_width_modifier = 1){
 
   rot = function(a) matrix(c(cos(a), sin(a), -sin(a), cos(a)), 2, 2)
 
@@ -45,13 +45,13 @@ pelvic_screw_function <- function(screw_start_x, screw_start_y, angle, screw_len
   return(screw_sf)
 }
 
-screw_function <- function(screw_start_x, screw_start_y, angle, screw_length_modifier = 1, screw_width_modifier = 1){
-  if(screw_start_x < 0.5){
-    st_buffer(st_point(x = c(screw_start_x+0.005, screw_start_y)), dist = 0.006)
-  }else{
-    st_buffer(st_point(x = c(screw_start_x - 0.005, screw_start_y)), dist = 0.006)
-  }
-}
+# screw_function <- function(screw_start_x, screw_start_y, angle, screw_length_modifier = 1, screw_width_modifier = 1){
+#   if(screw_start_x < 0.5){
+#     st_buffer(st_point(x = c(screw_start_x+0.005, screw_start_y)), dist = 0.006)
+#   }else{
+#     st_buffer(st_point(x = c(screw_start_x - 0.005, screw_start_y)), dist = 0.006)
+#   }
+# }
 
 #############-----------------------   Build: TP HOOKS  ----------------------###############
 
@@ -332,11 +332,7 @@ screw_hook_implant_function <- function(implant_type,
 
   
   if(str_detect(string = implant_type, pattern = "screw")){
-    if(str_detect(string = implant_type, pattern = "pelvic_screw")){
-      object <- pelvic_screw_function(screw_start_x = start_x, screw_start_y = y, angle = angle, screw_length_modifier = screw_length_mod, screw_width_modifier = screw_width_mod)
-    }else{
-      object <- screw_function(screw_start_x = start_x, screw_start_y = y, angle = angle, screw_length_modifier = screw_length_mod, screw_width_modifier = screw_width_mod)
-    }
+    object <- screw_function(screw_start_x = start_x, screw_start_y = y, angle = angle, screw_length_modifier = screw_length_mod, screw_width_modifier = screw_width_mod)
   }
   
   if(implant_type == "tp_hook"){

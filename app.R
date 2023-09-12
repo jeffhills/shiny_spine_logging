@@ -17,6 +17,7 @@ library(ggpmisc)
 library(rclipboard)
 library(nngeo)
 library(shinydashboard)
+library(vroom)
 
 # library(profvis)
 
@@ -215,193 +216,204 @@ ui <- dashboardPage(skin = "black",
                                      uiOutput(outputId = "diagnosis_symptoms_ui"),
                                      br(),
                                      actionBttn(inputId = "open_diagnosis_symptoms_procedure_modal", label = "Edit", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
+                                 ),
+                                 switchInput(
+                                   inputId = "fusion_procedure_performed",
+                                   width = '100%',
+                                   inline = TRUE,
+                                   label = "Implants:",
+                                   onLabel = "Yes",
+                                   offLabel = "No",
+                                   value = FALSE,
+                                   size = "mini"
                                  )
                           ),
                           column(width = 9, 
                                  box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Surgical Procedures:"), solidHeader = TRUE, status = "primary",
-                                     box(width = 7, 
-                                         fluidRow(
-                                           column(width =  11, 
-                                                  tags$table(
-                                                    tags$tr(width = "100%",
-                                                            tags$td(width = "30%", tags$div(style = "font-size:18px; font-weight:bold; text-align:left", "Select Approach:")),
-                                                            tags$td(width = "70%", 
-                                                                    radioGroupButtons(inputId = "spine_approach", 
-                                                                                      label = NULL,
-                                                                                      choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior or Lateral")),
-                                                                                                         tags$span(icon("fas fa-user", style = "color: steelblue"), strong("Posterior"))),
-                                                                                      choiceValues = list("Anterior", "Posterior"),
-                                                                                      selected = "Posterior", 
-                                                                                      direction = "horizontal",
-                                                                                      checkIcon = list(yes = icon("check")),
-                                                                                      justified = TRUE
-                                                                    )
-                                                            )
+                                     fluidRow(
+                                       box(width = 7, 
+                                           fluidRow(
+                                             column(width =  11, 
+                                                    tags$table(
+                                                      tags$tr(width = "100%",
+                                                              tags$td(width = "30%", tags$div(style = "font-size:18px; font-weight:bold; text-align:left", "Select Approach:")),
+                                                              tags$td(width = "70%", 
+                                                                      radioGroupButtons(inputId = "spine_approach", 
+                                                                                        label = NULL,
+                                                                                        choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior or Lateral")),
+                                                                                                           tags$span(icon("fas fa-user", style = "color: steelblue"), strong("Posterior"))),
+                                                                                        choiceValues = list("Anterior", "Posterior"),
+                                                                                        selected = "Posterior", 
+                                                                                        direction = "horizontal",
+                                                                                        checkIcon = list(yes = icon("check")),
+                                                                                        justified = TRUE
+                                                                      )
+                                                              )
+                                                      )
+                                                    ) 
+                                             ),
+                                             column(width = 1, 
+                                                    dropdownButton(
+                                                      sliderInput(
+                                                        inputId = "label_text_size",
+                                                        label = "Label Text Size",
+                                                        value = 14,
+                                                        min = 9,
+                                                        max = 20
+                                                      ),
+                                                      sliderInput(
+                                                        inputId = "label_text_offset",
+                                                        label = "Move Labels Lateral",
+                                                        min = -10,
+                                                        max = 10,
+                                                        value = -8
+                                                      ),
+                                                      switchInput(label = "Plot with patterns (slower):",
+                                                                  onLabel = "Yes",
+                                                                  offLabel = "No",
+                                                                  inputId = "plot_with_patterns_true",
+                                                                  value = FALSE
+                                                      ),
+                                                      switchInput(label = "Plot Summary Table:",
+                                                                  onLabel = "Yes",
+                                                                  offLabel = "No",
+                                                                  inputId = "plot_summary_table",
+                                                                  value = FALSE
+                                                      ),
+                                                      circle = TRUE,
+                                                      icon = icon("fas fa-cog"),
+                                                      size = "sm",
+                                                      inline = TRUE,
+                                                      right = TRUE
                                                     )
-                                                  ) 
+                                             )
                                            ),
-                                           column(width = 1, 
-                                                  dropdownButton(
-                                                    sliderInput(
-                                                      inputId = "label_text_size",
-                                                      label = "Label Text Size",
-                                                      value = 14,
-                                                      min = 9,
-                                                      max = 20
+                                           fluidRow(
+                                             column(width = 2,
+                                                    fluidRow(
+                                                      column(width = 9,
+                                                             div(style = "font-size:12px; text-align:center", "Change Lumbar Anatomy")
+                                                      ),
+                                                      column(width = 3,
+                                                             dropdownButton(circle = TRUE,size = "xs",
+                                                                            label = "Transitional Anatomy",
+                                                                            icon = icon("fas fa-asterisk"), 
+                                                                            awesomeRadio(
+                                                                              inputId = "lumbar_vertebrae_count",
+                                                                              label = "Number of Lumbar Vertebrae:", 
+                                                                              choices = c("4", "5", "6"),
+                                                                              selected = "5",
+                                                                              inline = TRUE, 
+                                                                              status = "success"
+                                                                            )
+                                                             )
+                                                      )
                                                     ),
-                                                    sliderInput(
-                                                      inputId = "label_text_offset",
-                                                      label = "Move Labels Lateral",
-                                                      min = -10,
-                                                      max = 10,
-                                                      value = -8
-                                                    ),
-                                                    switchInput(label = "Plot with patterns (slower):",
-                                                                onLabel = "Yes",
-                                                                offLabel = "No",
-                                                                inputId = "plot_with_patterns_true",
-                                                                value = FALSE
-                                                    ),
-                                                    switchInput(label = "Plot Summary Table:",
-                                                                onLabel = "Yes",
-                                                                offLabel = "No",
-                                                                inputId = "plot_summary_table",
-                                                                value = FALSE
-                                                    ),
-                                                    circle = TRUE,
-                                                    icon = icon("fas fa-cog"),
-                                                    size = "sm",
-                                                    inline = TRUE,
-                                                    right = TRUE
-                                                  )
+                                                    br(),
+                                                    noUiSliderInput(inputId = "crop_y",
+                                                                    label = "Spine Region",
+                                                                    min = 0,
+                                                                    max = 1,
+                                                                    value = c(0.05,0.42), direction = "rtl",
+                                                                    behaviour = "drag",color = "#0036FD",
+                                                                    orientation = "vertical",
+                                                                    height = "600px", width = "3px",
+                                                                    inline = TRUE)
+                                             ), 
+                                             column(width = 10,
+                                                    div(style = "font-size:16px; font-weight:bold; font-style:italic; text-align:center", "Add Procedures in Order Performed"),
+                                                    div(style = "font-size:12px; text-align:center", "Double click to remove an item."),
+                                                    plotOutput("spine_plan",
+                                                               height = 750,
+                                                               click = "plot_click",
+                                                               dblclick = "plot_double_click")
+                                             )   
                                            )
-                                         ),
-                                         fluidRow(
-                                           column(width = 2,
-                                                  fluidRow(
-                                                    column(width = 9,
-                                                           div(style = "font-size:12px; text-align:center", "Change Lumbar Anatomy")
-                                                    ),
-                                                    column(width = 3,
-                                                           dropdownButton(circle = TRUE,size = "xs",
-                                                                          label = "Transitional Anatomy",
-                                                                          icon = icon("fas fa-asterisk"), 
-                                                                          awesomeRadio(
-                                                                            inputId = "lumbar_vertebrae_count",
-                                                                            label = "Number of Lumbar Vertebrae:", 
-                                                                            choices = c("4", "5", "6"),
-                                                                            selected = "5",
-                                                                            inline = TRUE, 
-                                                                            status = "success"
-                                                                          )
-                                                           )
-                                                    )
-                                                  ),
-                                                  br(),
-                                                  noUiSliderInput(inputId = "crop_y",
-                                                                  label = "Spine Region",
-                                                                  min = 0,
-                                                                  max = 1,
-                                                                  value = c(0.05,0.42), direction = "rtl",
-                                                                  behaviour = "drag",color = "#0036FD",
-                                                                  orientation = "vertical",
-                                                                  height = "600px", width = "3px",
-                                                                  inline = TRUE)
-                                           ), 
-                                           column(width = 10,
-                                                  div(style = "font-size:16px; font-weight:bold; font-style:italic; text-align:center", "Add Procedures in Order Performed"),
-                                                  div(style = "font-size:12px; text-align:center", "Double click to remove an item."),
-                                                  plotOutput("spine_plan",
-                                                             height = 750,
-                                                             click = "plot_click",
-                                                             dblclick = "plot_double_click")
-                                           )   
-                                         )
-                                     ),
-                                     box(width = 5, ##### RIGHT COLUMN NEXT TO SPINE PLOT
-                                         uiOutput(outputId = "currently_adding_ui"),
-                                         conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
-                                                          div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Procedure & Click Spine to Add:")
-                                         ),
-                                         conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
-                                                          div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Category:"),
-                                                          actionBttn(
-                                                            inputId = "add_implants",
-                                                            size = "sm", 
-                                                            block = TRUE,
-                                                            label = "Add Surgical Implants (Screws, Hooks, Wires, Tethers, etc.)",
-                                                            style = "simple",
-                                                            color = "primary"
-                                                          ),
-                                                          br(),
-                                                          actionBttn(
-                                                            inputId = "add_decompressions",
-                                                            size = "sm", block = TRUE,
-                                                            label = "Add Decompressions",
-                                                            style = "simple",
-                                                            color = "primary"
-                                                          ),
-                                                          br(),
-                                                          actionBttn(
-                                                            inputId = "add_osteotomies",
-                                                            size = "sm", block = TRUE,
-                                                            label = "Add Osteotomies/Facetectomies",
-                                                            style = "simple",
-                                                            color = "primary"
-                                                          ),
-                                                          br(),
-                                                          actionBttn(
-                                                            inputId = "add_interbody",
-                                                            size = "sm", block = TRUE,
-                                                            label = "Add Interbody Fusion",
-                                                            style = "simple",
-                                                            color = "primary"
-                                                          ),
-                                                          br(),
-                                                          actionBttn(
-                                                            inputId = "add_special_approach",
-                                                            size = "sm", block = TRUE,
-                                                            label = "Add Special Approach (Costovertebral, etc)",
-                                                            style = "simple",
-                                                            color = "primary"
-                                                          ),
-                                                          br(),
-                                                          actionBttn(
-                                                            inputId = "add_other",
-                                                            size = "sm", block = TRUE,
-                                                            label = "Add Other (cement, structural allograft, I&D, etc)",
-                                                            style = "simple",
-                                                            color = "primary"
-                                                          ),
-                                                          uiOutput(outputId = "intervertebral_cage_ui"),
-                                                          br(),
-                                                          uiOutput(outputId = "tumor_resection_ui"),
-                                                          br(), 
-                                                          div(style = "font-size:20px; font-weight:bold; text-align:left", "2. Select Implant/Procedure & Click Spine to Add:"),
-                                         ),
-                                         div(class = "form-group shiny-input-container shiny-input-radiogroup shiny-input-container-inline", style = "width: 100%;text-align: -webkit-center;", 
-                                             radioGroupButtons(
-                                               inputId = "object_to_add",
-                                               direction = "vertical",
-                                               width = "95%",
-                                               justified = TRUE,
-                                               individual = FALSE,
-                                               label = NULL,
-                                               choices = c(
-                                                 "Pedicle Screw" = "pedicle_screw",
-                                                 "Pelvic Screw" = "pelvic_screw",
-                                                 "Occipital Screw" = "occipital_screw",
-                                                 "Transarticular Screw" = "transarticular_screw",
-                                                 "Pars Screw" = "pars_screw",
-                                                 "Translaminar Screw" = "translaminar_screw",
-                                                 "Lateral Mass Screw" = "lateral_mass_screw",
-                                                 "TP Hook" = "tp_hook",
-                                                 "Laminar Hook (Downgoing)" = "laminar_downgoing_hook",
-                                                 "Laminar Hook (Upgoing)" = "laminar_upgoing_hook",
-                                                 "Pedicle Hook" = "pedicle_hook",
-                                                 "Tether (Spinous Process)" = "tether",
-                                                 "Sublaminar Wire" = "sublaminar_wire"  
-                                               ),
+                                       ), # end of left box with spine plot
+                                       box(width = 5, ##### RIGHT COLUMN NEXT TO SPINE PLOT
+                                           uiOutput(outputId = "currently_adding_ui"),
+                                           conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
+                                                            div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Procedure & Click Spine to Add:")
+                                           ),
+                                           conditionalPanel(condition = "input.spine_approach.indexOf('Posterior') > -1",
+                                                            div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Category:"),
+                                                            actionBttn(
+                                                              inputId = "add_implants",
+                                                              size = "sm", 
+                                                              block = TRUE,
+                                                              label = "Add Surgical Implants (Screws, Hooks, Wires, Tethers, etc.)",
+                                                              style = "simple",
+                                                              color = "primary"
+                                                            ),
+                                                            br(),
+                                                            actionBttn(
+                                                              inputId = "add_decompressions",
+                                                              size = "sm", block = TRUE,
+                                                              label = "Add Decompressions",
+                                                              style = "simple",
+                                                              color = "primary"
+                                                            ),
+                                                            br(),
+                                                            actionBttn(
+                                                              inputId = "add_osteotomies",
+                                                              size = "sm", block = TRUE,
+                                                              label = "Add Osteotomies/Facetectomies",
+                                                              style = "simple",
+                                                              color = "primary"
+                                                            ),
+                                                            br(),
+                                                            actionBttn(
+                                                              inputId = "add_interbody",
+                                                              size = "sm", block = TRUE,
+                                                              label = "Add Interbody Fusion",
+                                                              style = "simple",
+                                                              color = "primary"
+                                                            ),
+                                                            br(),
+                                                            actionBttn(
+                                                              inputId = "add_special_approach",
+                                                              size = "sm", block = TRUE,
+                                                              label = "Add Special Approach (Costovertebral, etc)",
+                                                              style = "simple",
+                                                              color = "primary"
+                                                            ),
+                                                            br(),
+                                                            actionBttn(
+                                                              inputId = "add_other",
+                                                              size = "sm", block = TRUE,
+                                                              label = "Add Other (cement, structural allograft, I&D, etc)",
+                                                              style = "simple",
+                                                              color = "primary"
+                                                            ),
+                                                            uiOutput(outputId = "intervertebral_cage_ui"),
+                                                            br(),
+                                                            uiOutput(outputId = "tumor_resection_ui"),
+                                                            br(), 
+                                                            div(style = "font-size:20px; font-weight:bold; text-align:left", "2. Select Implant/Procedure & Click Spine to Add:"),
+                                           ),
+                                           div(class = "form-group shiny-input-container shiny-input-radiogroup shiny-input-container-inline", style = "width: 100%;text-align: -webkit-center;", 
+                                               radioGroupButtons(
+                                                 inputId = "object_to_add",
+                                                 direction = "vertical",
+                                                 width = "95%",
+                                                 justified = TRUE,
+                                                 individual = FALSE,
+                                                 label = NULL,
+                                                 choices = c(
+                                                   "Pedicle Screw" = "pedicle_screw",
+                                                   "Pelvic Screw" = "pelvic_screw",
+                                                   "Occipital Screw" = "occipital_screw",
+                                                   "Transarticular Screw" = "transarticular_screw",
+                                                   "Pars Screw" = "pars_screw",
+                                                   "Translaminar Screw" = "translaminar_screw",
+                                                   "Lateral Mass Screw" = "lateral_mass_screw",
+                                                   "TP Hook" = "tp_hook",
+                                                   "Laminar Hook (Downgoing)" = "laminar_downgoing_hook",
+                                                   "Laminar Hook (Upgoing)" = "laminar_upgoing_hook",
+                                                   "Pedicle Hook" = "pedicle_hook",
+                                                   "Tether (Spinous Process)" = "tether",
+                                                   "Sublaminar Wire" = "sublaminar_wire"  
+                                                 ),
                                                checkIcon = list(
                                                  yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
                                                ),
@@ -416,6 +428,140 @@ ui <- dashboardPage(skin = "black",
                                            color = "danger"
                                          )
                                      )## end of little box to the right of the spine
+                                     ), # end of the fluid row for the 2 boxes containing spine and procedure inputs
+                                     fluidRow(
+                                       box(width = 7, status = "info", 
+                                           title = div(style = "font-size:22px; font-weight:bold; text-align:left", 
+                                                       "Construct Details:"),
+                                           fluidRow(
+                                             column(width = 4, 
+                                                    dropdownButton(size = "xs", 
+                                                                   label = NULL, 
+                                                                   switchInput(label = "Left Supplemental Rods Eligible:",
+                                                                               inputId = "left_supplemental_rods_eligible",
+                                                                               size = "mini",
+                                                                               onLabel = "Yes",
+                                                                               offLabel = "No", 
+                                                                               value = FALSE
+                                                                   ),
+                                                                   switchInput(label = "Right Supplemental Rods Eligible:",
+                                                                               inputId = "right_supplemental_rods_eligible",
+                                                                               size = "mini",
+                                                                               onLabel = "Yes",
+                                                                               offLabel = "No", 
+                                                                               value = FALSE
+                                                                   )
+                                                    )
+                                             )
+                                           ),
+                                           conditionalPanel(condition = "input.fusion_procedure_performed == true & input.spine_approach.indexOf('Posterior') > -1",
+                                                            # box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "Rod Details:"), collapsible = TRUE,
+                                                            fluidRow(column(4), 
+                                                                     column(4, 
+                                                                            dropdown(icon = icon("link"), 
+                                                                                     width = "100%",
+                                                                                     label = "Add Crosslink",
+                                                                                     style = "unite",
+                                                                                     column(6, 
+                                                                                            checkboxGroupButtons(inputId = "crosslink_connectors",
+                                                                                                                 label = "Add crosslinks at:",
+                                                                                                                 choices = vertebral_bodies_vector,
+                                                                                                                 individual = FALSE,
+                                                                                                                 # justified = TRUE,
+                                                                                                                 direction = "vertical",
+                                                                                                                 checkIcon = list(
+                                                                                                                   yes = tags$i(class = "fa fa-check-square",
+                                                                                                                                style = "color: steelblue"),
+                                                                                                                   no = tags$i(class = "fa fa-square-o",
+                                                                                                                               style = "color: steelblue"))
+                                                                                            )),
+                                                                                     column(6, 
+                                                                                            actionBttn(
+                                                                                              inputId = "remove_all_crosslinks",
+                                                                                              label = "Remove All",
+                                                                                              style = "simple", 
+                                                                                              size = "xs",
+                                                                                              color = "danger", 
+                                                                                              icon = icon("undo-alt")
+                                                                                            )
+                                                                                     )
+                                                                                     
+                                                                            )
+                                                                     ),
+                                                                     column(4
+                                                                     )
+                                                            ),
+                                                            jh_make_shiny_table_column_function(input_type = "title", 
+                                                                                                left_label = "Left Rod(s):",
+                                                                                                right_label = "Right Rods(s):", 
+                                                                                                font_size = 20, 
+                                                                                                text_align = "left"),
+                                                            jh_make_shiny_table_column_function(input_type = "pickerInput", 
+                                                                                                left_input_id = "left_main_rod_size", 
+                                                                                                left_label = "Size:",
+                                                                                                right_input_id = "right_main_rod_size", 
+                                                                                                right_label = "Size:",
+                                                                                                left_column_percent_width = 50,
+                                                                                                right_column_percent_width = 50,
+                                                                                                choices_vector = c("None", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/quarter in"),
+                                                                                                initial_value_selected = "None",
+                                                                                                picker_choose_multiple = FALSE),
+                                                            jh_make_shiny_table_column_function(input_type = "awesomeRadio", 
+                                                                                                left_input_id = "left_main_rod_material", 
+                                                                                                left_label = "Material:",
+                                                                                                right_input_id = "right_main_rod_material", 
+                                                                                                right_label = "Material:",
+                                                                                                left_column_percent_width = 50,
+                                                                                                right_column_percent_width = 50,
+                                                                                                checkboxes_inline = TRUE,
+                                                                                                button_size = "normal",
+                                                                                                choices_vector = c("Non-instrumented", "Titanium", "Cobalt Chrome", "Stainless Steel"),
+                                                                                                initial_value_selected = "Non-instrumented",
+                                                                                                picker_choose_multiple = FALSE),
+                                                            
+                                                            jh_make_supplemental_rod_ui_function(rod_type = "accessory_rod", input_label = "Accessory Rod"),
+                                                            jh_make_supplemental_rod_ui_function(rod_type = "satellite_rod", input_label = "Satellite Rod"),
+                                                            jh_make_supplemental_rod_ui_function(rod_type = "intercalary_rod", input_label = "Intercalary Rod"),
+                                                            jh_make_supplemental_rod_ui_function(rod_type = "linked_rods", input_label = "Linked Rods"),
+                                                            jh_make_supplemental_rod_ui_function(rod_type = "kickstand_rod", input_label = "Kickstand Rod"),
+                                                            jh_make_shiny_table_column_function(input_type = "awesomeCheckbox", 
+                                                                                                left_input_id = "add_left_custom_rods", 
+                                                                                                left_label = "Customize Left Rod Construct:",
+                                                                                                right_input_id = "add_right_custom_rods", 
+                                                                                                right_label = "Customize Right Rod Construct:",
+                                                                                                left_condition_statement = "input.left_supplemental_rods_eligible == true", 
+                                                                                                right_condition_statement = "input.right_supplemental_rods_eligible == true", 
+                                                                                                initial_value_selected = FALSE,
+                                                                                                status = "success"),
+                                                            fixedRow(
+                                                              column(width = 6,
+                                                                     conditionalPanel(condition = "input.add_left_custom_rods == true",
+                                                                                      awesomeRadio(inputId = "left_custom_rods_number",
+                                                                                                   label = "Number of Left Total Rods:",
+                                                                                                   choices = c(2,3,4,5), 
+                                                                                                   inline = TRUE, selected = 2),
+                                                                                      uiOutput(outputId = "left_custom_rods_ui")
+                                                                     )
+                                                              ),
+                                                              column(width = 6,
+                                                                     conditionalPanel(condition = "input.add_right_custom_rods == true",
+                                                                                      awesomeRadio(inputId = "right_custom_rods_number", 
+                                                                                                   label = "Number of Right Total Rods:",
+                                                                                                   choices = c(2,3,4,5), 
+                                                                                                   inline = TRUE, 
+                                                                                                   selected = 2),
+                                                                                      uiOutput(outputId = "right_custom_rods_ui")
+                                                                     )
+                                                              )
+                                                            )
+                                                            # )
+                                                            ##################### NEW
+                                           ),
+                                           conditionalPanel(condition = "input.fusion_procedure_performed == true",
+                                                            uiOutput(outputId = "interbody_implants_ui")
+                                           )
+                                       ) ## end of the construct details box
+                                     ) ## end of the fluid row
                                  ),### end of the full box
                                  actionBttn(
                                    inputId = "implants_complete",
@@ -548,16 +694,6 @@ ui <- dashboardPage(skin = "black",
                                                    jh_make_bmp_ui_function(anterior_posterior = "posterior"),
                                                )
                               ),
-                              switchInput(
-                                inputId = "anterior_fusion_performed",
-                                width = '100%',
-                                inline = TRUE,
-                                label = "Anterior Fusion:",
-                                onLabel = "Yes",
-                                offLabel = "No",
-                                value = FALSE,
-                                size = "mini"
-                              ),
                               conditionalPanel(condition = "input.anterior_fusion_performed == true",
                                                box(width = 12, collapsible = TRUE, title = div(style = "font-size:20px; font-weight:bold; text-align:center",
                                                                                                "ANTERIOR Bone Graft & Biologics:"),
@@ -666,147 +802,14 @@ ui <- dashboardPage(skin = "black",
                                                )
                               ),
                               switchInput(
-                                inputId = "fusion_procedure_performed",
+                                inputId = "anterior_fusion_performed",
                                 width = '100%',
                                 inline = TRUE,
-                                label = "Implants:",
+                                label = "Anterior Fusion:",
                                 onLabel = "Yes",
                                 offLabel = "No",
                                 value = FALSE,
                                 size = "mini"
-                              ),
-                              conditionalPanel(condition = "input.fusion_procedure_performed == true",
-                                               uiOutput(outputId = "interbody_implants_ui")
-                              ),
-                              fluidRow(
-                                column(width = 4, 
-                                       dropdownButton(size = "xs", 
-                                                      label = NULL, 
-                                                      switchInput(label = "Left Supplemental Rods Eligible:",
-                                                                  inputId = "left_supplemental_rods_eligible",
-                                                                  size = "mini",
-                                                                  onLabel = "Yes",
-                                                                  offLabel = "No", 
-                                                                  value = FALSE
-                                                      ),
-                                                      switchInput(label = "Right Supplemental Rods Eligible:",
-                                                                  inputId = "right_supplemental_rods_eligible",
-                                                                  size = "mini",
-                                                                  onLabel = "Yes",
-                                                                  offLabel = "No", 
-                                                                  value = FALSE
-                                                      )
-                                       )
-                                ),
-                              ),
-                              conditionalPanel(condition = "input.fusion_procedure_performed == true & input.spine_approach.indexOf('Posterior') > -1",
-                                               box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "Rod Details:"), collapsible = TRUE,
-                                                   fluidRow(column(4), 
-                                                            column(4, 
-                                                                   dropdown(icon = icon("link"), 
-                                                                            width = "100%",
-                                                                            label = "Add Crosslink",
-                                                                            style = "unite",
-                                                                            column(6, 
-                                                                                   checkboxGroupButtons(inputId = "crosslink_connectors",
-                                                                                                        label = "Add crosslinks at:",
-                                                                                                        choices = vertebral_bodies_vector,
-                                                                                                        individual = FALSE,
-                                                                                                        # justified = TRUE,
-                                                                                                        direction = "vertical",
-                                                                                                        checkIcon = list(
-                                                                                                          yes = tags$i(class = "fa fa-check-square",
-                                                                                                                       style = "color: steelblue"),
-                                                                                                          no = tags$i(class = "fa fa-square-o",
-                                                                                                                      style = "color: steelblue"))
-                                                                                   )),
-                                                                            column(6, 
-                                                                                   actionBttn(
-                                                                                     inputId = "remove_all_crosslinks",
-                                                                                     label = "Remove All",
-                                                                                     style = "simple", 
-                                                                                     size = "xs",
-                                                                                     color = "danger", 
-                                                                                     icon = icon("undo-alt")
-                                                                                   )
-                                                                            )
-                                                                            
-                                                                   )
-                                                            ),
-                                                            column(4
-                                                            )
-                                                   ),
-                                                   jh_make_shiny_table_column_function(input_type = "title", 
-                                                                                       left_label = "Left Rod(s):",
-                                                                                       right_label = "Right Rods(s):", 
-                                                                                       font_size = 20, 
-                                                                                       text_align = "left"),
-                                                   jh_make_shiny_table_column_function(input_type = "pickerInput", 
-                                                                                       left_input_id = "left_main_rod_size", 
-                                                                                       left_label = "Size:",
-                                                                                       right_input_id = "right_main_rod_size", 
-                                                                                       right_label = "Size:",
-                                                                                       left_column_percent_width = 50,
-                                                                                       right_column_percent_width = 50,
-                                                                                       choices_vector = c("None", "Transition", "3.5mm", "4.0mm", "4.5mm", "4.75mm", "5.5mm", "6.0mm", "6.35mm/quarter in"),
-                                                                                       initial_value_selected = "None",
-                                                                                       picker_choose_multiple = FALSE),
-                                                   jh_make_shiny_table_column_function(input_type = "awesomeRadio", 
-                                                                                       left_input_id = "left_main_rod_material", 
-                                                                                       left_label = "Material:",
-                                                                                       right_input_id = "right_main_rod_material", 
-                                                                                       right_label = "Material:",
-                                                                                       left_column_percent_width = 50,
-                                                                                       right_column_percent_width = 50,
-                                                                                       checkboxes_inline = TRUE,
-                                                                                       button_size = "normal",
-                                                                                       choices_vector = c("Non-instrumented", "Titanium", "Cobalt Chrome", "Stainless Steel"),
-                                                                                       initial_value_selected = "Non-instrumented",
-                                                                                       picker_choose_multiple = FALSE),
-                                                   jh_make_shiny_table_column_function(input_type = "awesomeRadio", 
-                                                                                       left_input_id = "left_main_rod_contour", 
-                                                                                       left_label = "Rod was:",
-                                                                                       right_input_id = "right_main_rod_contour", 
-                                                                                       right_label = "Material:",
-                                                                                       left_column_percent_width = 50,
-                                                                                       right_column_percent_width = 50,
-                                                                                       checkboxes_inline = TRUE,
-                                                                                       button_size = "normal",
-                                                                                       choices_vector = c("Cut to length and contoured", "Pre-contoured"),
-                                                                                       initial_value_selected = "Cut to length and contoured",
-                                                                                       picker_choose_multiple = FALSE),
-                                                   jh_make_supplemental_rod_ui_function(rod_type = "accessory_rod", input_label = "Accessory Rod"),
-                                                   jh_make_supplemental_rod_ui_function(rod_type = "satellite_rod", input_label = "Satellite Rod"),
-                                                   jh_make_supplemental_rod_ui_function(rod_type = "intercalary_rod", input_label = "Intercalary Rod"),
-                                                   jh_make_supplemental_rod_ui_function(rod_type = "linked_rods", input_label = "Linked Rods"),
-                                                   jh_make_shiny_table_column_function(input_type = "awesomeCheckbox", 
-                                                                                       left_input_id = "add_left_custom_rods", 
-                                                                                       left_label = "Customize Left Rod Construct:",
-                                                                                       right_input_id = "add_right_custom_rods", 
-                                                                                       right_label = "Customize Right Rod Construct:",
-                                                                                       left_condition_statement = "input.left_supplemental_rods_eligible == true", 
-                                                                                       right_condition_statement = "input.right_supplemental_rods_eligible == true", 
-                                                                                       initial_value_selected = FALSE,
-                                                                                       status = "success"),
-                                                   fixedRow(
-                                                     column(width = 6,
-                                                            conditionalPanel(condition = "input.add_left_custom_rods == true",
-                                                                             awesomeRadio(inputId = "left_custom_rods_number",
-                                                                                          label = "Number of Left Total Rods:",
-                                                                                          choices = c(2,3,4,5), 
-                                                                                          inline = TRUE, selected = 2),
-                                                                             uiOutput(outputId = "left_custom_rods_ui")
-                                                            )
-                                                     ),
-                                                     column(width = 6,
-                                                            conditionalPanel(condition = "input.add_right_custom_rods == true",
-                                                                             awesomeRadio(inputId = "right_custom_rods_number", label = "Number of Right Total Rods:",choices = c(2,3,4,5), inline = TRUE, selected = 2),
-                                                                             uiOutput(outputId = "right_custom_rods_ui")
-                                                            )
-                                                     )
-                                                   )
-                                               )
-                                               ##################### NEW
                               ),
                               ### this input gets updated based on the laterality of screws to be used in the next conditional panel steps
                               conditionalPanel(condition = "input.spine_approach.indexOf('Never True') > -1",
@@ -1092,7 +1095,7 @@ server <- function(input, output, session) {
     
     redcap_url <- case_when(
       input$redcap_institution == "UTHSCSA" ~ 'https://redcap.uthscsa.edu/REDCap/api/',
-      input$redcap_institution == "UCSD" ~ 'https://redcap.ucsd.edu/REDCap/api/'
+      input$redcap_institution == "UCSD" ~ 'https://redcap.ucsd.edu/api/'
     )
     
     rcon_reactive$rcon <- redcapConnection(url = redcap_url, token = input$redcap_token)    
@@ -1318,14 +1321,6 @@ server <- function(input, output, session) {
     redcap_complication_df
     
   })
-  
-  # output$complication_for_redcap_upload_table <- renderTable({
-  #   if(length(input$complication_description)>0){
-  #     complication_recording_reactive_df()
-  #   }else{
-  #     tibble(complication = character())
-  #   }
-  # })
   
   observeEvent(input$complication_submit_to_redcap, {
     withProgress(message = 'Uploading Data', value = 0, {
@@ -2028,10 +2023,6 @@ server <- function(input, output, session) {
         additional_procedures_list$removal_instrumentation <- "Removal of anterior spinal instrumentation"
       }
       
-      # if(length(input$prior_fusion_levels)>0){
-      #   additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
-      # }
-      
       if(any(str_detect(string = input$head_positioning_anterior, pattern = "Tongs"))){
         additional_procedures_list$head_positioning_anterior <- "Application of Cranial Tongs"
       }
@@ -2248,8 +2239,7 @@ server <- function(input, output, session) {
         indications_list$conservative_attempted <- glue("{he_she} has exhausted conservative measures.")
       } 
     }
-    # input$diagnosis_category = c("msk", "deformity", "trauma", "tumor", "infection", "congenital", "other_neuro_conditions")
-    
+
     title_name <- if_else(input$sex == "Male", glue("Mr. {input$patient_last_name}"), glue("Ms. {input$patient_last_name}"))
     
     indications_list$risks <- glue("Risks and benefits of operative intervention were considered and discussed in detail and {title_name} has elected to proceed with surgery. I believe adequate informed consent was obtained.")
@@ -2372,26 +2362,26 @@ server <- function(input, output, session) {
   #                  if(length(head_positioning_anterior) == 0 | length(input$closure_details_anterior) == 0 | length(input$dressing_details_anterior) == 0 | length(input$intraoperative_complications_yes_no) == 0){
   #                    show_again <- TRUE
   #                  }else{
-  #                    show_again <- FALSE 
-  #                  } 
+  #                    show_again <- FALSE
+  #                  }
   #                }
-  #                
+  # 
   #                if(procedure_approach_reactive() == "posterior"){
   #                  if(length(head_positioning_posterior) == 0 | length(input$closure_details_posterior) == 0 | length(input$dressing_details_posterior) == 0 | length(input$intraoperative_complications_yes_no) == 0){
   #                    show_again <- TRUE
   #                  }else{
-  #                    show_again <- FALSE 
-  #                  } 
+  #                    show_again <- FALSE
+  #                  }
   #                }
-  #                
+  # 
   #                if(procedure_approach_reactive() == "combined"){
   #                  if(length(head_positioning_anterior) == 0 | length(input$closure_details_anterior) == 0 | length(input$dressing_details_anterior) == 0 | length(input$intraoperative_complications_yes_no) == 0 | length(head_positioning_posterior) == 0 | length(input$closure_details_posterior) == 0 | length(input$dressing_details_posterior) == 0 | length(input$intraoperative_complications_yes_no) == 0){
   #                    show_again <- TRUE
   #                  }else{
-  #                    show_again <- FALSE 
-  #                  } 
+  #                    show_again <- FALSE
+  #                  }
   #                }
-  #                
+  # 
   #                if(show_again == TRUE){
   #                  showModal(
   #                    addition_surgical_details_modal_box_2_function(required_options_missing = TRUE,
@@ -2416,21 +2406,21 @@ server <- function(input, output, session) {
   #                                                                   durotomy_timing_input = input$durotomy_timing,
   #                                                                   durotomy_instrument_input = input$durotomy_instrument,
   #                                                                   durotomy_repair_method_input = input$durotomy_repair_method,
-  #                                                                   
+  # 
   #                                                                   additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
   #                                                                   additional_procedures_anterior = input$additional_procedures_anterior,
   #                                                                   additional_procedures_other_anterior = input$additional_procedures_other_anterior,
   #                                                                   additional_end_procedure_details_anterior = input$additional_end_procedure_details_anterior,
   #                                                                   closure_details_anterior = input$closure_details_anterior,
   #                                                                   dressing_details_anterior = input$dressing_details_anterior,
-  #                                                                   
+  # 
   #                                                                   additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
   #                                                                   additional_procedures_posterior = input$additional_procedures_posterior,
   #                                                                   additional_procedures_other_posterior = input$additional_procedures_other_posterior,
   #                                                                   additional_end_procedure_details_posterior = input$additional_end_procedure_details_posterior,
   #                                                                   closure_details_posterior = input$closure_details_posterior,
   #                                                                   dressing_details_posterior = input$dressing_details_posterior,
-  #                                                                   
+  # 
   #                                                                   postop_dispo = input$postop_dispo,
   #                                                                   postop_abx = input$postop_abx,
   #                                                                   postop_map_goals = input$postop_map_goals,
@@ -2608,9 +2598,6 @@ server <- function(input, output, session) {
     enframe(details_list, name = "Variable", value = "Input") %>%
       unnest("Input") %>%
       mutate(Input = if_else(Input == "NA", "No Value Entered", Input))
-    # replace_na(list(Input = "No Value Entered"))
-    
-    # replace_na(list(Input = "No Value Entered"))
     
   })
   
@@ -2764,9 +2751,6 @@ server <- function(input, output, session) {
       )
     }
   })
-  
-  
-  
   
   ################----------  UPDATE CHOICES   ------------######################  
   ################----------  UPDATE CHOICES   ------------######################  
@@ -3042,49 +3026,25 @@ server <- function(input, output, session) {
   })
   
   
-  ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
-  observeEvent(left_rod_implants_df_reactive(),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(nrow(left_rod_implants_df_reactive()) > 1){
-      if(max(left_rod_implants_df_reactive()$vertebral_number) < 11){
-        rod_size <- "4.0mm"  
-      }else{
-        rod_size <- "6.0mm"  
-      }
-      updatePickerInput(session = session, 
-                        inputId = "left_main_rod_size", 
-                        selected = if_else(input$left_main_rod_size == "None", rod_size, input$left_main_rod_size)
-      )
-      updateAwesomeRadio(session = session, 
-                         inputId = "left_main_rod_material",
-                         inline = TRUE,
-                         choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
-                         selected = if_else(input$left_main_rod_material == "Non-instrumented", "Titanium", input$left_main_rod_material)
-      )
+  crosslink_connector_vector <- reactive({
+    input$crosslink_connectors
+  })
+  
+  observeEvent(crosslink_connector_vector(),  ignoreInit = TRUE, {
+    if(length(crosslink_connector_vector()) == 0){
+      all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
+        filter(object != "crosslink")
+    }else{
+      all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
+        filter(object != "crosslink") %>%
+        bind_rows(tibble(level = crosslink_connector_vector(), 
+                         object = "crosslink") %>%
+                    left_join(all_implants_constructed_df)) %>%
+        distinct()
     }
   })
   
-  
-  observeEvent(right_rod_implants_df_reactive(),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(nrow(right_rod_implants_df_reactive()) > 1){
-      if(max(left_rod_implants_df_reactive()$vertebral_number) < 11){
-        rod_size <- "4.0mm"  
-      }else{
-        rod_size <- "6.0mm"  
-      }
-      updatePickerInput(session = session, 
-                        inputId = "right_main_rod_size", 
-                        selected = if_else(input$right_main_rod_size == "None", rod_size, input$right_main_rod_size)
-      )
-      updateAwesomeRadio(session = session, 
-                         inputId = "right_main_rod_material", 
-                         inline = TRUE,
-                         choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
-                         selected = if_else(input$right_main_rod_material == "Non-instrumented", "Titanium", input$right_main_rod_material)
-      )
-    }
-  })
-  
-  ######### ######### sUPPLEMENTAL ROD OPTIONS ######### #########
+  ######### ######### REACTIVE OSTEOTOMY ######### #########
   
   osteotomy_level_reactive <- reactive({
     if(any(any(all_objects_to_add_list$objects_df$object == "grade_3") |
@@ -3102,298 +3062,16 @@ server <- function(input, output, session) {
     osteotomy_level
   })
   
-  ################------------------  Left RODS    ----------------------######################  
-  
-  observeEvent(input$reset_all,ignoreNULL = TRUE, ignoreInit = TRUE, {
-    updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = FALSE)
-  })
-  
-  left_supplement_rod_starts_list_reactive <- reactive({
-    all_added_objects_df <- all_objects_to_add_list$objects_df %>%
-      select(level, vertebral_number, object, x, y, side) %>%
-      filter(side == "left")
-    
-    starts_list <- jh_cranial_and_caudal_list_for_supplementary_rods_function(all_added_objects_df, osteotomy_site = osteotomy_level_reactive())
-    starts_list
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, left_supplement_rod_starts_list_reactive()), ignoreNULL = TRUE, ignoreInit = TRUE,{
-    if(nrow(left_rod_implants_df_reactive()) > 2){
-      updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
-    }
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, left_supplement_rod_starts_list_reactive()),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$left_supplemental_rods_eligible == TRUE){
-      updateSliderTextInput(session = session,
-                            inputId = "left_accessory_rod",
-                            choices = left_supplement_rod_starts_list_reactive()$all_levels,
-                            selected = left_supplement_rod_starts_list_reactive()$accessory_starts)        
-    }
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, left_supplement_rod_starts_list_reactive()),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$left_supplemental_rods_eligible == TRUE){
-      updateSliderTextInput(session = session,
-                            inputId = "left_satellite_rod",
-                            choices = left_supplement_rod_starts_list_reactive()$all_levels,
-                            selected = left_supplement_rod_starts_list_reactive()$satellite_starts)
-    }
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, left_supplement_rod_starts_list_reactive()),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$left_supplemental_rods_eligible == TRUE){
-      updateSliderTextInput(session = session,
-                            inputId = "left_intercalary_rod",
-                            choices = left_supplement_rod_starts_list_reactive()$all_levels,
-                            selected = left_supplement_rod_starts_list_reactive()$intercalary_starts)
-    }
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, left_supplement_rod_starts_list_reactive()), ignoreNULL = TRUE, ignoreInit = TRUE,{
-    if(nrow(left_rod_implants_df_reactive())>3){
-      # choices_df <- tibble(vertebral_number = seq(from = min(left_rod_implants_df_reactive()$vertebral_number), to = max(left_rod_implants_df_reactive()$vertebral_number), by = 1)) %>%
-      #   left_join(levels_numbered_df)
-      
-      choices_df <- levels_numbered_df %>%
-        filter(vertebral_number %in% seq(from = min(left_rod_implants_df_reactive()$vertebral_number), to = max(left_rod_implants_df_reactive()$vertebral_number), by = 1))
-      
-      if(!is.null(osteotomy_level_reactive())){
-        updatePickerInput(session = session, inputId = "left_intercalary_rod_junction",
-                          label = "Junction:",
-                          choices = choices_df$level,
-                          selected = osteotomy_level_reactive())
-      }else{
-        updatePickerInput(session = session, inputId = "left_intercalary_rod_junction",
-                          label = "Junction:",
-                          choices = choices_df$level,
-                          selected = head(x = tail(choices_df$level, 3), 1)
-        )
-      }
-      
-    }
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, left_supplement_rod_starts_list_reactive()),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$left_supplemental_rods_eligible == TRUE){
-      updateSliderTextInput(session = session,
-                            inputId = "left_linked_rods",
-                            choices = left_supplement_rod_starts_list_reactive()$all_levels,
-                            selected = left_supplement_rod_starts_list_reactive()$linked_starts)
-    }
-  })
-  
-  
-  # 
-  output$left_custom_rods_ui <- renderUI({
-    if(input$add_left_custom_rods == TRUE){
-      left_implants_df <- all_objects_to_add_list$objects_df %>%
-        select(level, side, object, x, y) %>%
-        filter(side == "left") %>%
-        filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
-        mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
-      
-      if(input$left_custom_rods_number > 1){
-        column(12,
-               pickerInput(inputId = "left_custom_rod_1",label = "Rod 1 Connects to:",
-                           choices = left_implants_df$implant_label,
-                           multiple = TRUE,
-                           options = list(`actions-box` = TRUE)),
-               pickerInput(inputId = "left_custom_rod_2",label = "Rod 2 Connects to:",
-                           choices = left_implants_df$implant_label,
-                           multiple = TRUE,
-                           options = list(`actions-box` = TRUE)),
-               if(input$left_custom_rods_number > 2){
-                 pickerInput(inputId = "left_custom_rod_3",label = "Rod 3 Connects to:",
-                             choices = left_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               },
-               if(input$left_custom_rods_number > 3){
-                 pickerInput(inputId = "left_custom_rod_4",label = "Rod 4 Connects to:",
-                             choices = left_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               },
-               if(input$left_custom_rods_number > 4){
-                 pickerInput(inputId = "left_custom_rod_5",label = "Rod 5 Connects to:",
-                             choices = left_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               }
-        )
-      }
-    }else{
-      NULL
-    }
-  })
-  
-  # ################------------------  Right RODS    ----------------------######################  
-  observeEvent(input$reset_all,ignoreNULL = TRUE, ignoreInit = TRUE, {
-    updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = FALSE)
-  })
-  
-  right_supplement_rod_starts_list_reactive <- reactive({
-    all_added_objects_df <- all_objects_to_add_list$objects_df %>%
-      select(level, vertebral_number, object, x, y, side) %>%
-      filter(side == "right")
-    
-    jh_cranial_and_caudal_list_for_supplementary_rods_function(all_added_objects_df, osteotomy_site = osteotomy_level_reactive())
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, right_supplement_rod_starts_list_reactive()),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(nrow(right_rod_implants_df_reactive()) > 2){
-      updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
-    }
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, right_supplement_rod_starts_list_reactive()),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$right_supplemental_rods_eligible == TRUE){
-      updateSliderTextInput(session = session,
-                            inputId = "right_accessory_rod",
-                            choices = right_supplement_rod_starts_list_reactive()$all_levels,
-                            selected = right_supplement_rod_starts_list_reactive()$accessory_starts)        
-    }
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, right_supplement_rod_starts_list_reactive()),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$right_supplemental_rods_eligible == TRUE){
-      updateSliderTextInput(session = session,
-                            inputId = "right_satellite_rod",
-                            choices = right_supplement_rod_starts_list_reactive()$all_levels,
-                            selected = right_supplement_rod_starts_list_reactive()$satellite_starts)
-    }
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, right_supplement_rod_starts_list_reactive()),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$right_supplemental_rods_eligible == TRUE){
-      updateSliderTextInput(session = session,
-                            inputId = "right_intercalary_rod",
-                            choices = right_supplement_rod_starts_list_reactive()$all_levels,
-                            selected = right_supplement_rod_starts_list_reactive()$intercalary_starts)
-    }
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, right_supplement_rod_starts_list_reactive()),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(nrow(right_rod_implants_df_reactive())>3){
-      # choices_df <- tibble(vertebral_number = seq(from = min(right_rod_implants_df_reactive()$vertebral_number), to = max(right_rod_implants_df_reactive()$vertebral_number), by = 1)) %>%
-      #   left_join(levels_numbered_df)
-      
-      choices_df <- levels_numbered_df %>%
-        filter(vertebral_number %in% seq(from = min(right_rod_implants_df_reactive()$vertebral_number), to = max(right_rod_implants_df_reactive()$vertebral_number), by = 1))
-      
-      if(!is.null(osteotomy_level_reactive())){
-        updatePickerInput(session = session, inputId = "right_intercalary_rod_junction",
-                          label = "Junction:",
-                          choices = choices_df$level,
-                          selected = osteotomy_level_reactive())
-      }else{
-        updatePickerInput(session = session, inputId = "right_intercalary_rod_junction",
-                          label = "Junction:",
-                          choices = choices_df$level,
-                          selected = head(x = tail(choices_df$level, 3), 1)
-        )
-      }
-      
-    }
-  })
-  
-  observeEvent(list(all_objects_to_add_list$objects_df, right_supplement_rod_starts_list_reactive()),ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$right_supplemental_rods_eligible == TRUE){
-      updateSliderTextInput(session = session,
-                            inputId = "right_linked_rods",
-                            choices = right_supplement_rod_starts_list_reactive()$all_levels,
-                            selected = right_supplement_rod_starts_list_reactive()$linked_starts)
-    }
-  })
-  
-  
-  # 
-  output$right_custom_rods_ui <- renderUI({
-    if(input$add_right_custom_rods == TRUE){
-      right_implants_df <- all_objects_to_add_list$objects_df %>%
-        select(level, side, object, x, y) %>%
-        filter(side == "right") %>%
-        filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
-        mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
-      
-      if(input$right_custom_rods_number > 1){
-        column(12,
-               pickerInput(inputId = "right_custom_rod_1",label = "Rod 1 Connects to:",
-                           choices = right_implants_df$implant_label,
-                           multiple = TRUE,
-                           options = list(`actions-box` = TRUE)),
-               pickerInput(inputId = "right_custom_rod_2",label = "Rod 2 Connects to:",
-                           choices = right_implants_df$implant_label,
-                           multiple = TRUE,
-                           options = list(`actions-box` = TRUE)),
-               if(input$right_custom_rods_number > 2){
-                 pickerInput(inputId = "right_custom_rod_3",label = "Rod 3 Connects to:",
-                             choices = right_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               },
-               if(input$right_custom_rods_number > 3){
-                 pickerInput(inputId = "right_custom_rod_4",label = "Rod 4 Connects to:",
-                             choices = right_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               },
-               if(input$right_custom_rods_number > 4){
-                 pickerInput(inputId = "right_custom_rod_5",label = "Rod 5 Connects to:",
-                             choices = right_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               }
-        )
-      }
-    }else{
-      NULL
-    }
-  })
-  
-  # output$transverse_custom_rods_ui <- renderUI({
-  #   if(input$add_right_custom_rods == TRUE){
-  #     transverse_implants_df  <- all_objects_to_add_list$objects_df %>%
-  #       select(level, side, object, x, y) %>%
-  #       filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
-  #       mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
-  #     
-  #     if(input$right_custom_rods_number > 1){
-  #       column(12,
-  #              pickerInput(inputId = "transverse_custom_rod_1",label = "Rod 1 Connects to:",
-  #                          choices = transverse_implants_df$implant_label,
-  #                          multiple = TRUE,
-  #                          options = list(`actions-box` = TRUE)),
-  #              pickerInput(inputId = "transverse_custom_rod_2",label = "Rod 2 Connects to:",
-  #                          choices = transverse_implants_df$implant_label,
-  #                          multiple = TRUE,
-  #                          options = list(`actions-box` = TRUE))
-  #       )
-  #     }
-  #   }else{
-  #     NULL
-  #   }
-  # })
-  
-  ################----------  UPDATE ROD OPTIONS END  ------------######################  
-  ################----------  UPDATE ROD OPTIONS END  ------------######################  
-  ################----------  UPDATE ROD OPTIONS END  ------------######################  
-  
+
   ################------------------  Fusion Levels   ----------------------######################  
-  
-  
-  observeEvent(input$implants_complete, ignoreInit = TRUE, ignoreNULL = TRUE, {
-    
+
+  observeEvent(all_objects_to_add_list$objects_df, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw|hook|plate"))) > 0 | nrow(fusion_levels_computed_reactive_df()) > 0){
       updateSwitchInput(session = session, 
                         inputId = "fusion_procedure_performed", 
                         value = TRUE)
     }
     
-  })
-  
-  observeEvent(input$implants_complete, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(any((all_objects_to_add_list$objects_df %>% filter(approach == "anterior"))$fusion == "yes")){
       updateSwitchInput(session = session,
                         inputId = "anterior_fusion_performed",
@@ -3650,23 +3328,7 @@ server <- function(input, output, session) {
       anti_join(implant_to_remove_df)
   })
   
-  crosslink_connector_vector <- reactive({
-    input$crosslink_connectors
-  })
-  
-  observeEvent(crosslink_connector_vector(),  ignoreInit = TRUE, {
-    if(length(crosslink_connector_vector()) == 0){
-      all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-        filter(object != "crosslink")
-    }else{
-      all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-        filter(object != "crosslink") %>%
-        bind_rows(tibble(level = crosslink_connector_vector(), 
-                         object = "crosslink") %>%
-                    left_join(all_implants_constructed_df)) %>%
-        distinct()
-    }
-  })
+
   
   
   ########################################### Build REACTIVE DATAFRAMES FOR IMPLANTS CONNECTING TO THE RODS ###########################################
@@ -3678,6 +3340,16 @@ server <- function(input, output, session) {
     fusion_levels_estimated_df
   })
   
+  
+  rods_list <- reactiveValues()
+  
+  #################### LEFT ROD CONSTRUCT ######################## #################### LEFT ROD CONSTRUCT ########################
+  #################### LEFT ROD CONSTRUCT ######################## #################### LEFT ROD CONSTRUCT ########################
+  #################### LEFT ROD CONSTRUCT ######################## #################### LEFT ROD CONSTRUCT ########################
+  #################### LEFT ROD CONSTRUCT ######################## #################### LEFT ROD CONSTRUCT ########################
+  #################### LEFT ROD CONSTRUCT ######################## #################### LEFT ROD CONSTRUCT ########################
+  #################### LEFT ROD CONSTRUCT ######################## #################### LEFT ROD CONSTRUCT ########################
+  
   left_rod_implants_df_reactive <- reactive({
     left_main_rod_df <- all_objects_to_add_list$objects_df %>%
       filter(side == "left") %>%
@@ -3686,15 +3358,737 @@ server <- function(input, output, session) {
       select(level, vertebral_number, x, y, side, object) %>%
       arrange(vertebral_number) 
     
-    # if(nrow(left_revision_implants_reactive_list()$retained_df) > 0){
-    #   left_main_rod_df <- left_main_rod_df %>%
-    #     union_all(left_revision_implants_reactive_list()$retained_df) %>%
-    #     select(level, vertebral_number, x, y, side, object) %>%
-    #     arrange(vertebral_number) %>%
-    #     distinct()
-    # }
     left_main_rod_df
   })
+  
+  ######### LEFT REVISION IMPLANTS   ######### 
+  ######### LEFT REVISION IMPLANTS   ######### 
+  left_revision_implants_reactive_list <- reactive({
+    if(req(input$revision_approach) == "posterior"){
+      if(length(input$left_revision_implants_removed)>0){
+        if(nrow(existing_patient_data$patient_df)>0){
+          
+          removed_df <- existing_patient_data$patient_df %>% 
+            select(record_id, side, level, object) %>%
+            filter(side == "left") %>%
+            filter(str_detect(object, "hook|screw")) %>%
+            filter(level %in% input$left_revision_implants_removed) %>%   ## this is generated in Load coordinates 
+            # left_join(revision_implants_df) %>%
+            left_join(all_implants_constructed_df %>%
+                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
+            distinct()
+        }else{
+          removed_df <- tibble(level = input$left_revision_implants_removed, side = "left") %>%
+            left_join(revision_screws_df) %>%
+            filter(object != "pelvic_screw_2") ## this is generated in Load coordinates 
+        }
+      }else{
+        removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
+      }
+      
+      if(length(input$left_revision_implants)>0){
+        if(nrow(existing_patient_data$patient_df)>0){
+          retained_df <- existing_patient_data$patient_df %>% 
+            select(record_id, side, level, object) %>%
+            filter(side == "left") %>%
+            filter(str_detect(object, "hook|screw")) %>%
+            filter(level %in% input$left_revision_implants_removed == FALSE) %>%
+            # left_join(revision_implants_df) %>%
+            left_join(all_implants_constructed_df %>%
+                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
+            distinct()
+        }else{
+          retained_df <- tibble(level = input$left_revision_implants, side = "left") %>%
+            filter(level %in% input$left_revision_implants_removed == FALSE) %>%
+            left_join(revision_screws_df) %>% ## this is generated in Load coordinates
+            filter(object != "pelvic_screw_2")  %>%
+            distinct()
+        }
+        
+        ### create full summary table describing what is happening with the revision implants and rods
+        if(length(input$left_revision_implants_removed)>0){
+          
+          if(nrow(existing_patient_data$patient_df)>0){
+            revision_implants_status_df <- existing_patient_data$patient_df %>% 
+              select(side, level, object) %>%
+              filter(side == "left") %>%
+              mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
+              # left_join(revision_implants_df) %>%
+              left_join(all_implants_constructed_df %>%
+                          select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
+              select(-object_constructed) %>%
+              distinct()
+          }else{
+            revision_implants_status_df <- tibble(level = input$left_revision_implants, 
+                                                  side = "left") %>%
+              mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
+              left_join(revision_screws_df) %>%
+              select(-object_constructed)  %>%
+              distinct() 
+          }
+          
+          
+        }else{
+          if(nrow(existing_patient_data$patient_df)>0){
+            revision_implants_status_df <- existing_patient_data$patient_df %>% 
+              select(side, level, object) %>%
+              filter(side == "left") %>%
+              mutate(remove_retain = "retain") %>%
+              # left_join(revision_implants_df) %>%
+              left_join(all_implants_constructed_df %>%
+                          select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
+              select(-object_constructed) %>%
+              distinct()
+          }else{
+            revision_implants_status_df <- tibble(level = input$left_revision_implants, side = "left") %>%
+              mutate(remove_retain = "retain") %>%
+              left_join(revision_screws_df)%>%
+              select(-object_constructed)  %>%
+              distinct()
+          }
+        }
+        
+        if(input$left_revision_rod_status == "retained_cut"){
+          retained_df <- retained_df %>%
+            mutate(prior_rod_connected = if_else(level %in% input$left_revision_implants_connected_to_prior_rod, "yes", "no"))
+          
+          revision_implants_status_df <- revision_implants_status_df %>%
+            mutate(prior_rod_connected = if_else(level %in% input$left_revision_implants_connected_to_prior_rod, "yes", "no"))
+        }
+        if(input$left_revision_rod_status == "retained"){
+          retained_df <- retained_df %>%
+            mutate(prior_rod_connected = "yes") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
+          
+          revision_implants_status_df <- revision_implants_status_df%>%
+            mutate(prior_rod_connected = "yes") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
+        }
+        
+        if(input$left_revision_rod_status == "removed"){
+          retained_df <- retained_df %>%
+            mutate(prior_rod_connected = "no") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
+          
+          revision_implants_status_df <- revision_implants_status_df%>%
+            mutate(prior_rod_connected = "no") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
+        }
+        
+        revision_implants_status_df <- revision_implants_status_df %>%
+          select(level, vertebral_number, side, remove_retain, prior_rod_connected, object, x, y)
+        
+      }else{
+        retained_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), x = double(), y = double())
+        revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
+      } 
+    }else{
+      removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
+      retained_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), x = double(), y = double())
+      revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
+      
+    }
+    retained_df <- retained_df %>%
+      distinct()
+    removed_df <- removed_df %>%
+      distinct()
+    revision_implants_status_df <- revision_implants_status_df %>%
+      distinct()
+    
+    list(retained_df = retained_df,
+         removed_df = removed_df, 
+         revision_implants_status_df = revision_implants_status_df)
+    
+  }
+  )
+  
+  observeEvent(left_revision_implants_reactive_list(), ignoreNULL = TRUE, ignoreInit = TRUE, {
+    if(nrow(left_revision_implants_reactive_list()$retained_df) < 2){
+      updateAwesomeRadio(session = session, inputId = "left_revision_rod_status", selected = "removed")
+    }
+  })
+  
+  observeEvent(input$left_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    
+    if(input$left_revision_rod_status == "retained_cut"){
+      updatePickerInput(session = session, inputId = "left_revision_implants_connected_to_prior_rod", 
+                        choices = left_revision_implants_reactive_list()$retained_df$level, 
+                        selected = left_revision_implants_reactive_list()$retained_df$level
+      )
+    }
+  })
+  
+  observeEvent(input$left_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    if(input$left_revision_rod_status == "retained" | input$left_revision_rod_status == "retained_cut"){
+      updatePickerInput(session = session,
+                        inputId = "left_revision_implants_rod_connectors", 
+                        choices = left_revision_implants_reactive_list()$retained_df$level
+      )
+    }
+  })
+  ######### LEFT REVISION IMPLANTS ENDS ######### 
+  ######### LEFT REVISION IMPLANTS ENDS  ######### 
+  
+  ############### LEFT RODS ################# ############### LEFT RODS ################# ############### LEFT RODS #################
+  ############### LEFT RODS ################# ############### LEFT RODS ################# ############### LEFT RODS #################
+  
+  ##### UPDATE SUPPLEMENT ROD CHOICES -----
+  ##### UPDATE SUPPLEMENT ROD CHOICES -----
+  observeEvent(input$reset_all,ignoreNULL = TRUE, ignoreInit = TRUE, {
+    updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = FALSE)
+  })
+  
+  observeEvent(list(all_objects_to_add_list$objects_df), ignoreNULL = TRUE, ignoreInit = TRUE,{
+    if(nrow(left_rod_implants_df_reactive()) > 2){
+      updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
+    }
+    
+  })
+  
+  observeEvent(input$add_left_accessory_rod, {
+    if(input$add_left_accessory_rod == TRUE){
+      start_list <- jh_supplementary_rods_choices_function(all_objects_df = left_rod_implants_df_reactive(),
+                                                           rod_type = "accessory_rod")
+      updateSliderTextInput(session = session,
+                            inputId = "left_accessory_rod",
+                            choices =  start_list$full_level_range,
+                            selected =  start_list$supplemental_starts)
+    }else{
+      updateSliderTextInput(session = session,
+                            inputId = "left_accessory_rod", 
+                            label = "Select Overlap Region:",
+                            choices = c("a", "b"),
+                            selected = c("a", "b")
+      )
+    }
+  }
+  )
+  
+  observeEvent(input$add_left_satellite_rod, {
+    if(input$add_left_satellite_rod == TRUE){
+      start_list <- jh_supplementary_rods_choices_function(all_objects_df = left_rod_implants_df_reactive(),
+                                                           osteotomy_site = osteotomy_level_reactive(),
+                                                           rod_type = "satellite_rod")
+      
+      updateSliderTextInput(session = session,
+                            inputId = "left_satellite_rod",
+                            choices =  start_list$implant_levels[2:(length(start_list$implant_levels)-1)],
+                            selected =  start_list$supplemental_starts)
+    }else{
+      updateSliderTextInput(session = session,
+                            inputId = "left_satellite_rod", 
+                            label = "Select Overlap Region:",
+                            choices = c("a", "b"),
+                            selected = c("a", "b")
+      )
+    }
+  }
+  )
+  
+  observeEvent(list(input$add_left_intercalary_rod, input$left_intercalary_rod_junction), {
+    if(input$add_left_intercalary_rod == TRUE && input$left_intercalary_rod_junction %in% implant_levels_numbered_df$level){
+      
+      left_implant_df <- left_rod_implants_df_reactive() %>%
+        filter(str_detect(level, "Iliac") == FALSE)
+
+        proximal_options <- (implant_levels_numbered_df %>%
+                               filter(str_detect(level, "Iliac") == FALSE) %>%
+                                   filter(vertebral_number >= min(left_implant_df$vertebral_number)) %>%
+                                   filter(vertebral_number < jh_get_vertebral_number_function(input$left_intercalary_rod_junction)))$level
+        
+        distal_options <- (implant_levels_numbered_df %>%
+                             filter(str_detect(level, "Iliac") == FALSE) %>%
+                                 filter(vertebral_number <= max(left_implant_df$vertebral_number)) %>%
+                                 filter(vertebral_number > jh_get_vertebral_number_function(input$left_intercalary_rod_junction)))$level
+        
+        overlap_vector_choices <- append(proximal_options, distal_options)
+        
+        
+        if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
+        overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
+      }else{
+        overlap_start <-    overlap_vector_choices[1:2]
+      }
+      
+      updateSliderTextInput(session = session,
+                            inputId = "left_intercalary_rod",
+                            label = "Select Overlap Region:",
+                            choices =  overlap_vector_choices,
+                            selected =  overlap_start)
+  
+        
+    }else{
+      updateSliderTextInput(session = session,
+                            inputId = "left_intercalary_rod", 
+                            label = "Select Overlap Region:",
+                            choices = c("a", "b"),
+                            selected = c("a", "a")
+      )
+    }
+  }
+  )
+  observeEvent(input$left_intercalary_rod,ignoreInit = TRUE, ignoreNULL = TRUE, {
+    
+    if(input$add_left_intercalary_rod == TRUE && input$left_intercalary_rod_junction %in% implant_levels_numbered_df$level && input$left_intercalary_rod[1] %in% implant_levels_numbered_df$level){
+      if(between(jh_get_vertebral_number_function(input$left_intercalary_rod_junction), 
+                 jh_get_vertebral_number_function(input$left_intercalary_rod[1]), 
+                 jh_get_vertebral_number_function(input$left_intercalary_rod[2 ])) == FALSE){
+        
+        left_implant_df <- left_rod_implants_df_reactive() %>%
+          filter(str_detect(level, "Iliac") == FALSE)
+        
+        proximal_options <- (implant_levels_numbered_df %>%
+                               filter(str_detect(level, "Iliac") == FALSE)%>%
+                               filter(vertebral_number >= min(left_implant_df$vertebral_number)) %>%
+                               filter(vertebral_number < jh_get_vertebral_number_function(input$left_intercalary_rod_junction)))$level
+        
+        distal_options <- (implant_levels_numbered_df %>%
+                             filter(str_detect(level, "Iliac") == FALSE) %>%
+                             filter(vertebral_number <= max(left_implant_df$vertebral_number)) %>%
+                             filter(vertebral_number > jh_get_vertebral_number_function(input$left_intercalary_rod_junction)))$level
+        
+        overlap_vector_choices <- append(proximal_options, distal_options)
+        
+        if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
+          overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
+        }else{
+          overlap_start <-    overlap_vector_choices[1:2]
+        }
+        
+        show_alert(title = "Either choose a different intercalary junction, or choose an overlap range that includes the junction")
+        updateSliderTextInput(session = session,
+                              inputId = "left_intercalary_rod",
+                              label = "Select Overlap Region:",
+                              choices =  overlap_vector_choices,
+                              selected =  overlap_start)
+        
+      }
+    }
+  })
+  
+  observeEvent(list(input$add_left_intercalary_rod), {
+    if(input$add_left_intercalary_rod == TRUE){
+      # junction_choices_vector <-  (implant_levels_numbered_df %>%
+      #                                filter(between(vertebral_number, jh_get_vertebral_number_function(input$left_intercalary_rod[1]), jh_get_vertebral_number_function(input$left_intercalary_rod[2]))) %>%
+      #                                filter(level %in% left_rod_implants_df_reactive()$level == FALSE))$level
+      distal_limit <- if_else(tail(left_rod_implants_df_reactive()$vertebral_number, 2)[1] >= 25, 25, tail(left_rod_implants_df_reactive()$vertebral_number, 2)[1])
+      
+      junction_choices_vector <- (implant_levels_numbered_df %>%
+                                    filter(between(vertebral_number, left_rod_implants_df_reactive()$vertebral_number[2], distal_limit)) %>% 
+                                    filter(level %in% left_rod_implants_df_reactive()$level  == FALSE ))$level
+      
+      
+      if(!is.null(osteotomy_level_reactive()) && osteotomy_level_reactive()[1] %in% junction_choices_vector){
+        starting_junction <- osteotomy_level_reactive()[1]
+      }else{
+        starting_junction <- junction_choices_vector[round(length(junction_choices_vector)/2, 0)]
+      }
+      
+      if(length(junction_choices_vector) > 0){
+        updatePickerInput(session = session, 
+                          inputId = "left_intercalary_rod_junction",
+                          label = "Junction:",
+                          choices = junction_choices_vector,
+                          selected = starting_junction
+        )
+      }
+    }else{
+      updatePickerInput(session = session,
+                        inputId = "left_intercalary_rod_junction",
+                        choices = c("a", "b"), 
+                        selected = "a")
+    }
+  }
+  )
+  
+  observeEvent(input$add_left_linked_rods,
+               ignoreNULL = TRUE, 
+               ignoreInit = TRUE, {
+                 
+                 if(input$add_left_linked_rods == TRUE){
+                   start_list <- jh_supplementary_rods_choices_function(all_objects_df = left_rod_implants_df_reactive(),
+                                                                        rod_type = "linked_rod")
+                   
+                   updateSliderTextInput(session = session,
+                                         inputId = "left_linked_rods", 
+                                         label = "Select Overlap Region:",
+                                         choices = start_list$implant_levels[2:(length(start_list$implant_levels)-1)],
+                                         selected = start_list$supplemental_starts
+                   )
+                 }else{
+                   updateSliderTextInput(session = session,
+                                         inputId = "left_linked_rods", 
+                                         label = "Select Overlap Region:",
+                                         choices = c("a", "b"),
+                                         selected = c("a", "b")
+                   )
+                 }
+               })
+  
+  observeEvent(input$add_left_kickstand_rod,
+               ignoreNULL = TRUE, 
+               ignoreInit = TRUE, {
+                 if(input$add_left_kickstand_rod == TRUE){
+                   
+                   if(any(str_detect(str_to_lower(left_rod_implants_df_reactive()$level), "iliac"))){
+                     start_list <- jh_supplementary_rods_choices_function(all_objects_df = left_rod_implants_df_reactive(),
+                                                                          rod_type = "kickstand_rod")
+                     
+                     updateSliderTextInput(session = session,
+                                           inputId = "left_kickstand_rod", 
+                                           label = "Select Proximal Point of Attachment:",
+                                           choices = start_list$full_level_range,
+                                           selected = start_list$supplemental_starts, 
+                                           to_fixed = start_list$supplemental_starts[2] 
+                     ) 
+                   }else{
+                     show_alert(title = "No Iliac Screw", text = "You must add an iliac screw to add a kickstand rod.")
+                     
+                     updateAwesomeCheckbox(session = session, 
+                                           inputId = "add_left_kickstand_rod", 
+                                           value = FALSE)
+                   }
+                 }
+               })
+  
+  
+  output$left_custom_rods_ui <- renderUI({
+    if(input$add_left_custom_rods == TRUE){
+      left_implants_df <- all_objects_to_add_list$objects_df %>%
+        select(level, side, object, x, y) %>%
+        filter(side == "left") %>%
+        filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
+        mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
+      
+      left_implant_choices <- as.list(left_implants_df$level)
+      
+      names(left_implant_choices) <- left_implants_df$implant_label
+      
+      if(input$left_custom_rods_number > 1){
+        column(12,
+               pickerInput(inputId = "left_custom_rod_1",label = "Rod 1 Connects to:",
+                           choices = left_implants_df$implant_label,
+                           multiple = TRUE,
+                           options = list(`actions-box` = TRUE)),
+               pickerInput(inputId = "left_custom_rod_2",label = "Rod 2 Connects to:",
+                           choices = left_implants_df$implant_label,
+                           multiple = TRUE,
+                           options = list(`actions-box` = TRUE)),
+               if(input$left_custom_rods_number > 2){
+                 pickerInput(inputId = "left_custom_rod_3",label = "Rod 3 Connects to:",
+                             choices = left_implants_df$implant_label,
+                             multiple = TRUE,
+                             options = list(`actions-box` = TRUE))
+               },
+               if(input$left_custom_rods_number > 3){
+                 pickerInput(inputId = "left_custom_rod_4",label = "Rod 4 Connects to:",
+                             choices = left_implants_df$implant_label,
+                             multiple = TRUE,
+                             options = list(`actions-box` = TRUE))
+               },
+               if(input$left_custom_rods_number > 4){
+                 pickerInput(inputId = "left_custom_rod_5",label = "Rod 5 Connects to:",
+                             choices = left_implants_df$implant_label,
+                             multiple = TRUE,
+                             options = list(`actions-box` = TRUE))
+               }
+        )
+      }
+    }else{
+      NULL
+    }
+  })
+  
+  observeEvent(list(input$plot_click,input$double_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_left_accessory_rod", 
+                          value = FALSE)
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_left_satellite_rod", 
+                          value = FALSE)
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_left_intercalary_rod", 
+                          value = FALSE)
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_left_linked_rods", 
+                          value = FALSE)
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_left_kickstand_rod", 
+                          value = FALSE)
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_left_custom_rods", 
+                          value = FALSE)
+    
+  })
+  observeEvent(list(input$add_left_custom_rods,
+                    input$left_custom_rod_1,
+                    input$left_custom_rod_2,
+                    input$left_custom_rod_3,
+                    input$left_custom_rod_4,
+                    input$left_custom_rod_5), ignoreInit = TRUE, ignoreNULL = TRUE, {
+                      
+                      updateAwesomeCheckbox(session = session, 
+                                            inputId = "add_left_accessory_rod", 
+                                            value = FALSE)
+                      
+                      updateAwesomeCheckbox(session = session, 
+                                            inputId = "add_left_satellite_rod", 
+                                            value = FALSE)
+                      
+                      updateAwesomeCheckbox(session = session, 
+                                            inputId = "add_left_intercalary_rod", 
+                                            value = FALSE)
+                      
+                      updateAwesomeCheckbox(session = session, 
+                                            inputId = "add_left_linked_rods", 
+                                            value = FALSE)
+                      
+                      updateAwesomeCheckbox(session = session, 
+                                            inputId = "add_left_kickstand_rod", 
+                                            value = FALSE)
+                    })
+  
+  ##### UPDATE SUPPLEMENT ROD CHOICES END -----
+  ##### UPDATE SUPPLEMENT ROD CHOICES END -----
+  
+    ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
+  observeEvent(left_rod_implants_df_reactive(),ignoreNULL = TRUE, ignoreInit = TRUE, {
+    if(nrow(left_rod_implants_df_reactive()) > 1){
+      if(max(left_rod_implants_df_reactive()$vertebral_number) < 11){
+        rod_size <- "4.0mm"  
+      }else{
+        rod_size <- "6.0mm"  
+      }
+      updatePickerInput(session = session, 
+                        inputId = "left_main_rod_size", 
+                        selected = if_else(input$left_main_rod_size == "None", rod_size, input$left_main_rod_size)
+      )
+      updateAwesomeRadio(session = session, 
+                         inputId = "left_main_rod_material",
+                         inline = TRUE,
+                         choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
+                         selected = if_else(input$left_main_rod_material == "Non-instrumented", "Titanium", input$left_main_rod_material)
+      )
+    }
+  })
+  
+  ####################### MAKE LEFT ROD GEOMS ######################
+  ####################### MAKE LEFT ROD GEOMS ######################
+  ####################### MAKE LEFT ROD GEOMS ######################
+  ###### REVISION RODS ---
+  ###### REVISION RODS ---
+  observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    
+    if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
+      if(input$left_revision_rod_status == "removed"){
+        geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+        
+      }else if(input$left_revision_rod_status == "retained_cut" | input$left_revision_rod_status == "retained"){
+        
+        left_revision_rod_matrix <- left_revision_implants_reactive_list()$retained_df %>%
+          select(x, y) %>%
+          # filter(!is.na(y)) %>%
+          mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+          mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+          mutate(x = x + 0.01) %>%
+          arrange(rev(y)) %>%
+          distinct() %>%
+          as.matrix()
+        
+        geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
+        
+      }else{
+        geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+      }
+    }
+  })
+  
+  ###### REVISION RODS END ---
+  ###### REVISION RODS END ---
+  
+  ###### LEFT SUPPLEMENTAL ROD GEOM  ---
+  ###### LEFT SUPPLEMENTAL ROD GEOM  --
+  
+  observeEvent(list(
+    input$reset_all,
+    left_rod_implants_df_reactive(),
+    input$add_left_accessory_rod,
+    input$left_accessory_rod,
+    input$left_accessory_rod_material,
+    input$add_left_satellite_rod,
+    input$left_satellite_rod,
+    input$add_left_intercalary_rod,
+    input$left_intercalary_rod,
+    input$left_intercalary_rod_junction,
+    input$add_left_linked_rods,
+    input$left_linked_rods,
+    input$add_left_kickstand_rod,
+    input$left_kickstand_rod,
+    input$left_revision_rod_status,
+    input$add_left_custom_rods,
+    input$left_custom_rod_1,
+    input$left_custom_rod_2,
+    input$left_custom_rod_3,
+    input$left_custom_rod_4,
+    input$left_custom_rod_5
+  ), ignoreInit = TRUE, ignoreNULL = TRUE,{
+    ##########RODS ############
+    ############# Left ROD #################
+    left_rods_connectors_list <- list()
+    if(any(input$add_left_accessory_rod, 
+           input$add_left_satellite_rod,
+           input$add_left_intercalary_rod, 
+           input$add_left_linked_rods, 
+           input$add_left_kickstand_rod, 
+           input$add_left_custom_rods)){
+      
+      if(input$add_left_accessory_rod == TRUE && input$left_accessory_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$left_accessory_rod)) == 2){
+        accessory_vector <- input$left_accessory_rod
+        
+      }else{
+        accessory_vector <- c("a")
+      }
+      if(input$add_left_satellite_rod == TRUE && input$left_satellite_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$left_satellite_rod)) == 2){
+        satellite_vector <- input$left_satellite_rod
+      }else{
+        satellite_vector <- c("a", "b")
+      }
+      if(input$add_left_intercalary_rod == TRUE && input$left_intercalary_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$left_intercalary_rod)) == 2){
+        intercalary_vector <- input$left_intercalary_rod
+        junction <- input$left_intercalary_rod_junction
+      }else{
+        intercalary_vector <- c("a")
+        junction <- NULL
+      }
+      if(input$add_left_linked_rods == TRUE && input$left_linked_rods[1] %in% all_screw_coordinates_df$level && length(unique(input$left_linked_rods)) == 2){
+        linked_vector <- input$left_linked_rods
+      }else{
+        linked_vector <- c("a")
+      }
+      
+      if((input$add_left_kickstand_rod == TRUE) && (input$left_kickstand_rod[1] %in% all_screw_coordinates_df$level) && (length(unique(input$left_kickstand_rod)) == 2)){
+        left_kickstand_rod_vector <- input$left_kickstand_rod
+      }else{
+        left_kickstand_rod_vector <- c("a")
+      }
+      
+      custom_rods_vector_list <- list()
+      if(input$add_left_custom_rods == TRUE){
+        if(input$left_custom_rods_number > 1 & length(input$left_custom_rod_1) > 1){
+          custom_rods_vector_list$custom_rod_1 <- input$left_custom_rod_1
+        }else{
+          custom_rods_vector_list$custom_rod_1 <- c("")
+        }
+        if(input$left_custom_rods_number > 1 & length(input$left_custom_rod_2) > 1){
+          custom_rods_vector_list$custom_rod_2 <- input$left_custom_rod_2
+        }else{
+          custom_rods_vector_list$custom_rod_2 <- c("")
+        }
+        if(input$left_custom_rods_number > 2 & length(input$left_custom_rod_3) > 1){
+          custom_rods_vector_list$custom_rod_3 <- input$left_custom_rod_3
+        }else{
+          custom_rods_vector_list$custom_rod_3 <- c("")
+        }
+        if(input$left_custom_rods_number > 3 & length(input$left_custom_rod_4) > 1){
+          custom_rods_vector_list$custom_rod_4 <- input$left_custom_rod_4
+        }else{
+          custom_rods_vector_list$custom_rod_4 <- c("")
+        }
+        if(input$left_custom_rods_number > 4 & length(input$left_custom_rod_5) > 1){
+          custom_rods_vector_list$custom_rod_5 <- input$left_custom_rod_5
+        }else{
+          custom_rods_vector_list$custom_rod_5 <- c("")
+        }
+      }
+      
+      left_implants_df <- left_rod_implants_df_reactive() %>%
+        mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
+      
+      if(length(left_implants_df$level) > 1){
+        ############# MAKE THE RODS #############
+        left_rods_connectors_list <- build_unilateral_rods_list_function(unilateral_full_implant_df = left_implants_df,
+                                                                         rod_side = "left",
+                                                                         add_accessory_rod = input$add_left_accessory_rod,
+                                                                         accessory_rod_vector = accessory_vector, 
+                                                                         add_satellite_rod = input$add_left_satellite_rod,
+                                                                         satellite_rods_vector = satellite_vector,
+                                                                         add_intercalary_rod = input$add_left_intercalary_rod, 
+                                                                         intercalary_rods_vector = intercalary_vector, 
+                                                                         intercalary_rod_junction = junction, 
+                                                                         add_linked_rods = input$add_left_linked_rods,
+                                                                         linked_rods_vector = linked_vector,
+                                                                         add_kickstand_rod = input$add_left_kickstand_rod,
+                                                                         kickstand_rod_vector = left_kickstand_rod_vector,
+                                                                         add_custom_rods = input$add_left_custom_rods,
+                                                                         custom_rods_vector_list = custom_rods_vector_list,
+                                                                         revision_rods_retained_df = left_revision_implants_reactive_list()$retained_df,
+                                                                         prior_rod_overlap_connectors = input$left_revision_implants_rod_connectors
+        )
+        if(length(left_rods_connectors_list$rod_list) > 0){
+          rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$rod_list), alpha = 0.75)
+        }else{
+          rods_list$left_rod_list_sf_geom <- NULL
+        }
+        
+        if(length(left_rods_connectors_list$connector_list) > 0){
+          rods_list$left_connector_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.75)
+        }else{
+          rods_list$left_connector_list_sf_geom <- NULL
+        }
+      }else{
+        rods_list$left_connector_list_sf_geom <- NULL
+        rods_list$left_rod_list_sf_geom <- NULL
+      }
+    }else if(nrow(left_rod_implants_df_reactive()) >1){
+      rods_list$left_connector_list_sf_geom <- NULL
+      
+      left_main_rod_matrix <- left_rod_implants_df_reactive() %>%
+        mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+        mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
+        select(x, y) %>%
+        # bind_rows(left_revision_rod_overlap) %>%
+        arrange(rev(y)) %>%
+        distinct() %>%
+        remove_missing() %>%
+        select(x, y) %>%
+        as.matrix()
+      
+      rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
+    }else{
+      rods_list$left_connector_list_sf_geom <- NULL
+      rods_list$left_rod_list_sf_geom <- NULL
+    }
+    
+  })
+  
+  ###### LEFT SUPPLEMENTAL ROD GEOM END  ---
+  ###### LEFT SUPPLEMENTAL ROD GEOM  END --
+  
+  ############### LEFT ROD ENDS ################# ############### LEFT RODS ENDS ################# ############### LEFT RODS ENDS #################
+  ############### LEFT ROD ENDS ################# ############### LEFT RODS ENDS ################# ############### LEFT RODS ENDS #################
+  
+  
+  
+  
+  
+  #################### LEFT ROD CONSTRUCT ENDS ######################## #################### LEFT ROD CONSTRUCT ENDS ########################
+  #################### LEFT ROD CONSTRUCT ENDS ######################## #################### LEFT ROD CONSTRUCT ENDS ########################  
+  #################### LEFT ROD CONSTRUCT ENDS ######################## #################### LEFT ROD CONSTRUCT ENDS ########################
+  #################### LEFT ROD CONSTRUCT ENDS ######################## #################### LEFT ROD CONSTRUCT ENDS ######################## 
+  
+  
+  #################### RIGHT ROD CONSTRUCT ######################## #################### RIGHT ROD CONSTRUCT ########################
+  #################### RIGHT ROD CONSTRUCT ######################## #################### RIGHT ROD CONSTRUCT ########################
+  #################### RIGHT ROD CONSTRUCT ######################## #################### RIGHT ROD CONSTRUCT ########################
+  #################### RIGHT ROD CONSTRUCT ######################## #################### RIGHT ROD CONSTRUCT ########################
+  #################### RIGHT ROD CONSTRUCT ######################## #################### RIGHT ROD CONSTRUCT ########################
+  #################### RIGHT ROD CONSTRUCT ######################## #################### RIGHT ROD CONSTRUCT ########################
   
   right_rod_implants_df_reactive <- reactive({
     right_main_rod_df <- all_objects_to_add_list$objects_df %>%
@@ -3702,17 +4096,756 @@ server <- function(input, output, session) {
       filter(approach == "posterior") %>%
       filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
       select(level, vertebral_number, x, y, side, object) %>%
-      distinct() %>%
-      arrange(vertebral_number)
+      arrange(vertebral_number) 
     
-    # if(nrow(right_revision_implants_reactive_list()$retained_df) > 0){
-    #   right_main_rod_df <- right_main_rod_df %>%
-    #     union_all(right_revision_implants_reactive_list()$retained_df) %>%
-    #     select(level, vertebral_number, x, y, side, object) %>%
-    #     arrange(vertebral_number) %>%
-    #     distinct()
-    # }
     right_main_rod_df
+  })
+  
+  ######### RIGHT REVISION IMPLANTS   ######### 
+  ######### RIGHT REVISION IMPLANTS   ######### 
+  right_revision_implants_reactive_list <- reactive({
+    if(req(input$revision_approach) == "posterior"){
+      if(length(input$right_revision_implants_removed)>0){
+        if(nrow(existing_patient_data$patient_df)>0){
+          
+          removed_df <- existing_patient_data$patient_df %>% 
+            select(record_id, side, level, object) %>%
+            filter(side == "right") %>%
+            filter(str_detect(object, "hook|screw")) %>%
+            filter(level %in% input$right_revision_implants_removed) %>%   ## this is generated in Load coordinates 
+            # left_join(revision_implants_df) %>%
+            left_join(all_implants_constructed_df %>%
+                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
+            distinct()
+        }else{
+          removed_df <- tibble(level = input$right_revision_implants_removed, side = "right") %>%
+            left_join(revision_screws_df) %>%
+            filter(object != "pelvic_screw_2") ## this is generated in Load coordinates 
+        }
+      }else{
+        removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
+      }
+      
+      if(length(input$right_revision_implants)>0){
+        if(nrow(existing_patient_data$patient_df)>0){
+          retained_df <- existing_patient_data$patient_df %>% 
+            select(record_id, side, level, object) %>%
+            filter(side == "right") %>%
+            filter(str_detect(object, "hook|screw")) %>%
+            filter(level %in% input$right_revision_implants_removed == FALSE) %>%
+            # left_join(revision_implants_df) %>%
+            left_join(all_implants_constructed_df %>%
+                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
+            distinct()
+        }else{
+          retained_df <- tibble(level = input$right_revision_implants, side = "right") %>%
+            filter(level %in% input$right_revision_implants_removed == FALSE) %>%
+            left_join(revision_screws_df) %>% ## this is generated in Load coordinates
+            filter(object != "pelvic_screw_2")  %>%
+            distinct()
+        }
+        
+        ### create full summary table describing what is happening with the revision implants and rods
+        if(length(input$right_revision_implants_removed)>0){
+          
+          if(nrow(existing_patient_data$patient_df)>0){
+            revision_implants_status_df <- existing_patient_data$patient_df %>% 
+              select(side, level, object) %>%
+              filter(side == "right") %>%
+              mutate(remove_retain = if_else(level %in% input$right_revision_implants_removed, "remove", "retain")) %>%
+              # left_join(revision_implants_df) %>%
+              left_join(all_implants_constructed_df %>%
+                          select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
+              select(-object_constructed) %>%
+              distinct()
+          }else{
+            revision_implants_status_df <- tibble(level = input$right_revision_implants, 
+                                                  side = "right") %>%
+              mutate(remove_retain = if_else(level %in% input$right_revision_implants_removed, "remove", "retain")) %>%
+              left_join(revision_screws_df) %>%
+              select(-object_constructed)  %>%
+              distinct() 
+          }
+          
+          
+        }else{
+          if(nrow(existing_patient_data$patient_df)>0){
+            revision_implants_status_df <- existing_patient_data$patient_df %>% 
+              select(side, level, object) %>%
+              filter(side == "right") %>%
+              mutate(remove_retain = "retain") %>%
+              # left_join(revision_implants_df) %>%
+              left_join(all_implants_constructed_df %>%
+                          select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
+              select(-object_constructed) %>%
+              distinct()
+          }else{
+            revision_implants_status_df <- tibble(level = input$right_revision_implants, side = "right") %>%
+              mutate(remove_retain = "retain") %>%
+              left_join(revision_screws_df)%>%
+              select(-object_constructed)  %>%
+              distinct()
+          }
+        }
+        
+        if(input$right_revision_rod_status == "retained_cut"){
+          retained_df <- retained_df %>%
+            mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
+          
+          revision_implants_status_df <- revision_implants_status_df %>%
+            mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
+        }
+        if(input$right_revision_rod_status == "retained"){
+          retained_df <- retained_df %>%
+            mutate(prior_rod_connected = "yes") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
+          
+          revision_implants_status_df <- revision_implants_status_df%>%
+            mutate(prior_rod_connected = "yes") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
+        }
+        
+        if(input$right_revision_rod_status == "removed"){
+          retained_df <- retained_df %>%
+            mutate(prior_rod_connected = "no") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
+          
+          revision_implants_status_df <- revision_implants_status_df%>%
+            mutate(prior_rod_connected = "no") %>%
+            mutate(old_rod_connected_to_new_rod = "no")
+        }
+        
+        revision_implants_status_df <- revision_implants_status_df %>%
+          select(level, vertebral_number, side, remove_retain, prior_rod_connected, object, x, y)
+        
+      }else{
+        retained_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), x = double(), y = double())
+        revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
+      } 
+    }else{
+      removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
+      retained_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), x = double(), y = double())
+      revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
+      
+    }
+    retained_df <- retained_df %>%
+      distinct()
+    removed_df <- removed_df %>%
+      distinct()
+    revision_implants_status_df <- revision_implants_status_df %>%
+      distinct()
+    
+    list(retained_df = retained_df,
+         removed_df = removed_df, 
+         revision_implants_status_df = revision_implants_status_df)
+    
+  }
+  )
+  
+  observeEvent(right_revision_implants_reactive_list(), ignoreNULL = TRUE, ignoreInit = TRUE, {
+    if(nrow(right_revision_implants_reactive_list()$retained_df) < 2){
+      updateAwesomeRadio(session = session, inputId = "right_revision_rod_status", selected = "removed")
+    }
+  })
+  
+  observeEvent(input$right_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    
+    if(input$right_revision_rod_status == "retained_cut"){
+      updatePickerInput(session = session, inputId = "right_revision_implants_connected_to_prior_rod", 
+                        choices = right_revision_implants_reactive_list()$retained_df$level, 
+                        selected = right_revision_implants_reactive_list()$retained_df$level
+      )
+    }
+  })
+  
+  observeEvent(input$right_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    if(input$right_revision_rod_status == "retained" | input$right_revision_rod_status == "retained_cut"){
+      updatePickerInput(session = session,
+                        inputId = "right_revision_implants_rod_connectors", 
+                        choices = right_revision_implants_reactive_list()$retained_df$level
+      )
+    }
+  })
+  ######### RIGHT REVISION IMPLANTS ENDS ######### 
+  ######### RIGHT REVISION IMPLANTS ENDS  ######### 
+  
+  ############### RIGHT RODS ################# ############### RIGHT RODS ################# ############### RIGHT RODS #################
+  ############### RIGHT RODS ################# ############### RIGHT RODS ################# ############### RIGHT RODS #################
+  
+  ##### UPDATE SUPPLEMENT ROD CHOICES -----
+  ##### UPDATE SUPPLEMENT ROD CHOICES -----
+  observeEvent(input$reset_all,ignoreNULL = TRUE, ignoreInit = TRUE, {
+    updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = FALSE)
+  })
+  
+  observeEvent(list(all_objects_to_add_list$objects_df), ignoreNULL = TRUE, ignoreInit = TRUE,{
+    if(nrow(right_rod_implants_df_reactive()) > 2){
+      updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
+    }
+    
+  })
+  
+  observeEvent(input$add_right_accessory_rod, {
+    if(input$add_right_accessory_rod == TRUE){
+      start_list <- jh_supplementary_rods_choices_function(all_objects_df = right_rod_implants_df_reactive(),
+                                                           rod_type = "accessory_rod")
+      updateSliderTextInput(session = session,
+                            inputId = "right_accessory_rod",
+                            choices =  start_list$full_level_range,
+                            selected =  start_list$supplemental_starts)
+    }else{
+      updateSliderTextInput(session = session,
+                            inputId = "right_accessory_rod", 
+                            label = "Select Overlap Region:",
+                            choices = c("a", "b"),
+                            selected = c("a", "b")
+      )
+    }
+  }
+  )
+  
+  observeEvent(input$add_right_satellite_rod, {
+    if(input$add_right_satellite_rod == TRUE){
+      start_list <- jh_supplementary_rods_choices_function(all_objects_df = right_rod_implants_df_reactive(),
+                                                           osteotomy_site = osteotomy_level_reactive(),
+                                                           rod_type = "satellite_rod")
+      
+      updateSliderTextInput(session = session,
+                            inputId = "right_satellite_rod",
+                            choices =  start_list$implant_levels[2:(length(start_list$implant_levels)-1)],
+                            selected =  start_list$supplemental_starts)
+    }else{
+      updateSliderTextInput(session = session,
+                            inputId = "right_satellite_rod", 
+                            label = "Select Overlap Region:",
+                            choices = c("a", "b"),
+                            selected = c("a", "b")
+      )
+    }
+  }
+  )
+  
+  observeEvent(list(input$add_right_intercalary_rod, input$right_intercalary_rod_junction), {
+    if(input$add_right_intercalary_rod == TRUE && input$right_intercalary_rod_junction %in% implant_levels_numbered_df$level){
+      
+      right_implant_df <- right_rod_implants_df_reactive() %>%
+        filter(str_detect(level, "Iliac") == FALSE)
+      
+      proximal_options <- (implant_levels_numbered_df %>%
+                             filter(str_detect(level, "Iliac") == FALSE) %>%
+                             filter(vertebral_number >= min(right_implant_df$vertebral_number)) %>%
+                             filter(vertebral_number < jh_get_vertebral_number_function(input$right_intercalary_rod_junction)))$level
+      
+      distal_options <- (implant_levels_numbered_df %>%
+                           filter(str_detect(level, "Iliac") == FALSE) %>%
+                           filter(vertebral_number <= max(right_implant_df$vertebral_number)) %>%
+                           filter(vertebral_number > jh_get_vertebral_number_function(input$right_intercalary_rod_junction)))$level
+      
+      overlap_vector_choices <- append(proximal_options, distal_options)
+      
+      
+      if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
+        overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
+      }else{
+        overlap_start <-    overlap_vector_choices[1:2]
+      }
+      
+      updateSliderTextInput(session = session,
+                            inputId = "right_intercalary_rod",
+                            label = "Select Overlap Region:",
+                            choices =  overlap_vector_choices,
+                            selected =  overlap_start)
+      
+      
+    }else{
+      updateSliderTextInput(session = session,
+                            inputId = "right_intercalary_rod", 
+                            label = "Select Overlap Region:",
+                            choices = c("a", "b"),
+                            selected = c("a", "a")
+      )
+    }
+  }
+  )
+  observeEvent(input$right_intercalary_rod,ignoreInit = TRUE, ignoreNULL = TRUE, {
+    
+    if(input$add_right_intercalary_rod == TRUE && input$right_intercalary_rod_junction %in% implant_levels_numbered_df$level && input$right_intercalary_rod[1] %in% implant_levels_numbered_df$level){
+      if(between(jh_get_vertebral_number_function(input$right_intercalary_rod_junction), 
+                 jh_get_vertebral_number_function(input$right_intercalary_rod[1]), 
+                 jh_get_vertebral_number_function(input$right_intercalary_rod[2 ])) == FALSE){
+        
+        right_implant_df <- right_rod_implants_df_reactive() %>%
+          filter(str_detect(level, "Iliac") == FALSE)
+        
+        proximal_options <- (implant_levels_numbered_df %>%
+                               filter(str_detect(level, "Iliac") == FALSE)%>%
+                               filter(vertebral_number >= min(right_implant_df$vertebral_number)) %>%
+                               filter(vertebral_number < jh_get_vertebral_number_function(input$right_intercalary_rod_junction)))$level
+        
+        distal_options <- (implant_levels_numbered_df %>%
+                             filter(str_detect(level, "Iliac") == FALSE) %>%
+                             filter(vertebral_number <= max(right_implant_df$vertebral_number)) %>%
+                             filter(vertebral_number > jh_get_vertebral_number_function(input$right_intercalary_rod_junction)))$level
+        
+        overlap_vector_choices <- append(proximal_options, distal_options)
+        
+        if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
+          overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
+        }else{
+          overlap_start <-    overlap_vector_choices[1:2]
+        }
+        
+        show_alert(title = "Either choose a different intercalary junction, or choose an overlap range that includes the junction")
+        updateSliderTextInput(session = session,
+                              inputId = "right_intercalary_rod",
+                              label = "Select Overlap Region:",
+                              choices =  overlap_vector_choices,
+                              selected =  overlap_start)
+        
+      }
+    }
+  })
+  
+  observeEvent(list(input$add_right_intercalary_rod), {
+    if(input$add_right_intercalary_rod == TRUE){
+      # junction_choices_vector <-  (implant_levels_numbered_df %>%
+      #                                filter(between(vertebral_number, jh_get_vertebral_number_function(input$right_intercalary_rod[1]), jh_get_vertebral_number_function(input$right_intercalary_rod[2]))) %>%
+      #                                filter(level %in% right_rod_implants_df_reactive()$level == FALSE))$level
+      distal_limit <- if_else(tail(right_rod_implants_df_reactive()$vertebral_number, 2)[1] >= 25, 25, tail(right_rod_implants_df_reactive()$vertebral_number, 2)[1])
+      
+      junction_choices_vector <- (implant_levels_numbered_df %>%
+                                    filter(between(vertebral_number, right_rod_implants_df_reactive()$vertebral_number[2], distal_limit)) %>% 
+                                    filter(level %in% right_rod_implants_df_reactive()$level  == FALSE ))$level
+      
+      
+      if(!is.null(osteotomy_level_reactive()) && osteotomy_level_reactive()[1] %in% junction_choices_vector){
+        starting_junction <- osteotomy_level_reactive()[1]
+      }else{
+        starting_junction <- junction_choices_vector[round(length(junction_choices_vector)/2, 0)]
+      }
+      
+      if(length(junction_choices_vector) > 0){
+        updatePickerInput(session = session, 
+                          inputId = "right_intercalary_rod_junction",
+                          label = "Junction:",
+                          choices = junction_choices_vector,
+                          selected = starting_junction
+        )
+      }
+    }else{
+      updatePickerInput(session = session,
+                        inputId = "right_intercalary_rod_junction",
+                        choices = c("a", "b"), 
+                        selected = "a")
+    }
+  }
+  )
+  
+  observeEvent(input$add_right_linked_rods,
+               ignoreNULL = TRUE, 
+               ignoreInit = TRUE, {
+                 
+                 if(input$add_right_linked_rods == TRUE){
+                   start_list <- jh_supplementary_rods_choices_function(all_objects_df = right_rod_implants_df_reactive(),
+                                                                        rod_type = "linked_rod")
+                   
+                   updateSliderTextInput(session = session,
+                                         inputId = "right_linked_rods", 
+                                         label = "Select Overlap Region:",
+                                         choices = start_list$implant_levels[2:(length(start_list$implant_levels)-1)],
+                                         selected = start_list$supplemental_starts
+                   )
+                 }else{
+                   updateSliderTextInput(session = session,
+                                         inputId = "right_linked_rods", 
+                                         label = "Select Overlap Region:",
+                                         choices = c("a", "b"),
+                                         selected = c("a", "b")
+                   )
+                 }
+               })
+  
+  observeEvent(input$add_right_kickstand_rod,
+               ignoreNULL = TRUE, 
+               ignoreInit = TRUE, {
+                 if(input$add_right_kickstand_rod == TRUE){
+                   
+                   if(any(str_detect(str_to_lower(right_rod_implants_df_reactive()$level), "iliac"))){
+                     start_list <- jh_supplementary_rods_choices_function(all_objects_df = right_rod_implants_df_reactive(),
+                                                                          rod_type = "kickstand_rod")
+                     
+                     updateSliderTextInput(session = session,
+                                           inputId = "right_kickstand_rod", 
+                                           label = "Select Proximal Point of Attachment:",
+                                           choices = start_list$full_level_range,
+                                           selected = start_list$supplemental_starts, 
+                                           to_fixed = start_list$supplemental_starts[2] 
+                     ) 
+                   }else{
+                     show_alert(title = "No Iliac Screw", text = "You must add an iliac screw to add a kickstand rod.")
+                     
+                     updateAwesomeCheckbox(session = session, 
+                                           inputId = "add_right_kickstand_rod", 
+                                           value = FALSE)
+                   }
+                 }
+               })
+  
+  
+  output$right_custom_rods_ui <- renderUI({
+    if(input$add_right_custom_rods == TRUE){
+      right_implants_df <- all_objects_to_add_list$objects_df %>%
+        select(level, side, object, x, y) %>%
+        filter(side == "right") %>%
+        filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
+        mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
+      
+      right_implant_choices <- as.list(right_implants_df$level)
+      
+      names(right_implant_choices) <- right_implants_df$implant_label
+      
+      if(input$right_custom_rods_number > 1){
+        column(12,
+               pickerInput(inputId = "right_custom_rod_1",label = "Rod 1 Connects to:",
+                           choices = right_implants_df$implant_label,
+                           multiple = TRUE,
+                           options = list(`actions-box` = TRUE)),
+               pickerInput(inputId = "right_custom_rod_2",label = "Rod 2 Connects to:",
+                           choices = right_implants_df$implant_label,
+                           multiple = TRUE,
+                           options = list(`actions-box` = TRUE)),
+               if(input$right_custom_rods_number > 2){
+                 pickerInput(inputId = "right_custom_rod_3",label = "Rod 3 Connects to:",
+                             choices = right_implants_df$implant_label,
+                             multiple = TRUE,
+                             options = list(`actions-box` = TRUE))
+               },
+               if(input$right_custom_rods_number > 3){
+                 pickerInput(inputId = "right_custom_rod_4",label = "Rod 4 Connects to:",
+                             choices = right_implants_df$implant_label,
+                             multiple = TRUE,
+                             options = list(`actions-box` = TRUE))
+               },
+               if(input$right_custom_rods_number > 4){
+                 pickerInput(inputId = "right_custom_rod_5",label = "Rod 5 Connects to:",
+                             choices = right_implants_df$implant_label,
+                             multiple = TRUE,
+                             options = list(`actions-box` = TRUE))
+               }
+        )
+      }
+    }else{
+      NULL
+    }
+  })
+  
+  observeEvent(list(input$plot_click,input$double_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_right_accessory_rod", 
+                          value = FALSE)
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_right_satellite_rod", 
+                          value = FALSE)
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_right_intercalary_rod", 
+                          value = FALSE)
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_right_linked_rods", 
+                          value = FALSE)
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_right_kickstand_rod", 
+                          value = FALSE)
+    
+    updateAwesomeCheckbox(session = session, 
+                          inputId = "add_right_custom_rods", 
+                          value = FALSE)
+    
+  })
+  
+  observeEvent(list(input$add_right_custom_rods,
+                    input$right_custom_rod_1,
+                    input$right_custom_rod_2,
+                    input$right_custom_rod_3,
+                    input$right_custom_rod_4,
+                    input$right_custom_rod_5), ignoreInit = TRUE, ignoreNULL = TRUE, {
+                      
+                      updateAwesomeCheckbox(session = session, 
+                                            inputId = "add_right_accessory_rod", 
+                                            value = FALSE)
+                      
+                      updateAwesomeCheckbox(session = session, 
+                                            inputId = "add_right_satellite_rod", 
+                                            value = FALSE)
+                      
+                      updateAwesomeCheckbox(session = session, 
+                                            inputId = "add_right_intercalary_rod", 
+                                            value = FALSE)
+                      
+                      updateAwesomeCheckbox(session = session, 
+                                            inputId = "add_right_linked_rods", 
+                                            value = FALSE)
+                      
+                      updateAwesomeCheckbox(session = session, 
+                                            inputId = "add_right_kickstand_rod", 
+                                            value = FALSE)
+                    })
+  
+  ##### UPDATE SUPPLEMENT ROD CHOICES END -----
+  ##### UPDATE SUPPLEMENT ROD CHOICES END -----
+  
+  ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
+  observeEvent(right_rod_implants_df_reactive(),ignoreNULL = TRUE, ignoreInit = TRUE, {
+    if(nrow(right_rod_implants_df_reactive()) > 1){
+      if(max(left_rod_implants_df_reactive()$vertebral_number) < 11){
+        rod_size <- "4.0mm"  
+      }else{
+        rod_size <- "6.0mm"  
+      }
+      updatePickerInput(session = session, 
+                        inputId = "right_main_rod_size", 
+                        selected = if_else(input$right_main_rod_size == "None", rod_size, input$right_main_rod_size)
+      )
+      updateAwesomeRadio(session = session, 
+                         inputId = "right_main_rod_material", 
+                         inline = TRUE,
+                         choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
+                         selected = if_else(input$right_main_rod_material == "Non-instrumented", "Titanium", input$right_main_rod_material)
+      )
+    }
+  })
+  
+  ####################### MAKE RIGHT ROD GEOMS ######################
+  ####################### MAKE RIGHT ROD GEOMS ######################
+  ####################### MAKE RIGHT ROD GEOMS ######################
+  ###### REVISION RODS ---
+  ###### REVISION RODS ---
+  observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    
+    if(nrow(right_revision_implants_reactive_list()$retained_df)>1){
+      if(input$right_revision_rod_status == "removed"){
+        geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
+        
+      }else if(input$right_revision_rod_status == "retained_cut" | input$right_revision_rod_status == "retained"){
+        
+        right_revision_rod_matrix <- right_revision_implants_reactive_list()$retained_df %>%
+          select(x, y) %>%
+          # filter(!is.na(y)) %>%
+          mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+          mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+          mutate(x = x + 0.01) %>%
+          arrange(rev(y)) %>%
+          distinct() %>%
+          as.matrix()
+        
+        geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
+        
+      }else{
+        geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
+      }
+    }
+  })
+  
+  ###### REVISION RODS END ---
+  ###### REVISION RODS END ---
+  
+  ###### RIGHT SUPPLEMENTAL ROD GEOM  ---
+  ###### RIGHT SUPPLEMENTAL ROD GEOM  --
+  
+
+  
+  observeEvent(list(
+    input$reset_all,
+    right_rod_implants_df_reactive(),
+    input$add_right_accessory_rod,
+    input$right_accessory_rod,
+    input$right_accessory_rod_material,
+    input$add_right_satellite_rod,
+    input$right_satellite_rod,
+    input$add_right_intercalary_rod,
+    input$right_intercalary_rod,
+    input$right_intercalary_rod_junction,
+    input$add_right_linked_rods,
+    input$right_linked_rods,
+    input$add_right_kickstand_rod,
+    input$right_kickstand_rod,
+    input$right_revision_rod_status,
+    input$add_right_custom_rods,
+    input$right_custom_rod_1,
+    input$right_custom_rod_2,
+    input$right_custom_rod_3,
+    input$right_custom_rod_4,
+    input$right_custom_rod_5
+  ), ignoreInit = TRUE, ignoreNULL = TRUE,{
+    ##########RODS ############
+    ############# Left ROD #################
+    right_rods_connectors_list <- list()
+    if(any(input$add_right_accessory_rod, 
+           input$add_right_satellite_rod,
+           input$add_right_intercalary_rod, 
+           input$add_right_linked_rods, 
+           input$add_right_kickstand_rod, 
+           input$add_right_kickstand_rod)){
+      
+      if(input$add_right_accessory_rod == TRUE && input$right_accessory_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_accessory_rod)) == 2){
+        accessory_vector <- input$right_accessory_rod
+        
+      }else{
+        accessory_vector <- c("a")
+      }
+      if(input$add_right_satellite_rod == TRUE && input$right_satellite_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_satellite_rod)) == 2){
+        satellite_vector <- input$right_satellite_rod
+      }else{
+        satellite_vector <- c("a", "b")
+      }
+      if(input$add_right_intercalary_rod == TRUE && input$right_intercalary_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_intercalary_rod)) == 2){
+        intercalary_vector <- input$right_intercalary_rod
+        junction <- input$right_intercalary_rod_junction
+      }else{
+        intercalary_vector <- c("a")
+        junction <- NULL
+      }
+      if(input$add_right_linked_rods == TRUE && input$right_linked_rods[1] %in% all_screw_coordinates_df$level && length(unique(input$right_linked_rods)) == 2){
+        linked_vector <- input$right_linked_rods
+      }else{
+        linked_vector <- c("a")
+      }
+      
+      if(input$add_right_kickstand_rod == TRUE && input$right_kickstand_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_kickstand_rod)) == 2){
+        right_kickstand_rod_vector <- input$right_kickstand_rod
+      }else{
+        right_kickstand_rod_vector <- c("a")
+      }
+      
+      custom_rods_vector_list <- list()
+      if(input$add_right_custom_rods == TRUE){
+        if(input$right_custom_rods_number > 1 & length(input$right_custom_rod_1) > 1){
+          custom_rods_vector_list$custom_rod_1 <- input$right_custom_rod_1
+        }else{
+          custom_rods_vector_list$custom_rod_1 <- c("")
+        }
+        if(input$right_custom_rods_number > 1 & length(input$right_custom_rod_2) > 1){
+          custom_rods_vector_list$custom_rod_2 <- input$right_custom_rod_2
+        }else{
+          custom_rods_vector_list$custom_rod_2 <- c("")
+        }
+        if(input$right_custom_rods_number > 2 & length(input$right_custom_rod_3) > 1){
+          custom_rods_vector_list$custom_rod_3 <- input$right_custom_rod_3
+        }else{
+          custom_rods_vector_list$custom_rod_3 <- c("")
+        }
+        if(input$right_custom_rods_number > 3 & length(input$right_custom_rod_4) > 1){
+          custom_rods_vector_list$custom_rod_4 <- input$right_custom_rod_4
+        }else{
+          custom_rods_vector_list$custom_rod_4 <- c("")
+        }
+        if(input$right_custom_rods_number > 4 & length(input$right_custom_rod_5) > 1){
+          custom_rods_vector_list$custom_rod_5 <- input$right_custom_rod_5
+        }else{
+          custom_rods_vector_list$custom_rod_5 <- c("")
+        }
+      }
+      
+      right_implants_df <- right_rod_implants_df_reactive() %>%
+        mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
+      
+      if(length(right_implants_df$level) > 1){
+        ############# MAKE THE RODS #############
+        right_rods_connectors_list <- build_unilateral_rods_list_function(unilateral_full_implant_df = right_implants_df,
+                                                                          rod_side = "right",
+                                                                          add_accessory_rod = input$add_right_accessory_rod,
+                                                                          accessory_rod_vector = accessory_vector, 
+                                                                          add_satellite_rod = input$add_right_satellite_rod,
+                                                                          satellite_rods_vector = satellite_vector,
+                                                                          add_intercalary_rod = input$add_right_intercalary_rod, 
+                                                                          intercalary_rods_vector = intercalary_vector, 
+                                                                          intercalary_rod_junction = junction, 
+                                                                          add_linked_rods = input$add_right_linked_rods,
+                                                                          linked_rods_vector = linked_vector,
+                                                                          add_kickstand_rod = input$add_right_kickstand_rod,
+                                                                          kickstand_rod_vector = right_kickstand_rod_vector,
+                                                                          add_custom_rods = input$add_right_custom_rods,
+                                                                          custom_rods_vector_list = custom_rods_vector_list,
+                                                                          revision_rods_retained_df = right_revision_implants_reactive_list()$retained_df,
+                                                                          prior_rod_overlap_connectors = input$right_revision_implants_rod_connectors
+        )
+        if(length(right_rods_connectors_list$rod_list) > 0){
+          rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.75)
+        }else{
+          rods_list$right_rod_list_sf_geom <- NULL
+        }
+        
+        if(length(right_rods_connectors_list$connector_list) > 0){
+          rods_list$right_connector_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.75)
+        }else{
+          rods_list$right_connector_list_sf_geom <- NULL
+        }
+      }else{
+        rods_list$right_connector_list_sf_geom <- NULL
+        rods_list$right_rod_list_sf_geom <- NULL
+      }
+    }else if(nrow(right_rod_implants_df_reactive()) >1){
+      rods_list$right_connector_list_sf_geom <- NULL
+      
+      right_main_rod_matrix <- right_rod_implants_df_reactive() %>%
+        mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+        mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
+        select(x, y) %>%
+        # bind_rows(right_revision_rod_overlap) %>%
+        arrange(rev(y)) %>%
+        distinct() %>%
+        remove_missing() %>%
+        select(x, y) %>%
+        as.matrix()
+      
+      rods_list$right_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(right_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
+    }else{
+      rods_list$right_connector_list_sf_geom <- NULL
+      rods_list$right_rod_list_sf_geom <- NULL
+    }
+    
+  })
+  
+  ###### RIGHT SUPPLEMENTAL ROD GEOM END  ---
+  ###### RIGHT SUPPLEMENTAL ROD GEOM  END --
+  
+  ############### RIGHT ROD ENDS ################# ############### RIGHT RODS ENDS ################# ############### RIGHT RODS ENDS #################
+  ############### RIGHT ROD ENDS ################# ############### RIGHT RODS ENDS ################# ############### RIGHT RODS ENDS #################
+  
+  
+  
+  
+  
+  #################### RIGHT ROD CONSTRUCT ENDS ######################## #################### RIGHT ROD CONSTRUCT ENDS ########################
+  #################### RIGHT ROD CONSTRUCT ENDS ######################## #################### RIGHT ROD CONSTRUCT ENDS ########################  
+  #################### RIGHT ROD CONSTRUCT ENDS ######################## #################### RIGHT ROD CONSTRUCT ENDS ########################
+  #################### RIGHT ROD CONSTRUCT ENDS ######################## #################### RIGHT ROD CONSTRUCT ENDS ########################
+  
+  
+  #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE ANTERIOR REVISION IMPLANTS DF   #############~~~~~~~~~~~~~~~~~~~ ##################### 
+  #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE ANTERIOR REVISION IMPLANTS DF   #############~~~~~~~~~~~~~~~~~~~ ##################### 
+  
+  anterior_plate_revision_implants_df_reactive <- reactive({
+    if(req(input$revision_approach) == "anterior"){
+      if(length(input$prior_anterior_plate_levels)>0){
+        
+        anterior_plate_revision_implants_df <- tibble(prior_plate_present_levels = input$prior_anterior_plate_levels) %>%
+          mutate(level = prior_plate_present_levels) %>%
+          mutate(prior_plate_status = if_else(level %in% input$prior_anterior_plate_removed_levels, "removed", "retained")) %>%
+          left_join(revision_anterior_plate_df)
+        
+      }else{
+        anterior_plate_revision_implants_df <- tibble(prior_plate_present_levels = character(), level = character(), prior_plate_status = character()) 
+      } 
+    }else{
+      anterior_plate_revision_implants_df <- tibble(prior_plate_present_levels = character(), level = character(), prior_plate_status = character()) 
+    }
+    
+    anterior_plate_revision_implants_df
   })
   
   
@@ -3858,7 +4991,11 @@ server <- function(input, output, session) {
   })
   
   
-  
+  ###################################### ---------------- BIOLOGICS -----------------------#################################
+  ###################################### ---------------- BIOLOGICS -----------------------#################################
+  ###################################### ---------------- BIOLOGICS -----------------------#################################
+  ###################################### ---------------- BIOLOGICS -----------------------#################################
+  ###################################### ---------------- BIOLOGICS -----------------------#################################
   
   ################## ------------- POSTERIOR BMP UI AND RESULTS ---------------#######################
   ################## ------------- POSTERIOR BMP UI AND RESULTS ---------------#######################
@@ -4016,394 +5153,14 @@ server <- function(input, output, session) {
          as.character(anterior_dose_statement)))
   })
   
-  
-  #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE REVISION IMPLANTS DF   #############~~~~~~~~~~~~~~~~~~~ ##################### 
-  #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE REVISION IMPLANTS DF   #############~~~~~~~~~~~~~~~~~~~ ##################### 
-  
-  anterior_plate_revision_implants_df_reactive <- reactive({
-    if(req(input$revision_approach) == "anterior"){
-      if(length(input$prior_anterior_plate_levels)>0){
-        
-        anterior_plate_revision_implants_df <- tibble(prior_plate_present_levels = input$prior_anterior_plate_levels) %>%
-          mutate(level = prior_plate_present_levels) %>%
-          mutate(prior_plate_status = if_else(level %in% input$prior_anterior_plate_removed_levels, "removed", "retained")) %>%
-          left_join(revision_anterior_plate_df)
-        
-      }else{
-        anterior_plate_revision_implants_df <- tibble(prior_plate_present_levels = character(), level = character(), prior_plate_status = character()) 
-      } 
-    }else{
-      anterior_plate_revision_implants_df <- tibble(prior_plate_present_levels = character(), level = character(), prior_plate_status = character()) 
-    }
-    
-    anterior_plate_revision_implants_df
-  })
+  ###################################### ---------------- BIOLOGICS END -----------------------#################################
+  ###################################### ---------------- BIOLOGICS END -----------------------#################################
+  ###################################### ---------------- BIOLOGICS END -----------------------#################################
+  ###################################### ---------------- BIOLOGICS END -----------------------#################################
+  ###################################### ---------------- BIOLOGICS END -----------------------#################################
   
   
-  ######### LEFT REVISION IMPLANTS
-  left_revision_implants_reactive_list <- reactive({
-    if(req(input$revision_approach) == "posterior"){
-      if(length(input$left_revision_implants_removed)>0){
-        if(nrow(existing_patient_data$patient_df)>0){
-          
-          removed_df <- existing_patient_data$patient_df %>% 
-            select(record_id, side, level, object) %>%
-            filter(side == "left") %>%
-            filter(str_detect(object, "hook|screw")) %>%
-            filter(level %in% input$left_revision_implants_removed) %>%   ## this is generated in Load coordinates 
-            # left_join(revision_implants_df) %>%
-            left_join(all_implants_constructed_df %>%
-                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
-            distinct()
-        }else{
-          removed_df <- tibble(level = input$left_revision_implants_removed, side = "left") %>%
-            left_join(revision_screws_df) %>%
-            filter(object != "pelvic_screw_2") ## this is generated in Load coordinates 
-        }
-      }else{
-        removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
-      }
-      
-      if(length(input$left_revision_implants)>0){
-        if(nrow(existing_patient_data$patient_df)>0){
-          retained_df <- existing_patient_data$patient_df %>% 
-            select(record_id, side, level, object) %>%
-            filter(side == "left") %>%
-            filter(str_detect(object, "hook|screw")) %>%
-            filter(level %in% input$left_revision_implants_removed == FALSE) %>%
-            # left_join(revision_implants_df) %>%
-            left_join(all_implants_constructed_df %>%
-                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
-            distinct()
-        }else{
-          retained_df <- tibble(level = input$left_revision_implants, side = "left") %>%
-            filter(level %in% input$left_revision_implants_removed == FALSE) %>%
-            left_join(revision_screws_df) %>% ## this is generated in Load coordinates
-            filter(object != "pelvic_screw_2")  %>%
-            distinct()
-        }
-        
-        ### create full summary table describing what is happening with the revision implants and rods
-        if(length(input$left_revision_implants_removed)>0){
-          
-          if(nrow(existing_patient_data$patient_df)>0){
-            revision_implants_status_df <- existing_patient_data$patient_df %>% 
-              select(side, level, object) %>%
-              filter(side == "left") %>%
-              mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
-              # left_join(revision_implants_df) %>%
-              left_join(all_implants_constructed_df %>%
-                          select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
-              select(-object_constructed) %>%
-              distinct()
-          }else{
-            revision_implants_status_df <- tibble(level = input$left_revision_implants, 
-                                                  side = "left") %>%
-              mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
-              left_join(revision_screws_df) %>%
-              select(-object_constructed)  %>%
-              distinct() 
-          }
-          
-          
-        }else{
-          if(nrow(existing_patient_data$patient_df)>0){
-            revision_implants_status_df <- existing_patient_data$patient_df %>% 
-              select(side, level, object) %>%
-              filter(side == "left") %>%
-              mutate(remove_retain = "retain") %>%
-              # left_join(revision_implants_df) %>%
-              left_join(all_implants_constructed_df %>%
-                          select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
-              select(-object_constructed) %>%
-              distinct()
-          }else{
-            revision_implants_status_df <- tibble(level = input$left_revision_implants, side = "left") %>%
-              mutate(remove_retain = "retain") %>%
-              left_join(revision_screws_df)%>%
-              select(-object_constructed)  %>%
-              distinct()
-          }
-        }
-        
-        if(input$left_revision_rod_status == "retained_cut"){
-          retained_df <- retained_df %>%
-            mutate(prior_rod_connected = if_else(level %in% input$left_revision_implants_connected_to_prior_rod, "yes", "no"))
-          
-          revision_implants_status_df <- revision_implants_status_df %>%
-            mutate(prior_rod_connected = if_else(level %in% input$left_revision_implants_connected_to_prior_rod, "yes", "no"))
-        }
-        if(input$left_revision_rod_status == "retained"){
-          retained_df <- retained_df %>%
-            mutate(prior_rod_connected = "yes") %>%
-            mutate(old_rod_connected_to_new_rod = "no")
-          
-          revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "yes") %>%
-            mutate(old_rod_connected_to_new_rod = "no")
-        }
-        # if(input$left_revision_rod_status == "retained_connected"){
-        #   retained_df <- retained_df %>%
-        #     mutate(prior_rod_connected = "yes") %>%
-        #     mutate(old_rod_connected_to_new_rod = "yes")
-        #   
-        #   revision_implants_status_df <- revision_implants_status_df%>%
-        #     mutate(prior_rod_connected = "yes")%>%
-        #     mutate(old_rod_connected_to_new_rod = "yes")
-        # }
-        
-        
-        if(input$left_revision_rod_status == "removed"){
-          retained_df <- retained_df %>%
-            mutate(prior_rod_connected = "no") %>%
-            mutate(old_rod_connected_to_new_rod = "no")
-          
-          revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "no") %>%
-            mutate(old_rod_connected_to_new_rod = "no")
-        }
-        
-        revision_implants_status_df <- revision_implants_status_df %>%
-          select(level, vertebral_number, side, remove_retain, prior_rod_connected, object, x, y)
-        
-      }else{
-        retained_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), x = double(), y = double())
-        revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
-      } 
-    }else{
-      removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
-      retained_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), x = double(), y = double())
-      revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
-      
-    }
-    retained_df <- retained_df %>%
-      distinct()
-    removed_df <- removed_df %>%
-      distinct()
-    revision_implants_status_df <- revision_implants_status_df %>%
-      distinct()
-    
-    list(retained_df = retained_df,
-         removed_df = removed_df, 
-         revision_implants_status_df = revision_implants_status_df)
-    
-  }
-  )
-  
-  observeEvent(left_revision_implants_reactive_list(), ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(nrow(left_revision_implants_reactive_list()$retained_df) < 2){
-      updateAwesomeRadio(session = session, inputId = "left_revision_rod_status", selected = "removed")
-    }
-  })
-  
-  observeEvent(input$left_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    
-    if(input$left_revision_rod_status == "retained_cut"){
-      updatePickerInput(session = session, inputId = "left_revision_implants_connected_to_prior_rod", 
-                        choices = left_revision_implants_reactive_list()$retained_df$level, 
-                        selected = left_revision_implants_reactive_list()$retained_df$level
-      )
-    }
-  })
-  
-  observeEvent(input$left_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$left_revision_rod_status == "retained" | input$left_revision_rod_status == "retained_cut"){
-      updatePickerInput(session = session,
-                        inputId = "left_revision_implants_rod_connectors", 
-                        choices = left_revision_implants_reactive_list()$retained_df$level
-      )
-    }
-  })
-  
-  ####### RIGHT REVISION IMPLANTS ----
-  right_revision_implants_reactive_list <- reactive({
-    if(req(input$revision_approach) == "posterior"){
-      if(length(input$right_revision_implants_removed)>0){
-        if(nrow(existing_patient_data$patient_df)>0){
-          removed_df <- existing_patient_data$patient_df %>% 
-            select(record_id, side, level, object) %>%
-            filter(side == "right") %>%
-            filter(str_detect(object, "hook|screw")) %>%
-            filter(level %in% input$right_revision_implants_removed) %>%   ## this is generated in Load coordinates 
-            # left_join(revision_implants_df) %>%
-            left_join(all_implants_constructed_df %>%
-                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
-            distinct()
-        }else{
-          removed_df <- tibble(level = input$right_revision_implants_removed, side = "right") %>%
-            left_join(revision_screws_df) %>%
-            filter(object != "pelvic_screw_2") ## this is generated in Load coordinates 
-        }
-      }else{
-        removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
-      }
-      
-      if(length(input$right_revision_implants)>0){
-        if(nrow(existing_patient_data$patient_df)>0){
-          retained_df <- existing_patient_data$patient_df %>% 
-            select(record_id, side, level, object) %>%
-            filter(side == "right") %>%
-            filter(str_detect(object, "hook|screw")) %>%
-            filter(level %in% input$right_revision_implants_removed == FALSE) %>%
-            # left_join(revision_implants_df) %>%
-            left_join(all_implants_constructed_df %>%
-                        select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
-            distinct()
-        }else{
-          retained_df <- tibble(level = input$right_revision_implants, side = "right") %>%
-            filter(level %in% input$right_revision_implants_removed == FALSE) %>%
-            left_join(revision_screws_df) %>% ## this is generated in Load coordinates
-            filter(object != "pelvic_screw_2")  %>%
-            distinct()
-        }
-        
-        ### create full summary table describing what is happening with the revision implants and rods
-        if(length(input$right_revision_implants_removed)>0){
-          
-          if(nrow(existing_patient_data$patient_df)>0){
-            revision_implants_status_df <- existing_patient_data$patient_df %>% 
-              select(side, level, object) %>%
-              filter(side == "right") %>%
-              mutate(remove_retain = if_else(level %in% input$right_revision_implants_removed, "remove", "retain")) %>%
-              # left_join(revision_implants_df) %>%
-              left_join(all_implants_constructed_df %>%
-                          select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
-              select(-object_constructed) %>%
-              distinct()
-          }else{
-            revision_implants_status_df <- tibble(level = input$right_revision_implants, side = "right") %>%
-              mutate(remove_retain = if_else(level %in% input$right_revision_implants_removed, "remove", "retain")) %>%
-              left_join(revision_screws_df) %>%
-              select(-object_constructed)  %>%
-              distinct() 
-          }
-          
-          
-        }else{
-          if(nrow(existing_patient_data$patient_df)>0){
-            revision_implants_status_df <- existing_patient_data$patient_df %>% 
-              select(side, level, object) %>%
-              filter(side == "right") %>%
-              mutate(remove_retain = "retain") %>%
-              # left_join(revision_implants_df) %>%
-              left_join(all_implants_constructed_df %>%
-                          select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
-              select(-object_constructed) %>%
-              distinct()
-          }else{
-            revision_implants_status_df <- tibble(level = input$right_revision_implants, side = "right") %>%
-              mutate(remove_retain = "retain") %>%
-              left_join(revision_screws_df)%>%
-              select(-object_constructed)  %>%
-              distinct()
-          }
-        }
-        
-        if(input$right_revision_rod_status == "retained_cut"){
-          retained_df <- retained_df %>%
-            mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
-          
-          revision_implants_status_df <- revision_implants_status_df %>%
-            mutate(prior_rod_connected = if_else(level %in% input$right_revision_implants_connected_to_prior_rod, "yes", "no"))
-        }
-        if(input$right_revision_rod_status == "retained"){
-          retained_df <- retained_df %>%
-            mutate(prior_rod_connected = "yes") %>%
-            mutate(old_rod_connected_to_new_rod = "no")
-          
-          revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "yes") %>%
-            mutate(old_rod_connected_to_new_rod = "no")
-        }
-        # if(input$right_revision_rod_status == "retained_connected"){
-        #   retained_df <- retained_df %>%
-        #     mutate(prior_rod_connected = "yes") %>%
-        #     mutate(old_rod_connected_to_new_rod = "yes")
-        #   
-        #   revision_implants_status_df <- revision_implants_status_df%>%
-        #     mutate(prior_rod_connected = "yes")%>%
-        #     mutate(old_rod_connected_to_new_rod = "yes")
-        # }
-        
-        
-        if(input$right_revision_rod_status == "removed"){
-          retained_df <- retained_df %>%
-            mutate(prior_rod_connected = "no") %>%
-            mutate(old_rod_connected_to_new_rod = "no")
-          
-          revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "no") %>%
-            mutate(old_rod_connected_to_new_rod = "no")
-        }
-        
-        revision_implants_status_df <- revision_implants_status_df %>%
-          select(level, vertebral_number, side, remove_retain, prior_rod_connected, object, x, y)
-        
-      }else{
-        retained_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), x = double(), y = double())
-        revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
-      } 
-    }else{
-      removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
-      retained_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), x = double(), y = double())
-      revision_implants_status_df <- tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character())
-      
-    }
-    retained_df <- retained_df %>%
-      distinct()
-    removed_df <- removed_df %>%
-      distinct()
-    revision_implants_status_df <- revision_implants_status_df %>%
-      distinct()
-    
-    list(retained_df = retained_df,
-         removed_df = removed_df, 
-         revision_implants_status_df = revision_implants_status_df)
-    
-  })
-  
-  observeEvent(right_revision_implants_reactive_list(), ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(nrow(right_revision_implants_reactive_list()$retained_df) < 2){
-      updateAwesomeRadio(session = session, inputId = "right_revision_rod_status", selected = "removed")
-    }
-  })
-  
-  observeEvent(input$right_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$right_revision_rod_status == "retained_cut"){
-      updatePickerInput(session = session, inputId = "right_revision_implants_connected_to_prior_rod", 
-                        choices = right_revision_implants_reactive_list()$retained_df$level, 
-                        selected = right_revision_implants_reactive_list()$retained_df$level
-      )
-    }
-  })
-  
-  observeEvent(input$right_revision_rod_status, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$right_revision_rod_status == "retained" | input$right_revision_rod_status == "retained_cut"){
-      updatePickerInput(session = session,
-                        inputId = "right_revision_implants_rod_connectors", 
-                        choices = right_revision_implants_reactive_list()$retained_df$level
-      )
-    }
-  })
-  
-  ###### COMBINE 
-  
-  output$revision_implants_table <- renderTable({
-    revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
-      bind_rows(right_revision_implants_reactive_list()$revision_implants_status_df)
-    
-    revision_implants_df
-  })
-  
-  output$anterior_revision_implants_table <- renderTable({
-    anterior_plate_revision_implants_df_reactive() %>%
-      select(level, prior_plate_present_levels, prior_plate_status)
-    
-    
-  })
-  
-  
-  
+
   
   
   #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
@@ -4509,10 +5266,6 @@ server <- function(input, output, session) {
   # 
   # #### ANTERIOR ####
   observeEvent(list(anterior_plate_revision_implants_df_reactive(), input$prior_anterior_plate_removed_levels, input$prior_anterior_plate_levels), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    # prior_plate_present_levels
-    # prior_plate_status
-    
-    
     if(nrow(anterior_plate_revision_implants_df_reactive())>0){
       if(any(anterior_plate_revision_implants_df_reactive()$prior_plate_status == "retained")){
         
@@ -4659,68 +5412,68 @@ server <- function(input, output, session) {
     }
   })
   
-  rods_list <- reactiveValues()
+  
   
   # observeEvent(list(input$plot_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-  observeEvent(list(left_rod_implants_df_reactive(), input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    if(nrow(left_rod_implants_df_reactive()) >1){
-      if(length(input$left_revision_implants_rod_connectors)>0){
-        left_revision_rod_overlap <- all_implants_constructed_df %>%
-          filter(level %in% input$left_revision_implants_rod_connectors, 
-                 object == "pedicle_screw", 
-                 side == "left") %>%
-          select(x, y) %>%
-          mutate(y = y - 0.01)
-      }else{
-        left_revision_rod_overlap <- tibble(x = double(), 
-                                            y = double())
-      }
-      
-      left_main_rod_matrix <- left_rod_implants_df_reactive() %>%
-        mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-        mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
-        select(x, y) %>%
-        bind_rows(left_revision_rod_overlap) %>%
-        arrange(rev(y)) %>%
-        distinct() %>%
-        remove_missing() %>%
-        select(x, y) %>%
-        as.matrix()
-      
-      rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
-    }
-    
-  })
-  
-  # observeEvent(list(input$plot_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-  observeEvent(list(right_rod_implants_df_reactive(), input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    
-    if(nrow(right_rod_implants_df_reactive()) >1){
-      if(length(input$right_revision_implants_rod_connectors)>0){
-        right_revision_rod_overlap <- all_implants_constructed_df %>%
-          filter(level %in% input$right_revision_implants_rod_connectors, 
-                 object == "pedicle_screw", 
-                 side == "right") %>%
-          select(x, y) %>%
-          mutate(y = y - 0.01)
-      }else{
-        right_revision_rod_overlap <- tibble(x = double(), 
-                                             y = double())
-      }
-      right_main_rod_matrix <- right_rod_implants_df_reactive() %>%
-        mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-        mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
-        select(x, y) %>%
-        bind_rows(right_revision_rod_overlap) %>%
-        arrange(rev(y)) %>%
-        distinct() %>%
-        remove_missing() %>%
-        select(x, y) %>%
-        as.matrix()
-      
-      rods_list$right_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(right_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
-    }
-  })
+  # observeEvent(list(left_rod_implants_df_reactive(), input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
+  #   if(nrow(left_rod_implants_df_reactive()) >1){
+  #     if(length(input$left_revision_implants_rod_connectors)>0){
+  #       left_revision_rod_overlap <- all_implants_constructed_df %>%
+  #         filter(level %in% input$left_revision_implants_rod_connectors, 
+  #                object == "pedicle_screw", 
+  #                side == "left") %>%
+  #         select(x, y) %>%
+  #         mutate(y = y - 0.01)
+  #     }else{
+  #       left_revision_rod_overlap <- tibble(x = double(), 
+  #                                           y = double())
+  #     }
+  #     
+  #     left_main_rod_matrix <- left_rod_implants_df_reactive() %>%
+  #       mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+  #       mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
+  #       select(x, y) %>%
+  #       bind_rows(left_revision_rod_overlap) %>%
+  #       arrange(rev(y)) %>%
+  #       distinct() %>%
+  #       remove_missing() %>%
+  #       select(x, y) %>%
+  #       as.matrix()
+  #     
+  #     rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
+  #   }
+  #   
+  # })
+  # 
+  # # observeEvent(list(input$plot_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
+  # observeEvent(list(right_rod_implants_df_reactive(), input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
+  #   
+  #   if(nrow(right_rod_implants_df_reactive()) >1){
+  #     if(length(input$right_revision_implants_rod_connectors)>0){
+  #       right_revision_rod_overlap <- all_implants_constructed_df %>%
+  #         filter(level %in% input$right_revision_implants_rod_connectors, 
+  #                object == "pedicle_screw", 
+  #                side == "right") %>%
+  #         select(x, y) %>%
+  #         mutate(y = y - 0.01)
+  #     }else{
+  #       right_revision_rod_overlap <- tibble(x = double(), 
+  #                                            y = double())
+  #     }
+  #     right_main_rod_matrix <- right_rod_implants_df_reactive() %>%
+  #       mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+  #       mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
+  #       select(x, y) %>%
+  #       bind_rows(right_revision_rod_overlap) %>%
+  #       arrange(rev(y)) %>%
+  #       distinct() %>%
+  #       remove_missing() %>%
+  #       select(x, y) %>%
+  #       as.matrix()
+  #     
+  #     rods_list$right_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(right_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
+  #   }
+  # })
   
   
   observeEvent(list(
@@ -5025,9 +5778,9 @@ server <- function(input, output, session) {
                        y = max(labels_posterior_df$y) + 0.03))
     
     posterior_spine_ggdraw +
-      reactiveValuesToList(geoms_list_revision_posterior) +
-      reactiveValuesToList(geoms_list_posterior) +
-      reactiveValuesToList(rods_list) +
+      # reactiveValuesToList(geoms_list_revision_posterior) +
+      # reactiveValuesToList(geoms_list_posterior) +
+      # reactiveValuesToList(rods_list) +
       draw_text(
         text = labels_posterior_df$level,
         x = labels_posterior_df$x_left,
@@ -5047,7 +5800,7 @@ server <- function(input, output, session) {
                y = input$crop_y[1] + 0.01, 
                label = l6_statement) +
       coord_sf(xlim = c(x_left_limit, x_right_limit),
-               ylim = input$crop_y)
+               ylim = input$crop_y, default = TRUE)
   })
   
   observeEvent(input$multi_approach_starting_position, {
@@ -5067,30 +5820,39 @@ server <- function(input, output, session) {
     if(input$spine_approach == "Anterior"){
       spine_plan_plot_anterior()
     }else{
-      spine_plan_plot_posterior_reactive() 
+      spine_plan_plot_posterior_reactive() +
+        reactiveValuesToList(geoms_list_revision_posterior) +
+        reactiveValuesToList(geoms_list_posterior) +
+        reactiveValuesToList(rods_list)
     }
   }
   )
   
   output$spine_plot_for_implants_tab <- renderPlot({
-    # if(input$multiple_approach == TRUE){
-    #   plot_grid(spine_plan_plot_anterior(), NULL, spine_plan_plot_posterior_reactive(), nrow = 1, rel_widths = c(1, -.1, 1))
-    # }else{
-    #   if(input$spine_approach == "Anterior"){
-    #     spine_plan_plot_anterior() 
-    #   }else{
-    #     ### POSTERIOR
-    #     spine_plan_plot_posterior_reactive()
-    #   }
-    # }
     if(input$approach_sequence == "posterior"){
-      spine_plan_plot_posterior_reactive()
+      spine_plan_plot_posterior_reactive()+
+        reactiveValuesToList(geoms_list_revision_posterior) +
+        reactiveValuesToList(geoms_list_posterior) +
+        reactiveValuesToList(rods_list)
     }else if(input$approach_sequence == "anterior"){
       spine_plan_plot_anterior()
     }else if(input$approach_sequence == "posterior-anterior" | input$approach_sequence == "posterior-anterior-posterior"){
-      plot_grid(spine_plan_plot_posterior_reactive(), NULL, spine_plan_plot_anterior(), nrow = 1, rel_widths = c(1, -.1, 1))
+      posterior_plot <- spine_plan_plot_posterior_reactive()+
+        reactiveValuesToList(geoms_list_revision_posterior) +
+        reactiveValuesToList(geoms_list_posterior) +
+        reactiveValuesToList(rods_list)
+      
+      plot_grid(posterior_plot, 
+                NULL, 
+                spine_plan_plot_anterior(), 
+                nrow = 1, 
+                rel_widths = c(1, -.1, 1))
     }else {
-      plot_grid(spine_plan_plot_anterior(), NULL, spine_plan_plot_posterior_reactive(), nrow = 1, rel_widths = c(1, -.1, 1))
+      posterior_plot <- spine_plan_plot_posterior_reactive()+
+        reactiveValuesToList(geoms_list_revision_posterior) +
+        reactiveValuesToList(geoms_list_posterior) +
+        reactiveValuesToList(rods_list)
+      plot_grid(spine_plan_plot_anterior(), NULL, posterior_plot, nrow = 1, rel_widths = c(1, -.1, 1))
     }
   }) %>%
     bindEvent(input$implants_complete)
@@ -5113,6 +5875,7 @@ server <- function(input, output, session) {
     
     # if(input$tabs != "patient_details_procedures"){
     
+    #LEFT#
     if(input$add_left_accessory_rod == TRUE){
       proximal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$left_accessory_rod[[1]])$caudal_interspace
       distal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$left_accessory_rod[[2]])$cranial_interspace
@@ -5128,6 +5891,11 @@ server <- function(input, output, session) {
     if(input$add_left_linked_rods == TRUE){
       additional_rods_list$left_linked <- glue("On the left side, a linked-rods construct was used, with the rods overlapping from {input$left_linked_rods[[1]]} to {input$left_linked_rods[[2]]}.")
     }
+    if(input$add_left_kickstand_rod == TRUE){
+      additional_rods_list$left_kickstand <- glue("A kickstand rod construct was used on the left. The kickstand rod was anchored to the left ilium and fixed proximally to the {input$left_linked_rods[[1]]} level.")
+    }
+    
+    #RIGHT#
     if(input$add_right_accessory_rod == TRUE){
       proximal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$right_accessory_rod[[1]])$caudal_interspace
       distal_junction <- jh_get_cranial_caudal_interspace_body_list_function(level = input$right_accessory_rod[[2]])$cranial_interspace
@@ -5143,6 +5911,10 @@ server <- function(input, output, session) {
     if(input$add_right_linked_rods == TRUE){
       additional_rods_list$right_linked <- glue("On the right side, a linked-rods construct was used, with the rods overlapping from {input$right_linked_rods[[1]]} to {input$right_linked_rods[[2]]}.")
     }
+    if(input$add_right_kickstand_rod == TRUE){
+      additional_rods_list$right_kickstand <- glue("A kickstand rod construct was used on the right. The kickstand rod was anchored to the right ilium and fixed proximally to the {input$right_linked_rods[1]} level.")
+    }
+    
     if(length(additional_rods_list) > 0){
       added_rods_statement <- glue_collapse(additional_rods_list, sep = " ")
     }else{
@@ -7242,6 +8014,20 @@ server <- function(input, output, session) {
   #     interbody_details_redcap_df_reactive()
   # })
   # 
+  
+  ######## Render "Revision Implants" for side tab:"    ######## 
+  output$revision_implants_table <- renderTable({
+    revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
+      bind_rows(right_revision_implants_reactive_list()$revision_implants_status_df)
+    
+    revision_implants_df
+  })
+  
+  output$anterior_revision_implants_table <- renderTable({
+    anterior_plate_revision_implants_df_reactive() %>%
+      select(level, prior_plate_present_levels, prior_plate_status)
+    
+  })
   
   ################## GENERATE TABLES AND PRINTOUTS FOR SIDE TAB TO SHOW WHAT IS UPLOADED TO THE OP NOTE GENERATOR
   output$posterior_approach_objects_for_op_note_df <- renderTable({

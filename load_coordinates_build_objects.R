@@ -23,7 +23,7 @@ posterior_spine_plot <- ggdraw() +
 
 anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
 
-implant_starts_df <- read_csv(file = "full_coordinates_df.csv") %>%
+implant_starts_df <- vroom(file = "full_coordinates_df.csv") %>%
   filter(!is.na(x)) %>%
   filter(object != "llif")
 
@@ -520,7 +520,7 @@ all_interbody_df <- implant_starts_df %>%
 
 anterior_df <- implant_starts_df %>%
   filter(approach == "anterior") %>%
-  remove_empty()
+  remove_empty(which = c("rows", "cols"))
 
 
 anterior_objects_df <- anterior_df %>%
@@ -560,14 +560,13 @@ all_points_all_implants_constructed_df <- implants_constructed_df %>%
   select(level, vertebral_number, everything())
 
  
-all_implants_constructed_df <- all_points_all_implants_constructed_df %>%
-  select(-ends_with("_x"), -ends_with("_y")) %>%
-  mutate(object_id = paste0(level, "_", side, "_", object)) %>%
-  group_by(object_id) %>%
-  mutate(n = row_number()) %>%
-  mutate(object_id = paste0(object_id, "_", n)) %>%
-  select(-n) %>%
-  ungroup() 
+all_implants_constructed_df <-  all_points_all_implants_constructed_df %>%
+  select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv, direction, object_constructed) %>%
+  group_by(level, side, object) %>%
+  mutate(object_id = paste0(level, "_", side, "_", object, "_", row_number())) %>%
+  ungroup() %>%
+  mutate(level = if_else(str_detect(level, "Iliac|S2AI") & object == "pelvic_screw_2", paste0(level, "_2"), level)) %>%
+  mutate(vertebral_number = if_else(str_detect(level, "Iliac|S2AI") & object == "pelvic_screw_2", vertebral_number + 0.5, vertebral_number)) 
 
 revision_anterior_plate_df <- all_implants_constructed_df %>%
   filter(object == "anterior_plate") %>%
@@ -577,11 +576,40 @@ all_objects_y_range_df <- all_implants_constructed_df %>%
   select(object, y) %>%
   distinct()
 
+implant_levels_numbered_df <- all_implants_constructed_df %>%
+  filter(implant == "yes") %>%
+  select(level, vertebral_number) %>%
+  distinct() %>%
+  arrange(vertebral_number)
+
+all_screw_coordinates_df <- all_implants_constructed_df %>%
+  filter(str_detect(object, "lateral_mass_screw|occipital_screw"), str_detect(level, "Occiput|C1")) %>%
+  select(level, vertebral_number, side, x, y) %>%
+  distinct() %>%
+  union_all(
+    all_implants_constructed_df %>%
+      filter(str_detect(object, "pedicle_screw|pelvic_screw")) %>%
+      select(level, vertebral_number, side, x, y) %>%
+      distinct()
+  ) %>%
+  arrange(vertebral_number, rev(y))
+
+all_screw_coordinates_df <- all_screw_coordinates_df %>%
+  mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_interspace)) %>%
+  unnest(level) %>%
+  filter(!is.na(level)) %>%
+  mutate(vertebral_number = map(.x = level, .f = ~ jh_get_vertebral_number_function(.x))) %>%
+  unnest(vertebral_number) %>%
+  union_all(all_screw_coordinates_df) %>%
+  arrange(vertebral_number) %>%
+  filter(str_detect(level, " 2") == FALSE) %>%
+  distinct()
+
 rm(osteotomy_df,
    decompression_df,
    incision_drainage_df,
    anterior_objects_df,
    all_interbody_df,
    all_points_all_implants_constructed_df,
-   implants_constructed_df)
+   implants_constructed_df, interspaces_coordinates_df, cervical_interspace_coord_df)
 
