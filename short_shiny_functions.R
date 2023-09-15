@@ -65,6 +65,9 @@ vertebral_bodies_vector <- c('C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'T1', 'T2
 
 interspaces_vector <- c('O-C1', 'C1-C2', 'C2-C3', 'C3-C4', 'C4-C5', 'C5-C6', 'C6-C7', 'C7-T1', 'T1-T2', 'T2-T3', 'T3-T4', 'T4-T5', 'T5-T6', 'T6-T7', 'T7-T8', 'T8-T9', 'T9-T10', 'T10-T11', 'T11-T12', 'T12-L1', 'L1-L2', 'L2-L3', 'L3-L4', 'L4-L5', 'L5-S1', 'L4-S1', 'L5-L6', 'L6-S1', 'Sacro-iliac')
 
+anterior_plate_vector <- c('C1-C2', 'C2-C3', 'C3-C4', 'C4-C5', 'C5-C6', 'C6-C7', 'C7-T1', 'T1-T2', 'T2-T3', 'T3-T4', 'T4-T5', 'T5-T6', 'T6-T7', 'T7-T8', 'T8-T9', 'T9-T10', 'T10-T11', 'T11-T12', 'T12-L1', 'L1-L2', 'L2-L3', 'L3-L4', 'L4-L5', 'L5-S1')
+
+
 jh_reorder_levels_function <- function(level_vector){
   levels <- tibble(level = as.character(level_vector)) %>%
     mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
@@ -1063,7 +1066,121 @@ jh_fusion_category_function <- function(fusion_vector, all_objects_df){
   return(fusion_df)
 }
 
+############################## MAKE CONDITIONAL PANELS FOR INTERBODY ######################################
+make_interbody_conditional_panel_function <-  function(cage_id_input = NULL){
 
+  if(str_detect( cage_id_input,"central")){
+    level_side <- str_to_upper(str_replace_all(string = str_split_i(string = cage_id_input, pattern = "_central_", i = 1), pattern = "_", "-"))
+    
+    object_label <- if_else(str_length(str_split_i(string = cage_id_input, pattern = "_central_", i = 2)) == 4, 
+                            str_to_upper(str_split_i(string = cage_id_input, pattern = "_central_", i = 2)), 
+                            str_to_title(str_replace_all(str_split_i(string = cage_id_input, pattern = "_central_", i = 2), pattern = "_", " "))
+    )
+    
+  }else if(str_detect( cage_id_input,"left")){
+    level_side <- paste("Left", str_to_upper(str_replace_all(string = str_split_i(string = cage_id_input, pattern = "_left_", i = 1), pattern = "_", "-")))
+    object_label <- if_else(str_length(str_split_i(string = cage_id_input, pattern = "_left_", i = 2)) == 4, 
+                            str_to_upper(str_split_i(string = cage_id_input, pattern = "_left_", i = 2)), 
+                            str_to_title(str_replace_all(str_split_i(string = cage_id_input, pattern = "_left_", i = 2), pattern = "_", " "))
+    )
+  }else if(str_detect( cage_id_input,"right")){
+    level_side <- paste("Right", str_to_upper(str_replace_all(string = str_split_i(string = cage_id_input, pattern = "_right_", i = 1), pattern = "_", "-")))
+    object_label <- if_else(str_length(str_split_i(string = cage_id_input, pattern = "_right_", i = 2)) == 4, 
+                            str_to_upper(str_split_i(string = cage_id_input, pattern = "_right_", i = 2)), 
+                            str_to_title(str_replace_all(str_split_i(string = cage_id_input, pattern = "_right_", i = 2), pattern = "_", " "))
+    )
+  }
+  
+  conditionalPanel(condition =  glue("input.interbody_implant_picker.indexOf('{cage_id_input}') > -1"),
+                    fluidRow(
+                      hr(),
+                      column(width = 3,
+                             tags$div(style = "font-size:20px; font-weight:bold; text-align:center", 
+                                      level_side,
+                                      ),
+                             tags$div(style = "font-size:20px; font-weight:bold; text-align:center", 
+                                      object_label,
+                             )
+                      ),
+                      column(9, 
+                             fixedRow(
+                               column(width = 5, 
+                                      pickerInput(
+                                        inputId = glue("{cage_id_input}_interbody_composition"),
+                                        label = NULL,
+                                        inline = "auto",
+                                        options = list(
+                                          title = "Choose Implant Type"),
+                                        choices = c("Allograft",
+                                                    "Autograft",
+                                                    "Carbon Fiber",
+                                                    "Coated PEEK",
+                                                    "PEEK", "Hybrid",
+                                                    "Titanium",
+                                                    "3D/Porous Titanium",
+                                                    "Other"),
+                                      ), 
+                               ), 
+                               column(width = 4,
+                                      textInput(inputId = glue("{cage_id_input}_interbody_device_name"),
+                                                label = NULL, placeholder = "Cage Name")
+                               ), 
+                               column(width = 3, 
+                                      numericInput(inputId = glue("{cage_id_input}_interbody_height"),
+                                                   label = NULL, value = 8,min = 5, max = 30,step = 1))
+                             ),
+                             fixedRow(
+                               column(width = 3, 
+                                      h5("Other Comments")),
+                               column(width = 6,
+                                      textInput(inputId = glue("{cage_id_input}_interbody_other"),
+                                                label = NULL,
+                                                placeholder = "Details",
+                                                width = "100%")
+                               ),
+                               column(width = 3, 
+                                      awesomeCheckbox(
+                                        inputId = glue("{cage_id_input}_interbody_integrated_fixation"),
+                                        label = "Integrated Fixation",
+                                        value = FALSE,
+                                        status = "danger"
+                                      ),
+                                      conditionalPanel(condition = glue("input.{cage_id_input}_interbody_integrated_fixation"),
+                                                       h4("Leave 0 for no screw"), 
+                                                       textInput(inputId = glue("{cage_id_input}_interbody_cranial_screw_1_size"), 
+                                                                 label = "Cranial Screw 1 size:", 
+                                                                 value = "0",
+                                                                 placeholder = "W x L"
+                                                       ),
+                                                       textInput(inputId = glue("{cage_id_input}_interbody_cranial_screw_2_size"), 
+                                                                 label = "Cranial Screw 2 size:", 
+                                                                 value = "0",
+                                                                 placeholder = "W x L"
+                                                       ),
+                                                       textInput(inputId = glue("{cage_id_input}_interbody_caudal_screw_1_size"), 
+                                                                 label = "Caudal Screw 1 size:", 
+                                                                 value = "0",
+                                                                 placeholder = "W x L"
+                                                       ),
+                                                       textInput(inputId = glue("{cage_id_input}_interbody_caudal_screw_2_size"), 
+                                                                 label = "Caudal Screw 2 size:", 
+                                                                 value = "0",
+                                                                 placeholder = "W x L"
+                                                       )
+                                      ),
+                                      awesomeCheckbox(
+                                        inputId = glue("{cage_id_input}_interbody_expandable"),
+                                        label = "Expandable",
+                                        value = FALSE,
+                                        status = "danger"
+                                      )
+                               )
+                             )
+                      ),
+                      hr()
+                    )
+                    )
+}
 
 ##########################################  MAKE UI's FOR INTERBODY ##################### ##################### 
 ##########################################  MAKE UI's FOR INTERBODY ##################### ##################### 
@@ -1791,7 +1908,10 @@ jh_rod_construct_connector_matrices_function <- function(full_rod_matrix, x_nudg
   
   proximal_connector_point_df <- full_rod_matrix %>%
     as_tibble() %>%
-    filter(y == max(y)) 
+    filter(y == max(y))  
+    # mutate(x = if_else(x < 0.5, 
+    #                    x + x_nudge, 
+    #                    x + x_nudge)) 
   
   matrix_list$top_connector_matrix <- proximal_connector_point_df %>%
     mutate(x = if_else(x < 0.5, 
@@ -1934,17 +2054,31 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
     
     if(add_kickstand_rod == TRUE && kickstand_rod_vector[1] %in% all_screw_coordinates_df$level && (kickstand_rod_vector[1] != kickstand_rod_vector[2])){
       
-      kickstand_rod_matrix <- tibble(level = kickstand_rod_vector) %>%
-        left_join(all_screw_coordinates_df %>% filter(side == rod_side)) %>%
+      # kickstand_rod_matrix <- tibble(level = kickstand_rod_vector) %>%
+        # left_join(all_screw_coordinates_df %>% filter(side == rod_side)) %>%
+      
+      x_modifier <- if_else(rod_side == "left", -0.01, 0.01)
+      
+      kickstand_rod_matrix <- all_screw_coordinates_df %>% 
+        filter(side == rod_side, level %in% kickstand_rod_vector) %>%
         select(x, y) %>%
         arrange(rev(y)) %>%
         distinct() %>%
-        mutate(x = if_else(x < 0.5, x - 0.005, x + 0.005))%>%
+        mutate(x = if_else(y == max(y), x + x_modifier, x)) %>%
         remove_missing() %>%
         select(x, y) %>%
         as.matrix()
       
-      kickstand_connector_matrix_list <- jh_rod_construct_connector_matrices_function(kickstand_rod_matrix, x_nudge = if_else(rod_side == "right", -0.01, 0))
+      kickstand_connector_matrix <- all_screw_coordinates_df %>% 
+        filter(side == rod_side, level %in% kickstand_rod_vector) %>%
+        select(x, y) %>%
+        arrange(rev(y)) %>%
+        distinct() %>%
+        remove_missing() %>%
+        select(x, y) %>%
+        as.matrix()
+      
+      kickstand_connector_matrix_list <- jh_rod_construct_connector_matrices_function(kickstand_connector_matrix)
       
       connector_list$kickstand_rod_top_connector <- jh_sf_rod_object_from_matrix_function(kickstand_connector_matrix_list$top_connector_matrix)
       
@@ -2037,28 +2171,37 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       x_linked_rod_modifier <- if_else(rod_side == "left", 0.004, -.004)
       
-      proximal_linked_rod_matrix <- tibble(level = proximal_rod_levels_vector) %>%
-        left_join(main_rod_df) %>%
+      # proximal_linked_rod_matrix <- tibble(level = proximal_rod_levels_vector) %>%
+      #   left_join(main_rod_df) %>%
+        
+        proximal_linked_rod_matrix <- main_rod_df %>% 
+        filter(level %in% proximal_rod_levels_vector) %>%
         mutate(x = if_else(level %in% distal_rod_levels_vector, x - x_linked_rod_modifier, x)) %>%
         select(x, y) %>%
         as.matrix()
       
-      distal_linked_rod_matrix <- tibble(level = distal_rod_levels_vector) %>%
-        left_join(main_rod_df) %>%
+      # distal_linked_rod_matrix <- tibble(level = distal_rod_levels_vector) %>%
+      #   left_join(main_rod_df) %>%
+        distal_linked_rod_matrix <- main_rod_df %>% 
+        filter(level %in% distal_rod_levels_vector) %>%
         mutate(x = if_else(level %in% proximal_rod_levels_vector, x + x_linked_rod_modifier, x)) %>%
         select(x, y) %>%
         as.matrix()
       
       
-      linked_rods_overlap_matrix <- tibble(level = linked_rods_vector) %>%
-        left_join(all_screw_coordinates_df %>%
-        filter(side == rod_side))  %>%
-        select(x, y) %>%
-        mutate(x = if_else(x < 0.5, x + x_linked_rod_modifier, x - x_linked_rod_modifier)) %>%
-        distinct() %>%
-        arrange(rev(y)) %>%
-        as.matrix()
-      
+      # linked_rods_overlap_matrix <- tibble(level = linked_rods_vector) %>%
+      #   left_join(all_screw_coordinates_df %>%
+      #   filter(side == rod_side))  %>%
+        
+        linked_rods_overlap_matrix <- all_screw_coordinates_df %>%
+          filter(side == rod_side, 
+                 level %in% linked_rods_vector) %>%
+          select(x, y) %>%
+          mutate(x = if_else(x < 0.5, x + x_linked_rod_modifier, x - x_linked_rod_modifier)) %>%
+          distinct() %>%
+          arrange(rev(y)) %>%
+          as.matrix()
+        
       connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rods_overlap_matrix, x_nudge = if_else(rod_side == "right", -0.01, 0))
       
       connector_list$linked_rod_top_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$top_connector_matrix)
@@ -2086,9 +2229,13 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         mutate(y = if_else(y == max(y), y + 0.03, y)) %>%
         as.matrix()
       
-      intercalary_rod_matrix <- tibble(level = intercalary_rods_vector) %>%
-        left_join(all_screw_coordinates_df %>%
-        filter(side == rod_side))  %>%
+      # intercalary_rod_matrix <- tibble(level = intercalary_rods_vector) %>%
+      #   left_join(all_screw_coordinates_df %>%
+      #   filter(side == rod_side))  %>%
+        
+        intercalary_rod_matrix <- all_screw_coordinates_df %>%
+        filter(side == rod_side, 
+               level %in% intercalary_rods_vector) %>%
         select(x, y) %>%
         arrange(rev(y)) %>%
         distinct() %>%
@@ -2096,14 +2243,17 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         select(x, y) %>%
         as.matrix()
       
-      intercalary_rod_connector_matrix <- tibble(level = intercalary_rods_vector) %>%
-        left_join(all_screw_coordinates_df %>%
-        filter(side == rod_side))  %>%
-        select(x, y) %>%
-        arrange(rev(y)) %>%
-        distinct() %>%
-        as.matrix()
-      
+      # intercalary_rod_connector_matrix <- tibble(level = intercalary_rods_vector) %>%
+      #   left_join(all_screw_coordinates_df %>%
+      #   filter(side == rod_side))  %>%
+        intercalary_rod_connector_matrix <- all_screw_coordinates_df %>%
+          filter(side == rod_side, 
+                 level %in% intercalary_rods_vector) %>%
+          select(x, y) %>%
+          arrange(rev(y)) %>%
+          distinct() %>%
+          as.matrix()
+        
       proximal_connector_matrix_list <- jh_rod_construct_connector_matrices_function(proximal_intercalary_rod_matrix)
       
       
@@ -2134,9 +2284,11 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
     
     if(add_accessory_rod == TRUE && accessory_rod_vector[1] %in% all_screw_coordinates_df$level && (accessory_rod_vector[1] !=accessory_rod_vector[2])){
       
-      accessory_rod_matrix <- tibble(level = accessory_rod_vector) %>%
-        left_join(all_screw_coordinates_df %>%
-        filter(side == rod_side)) %>%
+      # accessory_rod_matrix <- tibble(level = accessory_rod_vector) %>%
+      #   left_join(all_screw_coordinates_df %>%
+      #   filter(side == rod_side)) %>%
+      accessory_rod_matrix <- all_screw_coordinates_df %>%
+        filter(side == rod_side, level %in% accessory_rod_vector) %>%
         select(x, y) %>%
         arrange(rev(y)) %>%
         distinct() %>%

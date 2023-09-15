@@ -8,7 +8,7 @@
 #############-----------------------   LOAD DATA  ----------------------###############
 
 
-spine_png <- image_read(path = "spine_posterior.png")
+spine_png <- image_read(path = "spine_posterior.png", density = 5)
 
 posterior_spine_plot <- ggdraw() +
   draw_image(
@@ -22,10 +22,9 @@ posterior_spine_plot <- ggdraw() +
   ) 
 
 anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
-
-implant_starts_df <- vroom(file = "full_coordinates_df.csv") %>%
-  filter(!is.na(x)) %>%
-  filter(object != "llif")
+ 
+implant_starts_df <- fread(file = "full_coordinates_df.csv ") %>%
+  filter(!is.na(x)) 
 
 #############-----------------------   Build Key Dataframes  ----------------------###############
 
@@ -309,29 +308,29 @@ construct_objects_live_function <- function(all_procedures_selected_df){
     #############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
     anterior_df <- all_procedures_selected_df %>%
       filter(approach == "anterior") %>%
-      remove_empty() 
-    
+      remove_empty()
+
     if(nrow(anterior_df) > 0){
       assembled_df <- assembled_df %>%
         union_all(anterior_df %>%
                     mutate(object_constructed = pmap(list(..1 = object,
                                                           ..2 = width,
                                                           ..3 = inferior_endplate_y,
-                                                          ..4 = superior_endplate_y, 
-                                                          ..5 = superior_endplate_inferior_body_y, 
+                                                          ..4 = superior_endplate_y,
+                                                          ..5 = superior_endplate_inferior_body_y,
                                                           ..6 = inferior_endplate_superior_body_y,
-                                                          ..7 = y, 
+                                                          ..7 = y,
                                                           ..8 = direction),
-                                                     .f = ~ anterior_implant_function(object_type = ..1, 
+                                                     .f = ~ anterior_implant_function(object_type = ..1,
                                                                                       body_width = ..2,
                                                                                       inferior_endplate_y = ..3,
                                                                                       superior_endplate_y = ..4,
-                                                                                      superior_endplate_inferior_body_y = ..5, 
+                                                                                      superior_endplate_inferior_body_y = ..5,
                                                                                       inferior_endplate_superior_body_y = ..6, y_click = ..7, direction = ..8))))
     }
-    
-    
-    
+
+
+
     #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
     #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
     #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
@@ -511,13 +510,13 @@ all_interbody_df <- implant_starts_df %>%
                                                                    inferior_facet_inferior_border_y = ..11)))
 
 
-#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
-#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
-#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
-#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
-#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
-#############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
-
+# #############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+# #############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+# #############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+# #############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+# #############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+# #############-------#############-----------------------   ANTERIOR  ----------------------###############-------###############
+# 
 anterior_df <- implant_starts_df %>%
   filter(approach == "anterior") %>%
   remove_empty(which = c("rows", "cols"))
@@ -537,7 +536,7 @@ anterior_objects_df <- anterior_df %>%
                                                                     inferior_endplate_y = ..3,
                                                                     superior_endplate_y = ..4,
                                                                     superior_endplate_inferior_body_y = ..5,
-                                                                    inferior_endplate_superior_body_y = ..6, 
+                                                                    inferior_endplate_superior_body_y = ..6,
                                                                     y_click = ..7,
                                                                     direction = ..8)))
 
@@ -550,17 +549,12 @@ anterior_objects_df <- anterior_df %>%
 #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
 #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
 
-all_points_all_implants_constructed_df <- implants_constructed_df %>%
-  # select(-sublaminar_band_length, -length_for_tether) %>%
+all_implants_constructed_df <- implants_constructed_df %>%
   bind_rows(osteotomy_df) %>%
   bind_rows(decompression_df) %>%
   bind_rows(incision_drainage_df) %>%
   bind_rows(anterior_objects_df) %>%
   bind_rows(all_interbody_df) %>%
-  select(level, vertebral_number, everything())
-
- 
-all_implants_constructed_df <-  all_points_all_implants_constructed_df %>%
   select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv, direction, object_constructed) %>%
   group_by(level, side, object) %>%
   mutate(object_id = paste0(level, "_", side, "_", object, "_", row_number())) %>%
@@ -568,9 +562,6 @@ all_implants_constructed_df <-  all_points_all_implants_constructed_df %>%
   mutate(level = if_else(str_detect(level, "Iliac|S2AI") & object == "pelvic_screw_2", paste0(level, "_2"), level)) %>%
   mutate(vertebral_number = if_else(str_detect(level, "Iliac|S2AI") & object == "pelvic_screw_2", vertebral_number + 0.5, vertebral_number)) 
 
-revision_anterior_plate_df <- all_implants_constructed_df %>%
-  filter(object == "anterior_plate") %>%
-  select(level, vertebral_number, object, object_constructed)
 
 all_objects_y_range_df <- all_implants_constructed_df %>%
   select(object, y) %>%
@@ -605,11 +596,27 @@ all_screw_coordinates_df <- all_screw_coordinates_df %>%
   filter(str_detect(level, " 2") == FALSE) %>%
   distinct()
 
+all_cages_df <- all_implants_constructed_df %>%
+  filter(
+      object == "anterior_interbody_implant" |
+      object == "tlif" |
+      object == "plif" |
+      object == "llif" |
+      object == "anterior_disc_arthroplasty" |
+      object == "corpectomy_cage") %>%
+  select(level, side, vertebral_number, object, approach) %>%
+  # union_all(intervertebral_cage_df) %>%
+  distinct() %>%
+  arrange(vertebral_number) %>%
+  mutate(cage_id = paste(str_to_lower(str_replace_all(level, "-", "_")), side, object, sep = "_")) 
+
+# all_implants_constructed_df
+
 rm(osteotomy_df,
    decompression_df,
    incision_drainage_df,
    anterior_objects_df,
    all_interbody_df,
-   all_points_all_implants_constructed_df,
-   implants_constructed_df, interspaces_coordinates_df, cervical_interspace_coord_df)
+   # all_points_all_implants_constructed_df,
+   implants_constructed_df)
 

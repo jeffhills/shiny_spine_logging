@@ -1,5 +1,5 @@
 
-spine_codes_df <- read_csv("icd10_codes_2022_updated_dec_21.csv")
+spine_codes_df <- fread("icd10_codes_2022_updated_dec_21.csv")
 
 # spine_sections <- c("msk", "tumor", "congenital", "trauma")
 

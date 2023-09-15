@@ -318,7 +318,6 @@ op_note_anterior_function <- function(all_objects_to_add_df,
       
     }else{
       first_paragraph_list$surgical_approach <- glue("The anterior approach to the spine was carried out with assistance from the vascular surgeon. A {anterior_approach_laterality} approach was carried out down toward the spine. Once the approach was complete, retractors were placed and the surgical levels were confirmed using fluoroscopy. ")
-      
     }
   }
   
@@ -594,6 +593,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                        c2_nerve_transection = "na",
                                        surgical_approach = "Midline",
                                        approach_mis_open = "Open",
+                                       approach_microscope = "none",
                                        approach_robot_nav_xray = "Open",
                                        implant_start_point_method_input = "",
                                        implant_confirmation_method = "Intraoperative Xray was used to confirm the final position of all implants.",
@@ -846,7 +846,6 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     }
     if(surgical_approach == "Stab"){
       first_paragraph_list$surgical_approach <- glue("Intraoperative xray was used to confirm levels and stab incisions were made to access each pedicle from the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
-      
     }
     
   }else{
@@ -909,6 +908,10 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   if(str_detect(string = str_to_lower(local_anesthesia), pattern = "exposure")){ 
     first_paragraph_list$local_anesthesia <- glue("{str_to_sentence(local_anesthesia)}")
+  }
+  
+  if(str_detect(string = str_to_lower(approach_microscope), pattern = "microsc")){
+    first_paragraph_list$microscope <- glue("{str_to_sentence(approach_microscope)}")
   }
   
   if(length(complications_list) > 0){

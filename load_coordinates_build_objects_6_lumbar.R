@@ -156,7 +156,7 @@ posterior_spine_plot_l6 <- ggdraw() +
 
 l6_anterior_spine_png <- image_read(path = "spine_anterior_6_lumbar_vert.png")
 
-l6_implant_starts_lower_only_df <- read_csv(file = "full_coordinates_df.csv") %>%
+l6_implant_starts_lower_only_df <- fread(file = "full_coordinates_df.csv") %>%
   filter(!is.na(x)) %>%
   filter(vertebral_number > 23.9)
 
@@ -418,16 +418,42 @@ l6_anterior_objects_df <- l6_anterior_df %>%
 #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
 #############-------#############-----------------------   ASSEMBLE ALL  ----------------------###############-------###############
 
-l6_all_points_all_implants_constructed_df <- l6_implants_constructed_df %>%
+# l6_all_points_all_implants_constructed_df <- l6_implants_constructed_df %>%
+#   # select(-sublaminar_band_length, -length_for_tether) %>%
+#   bind_rows(l6_osteotomy_df) %>%
+#   bind_rows(l6_decompression_df) %>%
+#   bind_rows(l6_anterior_objects_df) %>%
+#   bind_rows(l6_all_interbody_df) %>%
+#   select(level, vertebral_number, everything())%>%
+#   remove_empty(which = c("rows", "cols"))
+# 
+# l6_revision_implants_df <- l6_all_points_all_implants_constructed_df %>%
+#   filter(object == "pedicle_screw" | object == "pelvic_screw" | object == "occipital_screw") %>%
+#   filter(approach == "posterior") %>%
+#   arrange(vertebral_number) %>%
+#   distinct() %>%
+#   group_by(level, object, side) %>%
+#   filter(y == max(y)) %>%
+#   ungroup()%>%
+#   remove_empty(which = c("rows", "cols"))
+# 
+# l6_all_implants_constructed_df <- l6_all_points_all_implants_constructed_df %>%
+#   select(-ends_with("_x"), -ends_with("_y")) %>%
+#   remove_empty(which = c("rows", "cols"))
+  # select(level, body_interspace, vertebral_number, approach, category,implant, object, side, x, y, fusion,interbody_fusion, direction, fixation_uiv_liv, object_constructed)
+
+l6_all_implants_constructed_df <- l6_implants_constructed_df %>%
   # select(-sublaminar_band_length, -length_for_tether) %>%
   bind_rows(l6_osteotomy_df) %>%
   bind_rows(l6_decompression_df) %>%
-  bind_rows(l6_anterior_objects_df) %>% 
+  bind_rows(l6_anterior_objects_df) %>%
   bind_rows(l6_all_interbody_df) %>%
   select(level, vertebral_number, everything())%>%
-  remove_empty()
+  remove_empty(which = c("rows", "cols"))%>%
+  select(-ends_with("_x"), -ends_with("_y")) %>%
+  remove_empty(which = c("rows", "cols"))
 
-l6_revision_implants_df <- l6_all_points_all_implants_constructed_df %>%
+l6_revision_implants_df <- l6_all_implants_constructed_df %>%
   filter(object == "pedicle_screw" | object == "pelvic_screw" | object == "occipital_screw") %>%
   filter(approach == "posterior") %>%
   arrange(vertebral_number) %>%
@@ -435,17 +461,12 @@ l6_revision_implants_df <- l6_all_points_all_implants_constructed_df %>%
   group_by(level, object, side) %>%
   filter(y == max(y)) %>%
   ungroup()%>%
-  remove_empty()
+  remove_empty(which = c("rows", "cols"))
 
-l6_all_implants_constructed_df <- l6_all_points_all_implants_constructed_df %>%
-  select(-ends_with("_x"), -ends_with("_y"))%>%
-  remove_empty()
-  # select(level, body_interspace, vertebral_number, approach, category,implant, object, side, x, y, fusion,interbody_fusion, direction, fixation_uiv_liv, object_constructed)
 
 rm(l6_osteotomy_df, 
    l6_decompression_df, 
    l6_all_interbody_df, 
    l6_anterior_objects_df,
-   l6_implants_constructed_df,
-   l6_all_points_all_implants_constructed_df)
+   l6_implants_constructed_df)
 

@@ -146,7 +146,20 @@ startup_modal_box <-
             ),
           )
         ),
-        uiOutput(outputId = "prior_patient_match")
+        conditionalPanel(condition = "input.redcap_institution.indexOf('NEVERTRUE') > -1",
+                         switchInput(inputId = "prior_patient_match_located", label = "Prior match?", value = FALSE)
+                         ),
+        conditionalPanel(condition = "input.prior_patient_match_located == true",
+                         column(12,
+                                tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", "Match found:"),
+                                br(),
+                                actionBttn(inputId = "record_complication_button", 
+                                           label = "Record Postop Complication", 
+                                           color = "warning", size = "md"),
+                                br(),
+                                tableOutput(outputId = "patient_prior_data")) 
+        )
+        # uiOutput(outputId = "prior_patient_match")
         # column(12, 
         #        textOutput(outputId = "match_found_result"),
         #        tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", "xxxx"),
@@ -574,7 +587,7 @@ startup_modal_box_diagnosis_symptoms <-
                                            inputId = "prior_anterior_plate_levels",
                                            label = "Prior Anterior Plate Levels:",
                                            selected = prior_anterior_plate_levels,
-                                           choices = revision_anterior_plate_df$level
+                                           choices = anterior_plate_vector
                                          )
                                        ),
                                        column(
@@ -584,7 +597,7 @@ startup_modal_box_diagnosis_symptoms <-
                                            inputId = "prior_anterior_plate_removed_levels",
                                            label = "Prior Anterior Plate Removed:",
                                            selected = prior_anterior_plate_removed_levels,
-                                           choices = revision_anterior_plate_df$level
+                                           choices = anterior_plate_vector
                                          )
                                        )
                                      )
@@ -809,7 +822,9 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                                                                            question_label_column_width = 25, 
                                                                            question_text_align = "right", 
                                                                            anterior_approach, 
-                                                                           posterior_approach){
+                                                                           posterior_approach,
+                                                                           anterior_cervical_approach_details_checkbox = c(),
+                                                                           posterior_additional_approach_details_checkbox = c()){
   
   modalDialog(title = "Confirm Surgical Details:", 
               size = "l",
@@ -970,6 +985,35 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                     choices_vector = interbody_levels_df$level,
                     initial_value_selected = interbody_levels_df$level,
                     status_color = "success",
+                  ),
+                  hr(),
+                  conditionalPanel(condition = "input.approach_sequence.indexOf('anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior-posterior') > -1 || input.approach_sequence.indexOf('anterior-posterior') > -1",
+                                   jh_make_shiny_table_row_function(
+                                     left_column_label = "Anterior Cervical:",
+                                     input_type = "checkbox",
+                                     input_id = "anterior_cervical_approach_details_checkbox",
+                                     left_column_percent_width = question_label_column_width,
+                                     font_size = row_label_font_size,
+                                     choices_vector = c(
+                                       "Microscope was utilized",
+                                       "Caspar Pins were utilized"
+                                     ),
+                                     initial_value_selected = anterior_cervical_approach_details_checkbox,
+                                   )
+                  ),
+                  hr(),
+                  conditionalPanel(condition = "input.approach_sequence.indexOf('posterior') > -1 || input.approach_sequence.indexOf('posterior-anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior-posterior') > -1 || input.approach_sequence.indexOf('anterior-posterior') > -1",
+                                   jh_make_shiny_table_row_function(
+                                     left_column_label = "Posterior Microscope:",
+                                     input_type = "checkbox",
+                                     input_id = "posterior_additional_approach_details_checkbox",
+                                     left_column_percent_width = question_label_column_width,
+                                     font_size = row_label_font_size,
+                                     choices_vector = c(
+                                       "Microscope was utilized"
+                                     ),
+                                     initial_value_selected = posterior_additional_approach_details_checkbox,
+                                   )
                   )
               )
   )
@@ -1011,8 +1055,7 @@ addition_surgical_details_modal_box_function <-
            preop_antibiotics_other = " ",
            anti_fibrinolytic = "",
            txa_loading = 20,
-           txa_maintenance = 5,
-           anterior_cervical_approach_details_checkbox = c()
+           txa_maintenance = 5
   ) {
     
     if(editing_the_details == FALSE){
@@ -1314,20 +1357,47 @@ addition_surgical_details_modal_box_function <-
             step = 5,
             text_align = "right",
           )
-        ),
-        hr(),
-        jh_make_shiny_table_row_function(
-          left_column_label = "Microscope",
-          input_type = "checkbox",
-          input_id = "anterior_cervical_approach_details_checkbox",
-          left_column_percent_width = left_column_percent_width,
-          font_size = row_label_font_size,
-          choices_vector = c(
-            "Microscope was utilized",
-            "Caspar Pins were utilized"
-          ),
-          initial_value_selected = anterior_cervical_approach_details_checkbox,
-        ),
+        )
+        # hr(),
+        # jh_make_shiny_table_row_function(
+        #   left_column_label = "Microscope",
+        #   input_type = "checkbox",
+        #   input_id = "anterior_cervical_approach_details_checkbox",
+        #   left_column_percent_width = left_column_percent_width,
+        #   font_size = row_label_font_size,
+        #   choices_vector = c(
+        #     "Microscope was utilized",
+        #     "Caspar Pins were utilized"
+        #   ),
+        #   initial_value_selected = anterior_cervical_approach_details_checkbox,
+        # ),
+        # conditionalPanel(condition = "input.approach_sequence.indexOf('anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior-posterior') > -1 || input.approach_sequence.indexOf('anterior-posterior') > -1",
+        #                  jh_make_shiny_table_row_function(
+        #                    left_column_label = "Microscope",
+        #                    input_type = "checkbox",
+        #                    input_id = "anterior_cervical_approach_details_checkbox",
+        #                    left_column_percent_width = left_column_percent_width,
+        #                    font_size = row_label_font_size,
+        #                    choices_vector = c(
+        #                      "Microscope was utilized",
+        #                      "Caspar Pins were utilized"
+        #                    ),
+        #                    initial_value_selected = anterior_cervical_approach_details_checkbox,
+        #                  )
+        # ),
+        # conditionalPanel(condition = "input.approach_sequence.indexOf('posterior') > -1 || input.approach_sequence.indexOf('posterior-anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior-posterior') > -1 || input.approach_sequence.indexOf('anterior-posterior') > -1",
+        #                  jh_make_shiny_table_row_function(
+        #                    left_column_label = "Microscope",
+        #                    input_type = "checkbox",
+        #                    input_id = "posterior_additional_approach_details_checkbox",
+        #                    left_column_percent_width = left_column_percent_width,
+        #                    font_size = row_label_font_size,
+        #                    choices_vector = c(
+        #                      "Microscope was utilized"
+        #                    ),
+        #                    initial_value_selected = posterior_additional_approach_details_checkbox,
+        #                  )
+        # )
       )
     )
   }

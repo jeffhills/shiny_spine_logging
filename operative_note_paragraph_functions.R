@@ -519,13 +519,11 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df,
   if(!is.null(anterior_bmp) && anterior_bmp > 0){
     anterior_bmp_dose_per_level <- round(anterior_bmp/str_count(string = procedure_paragraphs, pattern = "ANTERIOR_INTERBODY_BIOLOGIC_STATEMENT"), 1)
     
-    # fusion_graft_statement <- str_replace_all(fusion_graft_statement, pattern = "into the fusion bed", replacement = glue("and to improve the odds of successful fusion, I placed {anterior_bmp_dose_per_level}mg of BMP into the fusion bed"))
-    
-    fusion_graft_statement <- glue("{fusion_graft_statement} Additionally, I placed {anterior_bmp_dose_per_level}mg of BMP into the fusion bed to improve the odds of successful fusion")
+    fusion_graft_statement <- glue("{fusion_graft_statement} Additionally, I placed {anterior_bmp_dose_per_level}mg of BMP into the fusion bed to improve the odds of successful fusion. ")
  
   }
   
-  procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = "ANTERIOR_INTERBODY_BIOLOGIC_STATEMENT", replacement = as.character(glue("{fusion_graft_statement}. ")))
+  procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = "ANTERIOR_INTERBODY_BIOLOGIC_STATEMENT", replacement = as.character(glue("{fusion_graft_statement}")))
   
   
   
@@ -1227,7 +1225,7 @@ op_note_technique_combine_statement <- function(object,
     object == 'complete_facetectomy' ~ glue("For a complete facetectomy, the inferior, superior, medial and lateral borders of the inferior and superior facet were identified. Both the superior and inferior facet were completely excised and the underlying exiting nerve root decompressed. I performed a complete facetectomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}. This effectively decompressed {glue_collapse(x = exiting_roots_df$exiting_roots_statement, sep = ', ', last = ' and ')}."),
     object == 'grade_1' ~ glue("The inferior, superior, medial and lateral borders of the inferior facet were identified. The inferior facets {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} were excised and the bone was morselized to be used as morselized autograft."),
     object == 'grade_2' ~ glue("The borders of the inferior facet were identified and the inferior facets were adequately resected. A plane was then developed between the ligamentum and the dura centrally. This was carried out laterally in both directions until the facets were encountered. The superior facets were both adequately resected along with any necessary lamina to fully release the posterior column. {if_else(length(levels_side_df$level)>1, 'I performed posterior column (Smith-Peterson) osteotomies at', '')} {if_else(length(levels_side_df$level)>1, glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and '), '')}{if_else(length(levels_side_df$level)>1, '.', '')}"),   
-    object == 'diskectomy' ~ glue("For a discectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. Using a high-speed burr and Kerrison rongeur, I first performed a laminotomy, exposing the ligamentum flavum. I then carefully excised the ligamentum flavum, exposing the dura and exiting nerve root. The dural sac was identified and traversing root was protected. The annulus was then incised and the diseased disk material was removed.  I performed a discectomy with partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the {nerve_roots_list$traversing_roots}. Following the decompression, the canal and foramen and lateral recess were palpated to confirm an appropriate decompression had been completed."),
+    object == 'diskectomy' ~ glue("For the discectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. Using a high-speed burr and Kerrison rongeur, I first performed a laminotomy, exposing the ligamentum flavum. I then carefully excised the ligamentum flavum, exposing the dura and traversing {nerve_roots_list$traversing_roots} nerve root. The dural sac was identified and traversing root was protected. The annulus was then incised and the diseased disk material was removed.  I performed a discectomy with partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the {nerve_roots_list$traversing_roots}. Following the decompression, the canal and foramen and lateral recess were palpated to confirm an appropriate decompression had been completed."),
     object == 'laminotomy' ~ glue("For the laminotomy, the cranial and caudal laminar edges, pars, and facet joints were used as landmarks. Once I had determined the laminotomy site, I used a combination of a high-speed burr and Kerrison rongeur to resect the bone dorsal to the nerve root. I performed a laminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Following the decompression, the foramen was palpated to confirm an adequate decompression had been completed."),
     object == 'cervical_foraminotomy' ~ glue("For the posterior cervical foraminotomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}, the superior and inferior facet and joint line was clearly identified. I used a combination of a high-speed burr to resect roughly 50% of the overlying medial inferior facet, which exposed the superior facet. I then proceeded with the high-speed burr, resecting the superior articular facet out to the lateral border of the pedicles. Copious irrigation was used during the resection. After removing the superior facet, the exiting nerve root was identified. A Kerrison 1 was used to remove any remaining overlying tissue. I performed a posterior cervical foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Following the decompression, the hemostasis was obtained and I was able to palpate the lateral walls of the cranial and caudal pedicles, confirming adequate decompression."),
     object == 'laminectomy' ~ glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}. First, using a combination of a high-speed burr and Kerrison rongeur, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. Following the decompression, the canal was palpated to confirm an adequate decompression had been completed."),
@@ -1538,6 +1536,7 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
                                                            fusion_levels_vector = NULL,
                                                            additional_procedures_performed_vector = NULL){
   
+  
   ##### THIS IS WHAT CREATES the "REINSERTION OF SPINAL FIXATION" procedure
   # if(nrow(revision_implants_df)>0 & nrow(objects_added_df)>0){
   #   implant_removal_df <- revision_implants_df %>%
@@ -1556,6 +1555,13 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
   #                  mutate(object = "reinsertion_screw")))
   #   
   # } 
+  
+  if(nrow(objects_added_df)>0){
+    objects_added_df <- objects_added_df %>%
+    mutate(level = if_else(level == "Iliac_2", "Iliac", level))%>%
+    mutate(level = if_else(level == "S2AI_2", "S2AI", level))
+  }
+  
   
   if(length(revision_decompression_vector) > 0){
     if(nrow(objects_added_df)>0){
@@ -1637,7 +1643,7 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     mutate(count = row_number()) %>%
     mutate(procedures_performed_numbered = glue("{count}. {procedure_performed_statement}")) %>%
     select(procedures_performed_numbered)%>%
-    mutate(across(everything(), .fns = ~ as.character(.)))
+    mutate(across(everything(), .fns = ~ as.character(.))) 
   
   glue_collapse(procedures_numbered_df$procedures_performed_numbered, sep = "\n")
 }

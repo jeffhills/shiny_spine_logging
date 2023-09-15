@@ -17,7 +17,9 @@ library(ggpmisc)
 library(rclipboard)
 library(nngeo)
 library(shinydashboard)
-library(vroom)
+library(data.table)
+
+
 
 # library(profvis)
 
@@ -37,11 +39,10 @@ source("modal_functions.R", local = TRUE)
 source("make_geoms_functions.R", local = TRUE)
 source("build_spine_objects_functions.R", local = TRUE)
 source("load_coordinates_build_objects.R", local = TRUE)
-source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
+source("anterior_posterior_operative_note_generator_functions.R", local = TRUE) 
 source("operative_note_paragraph_functions.R", local = TRUE)
 source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
-# source("no_implants_added_op_note.R", local = TRUE)
 
 # jh_build_test_implant_function <- function(side_level_object_list = list("left_L3_pedicle_screw", "left_l4_pedicle_screw", "left_l5_pedicle_screw", 
 #                                                                          "right_L3_pedicle_screw", "right_l5_pedicle_screw")){
@@ -207,13 +208,19 @@ ui <- dashboardPage(skin = "black",
                   tabItem(tabName = "patient_details_procedures",
                           column(width = 3, 
                                  box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Patient Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE,
-                                     uiOutput(outputId = "patient_details_ui"),
+                                     # uiOutput(outputId = "patient_details_ui"),
+                                     tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", 
+                                              htmlOutput(outputId = "patient_details_text")
+                                     ),
                                      br(),
                                      actionBttn(inputId = "open_patient_details_modal", label = "Edit Patient Details", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
                                  ),
                                  br(),
                                  box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Diagnosis, Symptoms, Procedure Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE,
-                                     uiOutput(outputId = "diagnosis_symptoms_ui"),
+                                     # uiOutput(outputId = "diagnosis_symptoms_ui"),
+                                     tags$div(style = "font-size:20px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", 
+                                              htmlOutput(outputId = "diagnosis_symptoms_text")
+                                              ),
                                      br(),
                                      actionBttn(inputId = "open_diagnosis_symptoms_procedure_modal", label = "Edit", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
                                  ),
@@ -226,6 +233,21 @@ ui <- dashboardPage(skin = "black",
                                    offLabel = "No",
                                    value = FALSE,
                                    size = "mini"
+                                 ),
+                                 dropdownButton(
+                                   switchInput(label = "tumor diagnosis:",
+                                               onLabel = "Yes",
+                                               offLabel = "No",
+                                               inputId = "tumor_diagnosis_true_false",
+                                               value = FALSE
+                                   ),
+                                   switchInput(label = "Plot Summary Table:",
+                                               onLabel = "Yes",
+                                               offLabel = "No",
+                                               inputId = "intervertebral_cage_true_false",
+                                               value = FALSE
+                                   ),
+                                   circle = TRUE
                                  )
                           ),
                           column(width = 9, 
@@ -257,14 +279,14 @@ ui <- dashboardPage(skin = "black",
                                                       sliderInput(
                                                         inputId = "label_text_size",
                                                         label = "Label Text Size",
-                                                        value = 14,
+                                                        value = 18,
                                                         min = 9,
-                                                        max = 20
+                                                        max = 28
                                                       ),
                                                       sliderInput(
                                                         inputId = "label_text_offset",
                                                         label = "Move Labels Lateral",
-                                                        min = -10,
+                                                        min = -20,
                                                         max = 10,
                                                         value = -8
                                                       ),
@@ -321,8 +343,20 @@ ui <- dashboardPage(skin = "black",
                                                                     inline = TRUE)
                                              ), 
                                              column(width = 10,
-                                                    div(style = "font-size:16px; font-weight:bold; font-style:italic; text-align:center", "Add Procedures in Order Performed"),
-                                                    div(style = "font-size:12px; text-align:center", "Double click to remove an item."),
+                                                    div(style = "font-size:16px; font-weight:bold; font-style:italic; text-align:center", "Add Procedures in Order Performed. Double click to remove an item."),
+                                                    tags$table(
+                                                      tags$tr(
+                                                        tags$td(
+                                                          tags$div(style = "font-size:16px; font-weight:bold; font-family:sans-serif", "Currently Adding: ")
+                                                        ),
+                                                        tags$td(
+                                                          # htmlOutput(outputId = "currently_adding_text")
+                                                          tags$div(style = "font-size:16px; font-weight:bold; color:red; font-family:sans-serif; font-style:italic",
+                                                                   textOutput(outputId = "currently_adding_text")
+                                                          )
+                                                        )
+                                                      )
+                                                    ),
                                                     plotOutput("spine_plan",
                                                                height = 750,
                                                                click = "plot_click",
@@ -331,7 +365,20 @@ ui <- dashboardPage(skin = "black",
                                            )
                                        ), # end of left box with spine plot
                                        box(width = 5, ##### RIGHT COLUMN NEXT TO SPINE PLOT
-                                           uiOutput(outputId = "currently_adding_ui"),
+                                           # uiOutput(outputId = "currently_adding_ui"),
+                                           # tags$table(
+                                           #   tags$tr(
+                                           #     tags$td(
+                                           #       tags$div(style = "font-size:18px; font-weight:bold; font-family:sans-serif", "Currently Adding: ")
+                                           #     ),
+                                           #     tags$td(
+                                           #       # htmlOutput(outputId = "currently_adding_text")
+                                           #       tags$div(style = "font-size:18px; font-weight:bold; color:red; font-family:sans-serif; font-style:italic",
+                                           #                textOutput(outputId = "currently_adding_text")
+                                           #                )
+                                           #     )
+                                           #   )
+                                           # ),
                                            conditionalPanel(condition = "input.spine_approach.indexOf('Anterior') > -1",
                                                             div(style = "font-size:20px; font-weight:bold; text-align:left", "1. Select Procedure & Click Spine to Add:")
                                            ),
@@ -385,9 +432,26 @@ ui <- dashboardPage(skin = "black",
                                                               style = "simple",
                                                               color = "primary"
                                                             ),
-                                                            uiOutput(outputId = "intervertebral_cage_ui"),
+                                                            # uiOutput(outputId = "intervertebral_cage_ui"),
+                                                            conditionalPanel(condition = "input.intervertebral_cage_true_false == true",
+                                                                             actionBttn(
+                                                                               inputId = "add_intervertebral_cage",
+                                                                               size = "sm", block = TRUE,
+                                                                               label = "Add Intervertebral Cage (After VCR/Corpectomy)",
+                                                                               style = "simple",
+                                                                               color = "primary"
+                                                                             )),
                                                             br(),
-                                                            uiOutput(outputId = "tumor_resection_ui"),
+                                                            conditionalPanel(condition = "input.tumor_diagnosis_true_false == true",
+                                                                             actionBttn(
+                                                                               inputId = "add_tumor_resection",
+                                                                               size = "sm", 
+                                                                               block = TRUE,
+                                                                               label = "Add Resection & Decompression for TUMOR",
+                                                                               style = "simple",
+                                                                               color = "primary"
+                                                                             )),
+                                                            # uiOutput(outputId = "tumor_resection_ui"),
                                                             br(), 
                                                             div(style = "font-size:20px; font-weight:bold; text-align:left", "2. Select Implant/Procedure & Click Spine to Add:"),
                                            ),
@@ -540,7 +604,35 @@ ui <- dashboardPage(skin = "black",
                                                                                                    label = "Number of Left Total Rods:",
                                                                                                    choices = c(2,3,4,5), 
                                                                                                    inline = TRUE, selected = 2),
-                                                                                      uiOutput(outputId = "left_custom_rods_ui")
+                                                                                      column(12,
+                                                                                             pickerInput(inputId = "left_custom_rod_1",label = "Rod 1 Connects to:",
+                                                                                                         choices = c("a"),
+                                                                                                         multiple = TRUE,
+                                                                                                         options = list(`actions-box` = TRUE)),
+                                                                                             pickerInput(inputId = "left_custom_rod_2",label = "Rod 2 Connects to:",
+                                                                                                         choices = c("a"),
+                                                                                                         multiple = TRUE,
+                                                                                                         options = list(`actions-box` = TRUE)),
+                                                                                             conditionalPanel(condition = "input.left_custom_rods_number > 2",
+                                                                                                              pickerInput(inputId = "left_custom_rod_3",label = "Rod 3 Connects to:",
+                                                                                                                          choices = c("a"),
+                                                                                                                          multiple = TRUE,
+                                                                                                                          options = list(`actions-box` = TRUE))
+                                                                                             ),
+                                                                                             conditionalPanel(condition = "input.left_custom_rods_number > 3",
+                                                                                                              pickerInput(inputId = "left_custom_rod_4",label = "Rod 4 Connects to:",
+                                                                                                                          choices = c("a"),
+                                                                                                                          multiple = TRUE,
+                                                                                                                          options = list(`actions-box` = TRUE))
+                                                                                             ),
+                                                                                             conditionalPanel(condition = "input.left_custom_rods_number > 4",
+                                                                                                              pickerInput(inputId = "left_custom_rod_5",label = "Rod 5 Connects to:",
+                                                                                                                          choices = c("a"),
+                                                                                                                          multiple = TRUE,
+                                                                                                                          options = list(`actions-box` = TRUE))
+                                                                                             )
+                                                                                      )
+                                                                                      # uiOutput(outputId = "left_custom_rods_ui")
                                                                      )
                                                               ),
                                                               column(width = 6,
@@ -550,15 +642,40 @@ ui <- dashboardPage(skin = "black",
                                                                                                    choices = c(2,3,4,5), 
                                                                                                    inline = TRUE, 
                                                                                                    selected = 2),
-                                                                                      uiOutput(outputId = "right_custom_rods_ui")
+                                                                                      column(12,
+                                                                                             pickerInput(inputId = "right_custom_rod_1",label = "Rod 1 Connects to:",
+                                                                                                         choices = c("a"),
+                                                                                                         multiple = TRUE,
+                                                                                                         options = list(`actions-box` = TRUE)),
+                                                                                             pickerInput(inputId = "right_custom_rod_2",label = "Rod 2 Connects to:",
+                                                                                                         choices = c("a"),
+                                                                                                         multiple = TRUE,
+                                                                                                         options = list(`actions-box` = TRUE)),
+                                                                                             conditionalPanel(condition = "input.right_custom_rods_number > 2",
+                                                                                                              pickerInput(inputId = "right_custom_rod_3",label = "Rod 3 Connects to:",
+                                                                                                                          choices = c("a"),
+                                                                                                                          multiple = TRUE,
+                                                                                                                          options = list(`actions-box` = TRUE))
+                                                                                                              ),
+                                                                                             conditionalPanel(condition = "input.right_custom_rods_number > 3",
+                                                                                                              pickerInput(inputId = "right_custom_rod_4",label = "Rod 4 Connects to:",
+                                                                                                                          choices = c("a"),
+                                                                                                                          multiple = TRUE,
+                                                                                                                          options = list(`actions-box` = TRUE))
+                                                                                             ),
+                                                                                             conditionalPanel(condition = "input.right_custom_rods_number > 4",
+                                                                                                              pickerInput(inputId = "right_custom_rod_5",label = "Rod 5 Connects to:",
+                                                                                                                          choices = c("a"),
+                                                                                                                          multiple = TRUE,
+                                                                                                                          options = list(`actions-box` = TRUE))
+                                                                                             )
+                                                                                      )
+                                                                                      # uiOutput(outputId = "right_custom_rods_ui")
                                                                      )
                                                               )
                                                             )
                                                             # )
                                                             ##################### NEW
-                                           ),
-                                           conditionalPanel(condition = "input.fusion_procedure_performed == true",
-                                                            uiOutput(outputId = "interbody_implants_ui")
                                            )
                                        ) ## end of the construct details box
                                      ) ## end of the fluid row
@@ -1106,6 +1223,31 @@ server <- function(input, output, session) {
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   
+  # observeEvent(input$spine_approach, input$multiple_approach, input$multi_approach_starting_position, input$revision_approach, autoDestroy = TRUE, {
+  #   
+  #   if(any(str_to_lower(input$spine_approach) == "anterior",
+  #          input$multiple_approach == TRUE,
+  #          str_to_lower(input$multi_approach_starting_position) %in% c("anterior", "lateral"),
+  #          str_to_lower(input$revision_approach) == "anterior")){
+  #     
+  #     source("build_anterior_objects.R", local = TRUE) 
+  #   }
+  #   
+  #   # anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
+  # })
+  
+  # observe({
+  #   if(str_to_lower(input$spine_approach) == "anterior" | str_to_lower(input$revision_approach) == "anterior" |str_to_lower(input$multi_approach_starting_position) %in% c("anterior", "lateral") | input$multiple_approach == TRUE){
+  #     
+  #     source("build_anterior_objects.R", local = TRUE) 
+  #   }
+  # }) %>%
+  #   bindEvent(input$spine_approach, 
+  #             input$multiple_approach, 
+  #             input$multi_approach_starting_position, 
+  #             input$revision_approach,
+  #             ignoreInit = TRUE, ignoreNULL = TRUE)
+  
   ################################################    INITIAL STARTUP MODAL ######################################
   ################################################    INITIAL STARTUP MODAL ######################################
   ################################################    INITIAL STARTUP MODAL ######################################
@@ -1246,26 +1388,25 @@ server <- function(input, output, session) {
   })
   
   
+  observe({
+    if(existing_patient_data$match_found == TRUE){
+      updateSwitchInput(session = session, inputId = "prior_patient_match_located", value = TRUE, label = "Prior Patient Found")
+    }
+    
+  }) %>%
+    bindEvent(input$search_for_prior_patient,
+              # existing_patient_data$match_found,
+              ignoreInit = TRUE)
+  
   
   output$patient_prior_data <- renderTable({
     if(existing_patient_data$match_found == TRUE){
       existing_patient_data$patient_df
-    }
-  })
-  
-  
-  output$prior_patient_match <- renderUI({
-    if(existing_patient_data$match_found == TRUE){
-      column(12,
-             tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", "Match found:"),
-             br(),
-             actionBttn(inputId = "record_complication_button", label = "Record Postop Complication", color = "warning", size = "md"),
-             br(),
-             tableOutput(outputId = "patient_prior_data"))
     }else{
-      tags$div(style = "font-size:12px; font-weight:bold; color:darkblue; font-family:sans-serif;", "No Prior Data Loaded")
+      tibble(patient = character())
     }
   })
+
   
   ################################################  COMPLICATION RECORDING  MODAL BOX ######################################
   ################################################  COMPLICATION RECORDING  MODAL BOX ######################################
@@ -1663,17 +1804,17 @@ server <- function(input, output, session) {
   })
   
   
-  ####     ####     #### TEXT UI  ###    ####     ####     #### 
-  output$patient_details_ui <- renderUI({
+  ####     ####     #### TEXT   ###    ####     ####     #### 
+
+  output$patient_details_text <- renderText({
     age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
     details <- glue("{input$patient_first_name} {input$patient_last_name}, {age}yo {input$sex}")
-    
-    tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", details)
+    HTML("<div>", details, "</div>")
   })
   
-  output$diagnosis_symptoms_ui <- renderUI({
+  output$diagnosis_symptoms_text <- renderText({
     if(length(input$date_of_surgery)>0){
-      dos <- glue("Date of Surgery: {month(input$date_of_surgery, label = TRUE)} {day(input$date_of_surgery)}, {year(input$date_of_surgery)}")  
+      dos <- glue("Date of Surgery: {month(input$date_of_surgery)} {day(input$date_of_surgery)}, {year(input$date_of_surgery)}")  
     }else{
       dos <- "Date of Surgery:"
     }
@@ -1704,28 +1845,21 @@ server <- function(input, output, session) {
       symptoms <- "Symptoms:"
     }
     
-    column(12, 
-           tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", dos),
-           tags$div(style = "font-size:20; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", staged_procedure_text),
-           br(),
-           tags$div(style = "font-size:18px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", diagnosis),
-           br(),
-           tags$div(style = "font-size:18px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", symptoms)
-    )
+    HTML("<div>", dos, "</div>",
+         "<div>", staged_procedure_text, "</div>",
+         "<div>", diagnosis, "</div>", 
+         "<div>", symptoms, "</div>"
+         )
   })
   
-  
-  output$currently_adding_ui <- renderUI({
-    tags$table(
-      tags$tr(
-        tags$td(
-          tags$div(style = "font-size:18px; font-weight:bold; font-family:sans-serif", "Currently Adding:  ")
-        ),
-        tags$td(
-          tags$div(style = "font-size:18px; font-weight:bold; color:red; font-family:sans-serif; font-style:italic", str_to_title(string = str_replace_all(string = input$object_to_add, pattern = '_', replacement = ' ')))
-        )
-      )
-    )
+
+  output$currently_adding_text <- renderText({
+    if(input$object_to_add == "sublaminar_decompression"){
+      paste("Decompression + Foraminotomy")
+    }else{
+      str_to_title(string = str_replace_all(string = input$object_to_add, pattern = '_', replacement = ' '))
+    }
+    
   })
   
   
@@ -1815,7 +1949,6 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$implants_complete, ignoreInit = TRUE, {
-    
     if(nrow(all_objects_to_add_list$objects_df %>% 
             filter(str_detect(object, "screw") | str_detect(object, "anterior_plate")))>0){
       implants_placed_yes_no <- "yes" 
@@ -1870,7 +2003,9 @@ server <- function(input, output, session) {
                                                                        alignment_correction_method = input$alignment_correction_method,
                                                                        instruments_used_for_bony_work = input$instruments_used_for_bony_work,
                                                                        anterior_approach = anterior_approach_yes_no,
-                                                                       posterior_approach = posterior_approach_yes_no
+                                                                       posterior_approach = posterior_approach_yes_no,
+                                                                       anterior_cervical_approach_details_checkbox = input$anterior_cervical_approach_details_checkbox, 
+                                                                       posterior_additional_approach_details_checkbox = input$posterior_additional_approach_details_checkbox
         )
         
       )
@@ -2277,6 +2412,7 @@ server <- function(input, output, session) {
     procedure_approach
   })
   
+
   ## NOW make a reactive modal for editing the info if needed ###
   modal_box_surgical_details_reactive <- reactive({
     addition_surgical_details_modal_box_function(editing_the_details = TRUE, ## this shows a different button at the footer
@@ -2298,10 +2434,10 @@ server <- function(input, output, session) {
                                                  pre_positioning_motors = input$pre_positioning_motors,
                                                  neuromonitoring_signal_stability = input$neuromonitoring_signal_stability,
                                                  preop_antibiotics = input$preop_antibiotics,
+                                                 preop_antibiotics_other =  input$preop_antibiotics_other, 
                                                  anti_fibrinolytic = input$anti_fibrinolytic,
                                                  txa_loading = input$txa_loading,
-                                                 txa_maintenance = input$txa_maintenance, 
-                                                 anterior_cervical_approach_details_checkbox = input$anterior_cervical_approach_details_checkbox)
+                                                 txa_maintenance = input$txa_maintenance)
   })
   
   ## NOW OBSERVE THE COMPLETION OF MODAL BOX 1 AND THEN SHOW MODAL BOX 2
@@ -2662,9 +2798,19 @@ server <- function(input, output, session) {
   
   ###### ######  -----------   ######### Change to 6 Lumbar Vertebrae ###### ######  -----------   ######### 
   
-  observeEvent(input$lumbar_vertebrae_count, ignoreInit = TRUE,{
+  # observe({
+  #   if(input$lumbar_vertebrae_count == "6"){
+  #     source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
+  #   }
+  # })
+  # 
+  
+  
+  observeEvent(input$lumbar_vertebrae_count, ignoreInit = TRUE, ignoreNULL = TRUE,{
     if(input$lumbar_vertebrae_count == "6"){
       ## first backup L5
+      # source("build_anterior_objects.R", local = TRUE)
+      
       l5_levels_vector <<- levels_vector
       l5_labels_df <<- labels_df
       l5_vertebral_numbers_vector <<- vertebral_numbers_vector
@@ -2677,10 +2823,10 @@ server <- function(input, output, session) {
       l5_revision_implants_df <<- revision_implants_df
       l5_anterior_df <<- anterior_df
       l5_all_implants_constructed_df <<- all_implants_constructed_df
-      l5_spine_png <<- spine_png
       l5_open_canal_df <<- open_canal_df
       l5_labels_anterior_df <<- labels_anterior_df
       
+      # source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
       
       labels_anterior_df <<- labels_anterior_df  %>%
         add_row(level = "L6", x = 0.5, y = 0.14)
@@ -2738,17 +2884,10 @@ server <- function(input, output, session) {
   #########-------------------################   UPDATE CHOICES    #########-------------------################ 
   
   ################----------  Diagnoses    ------------######################  
-  
-  output$tumor_resection_ui <- renderUI({
-    
+
+  observe({
     if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
-      actionBttn(
-        inputId = "add_tumor_resection",
-        size = "sm", block = TRUE,
-        label = "Add Resection & Decompression for TUMOR",
-        style = "simple",
-        color = "primary"
-      )
+      updateSwitchInput(session = session, inputId = "tumor_diagnosis_true_false", value = TRUE)
     }
   })
   
@@ -2780,32 +2919,21 @@ server <- function(input, output, session) {
     }
   })
   
-  output$intervertebral_cage_ui <- renderUI({
-    osteotomy_df <- all_objects_to_add_list$objects_df %>%
+  observe({
+    all_objects_to_add_list$objects_df %>%
       filter(object == "grade_3" |
                object == "grade_4" | 
                object == "grade_5" |
                object == "grade_6") %>%
       select(level, vertebral_number, approach, object) %>%
       distinct()
-    ui_list <- list()
-    if(nrow(osteotomy_df) > 0){
-      ui_list$br <- br()
-      
-      ui_list$button <- actionBttn(
-        inputId = "add_intervertebral_cage",
-        size = "sm", block = TRUE,
-        label = "Add Intervertebral Cage (After VCR/Corpectomy)",
-        style = "simple",
-        color = "primary"
-      )
-      ui_list
-      
-    }else{
-      NULL
+    
+    if((any(all_objects_to_add_list$objects_df$object %in% c("grade_3", "grade_4", "grade_5")))){
+      updateSwitchInput(session = session, inputId = "intervertebral_cage_true_false", value = TRUE)
     }
   })
   
+
   observeEvent(input$add_intervertebral_cage, ignoreNULL = TRUE, ignoreInit = TRUE,{
     updateRadioGroupButtons(session = session, 
                             inputId = "object_to_add",
@@ -3118,6 +3246,14 @@ server <- function(input, output, session) {
   
   
   ########################################### object DETAILS REACTIVE ###########################################
+  geoms_list_anterior_diskectomy <- reactiveValues()
+  geoms_list_anterior_interbody <- reactiveValues()
+  geoms_list_anterior_instrumentation <- reactiveValues()
+  
+  geoms_list_posterior <- reactiveValues()
+  geoms_list_revision_posterior <- reactiveValues()
+  geoms_list_revision_anterior <- reactiveValues()
+  
   #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
   object_added_reactive_df <- reactive({
     
@@ -3127,11 +3263,12 @@ server <- function(input, output, session) {
       object_currently_selected_to_add <- input$object_to_add
     }
     
-    object_type_filtered_df <- all_implants_constructed_df %>%
-      filter(object %in% object_currently_selected_to_add)
+    # object_type_filtered_df <- all_implants_constructed_df %>%
+    #   filter(object %in% object_currently_selected_to_add)
     
     object_added_reactive_df <- nearPoints(
-      df = object_type_filtered_df,
+      df = (all_implants_constructed_df %>%
+              filter(object %in% object_currently_selected_to_add)),
       coordinfo = input$plot_click,
       xvar = "x",
       yvar = "y",
@@ -3148,8 +3285,8 @@ server <- function(input, output, session) {
       object_added_reactive_df <- object_added_reactive_df %>%
         bind_rows(anterior_interbody_df)
     }
-    
     object_added_reactive_df
+    
   })
   
   #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
@@ -3164,15 +3301,62 @@ server <- function(input, output, session) {
         all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
       }
     }
+    
   })
+  
+  ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS     ######### ~~~~~~~~~~~~~~  #############
+  ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS    ######### ~~~~~~~~~~~~~~  #############
+  
+  geoms_list_anterior_diskectomy <- reactiveValues()
+  geoms_list_anterior_interbody <- reactiveValues()
+  geoms_list_anterior_instrumentation <- reactiveValues()
+  
+  geoms_list_posterior <- reactiveValues()
+  geoms_list_revision_posterior <- reactiveValues()
+  geoms_list_revision_anterior <- reactiveValues()
+  
+  observeEvent(list(input$plot_click,
+                    input$plot_double_click,
+                    input$reset_all,
+                    all_objects_to_add_list$objects_df), {
+                      if(input$spine_approach == "Anterior"){
+                        anterior_df <- all_objects_to_add_list$objects_df %>%
+                          filter(approach == "anterior")
+                        
+                        anterior_geoms_list <- jh_make_anterior_geoms_function(all_anterior_objects_df = anterior_df)
+                        
+                        geoms_list_anterior_diskectomy$geoms <- anterior_geoms_list$geoms_list_anterior_diskectomy
+                        geoms_list_anterior_interbody$geoms <- anterior_geoms_list$geoms_list_anterior_interbody
+                        geoms_list_anterior_instrumentation$geoms <- anterior_geoms_list$geoms_list_anterior_instrumentation
+                        
+                      }else{
+                        # all_posterior_df <- all_objects_to_add_list$objects_df %>%
+                        #   filter(approach == "posterior")
+                        if(nrow(all_objects_to_add_list$objects_df %>%
+                          filter(approach == "posterior", str_detect(object, "screw")))>0){
+                          geoms_list_posterior$screws <- jh_make_posterior_screws_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
+                                                                                                   filter(approach == "posterior", str_detect(object, "screw")), plot_with_patterns = input$plot_with_patterns_true)
+                          geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
+                                                                                           filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
+                                                                                         plot_with_patterns = input$plot_with_patterns_true)
+                        }else{
+                            geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
+                                                                                             filter(approach == "posterior"),
+                                                                                       plot_with_patterns = input$plot_with_patterns_true)
+                          }
+                        
+                        
+                        
+                      }
+                    })
   
   ##### Modal to select whether the C2 nerve root was spared or transected.
   observeEvent(input$plot_click, ignoreInit = TRUE, {
     
-    object_added <- object_added_reactive_df()$object[1]
-    level_added <- object_added_reactive_df()$level[1]
+    # object_added <- object_added_reactive_df()$object[1]
+    # level_added <- object_added_reactive_df()$level[1]
     
-    if(object_added == "lateral_mass_screw" & level_added == "C1"){
+    if(object_added_reactive_df()$object[1] == "lateral_mass_screw" & object_added_reactive_df()$level[1] == "C1"){
       if(unique(object_added_reactive_df()$side) == "left"){
         showModal(
           modalDialog(
@@ -3204,114 +3388,129 @@ server <- function(input, output, session) {
   
   ##### Modal to report whether the PLL was taken down
   observeEvent(input$plot_click, ignoreInit = TRUE, {
-    object_added <- object_added_reactive_df()$object[1]
-    level_added <- object_added_reactive_df()$level[1]
-    if(object_added == "decompression_diskectomy_fusion" & level_added %in% c("C2-C3", "C3-C4", "C4-C5", "C5-C6", "C6-C7", "C7-T1", "T1-T2", "T2-T3")){
+    # object_added <- object_added_reactive_df()$object[1]
+    # level_added <- object_added_reactive_df()$level[1]
+    if(object_added_reactive_df()$object[1] == "decompression_diskectomy_fusion" & object_added_reactive_df()$level[1] %in% c("C2-C3", "C3-C4", "C4-C5", "C5-C6", "C6-C7", "C7-T1", "T1-T2", "T2-T3")){
       
-      if(level_added == "C2-C3"){
+      # str_replace_all(str_to_lower(object_added_reactive_df()$level[1]), pattern = "-", "_")
+      # paste0(str_replace_all(str_to_lower(object_added_reactive_df()$level[1]), pattern = "-", "_"), "_pll")
+ 
         showModal(
           modalDialog(
             size = "l",
             easyClose = FALSE,
-            awesomeRadio(inputId = "c2_c3_pll",
-                         label = "Was the PLL taken down?", 
+            awesomeRadio(inputId = paste0(str_replace_all(str_to_lower(object_added_reactive_df()$level[1]), pattern = "-", "_"), "_pll"),
+                         label = glue("Was the PLL at {object_added_reactive_df()$level[1]} taken down?"), 
                          choices = c("No", "Yes"), 
                          inline = TRUE,
                          width = "100%")
           )
-        ) 
-      }
-      if(level_added == "C3-C4"){
-        showModal(
-          modalDialog(
-            size = "l",
-            easyClose = FALSE,
-            awesomeRadio(inputId = "c3_c4_pll",
-                         label = "Was the PLL taken down?", 
-                         choices = c("No", "Yes"), 
-                         inline = TRUE,
-                         width = "100%")
-          )
-        ) 
-      }
-      if(level_added == "C4-C5"){
-        showModal(
-          modalDialog(
-            size = "l",
-            easyClose = FALSE,
-            awesomeRadio(inputId = "c4_c5_pll",
-                         label = "Was the PLL taken down?", 
-                         choices = c("No", "Yes"), 
-                         inline = TRUE,
-                         width = "100%")
-          )
-        ) 
-      }
-      if(level_added == "C5-C6"){
-        showModal(
-          modalDialog(
-            size = "l",
-            easyClose = FALSE,
-            awesomeRadio(inputId = "c5_c6_pll",
-                         label = "Was the PLL taken down?", 
-                         choices = c("No", "Yes"), 
-                         inline = TRUE,
-                         width = "100%")
-          )
-        ) 
-      }
-      if(level_added == "C6-C7"){
-        showModal(
-          modalDialog(
-            size = "l",
-            easyClose = FALSE,
-            awesomeRadio(inputId = "c6_c7_pll",
-                         label = "Was the PLL taken down?", 
-                         choices = c("No", "Yes"), 
-                         inline = TRUE,
-                         width = "100%")
-          )
-        ) 
-      }
-      if(level_added == "C7-T1"){
-        showModal(
-          modalDialog(
-            size = "l",
-            easyClose = FALSE,
-            awesomeRadio(inputId = "c7_t1_pll",
-                         label = "Was the PLL taken down?", 
-                         choices = c("No", "Yes"), 
-                         inline = TRUE,
-                         width = "100%")
-          )
-        ) 
-      }
-      if(level_added == "T1-T2"){
-        showModal(
-          modalDialog(
-            size = "l",
-            easyClose = FALSE,
-            awesomeRadio(inputId = "t1_t2_pll",
-                         label = "Was the PLL taken down?", 
-                         choices = c("No", "Yes"), 
-                         inline = TRUE,
-                         width = "100%")
-          )
-        ) 
-      }
-      if(level_added == "T2-T3"){
-        showModal(
-          modalDialog(
-            size = "l",
-            easyClose = FALSE,
-            awesomeRadio(inputId = "t2_t3_pll",
-                         label = "Was the PLL taken down?", 
-                         choices = c("No", "Yes"), 
-                         inline = TRUE,
-                         width = "100%")
-          )
-        ) 
-      }
+        )
+      
+      # if(level_added == "C2-C3"){
+      #   showModal(
+      #     modalDialog(
+      #       size = "l",
+      #       easyClose = FALSE,
+      #       awesomeRadio(inputId = "c2_c3_pll",
+      #                    label = "Was the PLL taken down?", 
+      #                    choices = c("No", "Yes"), 
+      #                    inline = TRUE,
+      #                    width = "100%")
+      #     )
+      #   ) 
+      # }
+      # if(level_added == "C3-C4"){
+      #   showModal(
+      #     modalDialog(
+      #       size = "l",
+      #       easyClose = FALSE,
+      #       awesomeRadio(inputId = "c3_c4_pll",
+      #                    label = "Was the PLL taken down?", 
+      #                    choices = c("No", "Yes"), 
+      #                    inline = TRUE,
+      #                    width = "100%")
+      #     )
+      #   ) 
+      # }
+      # if(level_added == "C4-C5"){
+      #   showModal(
+      #     modalDialog(
+      #       size = "l",
+      #       easyClose = FALSE,
+      #       awesomeRadio(inputId = "c4_c5_pll",
+      #                    label = "Was the PLL taken down?", 
+      #                    choices = c("No", "Yes"), 
+      #                    inline = TRUE,
+      #                    width = "100%")
+      #     )
+      #   ) 
+      # }
+      # if(level_added == "C5-C6"){
+      #   showModal(
+      #     modalDialog(
+      #       size = "l",
+      #       easyClose = FALSE,
+      #       awesomeRadio(inputId = "c5_c6_pll",
+      #                    label = "Was the PLL taken down?", 
+      #                    choices = c("No", "Yes"), 
+      #                    inline = TRUE,
+      #                    width = "100%")
+      #     )
+      #   ) 
+      # }
+      # if(level_added == "C6-C7"){
+      #   showModal(
+      #     modalDialog(
+      #       size = "l",
+      #       easyClose = FALSE,
+      #       awesomeRadio(inputId = "c6_c7_pll",
+      #                    label = "Was the PLL taken down?", 
+      #                    choices = c("No", "Yes"), 
+      #                    inline = TRUE,
+      #                    width = "100%")
+      #     )
+      #   ) 
+      # }
+      # if(level_added == "C7-T1"){
+      #   showModal(
+      #     modalDialog(
+      #       size = "l",
+      #       easyClose = FALSE,
+      #       awesomeRadio(inputId = "c7_t1_pll",
+      #                    label = "Was the PLL taken down?", 
+      #                    choices = c("No", "Yes"), 
+      #                    inline = TRUE,
+      #                    width = "100%")
+      #     )
+      #   ) 
+      # }
+      # if(level_added == "T1-T2"){
+      #   showModal(
+      #     modalDialog(
+      #       size = "l",
+      #       easyClose = FALSE,
+      #       awesomeRadio(inputId = "t1_t2_pll",
+      #                    label = "Was the PLL taken down?", 
+      #                    choices = c("No", "Yes"), 
+      #                    inline = TRUE,
+      #                    width = "100%")
+      #     )
+      #   ) 
+      # }
+      # if(level_added == "T2-T3"){
+      #   showModal(
+      #     modalDialog(
+      #       size = "l",
+      #       easyClose = FALSE,
+      #       awesomeRadio(inputId = "t2_t3_pll",
+      #                    label = "Was the PLL taken down?", 
+      #                    choices = c("No", "Yes"), 
+      #                    inline = TRUE,
+      #                    width = "100%")
+      #     )
+      #   ) 
+      # }
     }
   })
   
@@ -3751,8 +3950,7 @@ server <- function(input, output, session) {
                  }
                })
   
-  
-  output$left_custom_rods_ui <- renderUI({
+  observe({
     if(input$add_left_custom_rods == TRUE){
       left_implants_df <- all_objects_to_add_list$objects_df %>%
         select(level, side, object, x, y) %>%
@@ -3764,75 +3962,72 @@ server <- function(input, output, session) {
       
       names(left_implant_choices) <- left_implants_df$implant_label
       
-      if(input$left_custom_rods_number > 1){
-        column(12,
-               pickerInput(inputId = "left_custom_rod_1",label = "Rod 1 Connects to:",
-                           choices = left_implants_df$implant_label,
-                           multiple = TRUE,
-                           options = list(`actions-box` = TRUE)),
-               pickerInput(inputId = "left_custom_rod_2",label = "Rod 2 Connects to:",
-                           choices = left_implants_df$implant_label,
-                           multiple = TRUE,
-                           options = list(`actions-box` = TRUE)),
-               if(input$left_custom_rods_number > 2){
-                 pickerInput(inputId = "left_custom_rod_3",label = "Rod 3 Connects to:",
-                             choices = left_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               },
-               if(input$left_custom_rods_number > 3){
-                 pickerInput(inputId = "left_custom_rod_4",label = "Rod 4 Connects to:",
-                             choices = left_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               },
-               if(input$left_custom_rods_number > 4){
-                 pickerInput(inputId = "left_custom_rod_5",label = "Rod 5 Connects to:",
-                             choices = left_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               }
-        )
-      }
-    }else{
-      NULL
+      updatePickerInput(session = session, 
+                        inputId = "left_custom_rod_1", 
+                        choices = left_implants_df$implant_label)
+      
+      updatePickerInput(session = session, 
+                        inputId = "left_custom_rod_2", 
+                        choices = left_implants_df$implant_label)
+      
+      updatePickerInput(session = session, 
+                        inputId = "left_custom_rod_3", 
+                        choices = left_implants_df$implant_label)
+      
+      updatePickerInput(session = session, 
+                        inputId = "left_custom_rod_4", 
+                        choices = left_implants_df$implant_label)
+      
+      updatePickerInput(session = session, 
+                        inputId = "left_custom_rod_5", 
+                        choices = left_implants_df$implant_label)
     }
+  }) %>%
+    bindEvent(input$add_left_custom_rods, input$left_custom_rods_number)
+  
+
+  observeEvent(list(input$plot_click,input$double_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
+    if(any(input$add_left_accessory_rod, 
+           input$add_left_satellite_rod,
+           input$add_left_intercalary_rod,
+           input$add_left_linked_rods,
+           input$add_left_kickstand_rod, 
+           input$add_left_custom_rods)){
+      if(str_detect(input$object_to_add, "screw_hook_wire")){
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_left_accessory_rod", 
+                              value = FALSE)
+        
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_left_satellite_rod", 
+                              value = FALSE)
+        
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_left_intercalary_rod", 
+                              value = FALSE)
+        
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_left_linked_rods", 
+                              value = FALSE)
+        
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_left_kickstand_rod", 
+                              value = FALSE)
+        
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_left_custom_rods", 
+                              value = FALSE) 
+      }
+    }
+
   })
   
-  observeEvent(list(input$plot_click,input$double_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_left_accessory_rod", 
-                          value = FALSE)
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_left_satellite_rod", 
-                          value = FALSE)
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_left_intercalary_rod", 
-                          value = FALSE)
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_left_linked_rods", 
-                          value = FALSE)
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_left_kickstand_rod", 
-                          value = FALSE)
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_left_custom_rods", 
-                          value = FALSE)
-    
-  })
   observeEvent(list(input$add_left_custom_rods,
                     input$left_custom_rod_1,
                     input$left_custom_rod_2,
                     input$left_custom_rod_3,
                     input$left_custom_rod_4,
                     input$left_custom_rod_5), ignoreInit = TRUE, ignoreNULL = TRUE, {
-                      
                       updateAwesomeCheckbox(session = session, 
                                             inputId = "add_left_accessory_rod", 
                                             value = FALSE)
@@ -4031,13 +4226,13 @@ server <- function(input, output, session) {
                                                                          prior_rod_overlap_connectors = input$left_revision_implants_rod_connectors
         )
         if(length(left_rods_connectors_list$rod_list) > 0){
-          rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$rod_list), alpha = 0.75)
+          rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$rod_list), alpha = 0.85)
         }else{
           rods_list$left_rod_list_sf_geom <- NULL
         }
         
         if(length(left_rods_connectors_list$connector_list) > 0){
-          rods_list$left_connector_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.75)
+          rods_list$left_connector_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.95)
         }else{
           rods_list$left_connector_list_sf_geom <- NULL
         }
@@ -4059,7 +4254,7 @@ server <- function(input, output, session) {
         select(x, y) %>%
         as.matrix()
       
-      rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
+      rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
     }else{
       rods_list$left_connector_list_sf_geom <- NULL
       rods_list$left_rod_list_sf_geom <- NULL
@@ -4491,8 +4686,7 @@ server <- function(input, output, session) {
                  }
                })
   
-  
-  output$right_custom_rods_ui <- renderUI({
+  observe({
     if(input$add_right_custom_rods == TRUE){
       right_implants_df <- all_objects_to_add_list$objects_df %>%
         select(level, side, object, x, y) %>%
@@ -4504,67 +4698,64 @@ server <- function(input, output, session) {
       
       names(right_implant_choices) <- right_implants_df$implant_label
       
-      if(input$right_custom_rods_number > 1){
-        column(12,
-               pickerInput(inputId = "right_custom_rod_1",label = "Rod 1 Connects to:",
-                           choices = right_implants_df$implant_label,
-                           multiple = TRUE,
-                           options = list(`actions-box` = TRUE)),
-               pickerInput(inputId = "right_custom_rod_2",label = "Rod 2 Connects to:",
-                           choices = right_implants_df$implant_label,
-                           multiple = TRUE,
-                           options = list(`actions-box` = TRUE)),
-               if(input$right_custom_rods_number > 2){
-                 pickerInput(inputId = "right_custom_rod_3",label = "Rod 3 Connects to:",
-                             choices = right_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               },
-               if(input$right_custom_rods_number > 3){
-                 pickerInput(inputId = "right_custom_rod_4",label = "Rod 4 Connects to:",
-                             choices = right_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               },
-               if(input$right_custom_rods_number > 4){
-                 pickerInput(inputId = "right_custom_rod_5",label = "Rod 5 Connects to:",
-                             choices = right_implants_df$implant_label,
-                             multiple = TRUE,
-                             options = list(`actions-box` = TRUE))
-               }
-        )
-      }
-    }else{
-      NULL
+      updatePickerInput(session = session, 
+                        inputId = "right_custom_rod_1", 
+                        choices = right_implants_df$implant_label)
+      
+      updatePickerInput(session = session, 
+                        inputId = "right_custom_rod_2", 
+                        choices = right_implants_df$implant_label)
+      
+      updatePickerInput(session = session, 
+                        inputId = "right_custom_rod_3", 
+                        choices = right_implants_df$implant_label)
+      
+      updatePickerInput(session = session, 
+                        inputId = "right_custom_rod_4", 
+                        choices = right_implants_df$implant_label)
+      
+      updatePickerInput(session = session, 
+                        inputId = "right_custom_rod_5", 
+                        choices = right_implants_df$implant_label)
     }
-  })
+  }) %>%
+    bindEvent(input$add_right_custom_rods, input$right_custom_rods_number)
   
+
   observeEvent(list(input$plot_click,input$double_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_right_accessory_rod", 
-                          value = FALSE)
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_right_satellite_rod", 
-                          value = FALSE)
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_right_intercalary_rod", 
-                          value = FALSE)
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_right_linked_rods", 
-                          value = FALSE)
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_right_kickstand_rod", 
-                          value = FALSE)
-    
-    updateAwesomeCheckbox(session = session, 
-                          inputId = "add_right_custom_rods", 
-                          value = FALSE)
-    
+    if(any(input$add_right_accessory_rod, 
+           input$add_right_satellite_rod,
+           input$add_right_intercalary_rod,
+           input$add_right_linked_rods,
+           input$add_right_kickstand_rod, 
+           input$add_right_custom_rods)){
+      if(str_detect(input$object_to_add, "screw_hook_wire")){
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_right_accessory_rod",  
+                              value = FALSE)
+        
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_right_satellite_rod", 
+                              value = FALSE)
+        
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_right_intercalary_rod", 
+                              value = FALSE)
+        
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_right_linked_rods", 
+                              value = FALSE)
+        
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_right_kickstand_rod", 
+                              value = FALSE)
+        
+        updateAwesomeCheckbox(session = session, 
+                              inputId = "add_right_custom_rods", 
+                              value = FALSE) 
+      }
+    }
+
   })
   
   observeEvent(list(input$add_right_custom_rods,
@@ -4774,13 +4965,13 @@ server <- function(input, output, session) {
                                                                           prior_rod_overlap_connectors = input$right_revision_implants_rod_connectors
         )
         if(length(right_rods_connectors_list$rod_list) > 0){
-          rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.75)
+          rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.85)
         }else{
           rods_list$right_rod_list_sf_geom <- NULL
         }
         
         if(length(right_rods_connectors_list$connector_list) > 0){
-          rods_list$right_connector_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.75)
+          rods_list$right_connector_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.95)
         }else{
           rods_list$right_connector_list_sf_geom <- NULL
         }
@@ -4802,7 +4993,7 @@ server <- function(input, output, session) {
         select(x, y) %>%
         as.matrix()
       
-      rods_list$right_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(right_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.75)
+      rods_list$right_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(right_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
     }else{
       rods_list$right_connector_list_sf_geom <- NULL
       rods_list$right_rod_list_sf_geom <- NULL
@@ -4831,6 +5022,7 @@ server <- function(input, output, session) {
   
   anterior_plate_revision_implants_df_reactive <- reactive({
     if(req(input$revision_approach) == "anterior"){
+      revision_anterior_plate_df <- tibble(level = character(), vertebral_number = double(), object = character(), object_constructed = character()) 
       if(length(input$prior_anterior_plate_levels)>0){
         
         anterior_plate_revision_implants_df <- tibble(prior_plate_present_levels = input$prior_anterior_plate_levels) %>%
@@ -4846,7 +5038,10 @@ server <- function(input, output, session) {
     }
     
     anterior_plate_revision_implants_df
-  })
+  }) %>%
+    bindEvent(input$revision_approach, 
+              ignoreInit = TRUE, 
+              ignoreNULL = TRUE)
   
   
   ################# ------------  #############  REACTIVE UI's    ################# ------------  ############# 
@@ -4867,9 +5062,9 @@ server <- function(input, output, session) {
       intervertebral_cage_df <- cages_df %>%
         filter(vertebral_number == min(vertebral_number)) %>%
         mutate(level = as.character(glue_collapse(x = cages_df$level, sep = "-"))) %>%
-        select(level, vertebral_number, object, approach)
+        select(level, side, vertebral_number, object, approach)
     }else{
-      intervertebral_cage_df <- tibble(level = character(), vertebral_number = double(), object = character(), approach = character())
+      intervertebral_cage_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), approach = character())
     }
     
     interbody_implants_df <- all_objects_to_add_list$objects_df %>%
@@ -4881,59 +5076,51 @@ server <- function(input, output, session) {
           object == "llif" |
           object == "anterior_disc_arthroplasty" |
           object == "corpectomy_cage") %>%
-      select(level, vertebral_number, object, approach) %>%
+      select(level, side, vertebral_number, object, approach) %>%
       union_all(intervertebral_cage_df) %>%
       distinct() %>%
-      arrange(vertebral_number) 
+      arrange(vertebral_number) %>%
+      mutate(cage_id = paste(str_to_lower(str_replace_all(level, "-", "_")), side, object, sep = "_")) 
     # }
-  })
+    interbody_implants_df
+  }) %>%
+    bindEvent(input$plot_click,
+              input$implant_details)
   
-  
-  output$interbody_implants_ui <- renderUI({
-
-    if(nrow(interbody_df_reactive()) >0){
-      box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody Implant Details:"), collapsible = TRUE, 
-          fixedRow(
-            column(width = 12, 
-                   column(width = 3,
-                          h4(strong("Level:"))
-                   ),
-                   column(width = 9, 
-                          fixedRow(
-                            column(width = 5, 
-                                   h4(strong("Composition:")), 
-                            ), 
-                            column(width = 4,
-                                   h4(strong("Device Name:"))
-                            ), 
-                            column(width = 3, 
-                                   h4(strong("Height(mm):"))
-                            )
-                          )
-                   )
-            ),
-            map(.x = interbody_df_reactive()$level, .f = ~make_interbody_ui_function(level = .x))
-          )
-      )
+  observe({
+    if(nrow(interbody_df_reactive())>0){
+      updateSwitchInput(session = session, 
+                        inputId = "interbody_implant_true_false", 
+                        value = TRUE)
+      
+      updatePickerInput(session = session, 
+                        inputId = "interbody_implant_picker", 
+                        label = "Interbodies", 
+                        selected = interbody_df_reactive()$cage_id, 
+                        choices = interbody_df_reactive()$cage_id)
     }
-    # }
-  })
+  }) %>%
+    bindEvent(input$implants_complete, 
+              input$implant_details, 
+              ignoreInit = TRUE, 
+              ignoreNULL = TRUE)
+  
   
   interbody_details_df_reactive <- reactive({
-    interbody_implants_df <- interbody_df_reactive()
-    if(nrow(interbody_implants_df) > 0){
-      interbody_details_df <- interbody_implants_df %>%
-        mutate(level_label = str_to_lower(string = str_replace_all(string = level, pattern = "-", replacement = "_"))) %>%
-        mutate(composition_label = glue("{level_label}_interbody_composition")) %>%
-        mutate(device_name_label = glue("{level_label}_interbody_device_name")) %>%
-        mutate(height_label = glue("{level_label}_interbody_height")) %>%
-        mutate(integrated_fixation_label = glue("{level_label}_interbody_integrated_fixation")) %>%
-        mutate(integrated_cranial_screw_1_label = glue("{level_label}_interbody_cranial_screw_1_size")) %>%
-        mutate(integrated_cranial_screw_2_label = glue("{level_label}_interbody_cranial_screw_2_size")) %>%
-        mutate(integrated_caudal_screw_1_label = glue("{level_label}_interbody_caudal_screw_1_size")) %>%
-        mutate(integrated_caudal_screw_2_label = glue("{level_label}_interbody_caudal_screw_2_size")) %>%
-        mutate(expandable_label = glue("{level_label}_interbody_expandable")) %>%
-        mutate(other_label = glue("{level_label}_interbody_other")) %>%
+
+    if(nrow(interbody_df_reactive()) > 0){
+      interbody_details_df <- interbody_df_reactive() %>%
+        # mutate(cage_id = str_to_lower(string = str_replace_all(string = level, pattern = "-", replacement = "_"))) %>%
+        mutate(composition_label = glue("{cage_id}_interbody_composition")) %>%
+        mutate(device_name_label = glue("{cage_id}_interbody_device_name")) %>%
+        mutate(height_label = glue("{cage_id}_interbody_height")) %>%
+        mutate(integrated_fixation_label = glue("{cage_id}_interbody_integrated_fixation")) %>%
+        mutate(integrated_cranial_screw_1_label = glue("{cage_id}_interbody_cranial_screw_1_size")) %>%
+        mutate(integrated_cranial_screw_2_label = glue("{cage_id}_interbody_cranial_screw_2_size")) %>%
+        mutate(integrated_caudal_screw_1_label = glue("{cage_id}_interbody_caudal_screw_1_size")) %>%
+        mutate(integrated_caudal_screw_2_label = glue("{cage_id}_interbody_caudal_screw_2_size")) %>%
+        mutate(expandable_label = glue("{cage_id}_interbody_expandable")) %>%
+        mutate(other_label = glue("{cage_id}_interbody_other")) %>%
         mutate(composition = map(.x = composition_label, .f = ~input[[.x]])) %>%
         unnest(composition) %>%
         mutate(device_name = map(.x = device_name_label, .f = ~input[[.x]])) %>%
@@ -4958,6 +5145,11 @@ server <- function(input, output, session) {
         mutate(other = if_else(is.na(other), " ", other)) %>%
         mutate(device_name = if_else(is.na(device_name), " ", device_name)) %>%
         mutate(expandable_statement = if_else(expandable == "Expandable", "expandable", " ")) %>%
+        mutate(expandable_description = if_else(expandable == "Expandable",
+                                                "The implant was then expanded until I felt firm contact with the endplates.",
+                                                " "
+                                                )
+               ) %>%
         mutate(integrated_fixation_statement = if_else(integrated_fixation == "Integrated Fixation", "with integrated fixation", " ")) %>%
         mutate(integrated_fixation = if_else(integrated_fixation == "xx", "No integrated fixation", "Integrated Fixation")) %>%
         mutate(expandable = if_else(expandable == "xx", "Static", "Expandable")) %>%
@@ -4965,7 +5157,7 @@ server <- function(input, output, session) {
           integrated_cranial_screw_1 == "0" & integrated_cranial_screw_2 == "0" ~ glue("No screws were inserted through the implant cranially."),
           integrated_cranial_screw_1 != "0" & integrated_cranial_screw_2 == "0" ~ glue("A {integrated_cranial_screw_1}mm screw was inserted cranially through the implant."),
           integrated_cranial_screw_1 == "0" & integrated_cranial_screw_2 != "0" ~ glue("A {integrated_cranial_screw_2}mm screw was inserted cranially through the implant."),
-          integrated_cranial_screw_1 != "0" & integrated_cranial_screw_2 != "0" ~ glue("A {integrated_cranial_screw_1}mm and a {integrated_cranial_screw_2}mm screw were inserted cranially through the implant."),
+          integrated_cranial_screw_1 != "0" & integrated_cranial_screw_2 != "0" ~ glue("A {integrated_cranial_screw_1}mm screw and a {integrated_cranial_screw_2}mm screw were inserted cranially through the implant."),
         )) %>%
         mutate(integrated_cranial_screws_statement = as.character(integrated_cranial_screws_statement)) %>%
         mutate(integrated_cranial_screws_statement = if_else(integrated_fixation == "No integrated fixation", "", integrated_cranial_screws_statement)) %>%
@@ -4973,11 +5165,11 @@ server <- function(input, output, session) {
           integrated_caudal_screw_1 == "0" & integrated_caudal_screw_2 == "0" ~ glue("No screws were placed through the implant caudally."),
           integrated_caudal_screw_1 != "0" & integrated_caudal_screw_2 == "0" ~ glue("A {integrated_caudal_screw_1}mm screw was inserted aimed caudal."),
           integrated_caudal_screw_1 == "0" & integrated_caudal_screw_2 != "0" ~ glue("A {integrated_caudal_screw_2}mm screw was inserted aimed caudal."),
-          integrated_caudal_screw_1 != "0" & integrated_caudal_screw_2 != "0" ~ glue("A {integrated_caudal_screw_1}mm and a {integrated_caudal_screw_2}mm screw were placed caudal through the implant."),
+          integrated_caudal_screw_1 != "0" & integrated_caudal_screw_2 != "0" ~ glue("A {integrated_caudal_screw_1}mm screw and a {integrated_caudal_screw_2}mm screw were placed caudal through the implant."),
         )) %>%
         mutate(integrated_caudal_screws_statement = as.character(integrated_caudal_screws_statement)) %>%
         mutate(integrated_caudal_screws_statement = if_else(integrated_fixation == "No integrated fixation", "", integrated_caudal_screws_statement)) %>%
-        mutate(implant_statement = glue("At the {level} interspace, a {height}mm height {composition} {device_name} {other} {expandable_statement} implant {integrated_fixation_statement} was selected and placed into the {level} interspace. {integrated_cranial_screws_statement} {integrated_caudal_screws_statement}")) %>%
+        mutate(implant_statement = glue("At the {level} interspace, a {height}mm height {composition} {device_name} {other} {expandable_statement} implant {integrated_fixation_statement} was selected and placed into the {level} interspace. {expandable_description} {integrated_cranial_screws_statement} {integrated_caudal_screws_statement}")) %>%
         mutate(implant_statement = str_squish(implant_statement)) %>%
         mutate(implant_statement = str_remove_all(string = implant_statement, pattern = "()")) %>% 
         select(level, vertebral_number, approach, object, composition, device_name, height, integrated_fixation, expandable, other, implant_statement) %>%
@@ -5047,32 +5239,29 @@ server <- function(input, output, session) {
     posterior_bmp_kit_list$"L Kits:" <- 0
   })
   
-  output$posterior_bmp_kits <- renderUI({
+  output$posterior_bmp_kits <- renderText({
     bmp_kit_list <- reactiveValuesToList(posterior_bmp_kit_list)
-    if(length(bmp_kit_list) > 0){
-      bmp_kits_df <- enframe(bmp_kit_list) %>%
-        filter(value != 0) %>%
-        mutate(statement = as.character(glue("{name} {value}")))
+    bmp_kits_df <- enframe(bmp_kit_list) %>%
+      filter(value != 0) %>%
+      mutate(statement = as.character(glue("{name} {value}")))
+    
+    if(nrow(bmp_kits_df) > 0){
       kit_statement <- glue_collapse(bmp_kits_df$statement, sep = "<br>")
     }else{
       kit_statement <- "none"
     }
-    HTML(kit_statement)
+    
+    HTML("<div>", kit_statement, "</div>")
   })
-  
   
   posterior_bmp_dose_reactive <- reactive({
     Reduce("+", reactiveValuesToList(posterior_bmp_dose_list))
   })
-  output$posterior_bmp_dosage <- renderUI({
-    posterior_dose_statement <- glue("{posterior_bmp_dose_reactive()}mg")
-    
-    (div(style = "font-size:18px; 
-                   text-align: center;
-                   font-weight: bold;
-                   border-style: solid;
-                   border-color: burlywood", 
-         as.character(posterior_dose_statement)))
+  
+
+  output$posterior_bmp_dosage <- renderText({
+    posterior_dose_statement <- as.character(glue("{posterior_bmp_dose_reactive()}mg"))
+    HTML("<div>", posterior_dose_statement, "</div>")
   })
   
   ################## ------------- anterior BMP UI AND RESULTS ---------------#######################
@@ -5125,32 +5314,26 @@ server <- function(input, output, session) {
     anterior_bmp_kit_list$"L Kits:" <- 0
   })
   
-  output$anterior_bmp_kits <- renderUI({
+  output$anterior_bmp_kits <- renderText({
     bmp_kit_list <- reactiveValuesToList(anterior_bmp_kit_list)
-    if(length(bmp_kit_list) > 0){
-      bmp_kits_df <- enframe(bmp_kit_list) %>%
-        filter(value != 0) %>%
-        mutate(statement = as.character(glue("{name} {value}")))
+    bmp_kits_df <- enframe(bmp_kit_list) %>%
+      filter(value != 0) %>%
+      mutate(statement = as.character(glue("{name} {value}")))
+    if(nrow(bmp_kits_df) > 0){
       kit_statement <- glue_collapse(bmp_kits_df$statement, sep = "<br>")
     }else{
       kit_statement <- "none"
     }
-    HTML(kit_statement)
+    HTML("<div>", kit_statement, "</div>")
   })
   
   anterior_bmp_dose_reactive <- reactive({
     Reduce("+", reactiveValuesToList(anterior_bmp_dose_list))
   })
   
-  output$anterior_bmp_dosage <- renderUI({
-    anterior_dose_statement <- glue("{anterior_bmp_dose_reactive()}mg")
-    
-    (div(style = "font-size:18px; 
-                   text-align: center;
-                   font-weight: bold;
-                   border-style: solid;
-                   border-color: burlywood", 
-         as.character(anterior_dose_statement)))
+  output$anterior_bmp_dosage <- renderText({
+    anterior_dose_statement <- as.character(glue("{anterior_bmp_dose_reactive()}mg"))
+    HTML("<div>", anterior_dose_statement, "</div>")
   })
   
   ###################################### ---------------- BIOLOGICS END -----------------------#################################
@@ -5216,9 +5399,9 @@ server <- function(input, output, session) {
   ######### ~~~~~~~~~~~~~~  ############# POSTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
   ######### ~~~~~~~~~~~~~~  ############# POSTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
   
-  geoms_list_posterior <- reactiveValues()
-  geoms_list_revision_posterior <- reactiveValues()
-  geoms_list_revision_anterior <- reactiveValues()
+  # geoms_list_posterior <- reactiveValues()
+  # geoms_list_revision_posterior <- reactiveValues()
+  # geoms_list_revision_anterior <- reactiveValues()
   
   ######## ~~~~~~~~~~~ PRIOR DECOMPRESSIONS ---
   observeEvent(input$open_canal, ignoreNULL = TRUE, ignoreInit = TRUE, {
@@ -5322,47 +5505,22 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$crosslink_connectors, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    rods_list$crosslinks <- geom_sf(data = st_multipolygon((all_objects_to_add_list$objects_df %>% filter(object == "crosslink"))$object_constructed), alpha = 0.75, fill = "gold") 
+    rods_list$crosslinks <- geom_sf(data = st_multipolygon((all_objects_to_add_list$objects_df %>% filter(object == "crosslink"))$object_constructed), alpha = 0.9, fill = "gold") 
   })
   observeEvent(input$remove_all_crosslinks, ignoreNULL = TRUE, ignoreInit = TRUE, {
     rods_list$crosslinks <- NULL 
   })
   
-  ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS     ######### ~~~~~~~~~~~~~~  ############# 
-  ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS    ######### ~~~~~~~~~~~~~~  ############# 
-  
-  geoms_list_anterior_diskectomy <- reactiveValues()
-  geoms_list_anterior_interbody <- reactiveValues()
-  geoms_list_anterior_instrumentation <- reactiveValues()
-  
-  observeEvent(list(input$plot_click,
-                    input$plot_double_click,
-                    input$reset_all,
-                    all_objects_to_add_list$objects_df), {
-                      if(input$spine_approach == "Anterior"){
-                        anterior_df <- all_objects_to_add_list$objects_df %>%
-                          filter(approach == "anterior")
-                        
-                        anterior_geoms_list <- jh_make_anterior_geoms_function(all_anterior_objects_df = anterior_df)
-                        
-                        geoms_list_anterior_diskectomy$geoms <- anterior_geoms_list$geoms_list_anterior_diskectomy
-                        geoms_list_anterior_interbody$geoms <- anterior_geoms_list$geoms_list_anterior_interbody
-                        geoms_list_anterior_instrumentation$geoms <- anterior_geoms_list$geoms_list_anterior_instrumentation
-                        
-                      }else{
-                        all_posterior_df <- all_objects_to_add_list$objects_df %>%
-                          filter(approach == "posterior")
-                        
-                        geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_posterior_df, plot_with_patterns = input$plot_with_patterns_true)
-                        
-                      }
-                    })
+  # ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS     ######### ~~~~~~~~~~~~~~  #############
+  # ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS    ######### ~~~~~~~~~~~~~~  #############
+
   
   
   ######### ~~~~~~~~~~~~~~  ############# MAKE REACTIVE PLOT    ######### ~~~~~~~~~~~~~~  ############# 
   ######### ~~~~~~~~~~~~~~  ############# MAKE REACTIVE PLOT    ######### ~~~~~~~~~~~~~~  ############# 
-  spine_plan_plot_anterior <- reactive({
-    if(input$spine_approach == "Anterior"){
+  spine_plan_plot_anterior_reactive <- reactive({
+    # if(str_detect(str_to_lower(input$approach_sequence), "anterior")){
+    if(str_to_lower(input$spine_approach) == "anterior"){
       x_left_limit <- 0.3 - input$label_text_offset/100
       x_right_limit <- 1-x_left_limit
       plot_top_y <- input$crop_y[2]
@@ -5451,13 +5609,9 @@ server <- function(input, output, session) {
       plan_table_geom <- geom_sf(data = NULL)
     }
     
-    if(input$lumbar_vertebrae_count == "5"){
-      posterior_spine_ggdraw <- posterior_spine_plot
-    }
     
     if(input$lumbar_vertebrae_count == "6"){
       l6_statement <- "Note: 6 Lumbar Vertebrae"
-      posterior_spine_ggdraw <- posterior_spine_plot_l6
     }else{
       l6_statement <- " "
     }
@@ -5479,7 +5633,15 @@ server <- function(input, output, session) {
                        x_right = max(labels_posterior_df$x_right) + 0.03, 
                        y = max(labels_posterior_df$y) + 0.03))
     
-    posterior_spine_ggdraw +
+    ggdraw() +
+      draw_image(
+        spine_png,
+        scale = 1,
+        y = 0,
+        valign = 0,
+        x = 0,
+        height = 1
+      ) +
       # reactiveValuesToList(geoms_list_revision_posterior) +
       # reactiveValuesToList(geoms_list_posterior) +
       # reactiveValuesToList(rods_list) +
@@ -5502,7 +5664,7 @@ server <- function(input, output, session) {
                y = input$crop_y[1] + 0.01, 
                label = l6_statement) +
       coord_sf(xlim = c(x_left_limit, x_right_limit),
-               ylim = input$crop_y, default = TRUE)
+               ylim = input$crop_y, default = TRUE) 
   })
   
   observeEvent(input$multi_approach_starting_position, {
@@ -5518,17 +5680,27 @@ server <- function(input, output, session) {
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
-  output$spine_plan <- renderPlot({
-    if(input$spine_approach == "Anterior"){
-      spine_plan_plot_anterior()
+
+
+  output$spine_plan <-  renderPlot(res = 48, {
+    # main_page_reactive_plot()
+    if(str_to_lower(input$spine_approach) == "anterior"){
+      spine_plan_plot_anterior_reactive()
     }else{
       spine_plan_plot_posterior_reactive() +
         reactiveValuesToList(geoms_list_revision_posterior) +
         reactiveValuesToList(geoms_list_posterior) +
-        reactiveValuesToList(rods_list)
+        reactiveValuesToList(rods_list) 
     }
-  }
-  )
+  })
+  
+  
+  #   output$spine_plan <- renderCachedPlot(res = 5, {
+  #     main_page_reactive_plot()
+  # },
+  # cacheKeyExpr = { list(geoms_list_revision_posterior, geoms_list_posterior, rods_list, input$spine_approach)},
+  # cache = cachem::cache_mem()
+  # )
   
   output$spine_plot_for_implants_tab <- renderPlot({
     if(input$approach_sequence == "posterior"){
@@ -5537,8 +5709,8 @@ server <- function(input, output, session) {
         reactiveValuesToList(geoms_list_posterior) +
         reactiveValuesToList(rods_list)
     }else if(input$approach_sequence == "anterior"){
-      spine_plan_plot_anterior()
-    }else if(input$approach_sequence == "posterior-anterior" | input$approach_sequence == "posterior-anterior-posterior"){
+      spine_plan_plot_anterior_reactive()
+    }else if(input$approach_sequence == "posterior-anterior" || input$approach_sequence == "posterior-anterior-posterior"){
       posterior_plot <- spine_plan_plot_posterior_reactive()+
         reactiveValuesToList(geoms_list_revision_posterior) +
         reactiveValuesToList(geoms_list_posterior) +
@@ -5546,7 +5718,7 @@ server <- function(input, output, session) {
       
       plot_grid(posterior_plot, 
                 NULL, 
-                spine_plan_plot_anterior(), 
+                spine_plan_plot_anterior_reactive(), 
                 nrow = 1, 
                 rel_widths = c(1, -.1, 1))
     }else {
@@ -5554,7 +5726,8 @@ server <- function(input, output, session) {
         reactiveValuesToList(geoms_list_revision_posterior) +
         reactiveValuesToList(geoms_list_posterior) +
         reactiveValuesToList(rods_list)
-      plot_grid(spine_plan_plot_anterior(), NULL, posterior_plot, nrow = 1, rel_widths = c(1, -.1, 1))
+      
+      plot_grid(spine_plan_plot_anterior_reactive(), NULL, posterior_plot, nrow = 1, rel_widths = c(1, -.1, 1))
     }
   }) %>%
     bindEvent(input$implants_complete)
@@ -5856,6 +6029,14 @@ server <- function(input, output, session) {
                                                                            "")
     
     posterior_op_note_inputs_list_reactive$neuromonitoring_input_list <- neuromonitoring_input_list
+    
+    
+    ### USE OF MICROSCOPE###
+    if(any(str_detect(str_to_lower(input$posterior_additional_approach_details_checkbox), "microscop"))){
+      posterior_op_note_inputs_list_reactive$approach_microscope <- "After the deep retractors were placed into position, the microscope was brought into the field for the next steps in the procedure."
+    }else{
+      posterior_op_note_inputs_list_reactive$approach_microscope <- ""
+    }
     
     #######
     if(length(input$implant_start_point_method) == 0){
@@ -6498,6 +6679,7 @@ server <- function(input, output, session) {
                                                                            head_position = posterior_op_note_inputs_list_reactive()$head_positioning_posterior,
                                                                            surgical_approach = posterior_op_note_inputs_list_reactive()$approach_specified_posterior,
                                                                            approach_mis_open = posterior_op_note_inputs_list_reactive()$approach_open_mis,
+                                                                           approach_microscope = posterior_op_note_inputs_list_reactive()$approach_microscope,
                                                                            approach_robot_nav_xray = posterior_op_note_inputs_list_reactive()$approach_robot_navigation,
                                                                            neuromonitoring_list = posterior_op_note_inputs_list_reactive()$neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
                                                                            implant_start_point_method_input = posterior_op_note_inputs_list_reactive()$implant_start_point_method,
@@ -6773,11 +6955,11 @@ server <- function(input, output, session) {
   ###### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ALL INPUTS  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ######## 
   
   all_inputs_reactive_list <- reactive({
-    # if(input$tabs != "patient_details_procedures"){
+
     all_inputs_list <- reactiveValuesToList(input, all.names = FALSE)
     
     all_inputs_list <- keep(.x = all_inputs_list, .p = ~ !is.null(.x))
-    # }
+
   })
   
   
@@ -6800,7 +6982,9 @@ server <- function(input, output, session) {
       mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = "-AND-")))) %>%
       select(-value) %>%
       unnest(cols = result) %>%
-      filter(str_detect(string = name, pattern = "operative_note_text|crop_y|screw_length|screw_diameter|screw_type|rods_eligible|reset|button|level_object_for|pelvic_screw|modal|_complete|text_size|idpostop|drop", negate = TRUE)) %>%
+      filter(str_detect(string = name, 
+                        pattern = "central_corpectomy_cage|central_anterior_disc_arthroplasty|central_anterior_interbody_implant|left_tlif|right_tlif|left_plif|right_plif|operative_note|crop_y|screw_length|screw_diameter|screw_type|rods_eligible|reset|button|level_object_for|pelvic_screw|modal|_complete|text_size|idpostop|drop", 
+                        negate = TRUE)) %>%
       filter(name %in% variable_names_to_exclude == FALSE) %>%
       filter(!is.na(result)) %>%
       filter(result != "") %>%

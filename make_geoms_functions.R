@@ -1,3 +1,29 @@
+jh_make_posterior_screws_geoms_function <- function(all_posterior_objects_df, plot_with_patterns = FALSE){
+  ## SCREWS
+  geoms_list_posterior <- list()
+  if(any(str_detect(string = all_posterior_objects_df$object, "screw"))){
+    if(plot_with_patterns == TRUE){
+      geoms_list_posterior <- ggpattern::geom_sf_pattern(
+        data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed),
+        pattern = "stripe",
+        pattern_fill = "blue",
+        pattern_fill2 = "#445566",
+        alpha = 0.8,
+        pattern_colour = "blue",
+        pattern_density = 0.02,
+        pattern_spacing = 0.01,
+        pattern_angle = 80
+      )
+    }else{
+      geoms_list_posterior <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed), fill = "blue")
+    }
+    
+  }else{
+    geoms_list_posterior <- NULL
+  }
+  return(geoms_list_posterior)
+}
+
 jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with_patterns = FALSE){
   # all_posterior_objects_df <- construct_objects_live_function(all_posterior_objects_df)
   
@@ -5,7 +31,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   if(any(str_detect(all_posterior_objects_df$object, pattern = "vertebroplasty"))){
     geoms_list_posterior$vertebroplasty_sf_geom <- geom_sf_pattern(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "vertebroplasty")))$object_constructed),
                                                                    pattern = "plasma",
-                                                                   pattern_alpha = 0.5,
+                                                                   pattern_alpha = 0.75,
                                                                    alpha = 0.3,
                                                                    color = "grey96")
   }else{
@@ -15,7 +41,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   if(any(str_detect(all_posterior_objects_df$object, pattern = "vertebral_cement_augmentation"))){
     geoms_list_posterior$vertebroplasty_sf_geom <- geom_sf_pattern(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "vertebral_cement_augmentation")))$object_constructed),
                                                                    pattern = "plasma",
-                                                                   pattern_alpha = 0.5,
+                                                                   pattern_alpha = 0.75,
                                                                    alpha = 0.6,
                                                                    color = "grey75")
   }else{
@@ -34,7 +60,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
       data = st_multipolygon((all_posterior_objects_df %>% filter(object == "complete_facetectomy"))$object_constructed),
       pattern = "stripe",
       pattern_colour = "red",
-      alpha = 0.5,
+      alpha = 0.75,
       pattern_angle = 10,
       pattern_spacing = 0.01,
       pattern_density = 0.15,
@@ -48,7 +74,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
       data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_2"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
       pattern = "stripe",
       pattern_colour = "red",
-      alpha = 0.5,
+      alpha = 0.75,
       pattern_angle = 10,
       pattern_spacing = 0.01,
       pattern_density = 0.15,
@@ -125,7 +151,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
       # pattern = "stripe",
       # pattern_colour = "red",
       fill = "red",
-      alpha = 0.5
+      alpha = 0.75
       # pattern_spacing = 0.01
     )
   }else{
@@ -137,7 +163,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
       data = st_multipolygon((all_posterior_objects_df %>% filter(object == "sublaminar_decompression"))$object_constructed),
       pattern = "stripe",
       pattern_colour = "red",
-      alpha = 0.5,
+      alpha = 0.75,
       pattern_spacing = 0.01
     )
   }else{
@@ -292,27 +318,27 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
     geoms_list_posterior$intervertebral_cage_sf_geom <- NULL
   }
   
-  ## SCREWS
-  if(any(str_detect((all_posterior_objects_df$object), pattern = "screw"))){
-    if(plot_with_patterns == TRUE){
-      geoms_list_posterior$screws_geom <- ggpattern::geom_sf_pattern(
-        data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed),
-        pattern = "stripe",
-        pattern_fill = "blue",
-        pattern_fill2 = "#445566",
-        alpha = 0.8,
-        pattern_colour = "blue",
-        pattern_density = 0.02,
-        pattern_spacing = 0.01,
-        pattern_angle = 80
-      )
-    }else{
-      geoms_list_posterior$screws_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed), fill = "blue")
-    }
-    
-  }else{
-    geoms_list_posterior$screws_geom <- NULL
-  }
+  # ## SCREWS
+  # if(any(str_detect((all_posterior_objects_df$object), pattern = "screw"))){
+  #   if(plot_with_patterns == TRUE){
+  #     geoms_list_posterior$screws_geom <- ggpattern::geom_sf_pattern(
+  #       data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed),
+  #       pattern = "stripe",
+  #       pattern_fill = "blue",
+  #       pattern_fill2 = "#445566",
+  #       alpha = 0.8,
+  #       pattern_colour = "blue",
+  #       pattern_density = 0.02,
+  #       pattern_spacing = 0.01,
+  #       pattern_angle = 80
+  #     )
+  #   }else{
+  #     geoms_list_posterior$screws_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed), fill = "blue")
+  #   }
+  #   
+  # }else{
+  #   geoms_list_posterior$screws_geom <- NULL
+  # }
   
   ## HOOKS
   if(any(str_detect(all_posterior_objects_df$object, pattern = "hook"))){
@@ -369,7 +395,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
       data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "incision_drainage"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
       pattern = "stripe",
       pattern_colour = "lightblue",
-      alpha = 0.1,
+      alpha = 0.75,
       pattern_spacing = 0.03
     )
   }else{
@@ -408,7 +434,7 @@ jh_make_single_posterior_geom_function <- function(posterior_object_df, plot_wit
   if(any(str_detect(posterior_object_df$object, pattern = "vertebroplasty"))){
     geom_for_plot <- geom_sf_pattern(data = st_multipolygon((posterior_object_df %>% filter(str_detect(string = object, pattern = "vertebroplasty")))$object_constructed),
                                                                    pattern = "plasma",
-                                                                   pattern_alpha = 0.5,
+                                                                   pattern_alpha = 0.8,
                                                                    alpha = 0.3,
                                                                    color = "grey96")
   }
@@ -416,7 +442,7 @@ jh_make_single_posterior_geom_function <- function(posterior_object_df, plot_wit
   if(any(str_detect(posterior_object_df$object, pattern = "vertebral_cement_augmentation"))){
     geom_for_plot<- geom_sf_pattern(data = st_multipolygon((posterior_object_df %>% filter(str_detect(string = object, pattern = "vertebral_cement_augmentation")))$object_constructed),
                                                                    pattern = "plasma",
-                                                                   pattern_alpha = 0.5,
+                                                                   pattern_alpha = 0.8,
                                                                    alpha = 0.6,
                                                                    color = "grey75")
   }
@@ -431,7 +457,7 @@ jh_make_single_posterior_geom_function <- function(posterior_object_df, plot_wit
       data = st_multipolygon((posterior_object_df %>% filter(object == "complete_facetectomy"))$object_constructed),
       pattern = "stripe",
       pattern_colour = "red",
-      alpha = 0.5,
+      alpha = 0.75,
       pattern_angle = 10,
       pattern_spacing = 0.01,
       pattern_density = 0.15,
@@ -443,7 +469,7 @@ jh_make_single_posterior_geom_function <- function(posterior_object_df, plot_wit
       data = st_union(st_combine(st_multipolygon((posterior_object_df %>% filter(object == "grade_2"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
       pattern = "stripe",
       pattern_colour = "red",
-      alpha = 0.5,
+      alpha = 0.75,
       pattern_angle = 10,
       pattern_spacing = 0.01,
       pattern_density = 0.15,
@@ -504,7 +530,7 @@ jh_make_single_posterior_geom_function <- function(posterior_object_df, plot_wit
       # pattern = "stripe",
       # pattern_colour = "red",
       fill = "red",
-      alpha = 0.5
+      alpha = 0.75
       # pattern_spacing = 0.01
     )
   }
@@ -514,8 +540,8 @@ jh_make_single_posterior_geom_function <- function(posterior_object_df, plot_wit
       data = st_multipolygon((posterior_object_df %>% filter(object == "sublaminar_decompression"))$object_constructed),
       pattern = "stripe",
       pattern_colour = "red",
-      alpha = 0.5,
-      pattern_spacing = 0.01
+      alpha = 0.9,
+      pattern_spacing = 0.03
     )
   }
   
@@ -524,8 +550,8 @@ jh_make_single_posterior_geom_function <- function(posterior_object_df, plot_wit
       data = st_multipolygon((posterior_object_df %>% filter(object == "laminotomy"))$object_constructed),
       pattern = "stripe",
       pattern_colour = "red",
-      alpha = 0.7,
-      pattern_spacing = 0.01
+      alpha = 0.9,
+      pattern_spacing = 0.03
     )
   }
   
