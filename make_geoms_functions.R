@@ -384,7 +384,8 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   
   ## Tethers
   if(any(str_detect(all_posterior_objects_df$object, pattern = "tether"))){
-    geoms_list_posterior$tethers_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "tether")))$object_constructed))
+    geoms_list_posterior$tethers_sf_geom <- geom_sf(data = st_buffer(st_multilinestring((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "tether")))$object_constructed), dist = 0.001), fill = "red")
+    # geoms_list_posterior$tethers_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "tether")))$object_constructed))
   }else{
     geoms_list_posterior$tethers_sf_geom <- NULL
   }
@@ -449,7 +450,9 @@ jh_make_single_posterior_geom_function <- function(posterior_object_df, plot_wit
   
   ## OSTEOTOMIES
   if(any(str_detect(posterior_object_df$object, pattern = "grade_1"))){
-    geom_for_plot<- geom_sf(data = st_geometrycollection((posterior_object_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
+    geoms_list_posterior$tethers_sf_geom <- geom_sf(data = st_buffer(st_multilinestring((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "grade_1")))$object_constructed), dist = 0.0001), fill = "red")
+    
+    # geom_for_plot<- geom_sf(data = st_geometrycollection((posterior_object_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
   }
   
   if(any(str_detect(posterior_object_df$object, pattern = "complete_facetectomy"))){

@@ -10,16 +10,16 @@
 
 spine_png <- image_read(path = "spine_posterior.png", density = 5)
 
-posterior_spine_plot <- ggdraw() +
-  draw_image(
-    spine_png,
-    scale = 1,
-    y = 0,
-    valign = 0,
-    x = 0,
-    height = 1
-    # width = 1
-  ) 
+# posterior_spine_plot <- ggdraw() +
+#   draw_image(
+#     spine_png,
+#     scale = 1,
+#     y = 0,
+#     valign = 0,
+#     x = 0,
+#     height = 1
+#     # width = 1
+#   ) 
 
 anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
  
@@ -561,6 +561,25 @@ all_implants_constructed_df <- implants_constructed_df %>%
   ungroup() %>%
   mutate(level = if_else(str_detect(level, "Iliac|S2AI") & object == "pelvic_screw_2", paste0(level, "_2"), level)) %>%
   mutate(vertebral_number = if_else(str_detect(level, "Iliac|S2AI") & object == "pelvic_screw_2", vertebral_number + 0.5, vertebral_number)) 
+# 
+# 
+# imported_coordinates <- fread("all_object_coordinates_minus_arthroplasty.csv")
+# 
+# nearly_all_objects_constructed_df <- testing_import %>%
+#   filter(str_detect(object_id, "grade_1|tether|C1_central_corpectomy_cage_1") == FALSE) %>%
+#   group_by(object_id) %>%
+#   nest() %>%
+#   mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+#   select(object_id, object_constructed)
+# 
+# 
+# all_implants_constructed_df <- all_implants_constructed_df %>%
+#   filter(str_detect(object_id, "arthroplasty|grade_1|tether|C1_central_corpectomy_cage_1")) %>%
+#   select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv, object_constructed, object_id) %>%
+#   union_all(all_implants_constructed_df %>%
+#               filter(str_detect(object_id, "arthroplasty|grade_1|tether|C1_central_corpectomy_cage_1") == FALSE) %>%
+#               select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv, object_constructed, object_id) %>%
+#               left_join(nearly_all_objects_constructed_df))
 
 
 all_objects_y_range_df <- all_implants_constructed_df %>%
@@ -573,28 +592,30 @@ implant_levels_numbered_df <- all_implants_constructed_df %>%
   distinct() %>%
   arrange(vertebral_number)
 
-all_screw_coordinates_df <- all_implants_constructed_df %>%
-  filter(str_detect(object, "lateral_mass_screw|occipital_screw"), str_detect(level, "Occiput|C1")) %>%
-  select(level, vertebral_number, side, x, y) %>%
-  distinct() %>%
-  union_all(
-    all_implants_constructed_df %>%
-      filter(str_detect(object, "pedicle_screw|pelvic_screw")) %>%
-      select(level, vertebral_number, side, x, y) %>%
-      distinct()
-  ) %>%
-  arrange(vertebral_number, rev(y))
+# all_screw_coordinates_df <- all_implants_constructed_df %>%
+#   filter(str_detect(object, "lateral_mass_screw|occipital_screw"), str_detect(level, "Occiput|C1")) %>%
+#   select(level, vertebral_number, side, x, y) %>%
+#   distinct() %>%
+#   union_all(
+#     all_implants_constructed_df %>%
+#       filter(str_detect(object, "pedicle_screw|pelvic_screw")) %>%
+#       select(level, vertebral_number, side, x, y) %>%
+#       distinct()
+#   ) %>%
+#   arrange(vertebral_number, rev(y))
+# 
+# all_screw_coordinates_df <- all_screw_coordinates_df %>%
+#   mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_interspace)) %>%
+#   unnest(level) %>%
+#   filter(!is.na(level)) %>%
+#   mutate(vertebral_number = map(.x = level, .f = ~ jh_get_vertebral_number_function(.x))) %>%
+#   unnest(vertebral_number) %>%
+#   union_all(all_screw_coordinates_df) %>%
+#   arrange(vertebral_number) %>%
+#   filter(str_detect(level, " 2") == FALSE) %>%
+#   distinct()
 
-all_screw_coordinates_df <- all_screw_coordinates_df %>%
-  mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_interspace)) %>%
-  unnest(level) %>%
-  filter(!is.na(level)) %>%
-  mutate(vertebral_number = map(.x = level, .f = ~ jh_get_vertebral_number_function(.x))) %>%
-  unnest(vertebral_number) %>%
-  union_all(all_screw_coordinates_df) %>%
-  arrange(vertebral_number) %>%
-  filter(str_detect(level, " 2") == FALSE) %>%
-  distinct()
+all_screw_coordinates_df <- fread("all_screw_coordinates_df.csv")
 
 all_cages_df <- all_implants_constructed_df %>%
   filter(
@@ -611,6 +632,7 @@ all_cages_df <- all_implants_constructed_df %>%
   mutate(cage_id = paste(str_to_lower(str_replace_all(level, "-", "_")), side, object, sep = "_")) 
 
 # all_implants_constructed_df
+
 
 rm(osteotomy_df,
    decompression_df,

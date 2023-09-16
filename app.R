@@ -37,8 +37,9 @@ source("short_shiny_functions.R", local = TRUE)
 source("load_icd_codes.R", local = TRUE)
 source("modal_functions.R", local = TRUE)
 source("make_geoms_functions.R", local = TRUE)
-source("build_spine_objects_functions.R", local = TRUE)
-source("load_coordinates_build_objects.R", local = TRUE)
+# source("build_spine_objects_functions.R", local = TRUE)
+# source("load_coordinates_build_objects.R", local = TRUE)
+source("load_coordinates_build_objects_new.R", local = TRUE)
 source("anterior_posterior_operative_note_generator_functions.R", local = TRUE) 
 source("operative_note_paragraph_functions.R", local = TRUE)
 source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
@@ -3355,34 +3356,35 @@ server <- function(input, output, session) {
     
     # object_added <- object_added_reactive_df()$object[1]
     # level_added <- object_added_reactive_df()$level[1]
-    
-    if(object_added_reactive_df()$object[1] == "lateral_mass_screw" & object_added_reactive_df()$level[1] == "C1"){
-      if(unique(object_added_reactive_df()$side) == "left"){
-        showModal(
-          modalDialog(
-            size = "m",
-            easyClose = FALSE,
-            awesomeRadio(inputId = "left_c2_nerve_root_transection",
-                         label = "Was the left C2 nerve root sacrificed?", 
-                         choices = c("No", "Yes"), 
-                         inline = TRUE,
-                         width = "100%")
-          )
-        ) 
-      }
-      if(object_added_reactive_df()$side == "right"){
-        showModal(
-          modalDialog(
-            size = "m",
-            easyClose = FALSE,
-            awesomeRadio(inputId = "right_c2_nerve_root_transection",
-                         label = "Was the right C2 nerve root sacrificed?", 
-                         choices = c("No", "Yes"), 
-                         inline = TRUE,
-                         width = "100%")
-          )
-        ) 
-      }
+    if(nrow(object_added_reactive_df())>0){
+      if(object_added_reactive_df()$object[1] == "lateral_mass_screw" & object_added_reactive_df()$level[1] == "C1"){
+        if(unique(object_added_reactive_df()$side) == "left"){
+          showModal(
+            modalDialog(
+              size = "m",
+              easyClose = FALSE,
+              awesomeRadio(inputId = "left_c2_nerve_root_transection",
+                           label = "Was the left C2 nerve root sacrificed?", 
+                           choices = c("No", "Yes"), 
+                           inline = TRUE,
+                           width = "100%")
+            )
+          ) 
+        }
+        if(object_added_reactive_df()$side == "right"){
+          showModal(
+            modalDialog(
+              size = "m",
+              easyClose = FALSE,
+              awesomeRadio(inputId = "right_c2_nerve_root_transection",
+                           label = "Was the right C2 nerve root sacrificed?", 
+                           choices = c("No", "Yes"), 
+                           inline = TRUE,
+                           width = "100%")
+            )
+          ) 
+        }
+      } 
     }
   })
   
@@ -5404,32 +5406,38 @@ server <- function(input, output, session) {
   observeEvent(input$open_canal, ignoreNULL = TRUE, ignoreInit = TRUE, {
     
     if(length(input$open_canal) > 0){
-      open_df <- implant_starts_df %>%
+      
+      open_df <- all_implants_constructed_df %>%
         filter(object == "laminectomy") %>%
         filter(level %in% input$open_canal) %>%
-        mutate(category = "revision") %>%
-        mutate(object_constructed = pmap(list(..1 = left_x,
-                                              ..2 = superior_y,
-                                              ..3 = right_x,
-                                              ..4 = inferior_y,
-                                              ..5 = width,
-                                              ..6 = object,
-                                              ..7 = lateral_pars_x,
-                                              ..8 = superior_tp_y,
-                                              ..9 = side,
-                                              ..10 = inferior_pedicle_y,
-                                              ..11 = inferior_facet_superior_border_y),
-                                         .f = ~ build_decompression_function(left_x = ..1,
-                                                                             superior_y = ..2,
-                                                                             right_x = ..3,
-                                                                             inferior_y = ..4,
-                                                                             top_width = ..5,
-                                                                             object = ..6,
-                                                                             x_lateral_pars = ..7,
-                                                                             y_inferior_tp = ..8,
-                                                                             side = ..9,
-                                                                             inferior_pedicle_y = ..10,
-                                                                             inferior_facet_superior_border_y = ..11)))
+        mutate(category = "revision")
+      # 
+      # open_df <- implant_starts_df %>%
+      #   filter(object == "laminectomy") %>%
+      #   filter(level %in% input$open_canal) %>%
+      #   mutate(category = "revision") %>%
+      #   mutate(object_constructed = pmap(list(..1 = left_x,
+      #                                         ..2 = superior_y,
+      #                                         ..3 = right_x,
+      #                                         ..4 = inferior_y,
+      #                                         ..5 = width,
+      #                                         ..6 = object,
+      #                                         ..7 = lateral_pars_x,
+      #                                         ..8 = superior_tp_y,
+      #                                         ..9 = side,
+      #                                         ..10 = inferior_pedicle_y,
+      #                                         ..11 = inferior_facet_superior_border_y),
+      #                                    .f = ~ build_decompression_function(left_x = ..1,
+      #                                                                        superior_y = ..2,
+      #                                                                        right_x = ..3,
+      #                                                                        inferior_y = ..4,
+      #                                                                        top_width = ..5,
+      #                                                                        object = ..6,
+      #                                                                        x_lateral_pars = ..7,
+      #                                                                        y_inferior_tp = ..8,
+      #                                                                        side = ..9,
+      #                                                                        inferior_pedicle_y = ..10,
+      #                                                                        inferior_facet_superior_border_y = ..11)))
       
       geoms_list_revision_posterior$open_canal_sf <- ggpattern::geom_sf_pattern(
         data =  st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
