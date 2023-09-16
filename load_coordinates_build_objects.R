@@ -23,7 +23,7 @@ posterior_spine_plot <- ggdraw() +
 
 anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
  
-implant_starts_df <- fread(file = "full_coordinates_df.csv ") %>%
+implant_starts_df <- fread(file = "full_coordinates_no_empty.csv ", ) %>%
   filter(!is.na(x)) 
 
 #############-----------------------   Build Key Dataframes  ----------------------###############
