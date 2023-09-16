@@ -5399,10 +5399,7 @@ server <- function(input, output, session) {
   ######### ~~~~~~~~~~~~~~  ############# POSTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
   ######### ~~~~~~~~~~~~~~  ############# POSTERIOR OBJECTS     ######### ~~~~~~~~~~~~~~  ############# 
   
-  # geoms_list_posterior <- reactiveValues()
-  # geoms_list_revision_posterior <- reactiveValues()
-  # geoms_list_revision_anterior <- reactiveValues()
-  
+
   ######## ~~~~~~~~~~~ PRIOR DECOMPRESSIONS ---
   observeEvent(input$open_canal, ignoreNULL = TRUE, ignoreInit = TRUE, {
     
@@ -6018,7 +6015,7 @@ server <- function(input, output, session) {
     neuromonitoring_input_list$modalities <- input$neuromonitoring
     neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
     
-    if(any(input$pre_positioning_motors == "Not obtained")){
+    if(any(input$pre_positioning_motors == "Not obtained")){ 
       neuromonitoring_input_list$pre_positioning_motors <- " "
     }else{
       neuromonitoring_input_list$pre_positioning_motors <-  paste0("Pre-positioning motors were ", str_to_lower(glue_collapse(input$pre_positioning_motors, sep = ", ", last = " and ")), ".")
