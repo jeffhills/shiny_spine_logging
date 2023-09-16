@@ -9,7 +9,36 @@ anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
 
 all_object_ids_df <- fread(file = "all_object_ids_df.csv") 
 
-imported_coordinates <- fread("all_object_coordinates_minus_arthroplasty.csv")
+imported_coordinates <- fread("imported_coordinates_rounded.csv")
+
+# imported_coordinates <- fread("all_object_coordinates_minus_arthroplasty.csv") %>%
+#   mutate(x = round(x, 3), y = round(y, 3)) %>%
+#   distinct() %>%
+#   group_by(object_id) %>%
+#   mutate(object_count = row_number()) %>%
+#   ungroup() 
+# 
+# first_row_id <- imported_coordinates%>%
+#   group_by(object_id) %>%
+#   filter(object_count == 1) %>%
+#   select(-object_count)
+# 
+# new_last_row <- imported_coordinates %>%
+#   group_by(object_id) %>%
+#   filter(object_count == max(object_count)) %>%
+#   mutate(object_count = object_count + 1) %>%
+#   select(object_id, object_count) %>%
+#   left_join(
+#     first_row_id
+#   ) %>%
+#   select(object_id, x, y, object_count) %>%
+#   ungroup()
+# 
+# 
+# imported_coordinates <- imported_coordinates %>%
+#   union_all(new_last_row) %>%
+#   arrange(object_id, object_count) %>%
+#   select(-object_count) 
 
 #############-----------------------   Build Key Dataframes  ----------------------###############
 
