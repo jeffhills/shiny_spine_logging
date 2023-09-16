@@ -6532,13 +6532,17 @@ server <- function(input, output, session) {
   ##### Assemble and update the procedures performed section for POSTERIOR #########
 
   op_note_procedures_numbered_posterior_reactive <- reactive({
-    primary_procedures_numbered_paragraph <- op_note_procedures_performed_numbered_function(objects_added_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df, 
-                                                                                            revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df, 
-                                                                                            revision_decompression_vector = posterior_op_note_inputs_list_reactive()$open_canal, 
-                                                                                            fusion_levels_vector = posterior_op_note_inputs_list_reactive()$fusions_df$level, 
-                                                                                            additional_procedures_performed_vector = additional_procedures_vector_posterior_reactive()
-                                                                                            # additional_procedures_performed_vector = posterior_op_note_inputs_list_reactive()$additional_procedures_vector
-    )
+    if(str_detect(input$approach_sequence, "posterior")){
+      primary_procedures_numbered_paragraph <- op_note_procedures_performed_numbered_function(objects_added_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df, 
+                                                                                              revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df, 
+                                                                                              revision_decompression_vector = posterior_op_note_inputs_list_reactive()$open_canal, 
+                                                                                              fusion_levels_vector = posterior_op_note_inputs_list_reactive()$fusions_df$level, 
+                                                                                              additional_procedures_performed_vector = additional_procedures_vector_posterior_reactive()
+      )
+    }else{
+      primary_procedures_numbered_paragraph <- c()
+    }
+  
     primary_procedures_numbered_paragraph
   }) 
   
@@ -6559,8 +6563,13 @@ server <- function(input, output, session) {
   ##### Assemble and update the procedures performed section for ANTERIOR #########
 
   op_note_procedures_numbered_anterior_reactive <- reactive({
-    primary_procedures_numbered_paragraph_anterior <- anterior_op_note_procedures_performed_numbered_function(objects_added_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df, 
-                                                                                                              additional_procedures_performed_vector = anterior_op_note_inputs_list_reactive()$additional_procedures_vector)
+    if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df)>0){
+      primary_procedures_numbered_paragraph_anterior <- anterior_op_note_procedures_performed_numbered_function(objects_added_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df, 
+                                                                                                                additional_procedures_performed_vector = anterior_op_note_inputs_list_reactive()$additional_procedures_vector)
+    }else{
+      primary_procedures_numbered_paragraph_anterior <- c()
+    }
+
     primary_procedures_numbered_paragraph_anterior
   }) 
   

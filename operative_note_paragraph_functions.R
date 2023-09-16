@@ -566,7 +566,7 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
         select(-revision_levels_vector) %>%
         mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
         unnest(revision_level) %>%
-        mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
+        mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), paste0(object))) %>%
         select(level, object, vertebral_number) %>%
         # mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
         mutate(procedure_class = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
