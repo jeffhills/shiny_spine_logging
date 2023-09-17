@@ -245,7 +245,7 @@ ui <- dashboardPage(skin = "black",
                                                inputId = "tumor_diagnosis_true_false",
                                                value = FALSE
                                    ),
-                                   switchInput(label = "Plot Summary Table:",
+                                   switchInput(label = "intervertebral_cage True false:",
                                                onLabel = "Yes",
                                                offLabel = "No",
                                                inputId = "intervertebral_cage_true_false",
@@ -933,14 +933,15 @@ ui <- dashboardPage(skin = "black",
                                 size = "mini"
                               ),
                               hr(),
-                              conditionalPanel(condition = "input.fusion_procedure_performed == true",
-                                               pickerInput(inputId = "interbody_implant_picker",
-                                                           label = "Interbodies", 
-                                                           choices = c("a"), 
-                                                           multiple = TRUE,
-                                                           width = "fit"),
-                                               uiOutput(outputId = "interbody_details_ui")
-                                               ),
+                              dropdownButton(size = "xs",
+                                pickerInput(inputId = "interbody_implant_picker",
+                                            label = "Interbodies", 
+                                            choices = c("a"), 
+                                            multiple = TRUE,
+                                            width = "fit"),
+                                circle = TRUE
+                              ),
+                              uiOutput(outputId = "interbody_details_ui"),
                               hr(),
                               ### this input gets updated based on the laterality of screws to be used in the next conditional panel steps
                               conditionalPanel(condition = "input.spine_approach.indexOf('Never True') > -1",
@@ -5527,8 +5528,14 @@ server <- function(input, output, session) {
         filter(vertebral_number == min(vertebral_number)) %>%
         mutate(level = as.character(glue_collapse(x = cages_df$level, sep = "-"))) %>%
         select(level, side, vertebral_number, object, approach)
+      
     }else{
-      intervertebral_cage_df <- tibble(level = character(), side = character(), vertebral_number = double(), object = character(), approach = character())
+
+      intervertebral_cage_df <- tibble(level = character(), 
+                                       side = character(), 
+                                       vertebral_number = double(), 
+                                       object = character(), 
+                                       approach = character())
     }
     
     interbody_implants_df <- all_objects_to_add_list$objects_df %>%
@@ -5544,12 +5551,10 @@ server <- function(input, output, session) {
       union_all(intervertebral_cage_df) %>%
       distinct() %>%
       arrange(vertebral_number) %>%
-      mutate(cage_id = paste(str_to_lower(str_replace_all(level, "-", "_")), side, object, sep = "_")) 
-    # }
+      mutate(cage_id = paste(str_to_lower(str_replace_all(level, "-", "_")), side, object, sep = "_"))
+
     interbody_implants_df
-  }) %>%
-    bindEvent(input$plot_click,
-              input$implant_details)
+  }) 
   
   observe({
     if(nrow(interbody_df_reactive())>0){
@@ -5563,11 +5568,11 @@ server <- function(input, output, session) {
                         selected = interbody_df_reactive()$cage_id, 
                         choices = interbody_df_reactive()$cage_id)
     }
-  }) %>%
-    bindEvent(input$implants_complete, 
-              input$implant_details, 
-              ignoreInit = TRUE, 
-              ignoreNULL = TRUE)
+  }) 
+    # bindEvent(input$implants_complete, 
+    #           input$implant_details, 
+    #           ignoreInit = TRUE, 
+    #           ignoreNULL = TRUE)
   
   
   output$interbody_details_ui <- renderUI({
@@ -5593,7 +5598,7 @@ server <- function(input, output, session) {
                           )
                    )
             ),
-            map(.x = input$interbody_implant_picker, .f = ~ make_interbody_conditional_panel_function(cage_id_input =  .x))
+            map(.x = input$interbody_implant_picker, .f = ~ make_interbody_conditional_panel_function(cage_id_input =  paste(.x)))
           )
       )
     }
@@ -5636,9 +5641,9 @@ server <- function(input, output, session) {
         unnest(expandable) %>%
         mutate(other = map(.x = other_label, .f = ~if_else(is.null(input[[.x]]), "xx", input[[.x]]))) %>%
         unnest(other) %>%
-        mutate(composition = if_else(is.na(composition), " ", composition)) %>%
-        mutate(other = if_else(is.na(other), " ", other)) %>%
-        mutate(device_name = if_else(is.na(device_name), " ", device_name)) %>%
+        mutate(composition = if_else(is.na(composition), " ", paste0(composition))) %>%
+        mutate(other = if_else(is.na(other), " ", paste0(other))) %>%
+        mutate(device_name = if_else(is.na(device_name), " ", paste0(device_name))) %>%
         mutate(expandable_statement = if_else(expandable == "Expandable", "expandable", " ")) %>%
         mutate(expandable_description = if_else(expandable == "Expandable",
                                                 "The implant was then expanded until I felt firm contact with the endplates.",
@@ -6128,7 +6133,7 @@ server <- function(input, output, session) {
     #######
     neuromonitoring_input_list <- list()
     neuromonitoring_input_list$modalities <- input$neuromonitoring
-    neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
+    neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", " ", paste0(input$triggered_emg))
     
     if(any(input$pre_positioning_motors == "Not obtained")){ 
       neuromonitoring_input_list$pre_positioning_motors <- " "
@@ -6138,7 +6143,7 @@ server <- function(input, output, session) {
     
     neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
                                                                            as.character(input$neuromonitoring_signal_stability),
-                                                                           "")
+                                                                           " ")
     
     posterior_op_note_inputs_list_reactive$neuromonitoring_input_list <- neuromonitoring_input_list
     
@@ -6494,7 +6499,7 @@ server <- function(input, output, session) {
     #######
     neuromonitoring_input_list <- list()
     neuromonitoring_input_list$modalities <- input$neuromonitoring
-    neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", input$triggered_emg)
+    neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", " ", paste0(input$triggered_emg))
     
     # neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
     if(any(input$pre_positioning_motors == "Not obtained")){
@@ -6505,7 +6510,7 @@ server <- function(input, output, session) {
     
     neuromonitoring_input_list$neuromonitoring_signal_stability <- if_else(str_detect(string = paste(input$neuromonitoring, collapse = ", "), pattern = "SSEP"),
                                                                            as.character(input$neuromonitoring_signal_stability),
-                                                                           "")    
+                                                                           " ")    
     
     anterior_op_note_inputs_list_reactive$neuromonitoring_list <- neuromonitoring_input_list
     
