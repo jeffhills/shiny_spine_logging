@@ -11,7 +11,13 @@ all_object_ids_df <- fread(file = "all_object_ids_df.csv")
 
 imported_coordinates <- fread("imported_coordinates_rounded.csv")
 
-
+all_implants_constructed_df <<- all_object_ids_df %>%
+  filter(category == "implant") %>%
+  left_join(fread("coordinates/implant.csv") %>%
+              group_by(object_id) %>%
+              nest() %>%
+              mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+              select(object_id, object_constructed))
 
 #############-----------------------   Build Key Dataframes  ----------------------###############
 
@@ -42,6 +48,7 @@ labels_anterior_df <- all_object_ids_df %>%
     level == "T5" ~ y + 0.01,
     TRUE ~ y
   ))
+
 
 # open_canal_df <- all_object_ids_df %>%
 #   filter(object == "laminectomy") %>%
