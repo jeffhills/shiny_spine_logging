@@ -380,9 +380,9 @@ jh_get_cranial_caudal_interspace_body_list_function <- function(level){
 }
 
 #################################
-jh_filter_objects_by_y_range_function <- function(y_min = 0, y_max = 1, object_vector, full_y_range_df = all_objects_y_range_df){
+jh_filter_objects_by_y_range_function <- function(y_min = 0, y_max = 1, object_vector){
   
-  filtered_df <- full_y_range_df %>%
+  filtered_df <- all_object_ids_df %>%
     filter(between(y, y_min, y_max))
   
   filtered_vector <- discard(.x = object_vector, .p = ~ .x %in% filtered_df$object == FALSE)

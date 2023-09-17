@@ -193,67 +193,79 @@ posterior_spine_plot_l6 <- ggdraw() +
 
 l6_anterior_spine_png <- image_read(path = "spine_anterior_6_lumbar_vert.png")
 
-l5_to_l6_shifted_down_df <- all_object_ids_df %>%
-  select(-x, -y) %>%
-  left_join(imported_coordinates) %>%
-  filter(vertebral_number > 23.9) %>%
-  mutate(level = str_replace_all(string = level, pattern = "L5", replacement = "L6")) %>%
-  mutate(vertebral_number = vertebral_number + 1) %>%
-  mutate(y = y - 0.04) %>%
-  mutate(level = str_replace_all(string = object_id, pattern = "L5", replacement = "L6")) 
 
+jh_change_object_df_to_l6_function <- function(all_objects_input_df = tibble(level = character())){
+  l5_to_l6_shifted_down_df <- all_object_ids_df %>%
+    select(-x, -y) %>%
+    left_join(imported_coordinates) %>%
+    filter(vertebral_number > 23.9) %>%
+    mutate(level = str_replace_all(string = level, pattern = "L5", replacement = "L6")) %>%
+    mutate(vertebral_number = vertebral_number + 1) %>%
+    mutate(y = y - 0.04) %>%
+    mutate(level = str_replace_all(string = object_id, pattern = "L5", replacement = "L6")) 
+  
+  
+  
+  l5_l6_matrices_df <- all_object_ids_df %>%
+    select(-x, -y) %>%
+    left_join(imported_coordinates) %>%
+    filter(vertebral_number > 23.9) %>%
+    filter(vertebral_number < 24.7) %>%
+    mutate(level = str_replace_all(string = level, pattern = "S1", replacement = "L6")) %>%
+    mutate(level = str_replace_all(string = object_id, pattern = "S1", replacement = "L6")) %>%
+    union_all(l5_to_l6_shifted_down_df) 
+  
+  l6_implants_constructed_df <- l5_l6_matrices_df %>%
+    filter(str_detect(object_id, "arthroplasty") == FALSE) %>%
+    select(object_id, x, y) %>%
+    group_by(object_id) %>%
+    # filter(is.na(y)) %>%
+    nest() %>%
+    mutate(object_constructed = map(.x = data, .f = ~ st_linestring(as.matrix(.x)))) %>%
+    select(object_id, object_constructed)
+  
+  l5_to_l6_shifted_down_df_for_linking <- all_object_ids_df %>%
+    filter(vertebral_number > 23.9) %>%
+    mutate(level = str_replace_all(string = level, pattern = "L5", replacement = "L6")) %>%
+    mutate(vertebral_number = vertebral_number + 1) %>%
+    mutate(y = y - 0.04) %>%
+    mutate(level = str_replace_all(string = object_id, pattern = "L5", replacement = "L6")) 
+  
+  
+  l5_l6_for_linking <- all_object_ids_df %>%
+    # select(-x, -y) %>%
+    # left_join(imported_coordinates) %>%
+    filter(vertebral_number > 23.9) %>%
+    filter(vertebral_number < 24.7) %>%
+    mutate(level = str_replace_all(string = level, pattern = "S1", replacement = "L6")) %>%
+    mutate(level = str_replace_all(string = object_id, pattern = "S1", replacement = "L6")) %>%
+    union_all(l5_to_l6_shifted_down_df_for_linking) 
+  
+  
+  l6_implants_constructed_df <- l5_l6_for_linking %>%
+    distinct() %>%
+    filter(str_detect(object_id, "arthroplasty") == FALSE) %>%
+    left_join(l6_implants_constructed_df)
+  
+  l6_all_implants_constructed_df <- all_objects_input_df %>%
+    filter(vertebral_number < 23.9) %>%
+    bind_rows(l6_implants_constructed_df)
+  
+  l6_revision_implants_df <- l6_all_implants_constructed_df %>%
+    filter(object == "pedicle_screw" | object == "pelvic_screw" | object == "occipital_screw") %>%
+    filter(approach == "posterior") %>%
+    arrange(vertebral_number) %>%
+    distinct() %>%
+    group_by(level, object, side) %>%
+    filter(y == max(y)) %>%
+    ungroup()%>%
+    remove_empty(which = c("rows", "cols"))
+  
+  return(list(l6_implants_constructed_df = l6_all_implants_constructed_df, 
+              l6_revision_implants_df = l6_revision_implants_df))
+  
+}
 
-
-l5_l6_matrices_df <- all_object_ids_df %>%
-  select(-x, -y) %>%
-  left_join(imported_coordinates) %>%
-  filter(vertebral_number > 23.9) %>%
-  filter(vertebral_number < 24.7) %>%
-  mutate(level = str_replace_all(string = level, pattern = "S1", replacement = "L6")) %>%
-  mutate(level = str_replace_all(string = object_id, pattern = "S1", replacement = "L6")) %>%
-  union_all(l5_to_l6_shifted_down_df) 
-
-l6_implants_constructed_df <- l5_l6_matrices_df %>%
-  filter(str_detect(object_id, "arthroplasty") == FALSE) %>%
-  select(object_id, x, y) %>%
-  group_by(object_id) %>%
-  # filter(is.na(y)) %>%
-  nest() %>%
-  mutate(object_constructed = map(.x = data, .f = ~ st_linestring(as.matrix(.x)))) %>%
-  select(object_id, object_constructed)
-
-l5_to_l6_shifted_down_df_for_linking <- all_object_ids_df %>%
-  filter(vertebral_number > 23.9) %>%
-  mutate(level = str_replace_all(string = level, pattern = "L5", replacement = "L6")) %>%
-  mutate(vertebral_number = vertebral_number + 1) %>%
-  mutate(y = y - 0.04) %>%
-  mutate(level = str_replace_all(string = object_id, pattern = "L5", replacement = "L6")) 
-
-
-l5_l6_for_linking <- all_object_ids_df %>%
-  # select(-x, -y) %>%
-  # left_join(imported_coordinates) %>%
-  filter(vertebral_number > 23.9) %>%
-  filter(vertebral_number < 24.7) %>%
-  mutate(level = str_replace_all(string = level, pattern = "S1", replacement = "L6")) %>%
-  mutate(level = str_replace_all(string = object_id, pattern = "S1", replacement = "L6")) %>%
-  union_all(l5_to_l6_shifted_down_df_for_linking) 
-
-
-l6_all_implants_constructed_df <- l5_l6_for_linking %>%
-  distinct() %>%
-  filter(str_detect(object_id, "arthroplasty") == FALSE) %>%
-  left_join(l6_implants_constructed_df)
-
-l6_revision_implants_df <- l6_all_implants_constructed_df %>%
-  filter(object == "pedicle_screw" | object == "pelvic_screw" | object == "occipital_screw") %>%
-  filter(approach == "posterior") %>%
-  arrange(vertebral_number) %>%
-  distinct() %>%
-  group_by(level, object, side) %>%
-  filter(y == max(y)) %>%
-  ungroup()%>%
-  remove_empty(which = c("rows", "cols"))
 
 # #############-----------------------   Short Shiny Functions  ----------------------###############
 # 

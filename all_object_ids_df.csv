@@ -957,13 +957,13 @@ L5,24,body,posterior,implant,yes,pedicle_screw,right,0.5375,0.235,yes,no,yes,,L5
 S1,25,body,posterior,implant,yes,pedicle_screw,left,0.46,0.204,yes,no,yes,,S1_left_pedicle_screw_1
 S1,25,body,posterior,implant,yes,pedicle_screw,right,0.54,0.204,yes,no,yes,,S1_right_pedicle_screw_1
 Iliac,26,body,posterior,implant,yes,pelvic_screw_1,left,0.447,0.18,yes,no,yes,,Iliac_left_pelvic_screw_1_1
-Iliac,26,body,posterior,implant,yes,pelvic_screw_2,left,0.441,0.199,yes,no,yes,,Iliac_left_pelvic_screw_2_1
+Iliac_2,26.5,body,posterior,implant,yes,pelvic_screw_2,left,0.441,0.199,yes,no,yes,,Iliac_left_pelvic_screw_2_1
 Iliac,26,body,posterior,implant,yes,pelvic_screw_1,right,0.553,0.18,yes,no,yes,,Iliac_right_pelvic_screw_1_1
-Iliac,26,body,posterior,implant,yes,pelvic_screw_2,right,0.559,0.199,yes,no,yes,,Iliac_right_pelvic_screw_2_1
+Iliac_2,26.5,body,posterior,implant,yes,pelvic_screw_2,right,0.559,0.199,yes,no,yes,,Iliac_right_pelvic_screw_2_1
 S2AI,27,body,posterior,implant,yes,pelvic_screw_1,left,0.466,0.166,yes,no,yes,,S2AI_left_pelvic_screw_1_1
-S2AI,27,body,posterior,implant,yes,pelvic_screw_2,left,0.467,0.158,yes,no,yes,,S2AI_left_pelvic_screw_2_1
+S2AI_2,27.5,body,posterior,implant,yes,pelvic_screw_2,left,0.467,0.158,yes,no,yes,,S2AI_left_pelvic_screw_2_1
 S2AI,27,body,posterior,implant,yes,pelvic_screw_1,right,0.534,0.166,yes,no,yes,,S2AI_right_pelvic_screw_1_1
-S2AI,27,body,posterior,implant,yes,pelvic_screw_2,right,0.533,0.158,yes,no,yes,,S2AI_right_pelvic_screw_2_1
+S2AI_2,27.5,body,posterior,implant,yes,pelvic_screw_2,right,0.533,0.158,yes,no,yes,,S2AI_right_pelvic_screw_2_1
 C1-C2,1.5,interspace,posterior,decompression,no,sublaminar_decompression,central,0.5,0.8785,no,no,no,,C1-C2_central_sublaminar_decompression_1
 C2-C3,2.5,interspace,posterior,decompression,no,sublaminar_decompression,central,0.5,0.8585,no,no,no,,C2-C3_central_sublaminar_decompression_1
 C3-C4,3.5,interspace,posterior,decompression,no,sublaminar_decompression,central,0.5,0.8405,no,no,no,,C3-C4_central_sublaminar_decompression_1

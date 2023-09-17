@@ -433,6 +433,7 @@ ui <- dashboardPage(skin = "black",
                                                               style = "simple",
                                                               color = "primary"
                                                             ),
+                                                            br(),
                                                             # uiOutput(outputId = "intervertebral_cage_ui"),
                                                             conditionalPanel(condition = "input.intervertebral_cage_true_false == true",
                                                                              actionBttn(
@@ -452,7 +453,6 @@ ui <- dashboardPage(skin = "black",
                                                                                style = "simple",
                                                                                color = "primary"
                                                                              )),
-                                                            # uiOutput(outputId = "tumor_resection_ui"),
                                                             br(), 
                                                             div(style = "font-size:20px; font-weight:bold; text-align:left", "2. Select Implant/Procedure & Click Spine to Add:"),
                                            ),
@@ -1483,7 +1483,14 @@ server <- function(input, output, session) {
   }
   )
   
-  
+  observeEvent(input$close_startup_modal, ignoreInit = TRUE, ignoreNULL = TRUE, once = TRUE, {
+    all_implants_constructed_df <<- all_object_ids_df %>%
+      left_join(imported_coordinates %>%
+                  group_by(object_id) %>%
+                  nest() %>%
+                  mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+                  select(object_id, object_constructed))
+    })
   
   ################################################    MODAL BOX 2 ######################################
   ################################################    MODAL BOX 2 ######################################
@@ -2822,7 +2829,7 @@ server <- function(input, output, session) {
       l5_anterior_spine_jpg <<- anterior_spine_jpg
       l5_interbody_levels_df <<-interbody_levels_df
       l5_revision_implants_df <<- revision_implants_df
-      l5_anterior_df <<- anterior_df
+      # l5_anterior_df <<- anterior_df
       l5_all_implants_constructed_df <<- all_implants_constructed_df
       l5_open_canal_df <<- open_canal_df
       l5_labels_anterior_df <<- labels_anterior_df
@@ -2841,11 +2848,13 @@ server <- function(input, output, session) {
       interbody_levels_df <<- l6_levels_numbered_df %>%
         filter(str_detect(level, "-"))
       
-      all_implants_constructed_df <<- all_implants_constructed_df %>%
-        filter(vertebral_number < 23.9) %>%
-        bind_rows(l6_all_implants_constructed_df)
+      all_implants_constructed_df <<- jh_change_object_df_to_l6_function(all_implants_constructed_df)$l6_all_implants_constructed_df
+    
+      # all_implants_constructed_df <<- all_implants_constructed_df %>%
+      #   filter(vertebral_number < 23.9) %>%
+      #   bind_rows(l6_all_implants_constructed_df)
       
-      anterior_df <<- l6_anterior_df
+      # anterior_df <<- l6_anterior_df
       jh_get_vertebral_number_function <<- l6_jh_get_vertebral_number_function
       jh_get_vertebral_level_function <<- l6_jh_get_vertebral_level_function
       revision_implants_df <<- l6_revision_implants_df
@@ -2864,7 +2873,7 @@ server <- function(input, output, session) {
       
       all_implants_constructed_df <<- l5_all_implants_constructed_df
       
-      anterior_df <<- l5_anterior_df
+      # anterior_df <<- l5_anterior_df
       jh_get_vertebral_number_function <<- l5_jh_get_vertebral_number_function
       jh_get_vertebral_level_function <<- l5_jh_get_vertebral_level_function
       revision_implants_df <<- l5_revision_implants_df
@@ -2967,7 +2976,7 @@ server <- function(input, output, session) {
         'Tether (Spinous Process)' =  'tether'
       )
       
-      implant_options <- keep(.x = implants_vector, .p = ~ any(str_detect((all_objects_y_range_df %>%
+      implant_options <- keep(.x = implants_vector, .p = ~ any(str_detect((imported_coordinates %>%
                                                                              filter(between(y, input$crop_y[1], input$crop_y[2])))$object, .x)))
       
       

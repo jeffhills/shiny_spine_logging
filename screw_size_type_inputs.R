@@ -2,10 +2,10 @@
 
 # all_screw_size_type_inputs_df <-  all_implants_constructed_df %>%
 
-anterior_plate_screws_df <- all_implants_constructed_df %>%
+anterior_plate_screws_df <- all_object_ids_df %>%
   filter(vertebral_number < 23.9) %>%
   # union_all(l6_all_implants_constructed_df) %>%
-  bind_rows(l6_all_implants_constructed_df) %>%
+  # bind_rows(l6_all_implants_constructed_df) %>%
   select(level, vertebral_number, side, object) %>%
   filter(str_detect(object, "screw")) %>%
   filter(side == "left" | side == "right") %>%
@@ -14,9 +14,9 @@ anterior_plate_screws_df <- all_implants_constructed_df %>%
   filter(object == "pedicle_screw") %>%
   mutate(object = str_replace_all(object, "pedicle", "anterior_plate"))
 
-all_screw_size_type_inputs_df <- all_implants_constructed_df %>%
+all_screw_size_type_inputs_df <- all_object_ids_df %>%
   filter(vertebral_number < 23.9) %>%
-  bind_rows(l6_all_implants_constructed_df) %>%
+  # bind_rows(l6_all_implants_constructed_df) %>%
   select(level, vertebral_number, side, object) %>%
   filter(str_detect(object, "screw")) %>%
   filter(side == "left" | side == "right") %>%
