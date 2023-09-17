@@ -1068,27 +1068,31 @@ jh_fusion_category_function <- function(fusion_vector, all_objects_df){
 
 ############################## MAKE CONDITIONAL PANELS FOR INTERBODY ######################################
 make_interbody_conditional_panel_function <-  function(cage_id_input = NULL){
+  
 
-  if(str_detect(cage_id_input,"central")){
-    level_side <- str_to_upper(str_replace_all(string = str_split_i(string = cage_id_input, pattern = "_central_", i = 1), pattern = "_", "-"))
+  if(str_detect(cage_id_input,"central")){ 
+    level_side <-  str_to_upper(str_replace_all(string = str_split(string = cage_id_input, pattern = "_central_")[[1]][1], pattern = "_", "-"))
+    object_text <-  str_split(string = cage_id_input, pattern = "_central_")[[1]][2]
     
-    object_label <- if_else(str_length(str_split_i(string = cage_id_input, pattern = "_central_", i = 2)) == 4, 
-                            str_to_upper(str_split_i(string = cage_id_input, pattern = "_central_", i = 2)), 
-                            str_to_title(str_replace_all(str_split_i(string = cage_id_input, pattern = "_central_", i = 2), pattern = "_", " "))
-    )
+    object_label <- if_else(str_length(object_text) == 4,
+            str_to_upper(object_text), 
+            str_to_title(str_replace_all(object_text, pattern = "_", replacement = " ")))
     
   }else if(str_detect(cage_id_input,"left")){
-    level_side <- paste("Left", str_to_upper(str_replace_all(string = str_split_i(string = cage_id_input, pattern = "_left_", i = 1), pattern = "_", "-")))
-    object_label <- if_else(str_length(str_split_i(string = cage_id_input, pattern = "_left_", i = 2)) == 4, 
-                            str_to_upper(str_split_i(string = cage_id_input, pattern = "_left_", i = 2)), 
-                            str_to_title(str_replace_all(str_split_i(string = cage_id_input, pattern = "_left_", i = 2), pattern = "_", " "))
-    )
+    level_side <-  paste("Left", str_split(string = cage_id_input, pattern = "_left_")[[1]][1])
+    object_text <-  str_split(string = cage_id_input, pattern = "_left_")[[1]][2]
+    
+    object_label <- if_else(str_length(object_text) == 4,
+                            str_to_upper(object_text), 
+                            str_to_title(str_replace_all(object_text, pattern = "_", replacement = " ")))
+    
   }else if(str_detect( cage_id_input,"right")){
-    level_side <- paste("Right", str_to_upper(str_replace_all(string = str_split_i(string = cage_id_input, pattern = "_right_", i = 1), pattern = "_", "-")))
-    object_label <- if_else(str_length(str_split_i(string = cage_id_input, pattern = "_right_", i = 2)) == 4, 
-                            str_to_upper(str_split_i(string = cage_id_input, pattern = "_right_", i = 2)), 
-                            str_to_title(str_replace_all(str_split_i(string = cage_id_input, pattern = "_right_", i = 2), pattern = "_", " "))
-    )
+    level_side <-  paste("Right", str_split(string = cage_id_input, pattern = "_right_")[[1]][1])
+    object_text <-  str_split(string = cage_id_input, pattern = "_right_")[[1]][2]
+    
+    object_label <- if_else(str_length(object_text) == 4,
+                            str_to_upper(object_text), 
+                            str_to_title(str_replace_all(object_text, pattern = "_", replacement = " ")))
   }else{
     level_side <- "none"
     object_label <- "na"
