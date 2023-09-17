@@ -1220,6 +1220,23 @@ server <- function(input, output, session) {
     
   })
   
+  all_objects_to_add_list <- reactiveValues()
+  
+  all_objects_to_add_list$objects_df <- tibble(level = character(),
+                                               approach = character(),
+                                               category = character(),
+                                               vertebral_number = double(),
+                                               implant = character(),
+                                               object = character(),
+                                               side = character(),
+                                               x = double(),
+                                               y = double(),
+                                               fusion = character(),
+                                               interbody_fusion = character(),
+                                               body_interspace = character(),
+                                               fixation_uiv_liv = character(),
+                                               object_constructed = list())
+  
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
@@ -3229,22 +3246,7 @@ server <- function(input, output, session) {
   
   #########------------------------- ADD TO PLOT -------------------------###########
   
-  all_objects_to_add_list <- reactiveValues()
-  
-  all_objects_to_add_list$objects_df <- tibble(level = character(),
-                                               approach = character(),
-                                               category = character(),
-                                               vertebral_number = double(),
-                                               implant = character(),
-                                               object = character(),
-                                               side = character(),
-                                               x = double(),
-                                               y = double(),
-                                               fusion = character(),
-                                               interbody_fusion = character(),
-                                               body_interspace = character(),
-                                               fixation_uiv_liv = character(),
-                                               object_constructed = list())
+
   
   
   
@@ -5948,6 +5950,7 @@ server <- function(input, output, session) {
     
     # if(input$tabs != "patient_details_procedures"){
     ######
+    
     posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
       filter(approach == "posterior")  %>%
       select(-object_constructed) 
