@@ -932,6 +932,16 @@ ui <- dashboardPage(skin = "black",
                                 value = FALSE,
                                 size = "mini"
                               ),
+                              hr(),
+                              conditionalPanel(condition = "input.fusion_procedure_performed == true",
+                                               pickerInput(inputId = "interbody_implant_picker",
+                                                           label = "Interbodies", 
+                                                           choices = c("a"), 
+                                                           multiple = TRUE,
+                                                           width = "fit"),
+                                               uiOutput(outputId = "interbody_details_ui")
+                                               ),
+                              hr(),
                               ### this input gets updated based on the laterality of screws to be used in the next conditional panel steps
                               conditionalPanel(condition = "input.spine_approach.indexOf('Never True') > -1",
                                                checkboxGroupInput(inputId = "level_object_for_screw_details",
@@ -1165,6 +1175,9 @@ ui <- dashboardPage(skin = "black",
                           ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Anterior Revision Implants table:"), status = "success", collapsible = TRUE,solidHeader = TRUE,
                               tableOutput(outputId = "anterior_revision_implants_table")
+                          ),
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody Details:"), status = "success", collapsible = TRUE,solidHeader = TRUE,
+                              tableOutput(outputId = "interbody_details_df_sidetab")
                           ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Posterior Approach Objects for Op Note:"), status = "success", collapsible = TRUE,solidHeader = TRUE, 
                               tableOutput(outputId = "posterior_approach_objects_for_op_note_df")),
@@ -5557,6 +5570,37 @@ server <- function(input, output, session) {
               ignoreNULL = TRUE)
   
   
+  output$interbody_details_ui <- renderUI({
+    
+    if(length(input$interbody_implant_picker) >0){
+      box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody Implant Details:"), collapsible = TRUE, 
+          fixedRow(
+            column(width = 12, 
+                   column(width = 3,
+                          h4(strong("Level:"))
+                   ),
+                   column(width = 9, 
+                          fixedRow(
+                            column(width = 5, 
+                                   h4(strong("Composition:")), 
+                            ), 
+                            column(width = 4,
+                                   h4(strong("Device Name:"))
+                            ), 
+                            column(width = 3, 
+                                   h4(strong("Height(mm):"))
+                            )
+                          )
+                   )
+            ),
+            map(.x = input$interbody_implant_picker, .f = ~ make_interbody_conditional_panel_function(cage_id_input =  .x))
+          )
+      )
+    }
+    # }
+  })
+  
+  
   interbody_details_df_reactive <- reactive({
 
     if(nrow(interbody_df_reactive()) > 0){
@@ -8010,11 +8054,12 @@ server <- function(input, output, session) {
   # })  
   # 
   
-  ######## Render "Interbody Details Table for side tab:"    ######## 
-  # output$interbody_details_redcap_df_sidetab <- renderTable({
-  #     interbody_details_redcap_df_reactive()
-  # })
-  # 
+  ####### Render "Interbody Details Table for side tab:"    ########
+  output$interbody_details_df_sidetab <- renderTable({
+    interbody_details_df_reactive() %>%
+      as_tibble()
+  })
+
   
   ######## Render "Revision Implants" for side tab:"    ######## 
   output$revision_implants_table <- renderTable({

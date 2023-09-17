@@ -1069,7 +1069,7 @@ jh_fusion_category_function <- function(fusion_vector, all_objects_df){
 ############################## MAKE CONDITIONAL PANELS FOR INTERBODY ######################################
 make_interbody_conditional_panel_function <-  function(cage_id_input = NULL){
 
-  if(str_detect( cage_id_input,"central")){
+  if(str_detect(cage_id_input,"central")){
     level_side <- str_to_upper(str_replace_all(string = str_split_i(string = cage_id_input, pattern = "_central_", i = 1), pattern = "_", "-"))
     
     object_label <- if_else(str_length(str_split_i(string = cage_id_input, pattern = "_central_", i = 2)) == 4, 
@@ -1077,7 +1077,7 @@ make_interbody_conditional_panel_function <-  function(cage_id_input = NULL){
                             str_to_title(str_replace_all(str_split_i(string = cage_id_input, pattern = "_central_", i = 2), pattern = "_", " "))
     )
     
-  }else if(str_detect( cage_id_input,"left")){
+  }else if(str_detect(cage_id_input,"left")){
     level_side <- paste("Left", str_to_upper(str_replace_all(string = str_split_i(string = cage_id_input, pattern = "_left_", i = 1), pattern = "_", "-")))
     object_label <- if_else(str_length(str_split_i(string = cage_id_input, pattern = "_left_", i = 2)) == 4, 
                             str_to_upper(str_split_i(string = cage_id_input, pattern = "_left_", i = 2)), 
@@ -1089,97 +1089,101 @@ make_interbody_conditional_panel_function <-  function(cage_id_input = NULL){
                             str_to_upper(str_split_i(string = cage_id_input, pattern = "_right_", i = 2)), 
                             str_to_title(str_replace_all(str_split_i(string = cage_id_input, pattern = "_right_", i = 2), pattern = "_", " "))
     )
+  }else{
+    level_side <- "none"
+    object_label <- "na"
   }
-  
-  conditionalPanel(condition =  glue("input.interbody_implant_picker.indexOf('{cage_id_input}') > -1"),
-                    fluidRow(
-                      hr(),
-                      column(width = 3,
-                             tags$div(style = "font-size:20px; font-weight:bold; text-align:center", 
-                                      level_side,
-                                      ),
-                             tags$div(style = "font-size:20px; font-weight:bold; text-align:center", 
-                                      object_label,
-                             )
-                      ),
-                      column(9, 
-                             fixedRow(
-                               column(width = 5, 
-                                      pickerInput(
-                                        inputId = glue("{cage_id_input}_interbody_composition"),
-                                        label = NULL,
-                                        inline = "auto",
-                                        options = list(
-                                          title = "Choose Implant Type"),
-                                        choices = c("Allograft",
-                                                    "Autograft",
-                                                    "Carbon Fiber",
-                                                    "Coated PEEK",
-                                                    "PEEK", "Hybrid",
-                                                    "Titanium",
-                                                    "3D/Porous Titanium",
-                                                    "Other"),
-                                      ), 
-                               ), 
-                               column(width = 4,
-                                      textInput(inputId = glue("{cage_id_input}_interbody_device_name"),
-                                                label = NULL, placeholder = "Cage Name")
-                               ), 
-                               column(width = 3, 
-                                      numericInput(inputId = glue("{cage_id_input}_interbody_height"),
-                                                   label = NULL, value = 8,min = 5, max = 30,step = 1))
-                             ),
-                             fixedRow(
-                               column(width = 3, 
-                                      h5("Other Comments")),
-                               column(width = 6,
-                                      textInput(inputId = glue("{cage_id_input}_interbody_other"),
-                                                label = NULL,
-                                                placeholder = "Details",
-                                                width = "100%")
-                               ),
-                               column(width = 3, 
-                                      awesomeCheckbox(
-                                        inputId = glue("{cage_id_input}_interbody_integrated_fixation"),
-                                        label = "Integrated Fixation",
-                                        value = FALSE,
-                                        status = "danger"
-                                      ),
-                                      conditionalPanel(condition = glue("input.{cage_id_input}_interbody_integrated_fixation"),
-                                                       h4("Leave 0 for no screw"), 
-                                                       textInput(inputId = glue("{cage_id_input}_interbody_cranial_screw_1_size"), 
-                                                                 label = "Cranial Screw 1 size:", 
-                                                                 value = "0",
-                                                                 placeholder = "W x L"
-                                                       ),
-                                                       textInput(inputId = glue("{cage_id_input}_interbody_cranial_screw_2_size"), 
-                                                                 label = "Cranial Screw 2 size:", 
-                                                                 value = "0",
-                                                                 placeholder = "W x L"
-                                                       ),
-                                                       textInput(inputId = glue("{cage_id_input}_interbody_caudal_screw_1_size"), 
-                                                                 label = "Caudal Screw 1 size:", 
-                                                                 value = "0",
-                                                                 placeholder = "W x L"
-                                                       ),
-                                                       textInput(inputId = glue("{cage_id_input}_interbody_caudal_screw_2_size"), 
-                                                                 label = "Caudal Screw 2 size:", 
-                                                                 value = "0",
-                                                                 placeholder = "W x L"
-                                                       )
-                                      ),
-                                      awesomeCheckbox(
-                                        inputId = glue("{cage_id_input}_interbody_expandable"),
-                                        label = "Expandable",
-                                        value = FALSE,
-                                        status = "danger"
-                                      )
-                               )
-                             )
-                      ),
-                      hr()
-                    )
-                    )
+  if(level_side != "none"){
+    conditionalPanel(condition =  glue("input.interbody_implant_picker.indexOf('{cage_id_input}') > -1"),
+                     fluidRow(
+                       hr(),
+                       column(width = 3,
+                              tags$div(style = "font-size:20px; font-weight:bold; text-align:center", 
+                                       level_side,
+                              ),
+                              tags$div(style = "font-size:20px; font-weight:bold; text-align:center", 
+                                       object_label,
+                              )
+                       ),
+                       column(9, 
+                              fixedRow(
+                                column(width = 5, 
+                                       pickerInput(
+                                         inputId = glue("{cage_id_input}_interbody_composition"),
+                                         label = NULL,
+                                         inline = "auto",
+                                         options = list(
+                                           title = "Choose Implant Type"),
+                                         choices = c("Allograft",
+                                                     "Autograft",
+                                                     "Carbon Fiber",
+                                                     "Coated PEEK",
+                                                     "PEEK", "Hybrid",
+                                                     "Titanium",
+                                                     "3D/Porous Titanium",
+                                                     "Other"),
+                                       ), 
+                                ), 
+                                column(width = 4,
+                                       textInput(inputId = glue("{cage_id_input}_interbody_device_name"),
+                                                 label = NULL, placeholder = "Cage Name")
+                                ), 
+                                column(width = 3, 
+                                       numericInput(inputId = glue("{cage_id_input}_interbody_height"),
+                                                    label = NULL, value = 8,min = 5, max = 30,step = 1))
+                              ),
+                              fixedRow(
+                                column(width = 3, 
+                                       h5("Other Comments")),
+                                column(width = 6,
+                                       textInput(inputId = glue("{cage_id_input}_interbody_other"),
+                                                 label = NULL,
+                                                 placeholder = "Details",
+                                                 width = "100%")
+                                ),
+                                column(width = 3, 
+                                       awesomeCheckbox(
+                                         inputId = glue("{cage_id_input}_interbody_integrated_fixation"),
+                                         label = "Integrated Fixation",
+                                         value = FALSE,
+                                         status = "danger"
+                                       ),
+                                       conditionalPanel(condition = glue("input.{cage_id_input}_interbody_integrated_fixation"),
+                                                        h4("Leave 0 for no screw"), 
+                                                        textInput(inputId = glue("{cage_id_input}_interbody_cranial_screw_1_size"), 
+                                                                  label = "Cranial Screw 1 size:", 
+                                                                  value = "0",
+                                                                  placeholder = "W x L"
+                                                        ),
+                                                        textInput(inputId = glue("{cage_id_input}_interbody_cranial_screw_2_size"), 
+                                                                  label = "Cranial Screw 2 size:", 
+                                                                  value = "0",
+                                                                  placeholder = "W x L"
+                                                        ),
+                                                        textInput(inputId = glue("{cage_id_input}_interbody_caudal_screw_1_size"), 
+                                                                  label = "Caudal Screw 1 size:", 
+                                                                  value = "0",
+                                                                  placeholder = "W x L"
+                                                        ),
+                                                        textInput(inputId = glue("{cage_id_input}_interbody_caudal_screw_2_size"), 
+                                                                  label = "Caudal Screw 2 size:", 
+                                                                  value = "0",
+                                                                  placeholder = "W x L"
+                                                        )
+                                       ),
+                                       awesomeCheckbox(
+                                         inputId = glue("{cage_id_input}_interbody_expandable"),
+                                         label = "Expandable",
+                                         value = FALSE,
+                                         status = "danger"
+                                       )
+                                )
+                              )
+                       ),
+                       hr()
+                     )
+    ) 
+  }
 }
 
 ##########################################  MAKE UI's FOR INTERBODY ##################### ##################### 
