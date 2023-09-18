@@ -2559,7 +2559,7 @@ server <- function(input, output, session) {
   observeEvent(list(input$plot_click,
                     input$plot_double_click,
                     input$reset_all,
-                    all_objects_to_add_list$objects_df), {
+                    all_objects_to_add_list$objects_df) , {
                       if(input$spine_approach == "Anterior"){
                         anterior_df <- all_objects_to_add_list$objects_df %>%
                           filter(approach == "anterior")

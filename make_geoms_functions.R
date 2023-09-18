@@ -827,14 +827,7 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
       mutate(color_to_fill = row_number())%>%
       mutate(color_to_fill = if_else(color_to_fill == 1, "blue", "lightblue")) %>%
       ungroup()
-    
-    # geoms_list_anterior_interbody$anterior_disc_arthroplasty_sf_geom <- geom_sf(
-    #   data =  st_multipolygon((anterior_disc_arthroplasty_df)$object_constructed),
-    #   color = "#blue",
-    #   fill = "#lightblue",
-    #   # alpha = 0.3
-    # )
-    
+  
     geoms_list_anterior_interbody$anterior_disc_arthroplasty_sf_geom <-  geom_sf(data = anterior_disc_arthroplasty_df,
                                                                                  aes(geometry = object_constructed),
                                                                                  fill = "lightblue")

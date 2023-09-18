@@ -1069,7 +1069,6 @@ jh_fusion_category_function <- function(fusion_vector, all_objects_df){
 ############################## MAKE CONDITIONAL PANELS FOR INTERBODY ######################################
 make_interbody_conditional_panel_function <-  function(cage_id_input = NULL){
   
-
   if(str_detect(cage_id_input,"central")){ 
     level_side <-  str_to_upper(str_replace_all(string = str_split(string = cage_id_input, pattern = "_central_")[[1]][1], pattern = "_", "-"))
     object_text <-  str_split(string = cage_id_input, pattern = "_central_")[[1]][2]
