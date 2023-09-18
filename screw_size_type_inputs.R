@@ -2,113 +2,309 @@
 
 # all_screw_size_type_inputs_df <-  all_implants_constructed_df %>%
 
-anterior_plate_screws_df <- all_object_ids_df %>%
-  filter(vertebral_number < 23.9) %>%
-  # union_all(l6_all_implants_constructed_df) %>%
-  # bind_rows(l6_all_implants_constructed_df) %>%
-  select(level, vertebral_number, side, object) %>%
-  filter(str_detect(object, "screw")) %>%
-  filter(side == "left" | side == "right") %>%
-  arrange(vertebral_number) %>%
-  select(-vertebral_number) %>%
-  filter(object == "pedicle_screw") %>%
-  mutate(object = str_replace_all(object, "pedicle", "anterior_plate"))
-
-all_screw_size_type_inputs_df <- all_object_ids_df %>%
-  filter(vertebral_number < 23.9) %>%
-  # bind_rows(l6_all_implants_constructed_df) %>%
-  select(level, vertebral_number, side, object) %>%
-  filter(str_detect(object, "screw")) %>%
-  filter(side == "left" | side == "right") %>%
-  arrange(vertebral_number) %>%
-  select(-vertebral_number) %>%
-  group_by(level, side, object) %>%
-  bind_rows(anterior_plate_screws_df) %>% ### added this NEW for ANTERIOR PLATE SCREWS
-  mutate(count = row_number()) %>%
-  ungroup() %>%
-  mutate(level_object = str_to_lower(paste(level, object, sep = "_"))) %>%
-  mutate(level_object_label = str_to_title(paste(str_replace_all(level_object, "_", " ")))) %>%
-  mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI")) %>%
-  mutate(level_object_label = str_replace_all(level_object_label, "Occiput Occ", "Occ")) %>%
-  select(-side) %>%
-  distinct() %>%
-  mutate(left_object = paste("left", level_object, sep = "_"))%>%
-  mutate(right_object = paste("right", level_object, sep = "_")) %>%
-  mutate(implant_row_id = row_number()) %>%
-  select(implant_row_id, everything()) %>%
-  select(implant_row_id, level, level_object_label, left_object, right_object) %>%
-  mutate(left_diameter_input = map(.x = left_object,
-                                   .f = ~numericInput(inputId = paste0(.x, "_diameter"),
-                                                      label = NULL,
-                                                      value = "",
-                                                      width = '85%'))) %>%
-  mutate(left_length_input = map(.x = left_object,
-                                 .f = ~numericInput(inputId = paste0(.x, "_length"),
-                                                    label = NULL,
-                                                    value = "",
-                                                    width = '85%'))) %>%
-  mutate(right_diameter_input = map(.x = right_object,
-                                    .f = ~numericInput(inputId = paste0(.x, "_diameter"),
-                                                       label = NULL,
-                                                       value = "",
-                                                       width = '85%'))) %>%
-  mutate(right_length_input = map(.x = right_object,
-                                  .f = ~numericInput(inputId = paste0(.x, "_length"),
-                                                     label = NULL,
-                                                     value = "",
-                                                     width = '85%'))) %>%
-  mutate(left_type_input = map(.x = left_object,
-                               .f = ~radioGroupButtons( #"option2",
-                                 inputId = paste0(.x, "_type"),
-                                 label = NULL,
-                                 choices = c("M", "U", "P", "Red", "Offset"),
-                                 selected = "P",
-                                 checkIcon = list(yes = icon("wrench")),
-                                 size = "xs", direction = "horizontal",
-                                 justified = TRUE,
-                                 width = "95%"
-                               ))) %>%
-  mutate(right_type_input = map(.x = right_object,
-                                .f = ~ radioGroupButtons( #"option2",
-                                  inputId = paste0(.x, "_type"),
-                                  label = NULL,
-                                  choices = c("M", "U", "P", "Red", "Offset"),
-                                  selected = "P",
-                                  checkIcon = list(yes = icon("wrench")),
-                                  size = "xs", direction = "horizontal",
-                                  justified = TRUE,
-                                  width = "95%"
-                                )))
-
-
-  anterior_plate_screws_all_df <- all_screw_size_type_inputs_df %>%
-    filter(str_detect(string = left_object, pattern = "anterior_plate")) %>%
-    mutate(left_type_input = map(.x = left_object,
-                                 .f = ~radioGroupButtons( #"option2",
-                                   inputId = paste0(.x, "_type"),
-                                   label = NULL,
-                                   choices = c("Anterior"),
-                                   selected = "Anterior",
-                                   checkIcon = list(yes = icon("wrench")),
-                                   size = "xs", direction = "horizontal",
-                                   justified = TRUE,
-                                   width = "95%"
-                                 ))) %>%
-    mutate(right_type_input = map(.x = right_object,
-                                  .f = ~radioGroupButtons( #"option2",
-                                    inputId = paste0(.x, "_type"),
-                                    label = NULL,
-                                    choices = c("Anterior"),
-                                    selected = "Anterior",
-                                    checkIcon = list(yes = icon("wrench")),
-                                    size = "xs", direction = "horizontal",
-                                    justified = TRUE,
-                                    width = "95%"
-                                  )))
+jh_make_screw_details_inputs_df_function <- function(all_objects = tibble()){
   
-  all_screw_size_type_inputs_df <- all_screw_size_type_inputs_df %>%
-    filter(str_detect(string = left_object, pattern = "anterior_plate", negate = TRUE)) %>%
-    bind_rows(anterior_plate_screws_all_df) 
+  if(nrow(all_objects)>0){
+    
+    if(any(str_detect(all_objects, "anterior_plate"))){
+      anterior_plate_inputs_df <- all_objects %>%
+        filter(object == "anterior_plate") %>%
+        select(level, vertebral_number, side, object) %>%
+        mutate(side = "left", side2 = "right") %>%
+        pivot_longer(cols = c(side, side2), names_to = "discard", values_to = "side") %>%
+        select(-discard)  %>%
+        separate(col = level, into = c("proximal", "distal"), sep = "-") %>%
+        pivot_longer(cols = c(proximal, distal), names_to = "discard", values_to = "level") %>%
+        # mutate(vertebral_number = if_else(discard == "proximal", vertebral_number - 0.5, vertebral_number + 0.5)) %>%
+        select(level, side, object) %>%
+        group_by(level, side, object) %>%
+        # bind_rows(anterior_plate_screws_df) %>% ### added this NEW for ANTERIOR PLATE SCREWS
+        mutate(count = row_number()) %>%
+        ungroup() %>%
+        mutate(level_object = str_to_lower(paste(level, object, sep = "_"))) %>%
+        mutate(level_object_label = str_to_title(paste(str_replace_all(level_object, "_", " ")))) %>%
+        # mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI")) %>%
+        # mutate(level_object_label = str_replace_all(level_object_label, "Occiput Occ", "Occ")) %>%
+        select(-side) %>%
+        distinct() %>%
+        mutate(left_object = paste("left", level_object, sep = "_"))%>%
+        mutate(right_object = paste("right", level_object, sep = "_")) %>%
+        mutate(implant_row_id = row_number()) %>%
+        select(implant_row_id, everything()) %>%
+        select(implant_row_id, level, level_object_label, left_object, right_object) %>%
+        mutate(left_diameter_input = map(.x = left_object,
+                                         .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                            label = NULL,
+                                                            value = "",
+                                                            width = '85%'))) %>%
+        mutate(left_length_input = map(.x = left_object,
+                                       .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                          label = NULL,
+                                                          value = "",
+                                                          width = '85%'))) %>%
+        mutate(right_diameter_input = map(.x = right_object,
+                                          .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                             label = NULL,
+                                                             value = "",
+                                                             width = '85%'))) %>%
+        mutate(right_length_input = map(.x = right_object,
+                                        .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                           label = NULL,
+                                                           value = "",
+                                                           width = '85%'))) %>%
+        mutate(left_type_input = map(.x = left_object,
+                                     .f = ~radioGroupButtons( #"option2",
+                                       inputId = paste0(.x, "_type"),
+                                       label = NULL,
+                                       choices = c("Anterior"),
+                                       selected = "Anterior",
+                                       checkIcon = list(yes = icon("wrench")),
+                                       size = "xs", direction = "horizontal",
+                                       justified = TRUE,
+                                       width = "95%"
+                                     ))) %>%
+        mutate(right_type_input = map(.x = right_object,
+                                      .f = ~radioGroupButtons( #"option2",
+                                        inputId = paste0(.x, "_type"),
+                                        label = NULL,
+                                        choices = c("Anterior"),
+                                        selected = "Anterior",
+                                        checkIcon = list(yes = icon("wrench")),
+                                        size = "xs", direction = "horizontal",
+                                        justified = TRUE,
+                                        width = "95%"
+                                      )))
+    }else{
+      anterior_plate_inputs_df <- tibble(implant_row_id = integer(),
+             level = character(),
+             level_object_label = character(),
+             left_object = character(),
+             right_object = character(),
+             left_diameter_input = list(),
+             left_length_input = list(),
+             right_diameter_input = list(),
+             right_length_input = list(),
+             left_type_input = list(),
+             right_type_input = list())
+    }
+    
+    if(any(str_detect(all_objects$object, "screw"))){
+      
+      step_1 <- all_objects %>%
+        filter(str_detect(object, "screw")) %>%
+        select(level, vertebral_number, side, object) %>%
+        filter(side == "left" | side == "right") %>%
+        arrange(vertebral_number) %>%
+        select(-vertebral_number) %>%
+        group_by(level, side, object) %>%
+        # bind_rows(anterior_plate_screws_df) %>% ### added this NEW for ANTERIOR PLATE SCREWS
+        mutate(count = row_number()) %>%
+        ungroup()
+      
+      if(any(step_1$side == "left") == FALSE){
+        step_1 <- step_1 %>%
+          bind_rows(level = "x", side = "left", object = "x")
+      }
+      if(any(step_1$side == "right") == FALSE){
+        step_1 <- step_1 %>%
+          bind_rows(level = "x", side = "right", object = "x")
+      }
+      
+      all_screw_size_type_inputs_df <-  step_1 %>%
+        mutate(level_object_label = str_to_title(paste(level, str_replace_all(object, "_", " ")))) %>%
+        pivot_wider(names_from = side, values_from = object) %>%
+        replace_na(list(left = " ", right = c(" "))) %>%
+        mutate(implant_row_id = row_number()) %>%
+        mutate(left_object = paste0("left_", str_to_lower(level), "_", left), 
+               right_object = paste0("right_",str_to_lower(level), "_",  right))  %>%
+        select(implant_row_id, level, level_object_label, left_object, right_object) %>%
+        mutate(left_diameter_input = map(.x = left_object,
+                                         .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                            label = NULL,
+                                                            value = "",
+                                                            width = '85%'))) %>%
+        mutate(left_length_input = map(.x = left_object,
+                                       .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                          label = NULL,
+                                                          value = "",
+                                                          width = '85%'))) %>%
+        mutate(right_diameter_input = map(.x = right_object,
+                                          .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+                                                             label = NULL,
+                                                             value = "",
+                                                             width = '85%'))) %>%
+        mutate(right_length_input = map(.x = right_object,
+                                        .f = ~numericInput(inputId = paste0(.x, "_length"),
+                                                           label = NULL,
+                                                           value = "",
+                                                           width = '85%'))) %>%
+        mutate(left_type_input = map(.x = left_object,
+                                     .f = ~radioGroupButtons( #"option2",
+                                       inputId = paste0(.x, "_type"),
+                                       label = NULL,
+                                       choices = c("M", "U", "P", "Red", "Offset"),
+                                       selected = "P",
+                                       checkIcon = list(yes = icon("wrench")),
+                                       size = "xs", direction = "horizontal",
+                                       justified = TRUE,
+                                       width = "95%"
+                                     ))) %>%
+        mutate(right_type_input = map(.x = right_object,
+                                      .f = ~ radioGroupButtons( #"option2",
+                                        inputId = paste0(.x, "_type"),
+                                        label = NULL,
+                                        choices = c("M", "U", "P", "Red", "Offset"),
+                                        selected = "P",
+                                        checkIcon = list(yes = icon("wrench")),
+                                        size = "xs", direction = "horizontal",
+                                        justified = TRUE,
+                                        width = "95%"
+                                      )))
+      
+    }else{
+      all_screw_size_type_inputs_df <- tibble(implant_row_id = integer(),
+                                             level = character(),
+                                             level_object_label = character(),
+                                             left_object = character(),
+                                             right_object = character(),
+                                             left_diameter_input = list(),
+                                             left_length_input = list(),
+                                             right_diameter_input = list(),
+                                             right_length_input = list(),
+                                             left_type_input = list(),
+                                             right_type_input = list())
+    }
+    
+    all_screw_inputs_df <- all_screw_size_type_inputs_df %>%
+      bind_rows(anterior_plate_inputs_df)
+    
+  }else{
+    all_screw_inputs_df <- tibble(implant_row_id = integer(),
+                                            level = character(),
+                                            level_object_label = character(),
+                                            left_object = character(),
+                                            right_object = character(),
+                                            left_diameter_input = list(),
+                                            left_length_input = list(),
+                                            right_diameter_input = list(),
+                                            right_length_input = list(),
+                                            left_type_input = list(),
+                                            right_type_input = list())
+  }
+ 
+  
+  
+  return(all_screw_inputs_df)
+  
+}
+
+# anterior_plate_screws_df <- all_object_ids_df %>%
+#   filter(vertebral_number < 23.9) %>%
+#   # union_all(l6_all_implants_constructed_df) %>%
+#   # bind_rows(l6_all_implants_constructed_df) %>%
+#   select(level, vertebral_number, side, object) %>%
+#   filter(str_detect(object, "screw")) %>%
+#   filter(side == "left" | side == "right") %>%
+#   arrange(vertebral_number) %>%
+#   select(-vertebral_number) %>%
+#   filter(object == "pedicle_screw") %>%
+#   mutate(object = str_replace_all(object, "pedicle", "anterior_plate"))
+
+# all_screw_size_type_inputs_df <- all_object_ids_df %>%
+#   filter(vertebral_number < 23.9) %>%
+#   # bind_rows(l6_all_implants_constructed_df) %>%
+#   select(level, vertebral_number, side, object) %>%
+#   filter(str_detect(object, "screw")) %>%
+#   filter(side == "left" | side == "right") %>%
+#   arrange(vertebral_number) %>%
+#   select(-vertebral_number) %>%
+#   group_by(level, side, object) %>%
+#   bind_rows(anterior_plate_screws_df) %>% ### added this NEW for ANTERIOR PLATE SCREWS
+#   mutate(count = row_number()) %>%
+#   ungroup() %>%
+#   mutate(level_object = str_to_lower(paste(level, object, sep = "_"))) %>%
+#   mutate(level_object_label = str_to_title(paste(str_replace_all(level_object, "_", " ")))) %>%
+#   mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI")) %>%
+#   mutate(level_object_label = str_replace_all(level_object_label, "Occiput Occ", "Occ")) %>%
+#   select(-side) %>%
+#   distinct() %>%
+#   mutate(left_object = paste("left", level_object, sep = "_"))%>%
+#   mutate(right_object = paste("right", level_object, sep = "_")) %>%
+#   mutate(implant_row_id = row_number()) %>%
+#   select(implant_row_id, everything()) %>%
+#   select(implant_row_id, level, level_object_label, left_object, right_object) %>%
+#   mutate(left_diameter_input = map(.x = left_object,
+#                                    .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+#                                                       label = NULL,
+#                                                       value = "",
+#                                                       width = '85%'))) %>%
+#   mutate(left_length_input = map(.x = left_object,
+#                                  .f = ~numericInput(inputId = paste0(.x, "_length"),
+#                                                     label = NULL,
+#                                                     value = "",
+#                                                     width = '85%'))) %>%
+#   mutate(right_diameter_input = map(.x = right_object,
+#                                     .f = ~numericInput(inputId = paste0(.x, "_diameter"),
+#                                                        label = NULL,
+#                                                        value = "",
+#                                                        width = '85%'))) %>%
+#   mutate(right_length_input = map(.x = right_object,
+#                                   .f = ~numericInput(inputId = paste0(.x, "_length"),
+#                                                      label = NULL,
+#                                                      value = "",
+#                                                      width = '85%'))) %>%
+#   mutate(left_type_input = map(.x = left_object,
+#                                .f = ~radioGroupButtons( #"option2",
+#                                  inputId = paste0(.x, "_type"),
+#                                  label = NULL,
+#                                  choices = c("M", "U", "P", "Red", "Offset"),
+#                                  selected = "P",
+#                                  checkIcon = list(yes = icon("wrench")),
+#                                  size = "xs", direction = "horizontal",
+#                                  justified = TRUE,
+#                                  width = "95%"
+#                                ))) %>%
+#   mutate(right_type_input = map(.x = right_object,
+#                                 .f = ~ radioGroupButtons( #"option2",
+#                                   inputId = paste0(.x, "_type"),
+#                                   label = NULL,
+#                                   choices = c("M", "U", "P", "Red", "Offset"),
+#                                   selected = "P",
+#                                   checkIcon = list(yes = icon("wrench")),
+#                                   size = "xs", direction = "horizontal",
+#                                   justified = TRUE,
+#                                   width = "95%"
+#                                 )))
+
+# 
+#   anterior_plate_screws_all_df <- all_screw_size_type_inputs_df %>%
+#     filter(str_detect(string = left_object, pattern = "anterior_plate")) %>%
+#     mutate(left_type_input = map(.x = left_object,
+#                                  .f = ~radioGroupButtons( #"option2",
+#                                    inputId = paste0(.x, "_type"),
+#                                    label = NULL,
+#                                    choices = c("Anterior"),
+#                                    selected = "Anterior",
+#                                    checkIcon = list(yes = icon("wrench")),
+#                                    size = "xs", direction = "horizontal",
+#                                    justified = TRUE,
+#                                    width = "95%"
+#                                  ))) %>%
+#     mutate(right_type_input = map(.x = right_object,
+#                                   .f = ~radioGroupButtons( #"option2",
+#                                     inputId = paste0(.x, "_type"),
+#                                     label = NULL,
+#                                     choices = c("Anterior"),
+#                                     selected = "Anterior",
+#                                     checkIcon = list(yes = icon("wrench")),
+#                                     size = "xs", direction = "horizontal",
+#                                     justified = TRUE,
+#                                     width = "95%"
+#                                   )))
+#   
+#   all_screw_size_type_inputs_df <- all_screw_size_type_inputs_df %>%
+#     filter(str_detect(string = left_object, pattern = "anterior_plate", negate = TRUE)) %>%
+#     bind_rows(anterior_plate_screws_all_df) 
     # separate(col = level_object_label, into = c("level"), remove = FALSE)
 
 
@@ -134,32 +330,7 @@ jh_generate_df_for_screening_screw_inputs_function <- function(all_implants_df){
     anterior_plate_df <- tibble(level = character(), vertebral_number = double(), side = character(), object = character())
   }
   
-  
-  # level_object_df <- all_implants_df %>%
-  #   filter(object != "anterior_plate") %>%
-  #   select(level, vertebral_number, side, object) %>%
-  #   union_all(anterior_plate_df) %>% ### NEW
-  #   mutate(level_object_label = str_to_title(str_replace_all(paste(level, object), "_", " "))) %>%
-  #   mutate(level_object_label = str_replace_all(level_object_label, "S2ai", "S2AI"))
-  # 
-  # level_object_label_df <- level_object_df %>%
-  #   select(level, level_object_label) %>%
-  #   distinct()
-  # 
-  # left_objects_df <- level_object_df %>%
-  #   filter(side == "left") %>%
-  #   mutate(left_object = str_to_lower(str_replace_all(paste(side, level_object_label, sep = "_"), " ", "_"))) %>%
-  #   select(level_object_label, left_object)
-  # 
-  # right_objects_df <- level_object_df %>%
-  #   filter(side == "right") %>%
-  #   mutate(right_object = str_to_lower(str_replace_all(paste(side, level_object_label, sep = "_"), " ", "_"))) %>%
-  #   select(level_object_label, right_object)
-  # 
-  # level_object_label_df %>%
-  #   left_join(left_objects_df) %>%
-  #   left_join(right_objects_df) %>%
-  #   replace_na(list(left_object = "no_screw", right_object = "no_screw"))
+
   
   level_object_df <- all_implants_df %>%
     filter(object != "anterior_plate") %>%

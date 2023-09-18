@@ -626,7 +626,7 @@ startup_modal_box_diagnosis_symptoms <-
                                              inputId = "left_revision_implants",
                                              label = "Present:",
                                              selected = left_prior_implants,
-                                             choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                             choices = unique((revision_screws_df %>% filter(x < 0.5))$level)
                                            )
                                          ),
                                          column(
@@ -636,7 +636,7 @@ startup_modal_box_diagnosis_symptoms <-
                                              label = "Removed:",
                                              status = "danger",
                                              selected = left_prior_implants_removed,
-                                             choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                             choices = unique((revision_screws_df %>% filter(x < 0.5))$level)
                                            )
                                          )
                                        ),
@@ -649,7 +649,7 @@ startup_modal_box_diagnosis_symptoms <-
                                              inputId = "right_revision_implants",
                                              label = "Present:",
                                              selected = right_prior_implants,
-                                             choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                             choices = unique((revision_screws_df %>% filter(x < 0.5))$level)
                                            )
                                          ),
                                          column(
@@ -659,7 +659,7 @@ startup_modal_box_diagnosis_symptoms <-
                                              label = "Removed:",
                                              status = "danger",
                                              selected = right_prior_implants_removed,
-                                             choices = unique((revision_implants_df %>% filter(x < 0.5))$level)
+                                             choices = unique((revision_screws_df %>% filter(x < 0.5))$level)
                                            )
                                          )
                                        )

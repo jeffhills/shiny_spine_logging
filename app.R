@@ -944,105 +944,108 @@ ui <- dashboardPage(skin = "black",
                               uiOutput(outputId = "interbody_details_ui"),
                               hr(),
                               ### this input gets updated based on the laterality of screws to be used in the next conditional panel steps
-                              conditionalPanel(condition = "input.spine_approach.indexOf('Never True') > -1",
-                                               checkboxGroupInput(inputId = "level_object_for_screw_details",
-                                                                  label = "Screw Levels:",
-                                                                  choices = all_screw_size_type_inputs_df$level_object_label,
-                                                                  selected = ""),
-                                               checkboxGroupInput(inputId = "left_level_object_for_screw_details",
-                                                                  label = "Screw Levels:",
-                                                                  choices = all_screw_size_type_inputs_df$left_object,
-                                                                  selected = ""),
-                                               checkboxGroupInput(inputId = "right_level_object_for_screw_details",
-                                                                  label = "Screw Levels:",
-                                                                  choices = all_screw_size_type_inputs_df$right_object,
-                                                                  selected = "")),
-                              conditionalPanel(condition = "input.fusion_procedure_performed == true",
-                                               box(width = 12,
-                                                   title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
-                                                   jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
-                                                                                    left_column_percent_width = 30,
-                                                                                    input_type = "checkbox",
-                                                                                    font_size = 16,
-                                                                                    checkboxes_inline = TRUE,
-                                                                                    input_id = "implant_manufacturer",
-                                                                                    choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
-                                                   ),
-                                                   h4("Screw Sizes:"),
-                                                   fluidRow(
-                                                     column(4,
-                                                            "Implant"),
-                                                     column(2,
-                                                            "Left Diameter"),
-                                                     column(2,
-                                                            "Left Length"),
-                                                     column(2,
-                                                            "Right Diameter"),
-                                                     column(2,
-                                                            "Right Length")
-                                                   ),
-                                                   map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
-                                                       .f = ~
-                                                         conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$level_object_label[[.x]]}') >-1"),
-                                                                          fluidRow(
-                                                                            column(4,
-                                                                                   all_screw_size_type_inputs_df$level_object_label[[.x]]
-                                                                            ),
-                                                                            column(2,
-                                                                                   conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
-                                                                                                    all_screw_size_type_inputs_df$left_diameter_input[[.x]]
-                                                                                   )
-                                                                            ),
-                                                                            column(2,
-                                                                                   conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
-                                                                                                    all_screw_size_type_inputs_df$left_length_input[[.x]]
-                                                                                   )
-                                                                            ),
-                                                                            column(2,
-                                                                                   conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
-                                                                                                    all_screw_size_type_inputs_df$right_diameter_input[[.x]]
-                                                                                   )
-                                                                            ),
-                                                                            column(2,
-                                                                                   conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
-                                                                                                    all_screw_size_type_inputs_df$right_length_input[[.x]]
-                                                                                   )
-                                                                            )
-                                                                          )
-                                                         )
-                                                   ),
-                                                   hr(),
-                                                   h4("Screw Types:"),
-                                                   fluidRow(
-                                                     column(4,
-                                                            "Implant"),
-                                                     column(4,
-                                                            "Left Screw Type"),
-                                                     column(4,
-                                                            "Right Screw Type"),
-                                                   ),
-                                                   map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
-                                                       .f = ~
-                                                         conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$level_object_label[.x]}') >-1"),
-                                                                          fluidRow(
-                                                                            column(4,
-                                                                                   all_screw_size_type_inputs_df$level_object_label[[.x]]
-                                                                            ),
-                                                                            column(4,
-                                                                                   conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
-                                                                                                    all_screw_size_type_inputs_df$left_type_input[[.x]]
-                                                                                   )
-                                                                            ),
-                                                                            column(4,
-                                                                                   conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
-                                                                                                    all_screw_size_type_inputs_df$right_type_input[[.x]]
-                                                                                   )
-                                                                            ),
-                                                                          )
-                                                         )
-                                                   )
-                                               )
-                              )
+                              # conditionalPanel(condition = "input.spine_approach.indexOf('Never True') > -1",
+                              #                  checkboxGroupInput(inputId = "level_object_for_screw_details",
+                              #                                     label = "Screw Levels:",
+                              #                                     choices = all_screw_size_type_inputs_df$level_object_label,
+                              #                                     selected = ""),
+                              #                  checkboxGroupInput(inputId = "left_level_object_for_screw_details",
+                              #                                     label = "Screw Levels:",
+                              #                                     choices = all_screw_size_type_inputs_df$left_object,
+                              #                                     selected = ""),
+                              #                  checkboxGroupInput(inputId = "right_level_object_for_screw_details",
+                              #                                     label = "Screw Levels:",
+                              #                                     choices = all_screw_size_type_inputs_df$right_object,
+                              #                                     selected = "")
+                              #                  ),
+                              uiOutput(outputId = "screw_details_ui"),
+                              # conditionalPanel(condition = "input.fusion_procedure_performed == true",
+                                               # uiOutput(outputId = "screw_details_ui")
+                                               # box(width = 12,
+                                               #     title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
+                                               #     jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
+                                               #                                      left_column_percent_width = 30,
+                                               #                                      input_type = "checkbox",
+                                               #                                      font_size = 16,
+                                               #                                      checkboxes_inline = TRUE,
+                                               #                                      input_id = "implant_manufacturer",
+                                               #                                      choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
+                                               #     ),
+                                               #     h4("Screw Sizes:"),
+                                               #     fluidRow(
+                                               #       column(4,
+                                               #              "Implant"),
+                                               #       column(2,
+                                               #              "Left Diameter"),
+                                               #       column(2,
+                                               #              "Left Length"),
+                                               #       column(2,
+                                               #              "Right Diameter"),
+                                               #       column(2,
+                                               #              "Right Length")
+                                               #     ),
+                                               #     map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
+                                               #         .f = ~
+                                               #           conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$level_object_label[[.x]]}') >-1"),
+                                               #                            fluidRow(
+                                               #                              column(4,
+                                               #                                     all_screw_size_type_inputs_df$level_object_label[[.x]]
+                                               #                              ),
+                                               #                              column(2,
+                                               #                                     conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+                                               #                                                      all_screw_size_type_inputs_df$left_diameter_input[[.x]]
+                                               #                                     )
+                                               #                              ),
+                                               #                              column(2,
+                                               #                                     conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+                                               #                                                      all_screw_size_type_inputs_df$left_length_input[[.x]]
+                                               #                                     )
+                                               #                              ),
+                                               #                              column(2,
+                                               #                                     conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+                                               #                                                      all_screw_size_type_inputs_df$right_diameter_input[[.x]]
+                                               #                                     )
+                                               #                              ),
+                                               #                              column(2,
+                                               #                                     conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+                                               #                                                      all_screw_size_type_inputs_df$right_length_input[[.x]]
+                                               #                                     )
+                                               #                              )
+                                               #                            )
+                                               #           )
+                                               #     ),
+                                               #     hr(),
+                                               #     h4("Screw Types:"),
+                                               #     fluidRow(
+                                               #       column(4,
+                                               #              "Implant"),
+                                               #       column(4,
+                                               #              "Left Screw Type"),
+                                               #       column(4,
+                                               #              "Right Screw Type"),
+                                               #     ),
+                                               #     map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
+                                               #         .f = ~
+                                               #           conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$level_object_label[.x]}') >-1"),
+                                               #                            fluidRow(
+                                               #                              column(4,
+                                               #                                     all_screw_size_type_inputs_df$level_object_label[[.x]]
+                                               #                              ),
+                                               #                              column(4,
+                                               #                                     conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+                                               #                                                      all_screw_size_type_inputs_df$left_type_input[[.x]]
+                                               #                                     )
+                                               #                              ),
+                                               #                              column(4,
+                                               #                                     conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+                                               #                                                      all_screw_size_type_inputs_df$right_type_input[[.x]]
+                                               #                                     )
+                                               #                              ),
+                                               #                            )
+                                               #           )
+                                               #     )
+                                               # )
+                              # )
                           ),
                           box(width = 5, status = "primary",
                               fluidRow(
@@ -5703,6 +5706,98 @@ server <- function(input, output, session) {
   })
   
   
+  
+  output$screw_details_ui <- renderUI({
+    
+    all_screw_size_type_inputs_df <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df)
+    
+    box(width = 12,
+        title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
+        jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
+                                         left_column_percent_width = 30,
+                                         input_type = "checkbox",
+                                         font_size = 16,
+                                         checkboxes_inline = TRUE,
+                                         input_id = "implant_manufacturer",
+                                         choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
+        ),
+        h4("Screw Sizes:"),
+        fluidRow(
+          column(4,
+                 "Implant"),
+          column(2,
+                 "Left Diameter"),
+          column(2,
+                 "Left Length"),
+          column(2,
+                 "Right Diameter"),
+          column(2,
+                 "Right Length")
+        ),
+        map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
+            .f = ~
+              # conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$level_object_label[[.x]]}') >-1"),
+                               fluidRow(
+                                 column(4,
+                                        all_screw_size_type_inputs_df$level_object_label[[.x]]
+                                 ),
+                                 column(2,
+                                        # conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+                                                         all_screw_size_type_inputs_df$left_diameter_input[[.x]]
+                                        # )
+                                 ),
+                                 column(2,
+                                        # conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+                                                         all_screw_size_type_inputs_df$left_length_input[[.x]]
+                                        # )
+                                 ),
+                                 column(2,
+                                        # conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+                                                         all_screw_size_type_inputs_df$right_diameter_input[[.x]]
+                                        # )
+                                 ),
+                                 column(2,
+                                        # conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+                                                         all_screw_size_type_inputs_df$right_length_input[[.x]]
+                                        # )
+                                 )
+                               )
+              # )
+        ),
+        hr(),
+        h4("Screw Types:"),
+        fluidRow(
+          column(4,
+                 "Implant"),
+          column(4,
+                 "Left Screw Type"),
+          column(4,
+                 "Right Screw Type"),
+        ),
+        map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
+            .f = ~
+              # conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$level_object_label[.x]}') >-1"),
+                               fluidRow(
+                                 column(4,
+                                        all_screw_size_type_inputs_df$level_object_label[[.x]]
+                                 ),
+                                 column(4,
+                                        # conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+                                                         all_screw_size_type_inputs_df$left_type_input[[.x]]
+                                        # )
+                                 ),
+                                 column(4,
+                                        # conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+                                                         all_screw_size_type_inputs_df$right_type_input[[.x]]
+                                        # )
+                                 ),
+                               )
+              # )
+        )
+    )
+  }) %>%
+    bindEvent(input$implants_complete, ignoreInit = TRUE)
+  
   ###################################### ---------------- BIOLOGICS -----------------------#################################
   ###################################### ---------------- BIOLOGICS -----------------------#################################
   ###################################### ---------------- BIOLOGICS -----------------------#################################
@@ -7858,7 +7953,8 @@ server <- function(input, output, session) {
       if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw") | str_detect(object, "anterior_plate")))>0){
         
         implants_added_df <- jh_generate_df_for_screening_screw_inputs_function(all_objects_to_add_list$objects_df) %>%
-          left_join(all_screw_size_type_inputs_df %>% select(implant_row_id, level_object_label)) %>%
+          # left_join(all_screw_size_type_inputs_df %>% select(implant_row_id, level_object_label)) %>%
+          left_join(jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df) %>% select(implant_row_id, level_object_label)) %>%
           arrange(implant_row_id) %>%
           select(implant_row_id, level, level_object_label, left_object, right_object)
         
