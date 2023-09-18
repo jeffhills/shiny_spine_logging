@@ -128,19 +128,32 @@ all_cages_df <- all_object_ids_df %>%
 #   union_all(revision_implants_df %>% filter(level == "Iliac"))%>%
 #   filter(object != "pelvic_screw_2")
 
-revision_implants_df <- all_object_ids_df %>%
-  filter(category == "implant") %>%
-  filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw" | object == "pars_screw" | str_detect(object, "hook")) %>%
-  filter(approach == "posterior")
+# revision_implants_df <- all_object_ids_df %>%
+#   filter(category == "implant") %>%
+#   filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw" | object == "pars_screw" | str_detect(object, "hook")) %>%
+#   filter(approach == "posterior") %>%
+#   arrange(vertebral_number)%>%
+#   left_join(all_implants_constructed_df)
 
 revision_screws_df <- all_object_ids_df %>%
-  filter(str_detect(object, "hook") == FALSE) %>%
+  filter(category == "implant") %>%
+  filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw") %>%
   filter((str_detect(string = level, pattern = "C1|C3|C4|C5|C6") & object == "pedicle_screw") == FALSE) %>%
-  group_by(level, side) %>%
-  filter(y == max(y)) %>%
-  ungroup() %>%
-  union_all(revision_implants_df %>% filter(level == "Iliac"))%>%
-  filter(object != "pelvic_screw_2")
+  filter(approach == "posterior") %>%
+  arrange(vertebral_number)%>%
+  left_join(all_implants_constructed_df)
+
+# revision_screws_df <- all_object_ids_df %>%
+#   filter(str_detect(object, "hook") == FALSE) %>%
+#   filter((str_detect(string = level, pattern = "C1|C3|C4|C5|C6") & object == "pedicle_screw") == FALSE) %>%
+#   left_join(all_implants_constructed_df) %>%
+#   group_by(level, side) %>%
+#   filter(y == max(y)) %>%
+#   ungroup() %>%
+#   union_all(revision_implants_df %>% filter(level == "Iliac"))%>%
+#   filter(object != "pelvic_screw_2") %>%
+#   # filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw" | object == "pars_screw" | str_detect(object, "hook")) %>%
+#   arrange(vertebral_number) 
 
 
 #############-----------------------   Build: arthroplasty  ----------------------###############
