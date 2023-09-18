@@ -1926,10 +1926,20 @@ server <- function(input, output, session) {
                       mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
                       select(object_id, object_constructed))
         
+        arthroplasty_constructed_df <- arthroplasty_coordinates_df %>%
+          mutate(object_constructed = pmap(.l = list(..1 = inferior_endplate_y,
+                                                     ..2 = superior_endplate_y, 
+                                                     ..3 = width),
+                                           .f = ~ arthroplasty_function(y_for_inferior_endplate = ..1, 
+                                                                        y_for_superior_endplate = ..2,
+                                                                        endplate_width = ..3)))%>%
+          select(names(all_implants_constructed_df))
+        
         all_implants_constructed_df <<- all_implants_constructed_df %>%
           bind_rows(anterior_body_constructed_df) %>%
           bind_rows(anterior_disc_constructed_df) %>%
           bind_rows(anterior_interbody_fusion_constructed_df) %>%
+          bind_rows(arthroplasty_constructed_df) %>%
           distinct() 
       }
       
@@ -2008,11 +2018,21 @@ server <- function(input, output, session) {
                       nest() %>%
                       mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
                       select(object_id, object_constructed))
+      
+        
+        arthroplasty_constructed_df <- arthroplasty_coordinates_df %>%
+          mutate(object_constructed = pmap(.l = list(..1 = inferior_endplate_y,
+                                                     ..2 = superior_endplate_y, 
+                                                     ..3 = width),
+                                           .f = ~ arthroplasty_function(y_for_inferior_endplate = ..1, 
+                                                                        y_for_superior_endplate = ..2,
+                                                                        endplate_width = ..3)))
         
         all_implants_constructed_df <<- all_implants_constructed_df %>%
           bind_rows(anterior_body_constructed_df) %>%
           bind_rows(anterior_disc_constructed_df) %>%
           bind_rows(anterior_interbody_fusion_constructed_df) %>%
+          bind_rows(arthroplasty_constructed_df) %>%
           distinct() 
       }
     }

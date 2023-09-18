@@ -822,14 +822,26 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
     anterior_disc_arthroplasty_df <- all_anterior_objects_df %>%
       filter(object == "anterior_disc_arthroplasty") %>%
       remove_empty() %>%
-      unnest(object_constructed)
+      unnest(object_constructed) %>%
+      group_by(level) %>%
+      mutate(color_to_fill = row_number())%>%
+      mutate(color_to_fill = if_else(color_to_fill == 1, "blue", "lightblue")) %>%
+      ungroup()
+    
+    # geoms_list_anterior_interbody$anterior_disc_arthroplasty_sf_geom <- geom_sf(
+    #   data =  st_multipolygon((anterior_disc_arthroplasty_df)$object_constructed),
+    #   color = "#blue",
+    #   fill = "#lightblue",
+    #   # alpha = 0.3
+    # )
     
     geoms_list_anterior_interbody$anterior_disc_arthroplasty_sf_geom <-  geom_sf(data = anterior_disc_arthroplasty_df,
-                                                                                 aes(geometry = object_constructed, fill = color))
-    geoms_list_anterior_interbody$arthroplasty_fill <- scale_fill_identity()
+                                                                                 aes(geometry = object_constructed),
+                                                                                 fill = "lightblue")
+    # geoms_list_anterior_interbody$arthroplasty_fill <- scale_fill_identity()
   }else{
     geoms_list_anterior_interbody$anterior_disc_arthroplasty_sf_geom <- NULL
-    geoms_list_anterior_interbody$arthroplasty_fill <- NULL
+    # geoms_list_anterior_interbody$arthroplasty_fill <- NULL
   }
   
   ########  Corpectomy Cage  ########
