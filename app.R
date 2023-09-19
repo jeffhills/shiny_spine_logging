@@ -5790,7 +5790,7 @@ server <- function(input, output, session) {
       screw_size_details_df <- tibble(redcap_repeat_instrument = character(), 
                                       redcap_repeat_instance = character(), 
                                       dos_screws_repeating = character(),
-                                      screw_level = character(),
+                                      level = character(),
                                       screw_implant = character(),
                                       screw_side = character(),
                                       screw_diameter = character(),
@@ -6356,17 +6356,17 @@ server <- function(input, output, session) {
     # screw_size_details_df_reactive()
     if(any(str_detect(screw_size_details_df_reactive()$object, "anterior"))){
       
-      # names include: screw_level, screw_implant, screw_side, screw_diameter, screw_length, screw_type, screw_size_type
+      # names include: level, screw_implant, screw_side, screw_diameter, screw_length, screw_type, screw_size_type
       
       anterior_plate_screws_objects_df <- screw_size_details_df_reactive() %>%
-        filter(str_detect(object, "anterior")) %>%
+        filter(approach == "anterior") %>%
         mutate(approach = "anterior", 
                category = "anterior_disc", 
                implant = "yes"
                # object = "anterior_plate_screw"
                ) %>%
-        mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = screw_level))  %>%
-        select(level = screw_level, approach, category, vertebral_number, implant, object, side, screw_size_type)
+        mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level))  %>%
+        select(level, approach, category, vertebral_number, implant, object, side, screw_size_type)
       
       anterior_approach_objects_df <- anterior_approach_objects_df %>%
         bind_rows(anterior_plate_screws_objects_df) %>%
