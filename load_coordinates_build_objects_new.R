@@ -3,7 +3,28 @@
 
 spine_png <- image_read(path = "spine_posterior.png", density = 5)
 
+posterior_spine_ggdraw <- ggdraw() +
+  draw_image(
+    spine_png,
+    scale = 1,
+    y = 0,
+    valign = 0,
+    x = 0,
+    height = 1, clip = "on"
+  ) 
+
 anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
+
+anterior_spine_ggdraw <- ggdraw() +
+  draw_image(
+    anterior_spine_jpg,
+    scale = 1,
+    y = 0,
+    valign = 0,
+    x = 0,
+    height = 1, clip = "on"
+    # width = 1
+  ) 
 
 # implant_starts_df <- fread(file = "full_coordinates_no_empty.csv", header = TRUE, check.names = TRUE) 
 
@@ -26,6 +47,38 @@ all_implants_constructed_df <<- all_object_ids_df %>%
               nest() %>%
               mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
               select(object_id, object_constructed))
+
+# coordinate_file_names_list <- list(anterior_body = "coordinates/anterior_body.csv",
+#                                    anterior_disc = "coordinates/anterior_disc.csv",
+#                                    anterior_interbody_fusion = "coordinates/anterior_interbody_fusion.csv",
+#                                    decompression = "coordinates/decompression.csv",
+#                                    implant = "coordinates/implant.csv",
+#                                    incision_drainage = "coordinates/incision_drainage.csv",
+#                                    interbody = "coordinates/interbody.csv",
+#                                    osteotomy = "coordinates/osteotomy.csv",
+#                                    tumor = "coordinates/tumor.csv")
+# 
+# load_and_bind_coordinates_function <- function(all_implants_df, coordinate_file_name = "x"){
+#   coordinate_objects_constructed_df <- all_object_ids_df %>%
+#     filter(category == str_remove_all(coordinate_file_name, "coordinates/|.csv")) %>%
+#     left_join(fread(paste0(coordinate_file_name)) %>%
+#                 group_by(object_id) %>%
+#                 nest() %>%
+#                 mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+#                 select(object_id, object_constructed))
+# 
+#   all_implants_df %>%
+#     bind_rows(coordinate_objects_constructed_df) %>%
+#     distinct()
+# 
+# }
+# 
+# for (i in coordinate_file_names_list) {
+# 
+#   all_implants_constructed_df <- load_and_bind_coordinates_function(all_implants_df = all_implants_constructed_df,
+#                                                                     coordinate_file_name = i)
+# 
+# }
 
 #############-----------------------   Build Key Dataframes  ----------------------###############
 

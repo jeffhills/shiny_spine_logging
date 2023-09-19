@@ -18,6 +18,7 @@ library(rclipboard)
 library(nngeo)
 library(shinydashboard)
 library(data.table)
+library(shinyjs)
 
 
 
@@ -238,7 +239,7 @@ ui <- dashboardPage(skin = "black",
                                    value = FALSE,
                                    size = "mini"
                                  ),
-                                 dropdownButton(
+                                 dropdownButton(size = "xs",
                                    switchInput(label = "tumor diagnosis:",
                                                onLabel = "Yes",
                                                offLabel = "No",
@@ -249,6 +250,18 @@ ui <- dashboardPage(skin = "black",
                                                onLabel = "Yes",
                                                offLabel = "No",
                                                inputId = "intervertebral_cage_true_false",
+                                               value = FALSE
+                                   ),
+                                   switchInput(label = "Left C1 Lateral Mass Screw, True false:",
+                                               onLabel = "Yes",
+                                               offLabel = "No",
+                                               inputId = "left_c1_lateral_mass_screw_true_false",
+                                               value = FALSE
+                                   ),
+                                   switchInput(label = "Right C1 Lateral Mass Screw, True false:",
+                                               onLabel = "Yes",
+                                               offLabel = "No",
+                                               inputId = "right_c1_lateral_mass_screw_true_false",
                                                value = FALSE
                                    ),
                                    circle = TRUE
@@ -943,7 +956,9 @@ ui <- dashboardPage(skin = "black",
                                 ),
                               uiOutput(outputId = "interbody_details_ui"),
                               hr(),
-                              uiOutput(outputId = "screw_details_ui")
+                              uiOutput(outputId = "screw_details_ui"),
+                              hr(),
+                              # tableOutput(outputId = "test_screw_size_details_table_output")
                               ### this input gets updated based on the laterality of screws to be used in the next conditional panel steps
                               # conditionalPanel(condition = "input.spine_approach.indexOf('Never True') > -1",
                               #                  checkboxGroupInput(inputId = "level_object_for_screw_details",
@@ -1183,6 +1198,9 @@ ui <- dashboardPage(skin = "black",
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Interbody Details:"), status = "success", collapsible = TRUE,solidHeader = TRUE,
                               tableOutput(outputId = "interbody_details_df_sidetab")
                           ),
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Size Details:"), status = "success", collapsible = TRUE,solidHeader = TRUE,
+                              tableOutput(outputId = "screw_size_details_df_sidetab")
+                          ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Posterior Approach Objects for Op Note:"), status = "success", collapsible = TRUE,solidHeader = TRUE, 
                               tableOutput(outputId = "posterior_approach_objects_for_op_note_df")),
                           
@@ -1291,19 +1309,7 @@ server <- function(input, output, session) {
   })
   
   
-  ## now make a reactive modal for editing and if not all required info is entered:
-  # modal_box_patient_details_reactive <- reactive({
-  #   startup_modal_box(starting_first_name = input$patient_first_name, 
-  #                     starting_last_name = input$patient_last_name, 
-  #                     starting_dob = input$date_of_birth,
-  #                     starting_dos = input$date_of_surgery, 
-  #                     starting_sex = input$sex, 
-  #                     hospital_input = input$hospital, 
-  #                     redcap_token_input = input$redcap_token,
-  #                     button_proceed = "exit"
-  #   )
-  # })
-  
+
   observeEvent(input$open_patient_details_modal, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(input$open_patient_details_modal > 0){
       showModal(startup_modal_box(starting_first_name = input$patient_first_name, 
@@ -2596,41 +2602,131 @@ server <- function(input, output, session) {
   
   ##### Modal to select whether the C2 nerve root was spared or transected.
   observeEvent(input$plot_click, ignoreInit = TRUE, {
-    
-    # object_added <- object_added_reactive_df()$object[1]
-    # level_added <- object_added_reactive_df()$level[1]
     if(nrow(object_added_reactive_df())>0){
-      if(object_added_reactive_df()$object[1] == "lateral_mass_screw" & object_added_reactive_df()$level[1] == "C1"){
-        if(unique(object_added_reactive_df()$side) == "left"){
-          showModal(
-            modalDialog(
-              size = "m",
-              easyClose = FALSE,
-              awesomeRadio(inputId = "left_c2_nerve_root_transection",
-                           label = "Was the left C2 nerve root sacrificed?", 
-                           choices = c("No", "Yes"), 
-                           inline = TRUE,
-                           width = "100%")
-            )
-          ) 
-        }
-        if(object_added_reactive_df()$side == "right"){
-          showModal(
-            modalDialog(
-              size = "m",
-              easyClose = FALSE,
-              awesomeRadio(inputId = "right_c2_nerve_root_transection",
-                           label = "Was the right C2 nerve root sacrificed?", 
-                           choices = c("No", "Yes"), 
-                           inline = TRUE,
-                           width = "100%")
-            )
-          ) 
-        }
-      } 
+      if(object_added_reactive_df()$object[1] == "lateral_mass_screw" & object_added_reactive_df()$level[1] == "C1"& object_added_reactive_df()$side[1] == "left"){
+        updateSwitchInput(session = session, inputId = "left_c1_lateral_mass_screw_true_false", value = TRUE)
+      }
+      if(object_added_reactive_df()$object[1] == "lateral_mass_screw" & object_added_reactive_df()$level[1] == "C1"& object_added_reactive_df()$side[1] == "right"){
+        updateSwitchInput(session = session, inputId = "right_c1_lateral_mass_screw_true_false", value = TRUE)
+      }
+    } 
+  })
+  
+  observeEvent(input$left_c1_lateral_mass_screw_true_false, ignoreInit = TRUE, {
+    if(input$left_c1_lateral_mass_screw_true_false == TRUE){
+      showModal(
+        c2_nerve_transection_modal_function(side = "left")
+      )
+    }
+  })
+  observeEvent(input$right_c1_lateral_mass_screw_true_false, ignoreInit = TRUE, {
+    if(input$right_c1_lateral_mass_screw_true_false == TRUE){
+      showModal(
+        c2_nerve_transection_modal_function(side = "right")
+      )
     }
   })
   
+
+  c2_nerve_transection_list_reactive <-  reactive({
+    c1_screws <- case_when(input$left_c1_lateral_mass_screw_true_false == TRUE & input$right_c1_lateral_mass_screw_true_false == TRUE ~ "bilateral",
+                           input$left_c1_lateral_mass_screw_true_false == TRUE & input$right_c1_lateral_mass_screw_true_false == FALSE ~ "left_only",
+                           input$left_c1_lateral_mass_screw_true_false == FALSE & input$right_c1_lateral_mass_screw_true_false == TRUE ~ "right_only",
+                           input$left_c1_lateral_mass_screw_true_false == FALSE & input$right_c1_lateral_mass_screw_true_false == FALSE ~ "none"
+    )
+    
+    # c2_nerve_transection_list_reactive()$c2_nerve_transection_result = "bilateral_transection", "left", "right", "left_preserved", "right_preserved", "na"
+    if(c1_screws == "bilateral"){
+      c2_nerve_transection_result <- case_when(
+        str_to_lower(input$left_c2_nerve_root_transection) == "yes" & str_to_lower(input$right_c2_nerve_root_transection) == "yes" ~ "bilateral_transection",
+        str_to_lower(input$left_c2_nerve_root_transection) == "yes" & str_to_lower(input$right_c2_nerve_root_transection) == "no" ~ "left",
+        str_to_lower(input$left_c2_nerve_root_transection) == "no" & str_to_lower(input$right_c2_nerve_root_transection) == "yes" ~ "right",
+        TRUE ~ "bilateral_preserved"
+      )
+    }else if(c1_screws == "left_only"){
+      c2_nerve_transection_result <- if_else(str_to_lower(input$left_c2_nerve_root_transection) == "yes", "left", "left_preserved")
+    }else if(c1_screws == "right_only"){
+      c2_nerve_transection_result <- if_else(str_to_lower(input$right_c2_nerve_root_transection) == "yes", "right", "right_preserved")
+    }else{
+      c2_nerve_transection_result <- "na"
+    }
+    
+    if(c1_screws == "none" |c1_screws == "na"){
+      additional_procedure_statement <- "na"
+    }else{
+      if(c2_nerve_transection_result %in% c("bilateral_transection", "left", "right")){
+        laterality <- if_else(c2_nerve_transection_result == "bilateral_transection", "bilateral", c2_nerve_transection_result)
+        additional_procedure_statement <- as.character(glue("Transection of the {laterality} C2 Nerve Root/Greater Occipital Nerve (CPT = 64744)") )
+      }else{
+        additional_procedure_statement <- "na"
+      }
+    }
+    c2_transection_list <- list()
+    c2_transection_list$c1_screws <- c1_screws
+    c2_transection_list$c2_nerve_transection_result <- c2_nerve_transection_result
+    c2_transection_list$additional_procedure_statement <- additional_procedure_statement
+    c2_transection_list
+  }) %>%
+    bindEvent(input$implants_complete,
+              ignoreInit = TRUE,
+              ignoreNULL = TRUE)
+  
+  
+  # c2_nerve_root_transection_reactive <- reactive({
+  #   if(input$left_c1_lateral_mass_screw_true_false == TRUE){
+  #     left_c2_transection <- str_to_lower(input$left_c2_nerve_root_transection)
+  #   }else{
+  #     left_c2_transection <- "no"
+  #   }
+  #   if(input$right_c1_lateral_mass_screw_true_false == TRUE){
+  #     right_c2_transection <- str_to_lower(input$right_c2_nerve_root_transection)
+  #   }else{
+  #     right_c2_transection <- "no"
+  #   }
+  #   c2_nerve_transection <- case_when(
+  #     left_c2_nerve_transection == "yes" & right_c2_nerve_transection== "yes" ~ "bilateral",
+  #     left_c2_nerve_transection == "yes" & right_c2_nerve_transection == "no" ~ "left",
+  #     left_c2_nerve_transection == "no" & right_c2_nerve_transection == "yes" ~ "right",
+  #     left_c2_nerve_transection == "yes" & right_c2_nerve_transection == "yes" ~ "bilateral_preserved"
+  #   )
+  # })bindEvent(
+  #   
+  # )
+  
+  # observeEvent(input$plot_click, ignoreInit = TRUE, {
+  #   if(nrow(object_added_reactive_df())>0){
+  #     if(object_added_reactive_df()$object[1] == "lateral_mass_screw" & object_added_reactive_df()$level[1] == "C1"){
+  #       if(unique(object_added_reactive_df()$side) == "left"){
+  #         showModal(
+  #           modalDialog(
+  #             size = "m",
+  #             easyClose = FALSE,
+  #             awesomeRadio(inputId = "left_c2_nerve_root_transection",
+  #                          label = "Was the left C2 nerve root sacrificed?", 
+  #                          choices = c("No", "Yes"), 
+  #                          inline = TRUE,
+  #                          width = "100%")
+  #           )
+  #         ) 
+  #       }
+  #       if(object_added_reactive_df()$side == "right"){
+  #         showModal(
+  #           modalDialog(
+  #             size = "m",
+  #             easyClose = FALSE,
+  #             awesomeRadio(inputId = "right_c2_nerve_root_transection",
+  #                          label = "Was the right C2 nerve root sacrificed?", 
+  #                          choices = c("No", "Yes"), 
+  #                          inline = TRUE,
+  #                          width = "100%")
+  #           )
+  #         ) 
+  #       }
+  #     } 
+  #   }
+  # })
+  
+
   ##### Modal to report whether the PLL was taken down
   observeEvent(input$plot_click, ignoreInit = TRUE, {
     # object_added <- object_added_reactive_df()$object[1]
@@ -4362,16 +4458,17 @@ server <- function(input, output, session) {
                          y = max(labels_anterior_cropped_df$y) + 0.05))
       
       
-      ggdraw() +
-        draw_image(
-          anterior_spine_jpg,
-          scale = 1,
-          y = 0,
-          valign = 0,
-          x = 0,
-          height = 1
-          # width = 1
-        )  +
+      # ggdraw() +
+      #   draw_image(
+      #     anterior_spine_jpg,
+      #     scale = 1,
+      #     y = 0,
+      #     valign = 0,
+      #     x = 0,
+      #     height = 1
+      #     # width = 1
+      #   )  +
+      anterior_spine_ggdraw +
         draw_text(
           text = labels_anterior_cropped_df$level,
           x = labels_anterior_cropped_df$x_left,
@@ -4428,15 +4525,7 @@ server <- function(input, output, session) {
                        x_right = max(labels_posterior_df$x_right) + 0.03, 
                        y = max(labels_posterior_df$y) + 0.03))
 
-    ggdraw() +
-      draw_image(
-        spine_png,
-        scale = 1,
-        y = 0,
-        valign = 0,
-        x = 0,
-        height = 1
-      ) +
+    posterior_spine_ggdraw +
       draw_text(
         text = labels_posterior_df$level,
         x = labels_posterior_df$x_left,
@@ -4734,6 +4823,9 @@ server <- function(input, output, session) {
   }
   )
   
+  ################################### ANTERIOR ADDITIONAL PROCEDURES PERFORMED #################### 
+  ################################### ANTERIOR ADDITIONAL PROCEDURES PERFORMED #################### 
+  ################################### ANTERIOR ADDITIONAL PROCEDURES PERFORMED #################### 
   
   additional_procedures_performed_anterior_reactive <- reactive({
     additional_procedures_list <- list()
@@ -4795,6 +4887,28 @@ server <- function(input, output, session) {
                                selected = additional_procedures_performed_anterior_reactive())
   })
   
+  additional_anterior_procedures_vector_for_op_note_reactive <- reactive({
+    if(str_detect(input$approach_sequence, "anterior")){
+      
+      additional_procedures_list <- as.list(input$additional_procedures_anterior)
+      
+      if("Other" %in% input$additional_procedures_anterior){
+        additional_procedures_list$other_anterior <- input$additional_procedures_other_anterior
+      }
+      
+      additional_procedures_list <- discard(additional_procedures_list, .p = ~ (.x == "Other"))
+      
+      unlist(additional_procedures_list, use.names = FALSE)
+    }
+  })
+
+  ###################### ANTERIOR ADDITIONAL PROCEDURES PERFORMED #################### END
+  ###################### ANTERIOR ADDITIONAL PROCEDURES PERFORMED #################### END
+  ###################### ANTERIOR ADDITIONAL PROCEDURES PERFORMED #################### END
+  
+  ################################### POSTERIOR ADDITIONAL PROCEDURES PERFORMED ####################
+  ################################### POSTERIOR ADDITIONAL PROCEDURES PERFORMED ####################
+  ################################### POSTERIOR ADDITIONAL PROCEDURES PERFORMED ####################
   additional_procedures_performed_posterior_reactive <- reactive({
     additional_procedures_list <- list()
     if(procedure_approach_reactive() == "posterior" | procedure_approach_reactive() == "combined"){
@@ -4855,16 +4969,48 @@ server <- function(input, output, session) {
       if(any(input$dressing_details_posterior == "Wound Vac")){
         additional_procedures_list$wound_vac_anterior <- "Application of Wound Vac (negative pressure wound therapy; CPT = 97605)"    
       }
+      
+      if(c2_nerve_transection_list_reactive()$additional_procedure_statement != "na"){
+        additional_procedures_list$c2_nerve_transection <- paste(c2_nerve_transection_list_reactive()$additional_procedure_statement)
+      }
+
     }
-    unname(unlist(additional_procedures_list))
+    
+    additional_procedures_list
   })
   
+
   observeEvent(additional_procedures_performed_posterior_reactive(), ignoreInit = TRUE, {
+    if(all(unlist(additional_procedures_performed_posterior_reactive(), use.names = FALSE) %in% additional_procedure_options_vector) == FALSE){
+      additional_procedure_options_vector <<- union(additional_procedure_options_vector, unlist(additional_procedures_performed_posterior_reactive(), use.names = FALSE))
+    }
     updateAwesomeCheckboxGroup(session = session,
                                inputId = "additional_procedures_posterior",
-                               choices = unique(append(additional_procedure_options_vector, additional_procedures_performed_posterior_reactive())),
-                               selected = additional_procedures_performed_posterior_reactive())
+                               choices = additional_procedure_options_vector,
+                               selected = unlist(additional_procedures_performed_posterior_reactive(), use.names = FALSE)
+                               )
   })
+  
+  
+  additional_posterior_procedures_vector_for_op_note_reactive <- reactive({
+    if(str_detect(input$approach_sequence, "posterior")){
+
+      additional_procedures_list <- as.list(input$additional_procedures_posterior)
+      
+      if("Other" %in% input$additional_procedures_posterior){
+        additional_procedures_list$other_posterior <- input$additional_procedures_other_posterior
+      }
+      
+      additional_procedures_list <- discard(additional_procedures_list, .p = ~ (.x == "Other"))
+      
+      unlist(additional_procedures_list, use.names = FALSE)
+    }
+  })
+  
+  
+  ################################### POSTERIOR ADDITIONAL PROCEDURES PERFORMED #################### END
+  ################################### POSTERIOR ADDITIONAL PROCEDURES PERFORMED #################### END
+  ################################### POSTERIOR ADDITIONAL PROCEDURES PERFORMED #################### END
   
   
   ######################################## RUN ADDITIONAL SURGICAL DETAILS MODAL AFTER ADVANCING TO NEXT TAB ###############################
@@ -4991,43 +5137,43 @@ server <- function(input, output, session) {
   observeEvent(input$additional_surgical_details_1_complete, {
     add_procedures_list <- list()
     
-    if(length(input$prior_fusion_levels)>0){
-      add_procedures_list$exploration_of_fusion <- "Exploration of prior spinal fusion"
-    }
-    
-    if(str_detect(string = str_to_lower(toString(input$primary_diagnosis)), pattern = "myelitis|infecti|bacteria|coccal|meningitis")){
-      add_procedures_list$irrigation_debridement <- "Irrigation and Debridement"
-    }
-    
-    if(procedure_approach_reactive() == "anterior"){
-      showModal(
-        addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
-                                                       # additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
-                                                       additional_procedures_anterior = unlist(add_procedures_list, use.names = FALSE), 
-                                                       procedure_approach = procedure_approach_reactive()
-        )
+    showModal(
+      addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
+                                                     # additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
+                                                     # additional_procedures_anterior = unlist(add_procedures_list, use.names = FALSE), 
+                                                     procedure_approach = procedure_approach_reactive()
       )
-    }
-    if(procedure_approach_reactive() == "posterior"){
-      showModal(
-        addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
-                                                       # additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
-                                                       additional_procedures_posterior = unlist(add_procedures_list, use.names = FALSE), 
-                                                       procedure_approach = procedure_approach_reactive()
-        )
-      )  
-    }
-    if(procedure_approach_reactive() == "combined"){
-      showModal(
-        addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
-                                                       # additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
-                                                       additional_procedures_posterior = unlist(add_procedures_list, use.names = FALSE), 
-                                                       # additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
-                                                       additional_procedures_anterior = unlist(add_procedures_list, use.names = FALSE), 
-                                                       procedure_approach = procedure_approach_reactive()
-        )
-      )  
-    }
+    )
+    
+    # if(procedure_approach_reactive() == "anterior"){
+    #   showModal(
+    #     addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
+    #                                                    # additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
+    #                                                    # additional_procedures_anterior = unlist(add_procedures_list, use.names = FALSE), 
+    #                                                    procedure_approach = procedure_approach_reactive()
+    #     )
+    #   )
+    # }
+    # if(procedure_approach_reactive() == "posterior"){
+    #   showModal(
+    #     addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
+    #                                                    # additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
+    #                                                    additional_procedures_posterior = unlist(add_procedures_list, use.names = FALSE), 
+    #                                                    procedure_approach = procedure_approach_reactive()
+    #     )
+    #   )  
+    # }
+    # if(procedure_approach_reactive() == "combined"){
+    #   showModal(
+    #     addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
+    #                                                    # additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
+    #                                                    additional_procedures_posterior = unlist(add_procedures_list, use.names = FALSE), 
+    #                                                    # additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
+    #                                                    additional_procedures_anterior = unlist(add_procedures_list, use.names = FALSE), 
+    #                                                    procedure_approach = procedure_approach_reactive()
+    #     )
+    #   )  
+    # }
     
   })
   
@@ -5241,7 +5387,7 @@ server <- function(input, output, session) {
     details_list$'Anterior Head Position:' <- paste(input$head_positioning_anterior)
     
     # details_list$'Additional Anterior Procedures:' <- as.character(glue_collapse(x = additional_procedures_vector_anterior_reactive(), sep = "; "))
-    # details_list$'Additional Posterior Procedures:' <- as.character(glue_collapse(x = additional_procedures_vector_posterior_reactive(), sep = "; "))
+    # details_list$'Additional Posterior Procedures:' <- as.character(glue_collapse(x = additional_posterior_procedures_vector_for_op_note_reactive(), sep = "; "))
     details_list$'End of Procedure & Closure Details:' <- "---"
     
     if(!is.null(input$deep_drains_anterior) && input$deep_drains_anterior > 0){
@@ -5616,22 +5762,18 @@ server <- function(input, output, session) {
   
   observeEvent(input$implants_complete, ignoreInit = TRUE, {
     if(nrow(all_objects_to_add_list$objects_df)>0){
-      plate_screws_selected_df <- all_objects_to_add_list$objects_df %>%
-        filter(str_detect(object, "screw|anterior_plate")) %>%
-        arrange(vertebral_number) %>%
-        mutate(side_level_object = paste(side, str_to_lower(level), object, sep = "_")) %>%
-        select(level, vertebral_number, side, object, side_level_object)
-      
+      selected_screws <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df, return_shiny_inputs_df = FALSE)$side_level_object
       updateCheckboxGroupInput(session = session, inputId = "screws_implanted_picker_for_ui", 
-                        choices = plate_screws_selected_df$side_level_object, 
-                        selected = plate_screws_selected_df$side_level_object)
+                        choices = selected_screws, 
+                        selected = selected_screws)
     }
   })
   
 
   output$screw_details_ui <- renderUI({
     if(length(input$screws_implanted_picker_for_ui) > 0){
-          all_screw_size_type_inputs_df <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df) ## this adds the needed 'left_object' and 'right_object' so that it matches the  screws_implanted_picker_for_ui format
+          all_screw_size_type_inputs_df <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df, 
+                                                                                    return_shiny_inputs_df = TRUE) ## this adds the needed 'left_object' and 'right_object' so that it matches the  screws_implanted_picker_for_ui format
       box(width = 12,
           title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
           jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
@@ -5723,6 +5865,67 @@ server <- function(input, output, session) {
   }) 
     # bindEvent(input$screws_implanted_picker_for_ui, ignoreInit = TRUE)
   
+
+  ################------------------  Screw Size RESULTS  ----------------------######################  
+  ################------------------  Screw Size RESULTS  ----------------------######################  
+  
+  ### first update the bilaterality input for the conditional panel
+  
+  screw_size_details_df_reactive <- reactive({
+    
+    if(length(input$screws_implanted_picker_for_ui) > 0){
+      
+      screw_size_details_df <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df, 
+                                               return_shiny_inputs_df = FALSE)  %>%
+        mutate(screw_diameter = map(.x = screw_diameter_input_name, .f = ~ input[[.x]])) %>%
+        unnest(screw_diameter) %>%
+        mutate(screw_length = map(.x = screw_length_input_name, .f = ~ input[[.x]])) %>%
+        unnest(screw_length) %>%
+        mutate(screw_type = map(.x = screw_type_input_name, .f = ~ input[[.x]])) %>%
+        unnest(screw_type) %>%
+        mutate(screw_type = case_when(
+          screw_type == "U" ~ "Uniaxial",
+          screw_type == "M" ~ "Monoaxial",
+          screw_type == "P" ~ "Polyaxial",
+          screw_type == "Red" ~ "Reduction",
+          screw_type == "Offset" ~ "Offset",
+          screw_type == "Anterior" ~ "Anterior"
+        )) %>%
+        mutate(remove_unused_anterior_screws = if_else(screw_type == "Anterior" & (is.na(screw_length) | screw_length == "" | screw_length == screw_diameter), "remove", "keep")) %>%
+        filter(remove_unused_anterior_screws == "keep") %>%
+        select(-remove_unused_anterior_screws) %>%
+        mutate(screw_diameter = as.character(screw_diameter)) %>%
+        mutate(screw_length = as.character(screw_length)) %>%
+        mutate(screw_diameter = if_else(is.na(screw_diameter), "na", screw_diameter)) %>%
+        mutate(screw_length = if_else(is.na(screw_length), "na", screw_length)) %>%
+        mutate(screw_size = case_when(
+          screw_diameter == "na" & screw_length == "na" ~ "",
+          screw_diameter != "na" & screw_length == "na" ~ paste0(screw_diameter, "mm"),
+          screw_diameter == "na" & screw_length != "na" ~ paste0(screw_length, "mm"),
+          screw_diameter != "na" & screw_length != "na" ~ paste0(screw_diameter, "x", screw_length, "mm"))
+        )  %>%
+        mutate(screw_size_type = paste(screw_size, screw_type)) 
+  
+    }else{
+      screw_size_details_df <- tibble(redcap_repeat_instrument = character(), 
+                                      redcap_repeat_instance = character(), 
+                                      dos_screws_repeating = character(),
+                                      screw_level = character(),
+                                      screw_implant = character(),
+                                      screw_side = character(),
+                                      screw_diameter = character(),
+                                      screw_length = character(),
+                                      screw_type = character(), 
+                                      screw_size = character(), 
+                                      screw_size_type = character())
+    }
+    screw_size_details_df
+  })
+  
+  # output$test_screw_size_details_table_output <- renderTable({
+  #   screw_size_details_df_reactive()
+  # })
+  # 
   
   ################################### SCREWS UI END ######################################
   
@@ -5938,23 +6141,18 @@ server <- function(input, output, session) {
         mutate(implant_statement = " ")
     }
     
-    if(nrow(screw_details_redcap_df_reactive()) > 0){
-      posterior_screws_df <- posterior_approach_objects_df %>%
-        filter(approach == "posterior") %>%
-        filter(str_detect(object, "screw")) %>%
-        mutate(screw_implant = str_to_lower(paste(level, object, sep = "_"))) %>%
-        left_join(screw_details_redcap_df_reactive() %>% rename(side = screw_side)) %>%
-        select(level, approach, side, object, screw_size_type) %>%
-        mutate(screw_size_type = as.character(screw_size_type)) %>%
-        replace_na(list(screw_size_type = " "))
+    if(nrow(screw_size_details_df_reactive() %>% filter(approach == "posterior"))>0){
       
-      posterior_approach_objects_df <- posterior_approach_objects_df%>%
-        left_join(posterior_screws_df) %>%
-        mutate(screw_size_type = as.character(screw_size_type)) %>%
+      screw_results_df <- screw_size_details_df_reactive() %>%
+        filter(approach == "posterior") %>%
+        select(level, side, object, screw_size_type)
+      
+      posterior_approach_objects_df <- posterior_approach_objects_df %>%
+        left_join(screw_results_df) %>%
         replace_na(list(screw_size_type = " "))
     }else{
       posterior_approach_objects_df <- posterior_approach_objects_df %>%
-        mutate(screw_size_type = " ") 
+        mutate(screw_size_type = " ")
     }
     
     posterior_approach_objects_df <- posterior_approach_objects_df %>%
@@ -5962,7 +6160,7 @@ server <- function(input, output, session) {
     
     
     posterior_op_note_inputs_list_reactive$posterior_approach_objects_df <- posterior_approach_objects_df
-    
+    # posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df
     ####### fusion levels 
     
     if(length(input$fusion_levels_confirmed)>0){
@@ -5973,24 +6171,12 @@ server <- function(input, output, session) {
     }
     
     ####### C2 nerve transection
-    
-    
-    if(any(posterior_approach_objects_df$object == "c1_lateral_mass_screw")){
-      if(input$left_c2_nerve_root_transection == "Yes" & input$left_c2_nerve_root_transection == "Yes"){
-        posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "bilateral_transection"  
-      } 
-      if(input$left_c2_nerve_root_transection == "Yes" & input$left_c2_nerve_root_transection == "No"){
-        posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "left"  
-      } 
-      if(input$left_c2_nerve_root_transection == "No" & input$left_c2_nerve_root_transection == "Yes"){
-        posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "right"  
-      } 
-      if(input$left_c2_nerve_root_transection == "No" & input$left_c2_nerve_root_transection == "No"){
-        posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "bilateral_preserved"  
-      } 
+    if(c2_nerve_transection_list_reactive()$c1_screws != "none"){
+      posterior_op_note_inputs_list_reactive$c2_nerve_transection <- c2_nerve_transection_list_reactive()$c2_nerve_transection_result
     }else{
       posterior_op_note_inputs_list_reactive$c2_nerve_transection <- "na"
     }
+    
     
     ####### Head Positioning
     posterior_op_note_inputs_list_reactive$head_positioning_posterior <- input$head_positioning_posterior
@@ -6156,25 +6342,17 @@ server <- function(input, output, session) {
     }
     
     #######
+
     if(length(input$additional_procedures_posterior)>0){
-          # if(nrow(all_objects_to_add_list$objects_df %>% filter(level == "C1", object == "lateral_mass_screw"))>0){
-          # }
       if("Other" %in% input$additional_procedures_posterior){
         posterior_op_note_inputs_list_reactive$additional_procedures_vector  <- append(discard(input$additional_procedures_posterior, .p = ~ (.x == "Other")), paste(input$additional_procedures_other_posterior))
       }else{
         posterior_op_note_inputs_list_reactive$additional_procedures_vector <- input$additional_procedures_posterior
       }
       
-      if(posterior_op_note_inputs_list_reactive$c2_nerve_transection %in% c("left", "right", "bilateral_transection")){
-        posterior_op_note_inputs_list_reactive$additional_procedures_vector <- append(posterior_op_note_inputs_list_reactive$additional_procedures_vector, 
-                                                                                      "Transection of C2 Nerve Root/Greater Occipital Nerve (CPT = 64744)")  
-      }
-
     }else{
       posterior_op_note_inputs_list_reactive$additional_procedures_vector <-  c()
     }
-    
-    # posterior_op_note_inputs_list_reactive$additional_procedures_vector <- additional_procedures_vector_posterior_reactive()
     
     #######
     posterior_op_note_inputs_list_reactive$prior_fusion_levels <- input$prior_fusion_levels
@@ -6294,18 +6472,21 @@ server <- function(input, output, session) {
       filter(approach == "anterior")  %>%
       select(-object_constructed)
     
-    if(any(str_detect(screw_details_redcap_df_reactive()$screw_size_type, "Anterior"))){
+    
+    # screw_size_details_df_reactive()
+    if(any(str_detect(screw_size_details_df_reactive()$object, "anterior"))){
       
       # names include: screw_level, screw_implant, screw_side, screw_diameter, screw_length, screw_type, screw_size_type
       
-      anterior_plate_screws_objects_df <- screw_details_redcap_df_reactive() %>%
-        filter(str_detect(screw_size_type, "Anterior")) %>%
-        mutate(object = "anterior_plate_screw", 
-               approach = "anterior", 
+      anterior_plate_screws_objects_df <- screw_size_details_df_reactive() %>%
+        filter(str_detect(object, "anterior")) %>%
+        mutate(approach = "anterior", 
                category = "anterior_disc", 
-               implant = "yes") %>%
+               implant = "yes"
+               # object = "anterior_plate_screw"
+               ) %>%
         mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = screw_level))  %>%
-        select(level = screw_level, approach, category, vertebral_number, implant, object, side = screw_side, screw_size_type)
+        select(level = screw_level, approach, category, vertebral_number, implant, object, side, screw_size_type)
       
       anterior_approach_objects_df <- anterior_approach_objects_df %>%
         bind_rows(anterior_plate_screws_objects_df) %>%
@@ -6374,17 +6555,7 @@ server <- function(input, output, session) {
     
     ####### ADDITIONAL PROCEDURES
 
-    if(length(input$additional_procedures_anterior)>0){
-      if("Other" %in% input$additional_procedures_anterior){
-        anterior_op_note_inputs_list_reactive$additional_procedures_vector  <- append(discard(input$additional_procedures_anterior, .p = ~ (.x == "Other")), paste(input$additional_procedures_other_anterior))
-      }else{
-        anterior_op_note_inputs_list_reactive$additional_procedures_vector <- input$additional_procedures_anterior
-      }
-    }else{
-      anterior_op_note_inputs_list_reactive$additional_procedures_vector <-  c()
-    }
-    
-    # anterior_op_note_inputs_list_reactive$additional_procedures_vector <- additional_procedures_vector_anterior_reactive() #input$additional_procedures_anterior
+    anterior_op_note_inputs_list_reactive$additional_procedures_vector <- additional_anterior_procedures_vector_for_op_note_reactive() #input$additional_procedures_anterior
     
     #######
     neuromonitoring_input_list <- list()
@@ -6535,7 +6706,7 @@ server <- function(input, output, session) {
     )
 
   ##### Assemble and update the procedures performed section for POSTERIOR #########
-
+  
   op_note_procedures_numbered_posterior_reactive <- reactive({
     if(str_detect(input$approach_sequence, "posterior")){
       primary_procedures_numbered_paragraph <- op_note_procedures_performed_numbered_function(objects_added_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df, 
@@ -6547,26 +6718,35 @@ server <- function(input, output, session) {
     }else{
       primary_procedures_numbered_paragraph <- c()
     }
+  })
   
-    primary_procedures_numbered_paragraph
-  }) 
+
   
   observe(
     updateTextAreaInput(session = session, 
                         inputId = "procedures_numbered_confirm_edit_posterior", 
-                        value = paste(op_note_procedures_numbered_posterior_reactive())
+                        value = paste(op_note_procedures_numbered_posterior_reactive()
+                                      )
     )
   ) %>%
     bindEvent(input$editing_additional_surgical_details_1_complete,
-                input$additional_surgical_details_complete, 
-                input$operative_note,
+              input$additional_surgical_details_complete, 
+              input$operative_note,
               input$additional_procedures_other_posterior,
               ignoreInit = TRUE,
               ignoreNULL = TRUE
     )
-  
-  ##### Assemble and update the procedures performed section for ANTERIOR #########
+    # bindEvent(input$additional_surgical_details_complete,
+    #           # input$editing_additional_surgical_details_1_complete,
+    #           # input$additional_surgical_details_complete, 
+    #           # input$operative_note,
+    #           # input$additional_procedures_other_posterior,
+    #           ignoreInit = TRUE,
+    #           ignoreNULL = TRUE
+    # )
 
+  ##### Assemble and update the procedures performed section for ANTERIOR #########
+  
   op_note_procedures_numbered_anterior_reactive <- reactive({
     if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df)>0){
       primary_procedures_numbered_paragraph_anterior <- anterior_op_note_procedures_performed_numbered_function(objects_added_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df, 
@@ -6574,7 +6754,7 @@ server <- function(input, output, session) {
     }else{
       primary_procedures_numbered_paragraph_anterior <- c()
     }
-
+    
     primary_procedures_numbered_paragraph_anterior
   }) 
   
@@ -6591,7 +6771,6 @@ server <- function(input, output, session) {
               ignoreInit = TRUE,
               ignoreNULL = TRUE
     )
-  
   
   ### ASSEMBLE THE REACTIVE OP NOTE TEXT
   op_note_text_reactive <- reactive({
@@ -6963,84 +7142,7 @@ server <- function(input, output, session) {
   ############### ############### FIRST, COMPILE EACH OF THE TABLES THAT WILL BE USED FOR UPLOADING TO REDCAP:    ###############     ############### 
   
   
-  ###### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ALL INPUTS  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ######## 
-  
-  all_inputs_reactive_list <- reactive({
 
-    all_inputs_list <- reactiveValuesToList(input, all.names = FALSE)
-    
-    all_inputs_list <- keep(.x = all_inputs_list, .p = ~ !is.null(.x))
-
-  })
-  
-  
-  all_inputs_trimmed_reactive_df <- reactive({
-    variable_names_to_exclude <- c("object_to_add", 
-                                   "plot_with_patterns_true", 
-                                   "tabs", 
-                                   "label_text_offset", 
-                                   "search_for_prior_patient", 
-                                   "plot_summary_table",
-                                   "add_implants", 
-                                   "add_other", 
-                                   "add_special_approach", 
-                                   "add_interbody",
-                                   "add_osteotomies",
-                                   "add_decompressions")
-
-             
-    all_inputs_to_log_df <- enframe(all_inputs_reactive_list()) %>%
-      mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = "-AND-")))) %>%
-      select(-value) %>%
-      unnest(cols = result) %>%
-      filter(str_detect(string = name, 
-                        pattern = "central_corpectomy_cage|central_anterior_disc_arthroplasty|central_anterior_interbody_implant|left_tlif|right_tlif|left_plif|right_plif|operative_note|crop_y|screw_length|screw_diameter|screw_type|rods_eligible|reset|button|level_object_for|pelvic_screw|modal|_complete|text_size|idpostop|drop", 
-                        negate = TRUE)) %>%
-      filter(name %in% variable_names_to_exclude == FALSE) %>%
-      filter(!is.na(result)) %>%
-      filter(result != "") %>%
-      filter(result != " ") %>%
-      filter(str_detect(string = name, pattern = "[:upper:]", negate = TRUE)) %>%
-      filter(str_detect(string = name, pattern = "\\s", negate = TRUE) ) %>%
-      filter(str_detect(string = name, pattern = "\\W", negate = TRUE)) %>%
-      filter(str_detect(string = name, pattern = "\\t", negate = TRUE))
-    
-    rods_to_keep <- all_inputs_to_log_df %>%
-      filter(str_detect(name, "rod")) %>%
-      filter(str_detect(name, "add")) %>%
-      filter(result == "TRUE") %>%
-      mutate(rod_type = str_remove_all(string = name, pattern = "add_"))
-    
-    if(nrow(rods_to_keep)>0){
-      rod_types_to_keep_string <- paste0(rods_to_keep$rod_type, collapse = "|")
-      
-      all_rod_info_to_keep_df <- all_inputs_to_log_df %>%
-        filter(str_detect(string = name, pattern = rod_types_to_keep_string))
-      main_rod_info_to_keep_df <- all_inputs_to_log_df %>%
-        filter(str_detect(string = name, pattern = "main_rod"))
-      
-      all_inputs_to_log_df <- all_inputs_to_log_df %>%
-        filter(str_detect(string = name, pattern = "rod") == FALSE) %>%
-        bind_rows(main_rod_info_to_keep_df) %>%
-        bind_rows(all_rod_info_to_keep_df)
-    }else{
-      
-      main_rod_info_to_keep_df <- all_inputs_to_log_df %>%
-        filter(str_detect(string = name, pattern = "main_rod"))
-      
-      all_inputs_to_log_df <- all_inputs_to_log_df %>%
-        filter(str_detect(string = name, pattern = "rod") == FALSE) %>%
-        bind_rows(main_rod_info_to_keep_df) 
-    }
-    
-    
-    # all_inputs_to_log_df %>%
-    # filter(str_detect(measure, pattern = paste0(glue_collapse(rods_not_used$rod_type_not_used, sep = "|"))) == FALSE) 
-    
-    all_inputs_to_log_df
-    # }
-    
-  })
   
 
   
@@ -7159,11 +7261,12 @@ server <- function(input, output, session) {
     
     ##########   approach #############
     if(nrow(all_objects_to_add_list$objects_df)>0){
-      surgery_details_list$main_approach <- case_when(
-        any(all_objects_to_add_list$objects_df$approach == "anterior") & any(all_objects_to_add_list$objects_df$approach == "posterior")  ~ "combined anterior posterior",
-        any(all_objects_to_add_list$objects_df$approach == "anterior") == FALSE & any(all_objects_to_add_list$objects_df$approach == "posterior")  ~ "posterior",
-        any(all_objects_to_add_list$objects_df$approach == "anterior") & any(all_objects_to_add_list$objects_df$approach == "posterior") == FALSE  ~ "anterior"
-      )
+      surgery_details_list$main_approach <- input$approach_sequence
+      # surgery_details_list$main_approach <- case_when(
+      #   any(all_objects_to_add_list$objects_df$approach == "anterior") & any(all_objects_to_add_list$objects_df$approach == "posterior")  ~ "combined anterior posterior",
+      #   any(all_objects_to_add_list$objects_df$approach == "anterior") == FALSE & any(all_objects_to_add_list$objects_df$approach == "posterior")  ~ "posterior",
+      #   any(all_objects_to_add_list$objects_df$approach == "anterior") & any(all_objects_to_add_list$objects_df$approach == "posterior") == FALSE  ~ "anterior"
+      # )
     }else{
       surgery_details_list$main_approach <- str_to_lower(input$spine_approach)
     }
@@ -7713,119 +7816,29 @@ server <- function(input, output, session) {
   ################------------------  Screw Size RESULTS  ----------------------######################  
   ################------------------  Screw Size RESULTS  ----------------------######################  
   
-  ### first update the bilaterality input for the conditional panel
-  
-  
-  screws_selected_df_reactive <- reactive({
-    
-    if(input$implants_complete > 0){
-      if(nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw") | str_detect(object, "anterior_plate")))>0){
-        
-        implants_added_df <- jh_generate_df_for_screening_screw_inputs_function(all_objects_to_add_list$objects_df) %>%
-          # left_join(all_screw_size_type_inputs_df %>% select(implant_row_id, level_object_label)) %>%
-          left_join(jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df) %>% select(implant_row_id, level_object_label)) %>%
-          arrange(implant_row_id) %>%
-          select(implant_row_id, level, level_object_label, left_object, right_object)
-        
-      }else{
-        implants_added_df <- tibble(level_object_label = character(), level = character(), left_object = character(), right_object =  character(), implant_row_id = integer())
-      }
-      
-      implants_added_df 
-    }
-    
-  }) %>%
-    bindEvent(input$implants_complete, ignoreInit = TRUE, ignoreNULL = TRUE)
-  
-  
-  
-  ### NOW UPDATE THE INPUT TO HAVE THE Correct levels FOR EACH IMPLANT  implants_complete
-  observeEvent(list(input$implants_complete, input$return_to_add_implant_details_tab, input$implant_details, screws_selected_df_reactive()), ignoreInit = TRUE, {
-    
-    if(nrow(screws_selected_df_reactive())>0){
-      updateCheckboxGroupInput(session = session, 
-                               inputId = "level_object_for_screw_details",
-                               choices = screws_selected_df_reactive()$level_object_label,
-                               selected = screws_selected_df_reactive()$level_object_label) 
-    }
-  })
-  
-  observeEvent(list(input$implants_complete, input$return_to_add_implant_details_tab, input$implant_details, screws_selected_df_reactive()), ignoreInit = TRUE, {
-    if(nrow(screws_selected_df_reactive())>0){
-      updateCheckboxGroupInput(session = session, 
-                               inputId = "left_level_object_for_screw_details",
-                               choices = screws_selected_df_reactive()$left_object,
-                               selected = screws_selected_df_reactive()$left_object) 
-    }
-  })
-  
-  ### NOW UPDATE THE INPUT TO HAVE THE Correct levels FOR EACH IMPLANT 
-  observeEvent(list(input$implants_complete, input$return_to_add_implant_details_tab, input$implant_details, screws_selected_df_reactive()), ignoreInit = TRUE, {
-    if(nrow(screws_selected_df_reactive())>0){
-      updateCheckboxGroupInput(session = session, 
-                               inputId = "right_level_object_for_screw_details",
-                               choices = screws_selected_df_reactive()$right_object,
-                               selected = screws_selected_df_reactive()$right_object) 
-    }
-  })
+
   
   ## NEW
   screw_details_redcap_df_reactive <- reactive({
     
-    if(nrow(screws_selected_df_reactive())>0){
-      screw_details_full_df <- screws_selected_df_reactive() %>%
-        select(implant_row_id, level, left_object, right_object) %>%
-        pivot_longer(cols = c(left_object, right_object), names_to = "side", values_to = "level_side_object") %>%
-        mutate(side = str_remove_all(side, "_object")) %>%
-        filter(level_side_object != "no_screw") %>%
-        mutate(diameter_input_name = paste(level_side_object, "diameter", sep = "_")) %>%
-        mutate(length_input_name = paste(level_side_object, "length", sep = "_")) %>%
-        mutate(type_input_name = paste(level_side_object, "type", sep = "_")) %>%
-        mutate(screw_diameter = map(.x = diameter_input_name, .f = ~ input[[.x]])) %>%
-        unnest(screw_diameter) %>%
-        mutate(screw_length = map(.x = length_input_name, .f = ~ input[[.x]])) %>%
-        unnest(screw_length) %>%
-        mutate(screw_type = map(.x = type_input_name, .f = ~ input[[.x]])) %>%
-        unnest(screw_type) %>%
-        mutate(screw_type = case_when(
-          screw_type == "U" ~ "Uniaxial",
-          screw_type == "M" ~ "Monoaxial",
-          screw_type == "P" ~ "Polyaxial",
-          screw_type == "Red" ~ "Reduction",
-          screw_type == "Offset" ~ "Offset",
-          screw_type == "Anterior" ~ "Anterior"
-        )) %>%
-        mutate(remove_unused_anterior_screws = if_else(screw_type == "Anterior" & (is.na(screw_length) | screw_length == "" | screw_length == screw_diameter), "remove", "keep")) %>%
-        filter(remove_unused_anterior_screws == "keep") %>%
-        select(-remove_unused_anterior_screws) %>%
-        mutate(screw_diameter = as.character(screw_diameter)) %>%
-        mutate(screw_length = as.character(screw_length)) %>%
-        mutate(screw_diameter = if_else(is.na(screw_diameter), "na", screw_diameter)) %>%
-        mutate(screw_length = if_else(is.na(screw_length), "na", screw_length)) %>%
-        mutate(screw_size = case_when(
-          screw_diameter == "na" & screw_length == "na" ~ "",
-          screw_diameter != "na" & screw_length == "na" ~ paste0(screw_diameter, "mm"),
-          screw_diameter == "na" & screw_length != "na" ~ paste0(screw_length, "mm"),
-          screw_diameter != "na" & screw_length != "na" ~ paste0(screw_diameter, "x", screw_length, "mm"))
-        )  %>%
-        mutate(screw_size_type = paste(screw_size, screw_type)) %>%
-        mutate(implant = str_remove_all(str_remove_all(level_side_object, "right_"), "left_")) %>%
-        arrange(implant_row_id) %>%
+    if(length(input$screws_implanted_picker_for_ui) > 0){
+      
+      
+      screw_details_full_df <- screw_size_details_df_reactive() %>%
         mutate(redcap_repeat_instrument = "screw_details_repeating") %>%
         mutate(redcap_repeat_instance = row_number()) %>%
         mutate(dos_screws_repeating = as.character(input$date_of_surgery)) %>%
-        select(redcap_repeat_instrument, 
-               redcap_repeat_instance, 
+        select(redcap_repeat_instrument,
+               redcap_repeat_instance,
                dos_screws_repeating,
                screw_level = level,
-               screw_implant = implant,
+               screw_implant = object,
                screw_side = side,
-               screw_diameter, 
-               screw_length, 
+               screw_diameter,
+               screw_length,
                screw_type,
                screw_size,
-               screw_size_type) 
-      
+               screw_size_type)
       
       
     }else{
@@ -7887,7 +7900,6 @@ server <- function(input, output, session) {
   #################  ALL OBJECTS TABLE ##################
   output$all_objects_table <- renderTable({
     
-    
     all_objects_to_add_list$objects_df %>%
       select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y, fusion, interbody_fusion, fixation_uiv_liv) %>%
       mutate(proc_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(object = .x))) %>%
@@ -7937,12 +7949,12 @@ server <- function(input, output, session) {
   
   
   ######## Render "Screw Details Table for side tab:"    ######## 
-  # output$screw_details_redcap_df_sidetab <- renderTable({
-  #     
-  #     screw_details_redcap_df_reactive()
-  #     
-  # })  
-  # 
+  output$screw_size_details_df_sidetab <- renderTable({
+
+    screw_details_redcap_df_reactive()
+
+  })
+
   
   ####### Render "Interbody Details Table for side tab:"    ########
   output$interbody_details_df_sidetab <- renderTable({
@@ -7992,16 +8004,134 @@ server <- function(input, output, session) {
     paste(map2(.x = anterior_op_note_list, .y = names(anterior_op_note_list), .f = ~ paste0(.y, ": ", paste(.x, sep = ", ", collapse = ", "))))
   })
   
+  
+  ###### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ALL INPUTS  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ######## 
+  
+  # all_inputs_reactive_list <- reactive({
+  #   
+  #   all_inputs_list <- reactiveValuesToList(input, all.names = FALSE)
+  #   
+  #   all_inputs_list <- keep(.x = all_inputs_list, .p = ~ !is.null(.x))
+  #   
+  # })
+  
+  
+  all_inputs_trimmed_reactive_df <- reactive({
+    
+    strings_to_detect_and_remove_vector <- c("object_to_add", 
+                                   "plot_with_patterns_true", 
+                                   "tabs", 
+                                   "label_text_offset", 
+                                   "search_for_prior_patient", 
+                                   "plot_summary_table",
+                                   "add_implants", 
+                                   "add_other", 
+                                   "add_special_approach", 
+                                   "add_interbody",
+                                   "add_osteotomies",
+                                   "add_decompressions",
+                                   "button",
+                                   "screws_implanted_picker_for_ui",
+                                   "central_corpectomy_cage",
+                                   "central_anterior_disc_arthroplasty",
+                                   "central_anterior_interbody_implant",
+                                   "left_tlif", 
+                                   "right_tlif",
+                                   "left_plif", 
+                                   "right_plif",
+                                   "operative_note",
+                                   "crop_y", 
+                                   "screw_length",
+                                   "screw_diameter", 
+                                   "screw_type",
+                                   "rods_eligible", 
+                                   "reset", 
+                                   "button",
+                                   "level_object_for",
+                                   "pelvic_screw",
+                                   "modal", 
+                                   "_complete",
+                                   "text_size", 
+                                   "idpostop", 
+                                   "drop")
+    
+    all_inputs_list <- reactiveValuesToList(input, all.names = FALSE)
+    
+    all_inputs_list <- keep(.x = all_inputs_list, .p = ~ !is.null(.x))
+    
+    all_inputs_to_log_df <- enframe(all_inputs_list) %>%
+      mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = "-AND-")))) %>%
+      select(-value) %>%
+      unnest(cols = result) %>%
+      filter(str_detect(name, pattern = glue_collapse(x = strings_to_detect_and_remove_vector, sep = "|"))==FALSE) %>%
+      # filter(str_detect(string = name, 
+      #                   pattern = "button|screws_implanted_picker_for_ui|central_corpectomy_cage|central_anterior_disc_arthroplasty|central_anterior_interbody_implant|left_tlif|right_tlif|left_plif|right_plif|operative_note|crop_y|screw_length|screw_diameter|screw_type|rods_eligible|reset|button|level_object_for|pelvic_screw|modal|_complete|text_size|idpostop|drop", 
+      #                   negate = TRUE)) %>%
+      # filter(name %in% variable_names_to_exclude == FALSE) %>%
+      filter(!is.na(result)) %>%
+      filter(result != "") %>%
+      filter(result != " ") %>%
+      filter(str_detect(string = name, pattern = "[:upper:]", negate = TRUE)) %>%
+      filter(str_detect(string = name, pattern = "\\s", negate = TRUE) ) %>%
+      filter(str_detect(string = name, pattern = "\\W", negate = TRUE)) %>%
+      filter(str_detect(string = name, pattern = "\\t", negate = TRUE))
+    
+    rods_to_keep <- all_inputs_to_log_df %>%
+      filter(str_detect(name, "rod")) %>%
+      filter(str_detect(name, "add")) %>%
+      filter(result == "TRUE") %>%
+      mutate(rod_type = str_remove_all(string = name, pattern = "add_"))
+    
+    if(nrow(rods_to_keep)>0){
+      rod_types_to_keep_string <- paste0(rods_to_keep$rod_type, collapse = "|")
+      
+      all_rod_info_to_keep_df <- all_inputs_to_log_df %>%
+        filter(str_detect(string = name, pattern = rod_types_to_keep_string))
+      main_rod_info_to_keep_df <- all_inputs_to_log_df %>%
+        filter(str_detect(string = name, pattern = "main_rod"))
+      
+      all_inputs_to_log_df <- all_inputs_to_log_df %>%
+        filter(str_detect(string = name, pattern = "rod") == FALSE) %>%
+        bind_rows(main_rod_info_to_keep_df) %>%
+        bind_rows(all_rod_info_to_keep_df)
+    }else{
+      
+      main_rod_info_to_keep_df <- all_inputs_to_log_df %>%
+        filter(str_detect(string = name, pattern = "main_rod"))
+      
+      all_inputs_to_log_df <- all_inputs_to_log_df %>%
+        filter(str_detect(string = name, pattern = "rod") == FALSE) %>%
+        bind_rows(main_rod_info_to_keep_df) 
+    }
+    
+    
+    # all_inputs_to_log_df %>%
+    # filter(str_detect(measure, pattern = paste0(glue_collapse(rods_not_used$rod_type_not_used, sep = "|"))) == FALSE) 
+    
+    all_inputs_to_log_df
+    # }
+    
+  })
+  
   output$all_inputs <- renderTable({
     all_inputs_trimmed_reactive_df()
   })
   
   output$all_inputs_removed <- renderTable({
-    enframe(all_inputs_reactive_list()) %>%
-      mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = ";")))) %>%
+    all_inputs_list <- reactiveValuesToList(input, all.names = FALSE)
+    
+    all_inputs_list <- keep(.x = all_inputs_list, .p = ~ !is.null(.x))
+    
+    all_inputs_to_log_df <- enframe(all_inputs_list) %>%
+      mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = "-AND-")))) %>%
       select(-value) %>%
-      unnest(result) %>%
-      anti_join(all_inputs_trimmed_reactive_df())
+      unnest(cols = result)
+    all_inputs_to_log_df
+    # enframe(all_inputs_reactive_list()) %>%
+    #   mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = ";")))) %>%
+    #   select(-value) %>%
+    #   unnest(result) %>%
+    #   anti_join(all_inputs_trimmed_reactive_df())
   })
   
   ############### ############### NOW RENDER EACH OF THE TABLES FOR THE FINAL REVIEW IN THE MODAL:    ###############     ############### 

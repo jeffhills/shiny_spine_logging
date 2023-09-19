@@ -14,44 +14,55 @@ jh_replace_checkbox_other_with_text_function <- function(input_vector = c(" "),
   new_vector
 }
 
-jh_make_op_note_test_df_function <- function(posterior_or_anterior = "posterior", object = c("pre_selected"), spine_region = "lumbar"){
+jh_make_op_note_test_df_function <- function(posterior_or_anterior = "posterior", spine_region = "lumbar", object = c("pre_selected")){
   
   surgical_objects <- as_vector(object)
   
-  if(spine_region == "lumbar"){
-    object_levels <- c("L4", "L5", "S1", "Iliac", "S2AI", "L3-L4", "L4-L5")
-    object_list <- c("pedicle_screw", "pelvic_screw_1", "sublaminar_decompression", "anterior_interbody_implant", "diskectomy_fusion", "anterior_plate")
+  if(spine_region == "cervical" & posterior_or_anterior == "anterior"){
+    selected_objects_df <- tibble(level = c('C3-C4', 'C4-C5', 'C5-C6', 'C3-C4', 'C4-C5', 'C5-C6', 'C3-C4', 'C4-C5', 'C5-C6'), 
+           object = c('anterior_plate', 'anterior_plate', 'anterior_plate', 'anterior_interbody_implant', 'anterior_interbody_implant', 'anterior_interbody_implant', 'decompression_diskectomy_fusion', 'decompression_diskectomy_fusion', 'decompression_diskectomy_fusion'),
+           )%>%
+      left_join(all_implants_constructed_df) %>%
+      arrange(category, vertebral_number) %>%
+      distinct()
+    
+  }else if(spine_region == "cervical" & posterior_or_anterior == "posterior"){
+    selected_objects_df <- tibble(level = c('C3', 'C3', 'C4', 'C5', 'C5', 'C6', 'C2', 'C2', 'T1', 'T1', 'T2', 'T2', 'C3', 'C4', 'C5', 'C6'),
+                             side = c('left', 'right', 'left', 'left', 'right', 'right', 'left', 'right', 'left', 'right', 'left', 'right', 'central', 'central', 'central', 'central'),
+                             object = c('lateral_mass_screw', 'lateral_mass_screw', 'lateral_mass_screw', 'lateral_mass_screw', 'lateral_mass_screw', 'lateral_mass_screw', 'pars_screw', 'pars_screw', 'pedicle_screw', 'pedicle_screw', 'pedicle_screw', 'pedicle_screw', 'laminectomy', 'laminectomy', 'laminectomy', 'laminectomy')
+                             )%>% 
+      left_join(all_implants_constructed_df) %>%
+      arrange(category, vertebral_number) %>%
+      distinct()
+    
+  }else if(spine_region == "lumbar" & posterior_or_anterior == "anterior"){
+    selected_objects_df <- tibble(level = c('L3-L4', 'L4-L5', 'L5-S1'),
+                              side = c('central', 'central', 'central'),
+                              object = c('diskectomy_fusion', 'diskectomy_fusion', 'diskectomy_fusion'))%>% 
+      left_join(all_implants_constructed_df) %>%
+      arrange(category, vertebral_number) %>%
+      distinct()
   }else{
-    object_levels <- c("C2", "T1", "T2", "C3", "C4", "C5", "C6", "C3-C4", "C4-C5", "C5-C6")
-    object_list <- c("pars_screw", "pedicle_screw", "lateral_mass_screw", "laminectomy", "anterior_interbody_implant", "decompression_diskectomy_fusion", "anterior_plate")
+    
+    selected_objects_df <- tibble(level = c('L2', 'L2', 'L3', 'L4', 'L5', 'L5', 'S1', 'S1', 'Iliac', 'S2AI_2', 'S2AI_2', 'L3-L4', 'L4-L5', 'L4-L5', 'L5-S1'),
+                              side = c('left', 'right', 'right', 'left', 'left', 'right', 'left', 'right', 'left', 'left', 'right', 'central', 'central', 'right', 'left'),
+                              object = c('pedicle_screw', 'pedicle_screw', 'pedicle_screw', 'pedicle_screw', 'pedicle_screw', 'pedicle_screw', 'pedicle_screw', 'pedicle_screw', 'pelvic_screw_1', 'pelvic_screw_2', 'pelvic_screw_2', 'sublaminar_decompression', 'sublaminar_decompression', 'tlif', 'tlif')
+    )%>% 
+      left_join(all_implants_constructed_df) %>%
+      arrange(category, vertebral_number) %>%
+      distinct()
+    
   }
   
-  if(surgical_objects[[1]] == "pre_selected"){
-    testing_df <- all_implants_constructed_df %>%
-      filter(object %in% object_list) %>%
-      filter(approach == posterior_or_anterior) %>%
-      group_by(object) %>%
-      filter(level %in% object_levels) %>%
-      ungroup()
-  }else{
-    testing_df <- all_implants_constructed_df %>%
-      filter(object %in% surgical_objects) %>%
-      group_by(object) %>%
-      filter(level %in% object_levels) %>%
-      ungroup()
-  }
-  
-  testing_df
-  
-  testing_df <- testing_df %>%
+  selected_objects_df <- selected_objects_df %>%
     mutate(screw_size_type = "", implant_statement = "") %>%
     select(level, vertebral_number, body_interspace, approach, category, implant, object, side, screw_size_type, implant_statement)
   
   if(posterior_or_anterior == "anterior"){
-    testing_df <- testing_df %>%
+    selected_objects_df <- selected_objects_df %>%
       mutate(direction = " ")
   }
-  return(testing_df)
+  return(selected_objects_df)
 }
 
 

@@ -952,6 +952,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     }
   }
   
+  # c2_nerve_transection_list_reactive()$c2_nerve_transection_result = "bilateral_transection", "left", "right", "left_preserved", "right_preserved", "na"
   
   ################# C2 nerve transection
   if(c2_nerve_transection == "bilateral_transection"){
@@ -963,7 +964,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   if(c2_nerve_transection == "right"){
     procedure_details_list$c2_transection <- glue("To aide in accurate placement of the C1 lateral mass screws, I proceeded with the transection of the C2 nerve root (greater occipital nerve) on the right. The posterior C1 arch was identified and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered on the right. At this point, to allow accurate placement of the C1 screws and minimize risk of postoperative entrapment neuropathy or occipital neuralgia, the C2 nerve root was transected medial to the dorsal root ganglia on the right. This completed the transection of the C2 nerve root/Greater Occipital Nerve. ")
   }
-  if(c2_nerve_transection == "bilateral_preserved"){
+  if(str_detect(c2_nerve_transection, "preserved")){
     procedure_details_list$c2_transection <- glue("I proceeded with the exposure of the C1-C2 joint and the C1 lateral masses. The posterior C1 arch was identified, and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered. Bipolar cautery and hemostatic agents were used to aide in hemostasis of the venous plexus. A penfield was used to dissect the cranial and caudal borders of the C2 nerve root. The caudal aspect of the lateral posterior C1 arch was burred to allow a path to the C1 lateral mass just cranial to the C2 nerve root. The C1-C2 joint was exposed caudal to the C2 nerve root. ")
   }
   

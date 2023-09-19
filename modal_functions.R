@@ -3,6 +3,35 @@
 ################################################    INITIAL STARTUP MODAL ######################################
 ################################################    INITIAL STARTUP MODAL ######################################
 
+c2_nerve_transection_modal_function <- function(side = "left"){
+  left_modal <- modalDialog(
+    size = "m",
+    easyClose = FALSE,
+    prettyRadioButtons(inputId = "left_c2_nerve_root_transection",
+                 label = "Was the left C2 nerve root sacrificed?", 
+                 choices = c("No", "Yes"), 
+                 selected = "No",
+                 inline = TRUE,
+                 width = "100%")
+  )
+  
+  right_modal <- modalDialog(
+    size = "m",
+    easyClose = FALSE,
+    prettyRadioButtons(inputId = "right_c2_nerve_root_transection",
+                 label = "Was the right C2 nerve root sacrificed?", 
+                 choices = c("No", "Yes"), 
+                 selected = "No",
+                 inline = TRUE,
+                 width = "100%")
+  )
+  if(side == "left"){
+    left_modal
+  }else{
+    right_modal
+  }
+}
+
 startup_modal_box <-
   function(header_text = "Enter Details to Proceed",
            header_text_color = "black",
