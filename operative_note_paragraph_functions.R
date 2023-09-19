@@ -1415,7 +1415,7 @@ revision_implants_paragraph_function <- function(revision_implants_details_df){
     
     
     if(length(left_implants_prior_implants_removed_vector) > 0){
-      revision_implants_statements_list$left_remove_implants_start <- paste("I then proceeded with removal of prior spinal instrumentation on the left.")
+      revision_implants_statements_list$left_remove_implants_start <- paste("I then proceeded with removal of prior spinal instrumentation.")
       
       
       if(length(left_implants_prior_rod_connected_no_vector) > 0 & length(left_implants_prior_rod_connected_yes_vector) > 0){

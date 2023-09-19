@@ -865,6 +865,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                       initial_value_selected = approach_open_mis
                     )
                     },
+                  hr(),
                     if(posterior_approach == "yes"){
                       jh_make_shiny_table_row_function(
                         left_column_label = "Select any modality used:",
@@ -1404,6 +1405,28 @@ addition_surgical_details_modal_box_function <-
 
 
 ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
+additional_procedure_options_vector <- c("Robotic Assisted Spine Surgery",
+  "Use of stereotactic navigation system for screw placement",
+  "Open Biopsy of vertebral body", 
+  "Open Biopsy of extradural spinal lesion",
+  "Repair of dural/CSF leak",
+  "Dural Graft",
+  "Removal of spinal instrumentation",
+  "Open treatment of vertebral fracture",
+  "Intraoperative use of microscope for microdissection",
+  "Use of stereotactic navigation system for screw placement",
+  "Application of Cranial Tongs",
+  "Application of Cranial Tongs using Mayfield head holder",
+  "Application of Halo",
+  "Removal of tongs or Halo applied by another inidividual",
+  "Spinal Cord Monitoring",
+  "Secondary Closure of complex surgical wound",
+  "Incision and Drainage",
+  "Irrigation and Debridement",
+  "Application of Wound Vac (negative pressure wound therapy; CPT = 97605)",
+  "Other"
+)
+
 addition_surgical_details_modal_box_2_function <-
   function(required_options_missing = FALSE,
            procedure_approach = "",
@@ -1434,7 +1457,7 @@ addition_surgical_details_modal_box_2_function <-
            additional_end_procedure_details_anterior = NULL,
            closure_details_anterior = NULL,
            dressing_details_anterior = NULL,
-           additional_procedures_choices_anterior = c(""),
+           # additional_procedures_choices_anterior = c(""),
            additional_procedures_anterior = NULL,
            additional_procedures_other_anterior = "",
            
@@ -1444,7 +1467,7 @@ addition_surgical_details_modal_box_2_function <-
            additional_end_procedure_details_posterior = NULL,
            closure_details_posterior = NULL,
            dressing_details_posterior = NULL,
-           additional_procedures_choices_posterior = c(""),
+           # additional_procedures_choices_posterior = c(""),
            additional_procedures_posterior = NULL,
            additional_procedures_other_posterior = "",
 
@@ -1857,7 +1880,7 @@ addition_surgical_details_modal_box_2_function <-
             left_column_percent_width = 35,
             checkboxes_inline = FALSE,
             input_type = "checkbox",
-            choices_vector = additional_procedures_choices_anterior,
+            choices_vector = additional_procedure_options_vector,
             initial_value_selected = additional_procedures_anterior
           )
         },
@@ -1990,7 +2013,7 @@ addition_surgical_details_modal_box_2_function <-
             left_column_percent_width = 20,
             checkboxes_inline = FALSE,
             input_type = "checkbox",
-            choices_vector = additional_procedures_choices_posterior,
+            choices_vector = additional_procedure_options_vector,
             initial_value_selected = additional_procedures_posterior
           )
         },

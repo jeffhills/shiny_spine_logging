@@ -9,7 +9,15 @@ anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
 
 all_object_ids_df <- fread(file = "all_object_ids_df.csv") 
 
-imported_coordinates <- fread("imported_coordinates_rounded.csv")
+# imported_coordinates <- fread("imported_coordinates_rounded.csv")
+# 
+# all_implants_constructed_df <<- all_object_ids_df %>%
+#   filter(category == "implant") %>%
+#   left_join(fread("imported_coordinates_rounded.csv") %>%
+#               group_by(object_id) %>%
+#               nest() %>%
+#               mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+#               select(object_id, object_constructed))
 
 all_implants_constructed_df <<- all_object_ids_df %>%
   filter(category == "implant") %>%
