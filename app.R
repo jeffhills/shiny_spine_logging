@@ -18,9 +18,6 @@ library(rclipboard)
 library(nngeo)
 library(shinydashboard)
 library(data.table)
-library(shinyjs)
-
-
 
 # library(profvis)
 
@@ -1622,16 +1619,7 @@ server <- function(input, output, session) {
   }
   )
   
-  # observeEvent(input$close_startup_modal, ignoreInit = TRUE, ignoreNULL = TRUE, once = TRUE, {
-  #   # implant <- fread("coordinates/  implant.csv")
-  #   
-  #   all_implants_constructed_df <<- all_object_ids_df %>%
-  #     left_join(fread("coordinates/implant.csv") %>%
-  #                 group_by(object_id) %>%
-  #                 nest() %>%
-  #                 mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
-  #                 select(object_id, object_constructed))
-  #   })
+
   ################################################  COMPLICATION RECORDING  MODAL BOX END ######################################
   ################################################  COMPLICATION RECORDING  MODAL BOX END ######################################
   
@@ -2671,63 +2659,7 @@ server <- function(input, output, session) {
               ignoreInit = TRUE,
               ignoreNULL = TRUE)
   
-  
-  # c2_nerve_root_transection_reactive <- reactive({
-  #   if(input$left_c1_lateral_mass_screw_true_false == TRUE){
-  #     left_c2_transection <- str_to_lower(input$left_c2_nerve_root_transection)
-  #   }else{
-  #     left_c2_transection <- "no"
-  #   }
-  #   if(input$right_c1_lateral_mass_screw_true_false == TRUE){
-  #     right_c2_transection <- str_to_lower(input$right_c2_nerve_root_transection)
-  #   }else{
-  #     right_c2_transection <- "no"
-  #   }
-  #   c2_nerve_transection <- case_when(
-  #     left_c2_nerve_transection == "yes" & right_c2_nerve_transection== "yes" ~ "bilateral",
-  #     left_c2_nerve_transection == "yes" & right_c2_nerve_transection == "no" ~ "left",
-  #     left_c2_nerve_transection == "no" & right_c2_nerve_transection == "yes" ~ "right",
-  #     left_c2_nerve_transection == "yes" & right_c2_nerve_transection == "yes" ~ "bilateral_preserved"
-  #   )
-  # })bindEvent(
-  #   
-  # )
-  
-  # observeEvent(input$plot_click, ignoreInit = TRUE, {
-  #   if(nrow(object_added_reactive_df())>0){
-  #     if(object_added_reactive_df()$object[1] == "lateral_mass_screw" & object_added_reactive_df()$level[1] == "C1"){
-  #       if(unique(object_added_reactive_df()$side) == "left"){
-  #         showModal(
-  #           modalDialog(
-  #             size = "m",
-  #             easyClose = FALSE,
-  #             awesomeRadio(inputId = "left_c2_nerve_root_transection",
-  #                          label = "Was the left C2 nerve root sacrificed?", 
-  #                          choices = c("No", "Yes"), 
-  #                          inline = TRUE,
-  #                          width = "100%")
-  #           )
-  #         ) 
-  #       }
-  #       if(object_added_reactive_df()$side == "right"){
-  #         showModal(
-  #           modalDialog(
-  #             size = "m",
-  #             easyClose = FALSE,
-  #             awesomeRadio(inputId = "right_c2_nerve_root_transection",
-  #                          label = "Was the right C2 nerve root sacrificed?", 
-  #                          choices = c("No", "Yes"), 
-  #                          inline = TRUE,
-  #                          width = "100%")
-  #           )
-  #         ) 
-  #       }
-  #     } 
-  #   }
-  # })
-  
-
-  ##### Modal to report whether the PLL was taken down
+    ##### Modal to report whether the PLL was taken down
   observeEvent(input$plot_click, ignoreInit = TRUE, {
     # object_added <- object_added_reactive_df()$object[1]
     # level_added <- object_added_reactive_df()$level[1]
@@ -5082,27 +5014,6 @@ server <- function(input, output, session) {
     )
   })
   
-  ### CREATE VARIABLE FOR PROCEDURE APPROACH FOR GUIDING MODAL BOX CHOICES
-  # procedure_approach_reactive <- reactive({
-  #   if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
-  #     anterior_approach <- TRUE
-  #   }else{
-  #     anterior_approach <- FALSE
-  #   }
-  #   
-  #   if(any(all_objects_to_add_list$objects_df$approach == "posterior")){
-  #     posterior_approach <- TRUE
-  #   }else{
-  #     posterior_approach <- FALSE
-  #   }
-  #   procedure_approach <- case_when(
-  #     anterior_approach == TRUE & posterior_approach == TRUE ~ "combined", 
-  #     anterior_approach == TRUE & posterior_approach == FALSE ~ "anterior",
-  #     anterior_approach == FALSE & posterior_approach == TRUE ~ "posterior",
-  #     anterior_approach == FALSE & posterior_approach == FALSE ~ str_to_lower(input$spine_approach)
-  #   )
-  #   procedure_approach
-  # })
   
   
   ## NOW make a reactive modal for editing the info if needed ###
@@ -5144,37 +5055,6 @@ server <- function(input, output, session) {
                                                      procedure_approach = procedure_approach_reactive()
       )
     )
-    
-    # if(procedure_approach_reactive() == "anterior"){
-    #   showModal(
-    #     addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
-    #                                                    # additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
-    #                                                    # additional_procedures_anterior = unlist(add_procedures_list, use.names = FALSE), 
-    #                                                    procedure_approach = procedure_approach_reactive()
-    #     )
-    #   )
-    # }
-    # if(procedure_approach_reactive() == "posterior"){
-    #   showModal(
-    #     addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
-    #                                                    # additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
-    #                                                    additional_procedures_posterior = unlist(add_procedures_list, use.names = FALSE), 
-    #                                                    procedure_approach = procedure_approach_reactive()
-    #     )
-    #   )  
-    # }
-    # if(procedure_approach_reactive() == "combined"){
-    #   showModal(
-    #     addition_surgical_details_modal_box_2_function(required_options_missing = FALSE, 
-    #                                                    # additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
-    #                                                    additional_procedures_posterior = unlist(add_procedures_list, use.names = FALSE), 
-    #                                                    # additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
-    #                                                    additional_procedures_anterior = unlist(add_procedures_list, use.names = FALSE), 
-    #                                                    procedure_approach = procedure_approach_reactive()
-    #     )
-    #   )  
-    # }
-    
   })
   
   observeEvent(input$additional_surgical_details_complete, ignoreInit = TRUE, {
@@ -7936,14 +7816,7 @@ server <- function(input, output, session) {
   
   ####### Render "Procedur Specifics" for side tab:"    ########
   output$procedures_by_level_redcap_df_sidetab <- renderTable({
-    # procedures_by_level_redcap_df_reactive() %>%
-    #   pivot_longer(cols = c(-redcap_repeat_instrument, 
-    #                         -redcap_repeat_instance, 
-    #                         -dos_surg_repeating,
-    #                         -approach_repeating,
-    #                         -category,
-    #                         -side))%>%
-    #   filter(value != " ")
+
     procedures_by_level_redcap_df_reactive()
   })
   

@@ -79,7 +79,6 @@ all_implants_constructed_df <<- all_object_ids_df %>%
 #                                                                     coordinate_file_name = i)
 # 
 # }
-
 #############-----------------------   Build Key Dataframes  ----------------------###############
 
 left_label_x <- 0.32
