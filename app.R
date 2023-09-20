@@ -18,6 +18,9 @@ library(rclipboard)
 library(nngeo)
 library(shinydashboard)
 library(data.table)
+# library(shinyjs)
+
+
 
 # library(profvis)
 
@@ -35,25 +38,13 @@ source("short_shiny_functions.R", local = TRUE)
 source("load_icd_codes.R", local = TRUE)
 source("modal_functions.R", local = TRUE)
 source("make_geoms_functions.R", local = TRUE)
-# source("build_spine_objects_functions.R", local = TRUE)
-# source("load_coordinates_build_objects.R", local = TRUE)
 source("load_coordinates_build_objects_new.R", local = TRUE)
-source("anterior_posterior_operative_note_generator_functions.R", local = TRUE) 
+source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
 source("operative_note_paragraph_functions.R", local = TRUE)
 source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
 
-# jh_build_test_implant_function <- function(side_level_object_list = list("left_L3_pedicle_screw", "left_l4_pedicle_screw", "left_l5_pedicle_screw", 
-#                                                                          "right_L3_pedicle_screw", "right_l5_pedicle_screw")){
-#   
-#   test_df <- all_implants_constructed_df %>%
-#     mutate(side_level_object = str_to_lower(paste0(side, "_", level, "_", object))) %>%
-#     select(side_level_object, everything()) %>%
-#     filter(side_level_object %in% str_to_lower(side_level_object_list)) %>%
-#     select(-side_level_object)
-#   
-#   return(test_df)
-# }
+
 # ui <- shinyUI(basicPage(
 #   dateInput(inputId = "input_date", label = "Date:", value = ""),
 #   textOutput(outputId = "date_text_output")
@@ -345,7 +336,7 @@ ui <- dashboardPage(skin = "black",
                                                              )
                                                       )
                                                     ),
-                                                    br(),
+                                                    br(), 
                                                     noUiSliderInput(inputId = "crop_y",
                                                                     label = "Spine Region",
                                                                     min = 0,
@@ -353,7 +344,8 @@ ui <- dashboardPage(skin = "black",
                                                                     value = c(0.05,0.42), direction = "rtl",
                                                                     behaviour = "drag",color = "#0036FD",
                                                                     orientation = "vertical",
-                                                                    height = "600px", width = "3px",
+                                                                    height = "600px",
+                                                                    width = "3px",
                                                                     inline = TRUE)
                                              ), 
                                              column(width = 10,
@@ -955,109 +947,6 @@ ui <- dashboardPage(skin = "black",
                               hr(),
                               uiOutput(outputId = "screw_details_ui"),
                               hr(),
-                              # tableOutput(outputId = "test_screw_size_details_table_output")
-                              ### this input gets updated based on the laterality of screws to be used in the next conditional panel steps
-                              # conditionalPanel(condition = "input.spine_approach.indexOf('Never True') > -1",
-                              #                  checkboxGroupInput(inputId = "level_object_for_screw_details",
-                              #                                     label = "Screw Levels:",
-                              #                                     choices = all_screw_size_type_inputs_df$level_object_label,
-                              #                                     selected = ""),
-                              #                  checkboxGroupInput(inputId = "left_level_object_for_screw_details",
-                              #                                     label = "Screw Levels:",
-                              #                                     choices = all_screw_size_type_inputs_df$left_object,
-                              #                                     selected = ""),
-                              #                  checkboxGroupInput(inputId = "right_level_object_for_screw_details",
-                              #                                     label = "Screw Levels:",
-                              #                                     choices = all_screw_size_type_inputs_df$right_object,
-                              #                                     selected = "")
-                              #                  ),
-                              # conditionalPanel(condition = "input.fusion_procedure_performed == true",
-                                               # uiOutput(outputId = "screw_details_ui")
-                                               # box(width = 12,
-                                               #     title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
-                                               #     jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
-                                               #                                      left_column_percent_width = 30,
-                                               #                                      input_type = "checkbox",
-                                               #                                      font_size = 16,
-                                               #                                      checkboxes_inline = TRUE,
-                                               #                                      input_id = "implant_manufacturer",
-                                               #                                      choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
-                                               #     ),
-                                               #     h4("Screw Sizes:"),
-                                               #     fluidRow(
-                                               #       column(4,
-                                               #              "Implant"),
-                                               #       column(2,
-                                               #              "Left Diameter"),
-                                               #       column(2,
-                                               #              "Left Length"),
-                                               #       column(2,
-                                               #              "Right Diameter"),
-                                               #       column(2,
-                                               #              "Right Length")
-                                               #     ),
-                                               #     map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
-                                               #         .f = ~
-                                               #           conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$level_object_label[[.x]]}') >-1"),
-                                               #                            fluidRow(
-                                               #                              column(4,
-                                               #                                     all_screw_size_type_inputs_df$level_object_label[[.x]]
-                                               #                              ),
-                                               #                              column(2,
-                                               #                                     conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
-                                               #                                                      all_screw_size_type_inputs_df$left_diameter_input[[.x]]
-                                               #                                     )
-                                               #                              ),
-                                               #                              column(2,
-                                               #                                     conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
-                                               #                                                      all_screw_size_type_inputs_df$left_length_input[[.x]]
-                                               #                                     )
-                                               #                              ),
-                                               #                              column(2,
-                                               #                                     conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
-                                               #                                                      all_screw_size_type_inputs_df$right_diameter_input[[.x]]
-                                               #                                     )
-                                               #                              ),
-                                               #                              column(2,
-                                               #                                     conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
-                                               #                                                      all_screw_size_type_inputs_df$right_length_input[[.x]]
-                                               #                                     )
-                                               #                              )
-                                               #                            )
-                                               #           )
-                                               #     ),
-                                               #     hr(),
-                                               #     h4("Screw Types:"),
-                                               #     fluidRow(
-                                               #       column(4,
-                                               #              "Implant"),
-                                               #       column(4,
-                                               #              "Left Screw Type"),
-                                               #       column(4,
-                                               #              "Right Screw Type"),
-                                               #     ),
-                                               #     map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
-                                               #         .f = ~
-                                               #           conditionalPanel(condition = glue("input.level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$level_object_label[.x]}') >-1"),
-                                               #                            fluidRow(
-                                               #                              column(4,
-                                               #                                     all_screw_size_type_inputs_df$level_object_label[[.x]]
-                                               #                              ),
-                                               #                              column(4,
-                                               #                                     conditionalPanel(condition = glue("input.left_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
-                                               #                                                      all_screw_size_type_inputs_df$left_type_input[[.x]]
-                                               #                                     )
-                                               #                              ),
-                                               #                              column(4,
-                                               #                                     conditionalPanel(condition = glue("input.right_level_object_for_screw_details.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
-                                               #                                                      all_screw_size_type_inputs_df$right_type_input[[.x]]
-                                               #                                     )
-                                               #                              ),
-                                               #                            )
-                                               #           )
-                                               #     )
-                                               # )
-                              # )
                           ),
                           box(width = 5, status = "primary",
                               fluidRow(
@@ -1356,7 +1245,7 @@ server <- function(input, output, session) {
       }else{
         match_found <- FALSE
       }
-      
+
       if(match_found == TRUE){
         record_number <- joined_df$record_id[[1]]
         
@@ -1422,12 +1311,18 @@ server <- function(input, output, session) {
     
   })
   
+  # output$prior_patient_found <- renderText({
+  #   if(existing_patient_data$match_found == TRUE){
+  #     HTML("<div>", "Prior Patient Found", "</div>")
+  #   }else{
+  #     HTML("<div>", " ", "</div>")
+  #   }
+  # })
   
   observe({
     if(existing_patient_data$match_found == TRUE){
       updateSwitchInput(session = session, inputId = "prior_patient_match_located", value = TRUE, label = "Prior Patient Found")
     }
-    
   }) %>%
     bindEvent(input$search_for_prior_patient,
               # existing_patient_data$match_found,
@@ -1909,7 +1804,8 @@ server <- function(input, output, session) {
         
         anterior_disc_constructed_df <- all_object_ids_df %>%
           filter(category == "anterior_disc") %>%
-          left_join(fread("coordinates/anterior_disc.csv") %>%
+          filter(object != "anterior_disc_arthroplasty") %>%
+          left_join(fread("coordinates/anterior_disc.csv") %>% 
                       group_by(object_id) %>%
                       nest() %>%
                       mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
@@ -2002,6 +1898,7 @@ server <- function(input, output, session) {
         
         anterior_disc_constructed_df <- all_object_ids_df %>%
           filter(category == "anterior_disc") %>%
+          filter(object != "anterior_disc_arthroplasty") %>%
           left_join(fread("coordinates/anterior_disc.csv") %>%
                       group_by(object_id) %>%
                       nest() %>%
@@ -2499,7 +2396,7 @@ server <- function(input, output, session) {
   geoms_list_revision_posterior <- reactiveValues()
   rods_list <- reactiveValues()
 
-  
+
   #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
   object_added_reactive_df <- reactive({
     
@@ -2999,14 +2896,15 @@ server <- function(input, output, session) {
     updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = FALSE)
   })
   
-  observeEvent(list(all_objects_to_add_list$objects_df), ignoreNULL = TRUE, ignoreInit = TRUE,{
-    if(nrow(left_rod_implants_df_reactive()) > 2){
+  # observeEvent(list(all_objects_to_add_list$objects_df), ignoreNULL = TRUE, ignoreInit = TRUE,{
+  observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE,{
+    if(nrow(left_rod_implants_df_reactive()) > 2 && input$left_supplemental_rods_eligible == FALSE){
       updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
     }
     
   })
   
-  observeEvent(input$add_left_accessory_rod, {
+  observeEvent(input$add_left_accessory_rod,  ignoreInit = TRUE, {
     if(input$add_left_accessory_rod == TRUE){
       start_list <- jh_supplementary_rods_choices_function(all_objects_df = left_rod_implants_df_reactive(),
                                                            rod_type = "accessory_rod")
@@ -3025,7 +2923,7 @@ server <- function(input, output, session) {
   }
   )
   
-  observeEvent(input$add_left_satellite_rod, {
+  observeEvent(input$add_left_satellite_rod,  ignoreInit = TRUE, {
     if(input$add_left_satellite_rod == TRUE){
       start_list <- jh_supplementary_rods_choices_function(all_objects_df = left_rod_implants_df_reactive(),
                                                            osteotomy_site = osteotomy_level_reactive(),
@@ -3046,7 +2944,7 @@ server <- function(input, output, session) {
   }
   )
   
-  observeEvent(list(input$add_left_intercalary_rod, input$left_intercalary_rod_junction), {
+  observeEvent(list(input$add_left_intercalary_rod, input$left_intercalary_rod_junction), ignoreInit = TRUE, {
     if(input$add_left_intercalary_rod == TRUE && input$left_intercalary_rod_junction %in% implant_levels_numbered_df$level){
       
       left_implant_df <- left_rod_implants_df_reactive() %>%
@@ -3127,7 +3025,7 @@ server <- function(input, output, session) {
     }
   })
   
-  observeEvent(list(input$add_left_intercalary_rod), {
+  observeEvent(list(input$add_left_intercalary_rod), ignoreInit = TRUE, {
     if(input$add_left_intercalary_rod == TRUE){
       # junction_choices_vector <-  (implant_levels_numbered_df %>%
       #                                filter(between(vertebral_number, jh_get_vertebral_number_function(input$left_intercalary_rod[1]), jh_get_vertebral_number_function(input$left_intercalary_rod[2]))) %>%
@@ -3245,7 +3143,7 @@ server <- function(input, output, session) {
                         choices = left_implants_df$implant_label)
     }
   }) %>%
-    bindEvent(input$add_left_custom_rods, input$left_custom_rods_number)
+    bindEvent(input$add_left_custom_rods, input$left_custom_rods_number, ignoreInit = TRUE)
   
 
   observeEvent(list(input$plot_click,input$double_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
@@ -3499,8 +3397,8 @@ server <- function(input, output, session) {
           rods_list$left_connector_list_sf_geom <- NULL
         }
       }else{
-        rods_list$left_connector_list_sf_geom <- NULL
         rods_list$left_rod_list_sf_geom <- NULL
+        rods_list$left_connector_list_sf_geom <- NULL
       }
     }else if(nrow(left_rod_implants_df_reactive()) >1){
       rods_list$left_connector_list_sf_geom <- NULL
@@ -3518,8 +3416,8 @@ server <- function(input, output, session) {
       
       rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
     }else{
-      rods_list$left_connector_list_sf_geom <- NULL
       rods_list$left_rod_list_sf_geom <- NULL
+      rods_list$left_connector_list_sf_geom <- NULL
     }
     
   })
@@ -3735,14 +3633,15 @@ server <- function(input, output, session) {
     updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = FALSE)
   })
   
-  observeEvent(list(all_objects_to_add_list$objects_df), ignoreNULL = TRUE, ignoreInit = TRUE,{
-    if(nrow(right_rod_implants_df_reactive()) > 2){
+
+  observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE,{
+    if(nrow(right_rod_implants_df_reactive()) > 2 && input$right_supplemental_rods_eligible == FALSE){
       updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
     }
     
   })
   
-  observeEvent(input$add_right_accessory_rod, {
+  observeEvent(input$add_right_accessory_rod, ignoreInit = TRUE, {
     if(input$add_right_accessory_rod == TRUE){
       start_list <- jh_supplementary_rods_choices_function(all_objects_df = right_rod_implants_df_reactive(),
                                                            rod_type = "accessory_rod")
@@ -3761,7 +3660,7 @@ server <- function(input, output, session) {
   }
   )
   
-  observeEvent(input$add_right_satellite_rod, {
+  observeEvent(input$add_right_satellite_rod, ignoreInit = TRUE,{
     if(input$add_right_satellite_rod == TRUE){
       start_list <- jh_supplementary_rods_choices_function(all_objects_df = right_rod_implants_df_reactive(),
                                                            osteotomy_site = osteotomy_level_reactive(),
@@ -3782,7 +3681,7 @@ server <- function(input, output, session) {
   }
   )
   
-  observeEvent(list(input$add_right_intercalary_rod, input$right_intercalary_rod_junction), {
+  observeEvent(list(input$add_right_intercalary_rod, input$right_intercalary_rod_junction),  ignoreInit = TRUE, {
     if(input$add_right_intercalary_rod == TRUE && input$right_intercalary_rod_junction %in% implant_levels_numbered_df$level){
       
       right_implant_df <- right_rod_implants_df_reactive() %>%
@@ -3863,7 +3762,7 @@ server <- function(input, output, session) {
     }
   })
   
-  observeEvent(list(input$add_right_intercalary_rod), {
+  observeEvent(list(input$add_right_intercalary_rod),  ignoreInit = TRUE, {
     if(input$add_right_intercalary_rod == TRUE){
       # junction_choices_vector <-  (implant_levels_numbered_df %>%
       #                                filter(between(vertebral_number, jh_get_vertebral_number_function(input$right_intercalary_rod[1]), jh_get_vertebral_number_function(input$right_intercalary_rod[2]))) %>%
@@ -3981,7 +3880,7 @@ server <- function(input, output, session) {
                         choices = right_implants_df$implant_label)
     }
   }) %>%
-    bindEvent(input$add_right_custom_rods, input$right_custom_rods_number)
+    bindEvent(input$add_right_custom_rods, input$right_custom_rods_number,  ignoreInit = TRUE)
   
 
   observeEvent(list(input$plot_click,input$double_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
@@ -4485,7 +4384,9 @@ server <- function(input, output, session) {
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
   ##################### ~~~~~~~~~~~~~~~~ RENDER PLOTS ~~~~~~~~~~~~~~~~~~~ ##################
   
-  
+  # input$object_to_add
+  # object_added_reactive_df()
+
   output$spine_plan <-  renderPlot(res = 48, {
     # main_page_reactive_plot()
     if(str_to_lower(input$spine_approach) == "anterior"){
@@ -4547,14 +4448,32 @@ server <- function(input, output, session) {
   fusion_levels_computed_reactive_df <- reactive({
     fusion_levels_estimated_df <- fusion_levels_df_function(all_objects_to_add_df = all_objects_to_add_list$objects_df) %>%
       filter(level != "Sacro-iliac")
-    
+
     fusion_levels_estimated_df
+  })
+  # 
+  # observeEvent(input$implants_complete, ignoreInit = TRUE, {
+  #   updatePrettyCheckboxGroup(session = session, 
+  #                             inputId = "fusion_levels_confirmed", 
+  #                             selected = fusion_levels_computed_reactive_df()$level 
+  #   )
+  # })
+  
+  observeEvent(input$implants_complete, ignoreInit = TRUE, {
+    estimated_fusion_levels_posterior <- fusion_levels_df_function(all_objects_to_add_df = all_objects_to_add_list$objects_df %>% filter(approach == "posterior"))
+    
+    updatePrettyCheckboxGroup(session = session, 
+                              inputId = "posterior_fusion_levels_confirmed", 
+                              selected = estimated_fusion_levels_posterior$level 
+    )
   })
   
   observeEvent(input$implants_complete, ignoreInit = TRUE, {
+    estimated_fusion_levels_anterior <- fusion_levels_df_function(all_objects_to_add_df = all_objects_to_add_list$objects_df %>% filter(approach == "anterior"))
+    
     updatePrettyCheckboxGroup(session = session, 
-                              inputId = "fusion_levels_confirmed", 
-                              selected = fusion_levels_computed_reactive_df()$level 
+                              inputId = "anterior_fusion_levels_confirmed", 
+                              selected = estimated_fusion_levels_anterior$level 
     )
   })
   
@@ -4587,11 +4506,11 @@ server <- function(input, output, session) {
   
   observeEvent(input$implants_complete, ignoreNULL = TRUE, ignoreInit = TRUE, once = TRUE, {
     
-    if(length(fusion_levels_computed_reactive_df()$level)>0){
-      fusion_levels_computed_reactive_input <- fusion_levels_computed_reactive_df()$level
-    }else{
-      fusion_levels_computed_reactive_input <- c()
-    }
+    # if(length(fusion_levels_computed_reactive_df()$level)>0){
+    #   fusion_levels_computed_reactive_input <- fusion_levels_computed_reactive_df()$level
+    # }else{
+    #   fusion_levels_computed_reactive_input <- c()
+    # }
     
     if(nrow(all_objects_to_add_list$objects_df %>% 
             filter(str_detect(object, "screw") | str_detect(object, "anterior_plate")))>0){
@@ -4633,7 +4552,8 @@ server <- function(input, output, session) {
       confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
                                                                      deformity_correction_choices = deformity_correction_techniques_vector, 
                                                                      procedure_approach = procedure_approach_reactive(),
-                                                                     fusion_levels_confirmed = fusion_levels_computed_reactive_input, 
+                                                                     # fusion_levels_confirmed = fusion_levels_computed_reactive_input, 
+                                                                     
                                                                      anterior_approach = anterior_approach_yes_no,
                                                                      posterior_approach = posterior_approach_yes_no
       )
@@ -4688,7 +4608,9 @@ server <- function(input, output, session) {
                                                                        deformity_correction_choices = deformity_correction_techniques_vector,
                                                                        procedure_approach = procedure_approach_reactive(),
                                                                        # screws_selected_df_reactive = screws_selected_df_reactive(), 
-                                                                       fusion_levels_confirmed = input$fusion_levels_confirmed,
+                                                                       # fusion_levels_confirmed = input$fusion_levels_confirmed,
+                                                                       posterior_fusion_levels_confirmed = input$posterior_fusion_levels_confirmed,
+                                                                       anterior_fusion_levels_confirmed = input$anterior_fusion_levels_confirmed,
                                                                        approach_specified_posterior = input$approach_specified_posterior,
                                                                        approach_open_mis = input$approach_open_mis,
                                                                        approach_robot_navigation = input$approach_robot_navigation, 
@@ -6043,8 +5965,8 @@ server <- function(input, output, session) {
     # posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df
     ####### fusion levels 
     
-    if(length(input$fusion_levels_confirmed)>0){
-      posterior_op_note_inputs_list_reactive$fusions_df <- tibble(level = input$fusion_levels_confirmed) %>%
+    if(length(input$posterior_fusion_levels_confirmed)>0){
+      posterior_op_note_inputs_list_reactive$fusions_df <- tibble(level = input$posterior_fusion_levels_confirmed) %>%
         left_join(levels_numbered_df)
     }else{
       posterior_op_note_inputs_list_reactive$fusions_df <- tibble(level = character(), vertebral_number = double(), object = character())
@@ -7159,16 +7081,21 @@ server <- function(input, output, session) {
     }
     
     ##########   fusion performed #############
-    surgery_details_list$fusion <- if_else(length(input$fusion_levels_confirmed) > 0, "yes", "no")
+    surgery_details_list$fusion <- if_else(length(input$posterior_fusion_levels_confirmed) > 0 | length(input$anterior_fusion_levels_confirmed) > 0, "yes", "no")
     
     ##########   number of fused vertebrae  #############
-    surgery_details_list$number_of_fusion_levels <- if_else(length(input$fusion_levels_confirmed) >0, paste(length(input$fusion_levels_confirmed) + 1), "0")
+    surgery_details_list$number_of_fusion_levels <- if_else(surgery_details_list$fusion == "yes", 
+                                                            paste(length(union(input$posterior_fusion_levels_confirmed, input$anterior_fusion_levels_confirmed))+1), 
+                                                            "0")
     
     ##########   interspaces_fused #############
     if(length(input$fusion_levels_confirmed) >0){
-      surgery_details_list$interspaces_fused <- glue_collapse(input$fusion_levels_confirmed, sep = "; ")
+      surgery_details_list$interspaces_fused <- glue_collapse((tibble(level = union(input$posterior_fusion_levels_confirmed, input$anterior_fusion_levels_confirmed)
+      ) %>%
+        left_join(levels_numbered_df) %>%
+        arrange(vertebral_number))$level, sep = ": ")
     }
-    
+  
     ##########   interbody_fusion #############
     if(any(all_objects_to_add_list$objects_df$interbody_fusion == "yes")){
       surgery_details_list$interbody_fusion <- "yes"
@@ -7583,7 +7510,7 @@ server <- function(input, output, session) {
   procedures_by_level_redcap_df_reactive <- reactive({
     
     if(nrow(all_objects_to_add_list$objects_df)>0){
-      fusion_df <- jh_fusion_category_function(fusion_vector = input$fusion_levels_confirmed, 
+      fusion_df <- jh_fusion_category_function(fusion_vector = union(input$posterior_fusion_levels_confirmed, input$anterior_fusion_levels_confirmed), 
                                                all_objects_df = all_objects_to_add_list$objects_df)%>%
         mutate(side = "central")
       

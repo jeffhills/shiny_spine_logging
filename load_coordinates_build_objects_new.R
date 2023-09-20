@@ -48,6 +48,11 @@ all_implants_constructed_df <<- all_object_ids_df %>%
               mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
               select(object_id, object_constructed))
 
+implant_coordinates_df <- fread("coordinates/implant.csv") %>%
+  filter(str_detect(object_id, "screw")) %>%
+  separate(col = object_id, into = c("level", "side", "object"), sep = "_", extra = "merge") %>%
+  mutate(object = str_remove_all(object, "_1"))
+
 # coordinate_file_names_list <- list(anterior_body = "coordinates/anterior_body.csv",
 #                                    anterior_disc = "coordinates/anterior_disc.csv",
 #                                    anterior_interbody_fusion = "coordinates/anterior_interbody_fusion.csv",

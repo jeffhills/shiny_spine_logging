@@ -1615,8 +1615,9 @@ jh_connected_rod_all_implants_range_function <- function(all_objects_df, cranial
   }
   
   return(implant_range)
-  
 }
+
+
 
 jh_supplementary_rods_choices_function <- function(all_objects_df, 
                                                    osteotomy_site = NULL, 

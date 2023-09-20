@@ -43,8 +43,10 @@ startup_modal_box <-
            hospital_input = "",
            starting_mrn = "",
            redcap_token_input = "",
+           prior_patient_found = FALSE,
            button_proceed = "proceed_to_details"
   ) {
+
     if (button_proceed == "proceed_to_details") {
       footer_button <- actionBttn(
         inputId = "close_startup_modal",
@@ -63,15 +65,20 @@ startup_modal_box <-
       footer = footer_button,
       column(
         12,
-        fluidRow(column(8,
+        fluidRow(column(7,
                         tags$div(
                           style = glue(
                             "font-size:22px; font-weight:bold; color:{header_text_color}"
                           ),
                           header_text
-                        ),),
+                        )),
+                 column(2, 
+                        dropdown(size = "xs", style = "simple", 
+                                 switchInput(inputId = "prior_patient_match_located", label = "Prior match?", value = FALSE)
+                                 )
+                        ),
                  column(
-                   4,
+                   3,
                    actionBttn(
                      inputId = "test_patient_button",
                      label = "Use Test Patient",
@@ -175,12 +182,11 @@ startup_modal_box <-
             ),
           )
         ),
-        conditionalPanel(condition = "input.redcap_institution.indexOf('NEVERTRUE') > -1",
-                         switchInput(inputId = "prior_patient_match_located", label = "Prior match?", value = FALSE)
-                         ),
         conditionalPanel(condition = "input.prior_patient_match_located == true",
                          column(12,
-                                tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", "Match found:"),
+                                tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", 
+                                         "Match found:"
+                                         ),
                                 br(),
                                 actionBttn(inputId = "record_complication_button", 
                                            label = "Record Postop Complication", 
@@ -188,12 +194,6 @@ startup_modal_box <-
                                 br(),
                                 tableOutput(outputId = "patient_prior_data")) 
         )
-        # uiOutput(outputId = "prior_patient_match")
-        # column(12, 
-        #        textOutput(outputId = "match_found_result"),
-        #        tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", "xxxx"),
-        #        tableOutput(outputId = "patient_prior_data")
-        #        )
       )
     )
   }
@@ -388,9 +388,10 @@ startup_modal_box_diagnosis_symptoms <-
                                           lib = "glyphicon"))
             )
           ),
-          hr(),
+          hr(), 
           conditionalPanel(
-            condition = "input.spinal_regions.length > 0",
+            # condition = "input.spinal_regions.length > 0",
+            condition = "typeof input.spinal_regions !== 'undefined' && input.spinal_regions.length > 0",
             tags$div(style = "font-size:20px; font-weight:bold", "Select Diagnostic Categories:"),
             tags$div(style = "font-size:14px; font-weight:bold", "(Select all that apply)"),
             fluidRow(
@@ -837,7 +838,9 @@ lateral_mass_screws_after_decompression_modal_function <- function(implant_objec
 
 confirm_fusion_levels_and_technique_details_modal_box_function <- function(implants_placed = "no",
                                                                            procedure_approach = "",
-                                                                           fusion_levels_confirmed = c(),
+                                                                           # fusion_levels_confirmed = c(),
+                                                                           posterior_fusion_levels_confirmed = c(),
+                                                                           anterior_fusion_levels_confirmed = c(),
                                                                            approach_specified_posterior = "Midline",
                                                                            approach_open_mis = "Open",
                                                                            approach_robot_navigation = "NA",
@@ -1004,19 +1007,53 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                     initial_value_selected = instruments_used_for_bony_work
                   ),
                   hr(),
-                  jh_make_shiny_table_row_function(
-                    input_type = "prettyCheckboxGroup",
-                    left_column_label = "Please Confirm the Fusion Levels:",
-                    text_align = question_text_align,
-                    input_id = "fusion_levels_confirmed",
-                    left_column_percent_width = question_label_column_width,
-                    font_size = row_label_font_size,
-                    checkboxes_inline = FALSE,
-                    choices_vector = interbody_levels_df$level,
-                    initial_value_selected = interbody_levels_df$level,
-                    status_color = "success",
-                  ),
+                  # jh_make_shiny_table_row_function(
+                  #   input_type = "prettyCheckboxGroup",
+                  #   left_column_label = "Please Confirm the Fusion Levels:",
+                  #   text_align = question_text_align,
+                  #   input_id = "fusion_levels_confirmed",
+                  #   left_column_percent_width = question_label_column_width,
+                  #   font_size = row_label_font_size,
+                  #   checkboxes_inline = FALSE,
+                  #   choices_vector = interbody_levels_df$level,
+                  #   initial_value_selected = interbody_levels_df$level,
+                  #   status_color = "success",
+                  # ),
                   hr(),
+                  fluidRow(
+                    column(width = 4, 
+                           conditionalPanel(condition = "input.approach_sequence.indexOf('posterior') > -1 || input.approach_sequence.indexOf('posterior-anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior-posterior') > -1 || input.approach_sequence.indexOf('anterior-posterior') > -1",
+                                            jh_make_shiny_table_row_function(
+                                              input_type = "prettyCheckboxGroup",
+                                              left_column_label = "Please Confirm the POSTERIOR Fusion Levels:",
+                                              text_align = question_text_align,
+                                              input_id = "posterior_fusion_levels_confirmed",
+                                              left_column_percent_width = question_label_column_width,
+                                              font_size = row_label_font_size,
+                                              checkboxes_inline = FALSE,
+                                              choices_vector = interbody_levels_df$level,
+                                              initial_value_selected = interbody_levels_df$level,
+                                              status_color = "success",
+                                            )
+                           )
+                    ),
+                    column(width = 4, 
+                           conditionalPanel(condition = "input.approach_sequence.indexOf('anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior-posterior') > -1 || input.approach_sequence.indexOf('anterior-posterior') > -1",
+                                            jh_make_shiny_table_row_function(
+                                              input_type = "prettyCheckboxGroup",
+                                              left_column_label = "Please Confirm the ANTERIOR Fusion Levels:",
+                                              text_align = question_text_align,
+                                              input_id = "anterior_fusion_levels_confirmed",
+                                              left_column_percent_width = question_label_column_width,
+                                              font_size = row_label_font_size,
+                                              checkboxes_inline = FALSE,
+                                              choices_vector = interbody_levels_df$level,
+                                              initial_value_selected = interbody_levels_df$level,
+                                              status_color = "success",
+                                            )
+                           )
+                    )
+                  ),
                   conditionalPanel(condition = "input.approach_sequence.indexOf('anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior-posterior') > -1 || input.approach_sequence.indexOf('anterior-posterior') > -1",
                                    jh_make_shiny_table_row_function(
                                      left_column_label = "Anterior Cervical:",

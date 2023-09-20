@@ -14,7 +14,6 @@ jh_make_screw_details_inputs_df_function <- function(all_objects = tibble(), ret
         select(-discard)  %>%
         separate(col = level, into = c("proximal", "distal"), sep = "-") %>%
         pivot_longer(cols = c(proximal, distal), names_to = "discard", values_to = "level") %>%
-        # mutate(vertebral_number = if_else(discard == "proximal", vertebral_number - 0.5, vertebral_number + 0.5)) %>%
         select(level, side, object) %>%
         distinct() %>%
         group_by(level, side, object) %>%
