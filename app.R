@@ -95,6 +95,7 @@ ui <- dashboardPage(skin = "black",
                 #           inline-size: 250px;
                 #           overflow-wrap: break-word;
                 # }")),
+                        tags$style(type="text/css", "#spine_plan.recalculating { opacity: 1.0; }"),
                         tags$style(
                           "#posterior_bmp_size {
                 font-size: small;
