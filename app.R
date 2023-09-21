@@ -41,7 +41,7 @@ source("make_geoms_functions.R", local = TRUE)
 source("load_coordinates_build_objects_new.R", local = TRUE)
 source("anterior_posterior_operative_note_generator_functions.R", local = TRUE)
 source("operative_note_paragraph_functions.R", local = TRUE)
-source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
+# source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
 
 
@@ -1988,13 +1988,14 @@ server <- function(input, output, session) {
   #     source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
   #   }
   # })
-  # 
+  
   
   
   observeEvent(input$lumbar_vertebrae_count, ignoreInit = TRUE, ignoreNULL = TRUE,{
     if(input$lumbar_vertebrae_count == "6"){
       ## first backup L5
       # source("build_anterior_objects.R", local = TRUE)
+      source("load_coordinates_build_objects_6_lumbar.R", local = TRUE)
       
       l5_levels_vector <<- levels_vector
       l5_labels_df <<- labels_df
@@ -2005,7 +2006,7 @@ server <- function(input, output, session) {
       l5_spine_png <<- spine_png
       l5_anterior_spine_jpg <<- anterior_spine_jpg
       l5_interbody_levels_df <<-interbody_levels_df
-      l5_revision_implants_df <<- revision_implants_df
+      # l5_revision_implants_df <<- revision_implants_df
       # l5_anterior_df <<- anterior_df
       l5_all_implants_constructed_df <<- all_implants_constructed_df
       l5_open_canal_df <<- open_canal_df
@@ -2034,7 +2035,7 @@ server <- function(input, output, session) {
       # anterior_df <<- l6_anterior_df
       jh_get_vertebral_number_function <<- l6_jh_get_vertebral_number_function
       jh_get_vertebral_level_function <<- l6_jh_get_vertebral_level_function
-      revision_implants_df <<- l6_revision_implants_df
+      # revision_implants_df <<- l6_revision_implants_df
       open_canal_df <<- l6_open_canal_df
       
     }
@@ -2480,11 +2481,12 @@ server <- function(input, output, session) {
                                                                                              filter(approach == "posterior"),
                                                                                        plot_with_patterns = input$plot_with_patterns_true)
                           }
-                        
-                        
-                        
                       }
                     })
+  
+  observeEvent(input$reset_all, ignoreInit = TRUE, {
+    geoms_list_posterior <- reactiveValues()
+  })
   
   ##### Modal to select whether the C2 nerve root was spared or transected.
   observeEvent(input$plot_click, ignoreInit = TRUE, {
@@ -3298,12 +3300,12 @@ server <- function(input, output, session) {
     ##########RODS ############
     ############# Left ROD #################
     left_rods_connectors_list <- list()
-    if(any(input$add_left_accessory_rod, 
-           input$add_left_satellite_rod,
-           input$add_left_intercalary_rod, 
-           input$add_left_linked_rods, 
-           input$add_left_kickstand_rod, 
-           input$add_left_custom_rods)){
+    if(any(input$add_left_accessory_rod == TRUE, 
+           input$add_left_satellite_rod == TRUE,
+           input$add_left_intercalary_rod == TRUE, 
+           input$add_left_linked_rods == TRUE, 
+           input$add_left_kickstand_rod == TRUE, 
+           input$add_left_custom_rods == TRUE)){
       
       if(input$add_left_accessory_rod == TRUE && input$left_accessory_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$left_accessory_rod)) == 2){
         accessory_vector <- input$left_accessory_rod
@@ -3980,7 +3982,7 @@ server <- function(input, output, session) {
   ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
   observeEvent(right_rod_implants_df_reactive(),ignoreNULL = TRUE, ignoreInit = TRUE, {
     if(nrow(right_rod_implants_df_reactive()) > 1){
-      if(max(left_rod_implants_df_reactive()$vertebral_number) < 11){
+      if(max(right_rod_implants_df_reactive()$vertebral_number) < 11){
         rod_size <- "4.0mm"  
       }else{
         rod_size <- "6.0mm"  
@@ -4062,12 +4064,12 @@ server <- function(input, output, session) {
     ##########RODS ############
     ############# Right ROD #################
     right_rods_connectors_list <- list()
-    if(any(input$add_right_accessory_rod, 
-           input$add_right_satellite_rod,
-           input$add_right_intercalary_rod, 
-           input$add_right_linked_rods, 
-           input$add_right_kickstand_rod, 
-           input$add_right_kickstand_rod)){
+    if(any(input$add_right_accessory_rod == TRUE, 
+           input$add_right_satellite_rod == TRUE,
+           input$add_right_intercalary_rod == TRUE, 
+           input$add_right_linked_rods == TRUE, 
+           input$add_right_kickstand_rod == TRUE, 
+           input$add_right_kickstand_rod == TRUE)){
       
       if(input$add_right_accessory_rod == TRUE && input$right_accessory_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_accessory_rod)) == 2){
         accessory_vector <- input$right_accessory_rod
@@ -4581,12 +4583,6 @@ server <- function(input, output, session) {
   #####################   #####################   #########   RUN CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION ##################### #####################
   
   observeEvent(input$implants_complete, ignoreNULL = TRUE, ignoreInit = TRUE, once = TRUE, {
-    
-    # if(length(fusion_levels_computed_reactive_df()$level)>0){
-    #   fusion_levels_computed_reactive_input <- fusion_levels_computed_reactive_df()$level
-    # }else{
-    #   fusion_levels_computed_reactive_input <- c()
-    # }
     
     if(nrow(all_objects_to_add_list$objects_df %>% 
             filter(str_detect(object, "screw") | str_detect(object, "anterior_plate")))>0){
@@ -5913,7 +5909,8 @@ server <- function(input, output, session) {
       added_rods_statement
     }
     added_rods_statement
-  })
+  }) 
+    # bindEvent(input$implants_complete, ignoreInit = TRUE) ### THIS MESSES UP THE CONFIRM PROCEDURES AT THE END
   
   
   postop_plan_list_reactive <- reactive({
@@ -5995,7 +5992,8 @@ server <- function(input, output, session) {
     }
     # }
     postop_plan
-  })
+  }) 
+    # bindEvent(input$additional_surgical_details_complete, ignoreInit = TRUE)
   
   
   ######################### GENERATE ALL INPUTS FOR POSTERIOR OP NOTE:
@@ -6336,7 +6334,7 @@ server <- function(input, output, session) {
     posterior_op_note_inputs_list_reactive$procedures_performed_sentence <- glue_collapse(str_to_lower(gsub("^\\d+\\.\\s+", "", str_split(input$procedures_numbered_confirm_edit_posterior, pattern = "\n")[[1]])), sep = ", ", last = ", and ")
 
     posterior_op_note_inputs_list_reactive
-  })
+  }) 
   
   ######################################### NOW ALL THE NECESSARY INPUTS FOR THE POSTERIOR OP NOTE ARE GENERATED
   
