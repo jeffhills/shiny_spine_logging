@@ -846,16 +846,8 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
   if(any(all_anterior_objects_df$object == "anterior_disc_arthroplasty")){
     anterior_disc_arthroplasty_df <- all_anterior_objects_df %>%
       filter(object == "anterior_disc_arthroplasty") %>%
-      # remove_empty() %>%
       unnest(object_constructed) 
-      # group_by(level) %>%
-      # mutate(color_to_fill = row_number())%>%
-      # mutate(color_to_fill = if_else(color_to_fill == 1, "blue", "lightblue")) %>%
-      # ungroup()
-  
-    # geoms_list_anterior_interbody$anterior_disc_arthroplasty_sf_geom <-  geom_sf(data = anterior_disc_arthroplasty_df,
-    #                                                                              aes(geometry = object_constructed),
-    #                                                                              fill = "lightblue")
+
     arthroplasty_blue <- anterior_disc_arthroplasty_df %>%
       filter(color == "blue")
     
@@ -867,7 +859,6 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
     
   }else{
     geoms_list_anterior_interbody$anterior_disc_arthroplasty_sf_geom <- NULL
-    # geoms_list_anterior_interbody$arthroplasty_fill <- NULL
   }
   
   ########  Corpectomy Cage  ########

@@ -2471,6 +2471,7 @@ server <- function(input, output, session) {
                           filter(approach == "posterior", str_detect(object, "screw")))>0){
                           geoms_list_posterior$screws <- jh_make_posterior_screws_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
                                                                                                    filter(approach == "posterior", str_detect(object, "screw")), plot_with_patterns = input$plot_with_patterns_true)
+                          
                           geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
                                                                                            filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
                                                                                          plot_with_patterns = input$plot_with_patterns_true)
@@ -3272,7 +3273,8 @@ server <- function(input, output, session) {
   
   observeEvent(list(
     input$reset_all,
-    left_rod_implants_df_reactive(),
+    # left_rod_implants_df_reactive(),
+    input$plot_click,
     input$add_left_accessory_rod,
     input$left_accessory_rod,
     input$left_accessory_rod_material,
@@ -3362,8 +3364,16 @@ server <- function(input, output, session) {
         }
       }
       
-      left_implants_df <- left_rod_implants_df_reactive() %>%
-        mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
+      left_implants_df <- all_objects_to_add_list$objects_df %>%
+        filter(side == "left") %>%
+        filter(approach == "posterior") %>%
+        filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
+        select(level, vertebral_number, x, y, side, object) %>%
+        arrange(vertebral_number)  %>%
+          mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
+      
+      # left_implants_df <- left_rod_implants_df_reactive() %>%
+      #   mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
       
       if(length(left_implants_df$level) > 1){
         ############# MAKE THE RODS #############
@@ -3403,7 +3413,13 @@ server <- function(input, output, session) {
     }else if(nrow(left_rod_implants_df_reactive()) >1){
       rods_list$left_connector_list_sf_geom <- NULL
       
-      left_main_rod_matrix <- left_rod_implants_df_reactive() %>%
+      
+      left_main_rod_matrix <- all_objects_to_add_list$objects_df %>%
+        filter(side == "left") %>%
+        filter(approach == "posterior") %>%
+        filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
+        select(level, vertebral_number, x, y, side, object) %>%
+        arrange(vertebral_number)%>%
         mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
         mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
         select(x, y) %>%
@@ -3413,6 +3429,17 @@ server <- function(input, output, session) {
         remove_missing() %>%
         select(x, y) %>%
         as.matrix()
+      
+      # left_main_rod_matrix <- left_rod_implants_df_reactive() %>%
+      #   mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+      #   mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
+      #   select(x, y) %>%
+      #   # bind_rows(left_revision_rod_overlap) %>%
+      #   arrange(rev(y)) %>%
+      #   distinct() %>%
+      #   remove_missing() %>%
+      #   select(x, y) %>%
+      #   as.matrix()
       
       rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(left_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
     }else{
@@ -4010,7 +4037,8 @@ server <- function(input, output, session) {
   
   observeEvent(list(
     input$reset_all,
-    right_rod_implants_df_reactive(),
+    # right_rod_implants_df_reactive(),
+    input$plot_click,
     input$add_right_accessory_rod,
     input$right_accessory_rod,
     input$right_accessory_rod_material,
@@ -4100,8 +4128,16 @@ server <- function(input, output, session) {
         }
       }
       
-      right_implants_df <- right_rod_implants_df_reactive() %>%
+      right_implants_df <- all_objects_to_add_list$objects_df %>%
+        filter(side == "right") %>%
+        filter(approach == "posterior") %>%
+        filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
+        select(level, vertebral_number, x, y, side, object) %>%
+        arrange(vertebral_number) %>%
         mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
+      
+      # right_implants_df <- right_rod_implants_df_reactive() %>%
+      #   mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
       
       if(length(right_implants_df$level) > 1){
         ############# MAKE THE RODS #############
@@ -4141,7 +4177,12 @@ server <- function(input, output, session) {
     }else if(nrow(right_rod_implants_df_reactive()) >1){
       rods_list$right_connector_list_sf_geom <- NULL
       
-      right_main_rod_matrix <- right_rod_implants_df_reactive() %>%
+      right_main_rod_matrix <-  all_objects_to_add_list$objects_df %>%
+        filter(side == "right") %>%
+        filter(approach == "posterior") %>%
+        filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
+        select(level, vertebral_number, x, y, side, object) %>%
+        arrange(vertebral_number) %>%
         mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
         mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
         select(x, y) %>%
@@ -4151,6 +4192,17 @@ server <- function(input, output, session) {
         remove_missing() %>%
         select(x, y) %>%
         as.matrix()
+      
+      # right_main_rod_matrix <- right_rod_implants_df_reactive() %>%
+        # mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+        # mutate(y = if_else(y == min(y), y - 0.005, y))  %>%
+        # select(x, y) %>%
+        # # bind_rows(right_revision_rod_overlap) %>%
+        # arrange(rev(y)) %>%
+        # distinct() %>%
+        # remove_missing() %>%
+        # select(x, y) %>%
+        # as.matrix()
       
       rods_list$right_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(right_main_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
     }else{
@@ -4397,7 +4449,31 @@ server <- function(input, output, session) {
         reactiveValuesToList(geoms_list_posterior) +
         reactiveValuesToList(rods_list) 
     }
-  })
+  }) 
+    # bindEvent(input$plot_click,
+    #           input$reset_all,
+    #           # left_rod_implants_df_reactive(),
+    #           input$plot_click,
+    #           input$add_left_accessory_rod,
+    #           input$left_accessory_rod,
+    #           input$left_accessory_rod_material,
+    #           input$add_left_satellite_rod,
+    #           input$left_satellite_rod,
+    #           input$add_left_intercalary_rod,
+    #           input$left_intercalary_rod,
+    #           input$left_intercalary_rod_junction,
+    #           input$add_left_linked_rods,
+    #           input$left_linked_rods,
+    #           input$add_left_kickstand_rod,
+    #           input$left_kickstand_rod,
+    #           input$left_revision_rod_status,
+    #           input$add_left_custom_rods,
+    #           input$left_custom_rod_1,
+    #           input$left_custom_rod_2,
+    #           input$left_custom_rod_3,
+    #           input$left_custom_rod_4,
+    #           input$left_custom_rod_5,
+    #           input$close_startup_modal, ignoreInit = TRUE)
   
   
   output$spine_plot_for_implants_tab <- renderPlot(res = 48, {
