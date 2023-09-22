@@ -2655,12 +2655,6 @@ server <- function(input, output, session) {
         mutate(category = "revision")
       
       geoms_list_revision_posterior$open_canal_sf <- geom_sf(data = st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE), fill = "lightblue", alpha = 0.5)
-        # data =  st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE), 
-        # pattern_orientation = "radial",
-        # pattern = "gradient",
-        # fill = "grey50",
-        # pattern_fill2 = NA,
-        # colour = NA)
       
       # geoms_list_revision_posterior$open_canal_sf <- ggpattern::geom_sf_pattern(
       #   data =  st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE), 
@@ -7176,10 +7170,14 @@ server <- function(input, output, session) {
     ##########   fusion performed #############
     surgery_details_list$fusion <- if_else(length(input$posterior_fusion_levels_confirmed) > 0 | length(input$anterior_fusion_levels_confirmed) > 0, "yes", "no")
     
+    # surgery_details_list$fusion <- "yes"
+    
     ##########   number of fused vertebrae  #############
-    surgery_details_list$number_of_fusion_levels <- if_else(surgery_details_list$fusion == "yes", 
-                                                            paste(length(union(input$posterior_fusion_levels_confirmed, input$anterior_fusion_levels_confirmed))+1), 
+    surgery_details_list$number_of_fusion_levels <- if_else(surgery_details_list$fusion == "yes",
+                                                            paste(length(union(input$posterior_fusion_levels_confirmed, input$anterior_fusion_levels_confirmed))+1),
                                                             "0")
+    
+    # surgery_details_list$number_of_fusion_levels <- input$posterior_fusion_levels_confirmed
     
     ##########   interspaces_fused #############
     if(length(input$fusion_levels_confirmed) >0){
@@ -7188,6 +7186,8 @@ server <- function(input, output, session) {
         left_join(levels_numbered_df) %>%
         arrange(vertebral_number))$level, sep = ": ")
     }
+    
+    # surgery_details_list$interspaces_fused <- input$posterior_fusion_levels_confirmed
   
     ##########   interbody_fusion #############
     if(any(all_objects_to_add_list$objects_df$interbody_fusion == "yes")){
@@ -7245,8 +7245,8 @@ server <- function(input, output, session) {
     
     ##########   UIV  #############
     all_vertebrae_fixation_df <- all_objects_to_add_list$objects_df %>%
-      filter(level != "S2AI") %>%
-      filter(level != "Iliac") %>%
+      # filter(level != "S2AI") %>%
+      # filter(level != "Iliac") %>%
       filter(fixation_uiv_liv == "yes") %>%
       select(level, vertebral_number, body_interspace) %>%
       distinct() %>%
@@ -7256,10 +7256,12 @@ server <- function(input, output, session) {
       surgery_details_list$uiv <- "Occiput"
     }else{
       if(nrow(all_vertebrae_fixation_df) > 0){
-        surgery_details_list$uiv <- (all_vertebrae_fixation_df %>% filter(vertebral_number == min(vertebral_number)) %>% select(level) %>% distinct())$level
+        upper_level <- (all_vertebrae_fixation_df %>% filter(vertebral_number == min(vertebral_number)) %>% select(level) %>% distinct())$level
         
-        if(jh_check_body_or_interspace_function(surgery_details_list$uiv) == "interspace"){
-          surgery_details_list$uiv <- jh_get_cranial_caudal_interspace_body_list_function(level = surgery_details_list$uiv)$cranial_level
+        if(jh_check_body_or_interspace_function(upper_level) == "interspace"){
+          surgery_details_list$uiv <- jh_get_cranial_caudal_interspace_body_list_function(level = upper_level)$cranial_level
+        }else{
+          surgery_details_list$uiv <- upper_level
         }
       }else{
         surgery_details_list$uiv <- "not instrumented"
@@ -7268,10 +7270,14 @@ server <- function(input, output, session) {
     
     ##########   LIV  #############
     if(nrow(all_vertebrae_fixation_df) > 0){
-      surgery_details_list$liv <- (all_vertebrae_fixation_df %>% filter(vertebral_number == max(vertebral_number)) %>% select(level) %>% distinct())$level
+      lowest_level <- (all_vertebrae_fixation_df %>% filter(vertebral_number == max(vertebral_number)) %>% select(level) %>% distinct())$level
       
-      if(jh_check_body_or_interspace_function(surgery_details_list$liv) == "interspace"){
-        surgery_details_list$liv <- jh_get_cranial_caudal_interspace_body_list_function(level = surgery_details_list$liv)$caudal_level
+      if(jh_check_body_or_interspace_function(lowest_level) == "interspace"){
+        surgery_details_list$liv <- jh_get_cranial_caudal_interspace_body_list_function(level = lowest_level)$caudal_level
+      }else if(jh_check_body_or_interspace_function(lowest_level) == "pelvis"){
+        surgery_details_list$liv <- "pelvis"
+      }else{
+        surgery_details_list$liv <- lowest_level
       }
     }else{
       surgery_details_list$liv <- "not instrumented"
@@ -7280,8 +7286,8 @@ server <- function(input, output, session) {
     ##########   UPPER & LOWER TREATED  #############
     
     spine_treated_df <- all_objects_to_add_list$objects_df %>%
-      filter(level != "S2AI") %>%
-      filter(level != "Iliac") %>%
+      filter(str_detect(level, "S2AI") == FALSE, 
+             str_detect(level, "Iliac") == FALSE) %>%
       filter(level != "Occiput")
     
     spine_treated <- if_else(nrow(spine_treated_df) > 0, TRUE, FALSE)

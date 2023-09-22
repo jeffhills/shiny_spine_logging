@@ -517,7 +517,9 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
     select(-data) %>%
     unnest(levels) %>%
     mutate(procedure_performed_statement = glue("{procedure_class} at {levels}")) %>%
-    mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation", paste("Instrumentation of the Pelvis with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
+    mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation",
+                                                   paste("Instrumentation of the Pelvis with", levels, "fixation"), 
+                                                   as.character(procedure_performed_statement))) %>%
     select(procedure_class, procedure_performed_statement)
   
   added_procedures_df <- tibble(procedure_performed_statement = additional_procedures_performed_vector) 
