@@ -200,13 +200,13 @@ all_cages_df <- all_object_ids_df %>%
 #   arrange(vertebral_number)%>%
 #   left_join(all_implants_constructed_df)
 
-revision_screws_df <- all_object_ids_df %>%
-  filter(category == "implant") %>%
-  filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw") %>%
-  filter((str_detect(string = level, pattern = "C1|C3|C4|C5|C6") & object == "pedicle_screw") == FALSE) %>%
-  filter(approach == "posterior") %>%
-  arrange(vertebral_number)%>%
-  left_join(all_implants_constructed_df)
+# revision_screws_df <- all_object_ids_df %>%
+#   filter(category == "implant") %>%
+#   filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw") %>%
+#   filter((str_detect(string = level, pattern = "C1|C3|C4|C5|C6") & object == "pedicle_screw") == FALSE) %>%
+#   filter(approach == "posterior") %>%
+#   arrange(vertebral_number) %>%
+#   left_join(all_implants_constructed_df)
 
 # revision_screws_df <- all_object_ids_df %>%
 #   filter(str_detect(object, "hook") == FALSE) %>%
@@ -229,7 +229,6 @@ arthroplasty_coordinates_df <- all_object_ids_df %>%
          superior_endplate_y = c(0.955, 0.918, 0.888, 0.865, 0.838, 0.815, 0.79, 0.76, 0.732, 0.705, 0.675, 0.645, 0.613, 0.584, 0.555, 0.525, 0.49, 0.45, 0.406, 0.357, 0.305, 0.255, 0.205, 0.16), 
          width = c(0.0175, 0.021, 0.02275, 0.02275, 0.0245, 0.0245, 0.0245, 0.02625, 0.02625, 0.028, 0.028, 0.02975, 0.02975, 0.0315, 0.0315, 0.0315, 0.03325, 0.035, 0.035, 0.035, 0.03675, 0.0385, 0.04025, 0.042)
          )
-
 
 arthroplasty_function <- function(y_for_inferior_endplate, y_for_superior_endplate, endplate_width){
   endplate_height <- y_for_inferior_endplate - y_for_superior_endplate

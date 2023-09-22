@@ -2610,24 +2610,65 @@ server <- function(input, output, session) {
   ######### ~~~~~~~~~~~~~~  ############# POSTERIOR GEOMS     ######### ~~~~~~~~~~~~~~  ############# 
   ######### ~~~~~~~~~~~~~~  ############# POSTERIOR GEOMS     ######### ~~~~~~~~~~~~~~  ############# 
   
+  observeEvent(input$prior_instrumentation, ignoreInit = TRUE, {
+    if(input$prior_instrumentation == TRUE){
+      # revision_screws_df <<- all_object_ids_df %>%
+      #   filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw") %>%
+      #   filter((str_detect(string = level, pattern = "C1|C3|C4|C5|C6") & object == "pedicle_screw") == FALSE) %>%
+      #   arrange(vertebral_number) %>%
+      #   left_join(all_implants_constructed_df)
+      revision_screws_df <<- all_object_ids_df %>%
+        filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw") %>%
+        filter((str_detect(string = level, pattern = "C1|C3|C4|C5|C6") & object == "pedicle_screw") == FALSE) %>%
+        arrange(vertebral_number) %>%
+        left_join(fread("coordinates/implant.csv") %>%
+                    # mutate(x = if_else(x < 0.5, x - 0.025, x + 0.025)) %>%
+                    group_by(object_id) %>%
+                    nest() %>%
+                    mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+                    select(object_id, object_constructed))
+    }
+  })
   
   ######## ~~~~~~~~~~~ PRIOR DECOMPRESSIONS ---
   observeEvent(input$open_canal, ignoreNULL = TRUE, ignoreInit = TRUE, {
     
     if(length(input$open_canal) > 0){
       
+      if(any(all_implants_constructed_df$object == "laminectomy") == FALSE){
+        decompression_df <- all_object_ids_df %>%
+          filter(category == "decompression") %>%
+          left_join(fread("coordinates/decompression.csv") %>%
+                      group_by(object_id) %>%
+                      nest() %>%
+                      mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+                      select(object_id, object_constructed))
+        
+        all_implants_constructed_df <<- all_implants_constructed_df %>%
+          bind_rows(decompression_df)  %>%
+          distinct()
+      }
+      
       open_df <- all_implants_constructed_df %>%
         filter(object == "laminectomy") %>%
         filter(level %in% input$open_canal) %>%
         mutate(category = "revision")
       
-      geoms_list_revision_posterior$open_canal_sf <- ggpattern::geom_sf_pattern(
-        data =  st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
-        pattern_orientation = "radial",
-        pattern = "gradient",
-        fill = "grey50",
-        pattern_fill2 = NA,
-        colour = NA)
+      geoms_list_revision_posterior$open_canal_sf <- geom_sf(data = st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE), fill = "lightblue", alpha = 0.5)
+        # data =  st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE), 
+        # pattern_orientation = "radial",
+        # pattern = "gradient",
+        # fill = "grey50",
+        # pattern_fill2 = NA,
+        # colour = NA)
+      
+      # geoms_list_revision_posterior$open_canal_sf <- ggpattern::geom_sf_pattern(
+      #   data =  st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE), 
+      #   pattern_orientation = "radial",
+      #   pattern = "gradient",
+      #   fill = "grey50",
+      #   pattern_fill2 = NA,
+      #   colour = NA)
     }
   }
   )
@@ -2662,9 +2703,9 @@ server <- function(input, output, session) {
   # #### POSTERIOR ####
   observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(left_revision_implants_reactive_list()$removed_df)>0){
-      geoms_list_revision_posterior$left_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(left_revision_implants_reactive_list()$removed_df$object_constructed), 
+      geoms_list_revision_posterior$left_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(map(.x = left_revision_implants_reactive_list()$removed_df$object_constructed, .f = ~ .x - c(0.025, 0))), 
                                                                                       color = "black",
-                                                                                      fill = "grey99")
+                                                                                      fill = NA)
     }
     
     if(nrow(left_revision_implants_reactive_list()$retained_df)>0){
@@ -2674,9 +2715,9 @@ server <- function(input, output, session) {
   
   observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(right_revision_implants_reactive_list()$removed_df)>0){
-      geoms_list_revision_posterior$right_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(right_revision_implants_reactive_list()$removed_df$object_constructed), 
+      geoms_list_revision_posterior$right_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(map(.x = right_revision_implants_reactive_list()$removed_df$object_constructed, .f = ~ .x + c(0.025, 0))), 
                                                                                        color = "black",
-                                                                                       fill = "grey99")
+                                                                                       fill = NA)
     }
     
     if(nrow(right_revision_implants_reactive_list()$retained_df)>0){
@@ -2741,8 +2782,8 @@ server <- function(input, output, session) {
             distinct()
         }else{
           removed_df <- tibble(level = input$left_revision_implants_removed, side = "left") %>%
-            left_join(revision_screws_df) %>%
-            filter(object != "pelvic_screw_2") ## this is generated in Load coordinates 
+            left_join(revision_screws_df) 
+            # filter(object != "pelvic_screw_2") ## this is generated in Load coordinates. Not anymore
         }
       }else{
         removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
@@ -2763,7 +2804,7 @@ server <- function(input, output, session) {
           retained_df <- tibble(level = input$left_revision_implants, side = "left") %>%
             filter(level %in% input$left_revision_implants_removed == FALSE) %>%
             left_join(revision_screws_df) %>% ## this is generated in Load coordinates
-            filter(object != "pelvic_screw_2")  %>%
+            # filter(object != "pelvic_screw_2")  %>%
             distinct()
         }
         
@@ -3255,7 +3296,7 @@ server <- function(input, output, session) {
           # filter(!is.na(y)) %>%
           mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
           mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-          mutate(x = x + 0.01) %>%
+          mutate(x = x - 0.005) %>%
           arrange(rev(y)) %>%
           distinct() %>%
           as.matrix()
@@ -3394,9 +3435,9 @@ server <- function(input, output, session) {
                                                                          add_kickstand_rod = input$add_left_kickstand_rod,
                                                                          kickstand_rod_vector = left_kickstand_rod_vector,
                                                                          add_custom_rods = input$add_left_custom_rods,
-                                                                         custom_rods_vector_list = custom_rods_vector_list,
-                                                                         revision_rods_retained_df = left_revision_implants_reactive_list()$retained_df,
-                                                                         prior_rod_overlap_connectors = input$left_revision_implants_rod_connectors
+                                                                         custom_rods_vector_list = custom_rods_vector_list
+                                                                         # revision_rods_retained_df = left_revision_implants_reactive_list()$retained_df,
+                                                                         # prior_rod_overlap_connectors = input$left_revision_implants_rod_connectors
         )
         if(length(left_rods_connectors_list$rod_list) > 0){
           rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$rod_list), alpha = 0.85)
@@ -3504,8 +3545,8 @@ server <- function(input, output, session) {
             distinct()
         }else{
           removed_df <- tibble(level = input$right_revision_implants_removed, side = "right") %>%
-            left_join(revision_screws_df) %>%
-            filter(object != "pelvic_screw_2") ## this is generated in Load coordinates 
+            left_join(revision_screws_df) 
+            # filter(object != "pelvic_screw_2") ## this is generated in Load coordinates 
         }
       }else{
         removed_df <- tibble(level = character(), vertebral_number = double(), x = double(), y = double())
@@ -3526,7 +3567,7 @@ server <- function(input, output, session) {
           retained_df <- tibble(level = input$right_revision_implants, side = "right") %>%
             filter(level %in% input$right_revision_implants_removed == FALSE) %>%
             left_join(revision_screws_df) %>% ## this is generated in Load coordinates
-            filter(object != "pelvic_screw_2")  %>%
+            # filter(object != "pelvic_screw_2")  %>%
             distinct()
         }
         
@@ -4019,7 +4060,7 @@ server <- function(input, output, session) {
           # filter(!is.na(y)) %>%
           mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
           mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-          mutate(x = x + 0.01) %>%
+          mutate(x = x + 0.005) %>%
           arrange(rev(y)) %>%
           distinct() %>%
           as.matrix()
@@ -4158,9 +4199,9 @@ server <- function(input, output, session) {
                                                                           add_kickstand_rod = input$add_right_kickstand_rod,
                                                                           kickstand_rod_vector = right_kickstand_rod_vector,
                                                                           add_custom_rods = input$add_right_custom_rods,
-                                                                          custom_rods_vector_list = custom_rods_vector_list,
-                                                                          revision_rods_retained_df = right_revision_implants_reactive_list()$retained_df,
-                                                                          prior_rod_overlap_connectors = input$right_revision_implants_rod_connectors
+                                                                          custom_rods_vector_list = custom_rods_vector_list
+                                                                          # revision_rods_retained_df = right_revision_implants_reactive_list()$retained_df,
+                                                                          # prior_rod_overlap_connectors = input$right_revision_implants_rod_connectors
         )
         if(length(right_rods_connectors_list$rod_list) > 0){
           rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.85)
@@ -4442,7 +4483,7 @@ server <- function(input, output, session) {
   # input$object_to_add
   # object_added_reactive_df()
 
-  output$spine_plan <-  renderPlot(res = 48, {
+  output$spine_plan <-  renderPlot({
     # main_page_reactive_plot()
     if(str_to_lower(input$spine_approach) == "anterior"){
       spine_plan_plot_anterior_reactive()
@@ -4450,33 +4491,10 @@ server <- function(input, output, session) {
       spine_plan_plot_posterior_reactive() +
         reactiveValuesToList(geoms_list_revision_posterior) +
         reactiveValuesToList(geoms_list_posterior) +
-        reactiveValuesToList(rods_list) 
+        reactiveValuesToList(rods_list)
     }
   }) 
-    # bindEvent(input$plot_click,
-    #           input$reset_all,
-    #           # left_rod_implants_df_reactive(),
-    #           input$plot_click,
-    #           input$add_left_accessory_rod,
-    #           input$left_accessory_rod,
-    #           input$left_accessory_rod_material,
-    #           input$add_left_satellite_rod,
-    #           input$left_satellite_rod,
-    #           input$add_left_intercalary_rod,
-    #           input$left_intercalary_rod,
-    #           input$left_intercalary_rod_junction,
-    #           input$add_left_linked_rods,
-    #           input$left_linked_rods,
-    #           input$add_left_kickstand_rod,
-    #           input$left_kickstand_rod,
-    #           input$left_revision_rod_status,
-    #           input$add_left_custom_rods,
-    #           input$left_custom_rod_1,
-    #           input$left_custom_rod_2,
-    #           input$left_custom_rod_3,
-    #           input$left_custom_rod_4,
-    #           input$left_custom_rod_5,
-    #           input$close_startup_modal, ignoreInit = TRUE)
+  
   
   
   output$spine_plot_for_implants_tab <- renderPlot(res = 48, {
