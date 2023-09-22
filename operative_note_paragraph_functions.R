@@ -1063,8 +1063,11 @@ op_note_technique_combine_statement <- function(object,
   
   ### PELVIC SCREWS:
   if(str_detect(object, "pelvic_screw")){
+    levels_side_df <- levels_side_df %>%
+      mutate(level = str_remove_all(level, "_2"))
     
     pelvic_screws_wide <- levels_side_df %>%
+      mutate(level = str_remove_all(level, "_2")) %>%
       select(level, side) %>%
       mutate(count = row_number()) %>%
       pivot_wider(names_from = side, values_from = count) %>%
