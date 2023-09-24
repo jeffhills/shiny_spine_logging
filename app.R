@@ -7151,11 +7151,6 @@ server <- function(input, output, session) {
     ##########   approach #############
     if(nrow(all_objects_to_add_list$objects_df)>0){
       surgery_details_list$main_approach <- input$approach_sequence
-      # surgery_details_list$main_approach <- case_when(
-      #   any(all_objects_to_add_list$objects_df$approach == "anterior") & any(all_objects_to_add_list$objects_df$approach == "posterior")  ~ "combined anterior posterior",
-      #   any(all_objects_to_add_list$objects_df$approach == "anterior") == FALSE & any(all_objects_to_add_list$objects_df$approach == "posterior")  ~ "posterior",
-      #   any(all_objects_to_add_list$objects_df$approach == "anterior") & any(all_objects_to_add_list$objects_df$approach == "posterior") == FALSE  ~ "anterior"
-      # )
     }else{
       surgery_details_list$main_approach <- str_to_lower(input$spine_approach)
     }
@@ -7177,26 +7172,18 @@ server <- function(input, output, session) {
                                                             paste(length(union(input$posterior_fusion_levels_confirmed, input$anterior_fusion_levels_confirmed))+1),
                                                             "0")
     
-    # surgery_details_list$number_of_fusion_levels <- input$posterior_fusion_levels_confirmed
-    
     ##########   interspaces_fused #############
-    if(length(input$fusion_levels_confirmed) >0){
-      surgery_details_list$interspaces_fused <- glue_collapse((tibble(level = union(input$posterior_fusion_levels_confirmed, input$anterior_fusion_levels_confirmed)
-      ) %>%
-        left_join(levels_numbered_df) %>%
-        arrange(vertebral_number))$level, sep = ": ")
+    if(surgery_details_list$fusion == "yes"){
+      surgery_details_list$interspaces_fused <- glue_collapse(x = keep(.x = levels_vector, .p = ~ .x %in% union(input$posterior_fusion_levels_confirmed, input$anterior_fusion_levels_confirmed)), sep = "; ")
     }
     
-    # surgery_details_list$interspaces_fused <- input$posterior_fusion_levels_confirmed
-  
+
     ##########   interbody_fusion #############
     if(any(all_objects_to_add_list$objects_df$interbody_fusion == "yes")){
       surgery_details_list$interbody_fusion <- "yes"
     }else{
       surgery_details_list$interbody_fusion <- "no"
     }
-    
-    # surgery_details_list$interbody_fusion <- if_else("yes" %in% all_objects_to_add_list$objects_df$interbody_fusion, "yes", "no")
     
     ##########   interbody_fusion_levels #############
     if(surgery_details_list$interbody_fusion == "yes"){
@@ -7217,32 +7204,7 @@ server <- function(input, output, session) {
       surgery_details_list$number_of_interbody_fusions <- "0"
     }
     
-    
-    ##########   interspaces decompressed  #############
-    decompressions_df <- all_objects_to_add_list$objects_df %>%
-      filter(category == "decompression" |
-               object == "decompression_diskectomy_fusion" |
-               str_detect(string = object, pattern = "decompression") |
-               object == "diskectomy_only" |
-               object == "anterior_disc_arthroplasty") %>%
-      select(level, body_interspace) %>%
-      distinct()
-    
-    if(nrow(decompressions_df)>0){
-      interspaces_decompressed <- unique((decompressions_df %>% filter(body_interspace == "interspace"))$level)
-      
-      if(any(decompressions_df$body_interspace == "body")){
-        interspaces_decompressed <- unique(jh_reorder_levels_function(level_vector = append(interspaces_decompressed,
-                                                                                            jh_convert_body_levels_to_interspace_vector_function(vertebral_bodies_vector = (decompressions_df %>% filter(body_interspace == "body"))$level))))
-      }
-      ##########   number_of_levels_decompressed #############
-      surgery_details_list$number_of_levels_decompressed <- length(interspaces_decompressed)
-      
-      surgery_details_list$interspaces_decompressed <- glue_collapse(interspaces_decompressed, sep = "; ")
-    }else{
-      surgery_details_list$number_of_levels_decompressed <- "0"
-    }
-    
+
     ##########   UIV  #############
     all_vertebrae_fixation_df <- all_objects_to_add_list$objects_df %>%
       # filter(level != "S2AI") %>%
@@ -7312,14 +7274,7 @@ server <- function(input, output, session) {
       surgery_details_list$lower_treated_vertebrae <- "none"
     }
     
-    ###### SPINE CERVICAL VS LUMBAR FOR PRO CAPTURE #####
-    if(surgery_details_list$lower_treated_vertebrae %in% c("Occiput", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "T1", "T2", "T3", "T4", "T5", "T6")){
-      surgery_details_list$spine_region <- "cervical"
-    }else{
-      surgery_details_list$spine_region <- "lumbar"
-    }
-    
-    
+
     ##########   PELVIC FIXATION  #############
     surgery_details_list$pelvic_fixation <- if_else(any(str_detect(string = all_objects_to_add_list$objects_df$object, pattern = "pelvic_screw")), "yes", "no")
     
@@ -7327,25 +7282,20 @@ server <- function(input, output, session) {
       surgery_details_list$pelvic_fixation_screws <- glue_collapse((all_objects_to_add_list$objects_df %>% filter(str_detect(object, "pelvic_screw")))$level, sep = "; ")
     }
     
-    ##########   THREE COLUMN OSTEOTOMY #############
-    surgery_details_list$three_column_osteotomy <- if_else(any(all_objects_to_add_list$objects_df$object == "grade_3") |
-                                                             any(all_objects_to_add_list$objects_df$object == "grade_4") |
-                                                             any(all_objects_to_add_list$objects_df$object == "grade_5") |
-                                                             any(all_objects_to_add_list$objects_df$object == "grade_6"), "yes", "no")
-    if(surgery_details_list$three_column_osteotomy == "yes"){
-      surgery_details_list$three_column_osteotomy_level <- glue_collapse(x = (all_objects_to_add_list$objects_df %>%
-                                                                                filter(object == "grade_3" | object == "grade_4" | object == "grade_5") %>%
-                                                                                select(level) %>%
-                                                                                distinct() %>%
-                                                                                as_vector()), sep = "; ")
-      
-    }
-    
     ##########   RODS  #############
     
     if(str_detect(surgery_details_list$main_approach, "posterior")){
       surgery_details_list$left_rod <- if_else(input$left_main_rod_size == "None", "None", paste(input$left_main_rod_size, input$left_main_rod_material))
       surgery_details_list$right_rod <- if_else(input$right_main_rod_size == "None", "None", paste(input$right_main_rod_size, input$right_main_rod_material))
+    }
+    if(any(input$add_left_accessory_rod,
+           input$add_left_satellite_rod,
+           input$add_left_intercalary_rod,
+           input$add_left_linked_rods,
+           input$add_right_accessory_rod,
+           input$add_right_satellite_rod,
+           input$add_right_intercalary_rod,
+           input$add_right_linked_rods)){
       
       supplemental_rods_df <- tibble(supplemental_rod = c("accessory_rod",
                                                           "satellite_rod",
@@ -7365,7 +7315,6 @@ server <- function(input, output, session) {
                                                 input$add_right_intercalary_rod,
                                                 input$add_right_linked_rods)) %>%
         filter(yes_no == TRUE)
-      
       if(nrow(supplemental_rods_df %>% filter(side == "left")) >0){
         surgery_details_list$left_supplemental_rods <- glue_collapse((supplemental_rods_df %>% filter(side == "left"))$supplemental_rod, sep = "; ")
       }else{
@@ -7377,33 +7326,83 @@ server <- function(input, output, session) {
       }else{
         surgery_details_list$right_supplemental_rods <- "none"
       }
-      
-      ############# CROSSLINKS #############
-      
-      if(length(input$crosslink_connectors) > 0){
-        surgery_details_list$crosslink_connector_levels <- glue_collapse(input$crosslink_connectors, sep = "; ")
+    }else{
+      surgery_details_list$left_supplemental_rods <- "none"
+      surgery_details_list$right_supplemental_rods <- "none"
+    }
+    
+    ############# CROSSLINKS #############
+    
+    if(length(input$crosslink_connectors) > 0){
+      surgery_details_list$crosslink_connector_levels <- glue_collapse(input$crosslink_connectors, sep = "; ")
+    }else{
+      surgery_details_list$crosslink_connector_levels <- "none"
+    }
+    
+    #################### SPINE UIV PPX  #########################
+    if(surgery_details_list$fusion == "yes"){
+      uiv_ppx_df <- all_objects_to_add_list$objects_df %>%
+        filter(between(vertebral_number, jh_get_vertebral_number_function(surgery_details_list$uiv) -3, jh_get_vertebral_number_function(surgery_details_list$uiv) + 1.5)) %>%
+        filter(str_detect(string = object, pattern = "hook") |
+                 str_detect(string = object, pattern = "tether") |
+                 str_detect(string = object, pattern = "wire") |
+                 str_detect(string = object, pattern = "vertebroplasty") |
+                 str_detect(string = object, pattern = "vertebral_cement_augmentation")) %>%
+        select(level, object) %>%
+        distinct()
+      if(nrow(uiv_ppx_df) > 0){
+        surgery_details_list$uiv_ppx_used <- "yes"
+        surgery_details_list$uiv_ppx <- str_replace(string = glue_collapse(x = unique(uiv_ppx_df$object), sep = "; "), pattern = "_", replacement = " ")
       }else{
-        surgery_details_list$crosslink_connector_levels <- "none"
+        surgery_details_list$uiv_ppx_used <- "no"
       }
+    }
+    
+    
+    ##########   interspaces decompressed  #############
+    decompressions_df <- all_objects_to_add_list$objects_df %>%
+      filter(category == "decompression" |
+               object == "decompression_diskectomy_fusion" |
+               str_detect(string = object, pattern = "decompression") |
+               object == "diskectomy_only" |
+               object == "anterior_disc_arthroplasty") %>%
+      select(level, body_interspace) %>%
+      distinct()
+    
+    if(nrow(decompressions_df)>0){
+      interspaces_decompressed <- unique((decompressions_df %>% filter(body_interspace == "interspace"))$level)
       
-      #################### SPINE UIV PPX  #########################
-      if(nrow(all_vertebrae_fixation_df) > 0){
-        uiv_ppx_df <- all_objects_to_add_list$objects_df %>%
-          filter(level == surgery_details_list$upper_treated_vertebrae | level == surgery_details_list$uiv) %>%
-          filter(str_detect(string = object, pattern = "hook") |
-                   str_detect(string = object, pattern = "tether") |
-                   str_detect(string = object, pattern = "wire") |
-                   str_detect(string = object, pattern = "vertebroplasty") |
-                   str_detect(string = object, pattern = "vertebral_cement_augmentation")) %>%
-          select(level, object) %>%
-          distinct()
-        if(nrow(uiv_ppx_df) > 0){
-          surgery_details_list$uiv_ppx_used <- "yes"
-          surgery_details_list$uiv_ppx <- str_replace(string = glue_collapse(x = unique(uiv_ppx_df$object), sep = "; "), pattern = "_", replacement = " ")
-        }else{
-          surgery_details_list$uiv_ppx_used <- "no"
-        }
+      if(any(decompressions_df$body_interspace == "body")){
+        interspaces_decompressed <- unique(jh_reorder_levels_function(level_vector = append(interspaces_decompressed,
+                                                                                            jh_convert_body_levels_to_interspace_vector_function(vertebral_bodies_vector = (decompressions_df %>% filter(body_interspace == "body"))$level))))
       }
+      ##########   number_of_levels_decompressed #############
+      surgery_details_list$number_of_levels_decompressed <- length(interspaces_decompressed)
+      
+      surgery_details_list$interspaces_decompressed <- glue_collapse(interspaces_decompressed, sep = "; ")
+    }else{
+      surgery_details_list$number_of_levels_decompressed <- "0"
+    }
+    
+    ##########   THREE COLUMN OSTEOTOMY #############
+    surgery_details_list$three_column_osteotomy <- if_else(any(all_objects_to_add_list$objects_df$object == "grade_3") |
+                                                             any(all_objects_to_add_list$objects_df$object == "grade_4") |
+                                                             any(all_objects_to_add_list$objects_df$object == "grade_5") |
+                                                             any(all_objects_to_add_list$objects_df$object == "grade_6"), "yes", "no")
+    if(surgery_details_list$three_column_osteotomy == "yes"){
+      surgery_details_list$three_column_osteotomy_level <- glue_collapse(x = (all_objects_to_add_list$objects_df %>%
+                                                                                filter(object == "grade_3" | object == "grade_4" | object == "grade_5") %>%
+                                                                                select(level) %>%
+                                                                                distinct() %>%
+                                                                                as_vector()), sep = "; ")
+      
+    }
+    
+    ###### SPINE CERVICAL VS LUMBAR FOR PRO CAPTURE #####
+    if(surgery_details_list$lower_treated_vertebrae %in% c("Occiput", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "T1", "T2", "T3", "T4", "T5", "T6")){
+      surgery_details_list$spine_region <- "cervical"
+    }else{
+      surgery_details_list$spine_region <- "lumbar"
     }
     
     #################### BMP & ALLOGRAFT  #######################

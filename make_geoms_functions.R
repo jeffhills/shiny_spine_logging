@@ -409,7 +409,9 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   
   ## Tethers
   if(any(str_detect(all_posterior_objects_df$object, pattern = "tether"))){
-    geoms_list_posterior$tethers_sf_geom <- geom_sf(data = st_buffer(st_multilinestring((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "tether")))$object_constructed), dist = 0.001), fill = "red")
+    geoms_list_posterior$tethers_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(object, "tether")))$object_constructed), fill = "red")
+    
+    # geoms_list_posterior$tethers_sf_geom <- geom_sf(data = st_buffer(st_multilinestring((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "tether")))$object_constructed), dist = 0.001), fill = "red")
     # geoms_list_posterior$tethers_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "tether")))$object_constructed))
   }else{
     geoms_list_posterior$tethers_sf_geom <- NULL
