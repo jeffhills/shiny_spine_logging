@@ -138,46 +138,6 @@ labels_anterior_df <- all_object_ids_df %>%
   ))
 
 
-# open_canal_df <- all_object_ids_df %>%
-#   filter(object == "laminectomy") %>%
-#   mutate(category = "revision")
-
-# all_implants_constructed_df <- all_object_ids_df %>%
-#   left_join(imported_coordinates %>%
-#               group_by(object_id) %>%
-#               nest() %>%
-#               mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
-#               select(object_id, object_constructed))
-
-
-# all_implants_constructed_df <- imported_coordinates %>%
-#   group_by(object_id) %>%
-#   nest() %>%
-#   mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
-#   select(object_id, object_constructed)
-
-# polygon_objects_constructed_df <- imported_coordinates %>%
-#   filter(str_detect(object_id, "grade_1|tether|C1_central_corpectomy_cage_1") == FALSE) %>%
-#   group_by(object_id) %>%
-#   nest() %>%
-#   mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
-#   select(object_id, object_constructed)
-# 
-# line_objects_constructed_df <- imported_coordinates %>%
-#   filter(str_detect(object_id, "grade_1|tether|C1_central_corpectomy_cage_1")) %>%
-#   group_by(object_id) %>%
-#   nest() %>%
-#   mutate(object_constructed = map(.x = data, .f = ~ st_linestring(as.matrix(.x)))) %>%
-#   select(object_id, object_constructed)
-# 
-# all_implants_constructed_df <- all_object_ids_df %>%
-#   left_join(polygon_objects_constructed_df %>%
-#               bind_rows(line_objects_constructed_df))
-
-
-# all_objects_y_range_df <- imported_coordinates %>%
-#   select(object, y) %>%
-#   distinct()
 
 implant_levels_numbered_df <- all_object_ids_df %>%
   filter(implant == "yes") %>%
@@ -245,13 +205,13 @@ all_cages_df <- all_object_ids_df %>%
 
 
 #############-----------------------   Build: arthroplasty  ----------------------###############
-
-arthroplasty_coordinates_df <- all_object_ids_df %>%
-  filter(str_detect(object, "arthropl")) %>%
-  mutate(inferior_endplate_y = c(0.965, 0.925, 0.897, 0.87, 0.846, 0.821, 0.795, 0.77, 0.74, 0.712, 0.682, 0.65, 0.62, 0.591, 0.56, 0.53, 0.495, 0.457, 0.415, 0.367, 0.317, 0.263, 0.215, 0.168), 
-         superior_endplate_y = c(0.955, 0.918, 0.888, 0.865, 0.838, 0.815, 0.79, 0.76, 0.732, 0.705, 0.675, 0.645, 0.613, 0.584, 0.555, 0.525, 0.49, 0.45, 0.406, 0.357, 0.305, 0.255, 0.205, 0.16), 
-         width = c(0.0175, 0.021, 0.02275, 0.02275, 0.0245, 0.0245, 0.0245, 0.02625, 0.02625, 0.028, 0.028, 0.02975, 0.02975, 0.0315, 0.0315, 0.0315, 0.03325, 0.035, 0.035, 0.035, 0.03675, 0.0385, 0.04025, 0.042)
-         )
+# 
+# arthroplasty_coordinates_df <- all_object_ids_df %>%
+#   filter(str_detect(object, "arthropl")) %>%
+#   mutate(inferior_endplate_y = c(0.965, 0.925, 0.897, 0.87, 0.846, 0.821, 0.795, 0.77, 0.74, 0.712, 0.682, 0.65, 0.62, 0.591, 0.56, 0.53, 0.495, 0.457, 0.415, 0.367, 0.317, 0.263, 0.215, 0.168), 
+#          superior_endplate_y = c(0.955, 0.918, 0.888, 0.865, 0.838, 0.815, 0.79, 0.76, 0.732, 0.705, 0.675, 0.645, 0.613, 0.584, 0.555, 0.525, 0.49, 0.45, 0.406, 0.357, 0.305, 0.255, 0.205, 0.16), 
+#          width = c(0.0175, 0.021, 0.02275, 0.02275, 0.0245, 0.0245, 0.0245, 0.02625, 0.02625, 0.028, 0.028, 0.02975, 0.02975, 0.0315, 0.0315, 0.0315, 0.03325, 0.035, 0.035, 0.035, 0.03675, 0.0385, 0.04025, 0.042)
+#          )
 
 arthroplasty_function <- function(y_for_inferior_endplate, y_for_superior_endplate, endplate_width){
   endplate_height <- y_for_inferior_endplate - y_for_superior_endplate
@@ -277,16 +237,3 @@ arthroplasty_function <- function(y_for_inferior_endplate, y_for_superior_endpla
   return(disc_df)
 }
 
-# arthroplasty_constructed_df <- arthroplasty_coordinates_df %>%
-#   # filter(vertebral_number %in% c(4.5,5.5)) %>%
-#   mutate(object_constructed = pmap(.l = list(..1 = inferior_endplate_y,
-#                                              ..2 = superior_endplate_y,
-#                                              ..3 = width),
-#                                    .f = ~ arthroplasty_function(y_for_inferior_endplate = ..1,
-#                                                                 y_for_superior_endplate = ..2,
-#                                                                 endplate_width = ..3))) %>%
-#   select(names(all_implants_constructed_df))
-# 
-# all_implants_constructed_df <- all_implants_constructed_df %>%
-#   bind_rows(arthroplasty_constructed_df) %>%
-#   distinct()

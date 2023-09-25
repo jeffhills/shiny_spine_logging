@@ -14,6 +14,15 @@ jh_replace_checkbox_other_with_text_function <- function(input_vector = c(" "),
   new_vector
 }
 
+format_plan_list_function <- function(plan_label, input_vector){
+  if(length(input_vector) > 1){
+    plan_formatted <- paste0("  - ", plan_label, ":", glue_collapse(prepend(x = input_vector, values = " "), sep = "\n       > "))
+  }else{
+    plan_formatted <- paste0("  - ", plan_label, ": ", input_vector)
+  }
+  plan_formatted
+}
+
 jh_make_op_note_test_df_function <- function(posterior_or_anterior = "posterior", spine_region = "lumbar", object = c("pre_selected")){
   
   surgical_objects <- as_vector(object)
