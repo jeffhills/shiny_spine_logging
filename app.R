@@ -95,7 +95,7 @@ ui <- dashboardPage(skin = "black",
                 #           inline-size: 250px;
                 #           overflow-wrap: break-word;
                 # }")),
-                        tags$style(type="text/css", "#spine_plan.recalculating { opacity: 1.0; }"),
+                        # tags$style(type="text/css", "#spine_plan.recalculating { opacity: 1.0; }"),
                         tags$style(
                           "#posterior_bmp_size {
                 font-size: small;
@@ -1138,6 +1138,7 @@ ui <- dashboardPage(skin = "black",
 
 server <- function(input, output, session) {
   
+
   rcon_reactive <- reactiveValues()
   
   observeEvent(input$redcap_token, {
@@ -1154,6 +1155,34 @@ server <- function(input, output, session) {
   all_objects_to_add_list <- reactiveValues()
   
   all_objects_to_add_list$objects_df <- tibble(level = character(),
+                                               approach = character(),
+                                               category = character(),
+                                               vertebral_number = double(),
+                                               implant = character(),
+                                               object = character(),
+                                               side = character(),
+                                               x = double(),
+                                               y = double(),
+                                               fusion = character(),
+                                               interbody_fusion = character(),
+                                               body_interspace = character(),
+                                               fixation_uiv_liv = character(),
+                                               object_constructed = list())
+  all_objects_to_add_list$left_rod_implants_df <- tibble(level = character(),
+                                               approach = character(),
+                                               category = character(),
+                                               vertebral_number = double(),
+                                               implant = character(),
+                                               object = character(),
+                                               side = character(),
+                                               x = double(),
+                                               y = double(),
+                                               fusion = character(),
+                                               interbody_fusion = character(),
+                                               body_interspace = character(),
+                                               fixation_uiv_liv = character(),
+                                               object_constructed = list())
+  all_objects_to_add_list$right_rod_implants_df <- tibble(level = character(),
                                                approach = character(),
                                                category = character(),
                                                vertebral_number = double(),
@@ -2449,6 +2478,16 @@ server <- function(input, output, session) {
       }
     }
     
+    all_objects_to_add_list$left_rod_implants_df <- all_objects_to_add_list$objects_df %>%
+      filter(approach == "posterior", side == "left", str_detect(object, "screw|hook|wire"))%>%
+      select(level, vertebral_number, x, y, side, object) %>%
+      arrange(y) 
+    
+    all_objects_to_add_list$right_rod_implants_df <- all_objects_to_add_list$objects_df %>%
+      filter(approach == "posterior", side == "right", str_detect(object, "screw|hook|wire"))%>%
+      select(level, vertebral_number, x, y, side, object) %>%
+      arrange(y) 
+    
   })
   
   ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS     ######### ~~~~~~~~~~~~~~  #############
@@ -2754,16 +2793,16 @@ server <- function(input, output, session) {
   #################### LEFT ROD CONSTRUCT ######################## #################### LEFT ROD CONSTRUCT ########################
   #################### LEFT ROD CONSTRUCT ######################## #################### LEFT ROD CONSTRUCT ########################
   
-  left_rod_implants_df_reactive <- reactive({
-    left_main_rod_df <- all_objects_to_add_list$objects_df %>%
-      filter(side == "left") %>%
-      filter(approach == "posterior") %>%
-      filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
-      select(level, vertebral_number, x, y, side, object) %>%
-      arrange(vertebral_number) 
-    
-    left_main_rod_df
-  })
+  # left_rod_implants_df_reactive <- reactive({
+  #   left_main_rod_df <- all_objects_to_add_list$objects_df %>%
+  #     filter(side == "left") %>%
+  #     filter(approach == "posterior") %>%
+  #     filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
+  #     select(level, vertebral_number, x, y, side, object) %>%
+  #     arrange(vertebral_number) 
+  #   
+  #   left_main_rod_df
+  # })
   
   # LEFT REVISION IMPLANTS # 
 
@@ -2943,7 +2982,7 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(input$left_supplemental_rods_eligible == FALSE && nrow(left_rod_implants_df_reactive()) > 2){
+    if(input$left_supplemental_rods_eligible == FALSE && nrow(all_objects_to_add_list$left_rod_implants_df) > 2){
       updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
     }
     
@@ -2951,7 +2990,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$add_left_accessory_rod,  ignoreInit = TRUE, {
     if(input$add_left_accessory_rod == TRUE){
-      start_list <- jh_supplementary_rods_choices_function(all_objects_df = left_rod_implants_df_reactive(),
+      start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$left_rod_implants_df,
                                                            rod_type = "accessory_rod")
       updateSliderTextInput(session = session,
                             inputId = "left_accessory_rod",
@@ -2970,7 +3009,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$add_left_satellite_rod,  ignoreInit = TRUE, {
     if(input$add_left_satellite_rod == TRUE){
-      start_list <- jh_supplementary_rods_choices_function(all_objects_df = left_rod_implants_df_reactive(),
+      start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$left_rod_implants_df,
                                                            osteotomy_site = osteotomy_level_reactive(),
                                                            rod_type = "satellite_rod")
       
@@ -2992,7 +3031,7 @@ server <- function(input, output, session) {
   observeEvent(list(input$add_left_intercalary_rod, input$left_intercalary_rod_junction), ignoreInit = TRUE, {
     if(input$add_left_intercalary_rod == TRUE && input$left_intercalary_rod_junction %in% implant_levels_numbered_df$level){
       
-      left_implant_df <- left_rod_implants_df_reactive() %>%
+      left_implant_df <- all_objects_to_add_list$left_rod_implants_df %>%
         filter(str_detect(level, "Iliac") == FALSE)
 
         proximal_options <- (implant_levels_numbered_df %>%
@@ -3038,7 +3077,7 @@ server <- function(input, output, session) {
                  jh_get_vertebral_number_function(input$left_intercalary_rod[1]), 
                  jh_get_vertebral_number_function(input$left_intercalary_rod[2 ])) == FALSE){
         
-        left_implant_df <- left_rod_implants_df_reactive() %>%
+        left_implant_df <- all_objects_to_add_list$left_rod_implants_df %>%
           filter(str_detect(level, "Iliac") == FALSE)
         
         proximal_options <- (implant_levels_numbered_df %>%
@@ -3074,12 +3113,12 @@ server <- function(input, output, session) {
     if(input$add_left_intercalary_rod == TRUE){
       # junction_choices_vector <-  (implant_levels_numbered_df %>%
       #                                filter(between(vertebral_number, jh_get_vertebral_number_function(input$left_intercalary_rod[1]), jh_get_vertebral_number_function(input$left_intercalary_rod[2]))) %>%
-      #                                filter(level %in% left_rod_implants_df_reactive()$level == FALSE))$level
-      distal_limit <- if_else(tail(left_rod_implants_df_reactive()$vertebral_number, 2)[1] >= 25, 25, tail(left_rod_implants_df_reactive()$vertebral_number, 2)[1])
+      #                                filter(level %in% all_objects_to_add_list$left_rod_implants_df$level == FALSE))$level
+      distal_limit <- if_else(tail(all_objects_to_add_list$left_rod_implants_df$vertebral_number, 2)[1] >= 25, 25, tail(all_objects_to_add_list$left_rod_implants_df$vertebral_number, 2)[1])
       
       junction_choices_vector <- (implant_levels_numbered_df %>%
-                                    filter(between(vertebral_number, left_rod_implants_df_reactive()$vertebral_number[2], distal_limit)) %>% 
-                                    filter(level %in% left_rod_implants_df_reactive()$level  == FALSE ))$level
+                                    filter(between(vertebral_number, all_objects_to_add_list$left_rod_implants_df$vertebral_number[2], distal_limit)) %>% 
+                                    filter(level %in% all_objects_to_add_list$left_rod_implants_df$level  == FALSE ))$level
       
       
       if(!is.null(osteotomy_level_reactive()) && osteotomy_level_reactive()[1] %in% junction_choices_vector){
@@ -3110,7 +3149,7 @@ server <- function(input, output, session) {
                ignoreInit = TRUE, {
                  
                  if(input$add_left_linked_rods == TRUE){
-                   start_list <- jh_supplementary_rods_choices_function(all_objects_df = left_rod_implants_df_reactive(),
+                   start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$left_rod_implants_df,
                                                                         rod_type = "linked_rod")
                    
                    updateSliderTextInput(session = session,
@@ -3134,8 +3173,8 @@ server <- function(input, output, session) {
                ignoreInit = TRUE, {
                  if(input$add_left_kickstand_rod == TRUE){
                    
-                   if(any(str_detect(str_to_lower(left_rod_implants_df_reactive()$level), "iliac"))){
-                     start_list <- jh_supplementary_rods_choices_function(all_objects_df = left_rod_implants_df_reactive(),
+                   if(any(str_detect(str_to_lower(all_objects_to_add_list$left_rod_implants_df$level), "iliac"))){
+                     start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$left_rod_implants_df,
                                                                           rod_type = "kickstand_rod")
                      
                      updateSliderTextInput(session = session,
@@ -3195,8 +3234,8 @@ server <- function(input, output, session) {
   
     ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
   observeEvent(input$posterior_fusion_performed,ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(nrow(left_rod_implants_df_reactive()) > 1){
-      if(max(left_rod_implants_df_reactive()$vertebral_number) < 11){
+    if(nrow(all_objects_to_add_list$left_rod_implants_df) > 1){
+      if(max(all_objects_to_add_list$left_rod_implants_df$vertebral_number) < 11){
         rod_size <- "4.0mm"  
       }else{
         rod_size <- "6.0mm"  
@@ -3253,7 +3292,7 @@ server <- function(input, output, session) {
   ###### LEFT SUPPLEMENTAL ROD GEOM 
   # observeEvent(list(
   #   input$reset_all,
-  #   # left_rod_implants_df_reactive(),
+  #   # all_objects_to_add_list$left_rod_implants_df,
   #   input$plot_click,
   #   input$add_left_accessory_rod,
   #   input$left_accessory_rod,
@@ -3387,18 +3426,17 @@ server <- function(input, output, session) {
                          approach == "posterior",
                          str_detect(string = object, pattern = "screw|hook|wire"))) >1){
       
-      rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(all_objects_to_add_list$objects_df %>%
-                                                                                   filter(side == "left",
-                                                                                          approach == "posterior", 
-                                                                                          str_detect(string = object, pattern = "screw|hook|wire")) %>%
-                                                                                   select(x, y) %>%
-                                                                                   arrange(rev(y)) %>%
-                                                                                   mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-                                                                                   mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-                                                                                   as.matrix()), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
+      
+      rods_list$left_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(as.matrix(all_objects_to_add_list$left_rod_implants_df %>%
+                                                                                            select(x, y) %>%
+                                                                                            mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+                                                                                            mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+                                                                                            arrange(y))), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
     } 
     
   })
+  
+
   
   
   ###### LEFT SUPPLEMENTAL ROD GEOM END  ---
@@ -3424,16 +3462,16 @@ server <- function(input, output, session) {
   #################### RIGHT ROD CONSTRUCT ######################## #################### RIGHT ROD CONSTRUCT ########################
   #################### RIGHT ROD CONSTRUCT ######################## #################### RIGHT ROD CONSTRUCT ########################
   
-  right_rod_implants_df_reactive <- reactive({
-    right_main_rod_df <- all_objects_to_add_list$objects_df %>%
-      filter(side == "right") %>%
-      filter(approach == "posterior") %>%
-      filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
-      select(level, vertebral_number, x, y, side, object) %>%
-      arrange(vertebral_number) 
-    
-    right_main_rod_df
-  })
+  # right_rod_implants_df_reactive <- reactive({
+  #   right_main_rod_df <- all_objects_to_add_list$objects_df %>%
+  #     filter(side == "right") %>%
+  #     filter(approach == "posterior") %>%
+  #     filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
+  #     select(level, vertebral_number, x, y, side, object) %>%
+  #     arrange(vertebral_number) 
+  #   
+  #   right_main_rod_df
+  # })
   
   ######### RIGHT REVISION IMPLANTS   ######### 
   ######### RIGHT REVISION IMPLANTS   ######### 
@@ -3614,7 +3652,7 @@ server <- function(input, output, session) {
   
 
   observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE,{
-    if(input$right_supplemental_rods_eligible == FALSE && nrow(right_rod_implants_df_reactive()) > 2){
+    if(input$right_supplemental_rods_eligible == FALSE && nrow(all_objects_to_add_list$right_rod_implants_df) > 2){
       updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
     }
     
@@ -3622,7 +3660,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$add_right_accessory_rod, ignoreInit = TRUE, {
     if(input$add_right_accessory_rod == TRUE){
-      start_list <- jh_supplementary_rods_choices_function(all_objects_df = right_rod_implants_df_reactive(),
+      start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$right_rod_implants_df,
                                                            rod_type = "accessory_rod")
       updateSliderTextInput(session = session,
                             inputId = "right_accessory_rod",
@@ -3641,7 +3679,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$add_right_satellite_rod, ignoreInit = TRUE,{
     if(input$add_right_satellite_rod == TRUE){
-      start_list <- jh_supplementary_rods_choices_function(all_objects_df = right_rod_implants_df_reactive(),
+      start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$right_rod_implants_df,
                                                            osteotomy_site = osteotomy_level_reactive(),
                                                            rod_type = "satellite_rod")
       
@@ -3663,7 +3701,7 @@ server <- function(input, output, session) {
   observeEvent(list(input$add_right_intercalary_rod, input$right_intercalary_rod_junction),  ignoreInit = TRUE, {
     if(input$add_right_intercalary_rod == TRUE && input$right_intercalary_rod_junction %in% implant_levels_numbered_df$level){
       
-      right_implant_df <- right_rod_implants_df_reactive() %>%
+      right_implant_df <- all_objects_to_add_list$right_rod_implants_df %>%
         filter(str_detect(level, "Iliac") == FALSE)
       
       proximal_options <- (implant_levels_numbered_df %>%
@@ -3709,7 +3747,7 @@ server <- function(input, output, session) {
                  jh_get_vertebral_number_function(input$right_intercalary_rod[1]), 
                  jh_get_vertebral_number_function(input$right_intercalary_rod[2 ])) == FALSE){
         
-        right_implant_df <- right_rod_implants_df_reactive() %>%
+        right_implant_df <- all_objects_to_add_list$right_rod_implants_df %>%
           filter(str_detect(level, "Iliac") == FALSE)
         
         proximal_options <- (implant_levels_numbered_df %>%
@@ -3745,12 +3783,12 @@ server <- function(input, output, session) {
     if(input$add_right_intercalary_rod == TRUE){
       # junction_choices_vector <-  (implant_levels_numbered_df %>%
       #                                filter(between(vertebral_number, jh_get_vertebral_number_function(input$right_intercalary_rod[1]), jh_get_vertebral_number_function(input$right_intercalary_rod[2]))) %>%
-      #                                filter(level %in% right_rod_implants_df_reactive()$level == FALSE))$level
-      distal_limit <- if_else(tail(right_rod_implants_df_reactive()$vertebral_number, 2)[1] >= 25, 25, tail(right_rod_implants_df_reactive()$vertebral_number, 2)[1])
+      #                                filter(level %in% all_objects_to_add_list$right_rod_implants_df$level == FALSE))$level
+      distal_limit <- if_else(tail(all_objects_to_add_list$right_rod_implants_df$vertebral_number, 2)[1] >= 25, 25, tail(all_objects_to_add_list$right_rod_implants_df$vertebral_number, 2)[1])
       
       junction_choices_vector <- (implant_levels_numbered_df %>%
-                                    filter(between(vertebral_number, right_rod_implants_df_reactive()$vertebral_number[2], distal_limit)) %>% 
-                                    filter(level %in% right_rod_implants_df_reactive()$level  == FALSE ))$level
+                                    filter(between(vertebral_number, all_objects_to_add_list$right_rod_implants_df$vertebral_number[2], distal_limit)) %>% 
+                                    filter(level %in% all_objects_to_add_list$right_rod_implants_df$level  == FALSE ))$level
       
       
       if(!is.null(osteotomy_level_reactive()) && osteotomy_level_reactive()[1] %in% junction_choices_vector){
@@ -3781,7 +3819,7 @@ server <- function(input, output, session) {
                ignoreInit = TRUE, {
                  
                  if(input$add_right_linked_rods == TRUE){
-                   start_list <- jh_supplementary_rods_choices_function(all_objects_df = right_rod_implants_df_reactive(),
+                   start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$right_rod_implants_df,
                                                                         rod_type = "linked_rod")
                    
                    updateSliderTextInput(session = session,
@@ -3805,8 +3843,8 @@ server <- function(input, output, session) {
                ignoreInit = TRUE, {
                  if(input$add_right_kickstand_rod == TRUE){
                    
-                   if(any(str_detect(str_to_lower(right_rod_implants_df_reactive()$level), "iliac"))){
-                     start_list <- jh_supplementary_rods_choices_function(all_objects_df = right_rod_implants_df_reactive(),
+                   if(any(str_detect(str_to_lower(all_objects_to_add_list$right_rod_implants_df$level), "iliac"))){
+                     start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$right_rod_implants_df,
                                                                           rod_type = "kickstand_rod")
                      
                      updateSliderTextInput(session = session,
@@ -3869,8 +3907,8 @@ server <- function(input, output, session) {
   ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
   observeEvent(input$posterior_fusion_performed,ignoreNULL = TRUE, ignoreInit = TRUE, {
     
-    if(nrow(right_rod_implants_df_reactive()) > 1){
-      if(max(right_rod_implants_df_reactive()$vertebral_number) < 11){
+    if(nrow(all_objects_to_add_list$right_rod_implants_df) > 1){
+      if(max(all_objects_to_add_list$right_rod_implants_df$vertebral_number) < 11){
         rod_size <- "4.0mm"  
       }else{
         rod_size <- "6.0mm"  
@@ -3927,7 +3965,7 @@ server <- function(input, output, session) {
   
   # observeEvent(list(
   #   input$reset_all,
-  #   # right_rod_implants_df_reactive(),
+  #   # all_objects_to_add_list$right_rod_implants_df,
   #   input$plot_click,
   #   input$add_right_accessory_rod,
   #   input$right_accessory_rod,
@@ -4060,15 +4098,21 @@ server <- function(input, output, session) {
                          approach == "posterior",
                          str_detect(string = object, pattern = "screw|hook|wire"))) >1){
       
-      rods_list$right_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(all_objects_to_add_list$objects_df %>%
-                                                                                  filter(side == "right",
-                                                                                         approach == "posterior",
-                                                                                         str_detect(string = object, pattern = "screw|hook|wire")) %>%
-                                                                                  select(x, y) %>%
-                                                                                  arrange(rev(y)) %>%
-                                                                                  mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
-                                                                                  mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-                                                                                  as.matrix()), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
+      # rods_list$right_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(all_objects_to_add_list$objects_df %>%
+      #                                                                             filter(side == "right",
+      #                                                                                    approach == "posterior",
+      #                                                                                    str_detect(string = object, pattern = "screw|hook|wire")) %>%
+      #                                                                             select(x, y) %>%
+      #                                                                             arrange(rev(y)) %>%
+      #                                                                             mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+      #                                                                             mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+      #                                                                             as.matrix()), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
+      
+      rods_list$right_rod_list_sf_geom <- geom_sf(data = st_buffer(st_linestring(as.matrix(all_objects_to_add_list$right_rod_implants_df %>%
+                                                                                            select(x, y) %>%
+                                                                                            mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+                                                                                            mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+                                                                                            arrange(y))), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
     } 
     
   })
@@ -4149,6 +4193,9 @@ server <- function(input, output, session) {
         updateAwesomeCheckbox(session = session, 
                               inputId = "add_right_custom_rods", 
                               value = FALSE) 
+        
+        rods_list$right_connector_list_sf_geom <- NULL
+        rods_list$left_connector_list_sf_geom <- NULL
     }
     
   })

@@ -131,11 +131,11 @@ jh_make_screw_details_inputs_df_function <- function(all_objects = tibble(), ret
       
       if(any(step_1$side == "left") == FALSE){
         step_1 <- step_1 %>%
-          bind_rows(level = "x", side = "left", object = "x")
+          bind_rows(tibble(level = "x", side = "left", object = "x", count = 1))
       }
       if(any(step_1$side == "right") == FALSE){
         step_1 <- step_1 %>%
-          bind_rows(level = "x", side = "right", object = "x")
+          bind_rows(tibble(level = "x", side = "right", object = "x", count = 1))
       }
       
       posterior_screw_input_names_wide_df <-  step_1 %>%
