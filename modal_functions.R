@@ -1539,7 +1539,7 @@ addition_surgical_details_modal_box_2_function <-
            additional_end_procedure_details_anterior = NULL,
            closure_details_anterior = NULL,
            dressing_details_anterior = NULL,
-           # additional_procedures_choices_anterior = c(""),
+           additional_procedures_choices_anterior = additional_procedure_options_vector,
            additional_procedures_anterior = NULL,
            additional_procedures_other_anterior = "",
            
@@ -1549,7 +1549,7 @@ addition_surgical_details_modal_box_2_function <-
            additional_end_procedure_details_posterior = NULL,
            closure_details_posterior = NULL,
            dressing_details_posterior = NULL,
-           # additional_procedures_choices_posterior = c(""),
+           additional_procedures_choices_posterior = additional_procedure_options_vector,
            additional_procedures_posterior = NULL,
            additional_procedures_other_posterior = "",
 
@@ -1962,7 +1962,7 @@ addition_surgical_details_modal_box_2_function <-
             left_column_percent_width = 35,
             checkboxes_inline = FALSE,
             input_type = "checkbox",
-            choices_vector = additional_procedure_options_vector,
+            choices_vector = additional_procedures_choices_anterior,
             initial_value_selected = additional_procedures_anterior
           )
         },
@@ -2095,7 +2095,7 @@ addition_surgical_details_modal_box_2_function <-
             left_column_percent_width = 20,
             checkboxes_inline = FALSE,
             input_type = "checkbox",
-            choices_vector = additional_procedure_options_vector,
+            choices_vector = additional_procedures_choices_posterior,
             initial_value_selected = additional_procedures_posterior
           )
         },

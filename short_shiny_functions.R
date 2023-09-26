@@ -137,11 +137,11 @@ jh_convert_interspace_to_body_vector_function <- function(interspaces_vector){
 
 #################################
 jh_check_body_or_interspace_function <- function(level){
-  result <- case_when(level %in% vertebral_bodies_vector ~ "body",
-                      level %in% interspaces_vector ~ "interspace", 
-                      str_detect(str_to_lower(level), "ilia")~ "pelvis",
+  result <- case_when(str_detect(str_to_lower(level), "ilia")~ "pelvis",
                       str_detect(str_to_lower(level), "s2ai") ~ "pelvis",
-                      str_detect(str_to_lower(level), "occip") ~ "occiput",) 
+                      str_detect(str_to_lower(level), "occip") ~ "occiput",
+                      level %in% vertebral_bodies_vector ~ "body",
+                      level %in% interspaces_vector ~ "interspace") 
   
   
   result
@@ -2134,6 +2134,18 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
     #################### MAIN ROD ###################
     if(nrow(main_rod_df) >1){
       
+      main_rod_matrix <- main_rod_df %>%
+        arrange(rev(y)) %>%
+        select(x, y) %>%
+        bind_rows(revision_rod_overlap) %>%
+        arrange(rev(y)) %>%
+        distinct() %>%
+        remove_missing() %>%
+        select(x, y) %>%
+        as.matrix()
+      
+      rods_list$main_rod_sf <- jh_sf_rod_object_from_matrix_function(main_rod_matrix) 
+    }else if(nrow(main_rod_df) == 1 && nrow(revision_rod_overlap)>0){
       main_rod_matrix <- main_rod_df %>%
         arrange(rev(y)) %>%
         select(x, y) %>%
