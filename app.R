@@ -95,7 +95,7 @@ ui <- dashboardPage(skin = "black",
                 #           inline-size: 250px;
                 #           overflow-wrap: break-word;
                 # }")),
-                        # tags$style(type="text/css", "#spine_plan.recalculating { opacity: 1.0; }"),
+                        tags$style(type="text/css", "#spine_plan.recalculating { opacity: 1.0; }"),
                         tags$style(
                           "#posterior_bmp_size {
                 font-size: small;
@@ -685,6 +685,18 @@ ui <- dashboardPage(skin = "black",
                                        ) ## end of the construct details box
                                      ) ## end of the fluid row
                                  ),### end of the full box
+                                 conditionalPanel(condition = "input.multiple_approach == true",
+                                                  actionBttn(
+                                                    inputId = "proceed_to_other_approach",
+                                                    size = "md", 
+                                                    block = TRUE,
+                                                    label = "Done with Posterior, Switch to Anterior Approach",
+                                                    style = "simple",
+                                                    color = "success", 
+                                                    icon = icon("fas fa-arrow-circle-right")
+                                                  )
+                                                  ),
+                                 br(),
                                  actionBttn(
                                    inputId = "implants_complete",
                                    size = "md", 
@@ -1137,6 +1149,39 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
+  
+  observeEvent(input$multi_approach_starting_position, ignoreInit = TRUE, {
+    if(input$multiple_approach == TRUE){
+      if(input$multi_approach_starting_position != "Posterior"){
+        updateActionButton(session = session, inputId = "proceed_to_other_approach", label = "Done with Anterior, Switch to Posterior")
+      }
+    }
+
+    
+  })
+  observeEvent(input$proceed_to_other_approach, ignoreInit = TRUE, {
+    if(input$spine_approach == "Anterior"){
+      updateRadioGroupButtons(session = session,
+                              inputId = "spine_approach", 
+                              label = NULL,
+                              choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior or Lateral")),
+                                                 tags$span(icon("fas fa-user", style = "color: steelblue"), strong("Posterior"))),
+                              choiceValues = list("Anterior", "Posterior"),
+                              selected = "Posterior", 
+                              checkIcon = list(yes = icon("check"))
+                              )
+    }else{
+      updateRadioGroupButtons(session = session,
+                              inputId = "spine_approach", 
+                              label = NULL,
+                              choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior or Lateral")),
+                                                 tags$span(icon("fas fa-user", style = "color: steelblue"), strong("Posterior"))),
+                              choiceValues = list("Anterior", "Posterior"),
+                              selected = "Anterior", 
+                              checkIcon = list(yes = icon("check"))
+      )
+    }
+  })
   
 
   rcon_reactive <- reactiveValues()
@@ -4134,7 +4179,8 @@ server <- function(input, output, session) {
   
   
   observeEvent(list(input$plot_click,input$double_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    if(str_detect(input$object_to_add, "screw|hook|wire") && any(input$add_left_accessory_rod, 
+    if(str_detect(input$object_to_add, "screw|hook|wire") && 
+       any(input$add_left_accessory_rod, 
            input$add_left_satellite_rod,
            input$add_left_intercalary_rod,
            input$add_left_linked_rods,
@@ -4833,6 +4879,7 @@ server <- function(input, output, session) {
   ################################### POSTERIOR ADDITIONAL PROCEDURES PERFORMED ####################
   additional_procedures_performed_posterior_reactive <- reactive({
     additional_procedures_list <- list()
+    
     if(procedure_approach_reactive() == "posterior" | procedure_approach_reactive() == "combined"){
       additional_procedures_list <- as.list(input$additional_procedures_posterior)
       
@@ -5771,8 +5818,7 @@ server <- function(input, output, session) {
   ################------------------  Screw Size RESULTS  ----------------------######################  
   ################------------------  Screw Size RESULTS  ----------------------######################  
   
-  ### first update the bilaterality input for the conditional panel
-  
+
   screw_size_details_df_reactive <- reactive({
     
     if(length(input$screws_implanted_picker_for_ui) > 0 && input$implants_complete > 0){
@@ -6570,10 +6616,7 @@ server <- function(input, output, session) {
   
   approach_sequence_reactive <- reactive({
     if(nrow(all_objects_to_add_list$objects_df)>0){
-      approach_order_df <- all_objects_to_add_list$objects_df %>%
-        select(approach) %>%
-        distinct()
-      approach_sequence <- glue_collapse(approach_order_df$approach, sep = "-")
+      approach_sequence <- glue_collapse(unique(all_objects_to_add_list$objects_df$approach), sep = "-")
     }else{
       approach_sequence <- " "
     }
