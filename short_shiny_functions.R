@@ -2243,7 +2243,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
           filter(side == rod_side, 
                  level %in% linked_rods_vector) %>%
           select(x, y) %>%
-          mutate(x = if_else(x < 0.5, x + x_linked_rod_modifier, x - x_linked_rod_modifier)) %>%
+          mutate(x = if_else(x < 0.5, x + x_linked_rod_modifier, x + x_linked_rod_modifier)) %>%
           distinct() %>%
           arrange(rev(y)) %>%
           as.matrix()
@@ -2285,7 +2285,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         select(x, y) %>%
         arrange(rev(y)) %>%
         distinct() %>%
-        mutate(x = if_else(x < 0.5, x - 0.01, x + 0.01)) %>%
+        mutate(x = if_else(x < 0.5, x - 0.007, x + 0.007)) %>%
         select(x, y) %>%
         as.matrix()
       
