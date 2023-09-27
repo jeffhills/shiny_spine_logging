@@ -2099,8 +2099,8 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         arrange(rev(y)) %>%
         distinct() %>%
         mutate(x = if_else(y == max(y), x + x_modifier, x)) %>%
+        mutate(y = if_else(y == max(y), y + 0.007, y)) %>%
         remove_missing() %>%
-        select(x, y) %>%
         as.matrix()
       
       kickstand_connector_matrix <- all_screw_coordinates_df %>% 
@@ -2109,7 +2109,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         arrange(rev(y)) %>%
         distinct() %>%
         remove_missing() %>%
-        select(x, y) %>%
+        mutate(y = if_else(y == max(y), y + 0.007, y)) %>%
         as.matrix()
       
       kickstand_connector_matrix_list <- jh_rod_construct_connector_matrices_function(kickstand_connector_matrix)
@@ -2170,8 +2170,8 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       satellite_rod_matrix <- satellite_rods_vector_df %>%
         mutate(x = if_else(x < 0.5, x + 0.003, x - 0.003)) %>%
-        mutate(y = if_else(y == max(y), y + 0.01, y)) %>%
-        mutate(y = if_else(y == min(y), y - 0.01, y)) %>%
+        # mutate(y = if_else(y == max(y), y + 0.01, y)) %>%
+        # mutate(y = if_else(y == min(y), y - 0.01, y)) %>%
         remove_missing() %>%
         select(x, y) %>%
         as.matrix()
@@ -2234,11 +2234,6 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         select(x, y) %>%
         as.matrix()
       
-      
-      # linked_rods_overlap_matrix <- tibble(level = linked_rods_vector) %>%
-      #   left_join(all_screw_coordinates_df %>%
-      #   filter(side == rod_side))  %>%
-        
         linked_rods_overlap_matrix <- all_screw_coordinates_df %>%
           filter(side == rod_side, 
                  level %in% linked_rods_vector) %>%
@@ -2266,39 +2261,42 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       proximal_intercalary_rod_matrix <- main_rod_df %>%
         filter(vertebral_number <= jh_get_vertebral_number_function(level_to_get_number = intercalary_rod_junction)) %>%
         select(x, y) %>%
-        mutate(y = if_else(y == min(y), y - 0.03, y)) %>%
+        mutate(y = if_else(y == min(y), y - 0.01, y)) %>%
         as.matrix()
       
       distal_intercalary_rod_matrix <- main_rod_df %>%
         filter(vertebral_number >= jh_get_vertebral_number_function(level_to_get_number = intercalary_rod_junction)) %>%
         select(x, y) %>%
-        mutate(y = if_else(y == max(y), y + 0.03, y)) %>%
+        mutate(y = if_else(y == max(y), y + 0.01, y)) %>%
         as.matrix()
       
       # intercalary_rod_matrix <- tibble(level = intercalary_rods_vector) %>%
       #   left_join(all_screw_coordinates_df %>%
       #   filter(side == rod_side))  %>%
-        
-        intercalary_rod_matrix <- all_screw_coordinates_df %>%
+      
+      intercalary_rod_matrix <- all_screw_coordinates_df %>%
         filter(side == rod_side, 
                level %in% intercalary_rods_vector) %>%
         select(x, y) %>%
-        arrange(rev(y)) %>%
+        arrange(y) %>%
         distinct() %>%
+        mutate(y = if_else(y == max(y), y + 0.006, y)) %>%
+        mutate(y = if_else(y == min(y), y - 0.006, y)) %>%
         mutate(x = if_else(x < 0.5, x - 0.007, x + 0.007)) %>%
-        select(x, y) %>%
         as.matrix()
       
       # intercalary_rod_connector_matrix <- tibble(level = intercalary_rods_vector) %>%
       #   left_join(all_screw_coordinates_df %>%
       #   filter(side == rod_side))  %>%
-        intercalary_rod_connector_matrix <- all_screw_coordinates_df %>%
-          filter(side == rod_side, 
-                 level %in% intercalary_rods_vector) %>%
-          select(x, y) %>%
-          arrange(rev(y)) %>%
-          distinct() %>%
-          as.matrix()
+      intercalary_rod_connector_matrix <- all_screw_coordinates_df %>%
+        filter(side == rod_side, 
+               level %in% intercalary_rods_vector) %>%
+        select(x, y) %>%
+        arrange(y) %>%
+        mutate(y = if_else(y == max(y), y + 0.006, y)) %>%
+        mutate(y = if_else(y == min(y), y - 0.006, y)) %>%
+        distinct() %>%
+        as.matrix()
         
       proximal_connector_matrix_list <- jh_rod_construct_connector_matrices_function(proximal_intercalary_rod_matrix)
       

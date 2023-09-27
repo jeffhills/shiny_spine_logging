@@ -4380,10 +4380,24 @@ server <- function(input, output, session) {
   #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
   #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE PLOTS    #############~~~~~~~~~~~~~~~~~~~ ##################### 
   
-  # ############# ~~~~~~~~~~~~~~ ################## MAKE THE SUMMARY TABLE FOR THE PLOT    ############# ~~~~~~~~~~~~~~ ################## 
+  # ############# ~~~~~~~~~~~~~~ ################## CLEAR ALL WITH RESET ALL    ############# ~~~~~~~~~~~~~~ ################## 
 
-  
-
+  observeEvent(input$reset_all, ignoreInit = TRUE, {
+    
+    clear_reactive_values_function <- function(reactive_value_list_to_clear){
+      for (name in names(reactive_value_list_to_clear)){
+        reactive_value_list_to_clear[[name]] <- NULL
+      } 
+    }
+    clear_reactive_values_function(geoms_list_revision_posterior)
+    clear_reactive_values_function(geoms_list_posterior)
+    clear_reactive_values_function(rods_list)
+    
+    clear_reactive_values_function(geoms_list_revision_anterior)
+    clear_reactive_values_function(geoms_list_anterior_diskectomy)
+    clear_reactive_values_function(geoms_list_anterior_interbody)
+    clear_reactive_values_function(geoms_list_anterior_instrumentation)
+  })
   
   # ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS     ######### ~~~~~~~~~~~~~~  #############
   # ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS    ######### ~~~~~~~~~~~~~~  #############
