@@ -161,6 +161,38 @@ all_cages_df <- all_object_ids_df %>%
   arrange(vertebral_number) %>%
   mutate(cage_id = paste(str_to_lower(str_replace_all(level, "-", "_")), side, object, sep = "_")) 
 
+### FOR RODS CROSSING
+lines_df <- labels_df %>%
+  mutate(vertebral_number = vertebral_number - 0.5) %>%
+  select(-level) %>%
+  left_join(levels_numbered_df) %>%
+  filter(!is.na(level)) %>%
+  select(level, vertebral_number, y) %>%
+  mutate(x_left = 0.4, x_right = 0.6) %>%
+  mutate(y = if_else(level == "Sacro-iliac", y - 0.01, y)) %>%
+  rename(y_lower = y)  %>% 
+  mutate(y_upper = y_lower + 0.018) %>%
+  mutate(y_upper = case_when(
+    vertebral_number < 10.25 ~ y_upper,
+    between(vertebral_number, 10.25, 15.75) ~ y_upper + 0.0075,
+    between(vertebral_number, 15.75, 20.75) ~ y_upper + 0.01,
+    between(vertebral_number, 20.75, 23.75) ~ y_upper + 0.012,
+    vertebral_number > 23.75 ~ y_upper
+  ))
+
+
+lower_lines_list <- pmap(.l = list(..1 = lines_df$x_left, ..2 = lines_df$x_right, ..3 = lines_df$y_lower), 
+                         .f = ~ st_linestring(as.matrix(tibble(x = c(..1, ..2), y = ..3))))
+
+upper_lines_list <- pmap(.l = list(..1 = lines_df$x_left, ..2 = lines_df$x_right, ..3 = lines_df$y_upper), 
+                         .f = ~ st_linestring(as.matrix(tibble(x = c(..1, ..2), y = ..3))))
+
+
+names(lower_lines_list) <- lines_df$level
+
+names(upper_lines_list) <- lines_df$level
+rods_crossing_by_level_df <- tibble(level = names(lower_lines_list))
+
 #############-----------------------   Build Revision Implants  ----------------------###############
 # revision_implants_df <- all_implants_constructed_df %>%
 #   filter(category == "implant") %>%

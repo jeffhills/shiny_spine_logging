@@ -1943,16 +1943,14 @@ jh_rod_construct_connector_matrices_function <- function(full_rod_matrix, x_nudg
   proximal_connector_point_df <- full_rod_matrix %>%
     as_tibble() %>%
     filter(y == max(y))  
-    # mutate(x = if_else(x < 0.5, 
-    #                    x + x_nudge, 
-    #                    x + x_nudge)) 
+  
   
   matrix_list$top_connector_matrix <- proximal_connector_point_df %>%
     mutate(x = if_else(x < 0.5, 
                        x - 0.01 + x_nudge, 
                        x + 0.01 + x_nudge)) %>%
     union_all(proximal_connector_point_df) %>%
-    mutate(y = y - 0.007) %>%
+    # mutate(y = y - 0.005) %>%
     # remove_missing() %>%
     select(x, y) %>%
     as.matrix()
@@ -1964,7 +1962,7 @@ jh_rod_construct_connector_matrices_function <- function(full_rod_matrix, x_nudg
   matrix_list$bottom_connector_matrix <- distal_connector_point_df %>%
     mutate(x = if_else(x < 0.5, x - 0.01 + x_nudge, x + 0.01 + x_nudge)) %>%
     union_all(distal_connector_point_df) %>%
-    mutate(y = y + 0.007) %>%
+    # mutate(y = y + 0.005) %>%
     # remove_missing() %>%
     select(x, y) %>%
     as.matrix()
@@ -1975,18 +1973,39 @@ jh_rod_construct_connector_matrices_function <- function(full_rod_matrix, x_nudg
 
 jh_sf_rod_object_from_matrix_function <- function(matrix_input = as.matrix(tibble(x = 1, y = 2)), buffer_distance = 0.003){
   
-  if(!is.null(matrix_input) && is.matrix(matrix_input) && nrow(as_tibble(matrix_input)) > 1){
-   rod_object_sf <-  st_buffer(st_linestring(matrix_input), dist = buffer_distance, endCapStyle = "ROUND")
-  }else if(is.matrix(matrix_input)){
-    rod_matrix <- as_tibble(matrix_input) %>%
-      union_all(as_tibble(matrix_input)) %>%
-      as.matrix()
-    
-    rod_object_sf <-  st_buffer(st_linestring(rod_matrix), dist = buffer_distance, endCapStyle = "ROUND")
-    
+  # if(!is.null(matrix_input) && is.matrix(matrix_input) && nrow(as_tibble(matrix_input)) > 1){
+  #   rod_object_sf <-  st_buffer(st_linestring(matrix_input), dist = buffer_distance, endCapStyle = "ROUND")
+  # }else if(is.matrix(matrix_input)){
+  #   rod_matrix <- as_tibble(matrix_input) %>%
+  #     union_all(as_tibble(matrix_input)) %>%
+  #     as.matrix()
+  # 
+  #   rod_object_sf <-  st_buffer(st_linestring(rod_matrix), dist = buffer_distance, endCapStyle = "ROUND")
+  # 
+  # }else{
+  #   rod_object_sf <- NULL
+  # }
+  
+  if(!is.null(as.matrix(matrix_input))){
+    if(nrow(as_tibble(matrix_input))>1){
+      rod_matrix <- as_tibble(matrix_input) %>%
+        mutate(y = if_else(y == max(y), y + 0.0065, y)) %>%
+        mutate(y = if_else(y == min(y), y - 0.0065, y)) %>%
+        as.matrix()
+      rod_object_sf <-  st_buffer(st_linestring(rod_matrix), dist = buffer_distance, endCapStyle = "ROUND")
+    }else{
+      rod_matrix <- as_tibble(matrix_input) %>%
+        union_all(as_tibble(matrix_input)) %>%
+        mutate(y = if_else(y == max(y), y + 0.0065, y)) %>%
+        mutate(y = if_else(y == min(y), y - 0.0065, y)) %>%
+        as.matrix()
+      rod_object_sf <-  st_buffer(st_linestring(rod_matrix), dist = buffer_distance, endCapStyle = "ROUND")
+      
+    }
   }else{
     rod_object_sf <- NULL
   }
+  
   return(rod_object_sf)
 }
 
@@ -2035,13 +2054,14 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
                  side == rod_side) %>%
           mutate(connector_count = row_number()) %>%
           select(connector_count, x, y) %>%
-          mutate(y = y - 0.005)
+          mutate(x = if_else(x < 0.5, x - 0.01, x + 0.01)) %>% ## start left closer to the new rod
+          mutate(y = y - 0.01)
         
         prior_rod_connector_matrix_list <-  map(.x = revision_rod_overlap$connector_count, .f =  ~ revision_rod_overlap %>%
                                                   filter(connector_count == .x) %>%
                                                   bind_rows(revision_rod_overlap %>%
                                                               filter(connector_count == .x) %>%
-                                                              mutate(x = if_else(x < 0.5, x + 0.01, x - 0.01))) %>%
+                                                              mutate(x = if_else(x < 0.5, x + 0.02, x - 0.02))) %>%
                                                   select(x, y) %>%
                                                   remove_missing() %>%
                                                   as.matrix())
@@ -2076,7 +2096,8 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
                object == "pedicle_screw", 
                side == rod_side) %>%
         select(x, y) %>%
-        mutate(y = y - 0.01)
+        mutate(x = if_else(x < 0.5, x-0.01, x + 0.01)) %>%
+        mutate(y = y - 0.015)
       
     }else{
       revision_rod_overlap <- tibble(x = double(), 
@@ -2089,7 +2110,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
     if(add_kickstand_rod == TRUE && kickstand_rod_vector[1] %in% all_screw_coordinates_df$level && (kickstand_rod_vector[1] != kickstand_rod_vector[2])){
       
       # kickstand_rod_matrix <- tibble(level = kickstand_rod_vector) %>%
-        # left_join(all_screw_coordinates_df %>% filter(side == rod_side)) %>%
+      # left_join(all_screw_coordinates_df %>% filter(side == rod_side)) %>%
       
       x_modifier <- if_else(rod_side == "left", -0.01, 0.01)
       
@@ -2107,9 +2128,9 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         filter(side == rod_side, level %in% kickstand_rod_vector) %>%
         select(x, y) %>%
         arrange(rev(y)) %>%
+        mutate(y = if_else(y == max(y), y + 0.007, y)) %>%
         distinct() %>%
         remove_missing() %>%
-        mutate(y = if_else(y == max(y), y + 0.007, y)) %>%
         as.matrix()
       
       kickstand_connector_matrix_list <- jh_rod_construct_connector_matrices_function(kickstand_connector_matrix)
@@ -2192,7 +2213,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       rods_list$satellite_rod_sf <- jh_sf_rod_object_from_matrix_function(satellite_rod_matrix) 
       rods_list$main_rod_sf <- jh_sf_rod_object_from_matrix_function(main_rod_matrix) 
-
+      
     }
     
     #################### LINKED ROD ###################
@@ -2219,8 +2240,8 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       # proximal_linked_rod_matrix <- tibble(level = proximal_rod_levels_vector) %>%
       #   left_join(main_rod_df) %>%
-        
-        proximal_linked_rod_matrix <- main_rod_df %>% 
+      
+      proximal_linked_rod_matrix <- main_rod_df %>% 
         filter(level %in% proximal_rod_levels_vector) %>%
         mutate(x = if_else(level %in% distal_rod_levels_vector, x - x_linked_rod_modifier, x)) %>%
         select(x, y) %>%
@@ -2228,29 +2249,35 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       # distal_linked_rod_matrix <- tibble(level = distal_rod_levels_vector) %>%
       #   left_join(main_rod_df) %>%
-        distal_linked_rod_matrix <- main_rod_df %>% 
+      distal_linked_rod_matrix <- main_rod_df %>% 
         filter(level %in% distal_rod_levels_vector) %>%
         mutate(x = if_else(level %in% proximal_rod_levels_vector, x + x_linked_rod_modifier, x)) %>%
         select(x, y) %>%
         as.matrix()
       
-        linked_rods_overlap_matrix <- all_screw_coordinates_df %>%
-          filter(side == rod_side, 
-                 level %in% linked_rods_vector) %>%
-          select(x, y) %>%
-          mutate(x = if_else(x < 0.5, x + x_linked_rod_modifier, x + x_linked_rod_modifier)) %>%
-          distinct() %>%
-          arrange(rev(y)) %>%
-          as.matrix()
-        
-      connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rods_overlap_matrix, x_nudge = if_else(rod_side == "right", -0.01, 0))
+      
+      # linked_rods_overlap_matrix <- tibble(level = linked_rods_vector) %>%
+      #   left_join(all_screw_coordinates_df %>%
+      #   filter(side == rod_side))  %>%
+      
+      linked_rods_overlap_matrix <- all_screw_coordinates_df %>%
+        filter(side == rod_side, 
+               level %in% linked_rods_vector) %>%
+        select(x, y) %>%
+        mutate(x = if_else(x < 0.5, x + x_linked_rod_modifier, x + x_linked_rod_modifier)) %>%
+        distinct() %>%
+        arrange(rev(y)) %>%
+        as.matrix()
+      
+      connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rods_overlap_matrix)
+      # connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rods_overlap_matrix, x_nudge = if_else(rod_side == "right", -0.01, 0))
       
       connector_list$linked_rod_top_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$top_connector_matrix)
       connector_list$linked_rod_bottom_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$bottom_connector_matrix)
       
       rods_list$linked_proximal_rod_sf <- jh_sf_rod_object_from_matrix_function(proximal_linked_rod_matrix)
       rods_list$linked_distal_rod_sf <- jh_sf_rod_object_from_matrix_function(distal_linked_rod_matrix)
-
+      
       
       rods_list$main_rod_sf <- NULL
     }
@@ -2297,12 +2324,11 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         mutate(y = if_else(y == min(y), y - 0.006, y)) %>%
         distinct() %>%
         as.matrix()
-        
+      
       proximal_connector_matrix_list <- jh_rod_construct_connector_matrices_function(proximal_intercalary_rod_matrix)
       
       
       intercalary_connector_matrix_list <- jh_rod_construct_connector_matrices_function(intercalary_rod_connector_matrix)
-      
       
       distal_connector_matrix_list <- jh_rod_construct_connector_matrices_function(distal_intercalary_rod_matrix)
       
@@ -2311,15 +2337,11 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       connector_list$intercalary_distal_rod_top_connector <- jh_sf_rod_object_from_matrix_function(distal_connector_matrix_list$top_connector_matrix)
       connector_list$intercalary_distal_rod_bottom_connector <- jh_sf_rod_object_from_matrix_function(intercalary_connector_matrix_list$bottom_connector_matrix)
-      # connector_matrix_list <- jh_rod_construct_connector_matrices_function(intercalary_rod_connector_matrix)
-      
-      # connector_list$intercalary_rod_top_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$top_connector_matrix)
-      # connector_list$intercalary_rod_bottom_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$bottom_connector_matrix)
       
       rods_list$intercalary_rod_sf <- jh_sf_rod_object_from_matrix_function(intercalary_rod_matrix)
       rods_list$intercalary_distal_rod_sf <- jh_sf_rod_object_from_matrix_function(distal_intercalary_rod_matrix)
       rods_list$intercalary_proximal_rod_sf <- jh_sf_rod_object_from_matrix_function(proximal_intercalary_rod_matrix)
-   
+      
       
       rods_list$main_rod_sf <- NULL
     }
@@ -2384,6 +2406,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
   }
   
 }
+
 
 
 
