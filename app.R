@@ -1099,8 +1099,16 @@ ui <- dashboardPage(skin = "black",
                   ),
                   tabItem(tabName = "tables",
                           #         ###########################################
-                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Approach/Sequence:"), status = "success", collapsible = TRUE,solidHeader = TRUE,
-                              radioGroupButtons(inputId = "approach_sequence", 
+                          # box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedure Approach/Sequence:"), status = "success", collapsible = TRUE,solidHeader = TRUE,
+                          #     
+                          # ), 
+                          h3("Tables for Redcap Upload:"),
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Patient Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                              column(6, 
+                                     tableOutput(outputId = "patient_details_redcap_table")
+                                     ),
+                              column(6, 
+                                     radioGroupButtons(inputId = "approach_sequence", 
                                                 label = "Spine Approach/Sequence:", 
                                                 choices = list("Posterior" = "posterior", 
                                                                "Anterior/Lateral" = "anterior", 
@@ -1114,20 +1122,23 @@ ui <- dashboardPage(skin = "black",
                                                   yes = icon("ok", 
                                                              lib = "glyphicon")
                                                 )
-                              )
-                          ), 
-                          h3("Tables for Redcap Upload:"),
-                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Patient Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                              tableOutput(outputId = "patient_details_redcap_table")
+                              ))
+                              
                           ),
-                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Surgical Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                              tableOutput(outputId = "surgical_details_redcap_table")
-                          ),
-                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Intraoperative Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                              tableOutput(outputId = "intraoperative_details_redcap_table")
-                          ),
-                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Rods Crossing by Level:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
-                              tableOutput(outputId = "rods_crossing_by_level_table")
+                          fluidRow(
+                            column(6, 
+                                   box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Surgical Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                                tableOutput(outputId = "surgical_details_redcap_table")
+                                   )
+                            ),
+                            column(6, 
+                                   box(width = 6, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Intraoperative Details"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                                       tableOutput(outputId = "intraoperative_details_redcap_table")
+                                   ),
+                                   box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Rods Crossing by Level:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
+                                       tableOutput(outputId = "rods_crossing_by_level_table")
+                                   )
+                            )
                           ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Procedures by Level:"),status = "success", collapsible = TRUE,solidHeader = TRUE,
                               tableOutput(outputId = "procedures_by_level_redcap_table")
@@ -7668,10 +7679,21 @@ server <- function(input, output, session) {
         replace_na(list(left_rod_count = 0, right_rod_count = 0, left_rods_crossing = "", right_rods_crossing = "")) %>%
         mutate(total_rods_crossing = left_rod_count + right_rod_count) %>%
         filter(total_rods_crossing >0) %>%
-        select(level, total_rods_crossing)
+        mutate(left_rods_crossing = str_remove_all(left_rods_crossing, "_sf"),
+               right_rods_crossing = str_remove_all(right_rods_crossing, "_sf")) %>%
+        mutate(dos_rods_crossing_repeating = as.character(input$date_of_surgery)) %>%
+        select(dos_rods_crossing_repeating, level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing)
+        # select(level, total_rods_crossing)
       
     }else{
-      tibble(level = character(), total_rods_crossing = double())
+      tibble(level = character(),
+             left_rod_count = double(),
+             left_rods_crossing = character(),
+             right_rod_count = double(),
+             right_rods_crossing = character(),
+             total_rods_crossing = double()
+      )
+      # tibble(level = character(), total_rods_crossing = double())
     }
   })
   
@@ -7725,7 +7747,12 @@ server <- function(input, output, session) {
                                                "_complete",
                                                "text_size", 
                                                "idpostop", 
-                                               "drop")
+                                               "drop", 
+                                               "prior_patient_match_located", 
+                                               "redcap_token", 
+                                               "redcap", 
+                                               "edit",
+                                               "true_false")
       
       all_inputs_list <- reactiveValuesToList(input, all.names = FALSE)
       
@@ -8085,6 +8112,11 @@ server <- function(input, output, session) {
           }else{
             interbody_implant_repeating_instance_add <- 0
           }
+          if("rods_crossing_by_level_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+            rods_crossing_by_level_repeating_instance_add <- repeat_list$rods_crossing_by_level_repeating
+          }else{
+            rods_crossing_by_level_repeating_instance_add <- 0
+          }
           
           if("all_inputs_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
             all_inputs_repeating_instance_add <- repeat_list$all_inputs_repeating
@@ -8110,6 +8142,7 @@ server <- function(input, output, session) {
           procedures_by_level_repeating_instance_add <- 0
           screw_details_repeating_instance_add <- 0
           interbody_implant_repeating_instance_add <- 0
+          rods_crossing_by_level_repeating_instance_add <- 0
           all_inputs_repeating_instance_add <- 0
           # posterior_implant_removal_instance_add <- 0
           implant_removal_repeating_instance_add <- 0
@@ -8120,6 +8153,7 @@ server <- function(input, output, session) {
         procedures_by_level_repeating_instance_add <- 0
         screw_details_repeating_instance_add <- 0
         interbody_implant_repeating_instance_add <- 0
+        rods_crossing_by_level_repeating_instance_add <- 0
         all_inputs_repeating_instance_add <- 0
         # posterior_implant_removal_instance_add <- 0
         implant_removal_repeating_instance_add <- 0
@@ -8128,7 +8162,7 @@ server <- function(input, output, session) {
       ##### uploaded patient details #######
       
       withProgress(message = 'Uploading Data', value = 0, {
-        number_of_steps <- 9
+        number_of_steps <- 10
         
         incProgress(1/number_of_steps, detail = paste("Uploading Patient Details"))
         
@@ -8215,6 +8249,24 @@ server <- function(input, output, session) {
           
           importRecords(rcon = rcon_reactive$rcon, data = interbody_implant_repeating, returnContent = "count")
         }
+        
+        incProgress(1/number_of_steps, detail = paste("Uploading Rods crossing by Level Data"))
+        ##### uploaded RODS CROSSING BY LEVEL details #######
+        if(nrow(rods_crossing_by_level_redcap_table_reactive())>0){
+          rods_crossing_by_level_repeating <- rods_crossing_by_level_redcap_table_reactive() %>%
+            mutate(record_id = record_number) %>%
+            select(record_id, everything()) %>%
+            mutate(redcap_event_name = "surgery_arm_1") %>%
+            mutate(redcap_repeat_instance = row_number() + rods_crossing_by_level_repeating_instance_add) %>%
+            mutate(redcap_repeat_instrument = "rods_crossing_by_level_repeating") %>%
+            mutate(rods_crossing_by_level_repeating_complete = "Complete") %>%
+            mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+            select(record_id, redcap_event_name, everything())
+          
+          importRecords(rcon = rcon_reactive$rcon, data = rods_crossing_by_level_repeating, returnContent = "count")
+        }
+        
+        # rods_crossing_by_level_redcap_table_reactive
         
         incProgress(1/number_of_steps, detail = paste("Uploading All Data Inputs"))
         
