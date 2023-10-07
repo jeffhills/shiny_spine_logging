@@ -6065,34 +6065,34 @@ server <- function(input, output, session) {
   right_rod_crossing_table_reactive <- reactive({
     right_rods_connectors_list <- list()
     if(input$implants_complete > 0){
-      if(input$add_right_accessory_rod == TRUE && input$right_accessory_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_accessory_rod)) == 2){
-        accessory_vector <- input$right_accessory_rod
-      }else{
-        accessory_vector <- c("a")
-      }
-      if(input$add_right_satellite_rod == TRUE && input$right_satellite_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_satellite_rod)) == 2){
-        satellite_vector <- input$right_satellite_rod
-      }else{
-        satellite_vector <- c("a", "b")
-      }
-      if(input$add_right_intercalary_rod == TRUE && input$right_intercalary_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_intercalary_rod)) == 2){
-        intercalary_vector <- input$right_intercalary_rod
-        junction <- input$right_intercalary_rod_junction
-      }else{
-        intercalary_vector <- c("a")
-        junction <- NULL
-      }
-      if(input$add_right_linked_rods == TRUE && input$right_linked_rods[1] %in% all_screw_coordinates_df$level && length(unique(input$right_linked_rods)) == 2){
-        linked_vector <- input$right_linked_rods
-      }else{
-        linked_vector <- c("a")
-      }
-      
-      if(input$add_right_kickstand_rod == TRUE && input$right_kickstand_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_kickstand_rod)) == 2){
-        right_kickstand_rod_vector <- input$right_kickstand_rod
-      }else{
-        right_kickstand_rod_vector <- c("a")
-      }
+      # if(input$add_right_accessory_rod == TRUE && input$right_accessory_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_accessory_rod)) == 2){
+      #   accessory_vector <- input$right_accessory_rod
+      # }else{
+      #   accessory_vector <- c("a")
+      # }
+      # if(input$add_right_satellite_rod == TRUE && input$right_satellite_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_satellite_rod)) == 2){
+      #   satellite_vector <- input$right_satellite_rod
+      # }else{
+      #   satellite_vector <- c("a", "b")
+      # }
+      # if(input$add_right_intercalary_rod == TRUE && input$right_intercalary_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_intercalary_rod)) == 2){
+      #   intercalary_vector <- input$right_intercalary_rod
+      #   junction <- input$right_intercalary_rod_junction
+      # }else{
+      #   intercalary_vector <- c("a")
+      #   junction <- NULL
+      # }
+      # if(input$add_right_linked_rods == TRUE && input$right_linked_rods[1] %in% all_screw_coordinates_df$level && length(unique(input$right_linked_rods)) == 2){
+      #   linked_vector <- input$right_linked_rods
+      # }else{
+      #   linked_vector <- c("a")
+      # }
+      # 
+      # if(input$add_right_kickstand_rod == TRUE && input$right_kickstand_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_kickstand_rod)) == 2){
+      #   right_kickstand_rod_vector <- input$right_kickstand_rod
+      # }else{
+      #   right_kickstand_rod_vector <- c("a")
+      # }
       
       custom_rods_vector_list <- list()
       if(input$add_right_custom_rods == TRUE){
@@ -6134,16 +6134,16 @@ server <- function(input, output, session) {
         right_rods_connectors_list <- build_unilateral_rods_list_function(unilateral_full_implant_df = right_implants_df,
                                                                           rod_side = "right",
                                                                           add_accessory_rod = input$add_right_accessory_rod,
-                                                                          accessory_rod_vector = accessory_vector, 
+                                                                          accessory_rod_vector = input$right_accessory_rod, 
                                                                           add_satellite_rod = input$add_right_satellite_rod,
-                                                                          satellite_rods_vector = satellite_vector,
+                                                                          satellite_rods_vector = input$right_satellite_rod,
                                                                           add_intercalary_rod = input$add_right_intercalary_rod, 
-                                                                          intercalary_rods_vector = intercalary_vector, 
-                                                                          intercalary_rod_junction = junction, 
+                                                                          intercalary_rods_vector = input$right_intercalary_rod, 
+                                                                          intercalary_rod_junction = input$right_intercalary_rod_junction, 
                                                                           add_linked_rods = input$add_right_linked_rods,
-                                                                          linked_rods_vector = linked_vector,
+                                                                          linked_rods_vector = input$right_linked_rods,
                                                                           add_kickstand_rod = input$add_right_kickstand_rod,
-                                                                          kickstand_rod_vector = right_kickstand_rod_vector,
+                                                                          kickstand_rod_vector = input$right_kickstand_rod,
                                                                           add_custom_rods = input$add_right_custom_rods,
                                                                           custom_rods_vector_list = custom_rods_vector_list,
                                                                           revision_rods_retained_df = right_revision_implants_reactive_list()$retained_df,

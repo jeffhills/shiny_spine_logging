@@ -2097,6 +2097,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
                side == rod_side) %>%
         select(x, y) %>%
         mutate(x = if_else(x < 0.5, x-0.01, x + 0.01)) %>%
+        arrange(y) %>%
         mutate(y = y - 0.015)
       
     }else{
@@ -2143,38 +2144,36 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         filter(level != kickstand_rod_vector[2])%>%
         mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
         mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-        arrange(rev(y)) 
+        arrange(y)
       
     }else{
       main_rod_df <- unilateral_full_implant_df %>%
         mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
         mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
-        arrange(rev(y)) 
+        arrange(y)
     } 
     
     #################### MAIN ROD ###################
     if(nrow(main_rod_df) >1){
       
       main_rod_matrix <- main_rod_df %>%
-        arrange(rev(y)) %>%
         select(x, y) %>%
         bind_rows(revision_rod_overlap) %>%
-        arrange(rev(y)) %>%
         distinct() %>%
         remove_missing() %>%
         select(x, y) %>%
+        arrange(y) %>%
         as.matrix()
       
       rods_list$main_rod_sf <- jh_sf_rod_object_from_matrix_function(main_rod_matrix) 
     }else if(nrow(main_rod_df) == 1 && nrow(revision_rod_overlap)>0){
       main_rod_matrix <- main_rod_df %>%
-        arrange(rev(y)) %>%
         select(x, y) %>%
         bind_rows(revision_rod_overlap) %>%
-        arrange(rev(y)) %>%
         distinct() %>%
         remove_missing() %>%
         select(x, y) %>%
+        arrange(y) %>%
         as.matrix()
       
       rods_list$main_rod_sf <- jh_sf_rod_object_from_matrix_function(main_rod_matrix) 
@@ -2191,8 +2190,6 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       satellite_rod_matrix <- satellite_rods_vector_df %>%
         mutate(x = if_else(x < 0.5, x + 0.003, x - 0.003)) %>%
-        # mutate(y = if_else(y == max(y), y + 0.01, y)) %>%
-        # mutate(y = if_else(y == min(y), y - 0.01, y)) %>%
         remove_missing() %>%
         select(x, y) %>%
         as.matrix()
@@ -2247,18 +2244,13 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         select(x, y) %>%
         as.matrix()
       
-      # distal_linked_rod_matrix <- tibble(level = distal_rod_levels_vector) %>%
-      #   left_join(main_rod_df) %>%
+
       distal_linked_rod_matrix <- main_rod_df %>% 
         filter(level %in% distal_rod_levels_vector) %>%
         mutate(x = if_else(level %in% proximal_rod_levels_vector, x + x_linked_rod_modifier, x)) %>%
         select(x, y) %>%
         as.matrix()
-      
-      
-      # linked_rods_overlap_matrix <- tibble(level = linked_rods_vector) %>%
-      #   left_join(all_screw_coordinates_df %>%
-      #   filter(side == rod_side))  %>%
+    
       
       linked_rods_overlap_matrix <- all_screw_coordinates_df %>%
         filter(side == rod_side, 
