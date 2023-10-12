@@ -11,7 +11,7 @@ library(ggpattern)
 library(glue)
 library(rlist) 
 library(janitor)
-library(lubridate)
+library(lubridate) 
 library(redcapAPI)
 library(ggpmisc)
 library(rclipboard)
@@ -5584,7 +5584,7 @@ server <- function(input, output, session) {
   ################------------------  Interbody Details (and generating results)    ----------------------######################  
   
   interbody_df_reactive <- reactive({
-    if(input$add_intervertebral_cage + input$add_interbody > 0){
+    # if(input$add_interbody > 0 | input$add_intervertebral_cage > 0){
     if(any(str_detect(all_objects_to_add_list$objects_df$object, "intervertebral_cage"))){
       
       intervertebral_cage_df <- all_objects_to_add_list$objects_df %>%
@@ -5608,9 +5608,9 @@ server <- function(input, output, session) {
         arrange(vertebral_number) %>%
         mutate(cage_id = paste(str_to_lower(str_replace_all(level, "-", "_")), side, object, sep = "_"))
     }
-    }else{
-      interbody_implants_df <- tibble()
-    }
+    # }else{
+    #   interbody_implants_df <- tibble()
+    # }
     interbody_implants_df
 
   }) 
@@ -8261,7 +8261,7 @@ server <- function(input, output, session) {
             mutate(redcap_repeat_instrument = "rods_crossing_by_level_repeating") %>%
             mutate(rods_crossing_by_level_repeating_complete = "Complete") %>%
             mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
-            select(record_id, redcap_event_name, everything())
+            select(record_id, redcap_event_name, dos_rods_crossing_repeating, rods_crossing_level = level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing, everything())
           
           importRecords(rcon = rcon_reactive$rcon, data = rods_crossing_by_level_repeating, returnContent = "count")
         }
