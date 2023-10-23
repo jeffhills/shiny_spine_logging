@@ -3039,8 +3039,10 @@ server <- function(input, output, session) {
     }
     retained_df <- retained_df %>%
       distinct()
+    
     removed_df <- removed_df %>%
       distinct()
+    
     revision_implants_status_df <- revision_implants_status_df %>%
       distinct()
     
@@ -3087,6 +3089,8 @@ server <- function(input, output, session) {
   ############### LEFT RODS ################# ############### LEFT RODS ################# ############### LEFT RODS #################
   ############### LEFT RODS ################# ############### LEFT RODS ################# ############### LEFT RODS #################
   
+  # left_revision_implants_reactive_list()$retained_df #tibble(level, side, vertebral_number, object, x, y)
+  
   ##### UPDATE SUPPLEMENT ROD CHOICES -----
   ##### UPDATE SUPPLEMENT ROD CHOICES -----
   observeEvent(input$reset_all,ignoreNULL = TRUE, ignoreInit = TRUE, {
@@ -3103,6 +3107,7 @@ server <- function(input, output, session) {
   observeEvent(input$add_left_accessory_rod,  ignoreInit = TRUE, {
     if(input$add_left_accessory_rod == TRUE){
       start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$left_rod_implants_df,
+                                                           revision_objects_retained_df = left_revision_implants_reactive_list()$retained_df,
                                                            rod_type = "accessory_rod")
       updateSliderTextInput(session = session,
                             inputId = "left_accessory_rod",
@@ -3122,6 +3127,7 @@ server <- function(input, output, session) {
   observeEvent(input$add_left_satellite_rod,  ignoreInit = TRUE, {
     if(input$add_left_satellite_rod == TRUE){
       start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$left_rod_implants_df,
+                                                           revision_objects_retained_df = left_revision_implants_reactive_list()$retained_df,
                                                            osteotomy_site = osteotomy_level_reactive(),
                                                            rod_type = "satellite_rod")
       
@@ -3142,9 +3148,15 @@ server <- function(input, output, session) {
   
   observeEvent(list(input$add_left_intercalary_rod), ignoreInit = TRUE, {
     if(input$add_left_intercalary_rod == TRUE){
-
-      left_implants_df <- all_objects_to_add_list$left_rod_implants_df %>%
-        arrange(vertebral_number)
+      
+      if(nrow(left_revision_implants_reactive_list()$retained_df)>0){
+        left_implants_df <- all_objects_to_add_list$left_rod_implants_df %>%
+          bind_rows(left_revision_implants_reactive_list()$retained_df) %>%
+          arrange(vertebral_number)
+      }else{
+        left_implants_df <- all_objects_to_add_list$left_rod_implants_df %>%
+          arrange(vertebral_number) 
+      }
       
       distal_limit <- if_else(tail(left_implants_df$vertebral_number, 2)[1] >= 25, 25, tail(left_implants_df$vertebral_number, 2)[1])
       
@@ -3154,6 +3166,28 @@ server <- function(input, output, session) {
       
       if(!is.null(osteotomy_level_reactive()) && osteotomy_level_reactive()[1] %in% junction_choices_vector){
         starting_junction <- osteotomy_level_reactive()[1]
+      }else if(nrow(left_revision_implants_reactive_list()$retained_df)>0){
+        
+        if(min(left_revision_implants_reactive_list()$retained_df$vertebral_number) < min(all_objects_to_add_list$left_rod_implants_df$vertebral_number)){
+          ## revising distally
+          # starting_junction <-
+          distal_proximal_rods_df <- left_revision_implants_reactive_list()$retained_df %>%
+            bind_rows(all_objects_to_add_list$left_rod_implants_df) %>%
+            filter(vertebral_number >= max(left_revision_implants_reactive_list()$retained_df$vertebral_number)) %>%
+            filter(vertebral_number <= min(all_objects_to_add_list$left_rod_implants_df$vertebral_number))
+          
+          starting_junction <- jh_get_vertebral_level_function(number = mean(distal_proximal_rods_df$vertebral_number))
+        }else{
+          ## extending proximally
+          
+          distal_proximal_rods_df <- left_revision_implants_reactive_list()$retained_df %>%
+            bind_rows(all_objects_to_add_list$left_rod_implants_df) %>%
+            filter(vertebral_number <= min(left_revision_implants_reactive_list()$retained_df$vertebral_number)) %>%
+            filter(vertebral_number >= max(all_objects_to_add_list$left_rod_implants_df$vertebral_number))
+          
+          starting_junction <- jh_get_vertebral_level_function(number = mean(distal_proximal_rods_df$vertebral_number))
+        }
+        
       }else{
         starting_junction <- junction_choices_vector[round(length(junction_choices_vector)/2, 0)]
       }
@@ -3177,11 +3211,22 @@ server <- function(input, output, session) {
   
   
   observeEvent(list(input$add_left_intercalary_rod, input$left_intercalary_rod_junction), ignoreInit = TRUE, {
-    # observeEvent(input$left_intercalary_rod_junction, ignoreInit = TRUE, {
+
     if(input$add_left_intercalary_rod == TRUE && input$left_intercalary_rod_junction %in% implant_levels_numbered_df$level){
       
-      left_implant_df <- all_objects_to_add_list$left_rod_implants_df %>%
-        filter(str_detect(level, "Iliac") == FALSE)
+      if(nrow(left_revision_implants_reactive_list()$retained_df)>0){
+        left_implant_df <- all_objects_to_add_list$left_rod_implants_df %>%
+          bind_rows(left_revision_implants_reactive_list()$retained_df) %>%
+          arrange(vertebral_number)%>%
+          filter(str_detect(level, "Iliac") == FALSE)
+      }else{
+        left_implant_df <- all_objects_to_add_list$left_rod_implants_df %>%
+          arrange(vertebral_number) %>%
+          filter(str_detect(level, "Iliac") == FALSE)
+      }
+      
+      # left_implant_df <- all_objects_to_add_list$left_rod_implants_df %>%
+      #   filter(str_detect(level, "Iliac") == FALSE)
 
         proximal_options <- (implant_levels_numbered_df %>%
                                filter(str_detect(level, "Iliac") == FALSE) %>%
@@ -3196,11 +3241,13 @@ server <- function(input, output, session) {
         overlap_vector_choices <- append(proximal_options, distal_options)
         
         
-        if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
-        overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
-      }else{
-        overlap_start <-    overlap_vector_choices[1:2]
-      }
+      #   if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
+      #   overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
+      # }else{
+      #   overlap_start <-    overlap_vector_choices[1:2]
+      # }
+        overlap_start <- c(overlap_vector_choices[round(length(overlap_vector_choices)*0.2, 0)], 
+                           overlap_vector_choices[round(length(overlap_vector_choices)*0.8, 0)])
       
       updateSliderTextInput(session = session,
                             inputId = "left_intercalary_rod",
@@ -3226,8 +3273,19 @@ server <- function(input, output, session) {
                  jh_get_vertebral_number_function(input$left_intercalary_rod[1]),
                  jh_get_vertebral_number_function(input$left_intercalary_rod[2 ])) == FALSE){
 
-        left_implant_df <- all_objects_to_add_list$left_rod_implants_df %>%
-          filter(str_detect(level, "Iliac") == FALSE)
+        # left_implant_df <- all_objects_to_add_list$left_rod_implants_df %>%
+        #   filter(str_detect(level, "Iliac") == FALSE)
+        
+        if(nrow(left_revision_implants_reactive_list()$retained_df)>0){
+          left_implant_df <- all_objects_to_add_list$left_rod_implants_df %>%
+            bind_rows(left_revision_implants_reactive_list()$retained_df) %>%
+            arrange(vertebral_number)%>%
+            filter(str_detect(level, "Iliac") == FALSE)
+        }else{
+          left_implant_df <- all_objects_to_add_list$left_rod_implants_df %>%
+            arrange(vertebral_number) %>%
+            filter(str_detect(level, "Iliac") == FALSE)
+        }
 
         proximal_options <- (implant_levels_numbered_df %>%
                                filter(str_detect(level, "Iliac") == FALSE)%>%
@@ -3241,11 +3299,13 @@ server <- function(input, output, session) {
 
         overlap_vector_choices <- append(proximal_options, distal_options)
 
-        if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
-          overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
-        }else{
-          overlap_start <-    overlap_vector_choices[1:2]
-        }
+        # if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
+        #   overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
+        # }else{
+        #   overlap_start <-    overlap_vector_choices[1:2]
+        # }
+        overlap_start <- c(overlap_vector_choices[round(length(overlap_vector_choices)*0.2, 0)], 
+                           overlap_vector_choices[round(length(overlap_vector_choices)*0.8, 0)])
 
         show_alert(title = "Either choose a different intercalary junction, or choose an overlap range that includes the junction")
         updateSliderTextInput(session = session,
@@ -3258,7 +3318,7 @@ server <- function(input, output, session) {
     }
   })
   
-
+ 
   
   observeEvent(input$add_left_linked_rods,
                ignoreNULL = TRUE, 
@@ -3266,6 +3326,7 @@ server <- function(input, output, session) {
                  
                  if(input$add_left_linked_rods == TRUE){
                    start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$left_rod_implants_df,
+                                                                        revision_objects_retained_df = left_revision_implants_reactive_list()$retained_df,
                                                                         rod_type = "linked_rod")
                    
                    updateSliderTextInput(session = session,
@@ -3280,7 +3341,7 @@ server <- function(input, output, session) {
                                          label = "Select Overlap Region:",
                                          choices = c("a", "b"),
                                          selected = c("a", "b")
-                   )
+                   ) 
                  }
                })
   
@@ -3291,6 +3352,7 @@ server <- function(input, output, session) {
                    
                    if(any(str_detect(str_to_lower(all_objects_to_add_list$left_rod_implants_df$level), "iliac"))){
                      start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$left_rod_implants_df,
+                                                                          revision_objects_retained_df = left_revision_implants_reactive_list()$retained_df,
                                                                           rod_type = "kickstand_rod")
                      
                      updateSliderTextInput(session = session,
@@ -3780,6 +3842,7 @@ server <- function(input, output, session) {
   observeEvent(input$add_right_accessory_rod, ignoreInit = TRUE, {
     if(input$add_right_accessory_rod == TRUE){
       start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$right_rod_implants_df,
+                                                           revision_objects_retained_df = right_revision_implants_reactive_list()$retained_df,
                                                            rod_type = "accessory_rod")
       updateSliderTextInput(session = session,
                             inputId = "right_accessory_rod",
@@ -3798,7 +3861,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$add_right_satellite_rod, ignoreInit = TRUE,{
     if(input$add_right_satellite_rod == TRUE){
-      start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$right_rod_implants_df,
+      start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$right_rod_implants_df, 
+                                                           revision_objects_retained_df = right_revision_implants_reactive_list()$retained_df,
                                                            osteotomy_site = osteotomy_level_reactive(),
                                                            rod_type = "satellite_rod")
       
@@ -3816,11 +3880,17 @@ server <- function(input, output, session) {
     }
   }
   )
-  
-  observeEvent(list(input$add_right_intercalary_rod),  ignoreInit = TRUE, {
+  observeEvent(list(input$add_right_intercalary_rod), ignoreInit = TRUE, {
     if(input$add_right_intercalary_rod == TRUE){
-      right_implants_df <- all_objects_to_add_list$right_rod_implants_df %>%
-        arrange(vertebral_number)
+      
+      if(nrow(right_revision_implants_reactive_list()$retained_df)>0){
+        right_implants_df <- all_objects_to_add_list$right_rod_implants_df %>%
+          bind_rows(right_revision_implants_reactive_list()$retained_df) %>%
+          arrange(vertebral_number)
+      }else{
+        right_implants_df <- all_objects_to_add_list$right_rod_implants_df %>%
+          arrange(vertebral_number) 
+      }
       
       distal_limit <- if_else(tail(right_implants_df$vertebral_number, 2)[1] >= 25, 25, tail(right_implants_df$vertebral_number, 2)[1])
       
@@ -3830,6 +3900,28 @@ server <- function(input, output, session) {
       
       if(!is.null(osteotomy_level_reactive()) && osteotomy_level_reactive()[1] %in% junction_choices_vector){
         starting_junction <- osteotomy_level_reactive()[1]
+      }else if(nrow(right_revision_implants_reactive_list()$retained_df)>0){
+        
+        if(min(right_revision_implants_reactive_list()$retained_df$vertebral_number) < min(all_objects_to_add_list$right_rod_implants_df$vertebral_number)){
+          ## revising distally
+          # starting_junction <-
+          distal_proximal_rods_df <- right_revision_implants_reactive_list()$retained_df %>%
+            bind_rows(all_objects_to_add_list$right_rod_implants_df) %>%
+            filter(vertebral_number >= max(right_revision_implants_reactive_list()$retained_df$vertebral_number)) %>%
+            filter(vertebral_number <= min(all_objects_to_add_list$right_rod_implants_df$vertebral_number))
+          
+          starting_junction <- jh_get_vertebral_level_function(number = mean(distal_proximal_rods_df$vertebral_number))
+        }else{
+          ## extending proximally
+          
+          distal_proximal_rods_df <- right_revision_implants_reactive_list()$retained_df %>%
+            bind_rows(all_objects_to_add_list$right_rod_implants_df) %>%
+            filter(vertebral_number <= min(right_revision_implants_reactive_list()$retained_df$vertebral_number)) %>%
+            filter(vertebral_number >= max(all_objects_to_add_list$right_rod_implants_df$vertebral_number))
+          
+          starting_junction <- jh_get_vertebral_level_function(number = mean(distal_proximal_rods_df$vertebral_number))
+        }
+        
       }else{
         starting_junction <- junction_choices_vector[round(length(junction_choices_vector)/2, 0)]
       }
@@ -3851,11 +3943,24 @@ server <- function(input, output, session) {
   }
   )
   
-  observeEvent(list(input$add_right_intercalary_rod, input$right_intercalary_rod_junction),  ignoreInit = TRUE, {
+  
+  observeEvent(list(input$add_right_intercalary_rod, input$right_intercalary_rod_junction), ignoreInit = TRUE, {
+    
     if(input$add_right_intercalary_rod == TRUE && input$right_intercalary_rod_junction %in% implant_levels_numbered_df$level){
       
-      right_implant_df <- all_objects_to_add_list$right_rod_implants_df %>%
-        filter(str_detect(level, "Iliac") == FALSE)
+      if(nrow(right_revision_implants_reactive_list()$retained_df)>0){
+        right_implant_df <- all_objects_to_add_list$right_rod_implants_df %>%
+          bind_rows(right_revision_implants_reactive_list()$retained_df) %>%
+          arrange(vertebral_number)%>%
+          filter(str_detect(level, "Iliac") == FALSE)
+      }else{
+        right_implant_df <- all_objects_to_add_list$right_rod_implants_df %>%
+          arrange(vertebral_number) %>%
+          filter(str_detect(level, "Iliac") == FALSE)
+      }
+      
+      # right_implant_df <- all_objects_to_add_list$right_rod_implants_df %>%
+      #   filter(str_detect(level, "Iliac") == FALSE)
       
       proximal_options <- (implant_levels_numbered_df %>%
                              filter(str_detect(level, "Iliac") == FALSE) %>%
@@ -3870,11 +3975,13 @@ server <- function(input, output, session) {
       overlap_vector_choices <- append(proximal_options, distal_options)
       
       
-      if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
-        overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
-      }else{
-        overlap_start <-    overlap_vector_choices[1:2]
-      }
+      #   if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
+      #   overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
+      # }else{
+      #   overlap_start <-    overlap_vector_choices[1:2]
+      # }
+      overlap_start <- c(overlap_vector_choices[round(length(overlap_vector_choices)*0.2, 0)], 
+                         overlap_vector_choices[round(length(overlap_vector_choices)*0.8, 0)])
       
       updateSliderTextInput(session = session,
                             inputId = "right_intercalary_rod",
@@ -3896,12 +4003,23 @@ server <- function(input, output, session) {
   observeEvent(input$right_intercalary_rod,ignoreInit = TRUE, ignoreNULL = TRUE, {
     
     if(input$add_right_intercalary_rod == TRUE && input$right_intercalary_rod_junction %in% implant_levels_numbered_df$level && input$right_intercalary_rod[1] %in% implant_levels_numbered_df$level){
-      if(between(jh_get_vertebral_number_function(input$right_intercalary_rod_junction), 
-                 jh_get_vertebral_number_function(input$right_intercalary_rod[1]), 
+      if(between(jh_get_vertebral_number_function(input$right_intercalary_rod_junction),
+                 jh_get_vertebral_number_function(input$right_intercalary_rod[1]),
                  jh_get_vertebral_number_function(input$right_intercalary_rod[2 ])) == FALSE){
         
-        right_implant_df <- all_objects_to_add_list$right_rod_implants_df %>%
-          filter(str_detect(level, "Iliac") == FALSE)
+        # right_implant_df <- all_objects_to_add_list$right_rod_implants_df %>%
+        #   filter(str_detect(level, "Iliac") == FALSE)
+        
+        if(nrow(right_revision_implants_reactive_list()$retained_df)>0){
+          right_implant_df <- all_objects_to_add_list$right_rod_implants_df %>%
+            bind_rows(right_revision_implants_reactive_list()$retained_df) %>%
+            arrange(vertebral_number)%>%
+            filter(str_detect(level, "Iliac") == FALSE)
+        }else{
+          right_implant_df <- all_objects_to_add_list$right_rod_implants_df %>%
+            arrange(vertebral_number) %>%
+            filter(str_detect(level, "Iliac") == FALSE)
+        }
         
         proximal_options <- (implant_levels_numbered_df %>%
                                filter(str_detect(level, "Iliac") == FALSE)%>%
@@ -3915,11 +4033,13 @@ server <- function(input, output, session) {
         
         overlap_vector_choices <- append(proximal_options, distal_options)
         
-        if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
-          overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
-        }else{
-          overlap_start <-    overlap_vector_choices[1:2]
-        }
+        # if(overlap_vector_choices[2] != tail(overlap_vector_choices, 2)[1]){
+        #   overlap_start <-   c(overlap_vector_choices[2],tail(overlap_vector_choices, 2)[1])
+        # }else{
+        #   overlap_start <-    overlap_vector_choices[1:2]
+        # }
+        overlap_start <- c(overlap_vector_choices[round(length(overlap_vector_choices)*0.2, 0)], 
+                           overlap_vector_choices[round(length(overlap_vector_choices)*0.8, 0)])
         
         show_alert(title = "Either choose a different intercalary junction, or choose an overlap range that includes the junction")
         updateSliderTextInput(session = session,
@@ -3932,6 +4052,8 @@ server <- function(input, output, session) {
     }
   })
   
+  
+  
 
   
   observeEvent(input$add_right_linked_rods,
@@ -3940,6 +4062,7 @@ server <- function(input, output, session) {
                  
                  if(input$add_right_linked_rods == TRUE){
                    start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$right_rod_implants_df,
+                                                                        revision_objects_retained_df = right_revision_implants_reactive_list()$retained_df,
                                                                         rod_type = "linked_rod")
                    
                    updateSliderTextInput(session = session,
@@ -3965,6 +4088,7 @@ server <- function(input, output, session) {
                    
                    if(any(str_detect(str_to_lower(all_objects_to_add_list$right_rod_implants_df$level), "iliac"))){
                      start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$right_rod_implants_df,
+                                                                          revision_objects_retained_df = right_revision_implants_reactive_list()$retained_df,
                                                                           rod_type = "kickstand_rod")
                      
                      updateSliderTextInput(session = session,
