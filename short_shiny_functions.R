@@ -2063,7 +2063,8 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
                                                 add_custom_rods = FALSE, 
                                                 custom_rods_vector_list = list(),
                                                 revision_rods_retained_df = tibble(level = character(), vertebral_number = double(), x = double(), y = double(), prior_rod_connected = character()),
-                                                prior_rod_overlap_connectors = c("")
+                                                prior_rod_overlap_connectors = c(""),
+                                                include_revision_rods_in_list = FALSE
 ){
   
   # full_implant_range <- all_screw_coordinates_df %>%
@@ -2084,6 +2085,20 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       revision_implants_retained_df <- revision_rods_retained_df %>% 
         filter(prior_rod_connected == "yes")  
+      
+      if(include_revision_rods_in_list == TRUE){
+        revision_rod_matrix <- revision_implants_retained_df %>%
+          select(x, y) %>%
+          # filter(!is.na(y)) %>%
+          mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
+          mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
+          mutate(x = if_else(x < 0.5, x + 0.003, x - 0.003)) %>%
+          arrange(y) %>%
+          distinct() %>%
+          as.matrix()
+        
+        rods_list$revision_rod_sf <-  jh_sf_rod_object_from_matrix_function(revision_rod_matrix) 
+      }
       
       if(length(prior_rod_overlap_connectors)>0){
         revision_rod_overlap <- all_implants_constructed_df %>%
@@ -2142,6 +2157,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       revision_rod_overlap <- tibble(x = double(), 
                                      y = double())
     }
+    
     
     
     #################### KICKSTAND ROD ###################
@@ -2333,9 +2349,15 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       rods_list$linked_proximal_rod_sf <- jh_sf_rod_object_from_matrix_function(proximal_linked_rod_matrix)
       rods_list$linked_distal_rod_sf <- jh_sf_rod_object_from_matrix_function(distal_linked_rod_matrix)
-      
-      
+    
       rods_list$main_rod_sf <- NULL
+      
+      if(revision_rod_is == "distal"){
+        rods_list$linked_distal_rod_sf <- NULL
+      }
+      if(revision_rod_is == "proximal"){
+        rods_list$linked_proximal_rod_sf <- NULL
+      }
     }
     
     #################### INTERCALARY ROD ###################
@@ -2382,9 +2404,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         mutate(x = if_else(x < 0.5, x - 0.007, x + 0.007)) %>%
         as.matrix()
       
-      # intercalary_rod_connector_matrix <- tibble(level = intercalary_rods_vector) %>%
-      #   left_join(all_screw_coordinates_df %>%
-      #   filter(side == rod_side))  %>%
+
       intercalary_rod_connector_matrix <- all_screw_coordinates_df %>%
         filter(side == rod_side, 
                level %in% intercalary_rods_vector) %>%

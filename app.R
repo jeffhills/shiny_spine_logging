@@ -3441,7 +3441,8 @@ server <- function(input, output, session) {
     
     if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
       if(input$left_revision_rod_status == "removed"){
-        geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+        # geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+        rods_list$left_revision_rod_sf <- geom_sf(data = NULL)
         
       }else if(input$left_revision_rod_status == "retained_cut" | input$left_revision_rod_status == "retained"){
         
@@ -3455,10 +3456,11 @@ server <- function(input, output, session) {
           distinct() %>%
           as.matrix()
         
-        geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-        
+        # geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
+        rods_list$left_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(left_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
       }else{
-        geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+        # geoms_list_revision_posterior$left_revision_rod_sf <- geom_sf(data = NULL)
+        rods_list$left_revision_rod_sf <- geom_sf(data = NULL)
       }
     }
   })
@@ -4179,7 +4181,8 @@ server <- function(input, output, session) {
     
     if(nrow(right_revision_implants_reactive_list()$retained_df)>1){
       if(input$right_revision_rod_status == "removed"){
-        geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
+        # geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
+        rods_list$right_revision_rod_sf <- geom_sf(data = NULL)
         
       }else if(input$right_revision_rod_status == "retained_cut" | input$right_revision_rod_status == "retained"){
         
@@ -4193,10 +4196,11 @@ server <- function(input, output, session) {
           distinct() %>%
           as.matrix()
         
-        geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
-        
+        # geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
+        rods_list$right_revision_rod_sf <- geom_sf(data = st_buffer(st_linestring(right_revision_rod_matrix), dist = 0.003, endCapStyle = "ROUND"), fill = "black")
       }else{
         geoms_list_revision_posterior$right_revision_rod_sf <- geom_sf(data = NULL)
+        rods_list$right_revision_rod_sf <- geom_sf(data = NULL)
       }
     }
   })
@@ -6131,8 +6135,9 @@ server <- function(input, output, session) {
         # )
         
         ############# MAKE THE RODS #############
-        left_rods_connectors_list <- build_unilateral_rods_list_function(unilateral_full_implant_df = left_implants_df,
-                                                                         rod_side = "left",
+        left_rods_connectors_list <- build_unilateral_rods_list_function(unilateral_full_implant_df = left_implants_df, 
+                                                                         include_revision_rods_in_list = TRUE,
+                                                                         rod_side = "left", 
                                                                          add_accessory_rod = input$add_left_accessory_rod,
                                                                          accessory_rod_vector = input$left_accessory_rod, 
                                                                          add_satellite_rod = input$add_left_satellite_rod,
@@ -6257,6 +6262,7 @@ server <- function(input, output, session) {
         ############# MAKE THE RODS #############
         right_rods_connectors_list <- build_unilateral_rods_list_function(unilateral_full_implant_df = right_implants_df,
                                                                           rod_side = "right",
+                                                                          include_revision_rods_in_list = TRUE,
                                                                           add_accessory_rod = input$add_right_accessory_rod,
                                                                           accessory_rod_vector = input$right_accessory_rod, 
                                                                           add_satellite_rod = input$add_right_satellite_rod,
@@ -7806,11 +7812,12 @@ server <- function(input, output, session) {
         mutate(left_rods_crossing = str_remove_all(left_rods_crossing, "_sf"),
                right_rods_crossing = str_remove_all(right_rods_crossing, "_sf")) %>%
         mutate(dos_rods_crossing_repeating = as.character(input$date_of_surgery)) %>%
-        select(dos_rods_crossing_repeating, level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing)
+        select(dos_rods_crossing_repeating, rods_crossing_level = level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing)
         # select(level, total_rods_crossing)
       
     }else{
-      tibble(level = character(),
+      tibble(dos_rods_crossing_repeating = character(),
+             rods_crossing_level = character(),
              left_rod_count = double(),
              left_rods_crossing = character(),
              right_rod_count = double(),
@@ -7959,7 +7966,17 @@ server <- function(input, output, session) {
   
   #################  RODS CROSSING BY LEVEL TABLE ##################
   output$rods_crossing_by_level_table <- renderTable({
-    rods_crossing_by_level_redcap_table_reactive()
+    # rods_crossing_by_level_redcap_table_reactive()
+    
+    rods_crossing_by_level_repeating <- rods_crossing_by_level_redcap_table_reactive() %>%
+      mutate(record_id = "record number will go here") %>%
+      select(record_id, everything()) %>%
+      mutate(redcap_event_name = "surgery_arm_1") %>%
+      mutate(redcap_repeat_instance = paste(row_number(), "repeat instance will go here")) %>%
+      mutate(redcap_repeat_instrument = "rods_crossing_by_level_repeating") %>%
+      mutate(rods_crossing_by_level_repeating_complete = "Complete") %>%
+      mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+      select(record_id, redcap_event_name, redcap_repeat_instrument, redcap_repeat_instance, dos_rods_crossing_repeating, rods_crossing_level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing, rods_crossing_by_level_repeating_complete)
   })
   
   #################  PROCEDURES BY LEVEL TABLE ##################
@@ -8285,6 +8302,12 @@ server <- function(input, output, session) {
       
       ##### uploaded patient details #######
       
+      redcap_names_df <- exportFieldNames(rcon = rcon_reactive$rcon) %>%
+        as_tibble() %>%
+        select(redcap_field_names = original_field_name)
+      
+      tables_not_uploaded_list <- list()
+    
       withProgress(message = 'Uploading Data', value = 0, {
         number_of_steps <- 10
         
@@ -8296,7 +8319,11 @@ server <- function(input, output, session) {
           mutate(patient_details_complete = "Complete") %>%
           select(record_id, everything())
         
-        importRecords(rcon = rcon_reactive$rcon, data = patient_df_for_upload, returnContent = "count")
+        if(all(names(patient_df_for_upload) %in% redcap_names_df$redcap_field_names)){
+          importRecords(rcon = rcon_reactive$rcon, data = patient_df_for_upload, returnContent = "count")
+        }else{
+          tables_not_uploaded_list$patient_df <- "PatientDf"
+        }
         
         incProgress(1/number_of_steps, detail = paste("Uploading Surgical Details"))
         
@@ -8310,7 +8337,11 @@ server <- function(input, output, session) {
           mutate(surgical_details_complete = "Complete") %>%
           select(record_id, redcap_event_name, everything())
         
-        importRecords(rcon = rcon_reactive$rcon, data = surgical_details_instrument, returnContent = "count")
+        if(all(names(surgical_details_instrument %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
+          importRecords(rcon = rcon_reactive$rcon, data = surgical_details_instrument, returnContent = "count")
+          }else{
+            tables_not_uploaded_list$surgical_details_instrument <- "surgical_details_instrument"
+        }
         
         incProgress(1/number_of_steps, detail = paste("Uploading Intraoperative Details"))
         
@@ -8324,8 +8355,12 @@ server <- function(input, output, session) {
           mutate(intraoperative_details_complete = "Complete") %>%
           select(record_id, redcap_event_name, everything())
         
-        importRecords(rcon = rcon_reactive$rcon, data = intraoperative_details_redcap_upload_df, returnContent = "count")
-        
+        if(all(names(intraoperative_details_redcap_upload_df %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
+          importRecords(rcon = rcon_reactive$rcon, data = intraoperative_details_redcap_upload_df, returnContent = "count")
+        }else{
+          tables_not_uploaded_list$intraoperative_details_redcap_upload_df <- "intraoperative_details_redcap_upload_df"
+        }
+      
         incProgress(1/number_of_steps, detail = paste("Uploading Data per Level"))
         
         ###### Upload repeating objects for all levels ####
@@ -8339,8 +8374,14 @@ server <- function(input, output, session) {
             mutate(procedures_by_level_repeating_complete = "Complete") %>%
             select(record_id, redcap_event_name, everything())
           
-          importRecords(rcon = rcon_reactive$rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
+          if(all(names(procedures_by_level_repeating_instrument %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
+            importRecords(rcon = rcon_reactive$rcon, data = procedures_by_level_repeating_instrument, returnContent = "count")
+          }else{
+            tables_not_uploaded_list$procedures_by_level_repeating_instrument <- "procedures_by_level_repeating_instrument"
+          }
+          
         }
+        
         
         incProgress(1/number_of_steps, detail = paste("Uploading Implant Data"))
         
@@ -8354,7 +8395,12 @@ server <- function(input, output, session) {
             mutate(screw_details_repeating_complete = "Complete") %>%
             select(record_id, redcap_event_name, everything())
           
-          importRecords(rcon = rcon_reactive$rcon, data = screw_details_repeating, returnContent = "count")
+          if(all(names(screw_details_repeating %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
+            importRecords(rcon = rcon_reactive$rcon, data = screw_details_repeating, returnContent = "count")
+          }else{
+            tables_not_uploaded_list$screw_details_repeating <- "screw_details_repeating"
+          }
+          
         }
         
         incProgress(1/number_of_steps, detail = paste("Uploading Interbody Implant Data"))
@@ -8371,10 +8417,15 @@ server <- function(input, output, session) {
             mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
             select(record_id, redcap_event_name, everything())
           
-          importRecords(rcon = rcon_reactive$rcon, data = interbody_implant_repeating, returnContent = "count")
+          if(all(names(interbody_implant_repeating %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
+            importRecords(rcon = rcon_reactive$rcon, data = interbody_implant_repeating, returnContent = "count")
+          }else{
+            tables_not_uploaded_list$interbody_implant_repeating <- "interbody_implant_repeating"
+          }
         }
         
         incProgress(1/number_of_steps, detail = paste("Uploading Rods crossing by Level Data"))
+        
         ##### uploaded RODS CROSSING BY LEVEL details #######
         if(nrow(rods_crossing_by_level_redcap_table_reactive())>0){
           rods_crossing_by_level_repeating <- rods_crossing_by_level_redcap_table_reactive() %>%
@@ -8385,9 +8436,13 @@ server <- function(input, output, session) {
             mutate(redcap_repeat_instrument = "rods_crossing_by_level_repeating") %>%
             mutate(rods_crossing_by_level_repeating_complete = "Complete") %>%
             mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
-            select(record_id, redcap_event_name, dos_rods_crossing_repeating, rods_crossing_level = level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing, everything())
-          
-          importRecords(rcon = rcon_reactive$rcon, data = rods_crossing_by_level_repeating, returnContent = "count")
+            select(record_id, redcap_event_name, redcap_repeat_instrument,redcap_repeat_instance, dos_rods_crossing_repeating, rods_crossing_level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing, rods_crossing_by_level_repeating_complete)
+
+          if(all(names(rods_crossing_by_level_repeating %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
+            importRecords(rcon = rcon_reactive$rcon, data = rods_crossing_by_level_repeating, returnContent = "count")
+            }else{
+              tables_not_uploaded_list$rods_crossing_by_level_repeating <- "rods_crossing_by_level_repeating"
+          }
         }
         
         # rods_crossing_by_level_redcap_table_reactive
@@ -8409,7 +8464,12 @@ server <- function(input, output, session) {
             mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
             select(record_id, redcap_event_name, everything())
           
-          importRecords(rcon = rcon_reactive$rcon, data = all_inputs_repeating_df, returnContent = "count")
+          if(all(names(all_inputs_repeating_df %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
+            importRecords(rcon = rcon_reactive$rcon, data = all_inputs_repeating_df, returnContent = "count")
+          }else{
+            tables_not_uploaded_list$all_inputs_repeating_df <- "all_inputs_repeating_df"
+          }
+          
         }
         
         
@@ -8445,9 +8505,12 @@ server <- function(input, output, session) {
               removed_implant_removal_repeating,
               implant_removal_repeating_complete)
           
-          
-          importRecords(rcon = rcon_reactive$rcon, data = implant_removal_repeating_df, returnContent = "count") 
-          
+          if(all(names(implant_removal_repeating_df %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
+            importRecords(rcon = rcon_reactive$rcon, data = implant_removal_repeating_df, returnContent = "count") 
+          }else{
+            tables_not_uploaded_list$implant_removal_repeating_df <- "implant_removal_repeating_df"
+          }
+        
           incProgress(1/number_of_steps, detail = paste("Complete"))
           
         }else{
@@ -8458,10 +8521,16 @@ server <- function(input, output, session) {
         
       })
       
+      if(length(tables_not_uploaded_list)>0){
+        completion_text <- glue("Data was successfully Uploaded. But, the following tables were not uploaded because the field names did not match the redcap database: {glue_collapse(tables_not_uploaded_list, sep = ', ', last = ', and ')}.")
+      }else{
+        completion_text <- "All tables were successfully uploaded."
+      }
+
       sendSweetAlert(
         session = session,
         title = "Success !!",
-        text = "All in order",
+        text = completion_text,
         type = "success"
       )
     }else{
