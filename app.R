@@ -7626,17 +7626,14 @@ server <- function(input, output, session) {
         ungroup() %>%
         pivot_wider(names_from = level, values_from = object) %>%
         select(-repeat_count) %>%
-        clean_names() %>%
-        mutate(across(everything(), ~ replace_na(.x, " "))) %>%
-        mutate(redcap_repeat_instance = row_number()) %>%
-        mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-        mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-        select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything()) 
+        clean_names() 
+
+      
     }else{
       data_wide <- tibble(redcap_repeat_instrument = character(), 
                           redcap_repeat_instance = integer(),
                           dos_surg_repeating = character(),
-                          approach_repeating = character(),
+                          approach = character(),
                           side = character()
       ) 
       
@@ -7656,12 +7653,7 @@ server <- function(input, output, session) {
           ungroup() %>%
           pivot_wider(names_from = level, values_from = object) %>%
           select(-repeat_count) %>%
-          clean_names() %>%
-          mutate(across(everything(), ~ replace_na(.x, " "))) %>%
-          mutate(redcap_repeat_instance = row_number()) %>%
-          mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-          mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-          select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything())
+          clean_names()
         
         data_wide <- data_wide %>%
           bind_rows(anterior_plate_removed_df)
@@ -7681,17 +7673,11 @@ server <- function(input, output, session) {
           ungroup() %>%
           pivot_wider(names_from = level, values_from = object) %>%
           select(-repeat_count) %>%
-          clean_names() %>%
-          mutate(across(everything(), ~ replace_na(.x, " "))) %>%
-          mutate(redcap_repeat_instance = row_number()) %>%
-          mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-          mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-          select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything())
+          clean_names() 
         
         data_wide <- data_wide %>%
           bind_rows(left_implants_removed_df)
-        
-        
+  
       }
       
       if(length(input$right_revision_implants_removed)>0 && input$implants_complete > 0){
@@ -7705,18 +7691,19 @@ server <- function(input, output, session) {
           ungroup() %>%
           pivot_wider(names_from = level, values_from = object) %>%
           select(-repeat_count) %>%
-          clean_names() %>%
-          mutate(across(everything(), ~ replace_na(.x, " "))) %>%
-          mutate(redcap_repeat_instance = row_number()) %>%
-          mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
-          mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
-          select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything())
+          clean_names() 
         
         data_wide <- data_wide %>%
           bind_rows(right_implants_removed_df)
       }
     }
-    data_wide
+    data_wide %>%
+      ungroup() %>%
+      mutate(across(everything(), ~ replace_na(.x, " "))) %>%
+      mutate(redcap_repeat_instance = row_number()) %>%
+      mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
+      mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
+      select(redcap_repeat_instrument, redcap_repeat_instance, dos_surg_repeating, approach_repeating = approach, everything())
   })
   
   
