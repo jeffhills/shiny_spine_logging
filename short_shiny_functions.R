@@ -1022,10 +1022,14 @@ fusion_levels_df_function <- function(all_objects_to_add_df){
         filter(body_interspace == "body") %>%
         filter(vertebral_number == min(vertebral_number) | vertebral_number == max(vertebral_number)) %>%
         select(vertebral_number) %>%
-        distinct() %>%
-        mutate(vertebral_number = if_else(vertebral_number == min(vertebral_number), vertebral_number + 0.5, vertebral_number - 0.5))
+        distinct() 
+        # mutate(vertebral_number = if_else(vertebral_number == min(vertebral_number), vertebral_number + 0.5, vertebral_number - 0.5))
       
-      fusions_levels_df <- tibble(vertebral_number = seq(from = min(fusion_bodies_df$vertebral_number), to = max(fusion_bodies_df$vertebral_number), by = 1)) %>%
+      interspaces <- fusion_vertebral_numbers_df$vertebral_number - 0.5
+      interspaces <- append(interspaces, fusion_vertebral_numbers_df$vertebral_number + 0.5) 
+      
+      fusions_levels_df <- tibble(vertebral_number = interspaces) %>%
+      # fusions_levels_df <- tibble(vertebral_number = seq(from = min(fusion_bodies_df$vertebral_number), to = max(fusion_bodies_df$vertebral_number), by = 1)) %>%
         mutate(level = jh_get_vertebral_level_function(number = vertebral_number))  %>%
         bind_rows(fusion_range_df %>%
                     filter(body_interspace == "interspace") %>%
@@ -2317,6 +2321,9 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       x_linked_rod_modifier <- if_else(rod_side == "left", 0.004, -.004)
       
+      if(revision_rod_is == "proximal" | revision_rod_is == "distal"){
+        x_linked_rod_modifier <- if_else(rod_side == "left", 0.006, -.006)
+      }
       
       proximal_linked_rod_matrix <- main_rod_df %>% 
         filter(level %in% proximal_rod_levels_vector) %>%
@@ -2353,6 +2360,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       rods_list$main_rod_sf <- NULL
       
       if(revision_rod_is == "distal"){
+        
         rods_list$linked_distal_rod_sf <- NULL
       }
       if(revision_rod_is == "proximal"){

@@ -45,6 +45,52 @@ source("operative_note_paragraph_functions.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
 source("redcap_table_functions.R", local = TRUE)
 
+# anterior_body_constructed_df <- all_object_ids_df %>%
+#   filter(category == "anterior_body") %>%
+#   left_join(fread("coordinates/anterior_body.csv") %>%
+#               group_by(object_id) %>%
+#               nest() %>%
+#               mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+#               select(object_id, object_constructed))
+# 
+# anterior_disc_constructed_df <- all_object_ids_df %>%
+#   filter(category == "anterior_disc") %>%
+#   filter(object != "anterior_disc_arthroplasty") %>%
+#   left_join(fread("coordinates/anterior_disc.csv") %>% 
+#               group_by(object_id) %>%
+#               nest() %>%
+#               mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+#               select(object_id, object_constructed))
+# 
+# anterior_interbody_fusion_constructed_df <- all_object_ids_df %>%
+#   filter(category == "anterior_interbody_fusion") %>%
+#   left_join(fread("coordinates/anterior_interbody_fusion.csv") %>%
+#               group_by(object_id) %>%
+#               nest() %>%
+#               mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+#               select(object_id, object_constructed))
+# 
+# arthroplasty_constructed_df <- all_object_ids_df %>%
+#   filter(str_detect(object, "arthropl")) %>%
+#   mutate(inferior_endplate_y = c(0.965, 0.925, 0.897, 0.87, 0.846, 0.821, 0.795, 0.77, 0.74, 0.712, 0.682, 0.65, 0.62, 0.591, 0.56, 0.53, 0.495, 0.457, 0.415, 0.367, 0.317, 0.263, 0.215, 0.168), 
+#          superior_endplate_y = c(0.955, 0.918, 0.888, 0.865, 0.838, 0.815, 0.79, 0.76, 0.732, 0.705, 0.675, 0.645, 0.613, 0.584, 0.555, 0.525, 0.49, 0.45, 0.406, 0.357, 0.305, 0.255, 0.205, 0.16), 
+#          width = c(0.0175, 0.021, 0.02275, 0.02275, 0.0245, 0.0245, 0.0245, 0.02625, 0.02625, 0.028, 0.028, 0.02975, 0.02975, 0.0315, 0.0315, 0.0315, 0.03325, 0.035, 0.035, 0.035, 0.03675, 0.0385, 0.04025, 0.042)
+#   ) %>%
+#   mutate(object_constructed = pmap(.l = list(..1 = inferior_endplate_y,
+#                                              ..2 = superior_endplate_y, 
+#                                              ..3 = width),
+#                                    .f = ~ arthroplasty_function(y_for_inferior_endplate = ..1, 
+#                                                                 y_for_superior_endplate = ..2,
+#                                                                 endplate_width = ..3)))%>%
+#   select(names(all_implants_constructed_df))
+# 
+# all_implants_constructed_df <<- all_implants_constructed_df %>%
+#   bind_rows(anterior_body_constructed_df) %>%
+#   bind_rows(anterior_disc_constructed_df) %>%
+#   bind_rows(anterior_interbody_fusion_constructed_df) %>%
+#   bind_rows(arthroplasty_constructed_df) %>%
+#   distinct() 
+
 # ui <- shinyUI(basicPage(
 #   dateInput(inputId = "input_date", label = "Date:", value = ""),
 #   textOutput(outputId = "date_text_output")
@@ -454,7 +500,7 @@ ui <- dashboardPage(skin = "black",
                                                             actionBttn(
                                                               inputId = "add_other",
                                                               size = "sm", block = TRUE,
-                                                              label = "Add Other (cement, structural allograft, I&D, etc)",
+                                                              label = "Add Other (cement, structural allograft, I&D, Nerve transection, etc)",
                                                               style = "simple",
                                                               color = "primary"
                                                             ),
@@ -1175,6 +1221,8 @@ ui <- dashboardPage(skin = "black",
                           
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Anterior: Objects passed to Op Note Generater:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
                               verbatimTextOutput(outputId = "full_objects_passed_to_anterior_op_note")),
+                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Anterior: Objects passed to Op Note Generater/DATAFRAME:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
+                              tableOutput(outputId = "full_objects_passed_to_anterior_op_note_df")),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs Not Logged:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
                               tableOutput(outputId = "all_inputs_removed"))
                           #         ###########################################
@@ -2464,12 +2512,50 @@ server <- function(input, output, session) {
         distinct()
     }
     
+    # nerves_df <- all_implants_constructed_df %>%
+    #   # tabyl(object)
+    #   filter(object == "lateral_extraforaminal_approach") %>%
+    #   # select(level, vertebral_number, side, approach, x, y) %>%
+    #   mutate(object = "transection_spinal_nerve") %>%
+    #   rename(x1 = x, y1 = y) %>%
+    #   mutate(y1 = y1 + 0.003) %>%
+    #   mutate(x1 = if_else(side == "left", x1 + 0.003, x1 - 0.003)) %>% 
+    #   mutate(x2 = if_else(side == "left", x1 - 0.008, x1 + 0.008), 
+    #          y2 = y1 - 0.003) %>%
+    #   mutate(object_constructed = pmap(.l = list(..1 = x1, 
+    #                                              ..2 = x2, 
+    #                                              ..3 = y1, 
+    #                                              ..4 = y2), 
+    #                                    .f = ~ st_buffer(st_linestring(as.matrix(tibble(x = c(..1, ..2), y = c(..3, ..4)))), dist = 0.005)
+    #   ))
+    # 
+    # nerve_objects <- nerves_df$object_constructed
+    # 
+    # transection_line <- st_multipolygon(x = list(st_buffer(st_linestring(as.matrix(nerves_df %>%
+    #                                                                                  filter(side == "right") %>%
+    #                                                                                  group_by(level) %>%
+    #                                                                                  mutate(x = mean(x1, x2)) %>%
+    #                                                                                  ungroup() %>%
+    #                                                                                  select(x, y = y1))), dist = 0.002), 
+    #                                              st_buffer(st_linestring(as.matrix(nerves_df %>%
+    #                                                                                  filter(side == "left") %>%
+    #                                                                                  group_by(level) %>%
+    #                                                                                  mutate(x = mean(x1, x2)) %>%
+    #                                                                                  ungroup() %>%
+    #                                                                                  select(x, y = y1))
+    #                                              ), dist = 0.002)))
+    # 
+    # transected_nerve_objects <- map(.x = nerve_objects, .f =  ~ st_difference(x = .x, y = transection_line))
+    # 
+    # nerve_geoms <- map(.x = transected_nerve_objects, .f =  ~ geom_sf(data = .x, fill = "red"))
+    
     updateRadioGroupButtons(session = session, 
                             inputId = "object_to_add", 
                             choices = c("Vertebroplasty" = "vertebroplasty",
                                         "Vertebral Augmentation (cavity creation, then cement)" = "vertebral_cement_augmentation",
                                         "Structural Allograft Strut" = "structural_allograft",
-                                        "Incision & Drainage" = "incision_drainage"
+                                        "Incision & Drainage" = "incision_drainage", 
+                                        "Transection of Spinal Nerve" = "nerve_transection"
                             ),
                             checkIcon = list(
                               yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
@@ -2960,6 +3046,7 @@ server <- function(input, output, session) {
           if(nrow(existing_patient_data$patient_df)>0){
             revision_implants_status_df <- existing_patient_data$patient_df %>% 
               select(side, level, object) %>%
+              filter(str_detect(object, "hook|screw")) %>%
               filter(side == "left") %>%
               mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
               # left_join(revision_implants_df) %>%
@@ -2981,6 +3068,7 @@ server <- function(input, output, session) {
           if(nrow(existing_patient_data$patient_df)>0){
             revision_implants_status_df <- existing_patient_data$patient_df %>% 
               select(side, level, object) %>%
+              filter(str_detect(object, "hook|screw")) %>%
               filter(side == "left") %>%
               mutate(remove_retain = "retain") %>%
               # left_join(revision_implants_df) %>%
@@ -3010,7 +3098,7 @@ server <- function(input, output, session) {
             mutate(old_rod_connected_to_new_rod = "no")
           
           revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "yes") %>%
+            mutate(prior_rod_connected = if_else(remove_retain == "retain", "yes", "no")) %>%
             mutate(old_rod_connected_to_new_rod = "no")
         }
          
@@ -3700,6 +3788,7 @@ server <- function(input, output, session) {
           if(nrow(existing_patient_data$patient_df)>0){
             revision_implants_status_df <- existing_patient_data$patient_df %>% 
               select(side, level, object) %>%
+              filter(str_detect(object, "hook|screw")) %>%
               filter(side == "right") %>%
               mutate(remove_retain = if_else(level %in% input$right_revision_implants_removed, "remove", "retain")) %>%
               # left_join(revision_implants_df) %>%
@@ -3721,6 +3810,7 @@ server <- function(input, output, session) {
           if(nrow(existing_patient_data$patient_df)>0){
             revision_implants_status_df <- existing_patient_data$patient_df %>% 
               select(side, level, object) %>%
+              filter(str_detect(object, "hook|screw")) %>%
               filter(side == "right") %>%
               mutate(remove_retain = "retain") %>%
               # left_join(revision_implants_df) %>%
@@ -3750,7 +3840,7 @@ server <- function(input, output, session) {
             mutate(old_rod_connected_to_new_rod = "no")
           
           revision_implants_status_df <- revision_implants_status_df%>%
-            mutate(prior_rod_connected = "yes") %>%
+            mutate(prior_rod_connected = if_else(remove_retain == "retain", "yes", "no")) %>%
             mutate(old_rod_connected_to_new_rod = "no")
         }
         
@@ -6940,11 +7030,11 @@ server <- function(input, output, session) {
     #######
     neuromonitoring_input_list <- list()
     neuromonitoring_input_list$modalities <- input$neuromonitoring
-    neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", " ", paste0(input$triggered_emg))
+    neuromonitoring_input_list$emg <- if_else(input$triggered_emg == "No", "", paste0(input$triggered_emg))
     
     # neuromonitoring_input_list$pre_positioning_motors <- if_else(input$pre_positioning_motors == "Pre-positioning motors not obtained", "", input$pre_positioning_motors)
     if(any(input$pre_positioning_motors == "Not obtained")){
-      neuromonitoring_input_list$pre_positioning_motors <- " "
+      neuromonitoring_input_list$pre_positioning_motors <- ""
     }else{
       neuromonitoring_input_list$pre_positioning_motors <-  paste0("Pre-positioning motors were ", str_to_lower(glue_collapse(input$pre_positioning_motors, sep = ", ", last = " and ")), ".")
     }
@@ -7028,14 +7118,14 @@ server <- function(input, output, session) {
     
     #######
     ####### MULTIPLE APPROACH
-    if(input$approach_sequence == "anterior" | input$approach_sequence == "posterior"){
-      anterior_op_note_inputs_list_reactive$multiple_approach <- "NA"
-    }
     if(input$approach_sequence == "posterior-anterior" | input$approach_sequence == "posterior-anterior-posterior"){
       anterior_op_note_inputs_list_reactive$multiple_approach <- "posterior_first"
     }
     if(input$approach_sequence == "anterior-posterior"){
       anterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
+    }
+    if(input$approach_sequence == "anterior" | input$approach_sequence == "posterior"){
+      anterior_op_note_inputs_list_reactive$multiple_approach <- "Not Applicable"
     }
     
     ### PROCEDURES PERFORMED 
@@ -7117,7 +7207,7 @@ server <- function(input, output, session) {
   ##### Assemble and update the procedures performed section for ANTERIOR #########
   
   op_note_procedures_numbered_anterior_reactive <- reactive({
-    if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df)>0 && input$implants_complete > 0){
+    if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df) >0 && input$implants_complete > 0){
       primary_procedures_numbered_paragraph_anterior <- anterior_op_note_procedures_performed_numbered_function(objects_added_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df, 
                                                                                                                 additional_procedures_performed_vector = anterior_op_note_inputs_list_reactive()$additional_procedures_vector)
     }else{
@@ -7141,9 +7231,260 @@ server <- function(input, output, session) {
               ignoreNULL = TRUE
     )
   
+  
+  ### ASSEMBLE THE REACTIVE OP NOTE TEXT
+  # op_note_text_reactive <- reactive({
+  #   # if(input$implants_complete > 0){
+  #   ################# COMPLICATIONS ################3
+  #   complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
+  #     filter(complication != "") %>%
+  #     filter(complication != " ") %>%
+  #     filter(complication != "Other") %>%
+  #     remove_empty()
+  #   
+  #   if(nrow(complication_df) > 0){
+  #     complication_df <- complication_df %>%
+  #       mutate(row_count = row_number()) %>%
+  #       mutate(statement = paste0(row_count, ". ", complication)) %>%
+  #       mutate(statement = str_replace_all(statement, pattern = "_", replacement = " "))
+  #     
+  #     complication_statement <- glue_collapse(complication_df$statement, sep = '\n')
+  #   }else{
+  #     complication_statement <- "none"
+  #   }
+  #   
+  #   ### FLuids/Transfusions ###if_else(is.na(input$ebl), "See anesthesia records", paste(input$ebl)),
+  #   fluids_transfusions_list <- list(crystalloids_statement =if_else(is.na(input$crystalloids_administered), glue("none"), glue("-Crystalloids: {input$crystalloids_administered}cc")),
+  #                                    colloids_statement =if_else(is.na(input$colloids_administered), glue("none"), glue("-Colloids: {input$colloids_administered}cc")) ,
+  #                                    cell_saver_transfused_statement =if_else(is.na(input$cell_saver_transfused) | input$cell_saver_transfused == 0, glue("none"), glue("-Cell Saver: {input$cell_saver_transfused}cc")),
+  #                                    prbc_transfused_statement =if_else(is.na(input$prbc_transfused)| input$prbc_transfused == 0, glue("none") , glue("-pRBC's transfused: {input$prbc_transfused} {if_else(input$prbc_transfused >1, 'units', 'unit')}")),
+  #                                    ffp_transfused_statement =if_else(is.na(input$ffp_transfused)| input$ffp_transfused == 0, glue("none") , glue("-FFP transfused: {input$ffp_transfused} {if_else(input$ffp_transfused >1, 'units', 'unit')}")), 
+  #                                    cryo_transfused_statement =if_else(is.na(input$cryoprecipitate_transfused) | input$cryoprecipitate_transfused == 0, glue("none"), glue("-Cryoprecipitate transfused: {input$cryoprecipitate_transfused} {if_else(input$cryoprecipitate_transfused >1, 'units', 'unit')}")), 
+  #                                    platelets_transfused_statement =if_else(is.na(input$platelets_transfused) | input$platelets_transfused == 0, glue("none"), glue("-Platelets transfused: {input$platelets_transfused} {if_else(input$platelets_transfused >1, 'units', 'unit')}")))
+  #   
+  #   
+  #   fluids_transfusions_list <- discard(.x = fluids_transfusions_list, .p = ~ .x == "none")
+  #   
+  #   if(length(discard(.x = fluids_transfusions_list, .p = ~ .x == "none")) == 0){
+  #     fluids_transfusions_statement <- "See Anesthesia Records"
+  #   }else{
+  #     fluids_transfusions_statement <- glue_collapse(fluids_transfusions_list, sep = '\n')
+  #   }
+  #   
+  #   revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
+  #     bind_rows(right_revision_implants_reactive_list()$revision_implants_status_df)
+  #   
+  #   #### NO OBJECTS ADDED OP NOTE: ###
+  #   if(nrow(all_objects_to_add_list$objects_df) == 0 & nrow(revision_implants_df) == 0){
+  #     procedure_results_list <- list()
+  #     
+  #     op_note_list <- list()
+  #     
+  #     op_note_list$"\nPatient:" <- paste(input$patient_first_name, input$patient_last_name)
+  #     op_note_list$"\nDate of Surgery:" <- as.character(input$date_of_surgery)
+  #     op_note_list$"\nPrimary Surgeon:" <- if_else(!is.null(input$primary_surgeon_last_name), as.character(paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)), " ")
+  #     if(input$cosurgeon_yes_no == TRUE){
+  #       op_note_list$'\n*Co-Surgeon:' <- input$cosurgeon 
+  #     }
+  #     if(input$attending_assistant_yes_no == TRUE){
+  #       op_note_list$'\nSurgical Assistants:' <- paste(as.character(input$attending_assistant), 
+  #                                                      if_else(!is.null(input$surgical_assistants), 
+  #                                                              as.character(input$surgical_assistants),
+  #                                                              " "),
+  #                                                      sep = "; ")
+  #     }else{
+  #       op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
+  #     }
+  #     op_note_list$"\nPre-operative Diagnosis:" <- if_else(!is.null(input$preoperative_diagnosis), paste0("-", as.character(input$preoperative_diagnosis)), " ")
+  #     op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), glue_collapse(x = unlist(str_split(input$postoperative_diagnosis, pattern = "; ")), sep = "\n"), " ")
+  #     op_note_list$"\nIndications:" <- if_else(!is.null(input$indications), as.character(input$indications), " ") 
+  #     op_note_list$"\nSurgical Findings:" <- if_else(!is.na(input$surgical_finding), as.character(input$surgical_finding), " ") 
+  #     op_note_list$"\nSpecimens Removed:" <- if_else(!is.na(input$specimens_removed), as.character(input$specimens_removed), " ") 
+  #     op_note_list$"\nEstimated Blood Loss:" <- if_else(!is.na(input$ebl), as.character(input$ebl), " ") 
+  #     op_note_list$"\nFluids/Transfusions:" <- if_else(!is.na(fluids_transfusions_statement), as.character(fluids_transfusions_statement), " ")
+  #     op_note_list$"\nIntraoperative Complications:" <- if_else(!is.na(complication_statement), as.character(complication_statement), " ")
+  #     op_note_list$"\nSurgery Description:" <- "***"
+  #     op_note_list$"\nPostop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
+  #     
+  #     secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
+  #       unnest() %>%
+  #       mutate(row = row_number()) %>%
+  #       pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
+  #       select(row, full_text_vector)
+  #     
+  #   }else{
+  #     
+  #     ################# BUILD ANTERIOR OR POSTERIOR OR COMBINED OP NOTES ############
+  #     
+  #     procedure_results_list <- list()
+  #     
+  #     ########## POSTERIOR NOTE
+  #     
+  #     posterior_procedures_count <- nrow(posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df) + nrow(posterior_op_note_inputs_list_reactive()$revision_implants_df)
+  #     
+  #     if(posterior_procedures_count>0){ 
+  #       
+  #       procedure_results_list_posterior <- try(op_note_posterior_function(all_objects_to_add_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df,
+  #                                                                          fusion_levels_df = posterior_op_note_inputs_list_reactive()$fusions_df, 
+  #                                                                          c2_nerve_transection = posterior_op_note_inputs_list_reactive()$c2_nerve_transection,
+  #                                                                          head_position = posterior_op_note_inputs_list_reactive()$head_positioning_posterior,
+  #                                                                          surgical_approach = posterior_op_note_inputs_list_reactive()$approach_specified_posterior,
+  #                                                                          approach_mis_open = posterior_op_note_inputs_list_reactive()$approach_open_mis,
+  #                                                                          approach_microscope = posterior_op_note_inputs_list_reactive()$approach_microscope,
+  #                                                                          approach_robot_nav_xray = posterior_op_note_inputs_list_reactive()$approach_robot_navigation,
+  #                                                                          neuromonitoring_list = posterior_op_note_inputs_list_reactive()$neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
+  #                                                                          implant_start_point_method_input = posterior_op_note_inputs_list_reactive()$implant_start_point_method,
+  #                                                                          implant_confirmation_method = posterior_op_note_inputs_list_reactive()$implant_position_confirmation_method,
+  #                                                                          local_anesthesia = posterior_op_note_inputs_list_reactive()$local_anesthesia,
+  #                                                                          complications_list = posterior_op_note_inputs_list_reactive()$complications_list,
+  #                                                                          revision_decompression_vector = posterior_op_note_inputs_list_reactive()$open_canal,
+  #                                                                          revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df,
+  #                                                                          left_main_rod_size = posterior_op_note_inputs_list_reactive()$left_main_rod_size,
+  #                                                                          left_main_rod_material = posterior_op_note_inputs_list_reactive()$left_main_rod_material,
+  #                                                                          left_main_rod_contour = posterior_op_note_inputs_list_reactive()$left_main_rod_contour,
+  #                                                                          right_main_rod_size = posterior_op_note_inputs_list_reactive()$right_main_rod_size,
+  #                                                                          right_main_rod_material = posterior_op_note_inputs_list_reactive()$right_main_rod_material,
+  #                                                                          right_main_rod_contour = posterior_op_note_inputs_list_reactive()$right_main_rod_contour,
+  #                                                                          additional_rods_statement = posterior_op_note_inputs_list_reactive()$added_rods_statement,
+  #                                                                          antibiotics = posterior_op_note_inputs_list_reactive()$preop_antibiotics,
+  #                                                                          antifibrinolytic = posterior_op_note_inputs_list_reactive()$antifibrinolytic,
+  #                                                                          additional_procedures_vector = posterior_op_note_inputs_list_reactive()$additional_procedures_vector,
+  #                                                                          prior_fusion_levels_vector = posterior_op_note_inputs_list_reactive()$prior_fusion_levels,
+  #                                                                          instrumentation_removal_vector = posterior_op_note_inputs_list_reactive()$instrumentation_removed_vector,
+  #                                                                          bmp = posterior_op_note_inputs_list_reactive()$posterior_bmp_dose_reactive,
+  #                                                                          biologics_list = posterior_op_note_inputs_list_reactive()$posterior_biologics_list,
+  #                                                                          morselized_autograft_separate = posterior_op_note_inputs_list_reactive()$morselized_autograft_separate,
+  #                                                                          deep_drains = posterior_op_note_inputs_list_reactive()$deep_drains_posterior,
+  #                                                                          superficial_drains = posterior_op_note_inputs_list_reactive()$superficial_drains_posterior,
+  #                                                                          end_procedure_details = posterior_op_note_inputs_list_reactive()$additional_end_procedure_details,
+  #                                                                          closure = posterior_op_note_inputs_list_reactive()$closure_details,
+  #                                                                          dressing = posterior_op_note_inputs_list_reactive()$dressing_details,
+  #                                                                          multiple_position_procedure = posterior_op_note_inputs_list_reactive()$multiple_approach, 
+  #                                                                          alignment_correction_technique = posterior_op_note_inputs_list_reactive()$alignment_correction_method,
+  #                                                                          sex = posterior_op_note_inputs_list_reactive()$sex,
+  #                                                                          lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression, 
+  #                                                                          instruments_used_for_bony_work = posterior_op_note_inputs_list_reactive()$instruments_used_for_bony_work, 
+  #                                                                          attending_assistant = posterior_op_note_inputs_list_reactive()$attending_assistant,
+  #                                                                          procedures_performed_sentence =  posterior_op_note_inputs_list_reactive()$procedures_performed_sentence
+  #       ), silent = TRUE)
+  #       
+  #       procedure_results_list_posterior$procedures_numbered_paragraph <- input$procedures_numbered_confirm_edit_posterior
+  #     }
+  #     
+  #     
+  #     if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df) > 0){
+  #       
+  #       procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df, 
+  #                                                                    anterior_plate_revision_df = anterior_op_note_inputs_list_reactive()$anterior_plate_revision_df,
+  #                                                                    anterior_approach_laterality = anterior_op_note_inputs_list_reactive()$anterior_approach_laterality,
+  #                                                                    head_position = anterior_op_note_inputs_list_reactive()$head_positioning_anterior,
+  #                                                                    approach_statement = anterior_op_note_inputs_list_reactive()$approach_statement,
+  #                                                                    antibiotics = anterior_op_note_inputs_list_reactive()$preop_antibiotics,
+  #                                                                    antifibrinolytic = anterior_op_note_inputs_list_reactive()$antifibrinolytic,
+  #                                                                    additional_procedures_vector = anterior_op_note_inputs_list_reactive()$additional_procedures_vector,
+  #                                                                    neuromonitoring_list = anterior_op_note_inputs_list_reactive()$neuromonitoring_list,
+  #                                                                    local_anesthesia = anterior_op_note_inputs_list_reactive()$local_anesthesia,
+  #                                                                    bmp = anterior_op_note_inputs_list_reactive()$bmp,
+  #                                                                    anterior_biologics_df = anterior_op_note_inputs_list_reactive()$anterior_biologics_df,
+  #                                                                    bone_graft_vector = anterior_op_note_inputs_list_reactive()$bone_graft_vector,
+  #                                                                    morselized_allograft = anterior_op_note_inputs_list_reactive()$morselized_allograft,
+  #                                                                    deep_drains = anterior_op_note_inputs_list_reactive()$deep_drains_anterior,
+  #                                                                    superficial_drains = anterior_op_note_inputs_list_reactive()$superficial_drains_anterior,
+  #                                                                    end_procedure_details = anterior_op_note_inputs_list_reactive()$additional_end_procedure_details,
+  #                                                                    closure = anterior_op_note_inputs_list_reactive()$closure_details,
+  #                                                                    dressing = anterior_op_note_inputs_list_reactive()$dressing_details,
+  #                                                                    multiple_position_procedure = anterior_op_note_inputs_list_reactive()$multiple_approach,
+  #                                                                    sex = anterior_op_note_inputs_list_reactive()$sex,
+  #                                                                    procedures_performed_sentence = anterior_op_note_inputs_list_reactive()$procedures_performed_sentence
+  #       )
+  #       procedure_results_list_anterior$procedures_numbered_paragraph <- input$procedures_numbered_confirm_edit_anterior
+  #     }
+  #     
+  #     if(input$approach_sequence == "posterior"){
+  #       procedure_results_list <- procedure_results_list_posterior
+  #     }
+  #     if(input$approach_sequence == "anterior"){
+  #       procedure_results_list <- procedure_results_list_anterior
+  #     }
+  #     
+  #     if(input$approach_sequence == "posterior-anterior"){
+  #       procedure_results_list$procedures_numbered_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}") 
+  #       
+  #       procedure_results_list$procedure_details_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
+  #     }
+  #     if(input$approach_sequence == "anterior-posterior"){
+  #       procedure_results_list$procedures_numbered_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}") 
+  #       
+  #       procedure_results_list$procedure_details_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}")
+  #       
+  #     }
+  #     if(input$approach_sequence == "posterior-anterior-posterior"){
+  #       procedure_results_list$procedures_numbered_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}") 
+  #       
+  #       procedure_results_list$procedure_details_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
+  #     }
+  #     
+  #     op_note_list <- list()
+  #     op_note_list$"OPERATIVE REPORT" <- paste(" ")
+  #     op_note_list$"*Patient:" <- paste(input$patient_first_name, input$patient_last_name)
+  #     op_note_list$"\n*Date of Surgery:" <- as.character(input$date_of_surgery)
+  #     op_note_list$"\n*Primary Surgeon:" <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
+  #     if(input$cosurgeon_yes_no == TRUE){
+  #       op_note_list$'\n*Co-Surgeon:' <- input$cosurgeon 
+  #     }
+  #     if(input$attending_assistant_yes_no == TRUE){
+  #       op_note_list$'\nSurgical Assistants:' <- paste(as.character(input$attending_assistant), 
+  #                                                      if_else(!is.null(input$surgical_assistants), 
+  #                                                              as.character(input$surgical_assistants),
+  #                                                              " "),
+  #                                                      sep = "; ")
+  #     }else{
+  #       op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
+  #     }
+  # 
+  #     op_note_list$"\n*Preprocedure ASA Class:" <- input$asa_class
+  #     op_note_list$"\n*Anesthesia:" <- input$anesthesia
+  #     op_note_list$"\n*Intraoperative Complications:" <- complication_statement
+  #     op_note_list$"\n*Pre-operative Diagnosis:" <- glue_collapse(unlist(str_split(paste0("  -", input$preoperative_diagnosis), pattern = "; ")), sep = "\n  -")
+  #     op_note_list$"\n*Post-operative Diagnosis:" <- glue_collapse(unlist(str_split(paste0("  -", input$postoperative_diagnosis), pattern = "; ")), sep = "\n  -")
+  #     op_note_list$"\n*Indications:" <- input$indications
+  #     op_note_list$"\n*Estimated Blood Loss:" <- if_else(is.na(input$ebl), "See anesthesia records", paste0(input$ebl, "cc"))
+  #     op_note_list$"\n*Fluids/Transfusions:" <- fluids_transfusions_statement
+  #     op_note_list$"\n*Surgical Findings:" <- if_else(input$surgical_findings == "", "none", input$surgical_findings)
+  #     op_note_list$"\n*Specimens Taken:" <- if_else(input$specimens_removed == "", "none", input$specimens_removed)
+  #     op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
+  # 
+  #     if(length(input$implant_manufacturer)>0){
+  #       op_note_list$"\n*Implant Manufacturer:" <- paste(glue_collapse(x = input$implant_manufacturer, sep = ", ", last = " and "))
+  #     }
+  #     
+  #     op_note_list$"\n*Procedure  Description:" <- procedure_results_list$procedure_details_paragraph
+  #     op_note_list$"\n*Postop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
+  #     
+  #     secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
+  #       unnest() %>%
+  #       mutate(row = row_number()) %>%
+  #       pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
+  #       select(row, full_text_vector)
+  #     
+  #   }
+  #   
+  #   op_note_text <- glue_collapse(secion_headers_df$full_text_vector, sep = "\n")
+  #   
+  #   op_note_text  
+  #   # }
+  #   
+  # })
+  # 
+  
+  
+  
   ### ASSEMBLE THE REACTIVE OP NOTE TEXT
   op_note_text_reactive <- reactive({
-    if(input$implants_complete > 0){
+    
+    revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
+      bind_rows(right_revision_implants_reactive_list()$revision_implants_status_df)
+    
     ################# COMPLICATIONS ################3
     complication_df <- tibble(complication = append(input$intraoperative_complications_vector, input$other_intraoperative_complications)) %>%
       filter(complication != "") %>%
@@ -7180,218 +7521,176 @@ server <- function(input, output, session) {
       fluids_transfusions_statement <- glue_collapse(fluids_transfusions_list, sep = '\n')
     }
     
-    revision_implants_df <- left_revision_implants_reactive_list()$revision_implants_status_df %>%
-      bind_rows(right_revision_implants_reactive_list()$revision_implants_status_df)
-    
-    #### NO OBJECTS ADDED OP NOTE: ###
-    if(nrow(all_objects_to_add_list$objects_df) == 0 & nrow(revision_implants_df) == 0){
-      procedure_results_list <- list()
-      
-      op_note_list <- list()
-      
-      op_note_list$"\nPatient:" <- paste(input$patient_first_name, input$patient_last_name)
-      op_note_list$"\nDate of Surgery:" <- as.character(input$date_of_surgery)
-      op_note_list$"\nPrimary Surgeon:" <- if_else(!is.null(input$primary_surgeon_last_name), as.character(paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)), " ")
-      if(input$cosurgeon_yes_no == TRUE){
-        op_note_list$'\n*Co-Surgeon:' <- input$cosurgeon 
-      }
-      if(input$attending_assistant_yes_no == TRUE){
-        op_note_list$'\nSurgical Assistants:' <- paste(as.character(input$attending_assistant), 
-                                                       if_else(!is.null(input$surgical_assistants), 
-                                                               as.character(input$surgical_assistants),
-                                                               " "),
-                                                       sep = "; ")
-      }else{
-        op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
-      }
-      op_note_list$"\nPre-operative Diagnosis:" <- if_else(!is.null(input$preoperative_diagnosis), paste0("-", as.character(input$preoperative_diagnosis)), " ")
-      op_note_list$"\nPost-operative Diagnosis:" <- if_else(!is.null(input$postoperative_diagnosis), glue_collapse(x = unlist(str_split(input$postoperative_diagnosis, pattern = "; ")), sep = "\n"), " ")
-      op_note_list$"\nIndications:" <- if_else(!is.null(input$indications), as.character(input$indications), " ") 
-      op_note_list$"\nSurgical Findings:" <- if_else(!is.na(input$surgical_finding), as.character(input$surgical_finding), " ") 
-      op_note_list$"\nSpecimens Removed:" <- if_else(!is.na(input$specimens_removed), as.character(input$specimens_removed), " ") 
-      op_note_list$"\nEstimated Blood Loss:" <- if_else(!is.na(input$ebl), as.character(input$ebl), " ") 
-      op_note_list$"\nFluids/Transfusions:" <- if_else(!is.na(fluids_transfusions_statement), as.character(fluids_transfusions_statement), " ")
-      op_note_list$"\nIntraoperative Complications:" <- if_else(!is.na(complication_statement), as.character(complication_statement), " ")
-      op_note_list$"\nSurgery Description:" <- "***"
-      op_note_list$"\nPostop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
-      
-      secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
-        unnest() %>%
-        mutate(row = row_number()) %>%
-        pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
-        select(row, full_text_vector)
-      
+    op_note_list <- list()
+    op_note_list$"OPERATIVE REPORT" <- paste(" ")
+    op_note_list$"*Patient:" <- paste(input$patient_first_name, input$patient_last_name)
+    op_note_list$"\n*Date of Surgery:" <- as.character(input$date_of_surgery)
+    op_note_list$"\n*Primary Surgeon:" <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
+    if(input$cosurgeon_yes_no == TRUE){
+      op_note_list$'\n*Co-Surgeon:' <- input$cosurgeon 
+    }
+    if(input$attending_assistant_yes_no == TRUE){
+      op_note_list$'\nSurgical Assistants:' <- paste(as.character(input$attending_assistant), 
+                                                     if_else(!is.null(input$surgical_assistants), 
+                                                             as.character(input$surgical_assistants),
+                                                             " "),
+                                                     sep = "; ")
     }else{
+      op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
+    }
+    
+    op_note_list$"\n*Preprocedure ASA Class:" <- input$asa_class
+    op_note_list$"\n*Anesthesia:" <- input$anesthesia
+    op_note_list$"\n*Intraoperative Complications:" <- complication_statement
+    op_note_list$"\n*Pre-operative Diagnosis:" <- glue_collapse(unlist(str_split(paste0("  -", input$preoperative_diagnosis), pattern = "; ")), sep = "\n  -")
+    op_note_list$"\n*Post-operative Diagnosis:" <- glue_collapse(unlist(str_split(paste0("  -", input$postoperative_diagnosis), pattern = "; ")), sep = "\n  -")
+    op_note_list$"\n*Indications:" <- input$indications
+    op_note_list$"\n*Estimated Blood Loss:" <- if_else(is.na(input$ebl), "See anesthesia records", paste0(input$ebl, "cc"))
+    op_note_list$"\n*Fluids/Transfusions:" <- fluids_transfusions_statement
+    op_note_list$"\n*Surgical Findings:" <- if_else(input$surgical_findings == "", "none", input$surgical_findings)
+    op_note_list$"\n*Specimens Taken:" <- if_else(input$specimens_removed == "", "none", input$specimens_removed)
+
+    procedure_results_list <- list()
+    procedure_results_list_posterior <- list()
+    procedure_results_list_posterior$procedure_details_paragraph <- ""
+    procedure_results_list_posterior$procedures_numbered_paragraph <- ""
+    procedure_results_list_anterior <- list()
+    procedure_results_list_anterior$procedure_details_paragraph <- ""
+    procedure_results_list_anterior$procedures_numbered_paragraph <- ""
+    
+    posterior_approach_objects_df <- all_objects_to_add_list$objects_df %>%
+      filter(approach == "posterior")  %>%
+      select(-object_constructed) 
+    
+    posterior_procedures_count <-(nrow(all_objects_to_add_list$objects_df %>% filter(approach == "posterior")) + nrow(revision_implants_df))
+    
+    if(posterior_procedures_count>0){
+      procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df,
+                                                                         fusion_levels_df = posterior_op_note_inputs_list_reactive()$fusions_df,
+                                                                         c2_nerve_transection = posterior_op_note_inputs_list_reactive()$c2_nerve_transection,
+                                                                         head_position = posterior_op_note_inputs_list_reactive()$head_positioning_posterior,
+                                                                         surgical_approach = posterior_op_note_inputs_list_reactive()$approach_specified_posterior,
+                                                                         approach_mis_open = posterior_op_note_inputs_list_reactive()$approach_open_mis,
+                                                                         approach_microscope = posterior_op_note_inputs_list_reactive()$approach_microscope,
+                                                                         approach_robot_nav_xray = posterior_op_note_inputs_list_reactive()$approach_robot_navigation,
+                                                                         neuromonitoring_list = posterior_op_note_inputs_list_reactive()$neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
+                                                                         implant_start_point_method_input = posterior_op_note_inputs_list_reactive()$implant_start_point_method,
+                                                                         implant_confirmation_method = posterior_op_note_inputs_list_reactive()$implant_position_confirmation_method,
+                                                                         local_anesthesia = posterior_op_note_inputs_list_reactive()$local_anesthesia,
+                                                                         complications_list = posterior_op_note_inputs_list_reactive()$complications_list,
+                                                                         revision_decompression_vector = posterior_op_note_inputs_list_reactive()$open_canal,
+                                                                         revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df,
+                                                                         left_main_rod_size = posterior_op_note_inputs_list_reactive()$left_main_rod_size,
+                                                                         left_main_rod_material = posterior_op_note_inputs_list_reactive()$left_main_rod_material,
+                                                                         left_main_rod_contour = posterior_op_note_inputs_list_reactive()$left_main_rod_contour,
+                                                                         right_main_rod_size = posterior_op_note_inputs_list_reactive()$right_main_rod_size,
+                                                                         right_main_rod_material = posterior_op_note_inputs_list_reactive()$right_main_rod_material,
+                                                                         right_main_rod_contour = posterior_op_note_inputs_list_reactive()$right_main_rod_contour,
+                                                                         additional_rods_statement = posterior_op_note_inputs_list_reactive()$added_rods_statement,
+                                                                         antibiotics = posterior_op_note_inputs_list_reactive()$preop_antibiotics,
+                                                                         antifibrinolytic = posterior_op_note_inputs_list_reactive()$antifibrinolytic,
+                                                                         additional_procedures_vector = posterior_op_note_inputs_list_reactive()$additional_procedures_vector,
+                                                                         prior_fusion_levels_vector = posterior_op_note_inputs_list_reactive()$prior_fusion_levels,
+                                                                         instrumentation_removal_vector = posterior_op_note_inputs_list_reactive()$instrumentation_removed_vector,
+                                                                         bmp = posterior_op_note_inputs_list_reactive()$posterior_bmp_dose_reactive,
+                                                                         biologics_list = posterior_op_note_inputs_list_reactive()$posterior_biologics_list,
+                                                                         morselized_autograft_separate = posterior_op_note_inputs_list_reactive()$morselized_autograft_separate,
+                                                                         deep_drains = posterior_op_note_inputs_list_reactive()$deep_drains_posterior,
+                                                                         superficial_drains = posterior_op_note_inputs_list_reactive()$superficial_drains_posterior,
+                                                                         end_procedure_details = posterior_op_note_inputs_list_reactive()$additional_end_procedure_details,
+                                                                         closure = posterior_op_note_inputs_list_reactive()$closure_details,
+                                                                         dressing = posterior_op_note_inputs_list_reactive()$dressing_details,
+                                                                         multiple_position_procedure = posterior_op_note_inputs_list_reactive()$multiple_approach,
+                                                                         alignment_correction_technique = posterior_op_note_inputs_list_reactive()$alignment_correction_method,
+                                                                         sex = posterior_op_note_inputs_list_reactive()$sex,
+                                                                         lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression,
+                                                                         instruments_used_for_bony_work = posterior_op_note_inputs_list_reactive()$instruments_used_for_bony_work,
+                                                                         attending_assistant = posterior_op_note_inputs_list_reactive()$attending_assistant,
+                                                                         procedures_performed_sentence =  posterior_op_note_inputs_list_reactive()$procedures_performed_sentence
+      )
+
+    }
+    
+    if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df) > 0){
       
-      ################# BUILD ANTERIOR OR POSTERIOR OR COMBINED OP NOTES ############
-      
-      procedure_results_list <- list()
-      
-      ########## POSTERIOR NOTE
-      
-      posterior_procedures_count <- nrow(posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df) + nrow(posterior_op_note_inputs_list_reactive()$revision_implants_df)
-      
-      if(posterior_procedures_count>0){
-        
-        procedure_results_list_posterior <- try(op_note_posterior_function(all_objects_to_add_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df,
-                                                                           fusion_levels_df = posterior_op_note_inputs_list_reactive()$fusions_df, 
-                                                                           c2_nerve_transection = posterior_op_note_inputs_list_reactive()$c2_nerve_transection,
-                                                                           head_position = posterior_op_note_inputs_list_reactive()$head_positioning_posterior,
-                                                                           surgical_approach = posterior_op_note_inputs_list_reactive()$approach_specified_posterior,
-                                                                           approach_mis_open = posterior_op_note_inputs_list_reactive()$approach_open_mis,
-                                                                           approach_microscope = posterior_op_note_inputs_list_reactive()$approach_microscope,
-                                                                           approach_robot_nav_xray = posterior_op_note_inputs_list_reactive()$approach_robot_navigation,
-                                                                           neuromonitoring_list = posterior_op_note_inputs_list_reactive()$neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
-                                                                           implant_start_point_method_input = posterior_op_note_inputs_list_reactive()$implant_start_point_method,
-                                                                           implant_confirmation_method = posterior_op_note_inputs_list_reactive()$implant_position_confirmation_method,
-                                                                           local_anesthesia = posterior_op_note_inputs_list_reactive()$local_anesthesia,
-                                                                           complications_list = posterior_op_note_inputs_list_reactive()$complications_list,
-                                                                           revision_decompression_vector = posterior_op_note_inputs_list_reactive()$open_canal,
-                                                                           revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df,
-                                                                           left_main_rod_size = posterior_op_note_inputs_list_reactive()$left_main_rod_size,
-                                                                           left_main_rod_material = posterior_op_note_inputs_list_reactive()$left_main_rod_material,
-                                                                           left_main_rod_contour = posterior_op_note_inputs_list_reactive()$left_main_rod_contour,
-                                                                           right_main_rod_size = posterior_op_note_inputs_list_reactive()$right_main_rod_size,
-                                                                           right_main_rod_material = posterior_op_note_inputs_list_reactive()$right_main_rod_material,
-                                                                           right_main_rod_contour = posterior_op_note_inputs_list_reactive()$right_main_rod_contour,
-                                                                           additional_rods_statement = posterior_op_note_inputs_list_reactive()$added_rods_statement,
-                                                                           antibiotics = posterior_op_note_inputs_list_reactive()$preop_antibiotics,
-                                                                           antifibrinolytic = posterior_op_note_inputs_list_reactive()$antifibrinolytic,
-                                                                           additional_procedures_vector = posterior_op_note_inputs_list_reactive()$additional_procedures_vector,
-                                                                           prior_fusion_levels_vector = posterior_op_note_inputs_list_reactive()$prior_fusion_levels,
-                                                                           instrumentation_removal_vector = posterior_op_note_inputs_list_reactive()$instrumentation_removed_vector,
-                                                                           bmp = posterior_op_note_inputs_list_reactive()$posterior_bmp_dose_reactive,
-                                                                           biologics_list = posterior_op_note_inputs_list_reactive()$posterior_biologics_list,
-                                                                           morselized_autograft_separate = posterior_op_note_inputs_list_reactive()$morselized_autograft_separate,
-                                                                           deep_drains = posterior_op_note_inputs_list_reactive()$deep_drains_posterior,
-                                                                           superficial_drains = posterior_op_note_inputs_list_reactive()$superficial_drains_posterior,
-                                                                           end_procedure_details = posterior_op_note_inputs_list_reactive()$additional_end_procedure_details,
-                                                                           closure = posterior_op_note_inputs_list_reactive()$closure_details,
-                                                                           dressing = posterior_op_note_inputs_list_reactive()$dressing_details,
-                                                                           multiple_position_procedure = posterior_op_note_inputs_list_reactive()$multiple_approach, 
-                                                                           alignment_correction_technique = posterior_op_note_inputs_list_reactive()$alignment_correction_method,
-                                                                           sex = posterior_op_note_inputs_list_reactive()$sex,
-                                                                           lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression, 
-                                                                           instruments_used_for_bony_work = posterior_op_note_inputs_list_reactive()$instruments_used_for_bony_work, 
-                                                                           attending_assistant = posterior_op_note_inputs_list_reactive()$attending_assistant,
-                                                                           procedures_performed_sentence =  posterior_op_note_inputs_list_reactive()$procedures_performed_sentence
-        ), silent = TRUE)
-        
-        procedure_results_list_posterior$procedures_numbered_paragraph <- input$procedures_numbered_confirm_edit_posterior
-      }
-      
-      
-      if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df) > 0){
-        
-        procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df, 
-                                                                     anterior_plate_revision_df = anterior_op_note_inputs_list_reactive()$anterior_plate_revision_df,
-                                                                     anterior_approach_laterality = anterior_op_note_inputs_list_reactive()$anterior_approach_laterality,
-                                                                     head_position = anterior_op_note_inputs_list_reactive()$head_positioning_anterior,
-                                                                     approach_statement = anterior_op_note_inputs_list_reactive()$approach_statement,
-                                                                     antibiotics = anterior_op_note_inputs_list_reactive()$preop_antibiotics,
-                                                                     antifibrinolytic = anterior_op_note_inputs_list_reactive()$antifibrinolytic,
-                                                                     additional_procedures_vector = anterior_op_note_inputs_list_reactive()$additional_procedures_vector,
-                                                                     neuromonitoring_list = anterior_op_note_inputs_list_reactive()$neuromonitoring_list,
-                                                                     local_anesthesia = anterior_op_note_inputs_list_reactive()$local_anesthesia,
-                                                                     bmp = anterior_op_note_inputs_list_reactive()$bmp,
-                                                                     anterior_biologics_df = anterior_op_note_inputs_list_reactive()$anterior_biologics_df,
-                                                                     bone_graft_vector = anterior_op_note_inputs_list_reactive()$bone_graft_vector,
-                                                                     morselized_allograft = anterior_op_note_inputs_list_reactive()$morselized_allograft,
-                                                                     deep_drains = anterior_op_note_inputs_list_reactive()$deep_drains_anterior,
-                                                                     superficial_drains = anterior_op_note_inputs_list_reactive()$superficial_drains_anterior,
-                                                                     end_procedure_details = anterior_op_note_inputs_list_reactive()$additional_end_procedure_details,
-                                                                     closure = anterior_op_note_inputs_list_reactive()$closure_details,
-                                                                     dressing = anterior_op_note_inputs_list_reactive()$dressing_details,
-                                                                     multiple_position_procedure = anterior_op_note_inputs_list_reactive()$multiple_approach, 
-                                                                     sex = anterior_op_note_inputs_list_reactive()$sex,
-                                                                     procedures_performed_sentence = anterior_op_note_inputs_list_reactive()$procedures_performed_sentence
-        )
-        procedure_results_list_anterior$procedures_numbered_paragraph <- input$procedures_numbered_confirm_edit_anterior
-      }
-      
-      if(input$approach_sequence == "posterior"){
-        procedure_results_list <- procedure_results_list_posterior
-      }
-      if(input$approach_sequence == "anterior"){
-        procedure_results_list <- procedure_results_list_anterior
-      }
-      if(input$approach_sequence == "posterior-anterior"){
-        procedure_results_list$procedures_numbered_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}") 
-        
-        procedure_results_list$procedure_details_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
-      }
-      if(input$approach_sequence == "anterior-posterior"){
-        procedure_results_list$procedures_numbered_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}") 
-        
-        procedure_results_list$procedure_details_paragraph <- glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}")
-        
-      }
-      if(input$approach_sequence == "posterior-anterior-posterior"){
-        procedure_results_list$procedures_numbered_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}") 
-        
-        procedure_results_list$procedure_details_paragraph <- glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
-      }
-      
-      op_note_list <- list()
-      op_note_list$"OPERATIVE REPORT" <- paste(" ")
-      op_note_list$"*Patient:" <- paste(input$patient_first_name, input$patient_last_name)
-      op_note_list$"\n*Date of Surgery:" <- as.character(input$date_of_surgery)
-      op_note_list$"\n*Primary Surgeon:" <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
-      if(input$cosurgeon_yes_no == TRUE){
-        op_note_list$'\n*Co-Surgeon:' <- input$cosurgeon 
-      }
-      if(input$attending_assistant_yes_no == TRUE){
-        op_note_list$'\nSurgical Assistants:' <- paste(as.character(input$attending_assistant), 
-                                                       if_else(!is.null(input$surgical_assistants), 
-                                                               as.character(input$surgical_assistants),
-                                                               " "),
-                                                       sep = "; ")
+      procedure_results_list_anterior <- op_note_anterior_function(all_objects_to_add_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df, 
+                                                                   anterior_plate_revision_df = anterior_op_note_inputs_list_reactive()$anterior_plate_revision_df,
+                                                                   anterior_approach_laterality = anterior_op_note_inputs_list_reactive()$anterior_approach_laterality,
+                                                                   head_position = anterior_op_note_inputs_list_reactive()$head_positioning_anterior,
+                                                                   approach_statement = anterior_op_note_inputs_list_reactive()$approach_statement,
+                                                                   antibiotics = anterior_op_note_inputs_list_reactive()$preop_antibiotics,
+                                                                   antifibrinolytic = anterior_op_note_inputs_list_reactive()$antifibrinolytic,
+                                                                   additional_procedures_vector = anterior_op_note_inputs_list_reactive()$additional_procedures_vector,
+                                                                   neuromonitoring_list = anterior_op_note_inputs_list_reactive()$neuromonitoring_list,
+                                                                   local_anesthesia = anterior_op_note_inputs_list_reactive()$local_anesthesia,
+                                                                   bmp = anterior_op_note_inputs_list_reactive()$bmp,
+                                                                   anterior_biologics_df = anterior_op_note_inputs_list_reactive()$anterior_biologics_df,
+                                                                   bone_graft_vector = anterior_op_note_inputs_list_reactive()$bone_graft_vector,
+                                                                   morselized_allograft = anterior_op_note_inputs_list_reactive()$morselized_allograft,
+                                                                   deep_drains = anterior_op_note_inputs_list_reactive()$deep_drains_anterior,
+                                                                   superficial_drains = anterior_op_note_inputs_list_reactive()$superficial_drains_anterior,
+                                                                   end_procedure_details = anterior_op_note_inputs_list_reactive()$additional_end_procedure_details,
+                                                                   closure = anterior_op_note_inputs_list_reactive()$closure_details,
+                                                                   dressing = anterior_op_note_inputs_list_reactive()$dressing_details,
+                                                                   multiple_position_procedure = anterior_op_note_inputs_list_reactive()$multiple_approach,
+                                                                   sex = anterior_op_note_inputs_list_reactive()$sex,
+                                                                   procedures_performed_sentence = anterior_op_note_inputs_list_reactive()$procedures_performed_sentence
+      )
+    }
+
+    procedure_results_list$procedure_details_paragraph <- case_when(
+      input$approach_sequence == "posterior" ~ procedure_results_list_posterior$procedure_details_paragraph,
+      input$approach_sequence == "anterior" ~ procedure_results_list_anterior$procedure_details_paragraph,
+      input$approach_sequence == "posterior-anterior" ~  glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}"),
+      input$approach_sequence == "anterior-posterior" ~ glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}"),
+      input$approach_sequence == "posterior-anterior-posterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
+    )
+    
+    procedure_results_list$procedures_numbered_paragraph <- case_when(
+      input$approach_sequence == "posterior" ~ input$procedures_numbered_confirm_edit_posterior,
+      input$approach_sequence == "anterior" ~ input$procedures_numbered_confirm_edit_anterior,
+      input$approach_sequence == "posterior-anterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}"),
+      input$approach_sequence == "anterior-posterior" ~ glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}"),
+      input$approach_sequence == "posterior-anterior-posterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}")
+    )
+
+    op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
+    
+    if(length(input$implant_manufacturer)>0){
+      op_note_list$"\n*Implant Manufacturer:" <- paste(glue_collapse(x = input$implant_manufacturer, sep = ", ", last = " and "))
+    }
+    
+    if(nrow(all_objects_to_add_list$objects_df) == 0 & nrow(revision_implants_df) == 0){
+      op_note_list$"\n*Procedure  Description:" <- "***"
       }else{
-        op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
-      }
-      # op_note_list$"\n*Surgical Assistants:" <- input$surgical_assistants
-      op_note_list$"\n*Preprocedure ASA Class:" <- input$asa_class
-      op_note_list$"\n*Anesthesia:" <- input$anesthesia
-      op_note_list$"\n*Intraoperative Complications:" <- complication_statement
-      op_note_list$"\n*Pre-operative Diagnosis:" <- glue_collapse(unlist(str_split(paste0("  -", input$preoperative_diagnosis), pattern = "; ")), sep = "\n  -")
-      op_note_list$"\n*Post-operative Diagnosis:" <- glue_collapse(unlist(str_split(paste0("  -", input$postoperative_diagnosis), pattern = "; ")), sep = "\n  -")
-      op_note_list$"\n*Indications:" <- input$indications
-      op_note_list$"\n*Estimated Blood Loss:" <- if_else(is.na(input$ebl), "See anesthesia records", paste0(input$ebl, "cc"))
-      op_note_list$"\n*Fluids/Transfusions:" <- fluids_transfusions_statement
-      op_note_list$"\n*Surgical Findings:" <- if_else(input$surgical_findings == "", "none", input$surgical_findings)
-      op_note_list$"\n*Specimens Taken:" <- if_else(input$specimens_removed == "", "none", input$specimens_removed)
-      op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
-      # op_note_list$"\n*Procedures Performed:" <- input$procedures_numbered_confirm_edit_posterior
-      
-      if(length(input$implant_manufacturer)>0){
-        op_note_list$"\n*Implant Manufacturer:" <- paste(glue_collapse(x = input$implant_manufacturer, sep = ", ", last = " and "))
-      }
       
       op_note_list$"\n*Procedure  Description:" <- procedure_results_list$procedure_details_paragraph
-      op_note_list$"\n*Postop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
-      
-      secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
-        unnest() %>%
-        mutate(row = row_number()) %>%
-        pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
-        select(row, full_text_vector)
       
     }
+    op_note_list$"\n*Postop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
+    
+
+    secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
+      unnest() %>%
+      mutate(row = row_number()) %>%
+      pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
+      select(row, full_text_vector)
     
     op_note_text <- glue_collapse(secion_headers_df$full_text_vector, sep = "\n")
-    
-    op_note_text  
-    }
-    
+ 
+    op_note_text
   })
   
   
   
-  
   observeEvent(input$generate_operative_note, {
+    
+
     updateTextAreaInput(session = session, 
                         inputId = "operative_note_text", 
-                        value = HTML(op_note_text_reactive()))
+                        value = HTML(op_note_text_reactive())
+                        # value = HTML(op_note_text_reactive_testing())
+                        )
     
   }
   )
@@ -8033,6 +8332,16 @@ server <- function(input, output, session) {
     )
   })
   
+  output$full_objects_passed_to_posterior_op_note_df <- renderTable({
+    posterior_op_note_list <- posterior_op_note_inputs_list_reactive()
+    posterior_list_names <- names(posterior_op_note_list)
+    
+    tibble(contents = paste(map(posterior_op_note_list, .f = ~ paste(dput(.x))))) %>%
+      mutate(list_input_name = posterior_list_names) %>%
+      select(list_input_name, contents)
+    
+  })
+  
   output$anterior_approach_objects_for_op_note_df <- renderTable({
     anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df
   }
@@ -8042,6 +8351,17 @@ server <- function(input, output, session) {
     anterior_op_note_list <- anterior_op_note_inputs_list_reactive()
     anterior_op_note_list$anterior_approach_objects_df <- "See table"
     paste(map2(.x = anterior_op_note_list, .y = names(anterior_op_note_list), .f = ~ paste0(.y, ": ", paste(.x, sep = ", ", collapse = ", "))))
+  })
+  
+  output$full_objects_passed_to_anterior_op_note_df <- renderTable({
+    # list_no_df <- keep(.x = anterior_op_note_inputs_list_reactive(), .p = ~ is.data.frame(.x) == FALSE)
+    anterior_op_note_list <- anterior_op_note_inputs_list_reactive()
+    anterior_list_names <- names(anterior_op_note_list)
+    
+    tibble(contents = paste(map(anterior_op_note_list, .f = ~ paste(dput(.x))))) %>%
+      mutate(list_input_name = anterior_list_names) %>%
+      select(list_input_name, contents)
+    
   })
   
   
