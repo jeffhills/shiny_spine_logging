@@ -807,6 +807,13 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   if(nrow(all_objects_to_add_df)>0){
     
+    all_objects_to_add_df %>%
+      select(level, vertebral_number) %>%
+      bind_rows(revision_implants_df %>%
+                  filter(remove_retain == "remove") %>% 
+                  select(level, vertebral_number)) %>%
+      filter(vertebral_number == min(vertebral_number))
+    
     proximal_exposure_level <- all_objects_to_add_df %>%
       select(level, vertebral_number) %>%
       bind_rows(revision_implants_df %>%
@@ -814,12 +821,24 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                   select(level, vertebral_number)) %>%
       filter(vertebral_number == min(vertebral_number)) %>%
       mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
-      mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
-      select(vertebral_number) %>%
-      distinct() %>%
+      mutate(vertebral_number = if_else(vertebral_number >=25, 25, vertebral_number)) %>%
       mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
       select(level) %>%
       distinct()
+    
+    # proximal_exposure_level <- all_objects_to_add_df %>%
+    #   select(level, vertebral_number) %>%
+    #   bind_rows(revision_implants_df %>%
+    #               filter(remove_retain == "remove") %>% 
+    #               select(level, vertebral_number)) %>%
+    #   filter(vertebral_number == min(vertebral_number)) %>%
+    #   mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
+    #   mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
+    #   select(vertebral_number) %>%
+    #   distinct() %>%
+    #   mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+    #   select(level) %>%
+    #   distinct()
     
     distal_exposure_level <- all_objects_to_add_df %>%
       select(level, vertebral_number) %>%
@@ -828,15 +847,27 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                   select(level, vertebral_number)) %>%
       filter(vertebral_number == max(vertebral_number)) %>%
       mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
-      mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
-      select(vertebral_number) %>%
-      distinct() %>%
+      mutate(vertebral_number = if_else(vertebral_number >=25, 25, vertebral_number)) %>%
       mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
       select(level) %>%
-      distinct() %>%
-      mutate(level = if_else(level == "S2AI", "S1", 
-                             if_else(level == "Iliac", "S1", 
-                                     level)))  
+      distinct()
+    
+    # distal_exposure_level <- all_objects_to_add_df %>%
+    #   select(level, vertebral_number) %>%
+    #   bind_rows(revision_implants_df %>%
+    #               filter(remove_retain == "remove") %>% 
+    #               select(level, vertebral_number)) %>%
+    #   filter(vertebral_number == max(vertebral_number)) %>%
+    #   mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
+    #   mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
+    #   select(vertebral_number) %>%
+    #   distinct() %>%
+    #   mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
+    #   select(level) %>%
+    #   distinct() %>%
+    #   mutate(level = if_else(level == "S2AI", "S1", 
+    #                          if_else(level == "Iliac", "S1", 
+    #                                  level)))  
     
     if(surgical_approach == "Midline"){
       first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, exposing proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
@@ -937,7 +968,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   if(any(additional_procedures_vector == "Exploration of prior spinal fusion")){
     if(length(prior_fusion_levels_vector) > 0){
-      revision_statements_list$exploration_fusion_statement <- glue("I then proceeded with exploration of the prior fusion. Overlying scar was excised from the posterior elements and the prior fusion at {glue_collapse(prior_fusion_levels_vector, sep = ', ', last = ' and ')} was inspected and examined for any motion.")
+      revision_statements_list$exploration_fusion_statement <- glue("I then proceeded with exploration of the prior fusion. Overlying scar was excised from the posterior elements and the prior fusion from {prior_fusion_levels_vector[1]} to {tail(prior_fusion_levels_vector, 1)} was inspected and examined for any motion.")
     }
   } 
   
@@ -1018,12 +1049,14 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     
     posterior_implant_df <- posterior_implants_all_df %>%
       filter(procedure_category != "pelvic instrumentation") %>%
-      mutate(level = if_else(level == "Iliac", "Pelvis", level)) %>%
-      mutate(level = if_else(level == "S2AI", "Pelvis", level))
+      mutate(level = if_else(str_detect(str_to_lower(level), "iliac|s2ai"), "Pelvis", level))
+      # mutate(level = if_else(level == "Iliac", "Pelvis", level)) %>%
+      # mutate(level = if_else(level == "S2AI", "Pelvis", level))
     
     instrumented_levels_vector <- unique((posterior_implants_all_df %>% 
-                                            mutate(level = if_else(level == "Iliac", "the pelvis", level)) %>%
-                                            mutate(level = if_else(level == "S2AI", "the pelvis", level)) %>%
+                                            mutate(level = if_else(str_detect(str_to_lower(level), "iliac|s2ai"), "Pelvis", level)) %>%
+                                            # mutate(level = if_else(level == "Iliac", "the pelvis", level)) %>%
+                                            # mutate(level = if_else(level == "S2AI", "the pelvis", level)) %>%
                                             distinct())$level)
   }else{
     posterior_implant_df <- tibble(level = character(), side = character(), object = character())
