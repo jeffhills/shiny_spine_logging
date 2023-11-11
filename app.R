@@ -131,7 +131,9 @@ ui <- dashboardPage(skin = "black",
                                                  menuItem(text = "Review Data Tables",
                                                           tabName = "tables",
                                                           icon = icon("table")
-                                                 )
+                                                 ), 
+                                                 br(), 
+                                                 textOutput(outputId = "timer")
                                      )
                     ),
                     dashboardBody(
@@ -1257,6 +1259,68 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
+  
+  logging_timer_reactive_list <- reactiveValues()
+  logging_timer_reactive_list$elapsed_time <- 0
+  
+  # start_time <- reactiveVal(NULL)
+  # running <- reactiveVal(FALSE)
+  
+  # update_stopwatch <- function() {
+  #   if (running()) {
+  #     elapsed_time <- round(as.numeric(Sys.time() - start_time(), units = "secs"), 2)
+  #     output$timer <- renderText({
+  #       paste("Elapsed Time: ", format(elapsed_time, nsmall = 2), " seconds")
+  #     })
+  #   } else {
+  #     output$timer <- renderText("Stopwatch Stopped")
+  #   }
+  # }
+  # observeEvent(list(input$close_startup_modal, input$patient_last_name), {
+  #   if (!running()) {
+  #     start_time(Sys.time())
+  #     running(TRUE) 
+  #     update_stopwatch()
+  #   }
+  # })
+  observeEvent(input$close_startup_modal, ignoreInit = TRUE, once = TRUE, {
+    logging_timer_reactive_list$start_time <- as.numeric(Sys.time())
+    # start_time(Sys.time())
+  })
+  
+  # # Event handler for the "Stop Stopwatch" button
+  # observeEvent(input$generate_operative_note, {
+  #   if (running()) {
+  #     running(FALSE) 
+  #     elapsed_time <- round(as.numeric(Sys.time() - start_time(), units = "secs"), 2)
+  #     # output$timer <- renderText({
+  #     #   paste("Elapsed Time: ", format(elapsed_time, nsmall = 2), " seconds")
+  #     # })
+  #     logging_timer_reactive <- reactive({
+  #       paste("Elapsed Time: ", format(elapsed_time, nsmall = 2), " seconds")
+  #     })
+  #     # update_stopwatch()
+  #   }
+  # })
+  # observeEvent(input$generate_operative_note, {
+  #   
+  # })
+  
+  # logging_timer_reactive <- reactive({
+  # observe({
+  #   logging_timer_reactive_list$elapsed_time <- round(as.numeric(Sys.time()) - logging_timer_reactive_list$start_time, 1)
+  #   
+  #         # paste("Elapsed Time: ", format(elapsed_time, nsmall = 2), " seconds")
+  #       })
+  
+  observeEvent(input$generate_operative_note, ignoreInit = TRUE, {
+    logging_timer_reactive_list$elapsed_time <- round(as.numeric(Sys.time()) - logging_timer_reactive_list$start_time, 1)
+
+  })
+  
+  output$timer <- renderText({
+    logging_timer_reactive_list$elapsed_time
+  })
   
   observeEvent(input$multi_approach_starting_position, ignoreInit = TRUE, {
     if(input$multiple_approach == TRUE){
@@ -6139,35 +6203,7 @@ server <- function(input, output, session) {
   left_rod_crossing_table_reactive <- reactive({
     left_rods_connectors_list <- list()
     if(input$implants_complete > 0){
-      # if(input$add_left_accessory_rod == TRUE && input$left_accessory_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$left_accessory_rod)) == 2){
-      #   accessory_vector <- input$left_accessory_rod
-      # }else{
-      #   accessory_vector <- c("a")
-      # }
-      # if(input$add_left_satellite_rod == TRUE && input$left_satellite_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$left_satellite_rod)) == 2){
-      #   satellite_vector <- input$left_satellite_rod
-      # }else{
-      #   satellite_vector <- c("a", "b")
-      # }
-      # if(input$add_left_intercalary_rod == TRUE && input$left_intercalary_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$left_intercalary_rod)) == 2){
-      #   intercalary_vector <- input$left_intercalary_rod
-      #   junction <- input$left_intercalary_rod_junction
-      # }else{
-      #   intercalary_vector <- c("a")
-      #   junction <- NULL
-      # }
-      # if(input$add_left_linked_rods == TRUE && input$left_linked_rods[1] %in% all_screw_coordinates_df$level && length(unique(input$left_linked_rods)) == 2){
-      #   linked_vector <- input$left_linked_rods
-      # }else{
-      #   linked_vector <- c("a")
-      # }
-      # 
-      # if(input$add_left_kickstand_rod == TRUE && input$left_kickstand_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$left_kickstand_rod)) == 2){
-      #   left_kickstand_rod_vector <- input$left_kickstand_rod
-      # }else{
-      #   left_kickstand_rod_vector <- c("a")
-      # }
-      
+
       custom_rods_vector_list <- list()
       if(input$add_left_custom_rods == TRUE){
         if(input$left_custom_rods_number > 1 & length(input$left_custom_rod_1) > 1){
@@ -8577,6 +8613,11 @@ server <- function(input, output, session) {
           }else{
             implant_removal_repeating_instance_add <- 0
           }
+          if("logging_data_time_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
+            logging_data_time_repeating_instance_add <- repeat_list$logging_data_time_repeating_repeating
+          }else{
+            logging_data_time_repeating_instance_add <- 0
+          }
           
           
           
@@ -8594,6 +8635,7 @@ server <- function(input, output, session) {
           all_inputs_repeating_instance_add <- 0
           # posterior_implant_removal_instance_add <- 0
           implant_removal_repeating_instance_add <- 0
+          logging_data_time_repeating_instance_add <- 0
         }
       }else{
         record_number <- exportNextRecordName(rcon = rcon_reactive$rcon)
@@ -8605,6 +8647,7 @@ server <- function(input, output, session) {
         all_inputs_repeating_instance_add <- 0
         # posterior_implant_removal_instance_add <- 0
         implant_removal_repeating_instance_add <- 0
+        logging_data_time_repeating_instance_add <- 0
       }
       
       ##### uploaded patient details #######
@@ -8823,8 +8866,27 @@ server <- function(input, output, session) {
         }else{
           
           incProgress(1/number_of_steps, detail = paste("Complete"))
-          
         }
+        
+        if(!is.na(logging_timer_reactive_list$elapsed_time))
+          
+          time_spent_logging_df <- tibble(record_id = record_number) %>%
+          mutate(redcap_event_name = "surgery_arm_1") %>%
+          mutate(redcap_repeat_instance = row_number() + logging_data_time_repeating_instance_add) %>%
+          mutate(redcap_repeat_instrument = "logging_data_time_repeating") %>%
+          mutate(logging_data_time_repeating_complete = "Complete") %>%
+          mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+          mutate(dos_logging_data_time_repeating = as.character(input$date_of_surgery), 
+                 data_logging_time_seconds = as.character(logging_timer_reactive_list$elapsed_time)) %>%
+          select(record_id, redcap_event_name, everything())
+        
+        if(all(names(time_spent_logging_df %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
+          importRecords(rcon = rcon_reactive$rcon, data = time_spent_logging_df, returnContent = "count") 
+        }else{
+          tables_not_uploaded_list$time_spent_logging_df <- "time_spent_logging_df"
+        }
+        
+  
         
       })
       

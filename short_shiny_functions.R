@@ -1018,15 +1018,17 @@ fusion_levels_df_function <- function(all_objects_to_add_df){
       arrange(vertebral_number) 
     
     if(any(fusion_range_df$body_interspace == "body")){
-      fusion_bodies_df <- fusion_range_df %>%
-        filter(body_interspace == "body") %>%
-        filter(vertebral_number == min(vertebral_number) | vertebral_number == max(vertebral_number)) %>%
-        select(vertebral_number) %>%
-        distinct() 
+      # fusion_bodies_df <- fusion_range_df %>%
+      #   filter(body_interspace == "body") %>%
+      #   filter(vertebral_number == min(vertebral_number) | vertebral_number == max(vertebral_number)) %>%
+      #   select(vertebral_number) %>%
+      #   distinct() 
         # mutate(vertebral_number = if_else(vertebral_number == min(vertebral_number), vertebral_number + 0.5, vertebral_number - 0.5))
       
-      interspaces <- fusion_vertebral_numbers_df$vertebral_number - 0.5
-      interspaces <- append(interspaces, fusion_vertebral_numbers_df$vertebral_number + 0.5) 
+      interspaces <- seq(from = min(fusion_range_df$vertebral_number) + 0.5, to = max(fusion_range_df$vertebral_number) - 0.5, by = 1)
+      
+      # interspaces <- fusion_vertebral_numbers_df$vertebral_number - 0.5
+      # interspaces <- append(interspaces, fusion_vertebral_numbers_df$vertebral_number + 0.5) 
       
       fusions_levels_df <- tibble(vertebral_number = interspaces) %>%
       # fusions_levels_df <- tibble(vertebral_number = seq(from = min(fusion_bodies_df$vertebral_number), to = max(fusion_bodies_df$vertebral_number), by = 1)) %>%
