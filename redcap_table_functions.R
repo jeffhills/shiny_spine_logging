@@ -33,6 +33,7 @@ redcap_table_surgical_details_df_function <- function(all_objects_df_input = tib
                                                       left_revision_implants_removed_input = c(),
                                                       right_revision_implants_removed_input = c(),
                                                       staged_procedure_input = FALSE,
+                                                      stage_number = 1,
                                                       approach_sequence_input = "na",
                                                       spine_approach_input = "na",
                                                       approach_specified_anterior_input = "na",

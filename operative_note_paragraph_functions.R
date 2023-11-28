@@ -107,7 +107,7 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
 
 extract_levels_function <- function(input_df){
   levels_df <- input_df %>%
-    arrange(vertebral_number) %>%
+    arrange(as.double(vertebral_number)) %>%
     select(level) %>%
     distinct()
   
@@ -1618,6 +1618,7 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     mutate(across(everything(), .fns = ~ as.character(.)))
   
   summary_multiple_nested <- summary_nested_df %>%
+    # mutate(vertebral_number = as.double(vertebral_number)) %>%
     filter(procedures_per_line == "combine") %>%
     group_by(procedure_class) %>%
     nest() %>%

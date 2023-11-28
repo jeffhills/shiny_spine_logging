@@ -1226,7 +1226,8 @@ ui <- dashboardPage(skin = "black",
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Anterior: Objects passed to Op Note Generater/DATAFRAME:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
                               tableOutput(outputId = "full_objects_passed_to_anterior_op_note_df")),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs Not Logged:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
-                              tableOutput(outputId = "all_inputs_removed"))
+                              tableOutput(outputId = "all_inputs_removed")
+                              )
                           #         ###########################################
                   )
                 )
@@ -1328,9 +1329,9 @@ server <- function(input, output, session) {
         updateActionButton(session = session, inputId = "proceed_to_other_approach", label = "Done with Anterior, Switch to Posterior")
       }
     }
-
-    
   })
+  
+  
   observeEvent(input$proceed_to_other_approach, ignoreInit = TRUE, {
     if(input$spine_approach == "Anterior"){
       updateRadioGroupButtons(session = session,
@@ -1431,7 +1432,7 @@ server <- function(input, output, session) {
     )
 
   observeEvent(input$test_patient_button, {
-    updateTextInput(session = session, inputId = "patient_last_name", value = "TestLAST")
+    updateTextInput(session = session, inputId = "patient_last_name", value = paste0("TestLAST", sample(1:1000, 1)))
     updateTextInput(session = session, inputId = "patient_first_name", value = "TestFIRST")
     updateDateInput(session = session, inputId = "date_of_birth", value = date("1970-01-05"))
     updateDateInput(session = session, inputId = "date_of_surgery", value = Sys.Date())
@@ -2764,22 +2765,25 @@ server <- function(input, output, session) {
                       }else{
                         # all_posterior_df <- all_objects_to_add_list$objects_df %>%
                         #   filter(approach == "posterior")
-                        if(nrow(all_objects_to_add_list$objects_df %>%
-                          filter(approach == "posterior", str_detect(object, "screw")))>0){
+                        # if(nrow(all_objects_to_add_list$objects_df %>%
+                        #   filter(approach == "posterior", str_detect(object, "screw")))>0){
       
-                          
+                        if(str_detect(input$object_to_add, "screw")){
                           geoms_list_posterior$screws <- jh_make_posterior_screws_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
                                                                                                    filter(approach == "posterior", str_detect(object, "screw")), plot_with_patterns = input$plot_with_patterns_true)
                           
 
                           
+                          # geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
+                          #                                                                  filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
+                          #                                                                plot_with_patterns = input$plot_with_patterns_true)
+                        }else{
                           geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
                                                                                            filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
                                                                                          plot_with_patterns = input$plot_with_patterns_true)
-                        }else{
-                            geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
-                                                                                             filter(approach == "posterior"),
-                                                                                       plot_with_patterns = input$plot_with_patterns_true)
+                            # geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
+                            #                                                                  filter(approach == "posterior"),
+                            #                                                            plot_with_patterns = input$plot_with_patterns_true)
                         }
                       }
                     })
@@ -5866,7 +5870,7 @@ server <- function(input, output, session) {
   ################------------------  Interbody Details (and generating results)    ----------------------######################  
   
   interbody_df_reactive <- reactive({
-    # if(input$add_interbody > 0 | input$add_intervertebral_cage > 0){
+
     if(any(str_detect(all_objects_to_add_list$objects_df$object, "intervertebral_cage"))){
       
       intervertebral_cage_df <- all_objects_to_add_list$objects_df %>%
@@ -5890,9 +5894,7 @@ server <- function(input, output, session) {
         arrange(vertebral_number) %>%
         mutate(cage_id = paste(str_to_lower(str_replace_all(level, "-", "_")), side, object, sep = "_"))
     }
-    # }else{
-    #   interbody_implants_df <- tibble()
-    # }
+
     interbody_implants_df
 
   }) 
@@ -7847,6 +7849,7 @@ server <- function(input, output, session) {
                                                                        left_revision_implants_removed_input = input$left_revision_implants_removed,
                                                                        right_revision_implants_removed_input = input$right_revision_implants_removed,
                                                                        staged_procedure_input = input$staged_procedure,
+                                                                       stage_number = input$stage_number,
                                                                        approach_sequence_input = input$approach_sequence,
                                                                        spine_approach_input = input$spine_approach,
                                                                        approach_specified_anterior_input = input$approach_specified_anterior,
