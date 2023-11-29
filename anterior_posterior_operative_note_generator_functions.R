@@ -431,6 +431,13 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was transferred to the hospital bed. I was personally present for the entirety of the {procedures_listed}.")
   }
   
+  lower_case_levels <- as.list(str_to_lower(levels_numbered_df$level))
+  corrected_levels <- as.list(levels_numbered_df$level)
+  
+  for (i in c(1:length(lower_case_levels))) {
+    procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = lower_case_levels[[i]], replacement = corrected_levels[[i]])
+  }
+  
   procedure_paragraphs <- glue_collapse(x = procedure_details_list, sep = "\n\n")
   
   return(list(procedure_details_paragraph = procedure_paragraphs, 
@@ -1036,7 +1043,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       unnest(procedure_category) %>%
       mutate(procedure_category = str_to_lower(procedure_category)) %>%
       filter(str_detect(string = procedure_category, pattern = "instrumentation")) %>%
-      left_join(levels_numbered_df) %>%
+      # left_join(levels_numbered_df) %>%
       select(level, vertebral_number, procedure_category, object, side) %>%
       arrange(vertebral_number) %>%
       remove_missing() %>%
@@ -1266,6 +1273,13 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   if(instruments_used_for_bony_work == "High-speed burr and bone scalpel"){
     procedure_paragraphs <- str_replace_all(procedure_paragraphs, "high-speed burr", "bone scalpel and high-speed burr")
+  }
+ 
+  lower_case_levels <- as.list(str_to_lower(levels_numbered_df$level))
+  corrected_levels <- as.list(levels_numbered_df$level)
+  
+  for (i in c(1:length(lower_case_levels))) {
+    procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = lower_case_levels[[i]], replacement = corrected_levels[[i]])
   }
   
   

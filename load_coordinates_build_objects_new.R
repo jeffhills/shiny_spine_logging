@@ -76,6 +76,35 @@ implant_coordinates_df <- fread("coordinates/implant.csv") %>%
   separate(col = object_id, into = c("level", "side", "object"), sep = "_", extra = "merge") %>%
   mutate(object = str_remove_all(object, "_1"))
 
+##function for loading all possible
+jh_load_all_possible_objects_function <- function(){
+  coordinate_file_names_list <- list(anterior_body = "coordinates/anterior_body.csv",
+                                     anterior_disc = "coordinates/anterior_disc.csv",
+                                     anterior_interbody_fusion = "coordinates/anterior_interbody_fusion.csv",
+                                     decompression = "coordinates/decompression.csv",
+                                     implant = "coordinates/implant.csv",
+                                     incision_drainage = "coordinates/incision_drainage.csv",
+                                     interbody = "coordinates/interbody.csv",
+                                     osteotomy = "coordinates/osteotomy.csv",
+                                     tumor = "coordinates/tumor.csv")
+  
+  
+  coordinates_df_list <- map(coordinate_file_names_list, .f = ~ fread(paste0(.x)) %>% 
+                               group_by(object_id) %>%
+                               nest() %>%
+                               mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+                               select(object_id, object_constructed)
+  )
+  
+  all_implants_constructed_df <<- all_implants_constructed_df %>%
+    union_all(all_object_ids_df %>%
+                left_join(bind_rows(coordinates_df_list))) %>%
+    distinct()
+  
+  all_implants_constructed_df
+  
+}
+
 # coordinate_file_names_list <- list(anterior_body = "coordinates/anterior_body.csv",
 #                                    anterior_disc = "coordinates/anterior_disc.csv",
 #                                    anterior_interbody_fusion = "coordinates/anterior_interbody_fusion.csv",
