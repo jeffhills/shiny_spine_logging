@@ -105,15 +105,6 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
 }
 
 
-extract_levels_function <- function(input_df){
-  levels_df <- input_df %>%
-    arrange(as.double(vertebral_number)) %>%
-    select(level) %>%
-    distinct()
-  
-  glue_collapse(x = levels_df$level, sep = ", ", last = " and ")
-  
-}
 
 ################-------------------------#################### -------- ANTERIOR -----------################-------------------------#################### 
 ################-------------------------#################### -------- ANTERIOR -----------################-------------------------#################### 

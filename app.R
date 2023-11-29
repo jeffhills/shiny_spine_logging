@@ -1260,7 +1260,7 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
-  options(shiny.trace = TRUE)
+  # options(shiny.trace = TRUE)
   
   logging_timer_reactive_list <- reactiveValues()
   logging_timer_reactive_list$elapsed_time <- 0
@@ -7679,18 +7679,29 @@ server <- function(input, output, session) {
   })
   
   
-  
-  observeEvent(input$generate_operative_note, {
-    
 
-    updateTextAreaInput(session = session, 
-                        inputId = "operative_note_text", 
+  
+  observeEvent(input$procedures_numbered_confirm_edit_posterior, {
+    
+    updateTextAreaInput(session = session,
+                        inputId = "operative_note_text",
                         value = HTML(op_note_text_reactive())
                         # value = HTML(op_note_text_reactive_testing())
-                        )
+    )
     
   }
   )
+  
+  # observeEvent(input$generate_operative_note, {
+  # 
+  #   updateTextAreaInput(session = session,
+  #                       inputId = "operative_note_text",
+  #                       value = HTML(op_note_text_reactive())
+  #                       # value = HTML(op_note_text_reactive_testing())
+  #                       )
+  # 
+  # }
+  # )
   
   observeEvent(input$operative_note_text, ignoreNULL = TRUE, {
     
@@ -7724,7 +7735,19 @@ server <- function(input, output, session) {
       # op_note <- str_replace_all(string = op_note, pattern = "xxxx:", replacement = "<B>xxxxx:</B>")
       
       # postop_plan_sections_list
-      for(word in postop_plan_sections_list){
+      for(word in list("Postop Destination",
+                       "Postop Abx",
+                       "Postop MAP goals", 
+                       "Postop Anemia", 
+                       "Postop Imaging", 
+                       "Pain Control", 
+                       "Activity", 
+                       "Bracing", 
+                       "Diet/GI", 
+                       "Foley",
+                       "DVT PPX/Anticoag/Antiplatelet",
+                       "Drains & Dressing",
+                       "Follow-up")){
         op_note <- str_replace_all(string = op_note, pattern = word, replacement = glue("<em>{word}</em>"))
       }
       
@@ -7736,16 +7759,32 @@ server <- function(input, output, session) {
   })
   
   
-  observeEvent(input$generate_operative_note, {
-    output$clipboard_ui <- renderUI({
-      rclipboard::rclipButton(inputId = "clip_button", 
-                              label = "Copy To Clipboard", 
-                              clipText = input$operative_note_text, 
-                              icon = icon("clipboard"))
-    })
-  }
-  )
+  # observeEvent(input$generate_operative_note, {
+  #   output$clipboard_ui <- renderUI({
+  #     rclipboard::rclipButton(inputId = "clip_button", 
+  #                             label = "Copy To Clipboard", 
+  #                             clipText = input$operative_note_text, 
+  #                             icon = icon("clipboard"))
+  #   })
+  # }
+  # )
   
+  tryCatch({
+    # Code that might cause the error
+    observeEvent(input$generate_operative_note, {
+      output$clipboard_ui <- renderUI({
+        rclipboard::rclipButton(inputId = "clip_button", 
+                                label = "Copy To Clipboard", 
+                                clipText = input$operative_note_text, 
+                                icon = icon("clipboard"))
+      })
+    }
+    )
+  }, error = function(e) {
+    # Log the error message along with additional information
+    log_error_message <- paste("Error occurred:", e$message)
+    cat(log_error_message, file = "logfile.txt", append = TRUE)
+  })
   
   observeEvent(input$generate_operative_note, {
     output$operative_note_header_details <- renderUI({

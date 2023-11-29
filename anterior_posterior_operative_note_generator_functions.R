@@ -107,15 +107,15 @@ op_note_number_of_paragraphs_for_procedure_category <- function(procedure_cat){
 }
 
 
-extract_levels_function <- function(input_df){
-  levels_df <- input_df %>%
-    arrange(vertebral_number) %>%
-    select(level) %>%
-    distinct()
-  
-  glue_collapse(x = levels_df$level, sep = ", ", last = " and ")
-  
-}
+# extract_levels_function <- function(input_df){
+#   levels_df <- input_df %>%
+#     arrange(vertebral_number) %>%
+#     select(level) %>%
+#     distinct()
+#   
+#   glue_collapse(x = levels_df$level, sep = ", ", last = " and ")
+#   
+# }
 
 jh_capitalize_spine_levels_function <- function(sentence_text = "xxx"){
   statement_as_vector <- unlist(strsplit(sentence_text, " "))
@@ -431,14 +431,14 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was transferred to the hospital bed. I was personally present for the entirety of the {procedures_listed}.")
   }
   
+  procedure_paragraphs <- glue_collapse(x = procedure_details_list, sep = "\n\n")
+  
   lower_case_levels <- as.list(str_to_lower(levels_numbered_df$level))
   corrected_levels <- as.list(levels_numbered_df$level)
   
   for (i in c(1:length(lower_case_levels))) {
     procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = lower_case_levels[[i]], replacement = corrected_levels[[i]])
   }
-  
-  procedure_paragraphs <- glue_collapse(x = procedure_details_list, sep = "\n\n")
   
   return(list(procedure_details_paragraph = procedure_paragraphs, 
               procedures_numbered_paragraph = procedures_numbered_list[[1]]))
