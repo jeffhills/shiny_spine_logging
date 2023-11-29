@@ -1130,6 +1130,14 @@ ui <- dashboardPage(skin = "black",
                                 style = "float",
                                 color = "primary"
                               ),
+                              actionBttn(
+                                inputId = "generate_operative_note2",
+                                block = TRUE,
+                                size = "md",
+                                label = "Click for testing Operative Note",
+                                style = "float",
+                                color = "primary"
+                              ),
                               br(),
                               textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 500),
                               uiOutput("clipboard_ui"),
@@ -1260,7 +1268,7 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
-  # options(shiny.trace = TRUE)
+  options(shiny.trace = TRUE)
   
   logging_timer_reactive_list <- reactiveValues()
   logging_timer_reactive_list$elapsed_time <- 0
@@ -7681,27 +7689,27 @@ server <- function(input, output, session) {
   
 
   
-  observeEvent(input$procedures_numbered_confirm_edit_posterior, {
-    
-    updateTextAreaInput(session = session,
-                        inputId = "operative_note_text",
-                        value = HTML(op_note_text_reactive())
-                        # value = HTML(op_note_text_reactive_testing())
-    )
-    
-  }
-  )
-  
-  # observeEvent(input$generate_operative_note, {
-  # 
+  # observeEvent(input$procedures_numbered_confirm_edit_posterior, {
+  #   
   #   updateTextAreaInput(session = session,
   #                       inputId = "operative_note_text",
   #                       value = HTML(op_note_text_reactive())
   #                       # value = HTML(op_note_text_reactive_testing())
-  #                       )
-  # 
+  #   )
+  #   
   # }
   # )
+  
+  observeEvent(input$generate_operative_note2, {
+
+    updateTextAreaInput(session = session,
+                        inputId = "operative_note_text",
+                        value = HTML(op_note_text_reactive())
+                        # value = HTML(op_note_text_reactive_testing())
+                        )
+
+  }
+  )
   
   observeEvent(input$operative_note_text, ignoreNULL = TRUE, {
     
