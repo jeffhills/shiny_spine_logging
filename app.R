@@ -1268,7 +1268,8 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
-  options(shiny.trace = TRUE)
+  options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
+  # options(shiny.reactlog=TRUE) 
   
   logging_timer_reactive_list <- reactiveValues()
   logging_timer_reactive_list$elapsed_time <- 0
@@ -6000,7 +6001,9 @@ server <- function(input, output, session) {
   observeEvent(input$implants_complete, ignoreInit = TRUE, {
     if(nrow(all_objects_to_add_list$objects_df)>0){
       selected_screws <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df, return_shiny_inputs_df = FALSE)$side_level_object
-      updateCheckboxGroupInput(session = session, inputId = "screws_implanted_picker_for_ui", 
+      updateCheckboxGroupInput(session = session, 
+                               inputId = "screws_implanted_picker_for_ui", 
+                               label = "screws:",
                         choices = selected_screws, 
                         selected = selected_screws)
     }
@@ -7202,7 +7205,7 @@ server <- function(input, output, session) {
   ) %>%
     bindEvent(input$editing_additional_surgical_details_1_complete,
               input$additional_surgical_details_complete, 
-              input$operative_note,
+              # input$operative_note,
               input$additional_procedures_other_posterior,
               ignoreInit = TRUE,
               ignoreNULL = TRUE
@@ -7230,7 +7233,7 @@ server <- function(input, output, session) {
   ) %>%
     bindEvent(input$editing_additional_surgical_details_1_complete, ### this is only the editing box
               input$additional_surgical_details_complete, 
-              input$operative_note,
+              # input$operative_note,
               input$additional_procedures_other_anterior,
               ignoreInit = TRUE,
               ignoreNULL = TRUE
@@ -7676,7 +7679,7 @@ server <- function(input, output, session) {
     
 
     secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
-      unnest() %>%
+      unnest(result) %>%
       mutate(row = row_number()) %>%
       pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
       select(row, full_text_vector)

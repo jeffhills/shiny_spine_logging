@@ -16,7 +16,7 @@ jh_replace_checkbox_other_with_text_function <- function(input_vector = c(" "),
 
 format_plan_list_function <- function(plan_label, input_vector){
   if(length(input_vector) > 1){
-    plan_formatted <- paste0("  - ", plan_label, ":", glue_collapse(prepend(x = input_vector, values = " "), sep = "\n       > "))
+    plan_formatted <- paste0("  - ", plan_label, ":", glue_collapse(append(x = input_vector, values = " ", after = 0), sep = "\n       > "))
   }else{
     plan_formatted <- paste0("  - ", plan_label, ": ", input_vector)
   }
@@ -92,7 +92,8 @@ jh_make_op_note_test_df_function <- function(lumbar_pso_example = FALSE, posteri
 
 extract_levels_function <- function(input_df){
   levels_df <- input_df %>%
-    arrange(as.double(vertebral_number)) %>%
+    arrange(vertebral_number) %>%
+    # arrange(as.double(vertebral_number)) %>%
     select(level) %>%
     distinct()
   
