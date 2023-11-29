@@ -1260,68 +1260,26 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
+  options(shiny.trace = TRUE)
   
   logging_timer_reactive_list <- reactiveValues()
   logging_timer_reactive_list$elapsed_time <- 0
   
-  # start_time <- reactiveVal(NULL)
-  # running <- reactiveVal(FALSE)
-  
-  # update_stopwatch <- function() {
-  #   if (running()) {
-  #     elapsed_time <- round(as.numeric(Sys.time() - start_time(), units = "secs"), 2)
-  #     output$timer <- renderText({
-  #       paste("Elapsed Time: ", format(elapsed_time, nsmall = 2), " seconds")
-  #     })
-  #   } else {
-  #     output$timer <- renderText("Stopwatch Stopped")
-  #   }
-  # }
-  # observeEvent(list(input$close_startup_modal, input$patient_last_name), {
-  #   if (!running()) {
-  #     start_time(Sys.time())
-  #     running(TRUE) 
-  #     update_stopwatch()
-  #   }
-  # })
+
   observeEvent(input$close_startup_modal, ignoreInit = TRUE, once = TRUE, {
     logging_timer_reactive_list$start_time <- as.numeric(Sys.time())
-    # start_time(Sys.time())
   })
   
-  # # Event handler for the "Stop Stopwatch" button
-  # observeEvent(input$generate_operative_note, {
-  #   if (running()) {
-  #     running(FALSE) 
-  #     elapsed_time <- round(as.numeric(Sys.time() - start_time(), units = "secs"), 2)
-  #     # output$timer <- renderText({
-  #     #   paste("Elapsed Time: ", format(elapsed_time, nsmall = 2), " seconds")
-  #     # })
-  #     logging_timer_reactive <- reactive({
-  #       paste("Elapsed Time: ", format(elapsed_time, nsmall = 2), " seconds")
-  #     })
-  #     # update_stopwatch()
-  #   }
-  # })
-  # observeEvent(input$generate_operative_note, {
-  #   
-  # })
-  
-  # logging_timer_reactive <- reactive({
-  # observe({
-  #   logging_timer_reactive_list$elapsed_time <- round(as.numeric(Sys.time()) - logging_timer_reactive_list$start_time, 1)
-  #   
-  #         # paste("Elapsed Time: ", format(elapsed_time, nsmall = 2), " seconds")
-  #       })
-  
-  observeEvent(input$generate_operative_note, ignoreInit = TRUE, {
+  observeEvent(input$preview_redcap_upload, ignoreInit = TRUE, {
     logging_timer_reactive_list$elapsed_time <- round(as.numeric(Sys.time()) - logging_timer_reactive_list$start_time, 1)
-
+    
   })
   
   output$timer <- renderText({
-    logging_timer_reactive_list$elapsed_time
+    paste(logging_timer_reactive_list$elapsed_time, "seconds elapsed")
   })
+  
+
   
   observeEvent(input$multi_approach_starting_position, ignoreInit = TRUE, {
     if(input$multiple_approach == TRUE){
@@ -7780,7 +7738,10 @@ server <- function(input, output, session) {
   
   observeEvent(input$generate_operative_note, {
     output$clipboard_ui <- renderUI({
-      rclipboard::rclipButton(inputId = "clip_button", label = "Copy To Clipboard", clipText = input$operative_note_text, icon = icon("clipboard"))
+      rclipboard::rclipButton(inputId = "clip_button", 
+                              label = "Copy To Clipboard", 
+                              clipText = input$operative_note_text, 
+                              icon = icon("clipboard"))
     })
   }
   )

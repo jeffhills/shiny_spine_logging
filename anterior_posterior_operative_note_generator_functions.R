@@ -531,6 +531,8 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
   
   added_procedures_df <- tibble(procedure_performed_statement = additional_procedures_performed_vector) 
   
+  
+  
   procedures_numbered_df <- summary_nested_df %>%
     select(procedure_class) %>%
     distinct() %>%
