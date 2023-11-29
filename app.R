@@ -1480,7 +1480,7 @@ server <- function(input, output, session) {
     
     all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), 
                                         events = "enrollment_arm_1") %>%
-      type.convert() %>%
+      type.convert(as.is = TRUE) %>%
       select(record_id, last_name, first_name, date_of_birth) %>%
       mutate(last_name = str_to_lower(last_name),
              first_name = str_to_lower(first_name))
@@ -1530,7 +1530,7 @@ server <- function(input, output, session) {
         
         existing_patient_data$surgical_dates_df <- exportRecords(rcon = rcon_reactive$rcon, 
                                                                  records = existing_patient_data$record_id) %>%
-          type.convert() %>%
+          type.convert(as.is = TRUE) %>%
           mutate(last_name = str_to_lower(last_name),
                  first_name = str_to_lower(first_name)) %>%
           select(record_id, date_of_surgery, stage_number) %>%
@@ -1715,7 +1715,7 @@ server <- function(input, output, session) {
     
     complication_count_df <- exportRecords(rcon = rcon_reactive$rcon, 
                                            records = existing_patient_data$record_id) %>%
-      type.convert() %>%
+      type.convert(as.is = TRUE) %>%
       filter(redcap_event_name == "complication_arm_1")
     if(nrow(complication_count_df)>0){
       complication_repeat_instance <- max(complication_count_df$redcap_repeat_instance) + 1
@@ -8549,7 +8549,7 @@ server <- function(input, output, session) {
       
       if(redcapAPI::exportNextRecordName(rcon = rcon_reactive$rcon)>1){
         all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
-          type.convert() %>%
+          type.convert(as.is = TRUE) %>%
           select(record_id, last_name, first_name, date_of_birth) %>%
           mutate(last_name = str_to_lower(last_name),
                  first_name = str_to_lower(first_name))   

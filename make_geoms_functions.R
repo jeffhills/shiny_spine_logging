@@ -1,28 +1,3 @@
-# jh_make_posterior_single_posterior_screw_sf_geom <- function(object_to_add_df){
-#   
-#   st_polygon(list(
-#     as.matrix(implant_coordinates_df %>%
-#                 filter(level == object_to_add_df$level[1],
-#                        side == object_to_add_df$side[1],
-#                        object == object_to_add_df$object[1]) %>%
-#                 select(x, y)
-#     )
-#   )
-#   )
-#   
-#   # geom_sf(data = st_polygon(list(
-#   #   as.matrix(implant_coordinates_df %>%
-#   #               filter(level == object_to_add_df$level[1],
-#   #                      side == object_to_add_df$side[1],
-#   #                      object == object_to_add_df$object[1]) %>%
-#   #               select(x, y)
-#   #   )
-#   # )
-#   # ), 
-#   # fill = "blue"
-#   # )
-# }
-
 jh_make_posterior_screws_geoms_function <- function(all_posterior_objects_df, plot_with_patterns = FALSE){
   ## SCREWS
   geoms_list_posterior <- list()
