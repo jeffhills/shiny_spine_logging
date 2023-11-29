@@ -11,6 +11,163 @@ redcap_table_patient_details_df_function <- function(last_name_input = "xx",
   
 }
 
+### first function for inputting supplemental rods ##
+jh_supplement_rods_summarize_for_table_function <- function(side,
+                                                            add_accessory_rod_true_false = FALSE, 
+                                                            accessory_rod_material = "na", 
+                                                            accessory_rod_size = "na",
+                                                            add_satellite_rod_true_false = FALSE, 
+                                                            satellite_rod_material = "na", 
+                                                            satellite_rod_size = "na",
+                                                            add_intercalary_rod_true_false = FALSE, 
+                                                            intercalary_rod_material = "na", 
+                                                            intercalary_rod_size = "na",
+                                                            add_linked_rod_true_false = FALSE, 
+                                                            linked_rod_material = "na", 
+                                                            linked_rod_size = "na",
+                                                            add_kickstand_rod_true_false = FALSE, 
+                                                            kickstand_rod_material = "na", 
+                                                            kickstand_rod_size = "na"){
+  
+  rod_list <- list()
+  
+  if(add_accessory_rod_true_false){
+    accessory_size <- if_else(accessory_rod_size == "na", "", accessory_rod_size)
+    accessory_material <- if_else(accessory_rod_material == "na", "", accessory_rod_material)
+    
+    rod_list$accessory_rod <- as.character(glue("{str_to_title(side)} Accessory rod, {accessory_rod_size}-{accessory_rod_material}"))
+  }
+  if(add_satellite_rod_true_false){
+    rod_list$satellite_rod <- as.character(glue("{str_to_title(side)} Satellite rod, {satellite_rod_size}-{satellite_rod_material}"))
+  }
+  if(add_intercalary_rod_true_false){
+    rod_list$intercalary_rod <- as.character(glue("{str_to_title(side)} Intercalary rod, {intercalary_rod_size}-{intercalary_rod_material}"))
+  }
+  if(add_linked_rod_true_false){
+    rod_list$linked_rod <- as.character(glue("{str_to_title(side)} Linked rod, {linked_rod_size}-{linked_rod_material}"))
+  }
+  if(add_kickstand_rod_true_false){
+    rod_list$kickstand_rod <- as.character(glue("{str_to_title(side)} Kickstand rod, {kickstand_rod_size}-{kickstand_rod_material}"))
+  }
+  
+  if(length(rod_list)>0){
+    as.character(glue_collapse(x = rod_list, sep = " + "))
+  }else{
+    "none"
+  }
+  
+}
+
+jh_rods_table_add_supplemental_rod_size_material_function <- function(rods_crossing_df_input, 
+                                                                      side = "left",
+                                                                      main_rod_size = "xx",
+                                                                      main_rod_material = "xx",
+                                                                      accessory_rod_size = "xx",
+                                                                      accessory_rod_material = "xx", 
+                                                                      satellite_rod_size = "xx",
+                                                                      satellite_rod_material = "xx", 
+                                                                      intercalary_rod_size = "xx",
+                                                                      intercalary_rod_material = "xx", 
+                                                                      linked_rod_size = "xx",
+                                                                      linked_rod_material = "xx", 
+                                                                      kickstand_rod_size = "xx",
+                                                                      kickstand_rod_material = "xx" 
+){
+  
+  accessory_rod_size_input <- if(length(accessory_rod_size) == 0){
+    "xx"
+  }else{
+    accessory_rod_size
+  }
+  accessory_rod_material_input <- if(length(accessory_rod_material) == 0){
+    "xx"
+  }else{
+    accessory_rod_material
+  }
+  satellite_rod_size_input <- if(length(satellite_rod_size) == 0){
+    "xx"
+  }else{
+    satellite_rod_size
+  }
+  satellite_rod_material_input <- if(length(satellite_rod_material) == 0){
+    "xx"
+  }else{
+    satellite_rod_material
+  }
+  intercalary_rod_size_input <- if(length(intercalary_rod_size) == 0){
+    "xx"
+  }else{
+    intercalary_rod_size
+  }
+  intercalary_rod_material_input <- if(length(intercalary_rod_material) == 0){
+    "xx"
+  }else{
+    intercalary_rod_material
+  }
+  linked_rod_size_input <- if(length(linked_rod_size) == 0){
+    "xx"
+  }else{
+    linked_rod_size
+  }
+  linked_rod_material_input <- if(length(linked_rod_material) == 0){
+    "xx"
+  }else{
+    linked_rod_material
+  }
+  kickstand_rod_size_input <- if(length(kickstand_rod_size) == 0){
+    "xx"
+  }else{
+    kickstand_rod_size
+  }
+  kickstand_rod_material_input <- if(length(kickstand_rod_material) == 0){
+    "xx"
+  }else{
+    kickstand_rod_material
+  }
+  
+  if(side == "left") {
+    rods_with_size_material_df <- rods_crossing_df_input %>%
+      mutate(left_main_rod_size = main_rod_size, 
+             left_main_rod_material = main_rod_material) %>% 
+      mutate(left_accessory_rod_size = if_else(str_detect(str_to_lower(left_rods_crossing), "accessory"), accessory_rod_size_input, "xx"), 
+             left_accessory_rod_material = if_else(str_detect(str_to_lower(left_rods_crossing), "accessory"), accessory_rod_material_input, "xx"),
+             
+             left_satellite_rod_size = if_else(str_detect(str_to_lower(left_rods_crossing), "satellite"), satellite_rod_size_input, "xx"), 
+             left_satellite_rod_material = if_else(str_detect(str_to_lower(left_rods_crossing), "satellite"), satellite_rod_material_input, "xx"),
+             
+             left_intercalary_rod_size = if_else(str_detect(str_to_lower(left_rods_crossing), "intercalary"), intercalary_rod_size_input, "xx"), 
+             left_intercalary_rod_material = if_else(str_detect(str_to_lower(left_rods_crossing), "intercalary"), intercalary_rod_material_input, "xx"),
+             
+             left_linked_rod_size = if_else(str_detect(str_to_lower(left_rods_crossing), "linked"), linked_rod_size_input, "xx"), 
+             left_linked_rod_material = if_else(str_detect(str_to_lower(left_rods_crossing), "linked"), linked_rod_material_input, "xx"),
+             
+             left_kickstand_rod_size = if_else(str_detect(str_to_lower(left_rods_crossing), "kickstand"), kickstand_rod_size_input, "xx"), 
+             left_kickstand_rod_material = if_else(str_detect(str_to_lower(left_rods_crossing), "kickstand"), kickstand_rod_material_input, "xx")) 
+  }else if(side == "right"){
+    rods_with_size_material_df <-  rods_crossing_df_input %>%
+      mutate(right_main_rod_size = main_rod_size, 
+             right_main_rod_material = main_rod_material) %>%
+      mutate(right_accessory_rod_size = if_else(str_detect(str_to_lower(right_rods_crossing), "accessory"), accessory_rod_size_input, "xx"), 
+             right_accessory_rod_material = if_else(str_detect(str_to_lower(right_rods_crossing), "accessory"), accessory_rod_material_input, "xx"),
+             
+             right_satellite_rod_size = if_else(str_detect(str_to_lower(right_rods_crossing), "satellite"), satellite_rod_size_input, "xx"), 
+             right_satellite_rod_material = if_else(str_detect(str_to_lower(right_rods_crossing), "satellite"), satellite_rod_material_input, "xx"),
+             
+             right_intercalary_rod_size = if_else(str_detect(str_to_lower(right_rods_crossing), "intercalary"), intercalary_rod_size_input, "xx"), 
+             right_intercalary_rod_material = if_else(str_detect(str_to_lower(right_rods_crossing), "intercalary"), intercalary_rod_material_input, "xx"),
+             
+             right_linked_rod_size = if_else(str_detect(str_to_lower(right_rods_crossing), "linked"), linked_rod_size_input, "xx"), 
+             right_linked_rod_material = if_else(str_detect(str_to_lower(right_rods_crossing), "linked"), linked_rod_material_input, "xx"),
+             
+             right_kickstand_rod_size = if_else(str_detect(str_to_lower(right_rods_crossing), "kickstand"), kickstand_rod_size_input, "xx"), 
+             right_kickstand_rod_material = if_else(str_detect(str_to_lower(right_rods_crossing), "kickstand"), kickstand_rod_material_input, "xx")) 
+    
+  }else{
+    rods_with_size_material_df <-  rods_crossing_df_input
+  }
+  rods_with_size_material_df %>%
+    select_if(~ !all(. == "xx"))
+} 
 
 ################# GENERATE SURGICAL DETAILS DATAFRAME #################
 
@@ -47,11 +204,35 @@ redcap_table_surgical_details_df_function <- function(all_objects_df_input = tib
                                                       add_left_accessory_rod_input = FALSE,
                                                       add_left_satellite_rod_input = FALSE,
                                                       add_left_intercalary_rod_input = FALSE,
-                                                      add_left_linked_rods_input = FALSE,
+                                                      add_left_linked_rod_input = FALSE,
+                                                      add_left_kickstand_rod_input = FALSE,
+                                                      left_accessory_rod_material_input = "na",
+                                                      left_accessory_rod_size_input = "na",
+                                                      left_satellite_rod_material_input = "na",
+                                                      left_satellite_rod_size_input = "na",
+                                                      left_intercalary_rod_material_input = "na",
+                                                      left_intercalary_rod_size_input = "na",
+                                                      left_linked_rod_material_input = "na",
+                                                      left_linked_rod_size_input = "na",
+                                                      left_kickstand_rod_material_input = "na",
+                                                      left_kickstand_rod_size_input = "na",
+                                                      
                                                       add_right_accessory_rod_input = FALSE,
                                                       add_right_satellite_rod_input = FALSE,
                                                       add_right_intercalary_rod_input = FALSE,
-                                                      add_right_linked_rods_input = FALSE,
+                                                      add_right_linked_rod_input = FALSE,
+                                                      add_right_kickstand_rod_input = FALSE,
+                                                      right_accessory_rod_material_input = "na",
+                                                      right_accessory_rod_size_input = "na",
+                                                      right_satellite_rod_material_input = "na",
+                                                      right_satellite_rod_size_input = "na",
+                                                      right_intercalary_rod_material_input = "na",
+                                                      right_intercalary_rod_size_input = "na",
+                                                      right_linked_rod_material_input = "na",
+                                                      right_linked_rod_size_input = "na",
+                                                      right_kickstand_rod_material_input = "na",
+                                                      right_kickstand_rod_size_input = "na",
+                                                      
                                                       crosslink_connectors_input = c(),
                                                       anterior_bmp_dose_reactive_input = "na",
                                                       anterior_bone_graft_input = "",
@@ -303,52 +484,103 @@ redcap_table_surgical_details_df_function <- function(all_objects_df_input = tib
       
       ##########   RODS  #############
       
-      if(str_detect(surgery_details_list$main_approach, "posterior")){
-        surgery_details_list$left_rod <- if_else(left_main_rod_size_input == "None", "None", paste(left_main_rod_size_input, left_main_rod_material_input))
-        surgery_details_list$right_rod <- if_else(right_main_rod_size_input == "None", "None", paste(right_main_rod_size_input, right_main_rod_material_input))
-      }
-      if(any(add_left_accessory_rod_input,
-             add_left_satellite_rod_input,
-             add_left_intercalary_rod_input,
-             add_left_linked_rods_input,
-             add_right_accessory_rod_input,
-             add_right_satellite_rod_input,
-             add_right_intercalary_rod_input,
-             add_right_linked_rods_input)){
-        
-        supplemental_rods_df <- tibble(supplemental_rod = c("accessory_rod",
-                                                            "satellite_rod",
-                                                            "intercalary_rod",
-                                                            "linked_rods",
-                                                            "accessory_rod",
-                                                            "satellite_rod",
-                                                            "intercalary_rod",
-                                                            "linked_rods"),
-                                       side = c("left", "left", "left", "left", "right", "right", "right", "right"),
-                                       yes_no = c(add_left_accessory_rod_input,
-                                                  add_left_satellite_rod_input,
-                                                  add_left_intercalary_rod_input,
-                                                  add_left_linked_rods_input,
-                                                  add_right_accessory_rod_input,
-                                                  add_right_satellite_rod_input,
-                                                  add_right_intercalary_rod_input,
-                                                  add_right_linked_rods_input)) %>%
-          filter(yes_no == TRUE)
-        if(nrow(supplemental_rods_df %>% filter(side == "left")) >0){
-          surgery_details_list$left_supplemental_rods <- glue_collapse((supplemental_rods_df %>% filter(side == "left"))$supplemental_rod, sep = "; ")
-        }else{
-          surgery_details_list$left_supplemental_rods <- "none"
-        }
-        
-        if(nrow(supplemental_rods_df %>% filter(side == "right")) >0){
-          surgery_details_list$right_supplemental_rods <- glue_collapse((supplemental_rods_df %>% filter(side == "right"))$supplemental_rod, sep = "; ")
-        }else{
-          surgery_details_list$right_supplemental_rods <- "none"
-        }
-      }else{
-        surgery_details_list$left_supplemental_rods <- "none"
-        surgery_details_list$right_supplemental_rods <- "none"
-      }
+       ##########   RODS  #############
+  
+  if(str_detect(surgery_details_list$main_approach, "posterior")){
+    surgery_details_list$left_rod <- if_else(left_main_rod_size_input == "None", "None", paste(left_main_rod_size_input, left_main_rod_material_input))
+    surgery_details_list$right_rod <- if_else(right_main_rod_size_input == "None", "None", paste(right_main_rod_size_input, right_main_rod_material_input))
+    
+    surgery_details_list$left_supplemental_rods <- jh_supplement_rods_summarize_for_table_function(side = "left",
+                                                                                                   add_accessory_rod_true_false = add_left_accessory_rod_input, 
+                                                                                                   accessory_rod_material = left_accessory_rod_material_input, 
+                                                                                                   accessory_rod_size = left_accessory_rod_size_input,
+                                                                                                   add_satellite_rod_true_false = add_left_satellite_rod_input, 
+                                                                                                   satellite_rod_material = left_satellite_rod_material_input, 
+                                                                                                   satellite_rod_size = left_satellite_rod_size_input,
+                                                                                                   add_intercalary_rod_true_false = add_left_intercalary_rod_input, 
+                                                                                                   intercalary_rod_material = left_intercalary_rod_material_input, 
+                                                                                                   intercalary_rod_size = left_intercalary_rod_size_input,
+                                                                                                   add_linked_rod_true_false = add_left_linked_rod_input, 
+                                                                                                   linked_rod_material = left_linked_rod_material_input, 
+                                                                                                   linked_rod_size = left_linked_rod_size_input,
+                                                                                                   add_kickstand_rod_true_false = add_left_kickstand_rod_input, 
+                                                                                                   kickstand_rod_material = left_kickstand_rod_material_input, 
+                                                                                                   kickstand_rod_size = left_kickstand_rod_size_input)
+    
+    surgery_details_list$right_supplemental_rods <- jh_supplement_rods_summarize_for_table_function(side = "right",
+                                                                                                    add_accessory_rod_true_false = add_right_accessory_rod_input, 
+                                                                                                    accessory_rod_material = right_accessory_rod_material_input, 
+                                                                                                    accessory_rod_size = right_accessory_rod_size_input,
+                                                                                                    add_satellite_rod_true_false = add_right_satellite_rod_input, 
+                                                                                                    satellite_rod_material = right_satellite_rod_material_input, 
+                                                                                                    satellite_rod_size = right_satellite_rod_size_input,
+                                                                                                    add_intercalary_rod_true_false = add_right_intercalary_rod_input, 
+                                                                                                    intercalary_rod_material = right_intercalary_rod_material_input, 
+                                                                                                    intercalary_rod_size = right_intercalary_rod_size_input,
+                                                                                                    add_linked_rod_true_false = add_right_linked_rod_input, 
+                                                                                                    linked_rod_material = right_linked_rod_material_input, 
+                                                                                                    linked_rod_size = right_linked_rod_size_input,
+                                                                                                    add_kickstand_rod_true_false = add_right_kickstand_rod_input, 
+                                                                                                    kickstand_rod_material = right_kickstand_rod_material_input, 
+                                                                                                    kickstand_rod_size = right_kickstand_rod_size_input)
+  }
+  
+  # left_accessory_rod_material_input = "na",
+  # left_accessory_rod_size_input = "na",
+  # left_satellite_rod_material_input = "na",
+  # left_satellite_rod_size_input = "na",
+  # left_intercalary_rod_material_input = "na",
+  # left_intercalary_rod_size_input = "na",
+  # left_linked_rod_material_input = "na",
+  # left_linked_rod_size_input = "na",
+  
+      # 
+      # if(str_detect(surgery_details_list$main_approach, "posterior")){
+      #   surgery_details_list$left_rod <- if_else(left_main_rod_size_input == "None", "None", paste(left_main_rod_size_input, left_main_rod_material_input))
+      #   surgery_details_list$right_rod <- if_else(right_main_rod_size_input == "None", "None", paste(right_main_rod_size_input, right_main_rod_material_input))
+      # }
+      # if(any(add_left_accessory_rod_input,
+      #        add_left_satellite_rod_input,
+      #        add_left_intercalary_rod_input,
+      #        add_left_linked_rods_input,
+      #        add_right_accessory_rod_input,
+      #        add_right_satellite_rod_input,
+      #        add_right_intercalary_rod_input,
+      #        add_right_linked_rods_input)){
+      #   
+      #   supplemental_rods_df <- tibble(supplemental_rod = c("accessory_rod",
+      #                                                       "satellite_rod",
+      #                                                       "intercalary_rod",
+      #                                                       "linked_rods",
+      #                                                       "accessory_rod",
+      #                                                       "satellite_rod",
+      #                                                       "intercalary_rod",
+      #                                                       "linked_rods"),
+      #                                  side = c("left", "left", "left", "left", "right", "right", "right", "right"),
+      #                                  yes_no = c(add_left_accessory_rod_input,
+      #                                             add_left_satellite_rod_input,
+      #                                             add_left_intercalary_rod_input,
+      #                                             add_left_linked_rods_input,
+      #                                             add_right_accessory_rod_input,
+      #                                             add_right_satellite_rod_input,
+      #                                             add_right_intercalary_rod_input,
+      #                                             add_right_linked_rods_input)) %>%
+      #     filter(yes_no == TRUE)
+      #   if(nrow(supplemental_rods_df %>% filter(side == "left")) >0){
+      #     surgery_details_list$left_supplemental_rods <- glue_collapse((supplemental_rods_df %>% filter(side == "left"))$supplemental_rod, sep = "; ")
+      #   }else{
+      #     surgery_details_list$left_supplemental_rods <- "none"
+      #   }
+      #   
+      #   if(nrow(supplemental_rods_df %>% filter(side == "right")) >0){
+      #     surgery_details_list$right_supplemental_rods <- glue_collapse((supplemental_rods_df %>% filter(side == "right"))$supplemental_rod, sep = "; ")
+      #   }else{
+      #     surgery_details_list$right_supplemental_rods <- "none"
+      #   }
+      # }else{
+      #   surgery_details_list$left_supplemental_rods <- "none"
+      #   surgery_details_list$right_supplemental_rods <- "none"
+      # }
       
       ############# CROSSLINKS #############
       

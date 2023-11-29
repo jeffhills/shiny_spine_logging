@@ -7711,60 +7711,60 @@ server <- function(input, output, session) {
   }
   )
   
-  observeEvent(input$operative_note_text, ignoreNULL = TRUE, {
-    
-    output$operative_note_formatted <-  renderText({
-      
-      op_note <- input$operative_note_text
-      
-      op_note <- str_replace_all(string = op_note, pattern = "\\n\\n", replacement = "<br><br>")
-      op_note <- str_replace_all(string = op_note, pattern = "\\n", replacement = "<br>")
-      
-      op_note <- str_replace_all(string = op_note, pattern = "OPERATIVE REPORT", replacement = "<u><B>OPERATIVE REPORT</B></u>")
-      op_note <- str_replace_all(string = op_note, pattern = "Patient:", replacement = "<B>Patient:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Date of Surgery:", replacement = "<B>Date of Surgery:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Primary Surgeon:", replacement = "<B>Primary Surgeon:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Co-Surgeon:", replacement = "<B>Co-Surgeon:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Surgical Assistants:", replacement = "<B>Surgical Assistants:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Preprocedure ASA Class:", replacement = "<B>Preprocedure ASA Class:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Anesthesia:", replacement = "<B>Anesthesia:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Intraoperative Complications:", replacement = "<B>Intraoperative Complications:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Pre-operative Diagnosis:", replacement = "<B>Pre-operative Diagnosis:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Post-operative Diagnosis:", replacement = "<B>Post-operative Diagnosis:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Indications:", replacement = "<B>Indications:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Estimated Blood Loss:", replacement = "<B>Estimated Blood Loss:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Fluids/Transfusions:", replacement = "<B>Fluids/Transfusions:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Surgical Findings:", replacement = "<B>Surgical Findings:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Specimens Taken:", replacement = "<B>Specimens Taken:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Implant Manufacturer:", replacement = "<B>Implant Manufacturer:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Procedures Performed:", replacement = "<B>Procedures Performed:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Procedure  Description:", replacement = "<B>Procedure  Description:</B>")
-      op_note <- str_replace_all(string = op_note, pattern = "Postop Plan:", replacement = "<br><u><B>POSTOP PLAN:</B></u>")
-      # op_note <- str_replace_all(string = op_note, pattern = "xxxx:", replacement = "<B>xxxxx:</B>")
-      
-      # postop_plan_sections_list
-      for(word in list("Postop Destination",
-                       "Postop Abx",
-                       "Postop MAP goals", 
-                       "Postop Anemia", 
-                       "Postop Imaging", 
-                       "Pain Control", 
-                       "Activity", 
-                       "Bracing", 
-                       "Diet/GI", 
-                       "Foley",
-                       "DVT PPX/Anticoag/Antiplatelet",
-                       "Drains & Dressing",
-                       "Follow-up")){
-        op_note <- str_replace_all(string = op_note, pattern = word, replacement = glue("<em>{word}</em>"))
-      }
-      
-      op_note <- str_replace_all(string = op_note, pattern = "     > ", replacement = " &emsp; > ")
-      
-      # HTML(glue_collapse(op_note, sep = "<br>"))
-    })  
-    
-  })
+  # observeEvent(input$operative_note_text, ignoreNULL = TRUE, {
+  #   
+  #   output$operative_note_formatted <-  renderText({
+  #     
+  #     op_note <- input$operative_note_text
+  #     
+  #     op_note <- str_replace_all(string = op_note, pattern = "\\n\\n", replacement = "<br><br>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "\\n", replacement = "<br>")
+  #     
+  #     op_note <- str_replace_all(string = op_note, pattern = "OPERATIVE REPORT", replacement = "<u><B>OPERATIVE REPORT</B></u>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Patient:", replacement = "<B>Patient:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Date of Surgery:", replacement = "<B>Date of Surgery:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Primary Surgeon:", replacement = "<B>Primary Surgeon:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Co-Surgeon:", replacement = "<B>Co-Surgeon:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Surgical Assistants:", replacement = "<B>Surgical Assistants:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Preprocedure ASA Class:", replacement = "<B>Preprocedure ASA Class:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Anesthesia:", replacement = "<B>Anesthesia:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Intraoperative Complications:", replacement = "<B>Intraoperative Complications:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Pre-operative Diagnosis:", replacement = "<B>Pre-operative Diagnosis:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Post-operative Diagnosis:", replacement = "<B>Post-operative Diagnosis:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Indications:", replacement = "<B>Indications:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Estimated Blood Loss:", replacement = "<B>Estimated Blood Loss:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Fluids/Transfusions:", replacement = "<B>Fluids/Transfusions:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Surgical Findings:", replacement = "<B>Surgical Findings:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Specimens Taken:", replacement = "<B>Specimens Taken:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Implant Manufacturer:", replacement = "<B>Implant Manufacturer:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Procedures Performed:", replacement = "<B>Procedures Performed:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Procedure  Description:", replacement = "<B>Procedure  Description:</B>")
+  #     op_note <- str_replace_all(string = op_note, pattern = "Postop Plan:", replacement = "<br><u><B>POSTOP PLAN:</B></u>")
+  #     # op_note <- str_replace_all(string = op_note, pattern = "xxxx:", replacement = "<B>xxxxx:</B>")
+  #     
+  #     # postop_plan_sections_list
+  #     for(word in list("Postop Destination",
+  #                      "Postop Abx",
+  #                      "Postop MAP goals", 
+  #                      "Postop Anemia", 
+  #                      "Postop Imaging", 
+  #                      "Pain Control", 
+  #                      "Activity", 
+  #                      "Bracing", 
+  #                      "Diet/GI", 
+  #                      "Foley",
+  #                      "DVT PPX/Anticoag/Antiplatelet",
+  #                      "Drains & Dressing",
+  #                      "Follow-up")){
+  #       op_note <- str_replace_all(string = op_note, pattern = word, replacement = glue("<em>{word}</em>"))
+  #     }
+  #     
+  #     op_note <- str_replace_all(string = op_note, pattern = "     > ", replacement = " &emsp; > ")
+  #     
+  #     # HTML(glue_collapse(op_note, sep = "<br>"))
+  #   })  
+  #   
+  # })
   
   
   # observeEvent(input$generate_operative_note, {
@@ -7777,29 +7777,29 @@ server <- function(input, output, session) {
   # }
   # )
   
-  tryCatch({
-    # Code that might cause the error
-    observeEvent(input$generate_operative_note, {
-      output$clipboard_ui <- renderUI({
-        rclipboard::rclipButton(inputId = "clip_button", 
-                                label = "Copy To Clipboard", 
-                                clipText = input$operative_note_text, 
-                                icon = icon("clipboard"))
-      })
-    }
-    )
-  }, error = function(e) {
-    # Log the error message along with additional information
-    log_error_message <- paste("Error occurred:", e$message)
-    cat(log_error_message, file = "logfile.txt", append = TRUE)
-  })
+  # tryCatch({
+  #   # Code that might cause the error
+  #   observeEvent(input$generate_operative_note, {
+  #     output$clipboard_ui <- renderUI({
+  #       rclipboard::rclipButton(inputId = "clip_button", 
+  #                               label = "Copy To Clipboard", 
+  #                               clipText = input$operative_note_text, 
+  #                               icon = icon("clipboard"))
+  #     })
+  #   }
+  #   )
+  # }, error = function(e) {
+  #   # Log the error message along with additional information
+  #   log_error_message <- paste("Error occurred:", e$message)
+  #   cat(log_error_message, file = "logfile.txt", append = TRUE)
+  # })
   
-  observeEvent(input$generate_operative_note, {
-    output$operative_note_header_details <- renderUI({
-      HTML(op_note_text_reactive())
-    })
-  }
-  )
+  # observeEvent(input$generate_operative_note, {
+  #   output$operative_note_header_details <- renderUI({
+  #     HTML(op_note_text_reactive())
+  #   })
+  # }
+  # )
   
   ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
   ##############################~~~~~~~~~~~~~~~~~~~ ##################### MAKE THE TABLES    #############~~~~~~~~~~~~~~~~~~~ ##################### #################
@@ -7872,11 +7872,37 @@ server <- function(input, output, session) {
                                                                        add_left_accessory_rod_input = input$add_left_accessory_rod,
                                                                        add_left_satellite_rod_input = input$add_left_satellite_rod,
                                                                        add_left_intercalary_rod_input = input$add_left_intercalary_rod,
-                                                                       add_left_linked_rods_input = input$add_left_linked_rods,
+                                                                       add_left_linked_rod_input = input$add_left_linked_rod,
+                                                                       add_left_kickstand_rod_input = input$add_left_kickstand_rod,
+                                                                       
+                                                                       left_accessory_rod_material_input = input$left_accessory_rod_material,
+                                                                       left_accessory_rod_size_input = input$left_accessory_rod_size,
+                                                                       left_satellite_rod_material_input = input$left_satellite_rod_material,
+                                                                       left_satellite_rod_size_input = input$left_satellite_rod_size,
+                                                                       left_intercalary_rod_material_input = input$left_intercalary_rod_material,
+                                                                       left_intercalary_rod_size_input = input$left_intercalary_rod_size,
+                                                                       left_linked_rod_material_input = input$left_linked_rod_material,
+                                                                       left_linked_rod_size_input = input$left_linked_rod_size,
+                                                                       left_kickstand_rod_material_input = input$left_kickstand_rod_material,
+                                                                       left_kickstand_rod_size_input = input$left_kickstand_rod_size,
+                                                                       
                                                                        add_right_accessory_rod_input = input$add_right_accessory_rod,
                                                                        add_right_satellite_rod_input = input$add_right_satellite_rod,
                                                                        add_right_intercalary_rod_input = input$add_right_intercalary_rod,
-                                                                       add_right_linked_rods_input = input$add_right_linked_rods,
+                                                                       add_right_linked_rod_input = input$add_right_linked_rod,
+                                                                       add_right_kickstand_rod_input = input$add_right_kickstand_rod,
+                                                                       
+                                                                       right_accessory_rod_material_input = input$right_accessory_rod_material,
+                                                                       right_accessory_rod_size_input = input$right_accessory_rod_size,
+                                                                       right_satellite_rod_material_input = input$right_satellite_rod_material,
+                                                                       right_satellite_rod_size_input = input$right_satellite_rod_size,
+                                                                       right_intercalary_rod_material_input = input$right_intercalary_rod_material,
+                                                                       right_intercalary_rod_size_input = input$right_intercalary_rod_size,
+                                                                       right_linked_rod_material_input = input$right_linked_rod_material,
+                                                                       right_linked_rod_size_input = input$right_linked_rod_size,
+                                                                       right_kickstand_rod_material_input = input$right_kickstand_rod_material,
+                                                                       right_kickstand_rod_size_input = input$right_kickstand_rod_size,
+
                                                                        crosslink_connectors_input = input$crosslink_connectors,
                                                                        anterior_biologics_input = input$anterior_biologics,
                                                                        anterior_bmp_dose_reactive_input = anterior_bmp_dose_reactive(),
@@ -7901,7 +7927,8 @@ server <- function(input, output, session) {
                                                                        intraoperative_complications_vector_input = input$intraoperative_complications_vector,
                                                                        other_intraoperative_complications_input = input$other_intraoperative_complications,
                                                                        implant_manufacturer_input = input$implant_manufacturer,
-                                                                       operative_note_text_input = input$operative_note_text
+                                                                       # operative_note_text_input = input$operative_note_text
+                                                                       operative_note_text_input = "test if this is the error"
       )
       
       surgery_details_df$surgery_details_df
@@ -8128,11 +8155,12 @@ server <- function(input, output, session) {
   
   
   ##### rods crossing_by_level ####
+  ##### rods crossing_by_level ####
   rods_crossing_by_level_redcap_table_reactive <- reactive({
     
     if(input$implants_complete > 0){
       
-      labels_df %>%
+      rods_crossing_no_sizes_df <- labels_df %>%
         mutate(vertebral_number = vertebral_number - 0.5) %>%
         select(-level) %>%
         left_join(levels_numbered_df) %>%
@@ -8146,21 +8174,132 @@ server <- function(input, output, session) {
         mutate(left_rods_crossing = str_remove_all(left_rods_crossing, "_sf"),
                right_rods_crossing = str_remove_all(right_rods_crossing, "_sf")) %>%
         mutate(dos_rods_crossing_repeating = as.character(input$date_of_surgery)) %>%
-        select(dos_rods_crossing_repeating, rods_crossing_level = level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing)
-        # select(level, total_rods_crossing)
+        select(dos_rods_crossing_repeating, rods_crossing_level = level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing) 
+      
+      left_accessory_rod_material <- if(input$add_left_accessory_rod){paste(input$left_accessory_rod_material)}else{"xx"}
+      left_accessory_rod_size <- if(input$add_left_accessory_rod){paste(input$left_accessory_rod_size)}else{"xx"}
+      left_satellite_rod_material <- if(input$add_left_satellite_rod){paste(input$left_satellite_rod_material)}else{"xx"}
+      left_satellite_rod_size <- if(input$add_left_satellite_rod){paste(input$left_satellite_rod_size)}else{"xx"}
+      left_intercalary_rod_material <- if(input$add_left_intercalary_rod){paste(input$left_intercalary_rod_material)}else{"xx"}
+      left_intercalary_rod_size <- if(input$add_left_intercalary_rod){paste(input$left_intercalary_rod_size)}else{"xx"}
+      left_linked_rod_material <- if(input$add_left_linked_rod){paste(input$left_linked_rod_material)}else{"xx"}
+      left_linked_rod_size <- if(input$add_left_linked_rod){paste(input$left_linked_rod_size)}else{"xx"}
+      left_kickstand_rod_material <- if(input$add_left_kickstand_rod){paste(input$left_kickstand_rod_material)}else{"xx"}
+      left_kickstand_rod_size <- if(input$add_left_kickstand_rod){paste(input$left_kickstand_rod_size)}else{"xx"}
+      
+      rods_crossing_left_df <- jh_rods_table_add_supplemental_rod_size_material_function(rods_crossing_df_input = rods_crossing_no_sizes_df, 
+                                                                                         side = "left", 
+                                                                                         main_rod_size =input$left_main_rod_size,
+                                                                                         main_rod_material = input$left_main_rod_material,
+                                                                                         accessory_rod_material = left_accessory_rod_material, 
+                                                                                         accessory_rod_size = left_accessory_rod_size, 
+                                                                                         satellite_rod_material = left_satellite_rod_material, 
+                                                                                         satellite_rod_size = left_satellite_rod_size, 
+                                                                                         intercalary_rod_material = left_intercalary_rod_material, 
+                                                                                         intercalary_rod_size = left_intercalary_rod_size, 
+                                                                                         linked_rod_material = left_linked_rod_material, 
+                                                                                         linked_rod_size = left_linked_rod_size, 
+                                                                                         kickstand_rod_material = left_kickstand_rod_material, 
+                                                                                         kickstand_rod_size = left_kickstand_rod_size
+      )
+      
+      right_accessory_rod_material <- if(input$add_right_accessory_rod){paste(input$right_accessory_rod_material)}else{"xx"}
+      right_accessory_rod_size <- if(input$add_right_accessory_rod){paste(input$right_accessory_rod_size)}else{"xx"}
+      right_satellite_rod_material <- if(input$add_right_satellite_rod){paste(input$right_satellite_rod_material)}else{"xx"}
+      right_satellite_rod_size <- if(input$add_right_satellite_rod){paste(input$right_satellite_rod_size)}else{"xx"}
+      right_intercalary_rod_material <- if(input$add_right_intercalary_rod){paste(input$right_intercalary_rod_material)}else{"xx"}
+      right_intercalary_rod_size <- if(input$add_right_intercalary_rod){paste(input$right_intercalary_rod_size)}else{"xx"}
+      right_linked_rod_material <- if(input$add_right_linked_rod){paste(input$right_linked_rod_material)}else{"xx"}
+      right_linked_rod_size <- if(input$add_right_linked_rod){paste(input$right_linked_rod_size)}else{"xx"}
+      right_kickstand_rod_material <- if(input$add_right_kickstand_rod){paste(input$right_kickstand_rod_material)}else{"xx"}
+      right_kickstand_rod_size <- if(input$add_right_kickstand_rod){paste(input$right_kickstand_rod_size)}else{"xx"}
+      
+      rods_crossing_full_df <- jh_rods_table_add_supplemental_rod_size_material_function(rods_crossing_df_input = rods_crossing_left_df,
+                                                                                         side = "right", 
+                                                                                         main_rod_size =input$right_main_rod_size,
+                                                                                         main_rod_material = input$right_main_rod_material,
+                                                                                         accessory_rod_material = right_accessory_rod_material, 
+                                                                                         accessory_rod_size = right_accessory_rod_size, 
+                                                                                         satellite_rod_material = right_satellite_rod_material, 
+                                                                                         satellite_rod_size = right_satellite_rod_size, 
+                                                                                         intercalary_rod_material = right_intercalary_rod_material, 
+                                                                                         intercalary_rod_size = right_intercalary_rod_size, 
+                                                                                         linked_rod_material = right_linked_rod_material, 
+                                                                                         linked_rod_size = right_linked_rod_size, 
+                                                                                         kickstand_rod_material = right_kickstand_rod_material, 
+                                                                                         kickstand_rod_size = right_kickstand_rod_size
+      )
       
     }else{
-      tibble(dos_rods_crossing_repeating = character(),
-             rods_crossing_level = character(),
-             left_rod_count = double(),
-             left_rods_crossing = character(),
-             right_rod_count = double(),
-             right_rods_crossing = character(),
-             total_rods_crossing = double()
+      rods_crossing_full_df <- tibble(dos_rods_crossing_repeating = character(),
+                                      rods_crossing_level = character(),
+                                      left_rod_count = double(),
+                                      left_rods_crossing = character(),
+                                      right_rod_count = double(),
+                                      right_rods_crossing = character(),
+                                      total_rods_crossing = double(),
+                                      left_main_rod_size = character(),
+                                      left_main_rod_material = character(),
+                                      left_accessory_rod_size = character(),
+                                      left_accessory_rod_material = character(),
+                                      left_satellite_rod_size = character(),
+                                      left_satellite_rod_material = character(),
+                                      left_intercalary_rod_size = character(),
+                                      left_intercalary_rod_material = character(),
+                                      left_linked_rod_size = character(),
+                                      left_linked_rod_material = character(),
+                                      left_kickstand_rod_size = character(),
+                                      left_kickstand_rod_material = character(),
+                                      right_main_rod_size = character(),
+                                      right_main_rod_material = character(),
+                                      right_accessory_rod_size = character(),
+                                      right_accessory_rod_material = character(),
+                                      right_satellite_rod_size = character(),
+                                      right_satellite_rod_material = character(),
+                                      right_intercalary_rod_size = character(),
+                                      right_intercalary_rod_material = character(),
+                                      right_linked_rod_size = character(),
+                                      right_linked_rod_material = character(),
+                                      right_kickstand_rod_size = character(),
+                                      right_kickstand_rod_material = character()
       )
-      # tibble(level = character(), total_rods_crossing = double())
     }
+    rods_crossing_full_df
   })
+  
+  # rods_crossing_by_level_redcap_table_reactive <- reactive({
+  #   
+  #   if(input$implants_complete > 0){
+  #     
+  #     labels_df %>%
+  #       mutate(vertebral_number = vertebral_number - 0.5) %>%
+  #       select(-level) %>%
+  #       left_join(levels_numbered_df) %>%
+  #       filter(!is.na(level)) %>%
+  #       select(level) %>%
+  #       left_join(left_rod_crossing_table_reactive()) %>%
+  #       left_join(right_rod_crossing_table_reactive()) %>%
+  #       replace_na(list(left_rod_count = 0, right_rod_count = 0, left_rods_crossing = "", right_rods_crossing = "")) %>%
+  #       mutate(total_rods_crossing = left_rod_count + right_rod_count) %>%
+  #       filter(total_rods_crossing >0) %>%
+  #       mutate(left_rods_crossing = str_remove_all(left_rods_crossing, "_sf"),
+  #              right_rods_crossing = str_remove_all(right_rods_crossing, "_sf")) %>%
+  #       mutate(dos_rods_crossing_repeating = as.character(input$date_of_surgery)) %>%
+  #       select(dos_rods_crossing_repeating, rods_crossing_level = level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing)
+  #       # select(level, total_rods_crossing)
+  #     
+  #   }else{
+  #     tibble(dos_rods_crossing_repeating = character(),
+  #            rods_crossing_level = character(),
+  #            left_rod_count = double(),
+  #            left_rods_crossing = character(),
+  #            right_rod_count = double(),
+  #            right_rods_crossing = character(),
+  #            total_rods_crossing = double()
+  #     )
+  #     # tibble(level = character(), total_rods_crossing = double())
+  #   }
+  # })
   
 
   ###### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ALL INPUTS  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ######## 
