@@ -1130,14 +1130,6 @@ ui <- dashboardPage(skin = "black",
                                 style = "float",
                                 color = "primary"
                               ),
-                              actionBttn(
-                                inputId = "generate_operative_note2",
-                                block = TRUE,
-                                size = "md",
-                                label = "Click for testing Operative Note",
-                                style = "float",
-                                color = "primary"
-                              ),
                               br(),
                               textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 500),
                               uiOutput("clipboard_ui"),
@@ -1268,7 +1260,7 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
-  options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
+  # options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
   # options(shiny.reactlog=TRUE) 
   
   logging_timer_reactive_list <- reactiveValues()
@@ -1445,7 +1437,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$search_for_prior_patient, ignoreInit = TRUE, {
     
-    all_patient_ids_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), 
+    all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), 
                                         events = "enrollment_arm_1") %>%
       type.convert(as.is = TRUE) %>%
       select(record_id, last_name, first_name, date_of_birth) %>%
@@ -1467,7 +1459,7 @@ server <- function(input, output, session) {
       if(match_found == TRUE){
         record_number <- joined_df$record_id[[1]]
         
-        existing_patient_data$patient_df_full <- exportRecordsTyped(rcon = rcon_reactive$rcon, records = record_number, fields = append(c("record_id", "dos_surg_repeating", "approach_repeating", "side", "object"), str_to_lower(str_replace_all(levels_vector, pattern = "-", replacement = "_")))) %>%                    as_tibble()  %>%
+        existing_patient_data$patient_df_full <- exportRecords(rcon = rcon_reactive$rcon, records = record_number, fields = append(c("record_id", "dos_surg_repeating", "approach_repeating", "side", "object"), str_to_lower(str_replace_all(levels_vector, pattern = "-", replacement = "_")))) %>%                    as_tibble()  %>%
           type.convert(as.is = TRUE) %>%
           as_tibble() %>%
           filter(redcap_repeat_instrument == "procedures_by_level_repeating")  %>%
@@ -1496,7 +1488,7 @@ server <- function(input, output, session) {
         
         existing_patient_data$record_id <- record_number
         
-        existing_patient_data$surgical_dates_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
+        existing_patient_data$surgical_dates_df <- exportRecords(rcon = rcon_reactive$rcon, 
                                                                  records = existing_patient_data$record_id) %>%
           type.convert(as.is = TRUE) %>%
           mutate(last_name = str_to_lower(last_name),
@@ -1507,7 +1499,7 @@ server <- function(input, output, session) {
           mutate(stage_number = if_else(is.na(stage_number), 1, stage_number)) %>%
           filter(stage_number == 1)
         
-        existing_patient_data$prior_surgical_summary <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
+        existing_patient_data$prior_surgical_summary <- exportRecords(rcon = rcon_reactive$rcon, 
                                   records = existing_patient_data$record_id, 
                                   fields = c("record_id", 
                                              "date_of_surgery", 
@@ -1681,7 +1673,7 @@ server <- function(input, output, session) {
       complication_neuro <- "NA"
     }
     
-    complication_count_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
+    complication_count_df <- exportRecords(rcon = rcon_reactive$rcon, 
                                            records = existing_patient_data$record_id) %>%
       type.convert(as.is = TRUE) %>%
       filter(redcap_event_name == "complication_arm_1")
@@ -3542,16 +3534,30 @@ server <- function(input, output, session) {
       }else{
         rod_size <- "6.0mm"  
       }
-      updatePickerInput(session = session, 
-                        inputId = "left_main_rod_size", 
-                        selected = if_else(input$left_main_rod_size == "None", rod_size, input$left_main_rod_size)
-      )
-      updateAwesomeRadio(session = session, 
-                         inputId = "left_main_rod_material",
-                         inline = TRUE,
-                         choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
-                         selected = if_else(input$left_main_rod_material == "Non-instrumented", "Titanium", input$left_main_rod_material)
-      )
+      if(input$left_main_rod_size == "None"){
+        updatePickerInput(session = session, 
+                          inputId = "left_main_rod_size", 
+                          selected = rod_size
+        )
+      }
+      # updatePickerInput(session = session, 
+      #                   inputId = "left_main_rod_size", 
+      #                   selected = if_else(input$left_main_rod_size == "None", rod_size, input$left_main_rod_size)
+      # )
+      if(input$left_main_rod_material == "Non-instrumented"){
+        updateAwesomeRadio(session = session, 
+                           inputId = "left_main_rod_material",
+                           inline = TRUE,
+                           choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
+                           selected = "Titanium"
+        )
+      }
+      # updateAwesomeRadio(session = session, 
+      #                    inputId = "left_main_rod_material",
+      #                    inline = TRUE,
+      #                    choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
+      #                    selected = if_else(input$left_main_rod_material == "Non-instrumented", "Titanium", input$left_main_rod_material)
+      # )
     }
   })
   
@@ -7692,18 +7698,7 @@ server <- function(input, output, session) {
   
 
   
-  # observeEvent(input$procedures_numbered_confirm_edit_posterior, {
-  #   
-  #   updateTextAreaInput(session = session,
-  #                       inputId = "operative_note_text",
-  #                       value = HTML(op_note_text_reactive())
-  #                       # value = HTML(op_note_text_reactive_testing())
-  #   )
-  #   
-  # }
-  # )
-  
-  observeEvent(input$generate_operative_note2, {
+  observeEvent(input$generate_operative_note, {
 
     updateTextAreaInput(session = session,
                         inputId = "operative_note_text",
@@ -7714,71 +7709,71 @@ server <- function(input, output, session) {
   }
   )
   
-  # observeEvent(input$operative_note_text, ignoreNULL = TRUE, {
-  #   
-  #   output$operative_note_formatted <-  renderText({
-  #     
-  #     op_note <- input$operative_note_text
-  #     
-  #     op_note <- str_replace_all(string = op_note, pattern = "\\n\\n", replacement = "<br><br>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "\\n", replacement = "<br>")
-  #     
-  #     op_note <- str_replace_all(string = op_note, pattern = "OPERATIVE REPORT", replacement = "<u><B>OPERATIVE REPORT</B></u>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Patient:", replacement = "<B>Patient:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Date of Surgery:", replacement = "<B>Date of Surgery:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Primary Surgeon:", replacement = "<B>Primary Surgeon:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Co-Surgeon:", replacement = "<B>Co-Surgeon:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Surgical Assistants:", replacement = "<B>Surgical Assistants:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Preprocedure ASA Class:", replacement = "<B>Preprocedure ASA Class:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Anesthesia:", replacement = "<B>Anesthesia:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Intraoperative Complications:", replacement = "<B>Intraoperative Complications:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Pre-operative Diagnosis:", replacement = "<B>Pre-operative Diagnosis:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Post-operative Diagnosis:", replacement = "<B>Post-operative Diagnosis:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Indications:", replacement = "<B>Indications:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Estimated Blood Loss:", replacement = "<B>Estimated Blood Loss:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Fluids/Transfusions:", replacement = "<B>Fluids/Transfusions:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Surgical Findings:", replacement = "<B>Surgical Findings:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Specimens Taken:", replacement = "<B>Specimens Taken:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Implant Manufacturer:", replacement = "<B>Implant Manufacturer:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Procedures Performed:", replacement = "<B>Procedures Performed:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Procedure  Description:", replacement = "<B>Procedure  Description:</B>")
-  #     op_note <- str_replace_all(string = op_note, pattern = "Postop Plan:", replacement = "<br><u><B>POSTOP PLAN:</B></u>")
-  #     # op_note <- str_replace_all(string = op_note, pattern = "xxxx:", replacement = "<B>xxxxx:</B>")
-  #     
-  #     # postop_plan_sections_list
-  #     for(word in list("Postop Destination",
-  #                      "Postop Abx",
-  #                      "Postop MAP goals", 
-  #                      "Postop Anemia", 
-  #                      "Postop Imaging", 
-  #                      "Pain Control", 
-  #                      "Activity", 
-  #                      "Bracing", 
-  #                      "Diet/GI", 
-  #                      "Foley",
-  #                      "DVT PPX/Anticoag/Antiplatelet",
-  #                      "Drains & Dressing",
-  #                      "Follow-up")){
-  #       op_note <- str_replace_all(string = op_note, pattern = word, replacement = glue("<em>{word}</em>"))
-  #     }
-  #     
-  #     op_note <- str_replace_all(string = op_note, pattern = "     > ", replacement = " &emsp; > ")
-  #     
-  #     # HTML(glue_collapse(op_note, sep = "<br>"))
-  #   })  
-  #   
-  # })
+  observeEvent(input$operative_note_text, ignoreNULL = TRUE, {
+
+    output$operative_note_formatted <-  renderText({
+
+      op_note <- input$operative_note_text
+
+      op_note <- str_replace_all(string = op_note, pattern = "\\n\\n", replacement = "<br><br>")
+      op_note <- str_replace_all(string = op_note, pattern = "\\n", replacement = "<br>")
+
+      op_note <- str_replace_all(string = op_note, pattern = "OPERATIVE REPORT", replacement = "<u><B>OPERATIVE REPORT</B></u>")
+      op_note <- str_replace_all(string = op_note, pattern = "Patient:", replacement = "<B>Patient:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Date of Surgery:", replacement = "<B>Date of Surgery:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Primary Surgeon:", replacement = "<B>Primary Surgeon:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Co-Surgeon:", replacement = "<B>Co-Surgeon:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Surgical Assistants:", replacement = "<B>Surgical Assistants:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Preprocedure ASA Class:", replacement = "<B>Preprocedure ASA Class:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Anesthesia:", replacement = "<B>Anesthesia:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Intraoperative Complications:", replacement = "<B>Intraoperative Complications:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Pre-operative Diagnosis:", replacement = "<B>Pre-operative Diagnosis:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Post-operative Diagnosis:", replacement = "<B>Post-operative Diagnosis:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Indications:", replacement = "<B>Indications:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Estimated Blood Loss:", replacement = "<B>Estimated Blood Loss:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Fluids/Transfusions:", replacement = "<B>Fluids/Transfusions:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Surgical Findings:", replacement = "<B>Surgical Findings:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Specimens Taken:", replacement = "<B>Specimens Taken:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Implant Manufacturer:", replacement = "<B>Implant Manufacturer:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Procedures Performed:", replacement = "<B>Procedures Performed:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Procedure  Description:", replacement = "<B>Procedure  Description:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Postop Plan:", replacement = "<br><u><B>POSTOP PLAN:</B></u>")
+      # op_note <- str_replace_all(string = op_note, pattern = "xxxx:", replacement = "<B>xxxxx:</B>")
+
+      # postop_plan_sections_list
+      for(word in list("Postop Destination",
+                       "Postop Abx",
+                       "Postop MAP goals",
+                       "Postop Anemia",
+                       "Postop Imaging",
+                       "Pain Control",
+                       "Activity",
+                       "Bracing",
+                       "Diet/GI",
+                       "Foley",
+                       "DVT PPX/Anticoag/Antiplatelet",
+                       "Drains & Dressing",
+                       "Follow-up")){
+        op_note <- str_replace_all(string = op_note, pattern = word, replacement = glue("<em>{word}</em>"))
+      }
+
+      op_note <- str_replace_all(string = op_note, pattern = "     > ", replacement = " &emsp; > ")
+
+      # HTML(glue_collapse(op_note, sep = "<br>"))
+    })
+
+  })
   
   
-  # observeEvent(input$generate_operative_note, {
-  #   output$clipboard_ui <- renderUI({
-  #     rclipboard::rclipButton(inputId = "clip_button", 
-  #                             label = "Copy To Clipboard", 
-  #                             clipText = input$operative_note_text, 
-  #                             icon = icon("clipboard"))
-  #   })
-  # }
-  # )
+  observeEvent(input$generate_operative_note, {
+    output$clipboard_ui <- renderUI({
+      rclipboard::rclipButton(inputId = "clip_button",
+                              label = "Copy To Clipboard",
+                              clipText = input$operative_note_text,
+                              icon = icon("clipboard"))
+    })
+  }
+  )
   
   # tryCatch({
   #   # Code that might cause the error
@@ -8319,9 +8314,11 @@ server <- function(input, output, session) {
   all_inputs_trimmed_table_reactive <- reactive({
     if(input$implants_complete > 0){
       
-      strings_to_detect_and_remove_vector <- c("object_to_add", 
+      strings_to_detect_and_remove_vector <- c("object_to_add",
+                                               "txa",
                                                "plot_with_patterns_true", 
-                                               "tabs", 
+                                               "tab",
+                                               "add",
                                                "label_text_offset", 
                                                "search_for_prior_patient", 
                                                "plot_summary_table",
@@ -8703,7 +8700,7 @@ server <- function(input, output, session) {
       
       
       if(redcapAPI::exportNextRecordName(rcon = rcon_reactive$rcon)>1){
-        all_patient_ids_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
+        all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
           type.convert(as.is = TRUE) %>%
           select(record_id, last_name, first_name, date_of_birth) %>%
           mutate(last_name = str_to_lower(last_name),
@@ -8724,7 +8721,7 @@ server <- function(input, output, session) {
         if(match_found == TRUE){
           record_number <- joined_df$record_id[[1]]
           
-          max_repeat_instances_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, records = record_number) %>%
+          max_repeat_instances_df <- exportRecords(rcon = rcon_reactive$rcon, records = record_number) %>%
             type.convert(as.is = TRUE) %>%
             as_tibble() %>%
             select(redcap_repeat_instrument, redcap_repeat_instance) %>%
