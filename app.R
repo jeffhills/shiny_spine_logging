@@ -672,7 +672,7 @@ ui <- dashboardPage(skin = "black",
                                                             jh_make_supplemental_rod_ui_function(rod_type = "accessory_rod", input_label = "Accessory Rod"),
                                                             jh_make_supplemental_rod_ui_function(rod_type = "satellite_rod", input_label = "Satellite Rod"),
                                                             jh_make_supplemental_rod_ui_function(rod_type = "intercalary_rod", input_label = "Intercalary Rod"),
-                                                            jh_make_supplemental_rod_ui_function(rod_type = "linked_rods", input_label = "Linked Rods"),
+                                                            jh_make_supplemental_rod_ui_function(rod_type = "linked_rod", input_label = "Linked Rods"),
                                                             jh_make_supplemental_rod_ui_function(rod_type = "kickstand_rod", input_label = "Kickstand Rod"),
                                                             jh_make_shiny_table_column_function(input_type = "awesomeCheckbox", 
                                                                                                 left_input_id = "add_left_custom_rods", 
@@ -3444,24 +3444,24 @@ server <- function(input, output, session) {
   
  
   
-  observeEvent(input$add_left_linked_rods,
+  observeEvent(input$add_left_linked_rod,
                ignoreNULL = TRUE, 
                ignoreInit = TRUE, {
                  
-                 if(input$add_left_linked_rods == TRUE){
+                 if(input$add_left_linked_rod == TRUE){
                    start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$left_rod_implants_df,
                                                                         revision_objects_retained_df = left_revision_implants_reactive_list()$retained_df,
                                                                         rod_type = "linked_rod")
                    
                    updateSliderTextInput(session = session,
-                                         inputId = "left_linked_rods", 
+                                         inputId = "left_linked_rod", 
                                          label = "Select Overlap Region:",
                                          choices = start_list$implant_levels[2:(length(start_list$implant_levels)-1)],
                                          selected = start_list$supplemental_starts
                    )
                  }else{
                    updateSliderTextInput(session = session,
-                                         inputId = "left_linked_rods", 
+                                         inputId = "left_linked_rod", 
                                          label = "Select Overlap Region:",
                                          choices = c("a", "b"),
                                          selected = c("a", "b")
@@ -3606,8 +3606,8 @@ server <- function(input, output, session) {
   #   input$add_left_intercalary_rod,
   #   input$left_intercalary_rod,
   #   input$left_intercalary_rod_junction,
-  #   input$add_left_linked_rods,
-  #   input$left_linked_rods,
+  #   input$add_left_linked_rod,
+  #   input$left_linked_rod,
   #   input$add_left_kickstand_rod,
   #   input$left_kickstand_rod,
   #   input$left_revision_rod_status,
@@ -3626,7 +3626,7 @@ server <- function(input, output, session) {
     if(any(input$add_left_accessory_rod == TRUE, 
            input$add_left_satellite_rod == TRUE,
            input$add_left_intercalary_rod == TRUE, 
-           input$add_left_linked_rods == TRUE, 
+           input$add_left_linked_rod == TRUE, 
            input$add_left_kickstand_rod == TRUE, 
            input$add_left_kickstand_rod == TRUE, length(input$left_revision_implants_rod_connectors)>0)){
       
@@ -3648,8 +3648,8 @@ server <- function(input, output, session) {
         intercalary_vector <- c("a")
         junction <- NULL
       }
-      if(input$add_left_linked_rods == TRUE && input$left_linked_rods[1] %in% all_screw_coordinates_df$level && length(unique(input$left_linked_rods)) == 2){
-        linked_vector <- input$left_linked_rods
+      if(input$add_left_linked_rod == TRUE && input$left_linked_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$left_linked_rod)) == 2){
+        linked_vector <- input$left_linked_rod
       }else{
         linked_vector <- c("a")
       }
@@ -3706,8 +3706,8 @@ server <- function(input, output, session) {
                                                                           add_intercalary_rod = input$add_left_intercalary_rod, 
                                                                           intercalary_rods_vector = intercalary_vector, 
                                                                           intercalary_rod_junction = junction, 
-                                                                          add_linked_rods = input$add_left_linked_rods,
-                                                                          linked_rods_vector = linked_vector,
+                                                                          add_linked_rod = input$add_left_linked_rod,
+                                                                          linked_rod_vector = linked_vector,
                                                                           add_kickstand_rod = input$add_left_kickstand_rod,
                                                                           kickstand_rod_vector = left_kickstand_rod_vector,
                                                                           add_custom_rods = input$add_left_custom_rods,
@@ -4184,24 +4184,24 @@ server <- function(input, output, session) {
   
 
   
-  observeEvent(input$add_right_linked_rods,
+  observeEvent(input$add_right_linked_rod,
                ignoreNULL = TRUE, 
                ignoreInit = TRUE, {
                  
-                 if(input$add_right_linked_rods == TRUE){
+                 if(input$add_right_linked_rod == TRUE){
                    start_list <- jh_supplementary_rods_choices_function(all_objects_df = all_objects_to_add_list$right_rod_implants_df,
                                                                         revision_objects_retained_df = right_revision_implants_reactive_list()$retained_df,
                                                                         rod_type = "linked_rod")
                    
                    updateSliderTextInput(session = session,
-                                         inputId = "right_linked_rods", 
+                                         inputId = "right_linked_rod", 
                                          label = "Select Overlap Region:",
                                          choices = start_list$implant_levels[2:(length(start_list$implant_levels)-1)],
                                          selected = start_list$supplemental_starts
                    )
                  }else{
                    updateSliderTextInput(session = session,
-                                         inputId = "right_linked_rods", 
+                                         inputId = "right_linked_rod", 
                                          label = "Select Overlap Region:",
                                          choices = c("a", "b"),
                                          selected = c("a", "b")
@@ -4349,8 +4349,8 @@ server <- function(input, output, session) {
   #   input$add_right_intercalary_rod,
   #   input$right_intercalary_rod,
   #   input$right_intercalary_rod_junction,
-  #   input$add_right_linked_rods,
-  #   input$right_linked_rods,
+  #   input$add_right_linked_rod,
+  #   input$right_linked_rod,
   #   input$add_right_kickstand_rod,
   #   input$right_kickstand_rod,
   #   input$right_revision_rod_status,
@@ -4368,7 +4368,7 @@ server <- function(input, output, session) {
     if(any(input$add_right_accessory_rod == TRUE, 
            input$add_right_satellite_rod == TRUE,
            input$add_right_intercalary_rod == TRUE, 
-           input$add_right_linked_rods == TRUE, 
+           input$add_right_linked_rod == TRUE, 
            input$add_right_kickstand_rod == TRUE, 
            input$add_right_kickstand_rod == TRUE, length(input$right_revision_implants_rod_connectors)>0)){
       
@@ -4390,8 +4390,8 @@ server <- function(input, output, session) {
         intercalary_vector <- c("a")
         junction <- NULL
       }
-      if(input$add_right_linked_rods == TRUE && input$right_linked_rods[1] %in% all_screw_coordinates_df$level && length(unique(input$right_linked_rods)) == 2){
-        linked_vector <- input$right_linked_rods
+      if(input$add_right_linked_rod == TRUE && input$right_linked_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_linked_rod)) == 2){
+        linked_vector <- input$right_linked_rod
       }else{
         linked_vector <- c("a")
       }
@@ -4448,8 +4448,8 @@ server <- function(input, output, session) {
                                                                           add_intercalary_rod = input$add_right_intercalary_rod, 
                                                                           intercalary_rods_vector = intercalary_vector, 
                                                                           intercalary_rod_junction = junction, 
-                                                                          add_linked_rods = input$add_right_linked_rods,
-                                                                          linked_rods_vector = linked_vector,
+                                                                          add_linked_rod = input$add_right_linked_rod,
+                                                                          linked_rod_vector = linked_vector,
                                                                           add_kickstand_rod = input$add_right_kickstand_rod,
                                                                           kickstand_rod_vector = right_kickstand_rod_vector,
                                                                           add_custom_rods = input$add_right_custom_rods,
@@ -4496,13 +4496,13 @@ server <- function(input, output, session) {
        any(input$add_left_accessory_rod, 
            input$add_left_satellite_rod,
            input$add_left_intercalary_rod,
-           input$add_left_linked_rods,
+           input$add_left_linked_rod,
            input$add_left_kickstand_rod, 
            input$add_left_custom_rods, 
            input$add_right_accessory_rod, 
            input$add_right_satellite_rod,
            input$add_right_intercalary_rod,
-           input$add_right_linked_rods,
+           input$add_right_linked_rod,
            input$add_right_kickstand_rod, 
            input$add_right_custom_rods)){
         updateAwesomeCheckbox(session = session, 
@@ -4518,7 +4518,7 @@ server <- function(input, output, session) {
                               value = FALSE)
         
         updateAwesomeCheckbox(session = session, 
-                              inputId = "add_left_linked_rods", 
+                              inputId = "add_left_linked_rod", 
                               value = FALSE)
         
         updateAwesomeCheckbox(session = session, 
@@ -4542,7 +4542,7 @@ server <- function(input, output, session) {
                               value = FALSE)
         
         updateAwesomeCheckbox(session = session, 
-                              inputId = "add_right_linked_rods", 
+                              inputId = "add_right_linked_rod", 
                               value = FALSE)
         
         updateAwesomeCheckbox(session = session, 
@@ -4578,7 +4578,7 @@ server <- function(input, output, session) {
                                             value = FALSE)
                       
                       updateAwesomeCheckbox(session = session, 
-                                            inputId = "add_left_linked_rods", 
+                                            inputId = "add_left_linked_rod", 
                                             value = FALSE)
                       
                       updateAwesomeCheckbox(session = session, 
@@ -4608,7 +4608,7 @@ server <- function(input, output, session) {
                                             value = FALSE)
                       
                       updateAwesomeCheckbox(session = session, 
-                                            inputId = "add_right_linked_rods", 
+                                            inputId = "add_right_linked_rod", 
                                             value = FALSE)
                       
                       updateAwesomeCheckbox(session = session, 
@@ -5598,7 +5598,7 @@ server <- function(input, output, session) {
     details_list$'Anesthesia Type:' <- input$anesethesia
     details_list$'Neuromonitoring used:' <- toString(input$neuromonitoring)
     details_list$'Preoperative Antibiotics:' <- toString(input$preop_antibiotics)
-    details_list$'Antifibrinolytic:' <- toString(input$anti_fibrinolytic)
+    details_list$'Antifibrinolytic:' <- if_else(length(input$anti_fibrinolytic)>0, toString(input$anti_fibrinolytic), "none")
     details_list$'Findings:' <- input$surgical_findings
     details_list$'Specimens:' <- input$specimens_removed
     details_list$'--' <- "--"
@@ -6222,8 +6222,8 @@ server <- function(input, output, session) {
         #                                                                  add_intercalary_rod = input$add_left_intercalary_rod, 
         #                                                                  intercalary_rods_vector = intercalary_vector, 
         #                                                                  intercalary_rod_junction = junction, 
-        #                                                                  add_linked_rods = input$add_left_linked_rods,
-        #                                                                  linked_rods_vector = linked_vector,
+        #                                                                  add_linked_rod = input$add_left_linked_rod,
+        #                                                                  linked_rod_vector = linked_vector,
         #                                                                  add_kickstand_rod = input$add_left_kickstand_rod,
         #                                                                  kickstand_rod_vector = left_kickstand_rod_vector,
         #                                                                  add_custom_rods = input$add_left_custom_rods,
@@ -6243,8 +6243,8 @@ server <- function(input, output, session) {
                                                                          add_intercalary_rod = input$add_left_intercalary_rod, 
                                                                          intercalary_rods_vector = input$left_intercalary_rod, 
                                                                          intercalary_rod_junction = input$left_intercalary_rod_junction, 
-                                                                         add_linked_rods = input$add_left_linked_rods,
-                                                                         linked_rods_vector = input$left_linked_rods,
+                                                                         add_linked_rod = input$add_left_linked_rod,
+                                                                         linked_rod_vector = input$left_linked_rod,
                                                                          add_kickstand_rod = input$add_left_kickstand_rod,
                                                                          kickstand_rod_vector = input$left_kickstand_rod,
                                                                          add_custom_rods = input$add_left_custom_rods,
@@ -6309,8 +6309,8 @@ server <- function(input, output, session) {
       #   intercalary_vector <- c("a")
       #   junction <- NULL
       # }
-      # if(input$add_right_linked_rods == TRUE && input$right_linked_rods[1] %in% all_screw_coordinates_df$level && length(unique(input$right_linked_rods)) == 2){
-      #   linked_vector <- input$right_linked_rods
+      # if(input$add_right_linked_rod == TRUE && input$right_linked_rod[1] %in% all_screw_coordinates_df$level && length(unique(input$right_linked_rod)) == 2){
+      #   linked_vector <- input$right_linked_rod
       # }else{
       #   linked_vector <- c("a")
       # }
@@ -6368,8 +6368,8 @@ server <- function(input, output, session) {
                                                                           add_intercalary_rod = input$add_right_intercalary_rod, 
                                                                           intercalary_rods_vector = input$right_intercalary_rod, 
                                                                           intercalary_rod_junction = input$right_intercalary_rod_junction, 
-                                                                          add_linked_rods = input$add_right_linked_rods,
-                                                                          linked_rods_vector = input$right_linked_rods,
+                                                                          add_linked_rod = input$add_right_linked_rod,
+                                                                          linked_rod_vector = input$right_linked_rod,
                                                                           add_kickstand_rod = input$add_right_kickstand_rod,
                                                                           kickstand_rod_vector = input$right_kickstand_rod,
                                                                           add_custom_rods = input$add_right_custom_rods,
@@ -6458,7 +6458,7 @@ server <- function(input, output, session) {
                                                                                               rod_vector = input$left_intercalary_rod, 
                                                                                               intercalary_rod_junction = input$left_intercalary_rod_junction)
     }
-    if(input$add_left_linked_rods == TRUE){
+    if(input$add_left_linked_rod == TRUE){
       additional_rods_list$left_linked <-  jh_generate_supplemental_rod_statement_function(rod_type = "linked",
                                                                                               rod_side = "left",
                                                                                               rod_size = input$left_linked_rod_size,
@@ -6496,7 +6496,7 @@ server <- function(input, output, session) {
                                                                                                 rod_vector = input$right_intercalary_rod, 
                                                                                                 intercalary_rod_junction = input$right_intercalary_rod_junction)
     }
-    if(input$add_right_linked_rods == TRUE){
+    if(input$add_right_linked_rod == TRUE){
       additional_rods_list$right_linked <-  jh_generate_supplemental_rod_statement_function(rod_type = "linked",
                                                                                            rod_side = "right",
                                                                                            rod_size = input$right_linked_rod_size,
@@ -6813,7 +6813,7 @@ server <- function(input, output, session) {
       }
       posterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered for an antifibrinolytic{maintenance_gtt}")
     }else{
-      posterior_op_note_inputs_list_reactive$antifibrinolytic <- ""
+      posterior_op_note_inputs_list_reactive$antifibrinolytic <- " "
     }
     
     #######
@@ -7028,7 +7028,7 @@ server <- function(input, output, session) {
       }
       anterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered for an antifibrinolytic{maintenance_gtt}")
     }else{
-      anterior_op_note_inputs_list_reactive$antifibrinolytic <- ""
+      anterior_op_note_inputs_list_reactive$antifibrinolytic <- " "
     }
     
     ####### ADDITIONAL PROCEDURES
@@ -7647,16 +7647,16 @@ server <- function(input, output, session) {
     }
 
     procedure_results_list$procedure_details_paragraph <- case_when(
-      input$approach_sequence == "posterior" ~ procedure_results_list_posterior$procedure_details_paragraph,
-      input$approach_sequence == "anterior" ~ procedure_results_list_anterior$procedure_details_paragraph,
+      input$approach_sequence == "posterior" ~ glue("{procedure_results_list_posterior$procedure_details_paragraph}"),
+      input$approach_sequence == "anterior" ~ glue("{procedure_results_list_anterior$procedure_details_paragraph}"),
       input$approach_sequence == "posterior-anterior" ~  glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}"),
       input$approach_sequence == "anterior-posterior" ~ glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}"),
       input$approach_sequence == "posterior-anterior-posterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
     )
     
     procedure_results_list$procedures_numbered_paragraph <- case_when(
-      input$approach_sequence == "posterior" ~ input$procedures_numbered_confirm_edit_posterior,
-      input$approach_sequence == "anterior" ~ input$procedures_numbered_confirm_edit_anterior,
+      input$approach_sequence == "posterior" ~ glue("{input$procedures_numbered_confirm_edit_posterior}"),
+      input$approach_sequence == "anterior" ~ glue("{input$procedures_numbered_confirm_edit_anterior}"),
       input$approach_sequence == "posterior-anterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}"),
       input$approach_sequence == "anterior-posterior" ~ glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}"),
       input$approach_sequence == "posterior-anterior-posterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}")
@@ -7929,9 +7929,9 @@ server <- function(input, output, session) {
                                                                        
                                                                        intraoperative_complications_vector_input = input$intraoperative_complications_vector,
                                                                        other_intraoperative_complications_input = input$other_intraoperative_complications,
-                                                                       implant_manufacturer_input = input$implant_manufacturer,
+                                                                       implant_manufacturer_input = input$implant_manufacturer
                                                                        # operative_note_text_input = input$operative_note_text
-                                                                       operative_note_text_input = "test if this is the error"
+                                                                       # operative_note_text_input = "test if this is the error"
       )
       
       surgery_details_df$surgery_details_df
@@ -8444,15 +8444,19 @@ server <- function(input, output, session) {
   output$rods_crossing_by_level_table <- renderTable({
     # rods_crossing_by_level_redcap_table_reactive()
     
-    rods_crossing_by_level_repeating <- rods_crossing_by_level_redcap_table_reactive() %>%
-      mutate(record_id = "record number will go here") %>%
-      select(record_id, everything()) %>%
-      mutate(redcap_event_name = "surgery_arm_1") %>%
-      mutate(redcap_repeat_instance = paste(row_number(), "repeat instance will go here")) %>%
-      mutate(redcap_repeat_instrument = "rods_crossing_by_level_repeating") %>%
-      mutate(rods_crossing_by_level_repeating_complete = "Complete") %>%
-      mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
-      select(record_id, redcap_event_name, redcap_repeat_instrument, redcap_repeat_instance, dos_rods_crossing_repeating, rods_crossing_level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing, rods_crossing_by_level_repeating_complete)
+    rods_crossing_by_level_redcap_table_reactive() %>%
+      select(-dos_rods_crossing_repeating) %>%
+      select(rods_crossing_level, total_rods_crossing, everything())
+    
+    # rods_crossing_by_level_repeating <- rods_crossing_by_level_redcap_table_reactive() %>%
+    #   mutate(record_id = "record number will go here") %>%
+    #   select(record_id, everything()) %>%
+    #   mutate(redcap_event_name = "surgery_arm_1") %>%
+    #   mutate(redcap_repeat_instance = paste(row_number(), "repeat instance will go here")) %>%
+    #   mutate(redcap_repeat_instrument = "rods_crossing_by_level_repeating") %>%
+    #   mutate(rods_crossing_by_level_repeating_complete = "Complete") %>%
+    #   mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+    #   select(record_id, redcap_event_name, redcap_repeat_instrument, redcap_repeat_instance, dos_rods_crossing_repeating, rods_crossing_level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing, rods_crossing_by_level_repeating_complete)
   })
   
   #################  PROCEDURES BY LEVEL TABLE ##################
@@ -8941,7 +8945,18 @@ server <- function(input, output, session) {
             mutate(redcap_repeat_instrument = "rods_crossing_by_level_repeating") %>%
             mutate(rods_crossing_by_level_repeating_complete = "Complete") %>%
             mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
-            select(record_id, redcap_event_name, redcap_repeat_instrument,redcap_repeat_instance, dos_rods_crossing_repeating, rods_crossing_level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing, rods_crossing_by_level_repeating_complete)
+            select(record_id, redcap_event_name, redcap_repeat_instrument,redcap_repeat_instance, dos_rods_crossing_repeating, rods_crossing_level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing, contains("left"), contains("right"), rods_crossing_by_level_repeating_complete)
+          
+          
+          # rods_crossing_by_level_repeating <- rods_crossing_by_level_redcap_table_reactive() %>%
+          #   mutate(record_id = record_number) %>%
+          #   select(record_id, everything()) %>%
+          #   mutate(redcap_event_name = "surgery_arm_1") %>%
+          #   mutate(redcap_repeat_instance = row_number() + rods_crossing_by_level_repeating_instance_add) %>%
+          #   mutate(redcap_repeat_instrument = "rods_crossing_by_level_repeating") %>%
+          #   mutate(rods_crossing_by_level_repeating_complete = "Complete") %>%
+          #   mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
+          #   select(record_id, redcap_event_name, redcap_repeat_instrument,redcap_repeat_instance, dos_rods_crossing_repeating, rods_crossing_level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing, rods_crossing_by_level_repeating_complete)
 
           if(all(names(rods_crossing_by_level_repeating %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
             importRecords(rcon = rcon_reactive$rcon, data = rods_crossing_by_level_repeating, returnContent = "count")

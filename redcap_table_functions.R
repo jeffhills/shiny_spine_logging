@@ -486,7 +486,7 @@ redcap_table_surgical_details_df_function <- function(all_objects_df_input = tib
       
        ##########   RODS  #############
   
-  if(str_detect(surgery_details_list$main_approach, "posterior")){
+  if(str_detect(str_to_lower(surgery_details_list$main_approach), "posterior")){
     surgery_details_list$left_rod <- if_else(left_main_rod_size_input == "None", "None", paste(left_main_rod_size_input, left_main_rod_material_input))
     surgery_details_list$right_rod <- if_else(right_main_rod_size_input == "None", "None", paste(right_main_rod_size_input, right_main_rod_material_input))
     
@@ -542,29 +542,29 @@ redcap_table_surgical_details_df_function <- function(all_objects_df_input = tib
       # if(any(add_left_accessory_rod_input,
       #        add_left_satellite_rod_input,
       #        add_left_intercalary_rod_input,
-      #        add_left_linked_rods_input,
+      #        add_left_linked_rod_input,
       #        add_right_accessory_rod_input,
       #        add_right_satellite_rod_input,
       #        add_right_intercalary_rod_input,
-      #        add_right_linked_rods_input)){
+      #        add_right_linked_rod_input)){
       #   
       #   supplemental_rods_df <- tibble(supplemental_rod = c("accessory_rod",
       #                                                       "satellite_rod",
       #                                                       "intercalary_rod",
-      #                                                       "linked_rods",
+      #                                                       "linked_rod",
       #                                                       "accessory_rod",
       #                                                       "satellite_rod",
       #                                                       "intercalary_rod",
-      #                                                       "linked_rods"),
+      #                                                       "linked_rod"),
       #                                  side = c("left", "left", "left", "left", "right", "right", "right", "right"),
       #                                  yes_no = c(add_left_accessory_rod_input,
       #                                             add_left_satellite_rod_input,
       #                                             add_left_intercalary_rod_input,
-      #                                             add_left_linked_rods_input,
+      #                                             add_left_linked_rod_input,
       #                                             add_right_accessory_rod_input,
       #                                             add_right_satellite_rod_input,
       #                                             add_right_intercalary_rod_input,
-      #                                             add_right_linked_rods_input)) %>%
+      #                                             add_right_linked_rod_input)) %>%
       #     filter(yes_no == TRUE)
       #   if(nrow(supplemental_rods_df %>% filter(side == "left")) >0){
       #     surgery_details_list$left_supplemental_rods <- glue_collapse((supplemental_rods_df %>% filter(side == "left"))$supplemental_rod, sep = "; ")

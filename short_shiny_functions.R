@@ -92,8 +92,8 @@ jh_make_op_note_test_df_function <- function(lumbar_pso_example = FALSE, posteri
 
 extract_levels_function <- function(input_df){
   levels_df <- input_df %>%
-    arrange(vertebral_number) %>%
-    # arrange(as.double(vertebral_number)) %>%
+    # arrange(vertebral_number) %>%
+    arrange(as.double(vertebral_number)) %>%
     select(level) %>%
     distinct()
   
@@ -2090,8 +2090,8 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
                                                 add_intercalary_rod = FALSE,
                                                 intercalary_rods_vector = c("a"), 
                                                 intercalary_rod_junction = "T12", 
-                                                add_linked_rods = FALSE,
-                                                linked_rods_vector = c("a"),
+                                                add_linked_rod = FALSE,
+                                                linked_rod_vector = c("a"),
                                                 add_kickstand_rod = FALSE,
                                                 kickstand_rod_vector = c("a"),
                                                 add_custom_rods = FALSE, 
@@ -2302,11 +2302,11 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
     }
     
     #################### LINKED ROD ###################
-    if(add_linked_rods == TRUE && linked_rods_vector[1] %in% all_screw_coordinates_df$level && (linked_rods_vector[1] !=linked_rods_vector[2])){
+    if(add_linked_rod == TRUE && linked_rod_vector[1] %in% all_screw_coordinates_df$level && (linked_rod_vector[1] !=linked_rod_vector[2])){
       if(nrow(revision_rods_retained_df) > 0){
-        if(tail(revision_rods_retained_df$level, 1) == linked_rods_vector[2]){
+        if(tail(revision_rods_retained_df$level, 1) == linked_rod_vector[2]){
           revision_rod_is <-  "proximal"
-        }else if(head(revision_rods_retained_df$level, 1) == linked_rods_vector[1]){
+        }else if(head(revision_rods_retained_df$level, 1) == linked_rod_vector[1]){
           revision_rod_is <-  "distal"
         }else{
           revision_rod_is <-  "na"
@@ -2324,7 +2324,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
           filter(prior_rod_connected == "yes"))$level
         
       }else{
-        proximal_rod_distal_point <- (all_screw_coordinates_df %>%  filter(side == rod_side, level == linked_rods_vector[2]))$level
+        proximal_rod_distal_point <- (all_screw_coordinates_df %>%  filter(side == rod_side, level == linked_rod_vector[2]))$level
         
         proximal_rod_vector <- c(main_rod_df$level[1],
                                  proximal_rod_distal_point)
@@ -2338,7 +2338,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
                                          filter(prior_rod_connected == "yes"))$level
         
       }else{
-        distal_rod_proximal_point <- (all_screw_coordinates_df %>%  filter(side == rod_side, level == linked_rods_vector[1]))$level
+        distal_rod_proximal_point <- (all_screw_coordinates_df %>%  filter(side == rod_side, level == linked_rod_vector[1]))$level
         
         distal_rod_vector <- c(distal_rod_proximal_point, 
                                main_rod_df$level[length(main_rod_df$level)])
@@ -2369,17 +2369,17 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         as.matrix()
     
       
-      linked_rods_overlap_matrix <- all_screw_coordinates_df %>%
+      linked_rod_overlap_matrix <- all_screw_coordinates_df %>%
         filter(side == rod_side, 
-               level %in% linked_rods_vector) %>%
+               level %in% linked_rod_vector) %>%
         select(x, y) %>%
         mutate(x = if_else(x < 0.5, x + x_linked_rod_modifier, x + x_linked_rod_modifier)) %>%
         distinct() %>%
         arrange(rev(y)) %>%
         as.matrix()
       
-      connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rods_overlap_matrix)
-      # connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rods_overlap_matrix, x_nudge = if_else(rod_side == "right", -0.01, 0))
+      connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rod_overlap_matrix)
+      # connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rod_overlap_matrix, x_nudge = if_else(rod_side == "right", -0.01, 0))
       
       connector_list$linked_rod_top_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$top_connector_matrix)
       connector_list$linked_rod_bottom_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$bottom_connector_matrix)
