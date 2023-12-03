@@ -1479,6 +1479,30 @@ make_screw_types_function <-  function(level = NULL, left_screw_level = "no_scre
 ##########################################  FUNCTIONS FOR RODS  ##################### ##################### 
 ##########################################  FUNCTIONS FOR RODS  ##################### ##################### 
 
+jh_update_supplemental_rod_material_size_selected_function <- function(session_input,
+                                                                       input_add_side_supplemental_rod, 
+                                                                       side_supplemental_rod){
+  
+  if(input_add_side_supplemental_rod == TRUE){
+    updatePrettyRadioButtons(session = session_input,
+                             inputId = glue("{side_supplemental_rod}_material"), 
+                             selected = "Titanium")
+    
+    updatePickerInput(session = session_input, 
+                      inputId = glue("{side_supplemental_rod}_size"), 
+                      selected = "5.5mm")
+  }else{
+    updatePrettyRadioButtons(session = session_input,
+                             inputId = glue("{side_supplemental_rod}_material"), 
+                             selected = "NA")
+    
+    updatePickerInput(session = session_input, 
+                      inputId = glue("{side_supplemental_rod}_size"), 
+                      selected = "NA")
+    
+  }
+}
+
 jh_make_supplemental_rod_ui_function <- function(rod_type, input_label){
   
   slider_label <- case_when(

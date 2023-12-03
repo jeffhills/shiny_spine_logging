@@ -593,6 +593,20 @@ ui <- dashboardPage(skin = "black",
                                              )
                                            ),
                                            conditionalPanel(condition = "input.fusion_procedure_performed == true & input.spine_approach.indexOf('Posterior') > -1",
+                                                            fluidRow(
+                                                              actionBttn(
+                                                                inputId = "add_rods",
+                                                                size = "md", 
+                                                                block = TRUE,
+                                                                label = "ADD RODS",
+                                                                style = "bordered",
+                                                                color = "primary", 
+                                                                icon = icon("grip-lines-vertical")
+                                                              )
+                                                            )
+                                           ),
+                                           br(),
+                                           conditionalPanel(condition = "input.add_rods == true & input.fusion_procedure_performed == true & input.spine_approach.indexOf('Posterior') > -1",
                                                             # box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:center", "Rod Details:"), collapsible = TRUE,
                                                             fluidRow(column(4), 
                                                                      column(4, 
@@ -1260,7 +1274,7 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
-  # options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
+  options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
   # options(shiny.reactlog=TRUE) 
   
   logging_timer_reactive_list <- reactiveValues()
@@ -1516,8 +1530,6 @@ server <- function(input, output, session) {
         
         
       }
-    }else{
-      existing_patient_data$match_found <- FALSE
     }
     
   })
@@ -1578,17 +1590,19 @@ server <- function(input, output, session) {
   
   ########### UPDATE PRIOR IMPLANTS PRESENT WHEN PRIOR PATIENT FOUND #########
   observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), ignoreNULL = TRUE, ignoreInit = TRUE, {
-    if(any(str_detect(existing_patient_data$patient_df$object, "plate")) == TRUE){
-      
-      anterior_plate_levels_df <- existing_patient_data$patient_df %>%
-        filter(approach == "anterior") %>%
-        filter(str_detect(object, "plate")) %>%
-        distinct()
-      
-      updateAwesomeCheckboxGroup(session = session, 
-                                 inputId = "prior_anterior_plate_levels", 
-                                 selected = anterior_plate_levels_df$level)
-    }
+    if(existing_patient_data$match_found == TRUE){
+      if(any(str_detect(existing_patient_data$patient_df$object, "plate")) == TRUE){
+        
+        anterior_plate_levels_df <- existing_patient_data$patient_df %>%
+          filter(approach == "anterior") %>%
+          filter(str_detect(object, "plate")) %>%
+          distinct()
+        
+        updateAwesomeCheckboxGroup(session = session, 
+                                   inputId = "prior_anterior_plate_levels", 
+                                   selected = anterior_plate_levels_df$level)
+      }
+      }
   })
   
   observeEvent(list(existing_patient_data$patient_df, input$close_startup_modal), ignoreNULL = TRUE, ignoreInit = TRUE, {
@@ -2144,7 +2158,17 @@ server <- function(input, output, session) {
   
   ################################
   observeEvent(input$implants_complete,ignoreNULL = TRUE, ignoreInit = TRUE, {
-    updateTabItems(session = session, inputId = "tabs", selected = "implant_details")
+    # updateTabItems(session = session, inputId = "tabs", selected = "implant_details")
+    if(input$fusion_procedure_performed == TRUE && input$add_rods == 0 && nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw|hook|wire")))>0){
+      sendSweetAlert(
+        session = session,
+        title = "Please click 'Add Rods' Prior to Proceeding",
+        text = NULL,
+        type = "warning"
+      )
+    }else{
+      updateTabItems(session = session, inputId = "tabs", selected = "implant_details")
+    }
   })
   
   ############### generate modal to confirm the fusion levels #######
@@ -3239,6 +3263,32 @@ server <- function(input, output, session) {
     }
   }
   )
+  ### UPDATE ROD SIZE AND MATERIAL WHEN SELECTED
+  observeEvent(input$add_left_accessory_rod, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    jh_update_supplemental_rod_material_size_selected_function(session_input = session, 
+                                                               input_add_side_supplemental_rod = input$add_left_accessory_rod, 
+                                                               side_supplemental_rod = "left_accessory_rod")
+  })
+  observeEvent(input$add_left_satellite_rod, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    jh_update_supplemental_rod_material_size_selected_function(session_input = session, 
+                                                               input_add_side_supplemental_rod = input$add_left_satellite_rod, 
+                                                               side_supplemental_rod = "left_satellite_rod")
+  })
+  observeEvent(input$add_left_intercalary_rod, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    jh_update_supplemental_rod_material_size_selected_function(session_input = session, 
+                                                               input_add_side_supplemental_rod = input$add_left_intercalary_rod, 
+                                                               side_supplemental_rod = "left_intercalary_rod")
+  })
+  observeEvent(input$add_left_linked_rod, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    jh_update_supplemental_rod_material_size_selected_function(session_input = session, 
+                                                               input_add_side_supplemental_rod = input$add_left_linked_rod, 
+                                                               side_supplemental_rod = "left_linked_rod")
+  })
+  observeEvent(input$add_left_kickstand_rod, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    jh_update_supplemental_rod_material_size_selected_function(session_input = session, 
+                                                               input_add_side_supplemental_rod = input$add_left_kickstand_rod, 
+                                                               side_supplemental_rod = "left_kickstand_rod")
+  })
   
   observeEvent(input$add_left_satellite_rod,  ignoreInit = TRUE, {
     if(input$add_left_satellite_rod == TRUE){
@@ -3527,7 +3577,8 @@ server <- function(input, output, session) {
   ##### UPDATE SUPPLEMENT ROD CHOICES END -----
   
     ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
-  observeEvent(all_objects_to_add_list$left_rod_implants_df, ignoreNULL = TRUE, ignoreInit = TRUE, {
+  # observeEvent(all_objects_to_add_list$left_rod_implants_df, ignoreNULL = TRUE, ignoreInit = TRUE, {
+  observeEvent(input$add_rods, ignoreNULL = TRUE, ignoreInit = TRUE, {
     if(nrow(all_objects_to_add_list$left_rod_implants_df) > 1){
       if(max(all_objects_to_add_list$left_rod_implants_df$vertebral_number) < 11){
         rod_size <- "4.0mm"  
@@ -3540,10 +3591,6 @@ server <- function(input, output, session) {
                           selected = rod_size
         )
       }
-      # updatePickerInput(session = session, 
-      #                   inputId = "left_main_rod_size", 
-      #                   selected = if_else(input$left_main_rod_size == "None", rod_size, input$left_main_rod_size)
-      # )
       if(input$left_main_rod_material == "Non-instrumented"){
         updateAwesomeRadio(session = session, 
                            inputId = "left_main_rod_material",
@@ -3552,12 +3599,6 @@ server <- function(input, output, session) {
                            selected = "Titanium"
         )
       }
-      # updateAwesomeRadio(session = session, 
-      #                    inputId = "left_main_rod_material",
-      #                    inline = TRUE,
-      #                    choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
-      #                    selected = if_else(input$left_main_rod_material == "Non-instrumented", "Titanium", input$left_main_rod_material)
-      # )
     }
   })
   
@@ -3628,7 +3669,7 @@ server <- function(input, output, session) {
   observe({
     ##########RODS ############
     ############# left ROD #################
-    
+    if(input$add_rods > 0){
     if(any(input$add_left_accessory_rod == TRUE, 
            input$add_left_satellite_rod == TRUE,
            input$add_left_intercalary_rod == TRUE, 
@@ -3740,6 +3781,7 @@ server <- function(input, output, session) {
                                                                                             mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
                                                                                             arrange(y))), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
     } 
+    }
     
   })
   
@@ -3971,6 +4013,33 @@ server <- function(input, output, session) {
       updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
     }
     
+  })
+  
+  ### UPDATE ROD SIZE AND MATERIAL WHEN SELECTED
+  observeEvent(input$add_right_accessory_rod, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    jh_update_supplemental_rod_material_size_selected_function(session_input = session, 
+                                                               input_add_side_supplemental_rod = input$add_right_accessory_rod, 
+                                                               side_supplemental_rod = "right_accessory_rod")
+  })
+  observeEvent(input$add_right_satellite_rod, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    jh_update_supplemental_rod_material_size_selected_function(session_input = session, 
+                                                               input_add_side_supplemental_rod = input$add_right_satellite_rod, 
+                                                               side_supplemental_rod = "right_satellite_rod")
+  })
+  observeEvent(input$add_right_intercalary_rod, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    jh_update_supplemental_rod_material_size_selected_function(session_input = session, 
+                                                               input_add_side_supplemental_rod = input$add_right_intercalary_rod, 
+                                                               side_supplemental_rod = "right_intercalary_rod")
+  })
+  observeEvent(input$add_right_linked_rod, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    jh_update_supplemental_rod_material_size_selected_function(session_input = session, 
+                                                               input_add_side_supplemental_rod = input$add_right_linked_rod, 
+                                                               side_supplemental_rod = "right_linked_rod")
+  })
+  observeEvent(input$add_right_kickstand_rod, ignoreInit = TRUE, ignoreNULL = TRUE, {
+    jh_update_supplemental_rod_material_size_selected_function(session_input = session, 
+                                                               input_add_side_supplemental_rod = input$add_right_kickstand_rod, 
+                                                               side_supplemental_rod = "right_kickstand_rod")
   })
   
   observeEvent(input$add_right_accessory_rod, ignoreInit = TRUE, {
@@ -4283,8 +4352,8 @@ server <- function(input, output, session) {
   ##### UPDATE SUPPLEMENT ROD CHOICES END -----
   
   ######### ######### ROD SIZE AND ROD MATERIAL ######### #########
-  observeEvent(all_objects_to_add_list$right_rod_implants_df,ignoreNULL = TRUE, ignoreInit = TRUE, {
-    
+  # observeEvent(all_objects_to_add_list$right_rod_implants_df,ignoreNULL = TRUE, ignoreInit = TRUE, {
+  observeEvent(input$add_rods, ignoreNULL = TRUE, ignoreInit = TRUE, {
     if(nrow(all_objects_to_add_list$right_rod_implants_df) > 1){
       if(max(all_objects_to_add_list$right_rod_implants_df$vertebral_number) < 11){
         rod_size <- "4.0mm"  
@@ -4370,6 +4439,7 @@ server <- function(input, output, session) {
   observe({
     ##########RODS ############
     ############# Right ROD #################
+    if(input$add_rods > 0){
 
     if(any(input$add_right_accessory_rod == TRUE, 
            input$add_right_satellite_rod == TRUE,
@@ -4478,6 +4548,7 @@ server <- function(input, output, session) {
                                                                                             mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
                                                                                             arrange(y))), dist = 0.003, endCapStyle = "ROUND"), alpha = 0.85)
     } 
+    }
     
   })
   
@@ -4672,20 +4743,37 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$crosslink_connectors,  ignoreInit = TRUE, {
-    if(length(input$crosslink_connectors) == 0){
+    if(length(input$crosslink_connectors) > 0){
       all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-        filter(object != "crosslink")
+        # filter(object != "crosslink") %>%
+        bind_rows(all_implants_constructed_df %>%
+                    filter(object == "crosslink", 
+                           level %in% input$crosslink_connectors)
+        ) %>%
+        distinct()
       
       rods_list$crosslinks <- geom_sf(data = st_multipolygon((all_objects_to_add_list$objects_df %>% filter(object == "crosslink"))$object_constructed), alpha = 0.9, fill = "gold") 
-      
     }else{
-      all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-        filter(object != "crosslink") %>%
-        bind_rows(tibble(level = input$crosslink_connectors, 
-                         object = "crosslink") %>%
-                    left_join(all_implants_constructed_df)) %>%
-        distinct()
+      all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df %>%
+        filter(object != "crosslink")
+      
+      rods_list$crosslinks <- NULL
     }
+    
+    # if(length(input$crosslink_connectors) == 0){
+    #   all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
+    #     filter(object != "crosslink")
+    #   
+    # }else{
+    #   rods_list$crosslinks <- geom_sf(data = st_multipolygon((all_objects_to_add_list$objects_df %>% filter(object == "crosslink"))$object_constructed), alpha = 0.9, fill = "gold") 
+    #   
+    # all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
+    #   filter(object != "crosslink") %>%
+    #   bind_rows(tibble(level = input$crosslink_connectors,
+    #                    object = "crosslink") %>%
+    #               left_join(all_implants_constructed_df)) %>%
+    #   distinct()
+    # }
   })
   
   
@@ -7163,8 +7251,13 @@ server <- function(input, output, session) {
       approach_sequence <- " "
     }
     approach_sequence
-    
-  })
+  })%>%
+    bindEvent(input$spine_approach,
+              input$add_rods,
+              input$implants_complete,
+              # ignoreInit = TRUE,
+              ignoreNULL = TRUE
+    )
 
   observe(
     updateRadioGroupButtons(session = session, inputId = "approach_sequence", 
