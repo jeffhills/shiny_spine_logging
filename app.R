@@ -1274,7 +1274,7 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
-  options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
+  # options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
   # options(shiny.reactlog=TRUE) 
   
   logging_timer_reactive_list <- reactiveValues()
