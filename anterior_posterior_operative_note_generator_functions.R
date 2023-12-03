@@ -1268,6 +1268,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   }
   
   procedure_paragraphs <- str_replace_all(procedure_paragraphs, "a  ", "a ")
+  procedure_paragraphs <- str_remove_all(procedure_paragraphs, "character(0)")
   
   if(instruments_used_for_bony_work == "Bone scalpel only"){
     procedure_paragraphs <- str_replace_all(procedure_paragraphs, "high-speed burr", "bone scalpel")
