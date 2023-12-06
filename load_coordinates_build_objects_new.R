@@ -21,6 +21,9 @@ screw_size_labels_df <- tibble(level = screw_label_level_vector, screw_label = s
   mutate(screw_diameter_label = paste(screw_label, "diameter", sep = "_")) %>%
   mutate(screw_length_label = paste(screw_label, "length", sep = "_"))
 
+interspaces_vector_for_revision_rods <-  c('C1-C2', 'C2-C3', 'C3-C4', 'C4-C5', 'C5-C6', 'C6-C7', 'C7-T1', 'T1-T2', 'T2-T3', 'T3-T4', 'T4-T5', 'T5-T6', 'T6-T7', 'T7-T8', 'T8-T9', 'T9-T10', 'T10-T11', 'T11-T12', 'T12-L1', 'L1-L2', 'L2-L3', 'L3-L4', 'L4-L5', 'L5-S1')
+
+
 #############-----------------------   LOAD DATA  ----------------------###############
 
 

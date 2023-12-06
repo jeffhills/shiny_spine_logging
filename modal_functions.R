@@ -337,10 +337,12 @@ startup_modal_box_diagnosis_symptoms <-
            left_prior_implants_removed = "",
            right_prior_implants = "",
            right_prior_implants_removed = "",
-           left_rod_status = "retained_connected",
+           left_rod_status = "removed",
            left_implants_still_connected = "",
-           right_rod_status = "retained_connected",
+           left_revision_rod_cut_level = "",
+           right_rod_status = "removed",
            right_implants_still_connected = "", 
+           right_revision_rod_cut_level = "",
            revision_indication = ""
   ) {
     
@@ -743,14 +745,22 @@ startup_modal_box_diagnosis_symptoms <-
                                          )
                                        ),
                                        conditionalPanel(
-                                         condition = "input.left_revision_rod_status.indexOf('retained_cut') > -1 || input.left_revision_rod_status.indexOf('retained') > -1",
+                                         condition = "input.left_revision_rod_status.indexOf('retained_cut') > -1",
                                          pickerInput(
-                                           inputId = "left_revision_implants_rod_connectors",
-                                           label = "Select the levels where rod connectors were placed below (if any)",
+                                           inputId = "left_revision_rod_cut_level",
+                                           label = "Select the level where the rod was cut:",
                                            choices = c(""),
-                                           selected = c(""),
-                                           multiple = TRUE
+                                           selected = left_revision_rod_cut_level,
+                                           multiple = FALSE
                                          )
+                                       # condition = "input.left_revision_rod_status.indexOf('retained_cut') > -1 || input.left_revision_rod_status.indexOf('retained') > -1",
+                                       # pickerInput(
+                                       #   inputId = "left_revision_implants_rod_connectors",
+                                       #   label = "Select the levels where rod connectors were placed below (if any)",
+                                       #   choices = c(""),
+                                       #   selected = c(""),
+                                       #   multiple = TRUE
+                                       # )
                                        )
                                      ),
                                      column(
@@ -784,14 +794,22 @@ startup_modal_box_diagnosis_symptoms <-
                                          )
                                        ),
                                        conditionalPanel(
-                                         condition = "input.right_revision_rod_status.indexOf('retained_cut') > -1 || input.right_revision_rod_status.indexOf('retained') > -1",
+                                         condition = "input.right_revision_rod_status.indexOf('retained_cut') > -1",
                                          pickerInput(
-                                           inputId = "right_revision_implants_rod_connectors",
-                                           label = "Select the levels where rod connectors were placed below (if any)",
+                                           inputId = "right_revision_rod_cut_level",
+                                           label = "Select the level where the rod was cut:",
                                            choices = c(""),
-                                           selected = c(""),
-                                           multiple = TRUE
+                                           selected = right_revision_rod_cut_level,
+                                           multiple = FALSE
                                          )
+                                         # condition = "input.right_revision_rod_status.indexOf('retained_cut') > -1 || input.right_revision_rod_status.indexOf('retained') > -1",
+                                         # pickerInput(
+                                         #   inputId = "right_revision_implants_rod_connectors",
+                                         #   label = "Select the levels where rod connectors were placed below (if any)",
+                                         #   choices = c(""),
+                                         #   selected = c(""),
+                                         #   multiple = TRUE
+                                         # )
                                        )
                                      )
                                    )
@@ -847,8 +865,93 @@ lateral_mass_screws_after_decompression_modal_function <- function(implant_objec
   }
 }
 
-################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
-################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
+################################################    LINK Revision Rods to New RODS MODAL  ######################################
+################################################    LINK Revision Rods to New RODS MODAL  ######################################
+
+link_revision_rods_modal_function <-   function(left_revision_rod_present = FALSE,
+                                                link_left_revision_rods_true_false = FALSE,
+                                                link_left_revision_rods_overlap_choices = interspaces_vector_for_revision_rods,
+                                                link_left_revision_rods_overlap = c(),
+                                                right_revision_rod_present = FALSE,
+                                                link_right_revision_rods_true_false = FALSE,
+                                                link_right_revision_rods_overlap_choices = interspaces_vector_for_revision_rods,
+                                                link_right_revision_rods_overlap = c()
+) {
+  
+  modalDialog(
+    size = "l", 
+    easyClose = TRUE,
+    # footer = modalButton("Proceed"),
+    # footer = actionBttn(
+    #   inputId = "link_revision_rods_done_button",
+    #   label = "Proceed",
+    #   style = "simple",
+    #   color = "primary",
+    #   icon = icon("arrow-right")
+    # ),
+    fluidRow(
+      column(3, 
+             switchInput(
+               inputId = "left_revision_rod_present",
+               value = left_revision_rod_present,
+               onLabel = "Prior",
+               size = "mini"
+             )
+             ),
+      column(3, 
+             switchInput(
+               inputId = "right_revision_rod_present",
+               value = right_revision_rod_present,
+               onLabel = "Prior",
+               size = "mini"
+             )
+             )
+    ),
+    box(
+      width = 12,
+      title = "Link Revision Rods?",
+      solidHeader = TRUE,
+      status = "info",
+      column(
+        6,
+        conditionalPanel(condition = "input.left_revision_rod_present == true", 
+                         materialSwitch(
+                           inputId = "link_left_revision_rods_true_false",
+                           label = "Link Prior Left Rod to new rod?", 
+                           value = link_left_revision_rods_true_false,
+                           status = "success"
+                         )
+        )
+        # conditionalPanel(condition = "input.link_left_revision_rods_true_false == true", 
+        #                  sliderTextInput(inputId = "link_left_revision_rods_overlap",
+        #                                  label = "Select overlap region:", 
+        #                                  choices = link_left_revision_rods_overlap_choices,
+        #                                  selected = link_left_revision_rods_overlap, 
+        #                                  width = "90%")
+        # )
+        ),
+      column(
+        6,
+        conditionalPanel(condition = "input.right_revision_rod_present == true", 
+                         materialSwitch(
+                           inputId = "link_right_revision_rods_true_false",
+                           label = "Link Prior Right Rod to new rod?", 
+                           value = link_right_revision_rods_true_false,
+                           status = "success"
+                         )
+        )
+        # conditionalPanel(condition = "input.link_right_revision_rods_true_false == true", 
+        #                  sliderTextInput(inputId = "link_right_revision_rods_overlap",
+        #                  label = "Select overlap region:", 
+        #                  choices = link_right_revision_rods_overlap_choices,
+        #                  selected = link_right_revision_rods_overlap, 
+        #                  width = "90%")
+        # )
+        )
+      )
+    )
+}
+
 ################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 ###############################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 
@@ -865,6 +968,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                                                                            implant_position_confirmation_method = "Intraoperative fluoroscopy was used to confirm position of all implants.",
                                                                            deformity_correction_choices = c("The rods were secured into place with set screws. "), 
                                                                            alignment_correction_method = c("The rods were secured into place with set screws. "), 
+                                                                           alignment_correction_method_other = "", 
                                                                            instruments_used_for_bony_work = "High-speed burr only", 
                                                                            row_label_font_size = 16, 
                                                                            question_label_column_width = 25, 
@@ -1004,7 +1108,8 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                   if(implants_placed == "yes" && (procedure_approach == "posterior" | procedure_approach == "combined")){
                     conditionalPanel(condition = "input.alignment_correction_method.indexOf('Other') > -1",
                                      textInput(inputId = "alignment_correction_method_other", 
-                                               label = "Enter 'Other' Method as a full sentence:"))
+                                               label = "Enter 'Other' Method as a full sentence:", 
+                                               value = alignment_correction_method_other))
                   },
                   hr(),
                   jh_make_shiny_table_row_function(
