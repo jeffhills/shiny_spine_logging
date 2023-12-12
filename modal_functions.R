@@ -338,11 +338,15 @@ startup_modal_box_diagnosis_symptoms <-
            right_prior_implants = "",
            right_prior_implants_removed = "",
            left_rod_status = "removed",
-           left_implants_still_connected = "",
            left_revision_rod_cut_level = "",
+           left_revision_rod_cut_level_choices = "",
+           left_revision_implants_connected_to_prior_rod = "",
+           left_revision_implants_connected_to_prior_rod_choices = "",
            right_rod_status = "removed",
-           right_implants_still_connected = "", 
            right_revision_rod_cut_level = "",
+           right_revision_rod_cut_level_choices = "",
+           right_revision_implants_connected_to_prior_rod = "", 
+           right_revision_implants_connected_to_prior_rod_choices = "", 
            revision_indication = ""
   ) {
     
@@ -737,30 +741,22 @@ startup_modal_box_diagnosis_symptoms <-
                                        conditionalPanel(
                                          condition = "input.left_revision_rod_status.indexOf('retained_cut') > -1",
                                          pickerInput(
-                                           inputId = "left_revision_implants_connected_to_prior_rod",
-                                           label = "Select screws connected to the old rod:",
-                                           choices = c(""),
-                                           selected = left_implants_still_connected,
-                                           multiple = TRUE
+                                           inputId = "left_revision_rod_cut_level",
+                                           label = "Select the level where the rod was cut:",
+                                           choices = left_revision_rod_cut_level_choices,
+                                           selected = left_revision_rod_cut_level,
+                                           multiple = FALSE
                                          )
                                        ),
                                        conditionalPanel(
                                          condition = "input.left_revision_rod_status.indexOf('retained_cut') > -1",
                                          pickerInput(
-                                           inputId = "left_revision_rod_cut_level",
-                                           label = "Select the level where the rod was cut:",
-                                           choices = c(""),
-                                           selected = left_revision_rod_cut_level,
-                                           multiple = FALSE
+                                           inputId = "left_revision_implants_connected_to_prior_rod",
+                                           label = "Select screws connected to the old rod:",
+                                           choices = left_revision_implants_connected_to_prior_rod_choices,
+                                           selected = left_revision_implants_connected_to_prior_rod,
+                                           multiple = TRUE
                                          )
-                                       # condition = "input.left_revision_rod_status.indexOf('retained_cut') > -1 || input.left_revision_rod_status.indexOf('retained') > -1",
-                                       # pickerInput(
-                                       #   inputId = "left_revision_implants_rod_connectors",
-                                       #   label = "Select the levels where rod connectors were placed below (if any)",
-                                       #   choices = c(""),
-                                       #   selected = c(""),
-                                       #   multiple = TRUE
-                                       # )
                                        )
                                      ),
                                      column(
@@ -786,31 +782,24 @@ startup_modal_box_diagnosis_symptoms <-
                                        conditionalPanel(
                                          condition = "input.right_revision_rod_status.indexOf('retained_cut') > -1",
                                          pickerInput(
-                                           inputId = "right_revision_implants_connected_to_prior_rod",
-                                           label = "Select screws connected to the old rod:",
-                                           choices = c(""),
-                                           selected = right_implants_still_connected,
-                                           multiple = TRUE
+                                           inputId = "right_revision_rod_cut_level",
+                                           label = "Select the level where the rod was cut:",
+                                           choices = right_revision_rod_cut_level_choices,
+                                           selected = right_revision_rod_cut_level,
+                                           multiple = FALSE
                                          )
                                        ),
                                        conditionalPanel(
                                          condition = "input.right_revision_rod_status.indexOf('retained_cut') > -1",
                                          pickerInput(
-                                           inputId = "right_revision_rod_cut_level",
-                                           label = "Select the level where the rod was cut:",
-                                           choices = c(""),
-                                           selected = right_revision_rod_cut_level,
-                                           multiple = FALSE
+                                           inputId = "right_revision_implants_connected_to_prior_rod",
+                                           label = "Select screws connected to the old rod:",
+                                           choices = right_revision_implants_connected_to_prior_rod_choices,
+                                           selected = right_revision_implants_connected_to_prior_rod,
+                                           multiple = TRUE
                                          )
-                                         # condition = "input.right_revision_rod_status.indexOf('retained_cut') > -1 || input.right_revision_rod_status.indexOf('retained') > -1",
-                                         # pickerInput(
-                                         #   inputId = "right_revision_implants_rod_connectors",
-                                         #   label = "Select the levels where rod connectors were placed below (if any)",
-                                         #   choices = c(""),
-                                         #   selected = c(""),
-                                         #   multiple = TRUE
-                                         # )
-                                       )
+                                       ),
+                                       
                                      )
                                    )
                                  )
@@ -1058,7 +1047,8 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                   },
                   hr(),
                   if(implants_placed == "yes"){
-                    if(procedure_approach == "posterior" | procedure_approach == "combined"){
+                    if(str_detect(procedure_approach, "posterior")){
+                    # if(procedure_approach == "posterior" | procedure_approach == "combined"){
                     jh_make_shiny_table_row_function(
                       input_type = "awesomeRadio",
                       left_column_label = "Method for identifying screw start point:",
@@ -1096,7 +1086,8 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                   },
                   hr(),
                   if(implants_placed == "yes"){
-                    if(procedure_approach == "posterior" | procedure_approach == "combined"){
+                    if(str_detect(procedure_approach, "posterior")){
+                    # if(procedure_approach == "posterior" | procedure_approach == "combined"){
                       prettyCheckboxGroup(inputId = "alignment_correction_method", 
                                           label = "Select any techniques for alignment correction:", 
                                           choices = deformity_correction_choices,
@@ -1105,7 +1096,8 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                                           inline = FALSE)
                     }
                   },
-                  if(implants_placed == "yes" && (procedure_approach == "posterior" | procedure_approach == "combined")){
+                  if(implants_placed == "yes" && str_detect(procedure_approach, "posterior")){
+                  # if(implants_placed == "yes" && (procedure_approach == "posterior" | procedure_approach == "combined")){
                     conditionalPanel(condition = "input.alignment_correction_method.indexOf('Other') > -1",
                                      textInput(inputId = "alignment_correction_method_other", 
                                                label = "Enter 'Other' Method as a full sentence:", 
@@ -1959,10 +1951,12 @@ addition_surgical_details_modal_box_2_function <-
         
         ############# ANTERIOR ############# ############# ANTERIOR ############# ############# ANTERIOR #############
 
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
+          if(str_detect(procedure_approach, "anterior")){
           div(style = "font-size:20px; font-weight:bold; text-align:center", "ANTERIOR Details:")
           },
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "anterior")){
           jh_make_shiny_table_row_function(
             left_column_percent_width = 20,
             left_column_label = "Anterior Head Positioning:",
@@ -1983,8 +1977,10 @@ addition_surgical_details_modal_box_2_function <-
             initial_value_selected = head_positioning_anterior
           )
         },
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
+        if(str_detect(procedure_approach, "anterior")){br()},
+        if(str_detect(procedure_approach, "anterior")){
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
                                            input_type = "awesomeRadio",
                                            input_id = "deep_drains_anterior", 
@@ -1994,8 +1990,10 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "anterior")){br()},
+        if(str_detect(procedure_approach, "anterior")){
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
                                            input_type = "awesomeRadio",
                                            input_id = "superficial_drains_anterior", 
@@ -2005,8 +2003,10 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "anterior")){br()},
+        if(str_detect(procedure_approach, "anterior")){
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Select any used during anterior closure:",
             input_type = "checkbox",
@@ -2014,13 +2014,18 @@ addition_surgical_details_modal_box_2_function <-
             left_column_percent_width = 45,
             font_size = row_label_font_size,
             choices_vector = c("Vancomycin Powder",
-                               "Antibiotic Beads"),
+                               "Antibiotic Beads", 
+                               "Acellular Collagen Matrix", 
+                               "Hydrolyzed Collegen Powder", 
+                               "Other"),
             initial_value_selected = additional_end_procedure_details_anterior,
             return_as_full_table = TRUE
           )
         },
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "anterior")){br()},
+        if(str_detect(procedure_approach, "anterior")){
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Anterior Skin Closure:",
             input_type = "checkbox",
@@ -2036,8 +2041,10 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "anterior")){br()},
+        if(str_detect(procedure_approach, "anterior")){
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Anterior Skin/Dressing:",
             input_type = "checkbox",
@@ -2057,9 +2064,12 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){h4("Confirm Any Additional Anterior Procedures Performed:")},
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
+        if(str_detect(procedure_approach, "anterior")){br()},
+        if(str_detect(procedure_approach, "anterior")){h4("Confirm Any Additional Anterior Procedures Performed:")},
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){h4("Confirm Any Additional Anterior Procedures Performed:")},
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "anterior")){
           jh_make_shiny_table_row_function(
             left_column_label = "Additional Anterior Procedures:",
             font_size = row_label_font_size,
@@ -2071,8 +2081,10 @@ addition_surgical_details_modal_box_2_function <-
             initial_value_selected = additional_procedures_anterior
           )
         },
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
+        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "anterior")){br()},
+        if(str_detect(procedure_approach, "anterior")){
           conditionalPanel(
             condition = "input.additional_procedures_anterior.indexOf('Other') > -1",
             tags$table(
@@ -2093,10 +2105,12 @@ addition_surgical_details_modal_box_2_function <-
         ############# POSTERIOR ############# ############# POSTERIOR ############# ############# POSTERIOR #############
         
         hr(),
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "posterior")){
           div(style = "font-size:20px; font-weight:bold; text-align:center", "POSTERIOR Details:")
         },
-        if(procedure_approach == "posterior"  | procedure_approach == "combined"){
+        # if(procedure_approach == "posterior"  | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "posterior")){
           jh_make_shiny_table_row_function(
             left_column_percent_width = 20,
             left_column_label = "Posterior Head Positioning:",
@@ -2117,8 +2131,10 @@ addition_surgical_details_modal_box_2_function <-
             initial_value_selected = head_positioning_posterior
           )
         },
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "posterior")){br()},
+        if(str_detect(procedure_approach, "posterior")){
           jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
                                            input_type = "awesomeRadio",
                                            input_id = "deep_drains_posterior", 
@@ -2128,7 +2144,8 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "posterior")){
           jh_make_shiny_table_row_function(left_column_label = "Posterior Superficial drains:", 
                                            input_type = "awesomeRadio",
                                            input_id = "superficial_drains_posterior", 
@@ -2138,8 +2155,10 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "posterior")){br()},
+        if(str_detect(procedure_approach, "posterior")){
           jh_make_shiny_table_row_function(
             left_column_label = "Select any used during posterior closure:",
             input_type = "checkbox",
@@ -2152,8 +2171,10 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "posterior")){br()},
+        if(str_detect(procedure_approach, "posterior")){
           jh_make_shiny_table_row_function(
             left_column_label = "Posterior Skin Closure:",
             input_type = "checkbox",
@@ -2169,8 +2190,10 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "posterior")){br()},
+        if(str_detect(procedure_approach, "posterior")){
           jh_make_shiny_table_row_function(
             left_column_label = "Posterior Skin/Dressing:",
             input_type = "checkbox",
@@ -2190,9 +2213,12 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
-        if(procedure_approach == "Posterior" | procedure_approach == "combined"){h4("Confirm Any Additional Posterior Procedures Performed:")},
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
+        if(str_detect(procedure_approach, "posterior")){br()},
+        if(str_detect(procedure_approach, "posterior")){h4("Confirm Any Additional Posterior Procedures Performed:")},
+        # if(procedure_approach == "Posterior" | procedure_approach == "combined"){h4("Confirm Any Additional Posterior Procedures Performed:")},
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "posterior")){
           jh_make_shiny_table_row_function(
             left_column_label = "Additional Posterior Procedures:",
             font_size = row_label_font_size,
@@ -2205,7 +2231,8 @@ addition_surgical_details_modal_box_2_function <-
           )
         },
         br(),
-        if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
+        if(str_detect(procedure_approach, "posterior")){
           conditionalPanel(
             condition = "input.additional_procedures_posterior.indexOf('Other') > -1",
             tags$table(

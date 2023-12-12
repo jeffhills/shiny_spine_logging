@@ -1551,6 +1551,23 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
   #   
   # } 
   
+  if(any(objects_added_df$object == "incision_drainage")){
+    id_df <- objects_added_df %>%
+      filter(object == "incision_drainage")
+    
+    top_level <- (id_df %>%
+      filter(vertebral_number == min(vertebral_number)))$level
+    bottom_level <- (id_df %>%
+                    filter(vertebral_number == max(vertebral_number)))$level
+    
+    id_statement <- glue("Incision & Drainge from {top_level} to {bottom_level}")
+    
+    objects_added_df <- objects_added_df %>%
+      filter(object != "incision_drainage")
+  }else{
+    id_statement <- "xx"
+  }
+  
   if(nrow(objects_added_df)>0){
     objects_added_df <- objects_added_df %>%
     mutate(level = if_else(level == "Iliac_2", "Iliac", level))%>%
@@ -1634,6 +1651,7 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
                 bind_rows(summary_multiple_nested)) %>%
     select(procedure_performed_statement) %>%
     add_row(procedure_performed_statement = if_else(length(fusion_levels_vector) == 0, "xx", paste("Posterior Spinal Fusion at", glue_collapse(fusion_levels_vector, sep = ", ", last = " and ")))) %>%
+    add_row(procedure_performed_statement = id_statement) %>%
     bind_rows(added_procedures_df) %>%
     filter(procedure_performed_statement !="xx") %>%
     mutate(count = row_number()) %>%

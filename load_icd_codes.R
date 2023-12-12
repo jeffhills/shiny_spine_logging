@@ -62,10 +62,12 @@ jh_determine_if_section_dx_function <- function(diagnosis_vector, section_to_det
     FALSE
   }
 }
+
 jh_add_codes_to_diagnosis_function <- function(diagnosis_vector){
   codes_df <- tibble(diagnosis = diagnosis_vector) %>%
-    left_join(spine_codes_df) %>%
-    mutate(diagnosis_codes = paste(diagnosis, " (", icd_10_code, ")", sep = ""))
+    left_join(spine_codes_df) %>% 
+    replace_na(list(icd_10_code = "xx")) %>%
+    mutate(diagnosis_codes = if_else(icd_10_code == "xx", paste(diagnosis), paste(diagnosis, " (", icd_10_code, ")", sep = "")))
   
   return(codes_df$diagnosis_codes)
 }
