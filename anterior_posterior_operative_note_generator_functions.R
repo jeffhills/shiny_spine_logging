@@ -67,6 +67,7 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'anterior_interbody_implant', 'Insertion of interbody biomechanical implant', 'distinct',
                                         'corpectomy', 'Anterior vertebral corpectomy', 'combine',
                                         'partial_corpectomy', 'Anterior vertebral partial corpectomy', 'combine',
+                                        'partial_vertebral_excision', 'Anterior partial vertebral excision', 'combine',
                                         'corpectomy_cage', 'Anterior insertion of intervertebral biomechanical implant', 'combine',
                                         'anterior_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'anterior_plate_screw', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',

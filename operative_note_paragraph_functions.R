@@ -60,6 +60,7 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'anterior_interbody_implant', 'Insertion of interbody biomechanical implant', 'distinct',
                                         'corpectomy', 'Anterior vertebral corpectomy', 'combine',
                                         'partial_corpectomy', 'Anterior vertebral partial corpectomy', 'combine',
+                                        'partial_vertebral_excision', 'Anterior partial vertebral excision', 'combine',
                                         'corpectomy_cage', 'Anterior insertion of intervertebral biomechanical implant', 'combine',
                                         'anterior_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'anterior_plate_screw', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
@@ -264,9 +265,32 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df, 
     statement <- paste(statement_df$paragraph[[1]])
   }
   
+  if(object == "partial_vertebral_excision"){
+    
+    cranial_level_character <- jh_get_vertebral_level_function(number = unique(min(levels_nested_df$vertebral_number)))
+    
+    cranial_to_corpectomy_level <- jh_get_cranial_caudal_interspace_body_list_function(level = cranial_level_character)$cranial_level
+    
+    caudal_level_character <- jh_get_vertebral_level_function(number = unique(max(levels_nested_df$vertebral_number)))
+    
+    caudal_to_corpectomy_level <- jh_get_cranial_caudal_interspace_body_list_function(level = caudal_level_character)$caudal_level
+    
+    
+    statement_df <- levels_nested_df %>%
+      mutate(paragraph = glue("I confirmed the boundaries of the osteophyte/lesion to be excised were clearly exposed and other nearby structures were protected. I then used a combination of a osteotome, rongeur and burr to excise the fragment until I felt it was adequately resected. ")) %>%
+      select(paragraph) %>%
+      distinct()
+    
+    statement <- paste(statement_df$paragraph[[1]])
+  }
+
+  
   return(statement)
   
 }
+
+
+
 #############-----------------------               End              ----------------------###############
 
 
@@ -457,6 +481,7 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df,
                                                         "diskectomy_only",
                                                         "corpectomy",
                                                         "partial_corpectomy",
+                                                        "partial_vertebral_excision",
                                                         "anterior_interbody_implant", 
                                                         "corpectomy_cage",
                                                         "screw_washer",

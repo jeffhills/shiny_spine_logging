@@ -767,18 +767,7 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
       filter(count == max(count)) %>%
       ungroup() %>%
       distinct()
-    
-    # geoms_list_anterior_diskectomy$diskectomy_fusion_sf_geom <- ggpattern::geom_sf_pattern(
-    #   data =  st_multipolygon((diskectomy_fusion_df)$object_constructed),
-    #   pattern = "circle",
-    #   pattern_fill = "#F5A105",
-    #   color = "#F7B28F",
-    #   fill = "#F7B28F",
-    #   alpha = 0.3,
-    #   pattern_spacing = 0.005,
-    #   pattern_density = 0.7
-    # )
-    
+
     geoms_list_anterior_diskectomy$diskectomy_fusion_sf_geom <- geom_sf(
       data =  st_multipolygon((diskectomy_fusion_df)$object_constructed),
       color = "#F7B28F",
@@ -815,6 +804,15 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
       pattern_spacing = 0.01,
       pattern_density = 0.1
     )
+  }else{
+    geoms_list_anterior_diskectomy$partial_corpectomy_sf_geom <- NULL
+  }
+  
+  ########  PARTIAL EXCISION  ########
+  if(any(all_anterior_objects_df$object == "partial_vertebral_excision")){
+    geoms_list_anterior_interbody$anterior_partial_vertebral_excision <- geom_sf(data =  st_union(st_combine(st_multipolygon((all_anterior_objects_df %>% filter(object == "partial_vertebral_excision"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+                                                                                      fill = "pink") 
+    
   }else{
     geoms_list_anterior_diskectomy$partial_corpectomy_sf_geom <- NULL
   }
