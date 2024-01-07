@@ -6,6 +6,22 @@ jh_make_screw_details_inputs_df_function <- function(all_objects = tibble(), ret
   
   if(nrow(all_objects)>0){
     if(any(str_detect(all_objects$object, "anterior_plate"))){
+      
+      no_screws_level_vector <- all_objects %>%
+        filter(str_detect(object, "corpectomy")) %>%
+        select(level) %>%
+        distinct() %>%
+        as_vector()
+      # if(any(str_detect(all_objects$object, "corpectomy"))){
+      # no_screws_level <- all_objects %>%
+      #   filter(str_detect(object), "corpectomy") %>%
+      #   select(level) %>%
+      #   distinct() %>%
+      #   as.vector()
+      #   }else{
+      #   
+      # }
+      
       anterior_plate_input_names_wide_df <- all_objects %>%
         filter(object == "anterior_plate") %>%
         select(level, vertebral_number, side, object) %>%
@@ -15,6 +31,7 @@ jh_make_screw_details_inputs_df_function <- function(all_objects = tibble(), ret
         separate(col = level, into = c("proximal", "distal"), sep = "-") %>%
         pivot_longer(cols = c(proximal, distal), names_to = "discard", values_to = "level") %>%
         select(level, side, object) %>%
+        filter(level %in% no_screws_level_vector == FALSE) %>%
         distinct() %>%
         group_by(level, side, object) %>%
         mutate(count = row_number()) %>%
@@ -117,7 +134,6 @@ jh_make_screw_details_inputs_df_function <- function(all_objects = tibble(), ret
       filter(approach == "posterior") %>%
       filter(str_detect(object, "screw"))
     )>0){
-    # if(any(str_detect(all_objects$object, "screw"))){
       step_1 <- all_objects %>%
         filter(approach == "posterior") %>%
         filter(str_detect(object, "screw")) %>%

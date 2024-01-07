@@ -307,7 +307,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     approach_statement <- if_else(approach_statement == "none", "", approach_statement)
     
     first_paragraph_list$surgical_approach <- paste(glue("A standard {anterior_approach_laterality} Smith Robinson approach was utilized to get to the anterior cervical spine. The skin, subcutaneous tissue were incised, the platysma was transected, and then blunt dissection was carried out between the sternocleidomastoid and carotid sheath laterally, and trachea and esophagus  medially, down to the prevertebral fascia. Once the anterior spine was palpated, fluoroscopy was used to localize and confirm levels. "), 
-                                                    glue("The longus coli was elevated bilaterally from {proximal_exposure_level$level[[1]]} proximally and to {distal_exposure_level$level[[1]]} distally. Once exposure was adequate, the deep retractors were placed into the anterior spine. "),
+                                                    glue("The longus coli was elevated bilaterally from {proximal_exposure_level$level[[1]]} proximally and to {distal_exposure_level$level[[1]]} distally. Once exposure was adequate, the deep retractors were placed into position. "),
                                                     approach_statement)
   }else{
     
