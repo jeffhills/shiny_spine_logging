@@ -8783,7 +8783,7 @@ server <- function(input, output, session) {
             implant_removal_repeating_instance_add <- 0
           }
           if("logging_data_time_repeating" %in% max_repeat_instances_df$redcap_repeat_instrument){
-            logging_data_time_repeating_instance_add <- repeat_list$logging_data_time_repeating_repeating
+            logging_data_time_repeating_instance_add <- repeat_list$logging_data_time_repeating
           }else{
             logging_data_time_repeating_instance_add <- 0
           }

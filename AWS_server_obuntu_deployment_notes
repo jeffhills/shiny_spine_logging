@@ -67,3 +67,15 @@ sudo apt-get update
 sudo apt-get install libudunits2-dev libgdal-dev libgeos-dev libproj-dev 
 
 sudo su - -c "R -e \"install.packages('shiny')\""
+
+
+########### CERTBOT AND HTTPS CERTIFICATION #############
+
+The command to renew certbot is installed in one of the following locations:
+$ cd /etc/crontab/
+$ cd /etc/cron.*/*
+$ cd systemctl list-timers
+The certificate and key are save to:
+# Become root user
+$ sudo -i
+$ cd /etc/letsencrypt/live/dashwu.com/
