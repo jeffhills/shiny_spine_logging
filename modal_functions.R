@@ -21,18 +21,18 @@ passcode_modal_box <-
           #                                  input_id = "passcode"),
           hr()
         ),
-        br(),
-        column(12, 
-               conditionalPanel(
-          condition = "input.passcode == 'kennypowers'",
-          actionBttn(inputId = "passcode_correct", 
-                     label = "Click to Proceed")
-        )
-        )
+        br()
       )
     )
   }
 
+# column(12, 
+#        conditionalPanel(
+#          condition = "input.passcode == 'kennypowers'",
+#          actionBttn(inputId = "passcode_correct", 
+#                     label = "Click to Proceed")
+#        )
+# )
 
 c2_nerve_transection_modal_function <- function(side = "left"){
   left_modal <- modalDialog(

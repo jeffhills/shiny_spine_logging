@@ -1437,14 +1437,17 @@ server <- function(input, output, session) {
     passcode_modal_box()
     )
   
-  observeEvent(input$passcode_correct, {
-    removeModal()
-    showModal(
-      startup_modal_box(starting_first_name = "",
-                        starting_last_name = "",
-                        starting_dob = "",
-                        starting_dos = "")
-    )
+  # observeEvent(input$passcode_correct, {
+  observeEvent(input$passcode, {
+    if(input$passcode == "kennypowers"){
+      removeModal()
+      showModal(
+        startup_modal_box(starting_first_name = "",
+                          starting_last_name = "",
+                          starting_dob = "",
+                          starting_dos = "")
+      ) 
+    }
   }
   )
 
