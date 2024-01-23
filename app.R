@@ -1425,12 +1425,28 @@ server <- function(input, output, session) {
   ################################################    INITIAL STARTUP MODAL ######################################
   ################################################    INITIAL STARTUP MODAL ######################################
   
+  
+  # showModal(
+  #   startup_modal_box(starting_first_name = "",
+  #                     starting_last_name = "",
+  #                     starting_dob = "",
+  #                     starting_dos = "")
+  #   )
+  
   showModal(
-    startup_modal_box(starting_first_name = "",
-                      starting_last_name = "",
-                      starting_dob = "",
-                      starting_dos = "")
+    passcode_modal_box()
     )
+  
+  observeEvent(input$passcode_correct, {
+    removeModal()
+    showModal(
+      startup_modal_box(starting_first_name = "",
+                        starting_last_name = "",
+                        starting_dob = "",
+                        starting_dos = "")
+    )
+  }
+  )
 
   observeEvent(input$test_patient_button, {
     updateTextInput(session = session, inputId = "patient_last_name", value = paste0("TestLAST", sample(1:1000, 1)))

@@ -312,7 +312,7 @@ distinct_anterior_procedure_paragraph_function <- function(level_input, object_i
   }
   
   if(object_input == "diskectomy_fusion_no_interbody_device"){
-    paragraph <- glue("I then proceeded with the discectomy and interbody fusion of the {level_input} interspace.{burr_statement}Using a combination of knife, currette, pituitary rongeur, and Kerrison rongeur, the anterior longitudinal ligament was incised and the disc was excised. The endplates were distracted and the and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. Once I was satisfied with the endplate preparation, bone graft was placed into the disk space. This completed the anterior discectomy and interbody fusion of the {level_input} interspace.")
+    paragraph <- glue("I then proceeded with the discectomy and interbody fusion of the {level_input} interspace.{burr_statement}Using a combination of knife, currette, pituitary rongeur, and Kerrison rongeur, the anterior longitudinal ligament was incised and the disc was excised. The endplates were distracted and the and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. Once I was satisfied with the endplate preparation, bone graft was placed into the disk space. ANTERIOR_INTERBODY_BIOLOGIC_STATEMENT This completed the anterior discectomy and interbody fusion of the {level_input} interspace.")
   }
   
   if(object_input == "anterior_interbody_implant"){

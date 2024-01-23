@@ -2,6 +2,37 @@
 ################################################    INITIAL STARTUP MODAL ######################################
 ################################################    INITIAL STARTUP MODAL ######################################
 ################################################    INITIAL STARTUP MODAL ######################################
+passcode_modal_box <-
+  function() {
+    modalDialog(
+      size = "xl",
+      easyClose = FALSE,
+      footer = " ",
+      box(
+        width = 12,
+        title = "Enter Passcode:",
+        solidHeader = TRUE,
+        status = "info",
+        column(
+          12,
+          passwordInput(inputId = "passcode", label = "Enter Passcode:"),
+          # jh_make_shiny_table_row_function(left_column_label = "Enter Passcode to Proceed:", 
+          #                                  input_type = "text", 
+          #                                  input_id = "passcode"),
+          hr()
+        ),
+        br(),
+        column(12, 
+               conditionalPanel(
+          condition = "input.passcode == 'kennypowers'",
+          actionBttn(inputId = "passcode_correct", 
+                     label = "Click to Proceed")
+        )
+        )
+      )
+    )
+  }
+
 
 c2_nerve_transection_modal_function <- function(side = "left"){
   left_modal <- modalDialog(
@@ -2310,7 +2341,12 @@ addition_surgical_details_modal_box_2_function <-
                              "Start with clear liquid diet and advance as tolerated", 
                              "Start with clear liquid diet and advance when passing flatus",
                              "NPO until return of bowel sounds",
+                             "Please keep on maintenance fluids while NPO",
                              "Please place Nutrition Consult",
+                             "Daily BMP to monitor electrolyes",
+                             "Please minimize opioids as tolerated",
+                             "Alvimopan 12mg BID x 5 days (for GI motility)",
+                             "Famotidine 20mg BID",
                              "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
           initial_value_selected = postop_diet
         ),
