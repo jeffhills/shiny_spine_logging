@@ -16,9 +16,6 @@ passcode_modal_box <-
         column(
           12,
           passwordInput(inputId = "passcode", label = "Enter Passcode:"),
-          # jh_make_shiny_table_row_function(left_column_label = "Enter Passcode to Proceed:", 
-          #                                  input_type = "text", 
-          #                                  input_id = "passcode"),
           hr()
         ),
         br()
@@ -26,13 +23,6 @@ passcode_modal_box <-
     )
   }
 
-# column(12, 
-#        conditionalPanel(
-#          condition = "input.passcode == 'kennypowers'",
-#          actionBttn(inputId = "passcode_correct", 
-#                     label = "Click to Proceed")
-#        )
-# )
 
 c2_nerve_transection_modal_function <- function(side = "left"){
   left_modal <- modalDialog(
