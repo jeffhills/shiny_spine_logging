@@ -1097,6 +1097,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       }
       
       rod_statements_list$additional_rods_statement <- additional_rods_statement
+      
       if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
         rod_statements_list$set_screws <- glue("The rod was used to correct the alignment due to the fracture. Set screws were then tightened with a final tightener to the appropriate torque.")
       }else{

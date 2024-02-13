@@ -1,7 +1,9 @@
 jh_make_posterior_screws_geoms_function <- function(all_posterior_objects_df, plot_with_patterns = FALSE){
   ## SCREWS
   geoms_list_posterior <- list()
-  if(any(str_detect(string = all_posterior_objects_df$object, "screw"))){
+  
+  if(nrow(all_posterior_objects_df)>0){
+  # if(any(str_detect(string = all_posterior_objects_df$object, "screw"))){
     if(plot_with_patterns == TRUE){
       geoms_list_posterior <- ggpattern::geom_sf_pattern(
         data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed),
@@ -15,7 +17,7 @@ jh_make_posterior_screws_geoms_function <- function(all_posterior_objects_df, pl
         pattern_angle = 80
       )
     }else{
-      geoms_list_posterior <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed), fill = "blue")
+      geoms_list_posterior <- geom_sf(data = st_multipolygon(all_posterior_objects_df$object_constructed), fill = "blue")
     }
     
   }else{

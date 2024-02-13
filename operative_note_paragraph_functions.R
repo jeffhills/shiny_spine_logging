@@ -1203,7 +1203,6 @@ op_note_technique_combine_statement <- function(object,
     arrange(vertebral_number)   
   
   
-  
   start_point_identification_text <- case_when(
     str_detect(implant_start_point_identification, "NA") ~ "",
     str_detect(implant_start_point_identification, "anatomic landmarks") ~ "",

@@ -22,7 +22,9 @@ library(data.table)
 
 
 
-# library(profvis)
+library(profvis)
+
+
 
 # packageList <- c("shiny", "shinyWidgets", "sf", "tidyverse", "shinyBS", "cowplot", "magick", "ggpattern", "glue", "rlist",
 #                  "janitor", "lubridate", "redcapAPI", "ggpmisc", "rclipboard", "nngeo", "shinydashboard")
@@ -2455,15 +2457,8 @@ server <- function(input, output, session) {
     }
   })
   
-  observe({
-    all_objects_to_add_list$objects_df %>%
-      filter(object == "grade_3" |
-               object == "grade_4" | 
-               object == "grade_5" |
-               object == "grade_6") %>%
-      select(level, vertebral_number, approach, object) %>%
-      distinct()
-    
+  observeEvent(all_objects_to_add_list$objects_df, ignoreInit = TRUE, ignoreNULL = TRUE, {
+
     if((any(all_objects_to_add_list$objects_df$object %in% c("grade_3", "grade_4", "grade_5")))){
       updateSwitchInput(session = session, inputId = "intervertebral_cage_true_false", value = TRUE)
     }
@@ -2792,9 +2787,6 @@ server <- function(input, output, session) {
       object_currently_selected_to_add <- input$object_to_add
     }
     
-    # object_type_filtered_df <- all_implants_constructed_df %>%
-    #   filter(object %in% object_currently_selected_to_add)
-    
     object_added_reactive_df <- nearPoints(
       df = (all_implants_constructed_df %>%
               filter(object %in% object_currently_selected_to_add)),
@@ -2820,35 +2812,59 @@ server <- function(input, output, session) {
   
   #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
   
-  observeEvent(input$plot_click, {
-    all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-      bind_rows(object_added_reactive_df()) %>%
-      distinct()
-    
-    if(any(str_detect(object_added_reactive_df()$object, "grade_"))){
-      if(length(unique((all_objects_to_add_list$objects_df %>% filter(str_detect(object, "grade_")))$object)) > 1){
-        all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
-      }
-    }
-    jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")
-    # all_objects_to_add_list$left_rod_implants_df <- all_objects_to_add_list$objects_df %>%
-    #   filter(approach == "posterior", side == "left", str_detect(object, "screw|hook|wire"))%>%
-    #   select(level, vertebral_number, x, y, side, object) %>%
-    #   arrange(y) 
-    
-    # all_objects_to_add_list$right_rod_implants_df <- all_objects_to_add_list$objects_df %>%
-    #   filter(approach == "posterior", side == "right", str_detect(object, "screw|hook|wire"))%>%
-    #   select(level, vertebral_number, x, y, side, object) %>%
-    #   arrange(y) 
-    
-  })
+  # observeEvent(input$plot_click, {
+  #   all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
+  #     bind_rows(object_added_reactive_df()) %>%
+  #     distinct()
+  #   
+  #   if(any(str_detect(object_added_reactive_df()$object, "grade_"))){
+  #     if(length(unique((all_objects_to_add_list$objects_df %>% filter(str_detect(object, "grade_")))$object)) > 1){
+  #       all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
+  #     }
+  #   }
+  #   
+  #   # jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")
+  #   
+  # })
   
   ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS     ######### ~~~~~~~~~~~~~~  #############
   ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS    ######### ~~~~~~~~~~~~~~  #############
   
   observeEvent(list(input$plot_click,
                     input$plot_double_click,
-                    all_objects_to_add_list$objects_df) , {
+                    all_objects_to_add_list$objects_df), {
+                      
+                      all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
+                        bind_rows(object_added_reactive_df()) %>%
+                        distinct()
+                      
+                      if(str_detect(input$object_to_add, "grade_")){
+                        if(length(unique((all_objects_to_add_list$objects_df %>% filter(str_detect(object, "grade_")))$object)) > 1){
+                          all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
+                        }
+                      }
+                      
+                      # if(any(str_detect(object_added_reactive_df()$object, "grade_"))){
+                      #   if(length(unique((all_objects_to_add_list$objects_df %>% filter(str_detect(object, "grade_")))$object)) > 1){
+                      #     all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
+                      #   }
+                      # }
+                      if(input$left_supplemental_rods_eligible == FALSE){
+                        free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level, 
+                                                            left_revision_implants_reactive_list()$free_revision_screws_vector))
+                        if(length(free_screws_vector) > 2){
+                          updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
+                        } 
+                      }
+                      if(input$right_supplemental_rods_eligible == FALSE){
+                        free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level, 
+                                                            right_revision_implants_reactive_list()$free_revision_screws_vector))
+                        if(length(free_screws_vector) > 2){
+                          updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
+                        } 
+                      }
+                      
+                      
                       if(input$spine_approach == "Anterior"){
                         anterior_df <- all_objects_to_add_list$objects_df %>%
                           filter(approach == "anterior")
@@ -2862,7 +2878,8 @@ server <- function(input, output, session) {
                       }else{
                         if(str_detect(input$object_to_add, "screw")){
                           geoms_list_posterior$screws <- jh_make_posterior_screws_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
-                                                                                                   filter(approach == "posterior", str_detect(object, "screw")), plot_with_patterns = input$plot_with_patterns_true)
+                                                                                                   filter(approach == "posterior", str_detect(object, "screw")), 
+                                                                                                 plot_with_patterns = input$plot_with_patterns_true)
                           
                         }else{
                           geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
@@ -2887,7 +2904,7 @@ server <- function(input, output, session) {
       if(object_added_reactive_df()$object[1] == "lateral_mass_screw" & object_added_reactive_df()$level[1] == "C1"& object_added_reactive_df()$side[1] == "right"){
         updateSwitchInput(session = session, inputId = "right_c1_lateral_mass_screw_true_false", value = TRUE)
       }
-    } 
+    }
   })
   
   observeEvent(input$left_c1_lateral_mass_screw_true_false, ignoreInit = TRUE, {
@@ -3300,13 +3317,26 @@ server <- function(input, output, session) {
     updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = FALSE)
   })
   
-  observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level, left_revision_implants_reactive_list()$free_revision_screws_vector))
-    # print(paste(free_screws_vector))
-    if(input$left_supplemental_rods_eligible == FALSE && length(free_screws_vector) > 2){
-      updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
-    }
-  })
+  # observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
+  #   free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level, left_revision_implants_reactive_list()$free_revision_screws_vector))
+  #   # print(paste(free_screws_vector))
+  #   if(input$left_supplemental_rods_eligible == FALSE && length(free_screws_vector) > 2){
+  #     updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
+  #   }
+  # })
+  
+  # observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
+  #   
+  #   if(input$left_supplemental_rods_eligible == FALSE){
+  #     free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level, 
+  #                                         left_revision_implants_reactive_list()$free_revision_screws_vector))
+  #     # print(paste(free_screws_vector))
+  #     # if(input$left_supplemental_rods_eligible == FALSE && length(free_screws_vector) > 2){
+  #     if(length(free_screws_vector) > 2){
+  #       updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
+  #     } 
+  #   }
+  # })
  
   observeEvent(input$add_left_accessory_rod,  ignoreInit = TRUE, {
     if(input$add_left_accessory_rod == TRUE){
@@ -4110,14 +4140,17 @@ server <- function(input, output, session) {
     updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = FALSE)
   })
   
-  observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level, right_revision_implants_reactive_list()$free_revision_screws_vector))
-    # print(paste(free_screws_vector))
-    if(input$right_supplemental_rods_eligible == FALSE && length(free_screws_vector) > 2){
-      updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
-    }
-  })
-  
+  # observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
+  #   if(input$right_supplemental_rods_eligible == FALSE){
+  #     free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level, right_revision_implants_reactive_list()$free_revision_screws_vector))
+  #     # print(paste(free_screws_vector))
+  #     # if(input$right_supplemental_rods_eligible == FALSE && length(free_screws_vector) > 2){
+  #       if(length(free_screws_vector) > 2){
+  #       updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
+  #     } 
+  #   }
+  # })
+  # 
   observeEvent(input$add_right_accessory_rod,  ignoreInit = TRUE, {
     if(input$add_right_accessory_rod == TRUE){
       
@@ -5020,10 +5053,6 @@ server <- function(input, output, session) {
           fontface = "bold"
         ) +
         geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
-        reactiveValuesToList(geoms_list_revision_anterior) +
-        reactiveValuesToList(geoms_list_anterior_diskectomy) +
-        reactiveValuesToList(geoms_list_anterior_interbody) +
-        reactiveValuesToList(geoms_list_anterior_instrumentation) +
         coord_sf(xlim = c(x_left_limit, x_right_limit),
                  ylim = input$crop_y, default = TRUE) 
       # plan_table_geom   
@@ -5094,7 +5123,11 @@ server <- function(input, output, session) {
   output$spine_plan <-  renderPlot({
     # main_page_reactive_plot()
     if(str_to_lower(input$spine_approach) == "anterior"){
-      spine_plan_plot_anterior_reactive()
+      spine_plan_plot_anterior_reactive() +
+        reactiveValuesToList(geoms_list_revision_anterior) +
+        reactiveValuesToList(geoms_list_anterior_diskectomy) +
+        reactiveValuesToList(geoms_list_anterior_interbody) +
+        reactiveValuesToList(geoms_list_anterior_instrumentation)
     }else{
       spine_plan_plot_posterior_reactive() +
         reactiveValuesToList(geoms_list_revision_posterior) +
@@ -5103,50 +5136,88 @@ server <- function(input, output, session) {
     }
   }) 
   
+  # summary_spine_plot_reactive<- reactive({
+  #   posterior_spine_ggdraw
+  #   })%>%
+  #     bindEvent(input$implants_complete)
   
-  
-  summary_spine_plot_reactive<- reactive({
-    approach_vector <- unique(all_objects_to_add_list$objects_df$approach)
-    
-    if(length(approach_vector) <2){
-      if(input$approach_sequence == "posterior"){
-        panel_2_plot <- spine_plan_plot_posterior_reactive() +
-          reactiveValuesToList(geoms_list_revision_posterior) +
-          reactiveValuesToList(geoms_list_posterior) +
-          reactiveValuesToList(rods_list) 
-      }else{
-        panel_2_plot <-spine_plan_plot_anterior_reactive()
-      }
-    }else{
-      if(approach_vector[[1]] == "posterior"){
-         
-        panel_2_plot <- plot_grid((spine_plan_plot_posterior_reactive() +
-                     reactiveValuesToList(geoms_list_revision_posterior) +
-                     reactiveValuesToList(geoms_list_posterior) +
-                     reactiveValuesToList(rods_list)), 
-                  NULL, 
-                  spine_plan_plot_anterior_reactive(), 
-                  nrow = 1, 
-                  rel_widths = c(1, -.1, 1))
-      }else{
-        panel_2_plot <- plot_grid(spine_plan_plot_anterior_reactive(), 
-                                  NULL,
-                                  (spine_plan_plot_posterior_reactive() +
-                                     reactiveValuesToList(geoms_list_revision_posterior) +
-                                     reactiveValuesToList(geoms_list_posterior) +
-                                     reactiveValuesToList(rods_list)),
-                                  nrow = 1, 
-                                  rel_widths = c(1, -.1, 1))
-      }
-    } 
-    
-    panel_2_plot
-  }) %>%
-    bindEvent(input$implants_complete)
+  # summary_spine_plot_reactive<- reactive({
+  #   approach_vector <- unique(all_objects_to_add_list$objects_df$approach)
+  #   
+  #   if(length(approach_vector) <2){
+  #     if(input$approach_sequence == "posterior"){
+  #       panel_2_plot <- spine_plan_plot_posterior_reactive() +
+  #         reactiveValuesToList(geoms_list_revision_posterior) +
+  #         reactiveValuesToList(geoms_list_posterior) +
+  #         reactiveValuesToList(rods_list) 
+  #     }else{
+  #       panel_2_plot <-spine_plan_plot_anterior_reactive()
+  #     }
+  #   }else{
+  #     if(approach_vector[[1]] == "posterior"){
+  #        
+  #       panel_2_plot <- plot_grid((spine_plan_plot_posterior_reactive() +
+  #                    reactiveValuesToList(geoms_list_revision_posterior) +
+  #                    reactiveValuesToList(geoms_list_posterior) +
+  #                    reactiveValuesToList(rods_list)), 
+  #                 NULL, 
+  #                 spine_plan_plot_anterior_reactive(), 
+  #                 nrow = 1, 
+  #                 rel_widths = c(1, -.1, 1))
+  #     }else{
+  #       panel_2_plot <- plot_grid(spine_plan_plot_anterior_reactive(), 
+  #                                 NULL,
+  #                                 (spine_plan_plot_posterior_reactive() +
+  #                                    reactiveValuesToList(geoms_list_revision_posterior) +
+  #                                    reactiveValuesToList(geoms_list_posterior) +
+  #                                    reactiveValuesToList(rods_list)),
+  #                                 nrow = 1, 
+  #                                 rel_widths = c(1, -.1, 1))
+  #     }
+  #   } 
+  #   
+  #   panel_2_plot
+  # }) %>%
+  #   bindEvent(input$implants_complete)
   
   
   output$spine_plot_for_implants_tab <- renderPlot({
-    summary_spine_plot_reactive()
+    # summary_spine_plot_reactive()
+      approach_vector <- unique(all_objects_to_add_list$objects_df$approach)
+
+      if(length(approach_vector) <2){
+        if(input$approach_sequence == "posterior"){
+          panel_2_plot <- spine_plan_plot_posterior_reactive() +
+            reactiveValuesToList(geoms_list_revision_posterior) +
+            reactiveValuesToList(geoms_list_posterior) +
+            reactiveValuesToList(rods_list)
+        }else{
+          panel_2_plot <-spine_plan_plot_anterior_reactive()
+        }
+      }else{
+        if(approach_vector[[1]] == "posterior"){
+
+          panel_2_plot <- plot_grid((spine_plan_plot_posterior_reactive() +
+                       reactiveValuesToList(geoms_list_revision_posterior) +
+                       reactiveValuesToList(geoms_list_posterior) +
+                       reactiveValuesToList(rods_list)),
+                    NULL,
+                    spine_plan_plot_anterior_reactive(),
+                    nrow = 1,
+                    rel_widths = c(1, -.1, 1))
+        }else{
+          panel_2_plot <- plot_grid(spine_plan_plot_anterior_reactive(),
+                                    NULL,
+                                    (spine_plan_plot_posterior_reactive() +
+                                       reactiveValuesToList(geoms_list_revision_posterior) +
+                                       reactiveValuesToList(geoms_list_posterior) +
+                                       reactiveValuesToList(rods_list)),
+                                    nrow = 1,
+                                    rel_widths = c(1, -.1, 1))
+        }
+      }
+
+      panel_2_plot
   })%>%
     bindEvent(input$implants_complete)
   
@@ -6146,12 +6217,13 @@ server <- function(input, output, session) {
 
     interbody_implants_df
 
-  }) 
+  }) %>%
+  bindEvent(input$implants_complete, ignoreInit = TRUE)
   
   
   
   
-  observe({
+  observeEvent(interbody_df_reactive(), ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(interbody_df_reactive())>0){
       updateSwitchInput(session = session, 
                         inputId = "interbody_implant_true_false", 
