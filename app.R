@@ -2173,7 +2173,7 @@ server <- function(input, output, session) {
   observeEvent(input$spine_approach, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(input$spine_approach == "Anterior"){
       
-      if(any(all_implants_constructed_df$approach == "anterior") == FALSE){
+      # if(any(all_implants_constructed_df$approach == "anterior") == FALSE){
         anterior_body_constructed_df <- all_object_ids_df %>%
           filter(category == "anterior_body") %>%
           left_join(fread("coordinates/anterior_body.csv") %>%
@@ -2220,7 +2220,7 @@ server <- function(input, output, session) {
           bind_rows(arthroplasty_constructed_df) %>%
           distinct() 
       }
-    }
+    # }
   })
   
   #############~~~~~~~~~~~~~~~~~~~ ##################### MAKE ANTERIOR REVISION IMPLANTS DF   #############~~~~~~~~~~~~~~~~~~~ ##################### 
@@ -2799,9 +2799,15 @@ server <- function(input, output, session) {
     
     if(input$object_to_add == "decompression_diskectomy_fusion" | input$object_to_add == "diskectomy_fusion"){
       
-      anterior_interbody_df <- all_implants_constructed_df %>%
-        filter(object == "anterior_interbody_implant", 
-               level == object_added_reactive_df$level)
+      # anterior_interbody_df <- all_implants_constructed_df %>%
+      #   filter(object == "anterior_interbody_implant", 
+      #          level == object_added_reactive_df$level)
+      
+      anterior_interbody_df <-  object_added_reactive_df %>%
+        select(level, approach) %>%
+        mutate(object = "anterior_interbody_implant") %>%
+        left_join(all_implants_constructed_df) %>%
+        select(names(object_added_reactive_df))
       
       object_added_reactive_df <- object_added_reactive_df %>%
         bind_rows(anterior_interbody_df)
@@ -6217,8 +6223,8 @@ server <- function(input, output, session) {
 
     interbody_implants_df
 
-  }) %>%
-  bindEvent(input$implants_complete, ignoreInit = TRUE)
+  }) 
+  # bindEvent(input$implants_complete, ignoreInit = TRUE)
   
   
   
