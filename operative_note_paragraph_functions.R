@@ -145,7 +145,7 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df, 
       distinct()
     #
     
-    statement <- paste(as.character(glue_collapse(screw_statement_df$full_statement, sep = " ")), "Intraoperative Xrays was taken to confirm position of all implants. ")
+    statement <- paste(as.character(glue_collapse(screw_statement_df$full_statement, sep = " ")), "Intraoperative Xrays were taken to confirm position of all implants. ")
     
   }
   
@@ -1582,7 +1582,7 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     bottom_level <- (id_df %>%
                     filter(vertebral_number == max(vertebral_number)))$level
     
-    id_statement <- glue("Incision & Drainge from {top_level} to {bottom_level}")
+    id_statement <- glue("Incision & Drainage from {top_level} to {bottom_level}")
     
     objects_added_df <- objects_added_df %>%
       filter(object != "incision_drainage")

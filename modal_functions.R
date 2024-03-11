@@ -1,3 +1,117 @@
+##### POSTOP PLANS OPTIONS VECTOR ######
+postop_dispo_choices_vector <- c("discharge to home. Monitor in recovery for 4hrs for difficulty swallowing, breathing, other issues.", 
+                                 "admit to floor.", 
+                                 "admit to ICU.",
+                                 "***")
+
+
+postop_abx_choices_vector <- c("Ancef x 24hrs",
+                               "Ancef x 48hrs",
+                               "Vancomycin x 48hrs",
+                               "Continue broad spectrum antibiotics and f/u cultures",
+                               "Per infectious disease team recommendations",
+                               "Ancef until drains removed",
+                               "***")
+
+postop_map_goals_choices_vector <- c("No MAP goals needed",
+                                     "Please maintain MAPs 85-90 for a total of 7 days post-injury per AANS/CNS guidelines for incomplete spinal cord injury",
+                                     "Please maintain MAPs 85-90 for a total of 5 days post-injury",
+                                     "Please maintain MAPs 85-90 for a total of 2 days post-injury",
+                                     "***")
+
+
+postop_transfusion_threshold_choices_vector <- c("Please check daily CBC & transfuse for Hgb < 10 for first 48hrs",
+                                                 "***")
+
+postop_imaging_choices_vector <- c("please obtain postop upright AP/Lateral C-spine xrays",
+                                   "please obtain postop upright AP/Lateral T-spine xrays prior to discharge when able to stand & after drains out",
+                                   "please obtain postop upright AP/Lateral L-spine xrays prior to discharge when able to stand & after drains out",
+                                   "please obtain postop upright AP/Lateral standing scoliosis xrays prior to discharge when able to stand & after drains out",
+                                   "no postop imaging needed.",
+                                   "***")
+
+postop_pain_choices_vector <- c("Ice pack to affected area, PRN",
+                                "Dilaudid PCA [0.2mg bolus, 8min lockout, no basal](in addition to all other pain medication orders) - DISCONTINUE on POD 1", 
+                                "Oxycodone 5mg q4h, ok to give additional dose if needed", 
+                                "Oxycodone 10mg q4h, ok to give additional dose if needed",
+                                "Oxycodone *** q4h, ok to give additional dose if needed",
+                                "Tylenol 1000mg q8h scheduled.", 
+                                "Tylenol 650mg q8h scheduled",
+                                "Tylenol ***",
+                                "Gabapentin 100mg q8h scheduled",
+                                "Gabapentin 300mg q8h scheduled",
+                                "Toradol 15mg q8h for 48-72hrs",
+                                "Toradol 30mg q8h for 48-72hrs",
+                                "Toradol ***",
+                                "Celebrex 100mg BID",
+                                "Celebrex 200mg BID",
+                                "Meloxicam 15mg daily",
+                                "Tizanidine 4mg q6h prn for muscle spasms (avoid in geriatric males/males w/ urinary retention)",
+                                "Cyclobenzabrine 5mg q8h prn for muscle spasms (strong anticholinergic, minimize in geriatric)",
+                                "Baclofen 10mg TID prn for muscle spasms",
+                                "Diazepam 2.5mg q8h prn for muscle spasms",
+                                "Diazepam *** for muscle spasms",
+                                "Pain team consult",
+                                "Per Primary",
+                                "Continue home pain medications ***",
+                                "***"
+)
+
+postop_activity_choices_vector <- c("PT/OT daily",
+                                    "please mobilize out of bed minimum 3x daily", 
+                                    "No bending, twisting, lifting > 10lbs",
+                                    "***")
+
+postop_brace_choices_vector <- c("C collar at all times",
+                                 "Soft Collar for comfort only",
+                                 "TLSO brace while ambulating (OK to remove while in bed, sitting, or bathing)",
+                                 "Halo Vest at all times",
+                                 "No brace needed",
+                                 "***")
+
+postop_diet_choices_vector <- c("OK to resume normal diet", 
+                                "Start with clear liquid diet and advance as tolerated", 
+                                "Start with clear liquid diet and advance when passing flatus",
+                                "NPO until return of bowel sounds",
+                                "Please keep on maintenance fluids while NPO",
+                                "Please place Nutrition Consult",
+                                "Daily BMP to monitor electrolyes",
+                                "Please minimize opioids as tolerated",
+                                "Alvimopan 12mg BID x 5 days (for GI motility)",
+                                "Pantoprazole 40mg daily",
+                                "Famotidine 20mg BID",
+                                "Dexamethasone taper for dysphagia prevention: POD 0: 10mg IV in PM; POD 1: 4mg IV BID; POD 2: 2mg IV BID",
+                                "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository")
+
+postop_foley_choices_vector <- c("Discontinue foley when able",
+                                 "Discontinue foley once mobilizing with PT",
+                                 "***"
+)
+
+postop_dvt_ppx_choices_vector <- c("SCD's while in bed",
+                                   "OK to restart dvt ppx",
+                                   "Please hold any chemical dvt ppx for 48hrs",
+                                   "Please hold any chemical dvt ppx/anti-platelet/anti-coag for 5 days after surgery (High risk for hematoma/wound complications)",
+                                   "Please do not start any chemical dvt ppx without discussion with spine team",
+                                   "***")
+
+postop_drains_dressing_choices_vector <- c("Monitor and record drain output q12h", 
+                                           "Incisional wound vac continuous therapy",
+                                           "Wound vac to continuous therapy",
+                                           "Please keep a watertight dressing in place over wound and reinforce as needed with tegaderms",
+                                           "Please change to Silverlon dressing prior to discharge from hospital",
+                                           "Please change surgical dressing prior to discharge from hospital",
+                                           "***")
+
+postop_followup_choices_vector <- c("Follow-up in spine clinic in 2wks.", 
+                                    "Follow-up in spine clinic in 3wks.", 
+                                    "Follow-up in spine clinic in 6wks.",
+                                    "Follow-up in spine clinic in ***wks.",
+                                    "Follow-up in spine clinic on ***.",
+                                    "Follow-up in spine trauma clinic in 2wks.", 
+                                    "Follow-up in ***", 
+                                    "Plan to return to the OR on ***")
+
 ################################################    INITIAL STARTUP MODAL ######################################
 ################################################    INITIAL STARTUP MODAL ######################################
 ################################################    INITIAL STARTUP MODAL ######################################
@@ -1534,11 +1648,12 @@ additional_procedure_options_vector <- c("Robotic Assisted Spine Surgery",
                                          "Removal of tongs or Halo applied by another inidividual",
                                          "Spinal Cord Monitoring",
                                          "Secondary Closure of complex surgical wound",
-                                         "Incision and Drainage",
+                                         # "Incision and Drainage",
                                          "Irrigation and Debridement",
                                          "Application of Wound Vac (negative pressure wound therapy; CPT = 97605)",
                                          "Other"
 )
+ 
 
 addition_surgical_details_modal_box_2_function <-
   function(required_options_missing = FALSE,
@@ -2192,10 +2307,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "awesomeRadio",
-          choices_vector = c("discharge to home. Monitor in recovery for 4hrs for difficulty swallowing, breathing, other issues.", 
-                             "admit to floor.", 
-                             "admit to ICU.",
-                             "***"),
+          choices_vector = postop_dispo_choices_vector,
           initial_value_selected = postop_dispo
         ),
         br(),
@@ -2206,13 +2318,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("Ancef x 24hrs",
-                             "Ancef x 48hrs",
-                             "Vancomycin x 48hrs",
-                             "Continue broad spectrum antibiotics and f/u cultures",
-                             "Per infectious disease team recommendations",
-                             "Ancef until drains removed",
-                             "***"),
+          choices_vector = postop_abx_choices_vector,
           initial_value_selected = postop_abx
         ),
         br(),
@@ -2223,11 +2329,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("No MAP goals needed",
-                             "Please maintain MAPs 85-90 for a total of 7 days post-injury per AANS/CNS guidelines for incomplete spinal cord injury",
-                             "Please maintain MAPs 85-90 for a total of 5 days post-injury",
-                             "Please maintain MAPs 85-90 for a total of 2 days post-injury",
-                             "***"),
+          choices_vector = postop_map_goals_choices_vector,
           initial_value_selected = postop_map_goals
         ),
         br(),
@@ -2238,8 +2340,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("Please check daily CBC & transfuse for Hgb < 10 for first 48hrs",
-                             "***"),
+          choices_vector = postop_transfusion_threshold_choices_vector,
           initial_value_selected = postop_transfusion_threshold
         ),
         br(),
@@ -2250,12 +2351,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("please obtain postop upright AP/Lateral C-spine xrays",
-                             "please obtain postop upright AP/Lateral T-spine xrays prior to discharge when able to stand & after drains out",
-                             "please obtain postop upright AP/Lateral L-spine xrays prior to discharge when able to stand & after drains out",
-                             "please obtain postop upright AP/Lateral standing scoliosis xrays prior to discharge when able to stand & after drains out",
-                             "no postop imaging needed.",
-                             "***"),
+          choices_vector = postop_imaging_choices_vector,
           initial_value_selected = postop_imaging
         ),
         br(),
@@ -2266,28 +2362,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("Ice pack to affected area, PRN",
-                             "Dilaudid PCA (in addition to all other pain medication orders) - DISCONTINUE on POD 1", 
-                             "Oxycodone 5mg q4h, ok to give additional dose if needed", 
-                             "Oxycodone 10mg q4h, ok to give additional dose if needed",
-                             "Tylenol 1000mg q8h scheduled.", 
-                             "Tylenol 650mg q8h scheduled",
-                             "Gabapentin 100mg q8h scheduled",
-                             "Gabapentin 300mg q8h scheduled",
-                             "Toradol 15mg q8h for 48-72hrs",
-                             "Toradol 30mg q8h for 48-72hrs",
-                             "Celebrex 100mg BID",
-                             "Celebrex 200mg BID",
-                             "Meloxicam 15mg daily",
-                             "Tizanidine 4mg q6h prn for muscle spasms (avoid in geriatric males/males w/ urinary retention)",
-                             "Cyclobenzabrine 5mg q8h prn for muscle spasms (strong anticholinergic, minimize in geriatric)",
-                             "Baclofen 10mg TID prn for muscle spasms",
-                             "Diazepam 2.5mg q8h prn for muscle spasms",
-                             "Pain team consult",
-                             "Per Primary",
-                             "Continue home pain medications ***",
-                             "***"
-          ),
+          choices_vector = postop_pain_choices_vector,
           initial_value_selected = postop_pain
         ),
         br(),
@@ -2298,10 +2373,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("PT/OT daily",
-                             "please mobilize out of bed minimum 3x daily", 
-                             "No bending, twisting, lifting > 10lbs",
-                             "***"),
+          choices_vector = postop_activity_choices_vector,
           initial_value_selected = postop_activity
         ),
         br(),
@@ -2312,11 +2384,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("C collar at all times",
-                             "Soft Collar for comfort only",
-                             "TLSO brace while ambulating (OK to remove while in bed, sitting, or bathing",
-                             "No brace needed",
-                             "***"),
+          choices_vector = postop_brace_choices_vector,
           initial_value_selected = postop_brace
         ),
         br(),
@@ -2327,17 +2395,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("OK to resume normal diet", 
-                             "Start with clear liquid diet and advance as tolerated", 
-                             "Start with clear liquid diet and advance when passing flatus",
-                             "NPO until return of bowel sounds",
-                             "Please keep on maintenance fluids while NPO",
-                             "Please place Nutrition Consult",
-                             "Daily BMP to monitor electrolyes",
-                             "Please minimize opioids as tolerated",
-                             "Alvimopan 12mg BID x 5 days (for GI motility)",
-                             "Famotidine 20mg BID",
-                             "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
+          choices_vector = postop_diet_choices_vector,
           initial_value_selected = postop_diet
         ),
         br(),
@@ -2348,10 +2406,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("Discontinue foley when able",
-                             "Discontinue foley once mobilizing with PT",
-                             "***"
-                             ),
+          choices_vector = postop_foley_choices_vector,
           initial_value_selected = postop_foley
         ),
         br(),
@@ -2362,12 +2417,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("SCD's while in bed",
-                             "OK to restart dvt ppx",
-                             "Please hold any chemical dvt ppx for 48hrs",
-                             "Please hold any chemical dvt ppx/anti-platelet/anti-coag for 5 days after surgery (High risk for hematoma/wound complications)",
-                             "Please do not start any chemical dvt ppx without discussion with spine team",
-                             "***"),
+          choices_vector = postop_dvt_ppx_choices_vector,
           initial_value_selected = postop_dvt_ppx
         ),
         br(),
@@ -2378,13 +2428,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "checkbox",
-          choices_vector = c("Monitor and record drain output q12h", 
-                             "Incisional wound vac continuous therapy",
-                             "Wound vac to continuous therapy",
-                             "Please keep a watertight dressing in place over wound and reinforce as needed with tegaderms",
-                             "Please change to Silverlon dressing prior to discharge from hospital",
-                             "Please change surgical dressing prior to discharge from hospital",
-                             "***"),
+          choices_vector = postop_drains_dressing_choices_vector,
           initial_value_selected = postop_drains_dressing
         ),
         br(),
@@ -2395,14 +2439,7 @@ addition_surgical_details_modal_box_2_function <-
           left_column_percent_width = 20,
           checkboxes_inline = FALSE,
           input_type = "awesomeRadio",
-          choices_vector = c("Follow-up in spine clinic in 2wks.", 
-                             "Follow-up in spine clinic in 3wks.", 
-                             "Follow-up in spine clinic in 6wks.",
-                             "Follow-up in spine clinic in ***wks.",
-                             "Follow-up in spine clinic on ***.",
-                             "Follow-up in spine trauma clinic in 2wks.", 
-                             "Follow-up in ***", 
-                             "Plan to return to the OR on ***"),
+          choices_vector = postop_followup_choices_vector,
           initial_value_selected = postop_followup
         )
       )

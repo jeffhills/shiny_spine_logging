@@ -713,11 +713,12 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
                    },
                    tags$td(width = paste0(left_column_percent_width, "%"), tags$div(style = label_style, paste(left_column_label))),
                    if(text_align == "right"){middle_column_spacer},
-                   tags$td(width = paste0(right_column_percent_width, "%"), awesomeCheckboxGroup(inputId = input_id,
-                                                                                                 label = NULL, 
-                                                                                                 choices = choices_vector, 
-                                                                                                 selected = initial_value_selected, 
-                                                                                                 inline = checkboxes_inline))
+                   tags$td(width = paste0(right_column_percent_width, "%"), 
+                           awesomeCheckboxGroup(inputId = input_id,
+                                                label = NULL, 
+                                                choices = choices_vector, 
+                                                selected = initial_value_selected, 
+                                                inline = checkboxes_inline))
     )  
   }
   if(input_type == "checkboxGroupButtons"){

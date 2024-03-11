@@ -793,9 +793,10 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     head_position == "Mayfield" ~ glue("A Mayfield head holder was applied to {his_or_her} skull for positioning and secured to the bed.")
   ))
   
-  first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned prone on the OR table and all bony prominences were appropriately padded. After prepping and draping in the standard fashion, a surgical timeout was performed."))
+  first_paragraph_list$positioning <- paste(glue("{str_to_title(he_or_she)} was then positioned prone on the OR table and all bony prominences were appropriately padded. "))
   
-  
+  first_paragraph_list$timeout <- paste("After prepping and draping in the standard fashion, a surgical timeout was performed. ")
+    
   ############### JUST START OVER AT THIS POINT IF IT IS A MULTIPLE POSITION CASE
   if(multiple_position_procedure == "anterior_first"){
     
@@ -965,8 +966,27 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     }
   }
   
+  ### HALO ONLY ####
+  if(nrow(all_objects_to_add_df) == 0 && any(str_detect(additional_procedures_vector, "Halo"))){
+    first_paragraph_list$head_statement <- NULL
+    first_paragraph_list$draping <- NULL
+    first_paragraph_list$surgical_approach <- NULL
+    first_paragraph_list$positioning <- NULL
+    
+    first_paragraph_list$timeout <- paste("A surgical timeout was then performed. ")
+    
+    procedure_details_list$approach_statement <- glue_collapse(x = first_paragraph_list, sep = " ")
+    
+    procedure_details_list$procedure_statement <- "The patient was positioned in a supine neutral position. Under substerile conditions, the Halo ring was temporarily held in position with temporary pins. The skin near the pin sites was prepped and infiltrated with local anesthetic for pain control. The pins were then inserted through the Halo ring and gently tightened to the patient's skull. While alternating sides, the pins were sequentially tightened to a total torque of *** inch-pounds. A total of *** pins were used. "
+    
+    procedure_details_list$halo_vest_statement <- "After all pins were secured, the vest was fitted to the patients torse and adjusted to a snug but comfortable fit. The ring and vest were connected with the connecting bars. Then, Xray was taken to evalute the position of the neck and subaxial cervical spine. Once I was satisfied with the position, the bars were tightened to the vest and halo ring. This completed the application of the Halo. "
+      
+  }else{
+    procedure_details_list$approach_statement <- glue_collapse(x = first_paragraph_list, sep = " ")
+  }
   
-  procedure_details_list$approach_statement <- glue_collapse(x = first_paragraph_list, sep = " ")
+  
+  
   
   ################### Revision Procedures PARAGRAPHS ##################
   revision_statements_list <- list()

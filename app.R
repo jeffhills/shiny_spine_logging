@@ -290,7 +290,7 @@ ui <- dashboardPage(skin = "black",
                                               htmlOutput(outputId = "patient_details_text")
                                      ),
                                      br(),
-                                     actionBttn(inputId = "open_patient_details_modal", label = "Edit Patient Details", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
+                                     actionBttn(inputId = "open_patient_details_modal", label = "Edit Patient Details", icon = icon("fas fa-user-edit", verify_fa = FALSE), size = "sm", block = TRUE)
                                  ),
                                  br(),
                                  box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Diagnosis, Symptoms, Procedure Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE,
@@ -299,7 +299,7 @@ ui <- dashboardPage(skin = "black",
                                               htmlOutput(outputId = "diagnosis_symptoms_text")
                                               ),
                                      br(),
-                                     actionBttn(inputId = "open_diagnosis_symptoms_procedure_modal", label = "Edit", icon = icon("fas fa-user-edit"), size = "sm", block = TRUE)
+                                     actionBttn(inputId = "open_diagnosis_symptoms_procedure_modal", label = "Edit", icon = icon("fas fa-user-edit", verify_fa = FALSE), size = "sm", block = TRUE)
                                  ),
                                  switchInput(
                                    inputId = "fusion_procedure_performed",
@@ -351,8 +351,8 @@ ui <- dashboardPage(skin = "black",
                                                               tags$td(width = "70%", 
                                                                       radioGroupButtons(inputId = "spine_approach", 
                                                                                         label = NULL,
-                                                                                        choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue"), strong("Anterior or Lateral")),
-                                                                                                           tags$span(icon("fas fa-user", style = "color: steelblue"), strong("Posterior"))),
+                                                                                        choiceNames = list(tags$span(icon("fas fa-smile-beam", style = "color: steelblue", verify_fa = FALSE), strong("Anterior or Lateral")),
+                                                                                                           tags$span(icon("fas fa-user", style = "color: steelblue", verify_fa = FALSE), strong("Posterior"))),
                                                                                         choiceValues = list("Anterior", "Posterior"),
                                                                                         selected = "Posterior", 
                                                                                         direction = "horizontal",
@@ -392,7 +392,7 @@ ui <- dashboardPage(skin = "black",
                                                                   value = FALSE
                                                       ),
                                                       circle = TRUE,
-                                                      icon = icon("fas fa-cog"),
+                                                      icon = icon("fas fa-cog", verify_fa = FALSE),
                                                       size = "sm",
                                                       inline = TRUE,
                                                       right = TRUE
@@ -408,7 +408,7 @@ ui <- dashboardPage(skin = "black",
                                                       column(width = 3,
                                                              dropdownButton(circle = TRUE,size = "xs",
                                                                             label = "Transitional Anatomy",
-                                                                            icon = icon("fas fa-asterisk"), 
+                                                                            icon = icon("fas fa-asterisk", verify_fa = FALSE), 
                                                                             awesomeRadio(
                                                                               inputId = "lumbar_vertebrae_count",
                                                                               label = "Number of Lumbar Vertebrae:", 
@@ -555,7 +555,7 @@ ui <- dashboardPage(skin = "black",
                                                    "Sublaminar Wire" = "sublaminar_wire"  
                                                  ),
                                                checkIcon = list(
-                                                 yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
+                                                 yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue", verify_fa = FALSE)
                                                ),
                                                selected = "pedicle_screw"
                                              )
@@ -5432,6 +5432,61 @@ server <- function(input, output, session) {
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   COMPLETED CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   COMPLETED CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
   
+  ##update postop plans based on procedure
+  
+  age_reactive <- reactive({
+    if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
+      age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+    }else{
+      age <- 999
+    }
+  })
+  
+  # observeEvent(list(input$date_of_birth, input$date_of_surgery), ignoreInit = TRUE, ignoreNULL = TRUE, {
+
+  observeEvent(age_reactive(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+    # if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
+    #   age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
+    # }else{
+    #   age <- 999
+    # }
+    
+    age <- age_reactive()
+    
+    if(is.double(age) && age < 15){
+      postop_pain_choices_vector <<- c("Ice pack to affected area, PRN",
+                                       "Dilaudid PCA [0.1mg bolus, 10min lockout, no basal] - DISCONTINUE on POD 1",
+                                       "Oxycodone 0.1mg/kg q4h prn, ok to give additional dose if needed",
+                                       "Oxycodone 0.15mg/kg q4h prn, ok to give additional dose if needed",
+                                       "Oxycodone *** q4h, ok to give additional dose if needed",
+                                       "Tylenol 15mg/kg q6h scheduled.",
+                                       "Tylenol ***",
+                                       "Gabapentin 100mg q8h scheduled",
+                                       "Gabapentin 300mg q8h scheduled",
+                                       "Toradol 0.5mg/kg q8h for 48-72hrs",
+                                       "Toradol ***",
+                                       "Diazepam 0.1mg/kg q6h prn for muscle spasms",
+                                       "Diazepam 2.5mg q8h prn for muscle spasms",
+                                       "Baclofen 10mg TID prn for muscle spasms",
+                                       "Pain team consult",
+                                       "Per Primary",
+                                       "Continue home pain medications ***",
+                                       "***"
+      )
+    }
+  })
+  
+  observeEvent(age_reactive(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+
+    age <- age_reactive()
+    
+    if(is.double(age) && age < 15){
+      additional_procedure_options_vector[additional_procedure_options_vector == "Application of Halo"] <<- "Application of Halo in a pediatric patient (with >= 6 pins)"
+      }
+  })
+  
+  
+  
   
   
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL UPDATES  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
@@ -5484,21 +5539,21 @@ server <- function(input, output, session) {
         additional_procedures_list$head_positioning_anterior <- "Application of Cranial Tongs using Mayfield head holder"
       }
       
-      if(any(str_detect(string = input$head_positioning_anterior, pattern = "Halo"))){
-        age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
-        if(age < 18 & age > 0){
-          additional_procedures_list$head_positioning_anterior <- "Application of Halo for thin skull osteology (pediatric)"
-        }else{
-          additional_procedures_list$head_positioning_anterior <- "Application of Halo"
-        }
-      }
+      # if(any(str_detect(string = input$head_positioning_anterior, pattern = "Halo"))){
+      #   age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
+      #   if(age < 18 & age > 0){
+      #     additional_procedures_list$head_positioning_anterior <- "Application of Halo for thin skull osteology (pediatric)"
+      #   }else{
+      #     additional_procedures_list$head_positioning_anterior <- "Application of Halo"
+      #   }
+      # }
       
       if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
         additional_procedures_list$fracture <- "Open treatment of vertebral fracture"
       }
-      if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
-        additional_procedures_list$incision_drainage <- "Incision and Drainage"
-      }
+      # if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
+      #   additional_procedures_list$incision_drainage <- "Incision and Drainage"
+      # }
       if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
         additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
       }
@@ -5576,14 +5631,14 @@ server <- function(input, output, session) {
         additional_procedures_list$head_positioning_posterior <- "Application of Cranial Tongs using Mayfield head holder"
       }
       
-      if(any(str_detect(string = input$head_positioning_posterior, pattern = "Halo"))){
-        age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
-        if(age < 18 & age > 0){
-          additional_procedures_list$head_positioning_posterior <- "Application of Halo for thin skull osteology (pediatric)"
-        }else{
-          additional_procedures_list$head_positioning_posterior <- "Application of Halo"
-        }
-      }
+      # if(any(str_detect(string = input$head_positioning_posterior, pattern = "Halo"))){
+      #   age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
+      #   if(age < 18 & age > 0){
+      #     additional_procedures_list$head_positioning_posterior <- "Application of Halo for thin skull osteology (pediatric)"
+      #   }else{
+      #     additional_procedures_list$head_positioning_posterior <- "Application of Halo"
+      #   }
+      # }
       
       if(length(input$durotomy_repair_method)>0){
         if(str_detect(string = toString(input$durotomy_repair_method), pattern = "No Repair") == FALSE){
@@ -5594,9 +5649,9 @@ server <- function(input, output, session) {
       if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
         additional_procedures_list$fracture <- "Open treatment of vertebral fracture"
       }
-      if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
-        additional_procedures_list$incision_drainage <- "Incision and Drainage"
-      }
+      # if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
+      #   additional_procedures_list$incision_drainage <- "Incision and Drainage"
+      # }
       
       if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
         additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
@@ -7758,7 +7813,10 @@ server <- function(input, output, session) {
                                                                    procedures_performed_sentence = anterior_op_note_inputs_list_reactive()$procedures_performed_sentence
       )
     }
+    
+    
 
+    
     procedure_results_list$procedure_details_paragraph <- case_when(
       input$approach_sequence == "posterior" ~ glue("{procedure_results_list_posterior$procedure_details_paragraph}"),
       input$approach_sequence == "anterior" ~ glue("{procedure_results_list_anterior$procedure_details_paragraph}"),
@@ -7774,7 +7832,7 @@ server <- function(input, output, session) {
       input$approach_sequence == "anterior-posterior" ~ glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}"),
       input$approach_sequence == "posterior-anterior-posterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}")
     )
-
+    
     op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
     
     if(length(input$implant_manufacturer)>0){
@@ -7782,7 +7840,22 @@ server <- function(input, output, session) {
     }
     
     if(nrow(all_objects_to_add_list$objects_df) == 0 & nrow(revision_implants_df) == 0){
-      op_note_list$"\n*Procedure  Description:" <- "***"
+      
+      if(any(any(str_detect(posterior_op_note_inputs_list_reactive()$additional_procedures_vector, "Halo")), 
+             any(str_detect(anterior_op_note_inputs_list_reactive()$additional_procedures_vector, "Halo")))
+      ){
+        procedure_results_list <- op_note_posterior_function(local_anesthesia = input$local_anesthesia,
+                                                                       antibiotics = jh_replace_checkbox_other_with_text_function(input_vector = input$preop_antibiotics, 
+                                                                                                                                  replacement_text = input$preop_antibiotics_other),
+                                                                       additional_procedures_vector = posterior_op_note_inputs_list_reactive()$additional_procedures_vector,
+        )
+        
+        op_note_list$"\n*Procedure  Description:" <-  procedure_results_list$procedure_details_paragraph
+        
+      }else{
+        op_note_list$"\n*Procedure  Description:" <- "***"
+      }
+      
       }else{
       
       op_note_list$"\n*Procedure  Description:" <- procedure_results_list$procedure_details_paragraph
