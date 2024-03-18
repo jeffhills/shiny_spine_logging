@@ -80,7 +80,7 @@ postop_diet_choices_vector <- c("OK to resume normal diet",
                                 "Alvimopan 12mg BID x 5 days (for GI motility)",
                                 "Pantoprazole 40mg daily",
                                 "Famotidine 20mg BID",
-                                "Dexamethasone taper for dysphagia prevention: POD 0: 10mg IV in PM; POD 1: 4mg IV BID; POD 2: 2mg IV BID",
+                                "Dexamethasone taper for dysphagia prevention (POD 0 = 10mg IV in PM then POD 1 = 4mg IV BID then POD 2 = 2mg IV BID",
                                 "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository")
 
 postop_foley_choices_vector <- c("Discontinue foley when able",
@@ -188,7 +188,7 @@ startup_modal_box <-
         label = "Proceed",
         style = "simple",
         color = "primary",
-        icon = icon("arrow-right")
+        icon = icon("arrow-right", verify_fa = FALSE)
       )
     } else{
       footer_button <- modalButton("Proceed")
@@ -291,9 +291,9 @@ startup_modal_box <-
             selected = "UTHSCSA",
             checkIcon = list(
               yes = tags$i(class = "fa fa-circle", 
-                           style = "color: steelblue"),
+                           style = "color: steelblue", verify_fa = FALSE),
               no = tags$i(class = "fa fa-circle-o", 
-                          style = "color: steelblue"))
+                          style = "color: steelblue", verify_fa = FALSE))
           )
         ),
         fluidRow(
@@ -311,7 +311,7 @@ startup_modal_box <-
               inputId = "search_for_prior_patient",
               label = "Retrieve this Patient",
               style = "simple",
-              icon = icon("search"),
+              icon = icon("search", verify_fa = FALSE),
               color = "royal",
               size = "sm"
             ),
@@ -349,7 +349,7 @@ complication_modal_function <-   function(date_of_surgery_vector = NULL
       label = "Done with Complications",
       style = "simple",
       color = "primary",
-      icon = icon("arrow-right")
+      icon = icon("arrow-right", verify_fa = FALSE)
     ),
     box(
       width = 12,
@@ -506,7 +506,7 @@ startup_modal_box_diagnosis_symptoms <-
         label = "Proceed",
         style = "simple",
         color = "primary",
-        icon = icon("arrow-right")
+        icon = icon("arrow-right", verify_fa = FALSE)
       ),
       box(
         width = 12,
@@ -526,7 +526,7 @@ startup_modal_box_diagnosis_symptoms <-
               justified = FALSE,
               selected = spinal_regions_selected,
               checkIcon = list(yes = icon("ok",
-                                          lib = "glyphicon"))
+                                          lib = "glyphicon", verify_fa = FALSE))
             )
           ),
           hr(), 
@@ -542,7 +542,7 @@ startup_modal_box_diagnosis_symptoms <-
                 choices = spine_category_labels,
                 selected = diagnosis_category_value,
                 checkIcon = list(yes = icon("ok",
-                                            lib = "glyphicon"))
+                                            lib = "glyphicon", verify_fa = FALSE))
               )
             )
           ),
@@ -977,7 +977,7 @@ lateral_mass_screws_after_decompression_modal_function <- function(implant_objec
                                     inline = TRUE,
                                     choices = c("No", 
                                                 "Yes"),
-                                    icon = icon("check"), 
+                                    icon = icon("check", verify_fa = FALSE), 
                                     selected =  lateral_mass_screws_after_decompression,
                                     bigger = TRUE,
                                     status = "info"
@@ -1290,7 +1290,7 @@ addition_surgical_details_modal_box_function <-
       footer_button <- actionBttn(
         inputId = "additional_surgical_details_1_complete",
         label = "Continue",
-        icon = icon("fas fa-arrow-circle-right"), 
+        icon = icon("fas fa-arrow-circle-right", verify_fa = FALSE), 
         style = "simple",
         color = "success"
       )
@@ -1298,7 +1298,7 @@ addition_surgical_details_modal_box_function <-
       footer_button <- actionBttn(
         inputId = "editing_additional_surgical_details_1_complete",
         label = "Continue",
-        icon = icon("fas fa-arrow-circle-right"), 
+        icon = icon("fas fa-arrow-circle-right", verify_fa = FALSE), 
         style = "simple",
         color = "success"
       )
@@ -1722,7 +1722,7 @@ addition_surgical_details_modal_box_2_function <-
       footer = actionBttn(
         inputId = "additional_surgical_details_complete",
         label = "Continue",
-        icon = icon("fas fa-arrow-circle-right"), 
+        icon = icon("fas fa-arrow-circle-right", verify_fa = FALSE), 
         style = "simple",
         color = "success"
       ),

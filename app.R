@@ -658,7 +658,7 @@ ui <- dashboardPage(skin = "black",
                                                                                               style = "simple", 
                                                                                               size = "xs",
                                                                                               color = "danger", 
-                                                                                              icon = icon("undo-alt")
+                                                                                              icon = icon("undo-alt", verify_fa = FALSE)
                                                                                             )
                                                                                      )
                                                                                      
@@ -820,7 +820,7 @@ ui <- dashboardPage(skin = "black",
                                                     label = "Done with Posterior, Switch to Anterior Approach",
                                                     style = "simple",
                                                     color = "success", 
-                                                    icon = icon("fas fa-arrow-circle-right")
+                                                    icon = icon("fas fa-arrow-circle-right", verify_fa = FALSE)
                                                   )
                                                   ),
                                  br(),
@@ -831,7 +831,7 @@ ui <- dashboardPage(skin = "black",
                                    label = "Click when finished to Add Implant Details",
                                    style = "simple",
                                    color = "success", 
-                                   icon = icon("fas fa-arrow-circle-right")
+                                   icon = icon("fas fa-arrow-circle-right", verify_fa = FALSE)
                                  )
                           ) ## closes the right column 
                   ),
@@ -1098,7 +1098,7 @@ ui <- dashboardPage(skin = "black",
                                   label = "Click to Return",
                                   style = "simple",
                                   color = "primary", 
-                                  icon = icon("fas fa-arrow-circle-left")
+                                  icon = icon("fas fa-arrow-circle-left", verify_fa = FALSE)
                                 )
                               ),
                               plotOutput("spine_plot_for_implants_tab",
@@ -1111,7 +1111,7 @@ ui <- dashboardPage(skin = "black",
                                   label = "Click when finished to Upload Data & Generate Operative Note",
                                   style = "simple",
                                   color = "success", 
-                                  icon = icon("fas fa-arrow-circle-right")
+                                  icon = icon("fas fa-arrow-circle-right", verify_fa = FALSE)
                                 )
                               )
                           )
@@ -1129,7 +1129,7 @@ ui <- dashboardPage(skin = "black",
                                   label = "Click to Return",
                                   style = "simple",
                                   color = "primary", 
-                                  icon = icon("fas fa-arrow-circle-left")
+                                  icon = icon("fas fa-arrow-circle-left", verify_fa = FALSE)
                                 )
                               )),
                           box(width = 4, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Additional Surgical Details:"),status = "info", solidHeader = TRUE,
@@ -1140,7 +1140,7 @@ ui <- dashboardPage(skin = "black",
                                 label = "Click to Edit",
                                 style = "simple",
                                 color = "royal", 
-                                icon = icon("fas fa-user-edit"),
+                                icon = icon("fas fa-user-edit", verify_fa = FALSE),
                               ),
                               tableOutput(outputId = "additional_surgical_details_table"),
                           ),
