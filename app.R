@@ -3098,25 +3098,34 @@ server <- function(input, output, session) {
   # #### POSTERIOR ####
   observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(left_revision_implants_reactive_list()$removed_df)>0){
-      geoms_list_revision_posterior$left_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(map(.x = left_revision_implants_reactive_list()$removed_df$object_constructed, .f = ~ .x - c(0.025, 0))), 
+      # keep(.x =  left_revision_implants_reactive_list()$removed_df$object_constructed, .p = ~ !is.null(.x))
+      
+      geoms_list_revision_posterior$left_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(map(.x = keep(.x =  left_revision_implants_reactive_list()$removed_df$object_constructed, .p = ~ !is.null(.x)), 
+                                                                                                                 .f = ~ .x - c(0.025, 0))), 
                                                                                       color = "black",
                                                                                       fill = NA)
     }
     
     if(nrow(left_revision_implants_reactive_list()$retained_df)>0){
-      geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(left_revision_implants_reactive_list()$retained_df$object_constructed), fill = "black")
+      # keep(.x =  left_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))
+      
+      geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  left_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))), fill = "black")
     }
   })
   
   observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(right_revision_implants_reactive_list()$removed_df)>0){
-      geoms_list_revision_posterior$right_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(map(.x = right_revision_implants_reactive_list()$removed_df$object_constructed, .f = ~ .x + c(0.025, 0))), 
+      # keep(.x =  right_revision_implants_reactive_list()$removed_df$object_constructed, .p = ~ !is.null(.x))
+      
+      geoms_list_revision_posterior$right_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(map(.x = keep(.x =  right_revision_implants_reactive_list()$removed_df$object_constructed, .p = ~ !is.null(.x)), .f = ~ .x + c(0.025, 0))), 
                                                                                        color = "black",
                                                                                        fill = NA)
     }
     
     if(nrow(right_revision_implants_reactive_list()$retained_df)>0){
-      geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(right_revision_implants_reactive_list()$retained_df$object_constructed), fill = "black")
+      # keep(.x =  right_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))
+      
+      geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  right_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))), fill = "black")
     }
   })
   
@@ -3164,6 +3173,11 @@ server <- function(input, output, session) {
             filter(side == "left") %>%
             filter(str_detect(object, "hook|screw")) %>%
             mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
+            
+            group_by(object, level) %>%
+            mutate(object = if_else(str_detect(object, "pelvic"), paste0(object, "_", row_number()), object)) %>%
+            ungroup() %>%
+            
             left_join(all_implants_constructed_df %>%
                         select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
             distinct()%>%
@@ -3700,6 +3714,7 @@ server <- function(input, output, session) {
   ###### REVISION RODS ---
   left_revision_rod_matrix_reactive <- reactive({
     left_revision_rod_matrix <- as.matrix(tibble(x = double(), y = double()))
+    
     if(nrow(left_revision_implants_reactive_list()$retained_df)>1){
       if(input$left_revision_rod_status == "retained"){
         
@@ -3725,8 +3740,13 @@ server <- function(input, output, session) {
           level_min <- jh_get_vertebral_number_function(input$left_revision_rod_cut_level) 
           level_max <- max(jh_get_vertebral_number_function(input$left_revision_implants_connected_to_prior_rod))
         }
-        left_revision_rod_matrix <- all_screw_coordinates_df %>%
-          filter(side == "left") %>%
+        
+        # left_revision_rod_matrix <- all_screw_coordinates_df %>%
+          left_revision_rod_matrix <- tibble(level = input$left_revision_implants, side = "left") %>%
+          # filter(side == "left") %>%
+          # select(level, object) %>%
+          #   mutate(side == "left") %>%
+            left_join(revision_screws_df) %>%
           filter(between(vertebral_number, level_min, level_max))%>%
           mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
           mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
@@ -3796,8 +3816,12 @@ server <- function(input, output, session) {
           level_min <- jh_get_vertebral_number_function(input$left_revision_rod_cut_level) 
           level_max <- max(jh_get_vertebral_number_function(input$left_revision_implants_connected_to_prior_rod))
           
-          left_revision_rod_matrix <- all_screw_coordinates_df %>%
-            filter(side == "left") %>%
+          # left_revision_rod_matrix <- all_screw_coordinates_df %>%
+          # left_revision_implants_reactive_list$revision_implants_status_df
+          
+          left_revision_rod_matrix <-  tibble(level = input$left_revision_implants, side = "left") %>%
+            # filter(side == "left") %>%
+            left_join(revision_screws_df) %>%
             filter(between(vertebral_number, level_min, level_max))%>%
             mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
             mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
@@ -3987,6 +4011,11 @@ server <- function(input, output, session) {
             filter(side == "right") %>%
             filter(str_detect(object, "hook|screw")) %>%
             mutate(remove_retain = if_else(level %in% input$right_revision_implants_removed, "remove", "retain")) %>%
+            
+            group_by(object, level) %>%
+            mutate(object = if_else(str_detect(object, "pelvic"), paste0(object, "_", row_number()), object)) %>%
+            ungroup() %>%
+            
             left_join(all_implants_constructed_df %>%
                         select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
             distinct()%>%
@@ -4538,8 +4567,10 @@ server <- function(input, output, session) {
           level_min <- jh_get_vertebral_number_function(input$right_revision_rod_cut_level) 
           level_max <- max(jh_get_vertebral_number_function(input$right_revision_implants_connected_to_prior_rod))
         }
-        right_revision_rod_matrix <- all_screw_coordinates_df %>%
-          filter(side == "right") %>%
+        # right_revision_rod_matrix <- all_screw_coordinates_df %>%
+        right_revision_rod_matrix <- tibble(level = input$right_revision_implants, side = "right") %>%
+          # filter(side == "right") %>%
+          left_join(revision_screws_df) %>%
           filter(between(vertebral_number, level_min, level_max))%>%
           mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
           mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
@@ -4609,8 +4640,10 @@ server <- function(input, output, session) {
           level_min <- jh_get_vertebral_number_function(input$right_revision_rod_cut_level) 
           level_max <- max(jh_get_vertebral_number_function(input$right_revision_implants_connected_to_prior_rod))
           
-          right_revision_rod_matrix <- all_screw_coordinates_df %>%
-            filter(side == "right") %>%
+          # right_revision_rod_matrix <- all_screw_coordinates_df %>%
+          right_revision_rod_matrix <-  tibble(level = input$right_revision_implants, side = "right") %>%
+            # filter(side == "right") %>%
+            left_join(revision_screws_df) %>%
             filter(between(vertebral_number, level_min, level_max))%>%
             mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
             mutate(y = if_else(y == min(y), y - 0.005, y)) %>%
