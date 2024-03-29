@@ -1219,6 +1219,12 @@ make_interbody_conditional_panel_function <-  function(cage_id_input = NULL){
                                        ),
                                        conditionalPanel(condition = glue("input.{cage_id_input}_interbody_integrated_fixation"),
                                                         h4("Leave 0 for no screw"), 
+                                                        awesomeRadio(inputId = glue("{cage_id_input}_interbody_integrated_fixation_screw_anchor"), 
+                                                                     label = "Screws or Anchors?", choices = c("Screw", "Anchor"), 
+                                                                     selected = "Screws", 
+                                                                     inline = TRUE, 
+                                                                     status = "info"
+                                                        ),
                                                         textInput(inputId = glue("{cage_id_input}_interbody_cranial_screw_1_size"), 
                                                                   label = "Cranial Screw 1 size:", 
                                                                   value = "0",

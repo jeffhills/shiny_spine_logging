@@ -1145,7 +1145,15 @@ ui <- dashboardPage(skin = "black",
                               tableOutput(outputId = "additional_surgical_details_table"),
                           ),
                           box(width = 8, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Data Upload:"),status = "success", solidHeader = TRUE,
-                              actionBttn(inputId = "preview_redcap_upload", label = "Upload to Redcap Project", icon = icon("upload"), style = "jelly", color = "primary", size = "md"),
+                              column(width = 5, 
+                                     actionBttn(inputId = "preview_redcap_upload", label = "Upload to Redcap Project", icon = icon("upload"), style = "jelly", color = "primary", size = "md")
+                                     ),
+                              column(width = 7, 
+                                     tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", 
+                                              htmlOutput(outputId = "upload_completed_text")
+                                     )
+                                     #UPLOAD NOT COMPLETED
+                              )
                           ),
                           box(width = 8, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Operative Note Generator:"),status = "success", solidHeader = TRUE,
                               conditionalPanel(condition = "input.approach_sequence == 'posterior' || input.approach_sequence == 'posterior-anterior' || input.approach_sequence == 'posterior-anterior-posterior' || input.approach_sequence == 'anterior-posterior'", 
@@ -6371,6 +6379,7 @@ server <- function(input, output, session) {
         mutate(device_name_label = glue("{cage_id}_interbody_device_name")) %>%
         mutate(height_label = glue("{cage_id}_interbody_height")) %>%
         mutate(integrated_fixation_label = glue("{cage_id}_interbody_integrated_fixation")) %>%
+        mutate(integrated_fixation_screw_anchor_label = glue("{cage_id}_interbody_integrated_fixation_screw_anchor")) %>%
         mutate(integrated_cranial_screw_1_label = glue("{cage_id}_interbody_cranial_screw_1_size")) %>%
         mutate(integrated_cranial_screw_2_label = glue("{cage_id}_interbody_cranial_screw_2_size")) %>%
         mutate(integrated_caudal_screw_1_label = glue("{cage_id}_interbody_caudal_screw_1_size")) %>%
@@ -6385,6 +6394,8 @@ server <- function(input, output, session) {
         unnest(height) %>%
         mutate(integrated_fixation = map(.x = integrated_fixation_label, .f = ~if_else(isFALSE(input[[.x]]), "xx", "Integrated Fixation"))) %>%
         unnest(integrated_fixation) %>%
+        mutate(integrated_fixation_screw_anchor = map(.x = integrated_fixation_screw_anchor_label, .f = ~ if_else(is.null(input[[.x]]), "xx", paste0(str_to_lower(input[[.x]]))))) %>%
+        unnest(integrated_fixation_screw_anchor) %>%
         mutate(integrated_cranial_screw_1 = map(.x = integrated_cranial_screw_1_label, .f = ~if_else(is.null(input[[.x]]), "0", input[[.x]]))) %>%
         unnest(integrated_cranial_screw_1) %>%
         mutate(integrated_cranial_screw_2 = map(.x = integrated_cranial_screw_2_label, .f = ~if_else(is.null(input[[.x]]), "0", input[[.x]]))) %>%
@@ -6417,6 +6428,7 @@ server <- function(input, output, session) {
         )) %>%
         mutate(integrated_cranial_screws_statement = as.character(integrated_cranial_screws_statement)) %>%
         mutate(integrated_cranial_screws_statement = if_else(integrated_fixation == "No integrated fixation", "", integrated_cranial_screws_statement)) %>%
+        mutate(integrated_cranial_screws_statement = if_else(str_detect(integrated_fixation_screw_anchor, "anchor"), str_replace_all(integrated_cranial_screws_statement, "screw", "anchor"), integrated_cranial_screws_statement)) %>%
         mutate(integrated_caudal_screws_statement = case_when(
           integrated_caudal_screw_1 == "0" & integrated_caudal_screw_2 == "0" ~ glue("No screws were placed through the implant caudally."),
           integrated_caudal_screw_1 != "0" & integrated_caudal_screw_2 == "0" ~ glue("A {integrated_caudal_screw_1}mm screw was inserted aimed caudal."),
@@ -6425,6 +6437,7 @@ server <- function(input, output, session) {
         )) %>%
         mutate(integrated_caudal_screws_statement = as.character(integrated_caudal_screws_statement)) %>%
         mutate(integrated_caudal_screws_statement = if_else(integrated_fixation == "No integrated fixation", "", integrated_caudal_screws_statement)) %>%
+        mutate(integrated_caudal_screws_statement = if_else(str_detect(integrated_fixation_screw_anchor, "anchor"), str_replace_all(integrated_caudal_screws_statement, "screw", "anchor"), integrated_caudal_screws_statement)) %>%
         mutate(implant_statement = glue("At the {level} interspace, a {height}mm height {composition} {device_name} {other} {expandable_statement} implant {integrated_fixation_statement} was selected and placed into the {level} interspace. {expandable_description} {integrated_cranial_screws_statement} {integrated_caudal_screws_statement}")) %>%
         mutate(implant_statement = str_squish(implant_statement)) %>%
         mutate(implant_statement = str_remove_all(string = implant_statement, pattern = "()")) %>% 
@@ -9293,6 +9306,21 @@ server <- function(input, output, session) {
         type = "info"
       )
     }
+  })
+  
+  output$upload_completed_text <- renderText({
+    
+    if(final_upload_reactive_count$count < 1){
+      # HTML(style = "font-size:20px; font-weight:bold; color:darkred; font-family:sans-serif; font-style:italic",
+      #      "<div>", "Upload not yet completed.", "</div>")
+      HTML(paste("<span style='font-size:20px; font-weight:bold; color:darkred; font-family:sans-serif; font-style:italic;'>Upload not yet completed</span>"))
+    }else{
+      # HTML(style = "font-size:20px; font-weight:bold; color:green; font-family:sans-serif; font-style:italic",
+      #      "<div>", "Upload Completed", "</div>")
+      HTML(paste("<span style='font-size:20px; font-weight:bold; color:green; font-family:sans-serif; font-style:italic;'>Upload Completed</span>"))
+      
+    }
+
   })
   
   

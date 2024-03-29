@@ -90,6 +90,7 @@ postop_foley_choices_vector <- c("Discontinue foley when able",
 
 postop_dvt_ppx_choices_vector <- c("SCD's while in bed",
                                    "OK to restart dvt ppx",
+                                   "Please start Subq Heparin 5000 units q12h on ***",
                                    "Please hold any chemical dvt ppx for 48hrs",
                                    "Please hold any chemical dvt ppx/anti-platelet/anti-coag for 5 days after surgery (High risk for hematoma/wound complications)",
                                    "Please do not start any chemical dvt ppx without discussion with spine team",
