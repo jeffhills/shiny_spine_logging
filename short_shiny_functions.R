@@ -1221,7 +1221,7 @@ make_interbody_conditional_panel_function <-  function(cage_id_input = NULL){
                                                         h4("Leave 0 for no screw"), 
                                                         awesomeRadio(inputId = glue("{cage_id_input}_interbody_integrated_fixation_screw_anchor"), 
                                                                      label = "Screws or Anchors?", choices = c("Screw", "Anchor"), 
-                                                                     selected = "Screws", 
+                                                                     selected = "Screw", 
                                                                      inline = TRUE, 
                                                                      status = "info"
                                                         ),

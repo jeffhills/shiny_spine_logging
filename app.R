@@ -9317,7 +9317,7 @@ server <- function(input, output, session) {
     }else{
       # HTML(style = "font-size:20px; font-weight:bold; color:green; font-family:sans-serif; font-style:italic",
       #      "<div>", "Upload Completed", "</div>")
-      HTML(paste("<span style='font-size:20px; font-weight:bold; color:green; font-family:sans-serif; font-style:italic;'>Upload Completed</span>"))
+      HTML(paste("<span style='font-size:20px; font-weight:bold; color:green; font-family:sans-serif; font-style:italic;'>Upload Completed!</span>"))
       
     }
 
