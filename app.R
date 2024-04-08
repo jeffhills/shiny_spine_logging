@@ -1374,7 +1374,8 @@ server <- function(input, output, session) {
     
     redcap_url <- case_when(
       input$redcap_institution == "UTHSCSA" ~ 'https://redcap.uthscsa.edu/REDCap/api/',
-      input$redcap_institution == "UCSD" ~ 'https://redcap.ucsd.edu/api/'
+      # input$redcap_institution == "UCSD" ~ 'https://redcap.ucsd.edu/api/'
+      input$redcap_institution == "RCHSD" ~ 'https://redcap.rchsd.org/api/'
     )
     
     rcon_reactive$rcon <- redcapConnection(url = redcap_url, token = input$redcap_token)    

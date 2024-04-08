@@ -287,7 +287,9 @@ startup_modal_box <-
             inputId = "redcap_institution",
             label = "Institution:",
             choices = c("UTHSCSA", 
-                        "UCSD"),
+                        # "UCSD",
+                        "RCHSD"
+                        ),
             individual = TRUE,
             selected = "UTHSCSA",
             checkIcon = list(
