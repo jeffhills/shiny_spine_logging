@@ -288,7 +288,8 @@ startup_modal_box <-
             label = "Institution:",
             choices = c("UTHSCSA", 
                         # "UCSD",
-                        "RCHSD"
+                        "RCHSD", 
+                        "WashU"
                         ),
             individual = TRUE,
             selected = "UTHSCSA",

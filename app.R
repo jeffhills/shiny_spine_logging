@@ -1375,7 +1375,8 @@ server <- function(input, output, session) {
     redcap_url <- case_when(
       input$redcap_institution == "UTHSCSA" ~ 'https://redcap.uthscsa.edu/REDCap/api/',
       # input$redcap_institution == "UCSD" ~ 'https://redcap.ucsd.edu/api/'
-      input$redcap_institution == "RCHSD" ~ 'https://redcap.rchsd.org/api/'
+      input$redcap_institution == "RCHSD" ~ 'https://redcap.rchsd.org/api/',
+      input$redcap_institution == "WashU" ~ 'https://redcap.wustl.edu/redcap/api/'
     )
     
     rcon_reactive$rcon <- redcapConnection(url = redcap_url, token = input$redcap_token)    
@@ -1437,30 +1438,30 @@ server <- function(input, output, session) {
   ################################################    INITIAL STARTUP MODAL ######################################
   
   
-  # showModal(
-  #   startup_modal_box(starting_first_name = "",
-  #                     starting_last_name = "",
-  #                     starting_dob = "",
-  #                     starting_dos = "")
-  #   )
-  
   showModal(
-    passcode_modal_box()
+    startup_modal_box(starting_first_name = "",
+                      starting_last_name = "",
+                      starting_dob = "",
+                      starting_dos = "")
     )
   
+  # showModal(
+  #   passcode_modal_box()
+  #   )
+  
   # observeEvent(input$passcode_correct, {
-  observeEvent(input$passcode, {
-    if(input$passcode == "kennypowers"){
-      removeModal()
-      showModal(
-        startup_modal_box(starting_first_name = "",
-                          starting_last_name = "",
-                          starting_dob = "",
-                          starting_dos = "")
-      ) 
-    }
-  }
-  )
+  # observeEvent(input$passcode, {
+  #   if(input$passcode == "kennypowers"){
+  #     removeModal()
+  #     showModal(
+  #       startup_modal_box(starting_first_name = "",
+  #                         starting_last_name = "",
+  #                         starting_dob = "",
+  #                         starting_dos = "")
+  #     ) 
+  #   }
+  # }
+  # )
 
   observeEvent(input$test_patient_button, {
     updateTextInput(session = session, inputId = "patient_last_name", value = paste0("TestLAST", sample(1:1000, 1)))
