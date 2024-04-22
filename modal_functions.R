@@ -1286,7 +1286,7 @@ addition_surgical_details_modal_box_function <-
            preop_antibiotics = c("Cefazolin (Ancef)"),
            preop_antibiotics_other = " ",
            anti_fibrinolytic = "",
-           txa_loading = 20,
+           txa_loading = 30,
            txa_maintenance = 5
   ) {
     
