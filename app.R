@@ -8230,9 +8230,10 @@ server <- function(input, output, session) {
 
       
     }else{
-      data_wide <- tibble(redcap_repeat_instrument = character(), 
-                          redcap_repeat_instance = integer(),
-                          dos_surg_repeating = character(),
+      data_wide <- tibble(
+        # redcap_repeat_instrument = character(), 
+                          # redcap_repeat_instance = integer(),
+                          # dos_surg_repeating = character(),
                           approach = character(),
                           side = character()
       ) 
@@ -8297,6 +8298,8 @@ server <- function(input, output, session) {
           bind_rows(right_implants_removed_df)
       }
     }
+    
+    
     data_wide %>%
       ungroup() %>%
       mutate(across(everything(), ~ replace_na(.x, " "))) %>%
