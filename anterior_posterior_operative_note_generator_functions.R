@@ -837,20 +837,6 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       select(level) %>%
       distinct()
     
-    # proximal_exposure_level <- all_objects_to_add_df %>%
-    #   select(level, vertebral_number) %>%
-    #   bind_rows(revision_implants_df %>%
-    #               filter(remove_retain == "remove") %>% 
-    #               select(level, vertebral_number)) %>%
-    #   filter(vertebral_number == min(vertebral_number)) %>%
-    #   mutate(vertebral_number = round(vertebral_number - 0.25, 0)) %>%
-    #   mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
-    #   select(vertebral_number) %>%
-    #   distinct() %>%
-    #   mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
-    #   select(level) %>%
-    #   distinct()
-    
     distal_exposure_level <- all_objects_to_add_df %>%
       select(level, vertebral_number) %>%
       bind_rows(revision_implants_df %>%
@@ -862,23 +848,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
       select(level) %>%
       distinct()
-    
-    # distal_exposure_level <- all_objects_to_add_df %>%
-    #   select(level, vertebral_number) %>%
-    #   bind_rows(revision_implants_df %>%
-    #               filter(remove_retain == "remove") %>% 
-    #               select(level, vertebral_number)) %>%
-    #   filter(vertebral_number == max(vertebral_number)) %>%
-    #   mutate(vertebral_number = round(vertebral_number + 0.25, 0)) %>%
-    #   mutate(level = if_else(vertebral_number >=25, "S1", level)) %>%
-    #   select(vertebral_number) %>%
-    #   distinct() %>%
-    #   mutate(level = jh_get_vertebral_level_function(number = vertebral_number)) %>%
-    #   select(level) %>%
-    #   distinct() %>%
-    #   mutate(level = if_else(level == "S2AI", "S1", 
-    #                          if_else(level == "Iliac", "S1", 
-    #                                  level)))  
+
     
     if(surgical_approach == "Midline"){
       first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, exposing proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
@@ -888,8 +858,9 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       first_paragraph_list$surgical_approach <- glue("A paraspinal (Wiltse) posterior approach to the spine was performed. Skin was incised with a knife and cautery was used to control any skin bleeding. I dissected down until I identified the muscle layer and bluntly dissected between the multifidus and longissimus intermuscular plane. I exposed proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level. I manually palpated the transverse process and confirmed the level with xray. ")
       
     }
-    if(surgical_approach == "Stab"){
-      first_paragraph_list$surgical_approach <- glue("Intraoperative xray was used to confirm levels and stab incisions were made to access each pedicle from the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
+    if(surgical_approach == "Stab/Percutaneous"){
+      first_paragraph_list$surgical_approach <- " "
+      # first_paragraph_list$surgical_approach <- glue("Intraoperative xray was used to confirm levels and stab incisions were made to access each pedicle from the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
     }
     
   }else{
@@ -946,7 +917,8 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       
       first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, exposing proximally to the {proximal_exposure_level$level[1]} level and distally to the {distal_exposure_level$level[1]} level.")
     }else{
-      first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, appropriately exposing all necessary levels.")
+      first_paragraph_list$surgical_approach <- " "
+      # first_paragraph_list$surgical_approach <- glue("A standard posterior approach to the spine was performed, appropriately exposing all necessary levels.")
     }
   } 
   
@@ -1019,16 +991,16 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   ################# C2 nerve transection
   if(c2_nerve_transection == "bilateral_transection"){
-    procedure_details_list$c2_transection <- glue("To aide in accurate placement of the C1 lateral mass screws, I proceeded with the transection of the C2 nerve roots (greater occipital nerve) bilaterally. The posterior C1 arch was identified and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered on the left and the right. At this point, to allow accurate placement of the C1 screws and minimize risk of postoperative entrapment neuropathy or occipital neuralgia, the C2 nerve root was transected medial to the dorsal root ganglia on the left and the right. This completed the transection of the C2 nerve root/Greater Occipital Nerve. ")
+    procedure_details_list$c2_transection <- glue("To aid in accurate placement of the C1 lateral mass screws, I proceeded with the transection of the C2 nerve roots (greater occipital nerve) bilaterally. The posterior C1 arch was identified and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered on the left and the right. At this point, to allow accurate placement of the C1 screws and minimize risk of postoperative entrapment neuropathy or occipital neuralgia, the C2 nerve root was transected medial to the dorsal root ganglia on the left and the right. This completed the transection of the C2 nerve root/Greater Occipital Nerve. ")
   }
   if(c2_nerve_transection == "left"){
-    procedure_details_list$c2_transection <- glue("To aide in accurate placement of the C1 lateral mass screws, I proceeded with the transection of the C2 nerve root (greater occipital nerve) on the left. The posterior C1 arch was identified and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered on the left. At this point, to allow accurate placement of the C1 screws and minimize risk of postoperative entrapment neuropathy or occipital neuralgia, the C2 nerve root was transected medial to the dorsal root ganglia on the left. This completed the transection of the C2 nerve root/Greater Occipital Nerve. ")
+    procedure_details_list$c2_transection <- glue("To aid in accurate placement of the C1 lateral mass screws, I proceeded with the transection of the C2 nerve root (greater occipital nerve) on the left. The posterior C1 arch was identified and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered on the left. At this point, to allow accurate placement of the C1 screws and minimize risk of postoperative entrapment neuropathy or occipital neuralgia, the C2 nerve root was transected medial to the dorsal root ganglia on the left. This completed the transection of the C2 nerve root/Greater Occipital Nerve. ")
   }
   if(c2_nerve_transection == "right"){
-    procedure_details_list$c2_transection <- glue("To aide in accurate placement of the C1 lateral mass screws, I proceeded with the transection of the C2 nerve root (greater occipital nerve) on the right. The posterior C1 arch was identified and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered on the right. At this point, to allow accurate placement of the C1 screws and minimize risk of postoperative entrapment neuropathy or occipital neuralgia, the C2 nerve root was transected medial to the dorsal root ganglia on the right. This completed the transection of the C2 nerve root/Greater Occipital Nerve. ")
+    procedure_details_list$c2_transection <- glue("To aid in accurate placement of the C1 lateral mass screws, I proceeded with the transection of the C2 nerve root (greater occipital nerve) on the right. The posterior C1 arch was identified and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered on the right. At this point, to allow accurate placement of the C1 screws and minimize risk of postoperative entrapment neuropathy or occipital neuralgia, the C2 nerve root was transected medial to the dorsal root ganglia on the right. This completed the transection of the C2 nerve root/Greater Occipital Nerve. ")
   }
   if(str_detect(c2_nerve_transection, "preserved")){
-    procedure_details_list$c2_transection <- glue("I proceeded with the exposure of the C1-C2 joint and the C1 lateral masses. The posterior C1 arch was identified, and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered. Bipolar cautery and hemostatic agents were used to aide in hemostasis of the venous plexus. A penfield was used to dissect the cranial and caudal borders of the C2 nerve root. The caudal aspect of the lateral posterior C1 arch was burred to allow a path to the C1 lateral mass just cranial to the C2 nerve root. The C1-C2 joint was exposed caudal to the C2 nerve root. ")
+    procedure_details_list$c2_transection <- glue("I proceeded with the exposure of the C1-C2 joint and the C1 lateral masses. The posterior C1 arch was identified, and care was taken to stay on the underside of the C1 arch and avoid the vertebral artery. The exposure was carried laterally until the C2 nerve root was encountered. Bipolar cautery and hemostatic agents were used to aid in hemostasis of the venous plexus. A penfield was used to dissect the cranial and caudal borders of the C2 nerve root. The caudal aspect of the lateral posterior C1 arch was burred to allow a path to the C1 lateral mass just cranial to the C2 nerve root. The C1-C2 joint was exposed caudal to the C2 nerve root. ")
   }
   
   
@@ -1162,7 +1134,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   }
   
   if(nrow(structural_allograft_df) > 0){
-    procedure_details_list$structural_allograft <- glue("To aide in posterior arthrodesis and to cover the dorsal bony defect, I then proceeded with placement of a structural allograft strut. The dorsal bony defect was measured and a structural allograft was selected and trimmed to the appropriate size. The allograft was secured into place, spanning the level of {glue_collapse(structural_allograft_df$level, sep = ', ', last = ' and ')}. This completed the application of structural allograft.")
+    procedure_details_list$structural_allograft <- glue("To aid in posterior arthrodesis and to cover the dorsal bony defect, I then proceeded with placement of a structural allograft strut. The dorsal bony defect was measured and a structural allograft was selected and trimmed to the appropriate size. The allograft was secured into place, spanning the level of {glue_collapse(structural_allograft_df$level, sep = ', ', last = ' and ')}. This completed the application of structural allograft.")
   }
   
   

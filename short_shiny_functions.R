@@ -1,3 +1,9 @@
+clear_reactive_values_function <- function(reactive_value_list_to_clear){
+  for (name in names(reactive_value_list_to_clear)){
+    reactive_value_list_to_clear[[name]] <- NULL
+  } 
+}
+
 jh_replace_checkbox_other_with_text_function <- function(input_vector = c(" "), 
                                                          text_to_replace = "Other",
                                                          replacement_text = " "){
@@ -458,45 +464,45 @@ jh_filter_osteotomies_function <- function(full_df_to_filter){
   objects_in_sequence_df <- full_df_to_filter %>%
     bind_rows(tibble(level = "x", object = c("grade_1", "grade_2", "grade_3", "grade_4", "grade_5"))) %>%
     mutate(order_number = row_number())
-  
+
   grade_5_osteotomy_df <- objects_in_sequence_df %>%
-    filter(object == "grade_5") 
-  
+    filter(object == "grade_5")
+
   grade_4_osteotomy_df <- objects_in_sequence_df %>%
-    filter(object == "grade_4") 
-  
+    filter(object == "grade_4")
+
   grade_3_osteotomy_df <- objects_in_sequence_df %>%
-    filter(object == "grade_3") 
-   
+    filter(object == "grade_3")
+
   grade_2_osteotomy_df <- objects_in_sequence_df %>%
-    filter(object == "grade_2") 
+    filter(object == "grade_2")
     # separate(col = level, into = c("proximal_level", "distal_level"), remove = FALSE)
-  
+
   grade_1_osteotomy_df <- objects_in_sequence_df %>%
-    filter(object == "grade_1") 
-  
+    filter(object == "grade_1")
+
   if(nrow(grade_1_osteotomy_df) > 0){
     grade_1_osteotomy_df <- grade_1_osteotomy_df %>%
       mutate(distal_level = map(.x = level, .f =  ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level)) %>%
       unnest(distal_level) %>%
       distinct() %>%
       # mutate(distal_level = jh_get_cranial_caudal_interspace_body_list_function(level = level)$caudal_level) %>%
-      mutate(keep_remove = if_else(level %in% grade_2_osteotomy_df$level | 
+      mutate(keep_remove = if_else(level %in% grade_2_osteotomy_df$level |
                                      # level %in% grade_2_osteotomy_df$proximal_level |
                                      level %in% grade_3_osteotomy_df$level |
                                      level %in% grade_4_osteotomy_df$level |
-                                     level %in% grade_5_osteotomy_df$level |       
+                                     level %in% grade_5_osteotomy_df$level |
                                      distal_level %in% grade_3_osteotomy_df$level |
                                      distal_level %in% grade_4_osteotomy_df$level |
                                      distal_level %in% grade_5_osteotomy_df$level, "remove", "keep"))
   }
-  
+
   if(nrow(grade_2_osteotomy_df)>0){
     grade_2_osteotomy_df <- grade_2_osteotomy_df %>%
       mutate(keep_remove = if_else(level %in% grade_3_osteotomy_df$level |
                                      level %in% grade_4_osteotomy_df$level | level %in% grade_5_osteotomy_df$level, "remove", "keep"))
   }
-  
+
   if(nrow(grade_3_osteotomy_df)>0){
     grade_3_osteotomy_df <- grade_3_osteotomy_df %>%
       mutate(keep_remove = if_else(level %in% grade_4_osteotomy_df$level |
@@ -506,20 +512,20 @@ jh_filter_osteotomies_function <- function(full_df_to_filter){
     grade_4_osteotomy_df <- grade_4_osteotomy_df %>%
       mutate(keep_remove = if_else(level %in% grade_5_osteotomy_df$level, "remove", "keep"))
   }
-  
+
   if(nrow(grade_5_osteotomy_df)>0){
     grade_5_osteotomy_df <- grade_5_osteotomy_df %>%
       mutate(keep_remove = "keep")
   }
-  
-  
+
+
   all_grades_df <- grade_1_osteotomy_df %>%
     bind_rows(grade_2_osteotomy_df) %>%
     bind_rows(grade_3_osteotomy_df) %>%
     bind_rows(grade_4_osteotomy_df) %>%
     bind_rows(grade_5_osteotomy_df) %>%
     select(level, order_number, side, object, keep_remove)
-  
+
   final_filtered_full_df <- objects_in_sequence_df %>%
     left_join(all_grades_df)%>%
     select(order_number, level, keep_remove, everything()) %>%
@@ -528,10 +534,35 @@ jh_filter_osteotomies_function <- function(full_df_to_filter){
     select(-keep_remove, -order_number) %>%
     filter(level != "x") %>%
     filter(level != "x-x")
-  
+
   return(final_filtered_full_df)
 }
 
+jh_osteotomies_function <- function(existing_df, new_object_added_df) {
+  # Check if there's an existing osteotomy at the same level
+  existing_osteotomy <- existing_df %>%
+    filter(level == unique(new_object_added_df$level) & grepl("grade", object))
+  
+  # If an osteotomy exists at that level
+  if (nrow(existing_osteotomy) > 0) {
+    # Determine the max existing grade
+    max_grade <- max(as.integer(sub("grade_", "", existing_osteotomy$object)))
+    # Determine the grade of the new osteotomy
+    new_grade <- as.integer(sub("grade_", "", new_object_added_df$object))
+    
+    # Replace if the new grade is higher
+    if (new_grade > max_grade) {
+      existing_df <- existing_df %>%
+        filter(!(level == unique(new_object_added_df$level) & grepl("grade", object))) %>%
+        bind_rows(new_object_added_df)
+    }
+  } else {
+    # No existing osteotomy at that level, add new one
+    existing_df <- bind_rows(existing_df, new_object_added_df)
+  }
+  
+  return(existing_df)
+}
 
 jh_make_bmp_ui_function <-  function(anterior_posterior){
   fluidRow(  

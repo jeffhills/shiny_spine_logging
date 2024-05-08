@@ -302,3 +302,34 @@ arthroplasty_function <- function(y_for_inferior_endplate, y_for_superior_endpla
   return(disc_df)
 }
 
+
+
+###################### MAKE SCREWS GEOMS ######################
+
+left_screws_df <- all_implants_constructed_df %>%
+  filter(approach == "posterior",
+         str_detect(object, "screw"), 
+         side == "left")
+
+geoms_left_screws_list <- map(.x = left_screws_df$object_constructed, .f = ~ geom_sf(data = .x, fill = "blue"))
+
+names(geoms_left_screws_list) <- left_screws_df$object_id
+
+
+right_screws_df <- all_implants_constructed_df %>%
+  filter(approach == "posterior",
+         str_detect(object, "screw"), 
+         side == "right")
+
+geoms_right_screws_list <- map(.x = right_screws_df$object_constructed, .f = ~ geom_sf(data = .x, fill = "blue"))
+
+names(geoms_right_screws_list) <- right_screws_df$object_id
+
+
+# jh_load_all_possible_objects_function()
+# posterior_objects_df <- all_implants_constructed_df %>%
+#   filter(approach == "posterior", str_detect(object, "screw") == FALSE) 
+# postorior_geoms <- map2(.x = posterior_objects_df$object, .y = posterior_objects_df$object_constructed, 
+#                            .f = ~jh_make_single_posterior_geom_object_constructed_function(object = .x, object_constructed = .y)
+# )
+# names(postorior_geoms) <- posterior_objects_df$object_id

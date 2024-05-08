@@ -1,3 +1,7 @@
+
+
+
+
 jh_make_posterior_screws_geoms_function <- function(all_posterior_objects_df, plot_with_patterns = FALSE){
   ## SCREWS
   geoms_list_posterior <- list()
@@ -72,15 +76,21 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_2"))){
-    geoms_list_posterior$osteotomy_2_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_2"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.75,
-      pattern_angle = 10,
-      pattern_spacing = 0.01,
-      pattern_density = 0.15,
+    # geoms_list_posterior$osteotomy_2_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_2"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.75,
+    #   pattern_angle = 10,
+    #   pattern_spacing = 0.01,
+    #   pattern_density = 0.15,
+    # )
+    geoms_list_posterior$osteotomy_2_sf_geom <- geom_sf(
+      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_2"))$object_constructed),
+      fill = "darkred",
+      alpha = 0.75
     )
+    
   }else{
     geoms_list_posterior$osteotomy_2_sf_geom <- NULL
   }
@@ -141,13 +151,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "laminectomy"))){
-    # geoms_list_posterior$laminectomy_sf_geom <- ggpattern::geom_sf_pattern(
-    #   data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
-    #   pattern = "stripe",
-    #   pattern_colour = "red",
-    #   alpha = 0.7,
-    #   pattern_spacing = 0.01
-    # )
+
     geoms_list_posterior$laminectomy_sf_geom <- geom_sf(
       data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
       # pattern = "stripe",
@@ -166,7 +170,11 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
       pattern = "stripe",
       pattern_colour = "red",
       alpha = 0.75,
-      pattern_spacing = 0.01
+      pattern_spacing = 0.05
+      # alpha = 0.6,
+      # pattern_angle = 10,
+      # pattern_spacing = 0.03,
+      # pattern_density = 0.1
     )
   }else{
     geoms_list_posterior$sublaminar_decompression_sf_geom <- NULL
@@ -932,3 +940,358 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
               geoms_list_anterior_instrumentation = geoms_list_anterior_instrumentation))
   
 }
+
+#########################################
+
+jh_make_single_posterior_geom_object_constructed_function <- function(object, object_constructed, plot_with_patterns = FALSE){
+  # posterior_object_df <- construct_objects_live_function(posterior_object_df)
+  
+  object <- unique(object[[1]])
+  
+  geom_for_plot <- NULL
+  
+  if(grepl("vertebroplasty", object)){
+    geom_for_plot <- geom_sf_pattern(data = (object_constructed),
+                                     pattern = "plasma",
+                                     pattern_alpha = 0.8,
+                                     alpha = 0.3,
+                                     color = "grey96")
+  }
+  
+  if(grepl("vertebral_cement_augmentation", object)){
+    geom_for_plot<- geom_sf_pattern(data = (object_constructed),
+                                    pattern = "plasma",
+                                    pattern_alpha = 0.8,
+                                    alpha = 0.6,
+                                    color = "grey75")
+  }
+  
+  ## OSTEOTOMIES
+  if(grepl("grade_1", object)){
+    geom_for_plot <- geom_sf(data = st_buffer(object_constructed, dist = 0.0001), fill = "red")
+  }
+  
+  if(grepl("complete_facetectomy", object)){
+    geom_for_plot<- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.75,
+      pattern_angle = 10,
+      pattern_spacing = 0.01,
+      pattern_density = 0.15,
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "grade_2"))){
+  if(grepl("grade_2", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = object_constructed,
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.75,
+      pattern_angle = 10,
+      pattern_spacing = 0.01,
+      pattern_density = 0.15,
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "grade_3"))){
+  if(grepl("grade_3", object)){
+    geom_for_plot<- ggpattern::geom_sf_pattern(
+      data = object_constructed,
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.6,
+      pattern_angle = 10,
+      pattern_spacing = 0.03,
+      pattern_density = 0.1
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "grade_4"))){
+  if(grepl("grade_4", object)){
+    geom_for_plot<- ggpattern::geom_sf_pattern(
+      data = object_constructed,
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.6,
+      pattern_angle = 10,
+      pattern_spacing = 0.02,
+      pattern_density = 0.02
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "grade_5"))){
+  if(grepl("grade_5", object)){
+    geom_for_plot<- ggpattern::geom_sf_pattern(
+      data = object_constructed,
+      pattern = "crosshatch",
+      pattern_colour = "red",
+      alpha = 0.6,
+      pattern_angle = 10,
+      pattern_spacing = 0.02,
+      pattern_density = 0.02
+    )
+  }
+  
+  ## Decompresions ##
+  # if(any(str_detect(object, pattern = "laminectomy_for_facet_cyst"))){
+  if(grepl("laminectomy_for_facet_cyst", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = object_constructed,
+      pattern = "stripe",
+      pattern_colour = "orange",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "laminectomy"))){
+  if(grepl("laminectomy", object)){
+    
+    geom_for_plot <- geom_sf(
+      data = object_constructed,
+      # pattern = "stripe",
+      # pattern_colour = "red",
+      fill = "red",
+      alpha = 0.75
+      # pattern_spacing = 0.01
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "sublaminar_decompression"))){
+  if(grepl("sublaminar_decompression", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.9,
+      pattern_spacing = 0.03
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "laminotomy"))){
+  if(grepl("laminotomy", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.9,
+      pattern_spacing = 0.03
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "cervical_foraminotomy"))){
+  if(grepl("cervical_foraminotomy", object)){
+    geom_for_plot<- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }
+  # if(any(str_detect(object, pattern = "transpedicular_approach"))){
+  if(grepl("transpedicular_approach", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "costo"))){
+  if(grepl("costo", object)){
+    geom_for_plot<- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "lateral_extracavitary"))){
+  if(grepl("lateral_extracavitary", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "lateral_extraforaminal_approach"))){
+  if(grepl("lateral_extraforaminal_approach", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }
+  
+  # if(any(object_constructed == "diskectomy")){
+  if(grepl("diskectomy", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "laminoplasty"))){
+  if(grepl("laminoplasty", object)){
+    geom_for_plot_1 <- geom_sf(data = (object_constructed), fill  = "blue") 
+    geom_for_plot_2 <- geom_line(data = tibble(x = 0.515,
+                                               y =  c(max(object_constructed$y + 0.01),
+                                                      min(object_constructed$y) - 0.01)),
+                                 aes(x = x, y = y), linetype = "dotted", size = 2, color = "red") 
+    
+    geom_for_plot <- (geom_for_plot_1 + geom_for_plot_2)
+    
+  }
+  
+  
+  #### TUMOR
+  
+  # if(any(str_detect(object, pattern = "corpectomy_extracavitary_tumor"))){
+  if(grepl("corpectomy_extracavitary_tumor", object)){
+    geom_for_plot<- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "darkred",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }
+  
+  # if(any(str_detect(object, pattern = "laminectomy_for_tumor"))){
+  if(grepl("laminectomy_for_tumor", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = object_constructed,
+      pattern = "stripe",
+      pattern_colour = "darkred",
+      alpha = 0.7,
+      pattern_spacing = 0.01
+    )
+  }
+  ## INTERBODY
+  # if(any(object_constructed == "tlif") || any(object_constructed == "llif") ||any(object_constructed == "plif")){
+  if((grepl("tlif", object) | grepl("llif", object) | grepl("plif", object))){
+    geom_for_plot <- geom_sf(data = (object_constructed), fill = "red")
+  }
+  
+  # if(any(object_constructed == "no_implant_interbody_fusion")){
+  if(grepl("no_implant_interbody_fusion", object)){
+    geom_for_plot <- geom_sf(data = (object_constructed), fill = "#E66565")
+  }
+  
+  # if(any(str_detect(object, pattern = "intervertebral_cage"))){
+  if(grepl("intervertebral_cage", object)){
+    geom_for_plot<-  ggpattern::geom_sf_pattern(
+      data =  object_constructed,
+      pattern = "crosshatch",
+      pattern_fill = "grey90",
+      fill = "#7899F5",
+      alpha = 0.3,
+      pattern_spacing = 0.01,
+      pattern_density = 0.7
+    )
+  }
+  # ## SCREWS
+  # if(any(str_detect((object_constructed), pattern = "screw"))){
+  #   if(plot_with_patterns == TRUE){
+  #     geom_for_plot <- ggpattern::geom_sf_pattern(
+  #       data = (object_constructed),
+  #       pattern = "stripe",
+  #       pattern_fill = "blue",
+  #       pattern_fill2 = "#445566",
+  #       alpha = 0.8,
+  #       pattern_colour = "blue",
+  #       pattern_density = 0.02,
+  #       pattern_spacing = 0.01,
+  #       pattern_angle = 80
+  #     )
+  #   }else{
+  #     geom_for_plot<- geom_sf(data = ((posterior_object_df %>% filter(str_detect(string = object, pattern = "screw")))$object_constructed), fill = "blue")
+  #   }
+  #   
+  # }
+  
+  ## HOOKS
+  # if(any(str_detect(object, pattern = "hook"))){
+  if(grepl("hook", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "gradient",
+      pattern_fill = "blue",
+      pattern_fill2 = "#445566",
+      alpha = 0.8
+    )
+  }
+  
+  ## SUBLAMINAR BANDS
+  # if(any(str_detect(object, pattern = "wire"))){
+  if(grepl("wire", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = (object_constructed),
+      pattern = "gradient",
+      pattern_fill = "red",
+      pattern_fill2 = "#445566",
+      alpha = 0.8
+    )
+  }
+  
+  ##structural_allograft
+  # if(any(str_detect(object, pattern = "structural_allograft"))){
+  if(grepl("structural_allograft", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      data = object_constructed,
+      pattern = "plasma",
+      pattern_alpha = 0.6,
+      alpha = 0.6,
+      fill = "brown"
+    )
+    
+  }
+  
+  ## Tethers
+  # if(any(str_detect(object, pattern = "tether"))){
+  if(grepl("tether", object)){
+    geom_for_plot <- geom_sf(data = (object_constructed))
+  }
+  
+  # if(any(str_detect(object, pattern = "incision_drainage"))){
+  #   geom_for_plot <- ggpattern::geom_sf_pattern(
+  #     data = st_union(st_combine((object_constructed)),
+  #     pattern = "stripe",
+  #     pattern_colour = "red",
+  #     alpha = 0.1,
+  #     pattern_spacing = 0.03
+  #   )
+  # }
+  
+  # if(any(str_detect(object, pattern = "incision_drainage"))){
+  if(grepl("incision_drainage", object)){
+    geom_for_plot <- ggpattern::geom_sf_pattern(
+      # data = st_union(st_combine((object_constructed)),
+      data = (object_constructed),
+      pattern = "stripe",
+      pattern_colour = "red",
+      alpha = 0.1,
+      pattern_spacing = 0.03
+    )
+  }
+  
+  return(geom_for_plot)
+  
+}
+

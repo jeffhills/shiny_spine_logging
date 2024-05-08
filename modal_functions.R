@@ -1024,6 +1024,28 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
               easyClose = FALSE,
               footer = actionButton(inputId = "fusion_levels_technique_details_modal_complete_button", label = "Confirmed"),
               box(width = 12, title = div(style = "font-size:20px; font-weight:bold; text-align:left", "Approach & Technique Specifics:"),
+                  if(anterior_approach == "yes"){
+                    jh_make_shiny_table_row_function(
+                      left_column_label = "ANTERIOR Approach was:",
+                      input_type = "prettyRadioButtons",
+                      text_align = question_text_align,
+                      input_id = "approach_specified_anterior",
+                      left_column_percent_width = question_label_column_width,
+                      font_size = row_label_font_size,
+                      checkboxes_inline = TRUE,
+                      choices_vector = c("Left-sided", 
+                                         "Right-sided",
+                                         "Paramedian",
+                                         "Lateral Transpsoas",
+                                         "Lateral Antepsoas",
+                                         "Thoracoabdominal",
+                                         "Thoracotomy",
+                                         "Transperitoneal",
+                                         "Retroperitoneal"),
+                      initial_value_selected = approach_specified_anterior
+                    )
+                  },
+                  hr(),
                   if(posterior_approach == "yes"){
                     jh_make_shiny_table_row_function(
                       left_column_label = "POSTERIOR approach was:",
@@ -1034,7 +1056,8 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                       font_size = row_label_font_size,
                       checkboxes_inline = TRUE,
                       choices_vector = c("Midline",
-                                         "Paraspinal (Wiltse)"
+                                         "Paraspinal (Wiltse)",
+                                         "Stab/Percutaneous"
                                          ),
                       initial_value_selected = approach_specified_posterior
                     )
@@ -1070,34 +1093,35 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                         checkboxes_inline = TRUE,
                         choices_vector = c("Fluoroscopy-guided",
                                            "Navigated", 
-                                           "Robotic", 
+                                           "Robotic (using intraop CT)", 
+                                           "Robotic (using preop CT)", 
                                            "NA"),
                         initial_value_selected = approach_robot_navigation
                       )
                       },
                   hr(),
-                  if(anterior_approach == "yes"){
-                    jh_make_shiny_table_row_function(
-                      left_column_label = "ANTERIOR Approach was:",
-                      input_type = "prettyRadioButtons",
-                      text_align = question_text_align,
-                      input_id = "approach_specified_anterior",
-                      left_column_percent_width = question_label_column_width,
-                      font_size = row_label_font_size,
-                      checkboxes_inline = TRUE,
-                      choices_vector = c("Left-sided", 
-                                         "Right-sided",
-                                         "Paramedian",
-                                         "Lateral Transpsoas",
-                                         "Lateral Antepsoas",
-                                         "Thoracoabdominal",
-                                         "Thoracotomy",
-                                         "Transperitoneal",
-                                         "Retroperitoneal"),
-                      initial_value_selected = approach_specified_anterior
-                    )
-                  },
-                  hr(),
+                  # if(anterior_approach == "yes"){
+                  #   jh_make_shiny_table_row_function(
+                  #     left_column_label = "ANTERIOR Approach was:",
+                  #     input_type = "prettyRadioButtons",
+                  #     text_align = question_text_align,
+                  #     input_id = "approach_specified_anterior",
+                  #     left_column_percent_width = question_label_column_width,
+                  #     font_size = row_label_font_size,
+                  #     checkboxes_inline = TRUE,
+                  #     choices_vector = c("Left-sided", 
+                  #                        "Right-sided",
+                  #                        "Paramedian",
+                  #                        "Lateral Transpsoas",
+                  #                        "Lateral Antepsoas",
+                  #                        "Thoracoabdominal",
+                  #                        "Thoracotomy",
+                  #                        "Transperitoneal",
+                  #                        "Retroperitoneal"),
+                  #     initial_value_selected = approach_specified_anterior
+                  #   )
+                  # },
+                  # hr(),
                   if(implants_placed == "yes"){
                     if(str_detect(procedure_approach, "posterior")){
                     # if(procedure_approach == "posterior" | procedure_approach == "combined"){
@@ -2030,10 +2054,8 @@ addition_surgical_details_modal_box_2_function <-
             initial_value_selected = head_positioning_anterior
           )
         },
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
         if(str_detect(procedure_approach, "anterior")){br()},
         if(str_detect(procedure_approach, "anterior")){
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(left_column_label = "Anterior Deep drains:", 
                                            input_type = "awesomeRadio",
                                            input_id = "deep_drains_anterior", 
@@ -2045,8 +2067,6 @@ addition_surgical_details_modal_box_2_function <-
         },
         if(str_detect(procedure_approach, "anterior")){br()},
         if(str_detect(procedure_approach, "anterior")){
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(left_column_label = "Anterior Superficial drains:", 
                                            input_type = "awesomeRadio",
                                            input_id = "superficial_drains_anterior", 
@@ -2058,8 +2078,6 @@ addition_surgical_details_modal_box_2_function <-
         },
         if(str_detect(procedure_approach, "anterior")){br()},
         if(str_detect(procedure_approach, "anterior")){
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Select any used during anterior closure:",
             input_type = "checkbox",
@@ -2096,8 +2114,6 @@ addition_surgical_details_modal_box_2_function <-
         },
         if(str_detect(procedure_approach, "anterior")){br()},
         if(str_detect(procedure_approach, "anterior")){
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
           jh_make_shiny_table_row_function(
             left_column_label = "Anterior Skin/Dressing:",
             input_type = "checkbox",
@@ -2117,11 +2133,8 @@ addition_surgical_details_modal_box_2_function <-
             return_as_full_table = TRUE
           )
         },
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
         if(str_detect(procedure_approach, "anterior")){br()},
         if(str_detect(procedure_approach, "anterior")){h4("Confirm Any Additional Anterior Procedures Performed:")},
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){h4("Confirm Any Additional Anterior Procedures Performed:")},
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
         if(str_detect(procedure_approach, "anterior")){
           jh_make_shiny_table_row_function(
             left_column_label = "Additional Anterior Procedures:",
@@ -2134,8 +2147,6 @@ addition_surgical_details_modal_box_2_function <-
             initial_value_selected = additional_procedures_anterior
           )
         },
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){br()},
-        # if(procedure_approach == "anterior" | procedure_approach == "combined"){
         if(str_detect(procedure_approach, "anterior")){br()},
         if(str_detect(procedure_approach, "anterior")){
           conditionalPanel(
@@ -2184,8 +2195,7 @@ addition_surgical_details_modal_box_2_function <-
             initial_value_selected = head_positioning_posterior
           )
         },
-        # if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
-        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
+
         if(str_detect(procedure_approach, "posterior")){br()},
         if(str_detect(procedure_approach, "posterior")){
           jh_make_shiny_table_row_function(left_column_label = "Posterior Deep drains:", 
@@ -2197,7 +2207,6 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
         if(str_detect(procedure_approach, "posterior")){
           jh_make_shiny_table_row_function(left_column_label = "Posterior Superficial drains:", 
                                            input_type = "awesomeRadio",
@@ -2208,8 +2217,6 @@ addition_surgical_details_modal_box_2_function <-
                                            choices_vector = c("0", "1", "2", "3", "4", "5"), 
                                            checkboxes_inline = TRUE, return_as_full_table = TRUE)
         },
-        # if(procedure_approach == "posterior" | procedure_approach == "combined"){br()},
-        # if(procedure_approach == "posterior" | procedure_approach == "combined"){
         if(str_detect(procedure_approach, "posterior")){br()},
         if(str_detect(procedure_approach, "posterior")){
           jh_make_shiny_table_row_function(
