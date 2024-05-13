@@ -622,59 +622,43 @@ ui <- dashboardPage(skin = "black",
                                            br(),
                                            # tableOutput(outputId = "revision_screws_df"),
                                            conditionalPanel(condition = "input.add_rods >0 & input.fusion_procedure_performed == true & input.spine_approach.indexOf('Posterior') > -1",
-                                                            fluidRow(column(4, 
-                                                                            # conditionalPanel(condition = "input.left_revision_rod_present == true", 
-                                                                            #                  materialSwitch(
-                                                                            #                    inputId = "link_left_revision_rods_true_false",
-                                                                            #                    label = "Link Prior Left Rod to new rod?", 
-                                                                            #                    value = FALSE,
-                                                                            #                    status = "success"
-                                                                            #                  )
-                                                                            #                  )
-                                                            ), 
-                                                            column(4, 
-                                                                   dropdown(icon = icon("link"),
-                                                                            inputId = "add_crosslink_button", 
-                                                                            width = "100%",
-                                                                            label = "Add Crosslink",
-                                                                            style = "unite",
-                                                                            column(6, 
-                                                                                   checkboxGroupButtons(inputId = "crosslink_connectors",
-                                                                                                        label = "Add crosslinks at:",
-                                                                                                        choices = vertebral_bodies_vector,
-                                                                                                        individual = FALSE,
-                                                                                                        # justified = TRUE,
-                                                                                                        direction = "vertical",
-                                                                                                        checkIcon = list(
-                                                                                                          yes = tags$i(class = "fa fa-check-square",
-                                                                                                                       style = "color: steelblue"),
-                                                                                                          no = tags$i(class = "fa fa-square-o",
-                                                                                                                      style = "color: steelblue"))
-                                                                                   )),
-                                                                            column(6, 
-                                                                                   actionBttn(
-                                                                                     inputId = "remove_all_crosslinks",
-                                                                                     label = "Remove All",
-                                                                                     style = "simple", 
-                                                                                     size = "xs",
-                                                                                     color = "danger", 
-                                                                                     icon = icon("undo-alt", verify_fa = FALSE)
-                                                                                   )
-                                                                            )
-                                                                            
-                                                                   )
-                                                            ),
-                                                            column(4,
-                                                                   # conditionalPanel(condition = "input.right_revision_rod_present == true", 
-                                                                   #                  materialSwitch(
-                                                                   #                    inputId = "link_right_revision_rods_true_false",
-                                                                   #                    label = "Link Prior Right Rod to new rod?", 
-                                                                   #                    value = FALSE,
-                                                                   #                    status = "success"
-                                                                   #                  )
-                                                                   # )
-                                                                   
-                                                            )
+                                                            fluidRow(
+                                                              column(4, 
+                                                              ), 
+                                                              column(4, 
+                                                                     dropdown(icon = icon("link"),
+                                                                              inputId = "add_crosslink_button", 
+                                                                              width = "100%",
+                                                                              label = "Add Crosslink",
+                                                                              style = "unite",
+                                                                              column(6, 
+                                                                                     checkboxGroupButtons(inputId = "crosslink_connectors",
+                                                                                                          label = "Add crosslinks at:",
+                                                                                                          choices = vertebral_bodies_vector,
+                                                                                                          individual = FALSE,
+                                                                                                          # justified = TRUE,
+                                                                                                          direction = "vertical",
+                                                                                                          checkIcon = list(
+                                                                                                            yes = tags$i(class = "fa fa-check-square",
+                                                                                                                         style = "color: steelblue"),
+                                                                                                            no = tags$i(class = "fa fa-square-o",
+                                                                                                                        style = "color: steelblue"))
+                                                                                     )),
+                                                                              column(6, 
+                                                                                     actionBttn(
+                                                                                       inputId = "remove_all_crosslinks",
+                                                                                       label = "Remove All",
+                                                                                       style = "simple", 
+                                                                                       size = "xs",
+                                                                                       color = "danger", 
+                                                                                       icon = icon("undo-alt", verify_fa = FALSE)
+                                                                                     )
+                                                                              )
+                                                                              
+                                                                     )
+                                                              ),
+                                                              column(4,
+                                                              )
                                                             ),
                                                             jh_make_shiny_table_column_function(input_type = "title", 
                                                                                                 left_label = "Left Rod(s):",
@@ -786,7 +770,6 @@ ui <- dashboardPage(skin = "black",
                                                                                                                           options = list(`actions-box` = TRUE))
                                                                                              )
                                                                                       )
-                                                                                      # uiOutput(outputId = "left_custom_rods_ui")
                                                                      )
                                                               ),
                                                               column(width = 6,
@@ -824,7 +807,6 @@ ui <- dashboardPage(skin = "black",
                                                                                                                           options = list(`actions-box` = TRUE))
                                                                                              )
                                                                                       )
-                                                                                      # uiOutput(outputId = "right_custom_rods_ui")
                                                                      )
                                                               )
                                                             )
@@ -881,7 +863,8 @@ ui <- dashboardPage(skin = "black",
                                                                                 label = NULL,
                                                                                 choices = c("Morselized Allograft",
                                                                                             "Local Autograft",
-                                                                                            "Morselized Autograft (separate fascial incision)"
+                                                                                            "Morselized Autograft (separate fascial incision)",
+                                                                                            "Structural Autograft (harvested through separate fascial incision)"
                                                                                 )
                                                             )
                                                      ),
@@ -988,7 +971,8 @@ ui <- dashboardPage(skin = "black",
                                                                                 label = NULL, 
                                                                                 choices = c("Morselized Allograft",
                                                                                             "Local Autograft",
-                                                                                            "Morselized Autograft (separate fascial incision)"
+                                                                                            "Morselized Autograft (separate fascial incision)",
+                                                                                            "Structural Autograft (harvested through separate fascial incision)"
                                                                                 )
                                                             )
                                                      ),
@@ -2833,16 +2817,6 @@ server <- function(input, output, session) {
       object_currently_selected_to_add <- input$object_to_add
     }
     
-    # object_added_df <- nearPoints(
-    #   df = (all_implants_constructed_df %>%
-    #           filter(object %in% object_currently_selected_to_add)),
-    #   coordinfo = input$plot_click,
-    #   xvar = "x",
-    #   yvar = "y",
-    #   maxpoints = 1,
-    #   threshold = 45
-    # )
-    
     object_added_df <- nearPoints(
       df = object_to_add_choices_df_reactive(),
       coordinfo = input$plot_click,
@@ -2865,41 +2839,11 @@ server <- function(input, output, session) {
     }
     
     
-    # if(grepl("grade_", input$object_to_add)){
-    #   if(any(grepl("grade_", all_objects_to_add_list$objects_df$object))){
-    #     if(any(object_added_df$level == (all_objects_to_add_list$objects_df %>% filter(grepl("grade_", object)))$level)){
-    #       
-    #       current_osteotomy_grade <- as.double(str_remove(input$object_to_add, "grade_"))
-    #       
-    #       # This returns a data frame where any inferior osteotomies are removed
-    #       all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-    #         filter(!(grepl("grade_", object) & 
-    #                    level == object_added_df$level & 
-    #                    as.double(str_remove(object, "grade_")) < current_osteotomy_grade))
-    #       
-    #       already_added_same_level_osteotomy_grade <- as.double(str_remove(string = (all_objects_to_add_list$objects_df  %>%
-    #                                                                                    filter((grepl("grade_", object) & 
-    #                                                                                              level == object_added_df$level)))$object[1], 
-    #                                                                        pattern =  "grade_"))
-    #       
-    #       if(current_osteotomy_grade < already_added_same_level_osteotomy_grade) {
-    #         object_added_df <- object_added_df %>%
-    #           filter(object == "xxx") 
-    #       }
-    #       
-    #     }
-    #   }
-    # }
     
     all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
       bind_rows(object_added_df) %>%
       distinct() 
     
-    #   if(str_detect(object_added_df$object, "grade_")){
-    #     if(length(unique((all_objects_to_add_list$objects_df %>% filter(str_detect(object, "grade_")))$object)) > 1){
-    #       all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
-    #     }
-    # }
     if(grepl("grade_", input$object_to_add)){
       if(any(grepl("grade_", all_objects_to_add_list$objects_df$object))){
         if(any(object_added_df$level == (all_objects_to_add_list$objects_df %>% filter(grepl("grade_", object)))$level)){
@@ -3076,8 +3020,6 @@ server <- function(input, output, session) {
                           }
                           
                         }else{
-                          # possible_geoms_reactive$possible_geoms_list
-                          
                           # geoms_list_posterior$geoms[object_added_reactive_df()$object_id] <- postorior_geoms[object_added_reactive_df()$object_id]
                           
                           geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
@@ -3402,11 +3344,6 @@ server <- function(input, output, session) {
             filter(side == "left") %>%
             filter(str_detect(object, "hook|screw")) %>%
             mutate(remove_retain = if_else(level %in% input$left_revision_implants_removed, "remove", "retain")) %>%
-            
-            # group_by(object, level) %>%
-            # mutate(object = if_else(str_detect(object, "pelvic"), paste0(object, "_", row_number()), object)) %>%
-            # ungroup() %>%
-            
             left_join(all_implants_constructed_df %>%
                         select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
             distinct()%>%
@@ -5255,12 +5192,7 @@ server <- function(input, output, session) {
   # ############# ~~~~~~~~~~~~~~ ################## CLEAR ALL WITH RESET ALL    ############# ~~~~~~~~~~~~~~ ################## 
   
   observeEvent(input$reset_all, ignoreInit = TRUE, {
-    
-    # clear_reactive_values_function <- function(reactive_value_list_to_clear){
-    #   for (name in names(reactive_value_list_to_clear)){
-    #     reactive_value_list_to_clear[[name]] <- NULL
-    #   } 
-    # }
+
     clear_reactive_values_function(geoms_list_revision_posterior)
     clear_reactive_values_function(geoms_list_posterior)
     clear_reactive_values_function(geoms_list_posterior_screws)
@@ -5411,10 +5343,6 @@ server <- function(input, output, session) {
         posterior_geoms + 
         posterior_screws_geoms +
         rods_geoms
-        # reactiveValuesToList(geoms_list_revision_posterior) +
-        # reactiveValuesToList(geoms_list_posterior) +
-        # reactiveValuesToList(geoms_list_posterior_screws) +
-        # reactiveValuesToList(rods_list)
     }
   }) 
   
@@ -5941,6 +5869,10 @@ server <- function(input, output, session) {
         additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
       }
       
+      if(length(input$posterior_bone_graft) > 0 & any(input$posterior_bone_graft == "Structural Autograft (harvested through separate fascial incision)")){
+        additional_procedures_list$structural_autograft_separate <- "Structural Autograft (harvested through separate fascial incision)"
+      }
+      
       if(length(input$prior_fusion_levels)>0){
         additional_procedures_list$exploration_prior_fusion <- "Exploration of prior spinal fusion"
       }
@@ -5994,7 +5926,7 @@ server <- function(input, output, session) {
   
   observeEvent(additional_procedures_performed_posterior_reactive(), ignoreInit = TRUE, {
     if(all(additional_procedures_performed_posterior_reactive() %in% additional_procedure_options_vector) == FALSE){
-      additional_procedure_options_vector <<- union(additional_procedure_options_vector, additional_procedures_performed_posterior_reactive())
+      additional_procedure_options_vector <<- unique(union(additional_procedure_options_vector, additional_procedures_performed_posterior_reactive()))
     }
     
   })
@@ -7528,7 +7460,7 @@ server <- function(input, output, session) {
       
       ####### Antifibrinolytic
       if(length(input$anti_fibrinolytic)>0 & any(input$anti_fibrinolytic == "Tranexamic Acid (TXA)")){
-        if(input$txa_maintenance > 0){
+        if(length(input$txa_maintenance)>0 & input$txa_maintenance > 0){
           maintenance_gtt <- glue(" with a {input$txa_maintenance}mg/kg/hr maintenance drip.")
         }else{
           maintenance_gtt <- "."
@@ -7590,6 +7522,13 @@ server <- function(input, output, session) {
         posterior_op_note_inputs_list_reactive$morselized_autograft_separate <- TRUE
       }else{
         posterior_op_note_inputs_list_reactive$morselized_autograft_separate <- FALSE
+      }
+      
+      #######
+      if(any(input$posterior_bone_graft == "Structural Autograft (harvested through separate fascial incision)")){
+        posterior_op_note_inputs_list_reactive$structural_autograft_separate <- TRUE
+      }else{
+        posterior_op_note_inputs_list_reactive$structural_autograft_separate <- FALSE
       }
       
       ####### DRAINS AND DRESSING AND CLOSURE #########
@@ -8097,6 +8036,7 @@ server <- function(input, output, session) {
                                                                      bmp = posterior_op_note_inputs_list_reactive()$posterior_bmp_dose_reactive,
                                                                      biologics_list = posterior_op_note_inputs_list_reactive()$posterior_biologics_list,
                                                                      morselized_autograft_separate = posterior_op_note_inputs_list_reactive()$morselized_autograft_separate,
+                                                                     structural_autograft_separate = posterior_op_note_inputs_list_reactive()$structural_autograft_separate,
                                                                      deep_drains = posterior_op_note_inputs_list_reactive()$deep_drains_posterior,
                                                                      superficial_drains = posterior_op_note_inputs_list_reactive()$superficial_drains_posterior,
                                                                      end_procedure_details = posterior_op_note_inputs_list_reactive()$additional_end_procedure_details,

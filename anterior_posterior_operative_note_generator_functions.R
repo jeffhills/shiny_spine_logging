@@ -629,6 +629,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                        bmp = 0,
                                        biologics_list = list(),
                                        morselized_autograft_separate = FALSE,
+                                       structural_autograft_separate = FALSE,
                                        deep_drains = 0,
                                        superficial_drains = 0,
                                        end_procedure_details = NULL,
@@ -746,11 +747,14 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     
     additional_procedures_for_numbered_list$structural_allograft <- paste(glue("Application of strucural allograft strut at {glue_collapse(structural_allograft_df$level, sep = ', ', last = ', and ')}"))
     
-    # additional_procedures_for_numbered_list <- append(additional_procedures_for_numbered_list, c(as.character(glue("Application of strucural allograft strut at {glue_collapse(structural_allograft_df$level, sep = ', ', last = ', and ')}"))))
   }
   if(morselized_autograft_separate == TRUE){
     additional_procedures_for_numbered_list$morselized_autograft_separate <- "Application of morselized autograft obtained through a separate fascial incision"
   }
+  if(structural_autograft_separate == TRUE){
+    additional_procedures_for_numbered_list$morselized_autograft_separate <- "Application of morselized autograft obtained through a separate fascial incision"
+  }
+  
   
   procedures_numbered_list$primary_procedures <- op_note_procedures_performed_numbered_function(objects_added_df = all_objects_to_add_df, 
                                                                                                 revision_implants_df = revision_implants_df, 
@@ -1071,10 +1075,6 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     if(any(str_detect(posterior_implant_df$side, "bilateral"))){
       
       rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} {left_main_rod_contour} for the left and a {right_main_rod_size} {right_main_rod_material} {right_main_rod_contour} for the right. ") 
-      # rod_statements_list$alignment_and_rod_placement <-  case_when(
-      #   str_detect(string = alignment_correction_technique, pattern = "rod benders") ~ glue("The rods were set into place, secured with set screws and {alignment_correction_technique}."), 
-      #   str_detect(string = str_to_lower(alignment_correction_technique), pattern = "pro-axis") ~ glue("{alignment_correction_technique} and the rods were set into place and secured with set screws."), 
-      #   TRUE ~ glue("The rods were placed into position and secured with set screws. "))
       
       rod_statements_list$alignment_and_rod_placement <-  case_when(
         length(alignment_correction_technique) == 0 ~ paste("The rods were placed into position and secured with set screws."),
@@ -1130,8 +1130,11 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
         procedure_details_list$posterior_instrumentation_rods <- glue_collapse(rod_statements_list, sep = " ")
       }
     }
-    
   }
+  if(left_main_rod_material == "Non-instrumented" & right_main_rod_material ==  "Non-instrumented"){
+    procedure_details_list$posterior_instrumentation_rods <- " "
+  }
+    
   
   if(nrow(structural_allograft_df) > 0){
     procedure_details_list$structural_allograft <- glue("To aid in posterior arthrodesis and to cover the dorsal bony defect, I then proceeded with placement of a structural allograft strut. The dorsal bony defect was measured and a structural allograft was selected and trimmed to the appropriate size. The allograft was secured into place, spanning the level of {glue_collapse(structural_allograft_df$level, sep = ', ', last = ' and ')}. This completed the application of structural allograft.")
@@ -1164,6 +1167,10 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     
     if(morselized_autograft_separate == TRUE){
       fusion_statement_list$morselized_autograft_separate <- "A separate fascial incision was made to obtain additional morselized autograft and this was placed into the fusion bed. "
+    }
+    
+    if(structural_autograft_separate == TRUE){
+      fusion_statement_list$structural_autograft_separate <- "A separate fascial incision was made to obtain structural autograft from ***. This was secured into the fusion bed. "
     }
     
     
