@@ -80,6 +80,14 @@ implant_coordinates_df <- fread("coordinates/implant.csv") %>%
   mutate(object = str_remove_all(object, "_1"))
 
 ##function for loading all possible
+construct_sf_object_helper_function <- function(df, object_id) {
+  if (grepl("grade_1", object_id)) {
+    st_linestring(as.matrix(df))
+  } else {
+    st_polygon(list(as.matrix(df)))
+  }
+}
+
 jh_load_all_possible_objects_function <- function(){
   coordinate_file_names_list <- list(anterior_body = "coordinates/anterior_body.csv",
                                      anterior_disc = "coordinates/anterior_disc.csv",
@@ -92,10 +100,17 @@ jh_load_all_possible_objects_function <- function(){
                                      tumor = "coordinates/tumor.csv")
   
   
-  coordinates_df_list <- map(coordinate_file_names_list, .f = ~ fread(paste0(.x)) %>% 
+  # coordinates_df_list <- map(coordinate_file_names_list, .f = ~ fread(paste0(.x)) %>% 
+  #                              group_by(object_id) %>%
+  #                              nest() %>%
+  #                              mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+  #                              select(object_id, object_constructed)
+  # )
+  
+  coordinates_df_list <- map(coordinate_file_names_list, .f = ~ fread(.x) %>%
                                group_by(object_id) %>%
                                nest() %>%
-                               mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+                               mutate(object_constructed = map2(data, object_id, construct_sf_object_helper_function)) %>%
                                select(object_id, object_constructed)
   )
   

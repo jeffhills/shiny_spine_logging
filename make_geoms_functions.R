@@ -56,7 +56,10 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   
   ## OSTEOTOMIES
   if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_1"))){
-    geoms_list_posterior$osteotomy_1_sf <- geom_sf(data = st_geometrycollection((all_posterior_objects_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
+    # geoms_list_posterior$osteotomy_1_sf <- geom_sf(data = st_geometrycollection((all_posterior_objects_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
+    geoms_list_posterior$osteotomy_1_sf <- geom_sf(data = st_multilinestring((all_posterior_objects_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
+    
+    # geom_sf(data = st_multilinestring(x = (test_grade_1_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
   }else{
     geoms_list_posterior$osteotomy_1_sf <- NULL
   }

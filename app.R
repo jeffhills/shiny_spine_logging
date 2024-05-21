@@ -2579,7 +2579,8 @@ server <- function(input, output, session) {
         left_join(fread("coordinates/osteotomy.csv") %>%
                     group_by(object_id) %>%
                     nest() %>%
-                    mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+                    # mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+                    mutate(object_constructed = map2(data, object_id, construct_sf_object_helper_function)) %>%
                     select(object_id, object_constructed))
       
       all_implants_constructed_df <<- all_implants_constructed_df %>%
@@ -3012,7 +3013,9 @@ server <- function(input, output, session) {
                           
                           if(req(object_added_reactive_df()$side) == "left"){
                             
-                            geoms_list_posterior_screws$left_screws[length(geoms_list_posterior_screws$left_screws)+1] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
+                            # geoms_list_posterior_screws$left_screws[length(geoms_list_posterior_screws$left_screws)+1] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
+                            
+                            geoms_list_posterior_screws$left_screws[object_added_reactive_df()$object_id] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
                             
                           }else if(object_added_reactive_df()$side == "right"){
                             
@@ -3177,6 +3180,16 @@ server <- function(input, output, session) {
     )
     all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df %>%
       anti_join(implant_to_remove_df)
+    
+    if(grepl("screw", implant_to_remove_df$object)){
+      if(implant_to_remove_df$side == "left"){
+        geoms_list_posterior_screws$left_screws[implant_to_remove_df$object_id] <- NULL
+        
+      }
+      if(implant_to_remove_df$side == "right"){
+        geoms_list_posterior_screws$right_screws[implant_to_remove_df$object_id] <- NULL
+      } 
+    }
   })
   
   
