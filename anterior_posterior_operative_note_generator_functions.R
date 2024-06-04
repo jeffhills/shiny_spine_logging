@@ -620,7 +620,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                        right_main_rod_size = "5.5",
                                        right_main_rod_material = "Titanium",
                                        right_main_rod_contour = "rod was cut to the appropriate length and contoured",
-                                       additional_rods_statement = NULL,
+                                       additional_rods_statement = list(),
                                        antibiotics = vector(),
                                        antifibrinolytic = "",
                                        prior_fusion_levels_vector = vector(),
@@ -1024,6 +1024,13 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                                                                neuromonitoring_emg_statement = neuromonitoring_list$emg, 
                                                                                implant_start_point_method = implant_start_point_method_input, 
                                                                                implant_confirmation_method = implant_confirmation_method)
+    
+    if(str_detect(procedure_details_list$procedures, "rods were connected bilaterally and the osteotomy was closed in a controlled fashion.")){
+      if(any(str_detect(names(additional_rods_statement), "satellite"))){
+        procedure_details_list$procedures <- str_replace_all(procedure_details_list$procedures, "rods were connected bilaterally and the osteotomy was closed in a controlled fashion.", 
+                        "rods were connected bilaterally using a satellite rod configuration, and the osteotomy was closed in a controlled fashion")
+      }
+    }
   }
   
   if(length(complications_list) > 0){
@@ -1088,7 +1095,8 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
         }
       }
       
-      rod_statements_list$additional_rods_statement <- additional_rods_statement
+      # rod_statements_list$additional_rods_statement <- additional_rods_statement 
+      rod_statements_list$additional_rods_statement <- glue_collapse(additional_rods_statement, sep = " ") 
       
       if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
         rod_statements_list$set_screws <- glue("The rod was used to correct the alignment due to the fracture. Set screws were then tightened with a final tightener to the appropriate torque.")
@@ -1113,7 +1121,8 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     }else{
       if(any(str_detect(posterior_implant_df$side, "left"))){
         rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} {left_main_rod_contour} for the left and the rod was placed into position and secured with set screws.")
-        rod_statements_list$additional_rods_statement <- additional_rods_statement
+        # rod_statements_list$additional_rods_statement <- additional_rods_statement
+        rod_statements_list$additional_rods_statement <- glue_collapse(additional_rods_statement, sep = " ") 
         rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
         rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants.")
         rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}.")
@@ -1122,7 +1131,8 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
         
       }else{
         rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {right_main_rod_size} {right_main_rod_material} {right_main_rod_contour} for the right and the rod was placed into position and secured with set screws.")
-        rod_statements_list$additional_rods_statement <- additional_rods_statement
+        # rod_statements_list$additional_rods_statement <- additional_rods_statement
+        rod_statements_list$additional_rods_statement <- glue_collapse(additional_rods_statement, sep = " ") 
         rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
         rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants.")
         rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}.")

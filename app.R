@@ -2839,20 +2839,22 @@ server <- function(input, output, session) {
         bind_rows(anterior_interbody_df)
     }
     
-    
-    
-    all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-      bind_rows(object_added_df) %>%
-      distinct() 
-    
-    if(grepl("grade_", input$object_to_add)){
-      if(any(grepl("grade_", all_objects_to_add_list$objects_df$object))){
-        if(any(object_added_df$level == (all_objects_to_add_list$objects_df %>% filter(grepl("grade_", object)))$level)){
-          all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
-          
+    if(nrow(object_added_df)>0){
+      all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
+        bind_rows(object_added_df) %>%
+        distinct() 
+      
+      if(grepl("grade_", input$object_to_add)){
+        if(any(grepl("grade_", all_objects_to_add_list$objects_df$object))){
+          if(any(object_added_df$level == (all_objects_to_add_list$objects_df %>% filter(grepl("grade_", object)))$level)){
+            all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
+            
+          }
         }
       }
     }
+    
+
     
     object_added_df
     
@@ -2998,37 +3000,39 @@ server <- function(input, output, session) {
                     input$plot_double_click,
                     all_objects_to_add_list$objects_df), ignoreInit = TRUE, {
                       
-                      if(input$spine_approach == "Anterior"){
-                        anterior_df <- all_objects_to_add_list$objects_df %>%
-                          filter(approach == "anterior")
-                        
-                        anterior_geoms_list <- jh_make_anterior_geoms_function(all_anterior_objects_df = anterior_df)
-                        
-                        geoms_list_anterior_diskectomy$geoms <- anterior_geoms_list$geoms_list_anterior_diskectomy
-                        geoms_list_anterior_interbody$geoms <- anterior_geoms_list$geoms_list_anterior_interbody
-                        geoms_list_anterior_instrumentation$geoms <- anterior_geoms_list$geoms_list_anterior_instrumentation
-                        
-                      }else{
-                        if(str_detect(input$object_to_add, "screw")){
+                      if(nrow(object_added_reactive_df())>0){
+                        if(input$spine_approach == "Anterior"){
+                          anterior_df <- all_objects_to_add_list$objects_df %>%
+                            filter(approach == "anterior")
                           
-                          if(req(object_added_reactive_df()$side) == "left"){
-                            
-                            # geoms_list_posterior_screws$left_screws[length(geoms_list_posterior_screws$left_screws)+1] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
-                            
-                            geoms_list_posterior_screws$left_screws[object_added_reactive_df()$object_id] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
-                            
-                          }else if(object_added_reactive_df()$side == "right"){
-                            
-                            geoms_list_posterior_screws$right_screws[object_added_reactive_df()$object_id] <- geoms_right_screws_list[object_added_reactive_df()$object_id]
-                          }
+                          anterior_geoms_list <- jh_make_anterior_geoms_function(all_anterior_objects_df = anterior_df)
+                          
+                          geoms_list_anterior_diskectomy$geoms <- anterior_geoms_list$geoms_list_anterior_diskectomy
+                          geoms_list_anterior_interbody$geoms <- anterior_geoms_list$geoms_list_anterior_interbody
+                          geoms_list_anterior_instrumentation$geoms <- anterior_geoms_list$geoms_list_anterior_instrumentation
                           
                         }else{
-                          # geoms_list_posterior$geoms[object_added_reactive_df()$object_id] <- postorior_geoms[object_added_reactive_df()$object_id]
-                          
-                          geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
-                                                                                           filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
-                                                                                         plot_with_patterns = input$plot_with_patterns_true)
-                        }
+                          if(str_detect(input$object_to_add, "screw")){
+                            
+                            if(req(object_added_reactive_df()$side) == "left"){
+                              
+                              # geoms_list_posterior_screws$left_screws[length(geoms_list_posterior_screws$left_screws)+1] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
+                              
+                              geoms_list_posterior_screws$left_screws[object_added_reactive_df()$object_id] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
+                              
+                            }else if(object_added_reactive_df()$side == "right"){
+                              
+                              geoms_list_posterior_screws$right_screws[object_added_reactive_df()$object_id] <- geoms_right_screws_list[object_added_reactive_df()$object_id]
+                            }
+                            
+                          }else{
+                            # geoms_list_posterior$geoms[object_added_reactive_df()$object_id] <- postorior_geoms[object_added_reactive_df()$object_id]
+                            
+                            geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
+                                                                                             filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
+                                                                                           plot_with_patterns = input$plot_with_patterns_true)
+                          }
+                        } 
                       }
                     }
   )
@@ -3151,21 +3155,23 @@ server <- function(input, output, session) {
   observeEvent(input$plot_click, ignoreInit = TRUE, {
     # object_added <- object_added_reactive_df()$object[1]
     # level_added <- object_added_reactive_df()$level[1]
-    if(object_added_reactive_df()$object[1] == "decompression_diskectomy_fusion"){
-      # if(object_added_reactive_df()$level[1] %in% c("C2-C3", "C3-C4", "C4-C5", "C5-C6", "C6-C7", "C7-T1", "T1-T2", "T2-T3")){
+    if(nrow(object_added_reactive_df())>0){
+      if(object_added_reactive_df()$object[1] == "decompression_diskectomy_fusion"){
+        # if(object_added_reactive_df()$level[1] %in% c("C2-C3", "C3-C4", "C4-C5", "C5-C6", "C6-C7", "C7-T1", "T1-T2", "T2-T3")){
         if(input$plot_click$y > 0.7){
-        showModal(
-          modalDialog(
-            size = "l",
-            easyClose = FALSE,
-            awesomeRadio(inputId = paste0(str_replace_all(str_to_lower(object_added_reactive_df()$level[1]), pattern = "-", "_"), "_pll"),
-                         label = glue("Was the PLL at {object_added_reactive_df()$level[1]} taken down?"), 
-                         choices = c("No", "Yes"), 
-                         inline = TRUE,
-                         width = "100%")
+          showModal(
+            modalDialog(
+              size = "l",
+              easyClose = FALSE,
+              awesomeRadio(inputId = paste0(str_replace_all(str_to_lower(object_added_reactive_df()$level[1]), pattern = "-", "_"), "_pll"),
+                           label = glue("Was the PLL at {object_added_reactive_df()$level[1]} taken down?"), 
+                           choices = c("No", "Yes"), 
+                           inline = TRUE,
+                           width = "100%")
+            )
           )
-        )
-      }
+        }
+      } 
     }
   })
   
@@ -4997,7 +5003,7 @@ server <- function(input, output, session) {
   #####################  ################### ######################### CLEAR SUPPLEMENTAL RODS IF ADDING MORE IMPLANTS  ########
   
   
-  observeEvent(list(input$plot_click,input$double_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
+  observeEvent(list(input$plot_click,input$plot_double_click, input$reset_all), ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(str_detect(input$object_to_add, "screw|hook|wire") && 
        any(input$add_left_accessory_rod, 
            input$add_left_satellite_rod,
@@ -7182,7 +7188,8 @@ server <- function(input, output, session) {
         added_rods_statement <- glue_collapse(additional_rods_list, sep = " ")
       }
     }
-    added_rods_statement
+    additional_rods_list
+    # added_rods_statement
   }) 
   # bindEvent(input$implants_complete, ignoreInit = TRUE) ### THIS MESSES UP THE CONFIRM PROCEDURES AT THE END
   

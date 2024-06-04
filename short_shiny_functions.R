@@ -2275,7 +2275,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       connector_list$kickstand_rod_top_connector <- jh_sf_rod_object_from_matrix_function(kickstand_connector_matrix_list$top_connector_matrix)
       
-      rods_list$kickstand_rod <- jh_sf_rod_object_from_matrix_function(kickstand_rod_matrix) 
+      rods_list$kickstand_rod_sf <- jh_sf_rod_object_from_matrix_function(kickstand_rod_matrix) 
       
       main_rod_df <- unilateral_full_implant_df %>%
         filter(level != kickstand_rod_vector[2])%>%
@@ -2314,16 +2314,16 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         distinct()
       
       satellite_rod_matrix <- satellite_rods_vector_df %>%
-        mutate(x = if_else(x < 0.5, x + 0.004, x - 0.004)) %>%
+        mutate(x = if_else(x < 0.5, x - 0.004, x + 0.004)) %>%
         remove_missing() %>%
         select(x, y) %>%
         as.matrix()
       
-      rods_list$satellite_rod_sf <- jh_sf_rod_object_from_matrix_function(satellite_rod_matrix) 
+      # rods_list$satellite_rod_sf <- jh_sf_rod_object_from_matrix_function(satellite_rod_matrix) 
 
       main_rod_df <- main_rod_df %>%
-        anti_join(y = satellite_rods_vector_df) %>%
-        mutate(x = if_else(x < 0.5, x - 0.002, x + 0.002))
+        anti_join(y = satellite_rods_vector_df) 
+        # mutate(x = if_else(x < 0.5, x - 0.002, x + 0.002))
       
       main_rod_matrix <- main_rod_df %>%
         select(x, y) %>%
@@ -2482,7 +2482,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       connector_list$accessory_rod_top_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$top_connector_matrix)
       connector_list$accessory_rod_bottom_connector <- jh_sf_rod_object_from_matrix_function(connector_matrix_list$bottom_connector_matrix)
       
-      rods_list$accessory_rod <- jh_sf_rod_object_from_matrix_function(accessory_rod_matrix)
+      rods_list$accessory_rod_sf <- jh_sf_rod_object_from_matrix_function(accessory_rod_matrix)
     }
     
     if(add_custom_rods == TRUE){
@@ -2507,8 +2507,34 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       rods_list <- append(rods_list, custom_rods_list)
       
     }
+    
+    possible_rods_df <- tibble(rod = c("revision_rod_sf",
+                                       "satellite_rod_sf",
+                                       "linked_proximal_rod_sf",
+                                       "linked_distal_rod_sf",
+                                       "main_rod_sf",
+                                       "intercalary_distal_rod_sf",
+                                       "intercalary_proximal_rod_sf",
+                                       "intercalary_rod_sf",
+                                       "accessory_rod_sf",
+                                       "kickstand_rod_sf", 
+                                       "custom_rod_1_sf",
+                                       "custom_rod_2_sf",
+                                       "custom_rod_3_sf",
+                                       "custom_rod_4_sf",
+                                       "custom_rod_5_sf"
+    ))
+    
+    rods_sorted_df <- possible_rods_df%>%
+      filter(rod %in% names(rods_list)) %>%
+      left_join(enframe(rods_list) %>% rename(rod = name, constructed_rod = value))
+    
+    sorted_rod_list <- rods_sorted_df$constructed_rod
+    
+    names(sorted_rod_list) <- rods_sorted_df$rod
+    
 
-    return(list(rod_list = rods_list, 
+    return(list(rod_list = sorted_rod_list, 
                 connector_list = connector_list))
   }else{
     list(rod_list = NULL, 
