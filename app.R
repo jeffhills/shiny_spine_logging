@@ -5570,14 +5570,14 @@ server <- function(input, output, session) {
         "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place with set screws. ",
         "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
         "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
-        "In situ rod benders were then used to correct the coronal and sagittal plane. ",
+        "In situ rod benders were used to aide in correcting the alignment. ",
         "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
         "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
         "Other")
     }else{
       deformity_correction_techniques_vector <- c(
         "The rods were secured into place with set screws. ",
-        "In situ rod benders were then used to correct the coronal and sagittal plane. ",
+        "In situ rod benders were used to aide in correcting the alignment. ",
         "Other")
     }
     
@@ -5625,7 +5625,7 @@ server <- function(input, output, session) {
           "The rods were secured into place with set screws. ",
           "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
           "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
-          "In situ rod benders were then used to correct the coronal and sagittal plane. ",
+          "In situ rod benders were used to aide in correcting the alignment. ",
           "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
           "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
           "Other",
@@ -5633,7 +5633,7 @@ server <- function(input, output, session) {
       }else{
         deformity_correction_techniques_vector <- c(
           "The rods were secured into place with set screws. ",
-          "In situ rod benders were then used to correct the coronal and sagittal plane. ",
+          "In situ rod benders were used to aide in correcting the alignment. ",
           "Other",
           "NA")
       }
@@ -6034,7 +6034,7 @@ server <- function(input, output, session) {
       prior_surgery_for_revision_statement <- ""
     }
     
-    indications_list$opening <- glue("This is a {age} year-old {str_to_lower(input$sex)}{prior_surgery_for_revision_statement} that presented with {symptoms} and imaging findings consistent with these symptoms.")
+    indications_list$opening <- glue("This is a {age} year-old {str_to_lower(input$sex)}{prior_surgery_for_revision_statement} that presented with {symptoms} and imaging consistent with ***.")
     
     if(length(input$diagnosis_category)>0){
       if(any(input$diagnosis_category == "msk") | any(input$diagnosis_category == "deformity")){
@@ -7579,16 +7579,22 @@ server <- function(input, output, session) {
       
       
       #######
-      if(any(input$alignment_correction_method == "Other")){
-        posterior_op_note_inputs_list_reactive$alignment_correction_method <- gsub("Other", input$alignment_correction_method_other, input$alignment_correction_method, ignore.case = TRUE)
-      }else{
-        if(length(input$alignment_correction_method)>0){
-          posterior_op_note_inputs_list_reactive$alignment_correction_method <- input$alignment_correction_method
+      if(length(input$alignment_correction_method)>0){
+        if(any(input$alignment_correction_method == "Other")){
+          # posterior_op_note_inputs_list_reactive$alignment_correction_method <- gsub("Other", input$alignment_correction_method_other, input$alignment_correction_method, ignore.case = TRUE)
+          posterior_op_note_inputs_list_reactive$alignment_correction_method <- glue_collapse(gsub("Other", input$alignment_correction_method_other, input$alignment_correction_method, ignore.case = TRUE), sep = "")
+          
         }else{
-          posterior_op_note_inputs_list_reactive$alignment_correction_method <- "The rods were set into place and secured with set screws. "
+          if(length(input$alignment_correction_method)>0){
+            posterior_op_note_inputs_list_reactive$alignment_correction_method <- glue_collapse(input$alignment_correction_method, sep = "")
+          }else{
+            posterior_op_note_inputs_list_reactive$alignment_correction_method <- "The rods were set into place and secured with set screws. "
+          }
         }
-        
+      }else{
+        posterior_op_note_inputs_list_reactive$alignment_correction_method <- ""
       }
+
       
       #######
       posterior_op_note_inputs_list_reactive$sex <- input$sex

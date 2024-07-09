@@ -1163,7 +1163,6 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                   hr(),
                   if(implants_placed == "yes"){
                     if(str_detect(procedure_approach, "posterior")){
-                    # if(procedure_approach == "posterior" | procedure_approach == "combined"){
                       prettyCheckboxGroup(inputId = "alignment_correction_method", 
                                           label = "Select any techniques for alignment correction:", 
                                           choices = deformity_correction_choices,
@@ -1173,7 +1172,6 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                     }
                   },
                   if(implants_placed == "yes" && str_detect(procedure_approach, "posterior")){
-                  # if(implants_placed == "yes" && (procedure_approach == "posterior" | procedure_approach == "combined")){
                     conditionalPanel(condition = "input.alignment_correction_method.indexOf('Other') > -1",
                                      textInput(inputId = "alignment_correction_method_other", 
                                                label = "Enter 'Other' Method as a full sentence:", 
@@ -2087,7 +2085,7 @@ addition_surgical_details_modal_box_2_function <-
             choices_vector = c("Vancomycin Powder",
                                "Antibiotic Beads", 
                                "Acellular Collagen Matrix", 
-                               "Hydrolyzed Collegen Powder", 
+                               "Hydrolyzed Collagen Powder", 
                                "Other"),
             initial_value_selected = additional_end_procedure_details_anterior,
             return_as_full_table = TRUE

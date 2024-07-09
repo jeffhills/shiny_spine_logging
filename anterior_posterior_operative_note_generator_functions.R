@@ -1083,11 +1083,16 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       
       rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} {left_main_rod_contour} for the left and a {right_main_rod_size} {right_main_rod_material} {right_main_rod_contour} for the right. ") 
       
-      rod_statements_list$alignment_and_rod_placement <-  case_when(
-        length(alignment_correction_technique) == 0 ~ paste("The rods were placed into position and secured with set screws."),
-        alignment_correction_technique[1] == "NA" ~ paste("The rods were placed into position and secured with set screws."),
-        length(alignment_correction_technique) > 0 ~ paste(glue_collapse(alignment_correction_technique, sep = " "))
-      )
+      # rod_statements_list$alignment_and_rod_placement <-  case_when(
+      #   length(alignment_correction_technique) == 0 ~ paste("The rods were placed into position and secured with set screws."),
+      #   alignment_correction_technique[1] == "NA" ~ paste("The rods were placed into position and secured with set screws."),
+      #   length(alignment_correction_technique) > 0 ~ paste(glue_collapse(alignment_correction_technique, sep = " "))
+      # )
+      if(str_length(alignment_correction_technique)>5){
+        rod_statements_list$alignment_and_rod_placement <- alignment_correction_technique
+      }else{
+        rod_statements_list$alignment_and_rod_placement <- "The rods were placed into position and secured with set screws."
+      }
         
       if(nrow(revision_implants_df) > 0){
         if(any(revision_implants_df$prior_rod_connected == "yes")){
@@ -1095,8 +1100,9 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
         }
       }
       
-      # rod_statements_list$additional_rods_statement <- additional_rods_statement 
-      rod_statements_list$additional_rods_statement <- glue_collapse(additional_rods_statement, sep = " ") 
+      if(length(additional_rods_statement)>0){
+        rod_statements_list$additional_rods_statement <- glue_collapse(additional_rods_statement, sep = " ") 
+      }
       
       if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
         rod_statements_list$set_screws <- glue("The rod was used to correct the alignment due to the fracture. Set screws were then tightened with a final tightener to the appropriate torque.")
@@ -1219,17 +1225,9 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                                                            if_else(length(closure) > 1 | any(str_to_lower(closure) == "staples"), "were", "was"),
                                                            "used to close the skin layer."
       )
-      # closure_statements_list$superficial_closure <- paste("The subdermal layer was closed and",
-      #                                                      str_to_lower(glue_collapse(closure, sep = ', ', last = ' and ')),
-      #                                                      if_else(length(closure) == 1, "was", "were"),
-      #                                                      "used to close the skin layer."
-      # )
-      
     }
-    
   }else{
     closure_statements_list$superficial_closure <- "The subdermal layers and skin layers were then closed."
-    
   }
   ###### LOCAL ANESTHESIA
   if(str_detect(string = str_to_lower(local_anesthesia), pattern = "closure")){ 
@@ -1243,6 +1241,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     closure_statements_list$dressing <- str_replace_all(str_to_sentence(glue("Lastly, {glue_collapse(dressing, sep = ', ', last = ', and ')} was applied to the surgical site.")), pattern = "steristrips was", replacement = "steristrips were")
     
   }
+  closure_statements_list <- closure_statements_list[closure_statements_list != "character(0)"]
   
   procedure_details_list$closure <- glue_collapse(closure_statements_list, sep = " ")
   
@@ -1279,7 +1278,6 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   }
   
   procedure_paragraphs <- str_replace_all(procedure_paragraphs, "a  ", "a ")
-  procedure_paragraphs <- str_remove_all(procedure_paragraphs, "character(0)")
   
   if(instruments_used_for_bony_work == "Bone scalpel only"){
     procedure_paragraphs <- str_replace_all(procedure_paragraphs, "high-speed burr", "bone scalpel")
@@ -1296,6 +1294,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     procedure_paragraphs <- str_replace_all(string = procedure_paragraphs, pattern = lower_case_levels[[i]], replacement = corrected_levels[[i]])
   }
   
+  procedure_paragraphs <- str_remove_all(procedure_paragraphs, "character(0)")
   
   return(list(procedure_details_paragraph = procedure_paragraphs, 
               procedures_numbered_paragraph = procedures_numbered_list[[1]] 
