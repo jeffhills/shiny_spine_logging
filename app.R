@@ -19,11 +19,12 @@ library(nngeo)
 library(shinydashboard)
 library(data.table)
 # library(shinyjs)
+library(httr)
 
+# httr::set_config(config = authenticate())
 
-
+# httr::set_config(config = )
 # library(profvis)
-
 
 
 # packageList <- c("shiny", "shinyWidgets", "sf", "tidyverse", "shinyBS", "cowplot", "magick", "ggpattern", "glue", "rlist",
@@ -1517,7 +1518,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$search_for_prior_patient, ignoreInit = TRUE, {
     
-    all_patient_ids_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), 
+    all_patient_ids_df <- exportRecordsTyped(rcon = rcon_reactive$rcon,
+                                             fields = c("record_id", "last_name", "first_name", "date_of_birth"), 
                                         events = "enrollment_arm_1") %>%
       type.convert(as.is = TRUE) %>%
       select(record_id, last_name, first_name, date_of_birth) %>%
