@@ -1517,7 +1517,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$search_for_prior_patient, ignoreInit = TRUE, {
     
-    all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), 
+    all_patient_ids_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), 
                                         events = "enrollment_arm_1") %>%
       type.convert(as.is = TRUE) %>%
       select(record_id, last_name, first_name, date_of_birth) %>%
@@ -1539,18 +1539,16 @@ server <- function(input, output, session) {
       if(match_found == TRUE){
         record_number <- joined_df$record_id[[1]]
         
-        existing_patient_data$patient_df_full <- exportRecords(rcon = rcon_reactive$rcon, records = record_number, fields = append(c("record_id", "dos_surg_repeating", "approach_repeating", "side", "object"), str_to_lower(str_replace_all(levels_vector, pattern = "-", replacement = "_")))) %>%                    as_tibble()  %>%
+        existing_patient_data$patient_df_full <- exportRecordsTyped(rcon = rcon_reactive$rcon, records = record_number, fields = append(c("record_id", "dos_surg_repeating", "approach_repeating", "side", "object"), str_to_lower(str_replace_all(levels_vector, pattern = "-", replacement = "_")))) %>%                    as_tibble()  %>%
           type.convert(as.is = TRUE) %>%
           as_tibble() %>%
           filter(redcap_repeat_instrument == "procedures_by_level_repeating")  %>%
           mutate(across(.cols = everything(), .fns = ~ as.character(.x))) %>%
-          select(-redcap_event_name,
-                 -redcap_repeat_instrument,
-                 -redcap_repeat_instance, 
-                 -redcap_survey_identifier,
-                 -patient_details_complete, 
-                 -patient_details_timestamp, 
-                 -procedures_by_level_repeating_complete) %>%
+          select(record_id,
+                 dos_surg_repeating, 
+                 approach_repeating, 
+                 side, 
+                 contains(str_to_lower(implant_levels_numbered_df$level))) %>%
           pivot_longer(cols = c(-record_id, -approach_repeating, -side, -dos_surg_repeating), names_to = "level", values_to = "object") %>%
           filter(!is.na(object)) %>%
           rename(date_of_surgery = dos_surg_repeating)%>%
@@ -1560,6 +1558,21 @@ server <- function(input, output, session) {
           mutate(level = str_replace_all(string = level, pattern = "S2ai", replacement = "S2AI")) %>%
           rename(approach = approach_repeating)
         
+          # select(-redcap_event_name,
+          #        -redcap_repeat_instrument,
+          #        -redcap_repeat_instance, 
+          #        -redcap_survey_identifier,
+          #        -patient_details_complete, 
+          #        -patient_details_timestamp, 
+          #        -procedures_by_level_repeating_complete) %>%
+          # pivot_longer(cols = c(-record_id, -approach_repeating, -side, -dos_surg_repeating), names_to = "level", values_to = "object") %>%
+          # filter(!is.na(object)) %>%
+          # rename(date_of_surgery = dos_surg_repeating)%>%
+          # mutate(level = str_to_title(str_replace_all(string = level, pattern = "_", replacement = "-"))) %>%
+          # filter(object != " ") %>%
+          # filter(object != "") %>%
+          # mutate(level = str_replace_all(string = level, pattern = "S2ai", replacement = "S2AI")) %>%
+          # rename(approach = approach_repeating)
         
         
         existing_patient_data$patient_df <- existing_patient_data$patient_df_full
@@ -1568,7 +1581,7 @@ server <- function(input, output, session) {
         
         existing_patient_data$record_id <- record_number
         
-        existing_patient_data$surgical_dates_df <- exportRecords(rcon = rcon_reactive$rcon, 
+        existing_patient_data$surgical_dates_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
                                                                  records = existing_patient_data$record_id) %>%
           type.convert(as.is = TRUE) %>%
           mutate(last_name = str_to_lower(last_name),
@@ -1579,7 +1592,7 @@ server <- function(input, output, session) {
           mutate(stage_number = if_else(is.na(stage_number), 1, stage_number)) %>%
           filter(stage_number == 1)
         
-        existing_patient_data$prior_surgical_summary <- exportRecords(rcon = rcon_reactive$rcon, 
+        existing_patient_data$prior_surgical_summary <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
                                                                       records = existing_patient_data$record_id, 
                                                                       fields = c("record_id", 
                                                                                  "date_of_surgery", 
@@ -1753,7 +1766,7 @@ server <- function(input, output, session) {
       complication_neuro <- "NA"
     }
     
-    complication_count_df <- exportRecords(rcon = rcon_reactive$rcon, 
+    complication_count_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
                                            records = existing_patient_data$record_id) %>%
       type.convert(as.is = TRUE) %>%
       filter(redcap_event_name == "complication_arm_1")
@@ -9175,7 +9188,7 @@ server <- function(input, output, session) {
       
       
       if(redcapAPI::exportNextRecordName(rcon = rcon_reactive$rcon)>1){
-        all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
+        all_patient_ids_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, fields = c("record_id", "last_name", "first_name", "date_of_birth"), events = "enrollment_arm_1") %>%
           type.convert(as.is = TRUE) %>%
           select(record_id, last_name, first_name, date_of_birth) %>%
           mutate(last_name = str_to_lower(last_name),
@@ -9196,7 +9209,7 @@ server <- function(input, output, session) {
         if(match_found == TRUE){
           record_number <- joined_df$record_id[[1]]
           
-          max_repeat_instances_df <- exportRecords(rcon = rcon_reactive$rcon, records = record_number) %>%
+          max_repeat_instances_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, records = record_number) %>%
             type.convert(as.is = TRUE) %>%
             as_tibble() %>%
             select(redcap_repeat_instrument, redcap_repeat_instance) %>%

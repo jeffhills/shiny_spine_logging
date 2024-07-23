@@ -466,6 +466,7 @@ startup_modal_box_diagnosis_symptoms <-
            multi_approach_starting_position = "Posterior",
            spinal_regions_selected = c("Lumbar"),
            primary_or_revision = "Primary",
+           unplanned_reoperation = "NA",
            levels_with_prior_decompression = "",
            prior_fusion_levels = "",
            prior_instrumentation = FALSE,
@@ -672,6 +673,23 @@ startup_modal_box_diagnosis_symptoms <-
                 checkboxes_inline = TRUE,
                 individual_buttons = TRUE
               ), 
+              conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
+                               fluidRow(column(
+                                 width = 12,
+                                 jh_make_shiny_table_row_function(
+                                   left_column_label = "Unplanned Reoperation?",
+                                   input_type = "awesomeRadio",
+                                   input_id = "unplanned_reoperation",
+                                   left_column_percent_width = 50,
+                                   font_size = 16,
+                                   choices =  c("No", "Yes", "NA"), 
+                                   initial_value_selected = unplanned_reoperation,
+                                   checkboxes_inline = TRUE,
+                                   individual_buttons = TRUE
+                                 )
+                               )
+                               )
+              ),
               conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
                                fluidRow(column(
                                  width = 12,
