@@ -1320,8 +1320,8 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
-  # options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
-  # options(shiny.reactlog=TRUE) 
+  options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
+  options(shiny.reactlog=TRUE)
   
   logging_timer_reactive_list <- reactiveValues()
   logging_timer_reactive_list$elapsed_time <- 0
@@ -1343,8 +1343,8 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$multi_approach_starting_position, ignoreInit = TRUE, {
-    if(input$multiple_approach == TRUE){
-      if(input$multi_approach_starting_position != "Posterior"){
+    if (!is.null(input$multiple_approach) && input$multiple_approach == TRUE) {
+      if (!is.null(input$multi_approach_starting_position) && input$multi_approach_starting_position != "Posterior") {
         updateActionButton(session = session, inputId = "proceed_to_other_approach", label = "Done with Anterior, Switch to Posterior")
       }
     }
@@ -1352,7 +1352,7 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$proceed_to_other_approach, ignoreInit = TRUE, {
-    if(input$spine_approach == "Anterior"){
+    if (!is.null(input$spine_approach) && input$spine_approach == "Anterior") {
       updateRadioGroupButtons(session = session,
                               inputId = "spine_approach", 
                               label = NULL,
@@ -1407,34 +1407,7 @@ server <- function(input, output, session) {
                                                body_interspace = character(),
                                                fixation_uiv_liv = character(),
                                                object_constructed = list())
-  # jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left") <- tibble(level = character(),
-  #                                              approach = character(),
-  #                                              category = character(),
-  #                                              vertebral_number = double(),
-  #                                              implant = character(),
-  #                                              object = character(),
-  #                                              side = character(),
-  #                                              x = double(),
-  #                                              y = double(),
-  #                                              fusion = character(),
-  #                                              interbody_fusion = character(),
-  #                                              body_interspace = character(),
-  #                                              fixation_uiv_liv = character(),
-  #                                              object_constructed = list())
-  # jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right") <- tibble(level = character(),
-  #                                              approach = character(),
-  #                                              category = character(),
-  #                                              vertebral_number = double(),
-  #                                              implant = character(),
-  #                                              object = character(),
-  #                                              side = character(),
-  #                                              x = double(),
-  #                                              y = double(),
-  #                                              fusion = character(),
-  #                                              interbody_fusion = character(),
-  #                                              body_interspace = character(),
-  #                                              fixation_uiv_liv = character(),
-  #                                              object_constructed = list())
+
   
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
@@ -1486,7 +1459,7 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$open_patient_details_modal, ignoreInit = TRUE, ignoreNULL = TRUE, {
-    if(input$open_patient_details_modal > 0){
+    if (!is.null(input$open_patient_details_modal) && input$open_patient_details_modal > 0) {
       showModal(startup_modal_box(starting_first_name = input$patient_first_name, 
                                   starting_last_name = input$patient_last_name, 
                                   starting_dob = input$date_of_birth,
@@ -1518,48 +1491,49 @@ server <- function(input, output, session) {
   
   observeEvent(input$search_for_prior_patient, ignoreInit = TRUE, {
     
-    all_patient_ids_df <- exportRecordsTyped(rcon = rcon_reactive$rcon,
-                                             fields = c("record_id", "last_name", "first_name", "date_of_birth"), 
-                                        events = "enrollment_arm_1") %>%
-      type.convert(as.is = TRUE) %>%
-      select(record_id, last_name, first_name, date_of_birth) %>%
-      mutate(last_name = str_to_lower(last_name),
-             first_name = str_to_lower(first_name))
-    
-    if(nrow(all_patient_ids_df)>0){
-      joined_df <- all_patient_ids_df %>%
-        filter(last_name == str_to_lower(input$patient_last_name),  
-               first_name == str_to_lower(input$patient_first_name),
-               date_of_birth == paste(input$date_of_birth))
+    if (!is.null(rcon_reactive$rcon)) {  
+      all_patient_ids_df <- exportRecordsTyped(rcon = rcon_reactive$rcon,
+                                               fields = c("record_id", "last_name", "first_name", "date_of_birth"), 
+                                               events = "enrollment_arm_1") %>%
+        type.convert(as.is = TRUE) %>%
+        select(record_id, last_name, first_name, date_of_birth) %>%
+        mutate(last_name = str_to_lower(last_name),
+               first_name = str_to_lower(first_name))
       
-      if(nrow(joined_df)>0){
-        match_found <- TRUE
-      }else{
-        match_found <- FALSE
-      }
-      
-      if(match_found == TRUE){
-        record_number <- joined_df$record_id[[1]]
+      if(nrow(all_patient_ids_df)>0){
+        joined_df <- all_patient_ids_df %>%
+          filter(last_name == str_to_lower(input$patient_last_name),  
+                 first_name == str_to_lower(input$patient_first_name),
+                 date_of_birth == paste(input$date_of_birth))
         
-        existing_patient_data$patient_df_full <- exportRecordsTyped(rcon = rcon_reactive$rcon, records = record_number, fields = append(c("record_id", "dos_surg_repeating", "approach_repeating", "side", "object"), str_to_lower(str_replace_all(levels_vector, pattern = "-", replacement = "_")))) %>%                    as_tibble()  %>%
-          type.convert(as.is = TRUE) %>%
-          as_tibble() %>%
-          filter(redcap_repeat_instrument == "procedures_by_level_repeating")  %>%
-          mutate(across(.cols = everything(), .fns = ~ as.character(.x))) %>%
-          select(record_id,
-                 dos_surg_repeating, 
-                 approach_repeating, 
-                 side, 
-                 contains(str_to_lower(implant_levels_numbered_df$level))) %>%
-          pivot_longer(cols = c(-record_id, -approach_repeating, -side, -dos_surg_repeating), names_to = "level", values_to = "object") %>%
-          filter(!is.na(object)) %>%
-          rename(date_of_surgery = dos_surg_repeating)%>%
-          mutate(level = str_to_title(str_replace_all(string = level, pattern = "_", replacement = "-"))) %>%
-          filter(object != " ") %>%
-          filter(object != "") %>%
-          mutate(level = str_replace_all(string = level, pattern = "S2ai", replacement = "S2AI")) %>%
-          rename(approach = approach_repeating)
+        if(nrow(joined_df)>0){
+          match_found <- TRUE
+        }else{
+          match_found <- FALSE
+        }
         
+        if(match_found == TRUE){
+          record_number <- joined_df$record_id[[1]]
+          
+          existing_patient_data$patient_df_full <- exportRecordsTyped(rcon = rcon_reactive$rcon, records = record_number, fields = append(c("record_id", "dos_surg_repeating", "approach_repeating", "side", "object"), str_to_lower(str_replace_all(levels_vector, pattern = "-", replacement = "_")))) %>%                    as_tibble()  %>%
+            type.convert(as.is = TRUE) %>%
+            as_tibble() %>%
+            filter(redcap_repeat_instrument == "procedures_by_level_repeating")  %>%
+            mutate(across(.cols = everything(), .fns = ~ as.character(.x))) %>%
+            select(record_id,
+                   dos_surg_repeating, 
+                   approach_repeating, 
+                   side, 
+                   contains(str_to_lower(implant_levels_numbered_df$level))) %>%
+            pivot_longer(cols = c(-record_id, -approach_repeating, -side, -dos_surg_repeating), names_to = "level", values_to = "object") %>%
+            filter(!is.na(object)) %>%
+            rename(date_of_surgery = dos_surg_repeating)%>%
+            mutate(level = str_to_title(str_replace_all(string = level, pattern = "_", replacement = "-"))) %>%
+            filter(object != " ") %>%
+            filter(object != "") %>%
+            mutate(level = str_replace_all(string = level, pattern = "S2ai", replacement = "S2AI")) %>%
+            rename(approach = approach_repeating)
+          
           # select(-redcap_event_name,
           #        -redcap_repeat_instrument,
           #        -redcap_repeat_instance, 
@@ -1575,53 +1549,55 @@ server <- function(input, output, session) {
           # filter(object != "") %>%
           # mutate(level = str_replace_all(string = level, pattern = "S2ai", replacement = "S2AI")) %>%
           # rename(approach = approach_repeating)
-        
-        
-        existing_patient_data$patient_df <- existing_patient_data$patient_df_full
-        
-        existing_patient_data$match_found <- match_found
-        
-        existing_patient_data$record_id <- record_number
-        
-        existing_patient_data$surgical_dates_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
-                                                                 records = existing_patient_data$record_id) %>%
-          type.convert(as.is = TRUE) %>%
-          mutate(last_name = str_to_lower(last_name),
-                 first_name = str_to_lower(first_name)) %>%
-          select(record_id, date_of_surgery, stage_number) %>%
-          filter(!is.na(date_of_surgery)) %>%
-          mutate(stage_number = as.double(stage_number)) %>%
-          mutate(stage_number = if_else(is.na(stage_number), 1, stage_number)) %>%
-          filter(stage_number == 1)
-        
-        existing_patient_data$prior_surgical_summary <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
-                                                                      records = existing_patient_data$record_id, 
-                                                                      fields = c("record_id", 
-                                                                                 "date_of_surgery", 
-                                                                                 "main_approach", 
-                                                                                 "fusion", 
-                                                                                 "uiv",
-                                                                                 "upper_treated_vertebrae",
-                                                                                 "liv", "lower_treated_vertebrae",
-                                                                                 "pelvic_fixation")) %>%      
-          as_tibble() %>%
-          filter(redcap_repeat_instrument == "surgical_details") %>%
-          remove_empty() %>%
-          mutate(date_of_surgery = ymd(date_of_surgery))
-        
-        
+          
+          
+          existing_patient_data$patient_df <- existing_patient_data$patient_df_full
+          
+          existing_patient_data$match_found <- match_found
+          
+          existing_patient_data$record_id <- record_number
+          
+          existing_patient_data$surgical_dates_df <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
+                                                                        records = existing_patient_data$record_id) %>%
+            type.convert(as.is = TRUE) %>%
+            mutate(last_name = str_to_lower(last_name),
+                   first_name = str_to_lower(first_name)) %>%
+            select(record_id, date_of_surgery, stage_number) %>%
+            filter(!is.na(date_of_surgery)) %>%
+            mutate(stage_number = as.double(stage_number)) %>%
+            mutate(stage_number = if_else(is.na(stage_number), 1, stage_number)) %>%
+            filter(stage_number == 1)
+          
+          existing_patient_data$prior_surgical_summary <- exportRecordsTyped(rcon = rcon_reactive$rcon, 
+                                                                             records = existing_patient_data$record_id, 
+                                                                             fields = c("record_id", 
+                                                                                        "date_of_surgery", 
+                                                                                        "main_approach", 
+                                                                                        "fusion", 
+                                                                                        "uiv",
+                                                                                        "upper_treated_vertebrae",
+                                                                                        "liv", "lower_treated_vertebrae",
+                                                                                        "pelvic_fixation")) %>%      
+            as_tibble() %>%
+            filter(redcap_repeat_instrument == "surgical_details") %>%
+            remove_empty() %>%
+            mutate(date_of_surgery = ymd(date_of_surgery))
+          
+          
+        }
       }
     }
+    
+    
     
   })
   
   observe({
-    if(existing_patient_data$match_found == TRUE){
+    if (!is.null(existing_patient_data$match_found) && existing_patient_data$match_found) {
       updateSwitchInput(session = session, inputId = "prior_patient_match_located", value = TRUE, label = "Prior Patient Found")
     }
   }) %>%
     bindEvent(input$search_for_prior_patient,
-              # existing_patient_data$match_found,
               ignoreInit = TRUE)
   
   
@@ -2191,7 +2167,7 @@ server <- function(input, output, session) {
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup COMPLETE  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   Startup COMPLETE  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
   
-  observeEvent(input$multi_approach_starting_position, {
+  observeEvent(input$multi_approach_starting_position, ignoreInit = TRUE,  {
     if(input$multi_approach_starting_position == "Anterior" | input$multi_approach_starting_position == "Lateral"){
       updateRadioGroupButtons(session = session, inputId = "spine_approach", selected = "Anterior")
     }else{
