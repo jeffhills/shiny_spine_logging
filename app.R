@@ -19,32 +19,30 @@ library(nngeo)
 library(shinydashboard)
 library(data.table)
 # library(shinyjs)
-# library(httr)
+library(httr)
  
-install.packages('tidyverse')x
-
-install.packages('shinyWidgets')x 
-install.packages('sf') x
-install.packages('magick')x
-
-
-
-install.packages('ggpattern')x
-
-install.packages('shinyBS')x
-
-install.packages('ggplot2')x
-install.packages('cowplot')x
-install.packages('glue')x
-install.packages('rlist')x
-install.packages('janitor')x
-install.packages('lubridate')x
-install.packages('redcapAPI')x
-install.packages('ggpmisc')x
-install.packages('rclipboard')x
-install.packages('nngeo')x
-install.packages('shinydashboard')x
-install.packages('data.table')x
+# install.packages('tidyverse')x
+# 
+# install.packages('shinyWidgets')x 
+# install.packages('sf') x
+# install.packages('magick')x
+# 
+# install.packages('ggpattern')x
+# 
+# install.packages('shinyBS')x
+# 
+# install.packages('ggplot2')x
+# install.packages('cowplot')x
+# install.packages('glue')x
+# install.packages('rlist')x
+# install.packages('janitor')x
+# install.packages('lubridate')x
+# install.packages('redcapAPI')x
+# install.packages('ggpmisc')x
+# install.packages('rclipboard')x
+# install.packages('nngeo')x
+# install.packages('shinydashboard')x
+# install.packages('data.table')x
 
 
 # httr::set_config(config = authenticate())
