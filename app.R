@@ -19,7 +19,33 @@ library(nngeo)
 library(shinydashboard)
 library(data.table)
 # library(shinyjs)
-library(httr)
+# library(httr)
+ 
+install.packages('tidyverse')x
+
+install.packages('shinyWidgets')x 
+install.packages('sf') x
+install.packages('magick')x
+
+
+
+install.packages('ggpattern')x
+
+install.packages('shinyBS')x
+
+install.packages('ggplot2')x
+install.packages('cowplot')x
+install.packages('glue')x
+install.packages('rlist')x
+install.packages('janitor')x
+install.packages('lubridate')x
+install.packages('redcapAPI')x
+install.packages('ggpmisc')x
+install.packages('rclipboard')x
+install.packages('nngeo')x
+install.packages('shinydashboard')x
+install.packages('data.table')x
+
 
 # httr::set_config(config = authenticate())
 
@@ -1387,7 +1413,7 @@ server <- function(input, output, session) {
       input$redcap_institution == "WashU" ~ 'https://redcap.wustl.edu/redcap/api/'
     )
     
-    rcon_reactive$rcon <- redcapConnection(url = redcap_url, token = input$redcap_token)    
+    rcon_reactive$rcon <- redcapConnection(url = redcap_url, token = input$redcap_token, config =  httr::config(ssl_verifypeer = FALSE))    
     
   })
   
@@ -1491,8 +1517,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$search_for_prior_patient, ignoreInit = TRUE, {
     
-    if (!is.null(rcon_reactive$rcon)) {  
-      all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon,
+    if (!is.null(rcon_reactive$rcon)) { 
+      all_patient_ids_df <- exportRecords(rcon = rcon_reactive$rcon, 
                                                fields = c("record_id", "last_name", "first_name", "date_of_birth"), 
                                                events = "enrollment_arm_1") %>%
         type.convert(as.is = TRUE) %>%
