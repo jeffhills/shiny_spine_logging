@@ -904,12 +904,20 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
     implant_confirmation_method <- "NA"
   }
   
-  procedures_op_full_df <- df_for_paragraphs %>%
+  paragraph_df_prepped_df <- df_for_paragraphs %>%
     mutate(approach_technique_input = approach_technique,
            image_guidance_technique_input = image_guidance[1], 
            neuromonitoring_emg_statement_input = neuromonitoring_emg_statement, 
            method_implant_start_point = implant_start_point_method, 
-           method_implant_confirmation = implant_confirmation_method) %>%
+           method_implant_confirmation = implant_confirmation_method)
+    
+    if(any(df_for_paragraphs$procedure_category == "pelvic instrumentation") & any(df_for_paragraphs$procedure_category == "posterior spinal instrumentation")){
+      paragraph_df_prepped_df <- paragraph_df_prepped_df %>% 
+          select(-method_implant_confirmation) %>%
+          mutate(method_implant_confirmation = if_else(procedure_category == "pelvic instrumentation", implant_confirmation_method, " "))
+    }
+  
+  procedures_op_full_df <-  paragraph_df_prepped_df %>%
     mutate(procedure_statement = pmap(list(..1 = procedure_category,
                                            ..2 = nested_data, 
                                            ..3 = procedures_combine, 
@@ -997,7 +1005,8 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       emg_statement <- ""
     }
     
-    if(procedure_paragraph_intro == "posterior spinal instrumentation"){
+    if(procedure_paragraph_intro == "posterior spinal instrumentation" | procedure_paragraph_intro == "pelvic instrumentation"){
+    # if(procedure_paragraph_intro %in% c("posterior spinal instrumentation", "pelvic instrumentation")){
       if(str_length(implant_confirmation_method) > 6){
         implant_confirmation_method_text <- implant_confirmation_method
       }else{
@@ -1018,13 +1027,15 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       procedure_completion <- glue("This completed the posterior column osteotomies at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
     }else if(procedure_paragraph_intro == "reinsertion of spinal fixation"){
       procedure_completion <- glue("This completed the reinsertion of spinal fixation at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    }else if(procedure_paragraph_intro == "pelvic instrumentation"){
+      procedure_completion <- glue("{implant_confirmation_method_text} This completed the instrumentation of the pelvis.")
     }else{
       procedure_completion <- glue("This completed the {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
     }
     
     ##CREATE THE STATEMENT
     if(procedure_paragraph_intro == "pelvic instrumentation"){
-      statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} This completed the instrumentation of the pelvis.")
+      statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
     }else if(procedure_paragraph_intro == "inferior facetectomies"){
       statement <- glue("I first performed {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')}")
     }else if(procedure_paragraph_intro == "posterior column osteotomy" & length(unique(x = df_levels$level))>1){
@@ -1034,8 +1045,6 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
     }else{
       statement <- glue("I then proceeded with the {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
     }
-    
-    # Reinsertion of spinal fixation
     
   }
   

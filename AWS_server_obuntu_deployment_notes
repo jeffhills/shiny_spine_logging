@@ -74,7 +74,7 @@ sudo su - -c "R -e \"install.packages('shiny')\""
 The command to renew certbot is installed in one of the following locations:
 $ cd /etc/crontab/
 $ cd /etc/cron.*/*
-$ cd systemctl list-timers
+$ systemctl list-timers
 The certificate and key are save to:
 # Become root user
 $ sudo -i
