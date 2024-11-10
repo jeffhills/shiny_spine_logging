@@ -2085,30 +2085,79 @@ jh_supplementary_rods_choices_function <- function(all_objects_df,
 ####### ROD FUNCTION
 
 ####### ROD FUNCTION
+# jh_build_custom_rods_function <- function(cranial_caudal_points_vector, full_object_df, rod_number){
+#   
+#   interspace_choices_df <- full_object_df %>%
+#     select(level, vertebral_number) %>%
+#     distinct() %>%
+#     mutate(vertebral_number = vertebral_number + 0.5)  %>%
+#     mutate(implant_label = paste0(level, "-", lead(level), " interspace offset")) %>%
+#     filter(vertebral_number != max(vertebral_number)) %>%
+#     select(vertebral_number, implant_label)
+#   
+#   full_object_df <- full_object_df %>%
+#     select(vertebral_number, implant_label) %>%
+#     union_all(interspace_choices_df) %>%
+#     arrange(vertebral_number)
+#   
+#   
+#   
+#   custom_rod_matrix <- tibble(implant_label = cranial_caudal_points_vector) %>% 
+#     unnest() %>% 
+#     left_join(full_object_df) %>% 
+#     select(x, y) %>% 
+#     arrange(rev(y)) %>% 
+#     distinct() %>% 
+#     mutate(rod_x_modifier = case_when(
+#       rod_number == 1 ~ 0.00, 
+#       rod_number == 2 ~ 0.0025,
+#       rod_number == 3 ~ 0.005,
+#       rod_number == 4 ~ 0.001,
+#       rod_number == 5 ~ 0.0015 
+#     )) %>% 
+#     mutate(x = if_else(x < 0.5, x + rod_x_modifier, x - rod_x_modifier)) %>% 
+#     select(x, y) %>% 
+#     remove_missing() %>% 
+#     arrange(rev(y)) %>% 
+#     as.matrix()
+#   
+#   st_buffer(st_linestring(custom_rod_matrix), dist = 0.0025, endCapStyle = "ROUND")
+#   
+# }
+
 jh_build_custom_rods_function <- function(cranial_caudal_points_vector, full_object_df, rod_number){
-  custom_rod_matrix <- tibble(implant_label = cranial_caudal_points_vector) %>%
-    unnest() %>%
-    left_join(full_object_df) %>%
-    select(x, y) %>%
-    arrange(rev(y)) %>%
-    distinct() %>%
+  custom_rod_matrix <-  map(.x = cranial_caudal_points_vector, 
+                            .f = ~ if(.x %in% full_object_df$implant_label){
+                              full_object_df %>%
+                                filter(implant_label == .x) %>%
+                                select(x, y)
+                            }else{
+                              full_object_df %>%
+                                filter(str_detect(.x, level)) %>%
+                                summarise(x = mean(x), y = mean(y)) %>%
+                                mutate(x = if_else(x < 0.5, x + 0.0025, x - 0.0025))
+      
+                            }
+  ) %>%
+    bind_rows() %>% 
+    arrange(rev(y)) %>% 
+    distinct() %>% 
     mutate(rod_x_modifier = case_when(
       rod_number == 1 ~ 0.00, 
       rod_number == 2 ~ 0.0025,
       rod_number == 3 ~ 0.005,
       rod_number == 4 ~ 0.001,
-      rod_number == 5 ~ 0.0015
-    )) %>%
-    mutate(x = if_else(x < 0.5, x + rod_x_modifier, x - rod_x_modifier))%>%
-    select(x, y) %>%
-    remove_missing() %>%
-    arrange(rev(y)) %>%
+      rod_number == 5 ~ 0.0015 
+    )) %>% 
+    mutate(x = if_else(x < 0.5, x + rod_x_modifier, x - rod_x_modifier)) %>% 
+    select(x, y) %>% 
+    remove_missing() %>% 
+    arrange(rev(y)) %>% 
     as.matrix()
   
   st_buffer(st_linestring(custom_rod_matrix), dist = 0.0025, endCapStyle = "ROUND")
   
 }
-
 
 jh_rod_construct_connector_matrices_function <- function(full_rod_matrix, x_nudge = 0){
   
@@ -2504,8 +2553,8 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       
       names(custom_rods_list) <- custom_rods_df$rod_name
       
-      rods_list <- append(rods_list, custom_rods_list)
-      
+      # rods_list <- append(rods_list, custom_rods_list)
+      rods_list <- custom_rods_list
     }
     
     possible_rods_df <- tibble(rod = c("revision_rod_sf",

@@ -3862,14 +3862,27 @@ server <- function(input, output, session) {
   observe({
     if(input$add_left_custom_rods == TRUE){
       left_implants_df <- all_objects_to_add_list$objects_df %>%
-        select(level, side, object, x, y) %>%
+        select(level, vertebral_number, side, object, x, y) %>%
         filter(side == "left") %>%
         filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
         mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
       
-      left_implant_choices <- as.list(left_implants_df$level)
+      interspace_choices_df <- left_implants_df %>%
+        select(level, vertebral_number) %>%
+        distinct() %>%
+        mutate(vertebral_number = vertebral_number + 0.5)  %>%
+        mutate(implant_label = paste0(level, "-", lead(level), " interspace offset")) %>%
+        filter(vertebral_number != max(vertebral_number)) %>%
+        select(vertebral_number, implant_label)
       
-      names(left_implant_choices) <- left_implants_df$implant_label
+      left_implants_df <- left_implants_df %>%
+        select(vertebral_number, implant_label) %>%
+        union_all(interspace_choices_df) %>%
+        arrange(vertebral_number)
+      
+      # left_implant_choices <- as.list(left_implants_df$level)
+      # 
+      # names(left_implant_choices) <- left_implants_df$implant_label
       
       updatePickerInput(session = session, 
                         inputId = "left_custom_rod_1", 
@@ -4694,15 +4707,34 @@ server <- function(input, output, session) {
   
   observe({
     if(input$add_right_custom_rods == TRUE){
+      # right_implants_df <- all_objects_to_add_list$objects_df %>%
+      #   select(level, side, object, x, y) %>%
+      #   filter(side == "right") %>%
+      #   filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
+      #   mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
+      # 
+      # right_implant_choices <- as.list(right_implants_df$level)
+      # 
+      # names(right_implant_choices) <- right_implants_df$implant_label
+      
       right_implants_df <- all_objects_to_add_list$objects_df %>%
-        select(level, side, object, x, y) %>%
+        select(level, vertebral_number, side, object, x, y) %>%
         filter(side == "right") %>%
         filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
         mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
       
-      right_implant_choices <- as.list(right_implants_df$level)
+      interspace_choices_df <- right_implants_df %>%
+        select(level, vertebral_number) %>%
+        distinct() %>%
+        mutate(vertebral_number = vertebral_number + 0.5)  %>%
+        mutate(implant_label = paste0(level, "-", lead(level), " interspace offset")) %>%
+        filter(vertebral_number != max(vertebral_number)) %>%
+        select(vertebral_number, implant_label)
       
-      names(right_implant_choices) <- right_implants_df$implant_label
+      right_implants_df <- right_implants_df %>%
+        select(vertebral_number, implant_label) %>%
+        union_all(interspace_choices_df) %>%
+        arrange(vertebral_number)
       
       updatePickerInput(session = session, 
                         inputId = "right_custom_rod_1", 
@@ -7181,6 +7213,10 @@ server <- function(input, output, session) {
                                                                                                 rod_vector = input$left_kickstand_rod)
       }
       
+      if(input$add_left_custom_rods == TRUE){
+        additional_rods_list$left_custom <- glue("On the left, {input$left_custom_rods_number} rods were used in the construct.")
+      }
+      
       #RIGHT#
       if(input$add_right_accessory_rod == TRUE){
         additional_rods_list$right_accessory <-  jh_generate_supplemental_rod_statement_function(rod_type = "accessory",
@@ -7219,9 +7255,16 @@ server <- function(input, output, session) {
                                                                                                  rod_vector = input$right_kickstand_rod)
       }
       
+      
+      if(input$add_right_custom_rods == TRUE){
+        additional_rods_list$right_custom <- glue("On the right, {input$right_custom_rods_number} rods were used in the construct.")
+      }
+      
       if(length(additional_rods_list) > 0){
         added_rods_statement <- glue_collapse(additional_rods_list, sep = " ")
       }
+      
+      
     }
     additional_rods_list
     # added_rods_statement
@@ -7477,7 +7520,7 @@ server <- function(input, output, session) {
       
       posterior_op_note_inputs_list_reactive$revision_implants_df <- revision_implants_df
       
-      # RODS
+      ########## RODS
       ####### Left
       posterior_op_note_inputs_list_reactive$left_main_rod_size <- input$left_main_rod_size
       posterior_op_note_inputs_list_reactive$left_main_rod_material <- input$left_main_rod_material
