@@ -56,10 +56,17 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   
   ## OSTEOTOMIES
   if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_1"))){
-    # geoms_list_posterior$osteotomy_1_sf <- geom_sf(data = st_geometrycollection((all_posterior_objects_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
-    geoms_list_posterior$osteotomy_1_sf <- geom_sf(data = st_multilinestring((all_posterior_objects_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
     
-    # geom_sf(data = st_multilinestring(x = (test_grade_1_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
+    geoms_list_posterior$osteotomy_1_sf <- geom_path(data = (all_posterior_objects_df %>%
+                        filter(object == "grade_1") %>%
+                          select(side, object, object_id) %>%
+                        left_join(all_objects_coordinates_df) %>%
+                        filter(!is.na(x))), 
+              aes(x = x, y = y, group = object_id), color = "red", size = 1)
+    
+    
+    # geoms_list_posterior$osteotomy_1_sf <- geom_sf(data = st_multilinestring((all_posterior_objects_df %>% filter(object == "grade_1"))$object_constructed), color = "red", size = 1)
+    
   }else{
     geoms_list_posterior$osteotomy_1_sf <- NULL
   }
@@ -88,11 +95,21 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
     #   pattern_spacing = 0.01,
     #   pattern_density = 0.15,
     # )
-    geoms_list_posterior$osteotomy_2_sf_geom <- geom_sf(
-      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_2"))$object_constructed),
-      fill = "darkred",
-      alpha = 0.75
-    )
+    
+    
+    # geoms_list_posterior$osteotomy_2_sf_geom <- geom_sf(
+    #   data = st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_2"))$object_constructed),
+    #   fill = "darkred",
+    #   alpha = 0.75
+    # )
+    
+    
+    geoms_list_posterior$osteotomy_2_sf_geom <- geom_polygon(data = (all_posterior_objects_df %>%
+                                                               filter(object == "grade_2") %>%
+                                                                 select(side, object, object_id) %>%
+                                                               left_join(all_objects_coordinates_df) %>%
+                                                               filter(!is.na(x))), 
+                                                     aes(x = x, y = y, group = object_id), color = "darkred", fill = "darkred")
     
   }else{
     geoms_list_posterior$osteotomy_2_sf_geom <- NULL

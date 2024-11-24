@@ -98,14 +98,7 @@ jh_load_all_possible_objects_function <- function(){
                                      interbody = "coordinates/interbody.csv",
                                      osteotomy = "coordinates/osteotomy.csv",
                                      tumor = "coordinates/tumor.csv")
-  
-  
-  # coordinates_df_list <- map(coordinate_file_names_list, .f = ~ fread(paste0(.x)) %>% 
-  #                              group_by(object_id) %>%
-  #                              nest() %>%
-  #                              mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
-  #                              select(object_id, object_constructed)
-  # )
+
   
   coordinates_df_list <- map(coordinate_file_names_list, .f = ~ fread(.x) %>%
                                group_by(object_id) %>%
@@ -122,6 +115,23 @@ jh_load_all_possible_objects_function <- function(){
   all_implants_constructed_df
   
 }
+
+
+coordinate_file_names_list_all <- list(anterior_body = "coordinates/anterior_body.csv",
+                                   anterior_disc = "coordinates/anterior_disc.csv",
+                                   anterior_interbody_fusion = "coordinates/anterior_interbody_fusion.csv",
+                                   decompression = "coordinates/decompression.csv",
+                                   implant = "coordinates/implant.csv",
+                                   incision_drainage = "coordinates/incision_drainage.csv",
+                                   interbody = "coordinates/interbody.csv",
+                                   osteotomy = "coordinates/osteotomy.csv",
+                                   tumor = "coordinates/tumor.csv")
+
+
+coordinates_df_list_all <- map(coordinate_file_names_list_all, .f = ~ fread(.x))
+
+all_objects_coordinates_df <- bind_rows(coordinates_df_list_all)
+
 
 # coordinate_file_names_list <- list(anterior_body = "coordinates/anterior_body.csv",
 #                                    anterior_disc = "coordinates/anterior_disc.csv",

@@ -1344,8 +1344,8 @@ ui <- dashboardPage(skin = "black",
 ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## SERVER STARTS ###### ###### ###### ###### ~~~~~~~~~~~~~~~~~~~~~ ###### ###### ###### ########## 
 
 server <- function(input, output, session) {
-  options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
-  options(shiny.reactlog=TRUE)
+  # options(shiny.trace = TRUE, shiny.error = browser, shiny.fullstacktrace = TRUE)
+  # options(shiny.reactlog=TRUE)
   
   logging_timer_reactive_list <- reactiveValues()
   logging_timer_reactive_list$elapsed_time <- 0
@@ -3044,13 +3044,31 @@ server <- function(input, output, session) {
                             
                             if(req(object_added_reactive_df()$side) == "left"){
                               
-                              # geoms_list_posterior_screws$left_screws[length(geoms_list_posterior_screws$left_screws)+1] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
+                              # geoms_list_posterior_screws$left_screws[object_added_reactive_df()$object_id] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
                               
-                              geoms_list_posterior_screws$left_screws[object_added_reactive_df()$object_id] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
+                              geoms_list_posterior_screws$left_screws <- geom_polygon(data = (all_objects_to_add_list$objects_df %>%
+                                                                         select(side, object, object_id) %>%
+                                                                         filter(side == "left", str_detect(object, "screw")) %>%
+                                                                         left_join(all_objects_coordinates_df) %>%
+                                                                         filter(!is.na(x))),
+                                                               aes(x = x, y = y, 
+                                                                   group = object_id), 
+                                                               color = "blue",
+                                                               fill = "blue") 
                               
                             }else if(object_added_reactive_df()$side == "right"){
                               
-                              geoms_list_posterior_screws$right_screws[object_added_reactive_df()$object_id] <- geoms_right_screws_list[object_added_reactive_df()$object_id]
+                              # geoms_list_posterior_screws$right_screws[object_added_reactive_df()$object_id] <- geoms_right_screws_list[object_added_reactive_df()$object_id]
+                              
+                              geoms_list_posterior_screws$right_screws <- geom_polygon(data = (all_objects_to_add_list$objects_df %>%
+                                                                                                select(side, object, object_id) %>%
+                                                                                                filter(side == "right", str_detect(object, "screw")) %>%
+                                                                                                left_join(all_objects_coordinates_df) %>%
+                                                                                                filter(!is.na(x))),
+                                                                                      aes(x = x, y = y, 
+                                                                                          group = object_id), 
+                                                                                      color = "blue",
+                                                                                      fill = "blue") 
                             }
                             
                           }else{
