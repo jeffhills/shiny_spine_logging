@@ -2629,7 +2629,7 @@ jh_generate_supplemental_rod_statement_function <- function(rod_type = "accessor
     }
     
     if(str_detect(rod_type, "kickstand")){
-      rod_statement <- str_squish(glue("On the {rod_side}, a {rod_size} {rod_material} kickstand rod was used to aide in coronal correction. The rod was anchored to the ilium distally and connected proximally at the {rod_vector[1]} level."))
+      rod_statement <- str_squish(glue("On the {rod_side}, a {rod_size} {rod_material} kickstand rod was anchored to the ilium distally and connected proximally at the {rod_vector[1]} level."))
     }
     
   }else{

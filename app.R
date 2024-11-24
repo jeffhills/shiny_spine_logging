@@ -5639,6 +5639,7 @@ server <- function(input, output, session) {
         "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
         "In situ rod benders were used to aide in correcting the alignment. ",
         "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
+        "Compression and distraction off the kickstand rod was used to aide in correcting the alignment. ",
         "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
         "Other")
     }else{
@@ -7205,6 +7206,7 @@ server <- function(input, output, session) {
                                                                                              rod_material = input$left_linked_rod_material,
                                                                                              rod_vector = input$left_linked_rod)
       }
+      
       if(input$add_left_kickstand_rod == TRUE){
         additional_rods_list$left_kickstand <-  jh_generate_supplemental_rod_statement_function(rod_type = "kickstand",
                                                                                                 rod_side = "left",

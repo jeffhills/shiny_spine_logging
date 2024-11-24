@@ -1479,6 +1479,7 @@ addition_surgical_details_modal_box_function <-
           font_size = row_label_font_size,
           input_type = "awesomeRadio",
           choices_vector = c("None",
+                             "Prior to the exposure, Xray was used to aide in performing an erector spinae plane block, injecting a mixture containing liposomal Bupivicaine onto the L3 spinous process.",
                              "During the EXPOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
                              "During the CLOSURE, Bupivicaine  was injected into the subcutaneous and deep tissues.",
                              "During the EXPOSURE, liposomal Bupivicaine was injected into the subcutaneous and deep tissues.",
