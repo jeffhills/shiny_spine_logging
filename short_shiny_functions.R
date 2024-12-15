@@ -1914,11 +1914,21 @@ jh_supplementary_rods_choices_function <- function(all_objects_df,
         distinct()
     }
     
-    if(nrow(implant_df) > 3 & any(str_detect(str_to_lower(implant_df$level), "iliac"))){
+    if(nrow(implant_df) > 3 & any(str_detect(str_to_lower(implant_df$level), "iliac|s2ai"))){
       
       proximal_point <- implant_df$level[which.min(abs(implant_df$vertebral_number - 20.25))]
       
-      distal_point <- if_else(any(implant_df$level == "Iliac_2"), "Iliac_2", "Iliac")
+      # distal_point <- if_else(any(implant_df$level == "Iliac_2"), "Iliac_2", "Iliac")
+      if(min(implant_df$x) < 0.5){
+              distal_point <-  (implant_df %>%
+                          filter(str_detect(object, "pelvic")) %>%
+                          filter(x == min(x)))$level
+      }else{
+        distal_point <-  (implant_df %>%
+                            filter(str_detect(object, "pelvic")) %>%
+                            filter(x == max(x)))$level
+      }
+
       
       supplemental_starts_vector <- c(proximal_point, 
                                    distal_point

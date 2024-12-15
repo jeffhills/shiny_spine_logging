@@ -361,6 +361,7 @@ ui <- dashboardPage(skin = "black",
                                                             inputId = "right_c1_lateral_mass_screw_true_false",
                                                             value = FALSE
                                                 ),
+                                                tableOutput(outputId = "all_obects_added_table"),
                                                 circle = TRUE
                                  )
                           ),
@@ -2502,6 +2503,13 @@ server <- function(input, output, session) {
     }
   })
   
+  
+  output$all_obects_added_table <- renderTable({
+    req(all_objects_to_add_list$objects_df)
+    all_objects_to_add_list$objects_df %>%
+      select(level, vertebral_number, body_interspace, approach, category, implant, object, side, x, y)
+  })
+  
   observeEvent(all_objects_to_add_list$objects_df, ignoreInit = TRUE, ignoreNULL = TRUE, {
     
     if((any(all_objects_to_add_list$objects_df$object %in% c("grade_3", "grade_4", "grade_5")))){
@@ -3022,11 +3030,66 @@ server <- function(input, output, session) {
   #                   }
   # )
   
+  observeEvent(input$plot_double_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    implant_to_remove_df <- nearPoints(
+      df = all_objects_to_add_list$objects_df,
+      coordinfo = input$plot_double_click,
+      xvar = "x",
+      yvar = "y",
+      maxpoints = 1,
+      threshold = 50
+    )
+    # print(implant_to_remove_df)
+    
+    all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df %>%
+      anti_join(implant_to_remove_df)
+    
+    # print(all_objects_to_add_list$objects_df)
+    
+    if(grepl("screw", implant_to_remove_df$object)){
+      if(implant_to_remove_df$side == "left"){
+        # print("left screw")
+        # print(str(geoms_list_posterior_screws))
 
+        # geoms_list_posterior_screws$left_screws[implant_to_remove_df$object_id] <- NULL
+        geoms_list_posterior_screws$left_screws <- geom_polygon(data = (all_objects_to_add_list$objects_df %>%
+                                                                          select(side, object, object_id) %>%
+                                                                          filter(side == "left", str_detect(object, "screw")) %>%
+                                                                          left_join(all_objects_coordinates_df) %>%
+                                                                          filter(!is.na(x))),
+                                                                aes(x = x, y = y, 
+                                                                    group = object_id), 
+                                                                color = "blue",
+                                                                fill = "blue") 
+
+      }
+      if(implant_to_remove_df$side == "right"){
+        # print("right screw")
+        # print(str(geoms_list_posterior_screws$right_screws))
+        # geoms_list_posterior_screws$right_screws[implant_to_remove_df$object_id] <- NULL
+        
+        geoms_list_posterior_screws$right_screws <- geom_polygon(data = (all_objects_to_add_list$objects_df %>%
+                                                                           select(side, object, object_id) %>%
+                                                                           filter(side == "right", str_detect(object, "screw")) %>%
+                                                                           left_join(all_objects_coordinates_df) %>%
+                                                                           filter(!is.na(x))),
+                                                                 aes(x = x, y = y, 
+                                                                     group = object_id), 
+                                                                 color = "blue",
+                                                                 fill = "blue") 
+        
+      }
+    }else{
+      geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
+                                                                       filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
+                                                                     plot_with_patterns = input$plot_with_patterns_true)
+    }
+    
+  })
   
   observeEvent(list(input$plot_click,
-                    input$plot_double_click,
-                    all_objects_to_add_list$objects_df), ignoreInit = TRUE, {
+                    all_objects_to_add_list$objects_df,
+                    input$plot_double_click), ignoreInit = TRUE, {
                       
                       if(nrow(object_added_reactive_df())>0){
                         if(input$spine_approach == "Anterior"){
@@ -3221,28 +3284,7 @@ server <- function(input, output, session) {
     }
   })
   
-  observeEvent(input$plot_double_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
-    implant_to_remove_df <- nearPoints(
-      df = all_objects_to_add_list$objects_df,
-      coordinfo = input$plot_double_click,
-      xvar = "x",
-      yvar = "y",
-      maxpoints = 1,
-      threshold = 50
-    )
-    all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df %>%
-      anti_join(implant_to_remove_df)
-    
-    if(grepl("screw", implant_to_remove_df$object)){
-      if(implant_to_remove_df$side == "left"){
-        geoms_list_posterior_screws$left_screws[implant_to_remove_df$object_id] <- NULL
-        
-      }
-      if(implant_to_remove_df$side == "right"){
-        geoms_list_posterior_screws$right_screws[implant_to_remove_df$object_id] <- NULL
-      } 
-    }
-  })
+
   
   
   
