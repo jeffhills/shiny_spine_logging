@@ -103,10 +103,10 @@ S1,25,left,0.46,0.204
 S1,25,right,0.54,0.204
 Sacro-iliac,25.5,left,0.4535,0.192
 Sacro-iliac,25.5,right,0.5465,0.192
-Iliac,26,left,0.447,0.18
-Iliac,26,right,0.553,0.18
-Iliac_2,26.5,left,0.441,0.1825
-Iliac_2,26.5,right,0.559,0.1825
+Iliac,26,left,0.441,0.195
+Iliac,26,right,0.559,0.195
+Iliac_2,26.5,left,0.447,0.18
+Iliac_2,26.5,right,0.553,0.18
 S2AI,27,left,0.466,0.166
 S2AI,27,right,0.534,0.166
 S2AI_2,27.5,left,0.467,0.158

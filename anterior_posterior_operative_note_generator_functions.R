@@ -822,12 +822,12 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   if(nrow(all_objects_to_add_df)>0){
     
-    all_objects_to_add_df %>%
-      select(level, vertebral_number) %>%
-      bind_rows(revision_implants_df %>%
-                  filter(remove_retain == "remove") %>% 
-                  select(level, vertebral_number)) %>%
-      filter(vertebral_number == min(vertebral_number))
+    # all_objects_to_add_df %>%
+    #   select(level, vertebral_number) %>%
+    #   bind_rows(revision_implants_df %>%
+    #               filter(remove_retain == "remove") %>% 
+    #               select(level, vertebral_number)) %>%
+    #   filter(vertebral_number == min(vertebral_number))
     
     proximal_exposure_level <- all_objects_to_add_df %>%
       select(level, vertebral_number) %>%
@@ -1104,7 +1104,8 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
         rod_statements_list$additional_rods_statement <- glue_collapse(additional_rods_statement, sep = " ") 
       }
       
-      if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
+      # if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
+        if(any(str_detect(additional_procedures_vector, "fracture"))){
         rod_statements_list$set_screws <- glue("The rod was used to correct the alignment due to the fracture. Set screws were then tightened with a final tightener to the appropriate torque.")
       }else{
         rod_statements_list$set_screws <- glue("The set screws were then tightened with a final tightener to the appropriate torque.")
@@ -1116,8 +1117,12 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
       
       rod_statements_list$xrays <- glue("Intraoperative Xray was used to confirm the final position of all implants and to confirm appropriate alignment had been achieved.")
       
+      
       if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
         rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}, and the open treatment of the vertebral fracture.")
+      }else if(any(str_detect(additional_procedures_vector, "pelvic ring fracture"))){
+        rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}, and the open treatment of the posterior pelvic ring fracture/dislocation.")
+        
       }else{
         rod_statements_list$final <- glue("This completed the instrumentation of {glue_collapse(x = instrumented_levels_vector, sep = ', ', last = ', and ')}.") 
       }

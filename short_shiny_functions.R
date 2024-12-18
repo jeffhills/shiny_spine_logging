@@ -303,8 +303,10 @@ jh_get_vertebral_number_function <- function(level_to_get_number){
       level_to_get_number == "Sacro-iliac" ~ 25.5,
       level_to_get_number == 'Iliac' ~ 26,
       level_to_get_number == 'Iliac 2' ~ 26.5,
+      level_to_get_number == 'Iliac_2' ~ 26.5,
       level_to_get_number == 'S2AI' ~ 27,
-      level_to_get_number == 'S2AI 2' ~ 27.5
+      level_to_get_number == 'S2AI 2' ~ 27.5,
+      level_to_get_number == 'S2AI_2' ~ 27.5
     )
   return(vert_number)
 }
@@ -1722,7 +1724,8 @@ jh_connected_rod_all_implants_range_function <- function(all_objects_df, cranial
       # filter(level %in% cranial_caudal_vector) 
     
     full_range_df <- all_objects_df %>%
-      filter(between(vertebral_number, jh_get_vertebral_number_function(cranial_caudal_vector[1]), jh_get_vertebral_number_function(cranial_caudal_vector[2]))) 
+      filter(between(vertebral_number, jh_get_vertebral_number_function(cranial_caudal_vector[1]), jh_get_vertebral_number_function(cranial_caudal_vector[2]))) %>%
+      arrange(rev(y))
     
     # full_range_df <- all_objects_df %>%
     #   filter(vertebral_number >= min(cranial_caudal_points_df$vertebral_number))%>%
@@ -2405,26 +2408,46 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       proximal_rod_vector <- c(unique((main_rod_df %>%  filter(vertebral_number == min(vertebral_number)))$level),
                                proximal_rod_distal_point)
       
-      proximal_rod_levels_vector <- jh_connected_rod_all_implants_range_function(all_objects_df = all_screw_coordinates_df %>%
+      proximal_rod_levels_vector <- jh_connected_rod_all_implants_range_function(all_objects_df = main_rod_df %>%
                                                                                    filter(side == rod_side), 
                                                                                  cranial_caudal_vector = proximal_rod_vector)
-
+      
       distal_rod_proximal_point <- (all_screw_coordinates_df %>%  filter(side == rod_side, level == linked_rod_vector[1]))$level
       
       distal_rod_vector <- c(distal_rod_proximal_point, 
                              unique((main_rod_df %>%  filter(vertebral_number == max(vertebral_number)))$level))
-      
-      distal_rod_levels_vector <- jh_connected_rod_all_implants_range_function(all_objects_df = all_screw_coordinates_df %>%
+
+      distal_rod_levels_vector <- jh_connected_rod_all_implants_range_function(all_objects_df = main_rod_df %>%
                                                                                  filter(side == rod_side), 
                                                                                cranial_caudal_vector = distal_rod_vector)
-
-      x_linked_rod_modifier <- if_else(rod_side == "left", 0.003, -.003)
+      
+      proximal_rod_coord_df <- all_screw_coordinates_df %>% 
+        filter(side == rod_side) %>%
+        filter(level %in% proximal_rod_levels_vector)
+      
+      distal_rod_coord_df <- all_screw_coordinates_df %>% 
+        filter(side == rod_side) %>%
+        filter(level %in% distal_rod_levels_vector)
+      
+      proximal_rod_2nd_most_distal_screw_df <- proximal_rod_coord_df %>%
+        filter(level %in% distal_rod_coord_df$level) %>%
+        tail(2) %>%
+        head(1)
+      
+      distal_rod_proximal_screw_df <- distal_rod_coord_df %>%
+        filter(level %in% proximal_rod_coord_df$level) %>%
+        tail(1)
+  
+      x_linked_rod_modifier <- if_else(distal_rod_proximal_screw_df$x < proximal_rod_2nd_most_distal_screw_df$x, -0.003, 0.003)
+      
+      # x_linked_rod_modifier <- if_else(rod_side == "left", 0.003, -.003)
 
       proximal_linked_rod_matrix <- all_screw_coordinates_df %>% 
         filter(side == rod_side) %>%
         mutate(x = if_else(level %in% distal_rod_levels_vector, x - x_linked_rod_modifier, x)) %>%
         filter(level %in% proximal_rod_levels_vector) %>%
         select(x, y) %>%
+        arrange(y) %>%
         as.matrix()
       
       distal_linked_rod_matrix <- all_screw_coordinates_df %>%
@@ -2432,15 +2455,16 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
         mutate(x = if_else(level %in% proximal_rod_levels_vector, x + x_linked_rod_modifier, x)) %>%
         filter(level %in% distal_rod_levels_vector) %>%
         select(x, y) %>%
+        arrange(y) %>%
         as.matrix()
       
       linked_rod_overlap_matrix <- all_screw_coordinates_df %>%
         filter(side == rod_side, 
                level %in% linked_rod_vector) %>%
         select(x, y) %>%
-        mutate(x = if_else(x < 0.5, x + x_linked_rod_modifier, x + x_linked_rod_modifier)) %>%
+        mutate(x = if_else(x < 0.5, x + abs(x_linked_rod_modifier), x - abs(x_linked_rod_modifier))) %>%
         distinct() %>%
-        arrange(rev(y)) %>%
+        arrange(y) %>%
         as.matrix()
       
       connector_matrix_list <- jh_rod_construct_connector_matrices_function(full_rod_matrix = linked_rod_overlap_matrix)
