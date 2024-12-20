@@ -1675,7 +1675,6 @@ addition_surgical_details_modal_box_function <-
     )
   }
 
-
 ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   ADDITIONAL SURGICAL DETAILS MODAL  #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ######### ~~~~~~~~~~~~~~~###
 additional_procedure_options_vector <- c("Robotic Assisted Spine Surgery",
                                          "Use of stereotactic navigation system for screw placement",

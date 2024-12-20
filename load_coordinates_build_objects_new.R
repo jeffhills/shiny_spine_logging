@@ -196,7 +196,6 @@ labels_anterior_df <- all_object_ids_df %>%
   ))
 
 
-
 implant_levels_numbered_df <- all_object_ids_df %>%
   filter(implant == "yes") %>%
   select(level, vertebral_number) %>%

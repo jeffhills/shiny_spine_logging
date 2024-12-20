@@ -2478,7 +2478,7 @@ build_unilateral_rods_list_function <- function(unilateral_full_implant_df,
       rods_list$main_rod_sf <- NULL
       
     }
-    
+     
     #################### INTERCALARY ROD ###################
     if(add_intercalary_rod == TRUE && intercalary_rods_vector[1] %in% all_screw_coordinates_df$level && intercalary_rod_junction %in% all_screw_coordinates_df$level && (intercalary_rods_vector[1] !=intercalary_rods_vector[2])){
       
