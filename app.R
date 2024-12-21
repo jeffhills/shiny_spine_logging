@@ -3152,7 +3152,8 @@ server <- function(input, output, session) {
     
   })
   
-  observeEvent(list(input$plot_click,
+  observeEvent(list(
+    # input$plot_click,
                     all_objects_to_add_list$objects_df,
                     input$plot_double_click), ignoreInit = TRUE, {
                       
@@ -3170,7 +3171,7 @@ server <- function(input, output, session) {
                         }else{
                           if(str_detect(input$object_to_add, "screw")){
                             
-                            if(req(object_added_reactive_df()$side) == "left"){
+                            if(object_added_reactive_df()$side == "left"){
                               
                               # geoms_list_posterior_screws$left_screws[object_added_reactive_df()$object_id] <- geoms_left_screws_list[object_added_reactive_df()$object_id]
                               
@@ -5553,7 +5554,8 @@ server <- function(input, output, session) {
         revision_geoms + 
         posterior_geoms + 
         posterior_screws_geoms +
-        rods_geoms
+        rods_geoms 
+        # theme_minimal_grid()
     }
   }) 
   
