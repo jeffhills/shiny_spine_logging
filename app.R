@@ -862,11 +862,12 @@ ui <- dashboardPage(skin = "black",
                                    style = "simple",
                                    color = "success", 
                                    icon = icon("fas fa-arrow-circle-right", verify_fa = FALSE)
-                                 ),
-                                 br(),
-                                 tableOutput(outputId = "troubleshooting_plot_click"),
-                                 br(),
-                                 tableOutput(outputId = "troubleshooting_plot_clicks_only")
+                                 )
+                                 
+                                 # br(),
+                                 # tableOutput(outputId = "troubleshooting_plot_click"),
+                                 # br(),
+                                 # tableOutput(outputId = "troubleshooting_plot_clicks_only")
                                  
                           ) ## closes the right column 
                   ),
@@ -2841,61 +2842,61 @@ server <- function(input, output, session) {
   ## TROUBLESHOOTING ##
   
   
-  troubleshooting_list <- reactiveValues(click_tibble = tibble(), 
-                                         click_only_tibble = tibble())
-  
-  observeEvent(input$plot_click, {
-    if(input$object_to_add == "pelvic_screw"){
-      object_currently_selected_to_add <- c("pelvic_screw_1", "pelvic_screw_2")
-    }else{
-      object_currently_selected_to_add <- input$object_to_add
-    }
-    
-    objects_selected_df <-  all_implants_constructed_df %>%
-      select(level, object, side, x, y)%>%
-      filter(object %in% object_currently_selected_to_add)
-  
-    object_added_df <- nearPoints(
-      df = objects_selected_df,
-      coordinfo = input$plot_click,
-      xvar = "x",
-      yvar = "y",
-      maxpoints = 1,
-      threshold = 200
-    )
-    
-    object_click_added_df <- object_added_df %>%
-      mutate(x_click = input$plot_click$x, 
-             y_click = input$plot_click$y) %>%
-      select(x_click, y_click, everything())
-    
-    if(nrow(troubleshooting_list$click_tibble)==0){
-      troubleshooting_list$click_tibble <- object_click_added_df
-    }else{
-      troubleshooting_list$click_tibble <- troubleshooting_list$click_tibble %>%
-        union_all(object_click_added_df)
-    }
-    
-    click_points_df <- tibble(x_click = input$plot_click$x, 
-                              y_click = input$plot_click$y)
-    
-    if(nrow(troubleshooting_list$click_only_tibble)==0){
-      troubleshooting_list$click_only_tibble <- click_points_df
-    }else{
-      troubleshooting_list$click_only_tibble <- troubleshooting_list$click_only_tibble %>%
-        union_all(click_points_df)
-    }
-    
-  })
-  
-  output$troubleshooting_plot_click <- renderTable({
-    troubleshooting_list$click_tibble
-  })
-  
-  output$troubleshooting_plot_clicks_only <- renderTable({
-    troubleshooting_list$click_only_tibble
-  })
-  
+  # troubleshooting_list <- reactiveValues(click_tibble = tibble(), 
+  #                                        click_only_tibble = tibble())
+  # 
+  # observeEvent(input$plot_click, {
+  #   if(input$object_to_add == "pelvic_screw"){
+  #     object_currently_selected_to_add <- c("pelvic_screw_1", "pelvic_screw_2")
+  #   }else{
+  #     object_currently_selected_to_add <- input$object_to_add
+  #   }
+  #   
+  #   objects_selected_df <-  all_implants_constructed_df %>%
+  #     select(level, object, side, x, y)%>%
+  #     filter(object %in% object_currently_selected_to_add)
+  # 
+  #   object_added_df <- nearPoints(
+  #     df = objects_selected_df,
+  #     coordinfo = input$plot_click,
+  #     xvar = "x",
+  #     yvar = "y",
+  #     maxpoints = 1,
+  #     threshold = 200
+  #   )
+  #   
+  #   object_click_added_df <- object_added_df %>%
+  #     mutate(x_click = input$plot_click$x, 
+  #            y_click = input$plot_click$y) %>%
+  #     select(x_click, y_click, everything())
+  #   
+  #   if(nrow(troubleshooting_list$click_tibble)==0){
+  #     troubleshooting_list$click_tibble <- object_click_added_df
+  #   }else{
+  #     troubleshooting_list$click_tibble <- troubleshooting_list$click_tibble %>%
+  #       union_all(object_click_added_df)
+  #   }
+  #   
+  #   click_points_df <- tibble(x_click = input$plot_click$x, 
+  #                             y_click = input$plot_click$y)
+  #   
+  #   if(nrow(troubleshooting_list$click_only_tibble)==0){
+  #     troubleshooting_list$click_only_tibble <- click_points_df
+  #   }else{
+  #     troubleshooting_list$click_only_tibble <- troubleshooting_list$click_only_tibble %>%
+  #       union_all(click_points_df)
+  #   }
+  #   
+  # })
+  # 
+  # output$troubleshooting_plot_click <- renderTable({
+  #   troubleshooting_list$click_tibble
+  # })
+  # 
+  # output$troubleshooting_plot_clicks_only <- renderTable({
+  #   troubleshooting_list$click_only_tibble
+  # })
+  # 
   ### ADDING OBJECT ###
   object_to_add_choices_df_reactive <- reactive({
     if(input$object_to_add == "pelvic_screw"){
@@ -2903,10 +2904,10 @@ server <- function(input, output, session) {
     }else{
       object_currently_selected_to_add <- input$object_to_add
     }
-    
+
     all_implants_constructed_df %>%
       filter(object %in% object_currently_selected_to_add)
-    
+
   })
   
   

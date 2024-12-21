@@ -1178,6 +1178,9 @@ make_interbody_conditional_panel_function <-  function(cage_id_input = NULL){
     
   }else if(str_detect(cage_id_input,"left")){
     level_side <-  paste("Left", str_split(string = cage_id_input, pattern = "_left_")[[1]][1])
+    
+    level_side <- str_replace_all(str_to_upper(str_replace_all(level_side, "_", "-")), pattern = "LEFT", "Left")
+    
     object_text <-  str_split(string = cage_id_input, pattern = "_left_")[[1]][2]
     
     object_label <- if_else(str_length(object_text) == 4,
@@ -1186,6 +1189,8 @@ make_interbody_conditional_panel_function <-  function(cage_id_input = NULL){
     
   }else if(str_detect( cage_id_input,"right")){
     level_side <-  paste("Right", str_split(string = cage_id_input, pattern = "_right_")[[1]][1])
+    level_side <- str_replace_all(str_to_upper(str_replace_all(level_side, "_", "-")), pattern = "RIGHT", "Right") 
+    
     object_text <-  str_split(string = cage_id_input, pattern = "_right_")[[1]][2]
     
     object_label <- if_else(str_length(object_text) == 4,
