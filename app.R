@@ -4369,11 +4369,6 @@ server <- function(input, output, session) {
               filter(side == "right") %>%
               filter(str_detect(object, "hook|screw")) %>%
               mutate(remove_retain = if_else(level %in% input$right_revision_implants_removed, "remove", "retain")) %>%
-              
-              # group_by(object, level) %>%
-              # mutate(object = if_else(str_detect(object, "pelvic"), paste0(object, "_", row_number()), object)) %>%
-              # ungroup() %>%
-              
               left_join(all_implants_constructed_df %>%
                           select(level, side, object, object_constructed, vertebral_number, approach, x, y)) %>%
               distinct()%>%

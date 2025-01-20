@@ -1753,6 +1753,7 @@ jh_supplementary_rods_choices_function <- function(all_objects_df,
                                                    osteotomy_site = NULL, 
                                                    rod_type = "accessory_rod"){ 
   
+
   implant_df <-  all_objects_df %>%
     filter(str_detect(string = object, pattern = "screw|hook|wire")) %>%
     arrange(vertebral_number)
@@ -1927,13 +1928,18 @@ jh_supplementary_rods_choices_function <- function(all_objects_df,
       proximal_point <- implant_df$level[which.min(abs(implant_df$vertebral_number - 20.25))]
       
       # distal_point <- if_else(any(implant_df$level == "Iliac_2"), "Iliac_2", "Iliac")
-      if(min(implant_df$x) < 0.5){
+      
+      # if(any(names(all_objects_df) == "side")){print(all_objects_df$side)}
+      # if(min(implant_df$x) < 0.5){
+        if(all_objects_df$side[[1]] == "left"){
               distal_point <-  (implant_df %>%
-                          filter(str_detect(object, "pelvic")) %>%
+                          filter(str_detect(str_to_lower(level), "iliac|s2ai")) %>%
+                            left_join(all_implants_constructed_df) %>%
                           filter(x == min(x)))$level
       }else{
         distal_point <-  (implant_df %>%
-                            filter(str_detect(object, "pelvic")) %>%
+                            filter(str_detect(str_to_lower(level), "iliac|s2ai")) %>%
+                            left_join(all_implants_constructed_df) %>%
                             filter(x == max(x)))$level
       }
 
