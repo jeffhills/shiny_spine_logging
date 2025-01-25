@@ -362,6 +362,8 @@ ui <- dashboardPage(skin = "black",
                                                             value = FALSE
                                                 ),
                                                 tableOutput(outputId = "all_obects_added_table"),
+                                                hr(),
+                                                tableOutput(outputId = "revision_objects_table"),
                                                 circle = TRUE
                                  )
                           ),
@@ -1564,24 +1566,7 @@ server <- function(input, output, session) {
             filter(object != "") %>%
             mutate(level = str_replace_all(string = level, pattern = "S2ai", replacement = "S2AI")) %>%
             rename(approach = approach_repeating)
-          
-          # select(-redcap_event_name,
-          #        -redcap_repeat_instrument,
-          #        -redcap_repeat_instance, 
-          #        -redcap_survey_identifier,
-          #        -patient_details_complete, 
-          #        -patient_details_timestamp, 
-          #        -procedures_by_level_repeating_complete) %>%
-          # pivot_longer(cols = c(-record_id, -approach_repeating, -side, -dos_surg_repeating), names_to = "level", values_to = "object") %>%
-          # filter(!is.na(object)) %>%
-          # rename(date_of_surgery = dos_surg_repeating)%>%
-          # mutate(level = str_to_title(str_replace_all(string = level, pattern = "_", replacement = "-"))) %>%
-          # filter(object != " ") %>%
-          # filter(object != "") %>%
-          # mutate(level = str_replace_all(string = level, pattern = "S2ai", replacement = "S2AI")) %>%
-          # rename(approach = approach_repeating)
-          
-          
+
           existing_patient_data$patient_df <- existing_patient_data$patient_df_full
           
           existing_patient_data$match_found <- match_found
@@ -1621,6 +1606,12 @@ server <- function(input, output, session) {
     
     
     
+  })
+  
+  output$revision_objects_table <- renderTable({
+    # existing_patient_data$patient_df_full
+    req(left_revision_implants_reactive_list()$revision_implants_status_df)
+    left_revision_implants_reactive_list()$revision_implants_status_df
   })
   
   observe({
@@ -3407,7 +3398,10 @@ server <- function(input, output, session) {
         filter(level %in% input$open_canal) %>%
         mutate(category = "revision")
       
-      geoms_list_revision_posterior$open_canal_sf <- geom_sf(data = st_union(st_combine(st_multipolygon(open_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE), fill = "lightblue", alpha = 0.5)
+      open_canal_for_plotting_df <- open_df %>%
+      filter(between(y, input$crop_y[1], input$crop_y[2]))
+      
+      geoms_list_revision_posterior$open_canal_sf <- geom_sf(data = st_union(st_combine(st_multipolygon(open_canal_for_plotting_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE), fill = "lightblue", alpha = 0.5)
       
     }
   }
@@ -3440,6 +3434,7 @@ server <- function(input, output, session) {
     
   })
   
+  
   # #### POSTERIOR ####
   observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(left_revision_implants_reactive_list()$removed_df)>0){
@@ -3455,6 +3450,12 @@ server <- function(input, output, session) {
       # keep(.x =  left_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))
       
       geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  left_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))), fill = "black")
+      
+      # left_rev_implants_retained_for_plotting_df <- left_revision_implants_reactive_list()$retained_df %>%
+      #   filter(between(y, input$crop_y[1], input$crop_y[2]))
+      # 
+      # geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  left_rev_implants_retained_for_plotting_df$object_constructed, .p = ~ !is.null(.x))), fill = "black")
+      
     }
   })
   
@@ -3470,8 +3471,13 @@ server <- function(input, output, session) {
     if(nrow(right_revision_implants_reactive_list()$retained_df)>0){
       # keep(.x =  right_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))
       
+      # right_rev_implants_retained_for_plotting_df <- right_revision_implants_reactive_list()$retained_df %>%
+      #   filter(between(y, input$crop_y[1], input$crop_y[2]))
+      
       geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  right_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))), fill = "black")
-    }
+      # geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  right_rev_implants_retained_for_plotting_df$object_constructed, .p = ~ !is.null(.x))), fill = "black")
+      
+      }
   })
   
   
@@ -5520,7 +5526,8 @@ server <- function(input, output, session) {
                y = input$crop_y[1] + 0.01, 
                label = l6_statement) +
       coord_sf(xlim = c(x_left_limit, x_right_limit),
-               ylim = input$crop_y, default = TRUE) 
+               ylim = input$crop_y, default = TRUE,
+               clip = "on" ) 
   })
   
   
@@ -5533,7 +5540,9 @@ server <- function(input, output, session) {
   
   output$spine_plan <-  renderPlot({
     # main_page_reactive_plot()
-    
+    x_left_limit <- 0.3 - input$label_text_offset/100
+    x_right_limit <- 1-x_left_limit
+
     revision_geoms <- reactiveValuesToList(geoms_list_revision_posterior) 
       posterior_geoms <- reactiveValuesToList(geoms_list_posterior)
       posterior_screws_geoms <- reactiveValuesToList(geoms_list_posterior_screws) 
@@ -5550,7 +5559,11 @@ server <- function(input, output, session) {
         revision_geoms + 
         posterior_geoms + 
         posterior_screws_geoms +
-        rods_geoms 
+        rods_geoms +
+        coord_sf(xlim = c(x_left_limit, x_right_limit),
+                 ylim = input$crop_y, default = TRUE,
+                 clip = "on" ) 
+
         # theme_minimal_grid()
     }
   }) 

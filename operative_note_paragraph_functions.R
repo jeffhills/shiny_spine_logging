@@ -1302,7 +1302,7 @@ op_note_technique_combine_statement <- function(object,
   
   
   technique_statement <- case_when(
-    object == "incision_drainage" ~ glue("The wound was inspected thoroughly and any necrotic appearing tissue was excised. Tissue samples from deep and superficial wound bed were sent for cultures. The wound bed was thoroughly irrigated and then working layer by layer from deep to superficial, the bone, deep muscle, fascia and subcutaneous tissue was meticulously debrided with a curette. Devitalized muscle, fascia and subcutaneous tissue was excised. Once I felt the wound was clean and an adequate debridement had been completed, I again copiously irrigated the wound."), 
+    object == "incision_drainage" ~ glue("The wound was inspected thoroughly and any necrotic appearing tissue was excised. Tissue samples were sent for cultures. The wound bed was thoroughly irrigated and the bone, deep muscle, fascia and subcutaneous tissue was debrided. Devitalized muscle, fascia and subcutaneous tissue was excised. The wound was irrigated thoroughly until I felt the wound was clean and an adequate debridement had been completed."), 
     object == "vertebroplasty" ~ glue("For vertebral body cement augmentation, a cannula was inserted into the vertebral body through the pedicle. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebroplasty was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
     object == "vertebral_cement_augmentation" ~ glue("For vertebral body cement augmentation, I first created a cavity within the vertebral body. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebral augmentation was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
     object == "laminar_downgoing_hook" ~ glue("For downgoing laminar hooks, the ligamentum flavum was removed at the site of the hook insertion. A hook was then inserted securely under the lamina {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
@@ -1670,7 +1670,7 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
         i_d_cpt_code <- "22015"
     }
     
-    id_statement <- glue("Incision & Drainage of deep, subfascial spine abscess from {top_level} to {bottom_level} ({i_d_cpt_code}}")
+    id_statement <- glue("Incision & Drainage of deep, subfascial spine abscess from {top_level} to {bottom_level} ({i_d_cpt_code)}")
     
     objects_added_df <- objects_added_df %>%
       filter(object != "incision_drainage")

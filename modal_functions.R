@@ -606,11 +606,14 @@ startup_modal_box_diagnosis_symptoms <-
           )
         )
       ),
+      conditionalPanel(
+        condition = "input.symptoms.length > 0", 
       box(
         width = 12,
         title = "General Procedure Details:",
         solidHeader = TRUE,
-        status = "info",
+        status = "info", 
+        # collapsed = TRUE,
         column(
           12,
           tags$div(style = "font-size:20px; font-weight:bold", "Procedure: Stage & Approach:"),
@@ -966,6 +969,7 @@ startup_modal_box_diagnosis_symptoms <-
           )
         )
       )
+    )
     )
   }
 
