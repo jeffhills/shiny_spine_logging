@@ -317,7 +317,10 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     }else if(anterior_approach_laterality == "Lateral Transpsoas"){
       first_paragraph_list$surgical_approach <- glue("Fluoroscopy was used to obtain a perfect AP and lateral xrays and mark the levels. The skin and subcutaneous fat was incised in line with the disk space. The aponeurosis of the external obliques were incised and the muscle fibers divided. The internal obliques were divided, and the transversus abdominis was then divided. I then bluntly dissected the plane between the retroperitoneal fat and the psoas fascia, and the peritoneal cavity was retracted anteriorly. The surface of the psoas was identified and followed down to the vertebral body. Once I was down to the spine, a pin was placed to confirm levels using xray. The dilators were then inserted sequentially and EMG was used to test each dilator to confirm I was not impinging the lumbar plexus. Once the largest dilator had been placed, the retractor was inserted and I used triggered EMG and direct visualization to confirm I had not trapped any of the lumbar plexus. ")
       
-    }else{
+    }else if(anterior_approach_laterality == "Lateral Retropleural"){
+      first_paragraph_list$surgical_approach <- glue("After the patient was positioned, X-ray was used to confirm levels and outline the vertebral levels of interest. An incision was drawn roughly 6cm in length, with 1/3 of the incision over the posterior vertebral body at the surgical level. The skin was incised in line with the rib and the subcutaneous dissection was carried down to the rib. A subperiosteal dissection was carried out over the rib and a roughly 6-7cm section of rib was excised. Blunt dissection was then carried down between the parietal pleura and endothoracic fascia, down to the spine. The deep retractors were placed and fluoroscopy was used to confirm the level. ")      
+    
+      }else{
       first_paragraph_list$surgical_approach <- glue("The anterior approach to the spine was carried out with assistance from the vascular surgeon. A {str_to_lower(anterior_approach_laterality)} approach was carried out down toward the spine. Once the approach was complete, retractors were placed and the surgical levels were confirmed using fluoroscopy. ")
     }
   }

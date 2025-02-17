@@ -1062,6 +1062,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                                          "Lateral Antepsoas",
                                          "Thoracoabdominal",
                                          "Thoracotomy",
+                                         "Lateral Retropleural",
                                          "Transperitoneal",
                                          "Retroperitoneal"),
                       initial_value_selected = approach_specified_anterior

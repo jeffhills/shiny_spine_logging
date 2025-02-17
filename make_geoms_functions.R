@@ -844,7 +844,7 @@ jh_make_anterior_geoms_function <- function(all_anterior_objects_df){
                                                                                       fill = "pink") 
     
   }else{
-    geoms_list_anterior_diskectomy$partial_corpectomy_sf_geom <- NULL
+    geoms_list_anterior_diskectomy$anterior_partial_vertebral_excision <- NULL
   }
   
   ########  Arthroplasty  ########

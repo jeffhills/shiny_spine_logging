@@ -208,10 +208,17 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df, 
         
         cranial_to_corpectomy_level <- jh_get_cranial_caudal_interspace_body_list_function(level = corpectomy_level)$cranial_level
         
-        statement_df <- levels_nested_df %>%
-          mutate(paragraph = glue("I confirmed that I had adequately exposed the {corpectomy_level} body, the {interspace_character} disk, and the {cranial_to_corpectomy_level} body. I then started with the discectomy. Using a combination of a knife, curette, pituitary rongeur, and Kerrison rongeur, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the discectomy, I used a combination of a burr and rongeur to excise roughly 60% of the {corpectomy_level} vertebral body. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
-          select(paragraph) %>%
-          distinct()
+        if(str_starts(corpectomy_level, "T")){
+          statement_df <- levels_nested_df %>%
+            mutate(paragraph = glue("I confirmed that I had adequately exposed {corpectomy_level} body, and the {interspace_character} disk. Using a combination of a high-speed burr, curette, pituitary, and Kerrison rongeur, the pedicle of {corpectomy_level} was excised, and the posterior border of the vertebral body and dura was identified. Then, the posterior vertebral body of {corpectomy_level} was excised, creating a cavity for the ventral decompression. The decompression was carried dorsally to the posterior longitudinal ligament. ")) %>%
+            select(paragraph) %>%
+            distinct()
+        }else{
+          statement_df <- levels_nested_df %>%
+            mutate(paragraph = glue("I confirmed that I had adequately exposed the {corpectomy_level} body, the {interspace_character} disk, and the {cranial_to_corpectomy_level} body. I then started with the discectomy. Using a combination of a knife, curette, pituitary rongeur, and Kerrison rongeur, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the discectomy, I used a combination of a burr and rongeur to excise roughly 60% of the {corpectomy_level} vertebral body. I carried the corpectomy laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
+            select(paragraph) %>%
+            distinct() 
+        }
       }else{
         interspace_character <- jh_get_cranial_caudal_interspace_body_list_function(level = corpectomy_level)$caudal_interspace
         
@@ -231,10 +238,18 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df, 
       caudal_level_character <- jh_get_vertebral_level_function(number = unique(max(levels_nested_df$vertebral_number)))
       interspace_character <- jh_get_cranial_caudal_interspace_body_list_function(level = cranial_level_character)$caudal_interspace
       
-      statement_df <- levels_nested_df %>%
-        mutate(paragraph = glue("I confirmed that I had adequately exposed {cranial_level_character} body, the {interspace_character} disk, and the {caudal_level_character} body. I then started with the discectomy. Using a combination of a knife, curette, pituitary rongeur, and Kerrison rongeur, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the discectomy, I used a combination of a burr and rongeur to excise roughly 60% of the {cranial_level_character} and {caudal_level_character} vertebral bodies. I carried the corpectomies laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
-        select(paragraph) %>%
-        distinct()
+      if(str_starts(cranial_level_character, "T") & str_starts(caudal_level_character, "T")){
+        statement_df <- levels_nested_df %>%
+          mutate(paragraph = glue("I confirmed that I had adequately exposed the {cranial_level_character} body, the {interspace_character} disk, and the {caudal_level_character} body. Using a combination of a high-speed burr, curette, pituitary, and Kerrison rongeur, the pedicle of {caudal_level_character} was excised, and the posterior border of the vertebral body and dura was identified. Then, the posterior vertebral body of {cranial_level_character} and {caudal_level_character} were excised, creating a cavity for the ventral decompression. The decompression was carried dorsally to the posterior longitudinal ligament. ")) %>%
+          select(paragraph) %>%
+          distinct()
+      }else{
+        statement_df <- levels_nested_df %>%
+          mutate(paragraph = glue("I confirmed that I had adequately exposed the {cranial_level_character} body, the {interspace_character} disk, and the {caudal_level_character} body. I then started with the discectomy. Using a combination of a knife, curette, pituitary rongeur, and Kerrison rongeur, the anterior longitudinal ligament was incised and the {interspace_character} disc was completely excised. Once I was satisfied with the discectomy, I used a combination of a burr and rongeur to excise roughly 60% of the {cranial_level_character} and {caudal_level_character} vertebral bodies. I carried the corpectomies laterally to the edge of the uncus and dorsally to the posterior longitudinal ligament, effectively decompressing the central canal.")) %>%
+          select(paragraph) %>%
+          distinct()  
+      }
+      
     }
     
     

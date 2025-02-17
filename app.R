@@ -5669,7 +5669,11 @@ server <- function(input, output, session) {
           reactiveValuesToList(geoms_list_posterior_screws) +
           reactiveValuesToList(rods_list)
       }else{
-        panel_2_plot <-spine_plan_plot_anterior_reactive()
+        panel_2_plot <-spine_plan_plot_anterior_reactive()+
+          reactiveValuesToList(geoms_list_revision_anterior) +
+          reactiveValuesToList(geoms_list_anterior_diskectomy) +
+          reactiveValuesToList(geoms_list_anterior_interbody) +
+          reactiveValuesToList(geoms_list_anterior_instrumentation)
       }
     }else{
       if(approach_vector[[1]] == "posterior"){
@@ -5680,11 +5684,19 @@ server <- function(input, output, session) {
                                      reactiveValuesToList(geoms_list_posterior_screws) +
                                      reactiveValuesToList(rods_list)),
                                   NULL,
-                                  spine_plan_plot_anterior_reactive(),
+                                  spine_plan_plot_anterior_reactive()+
+                                    reactiveValuesToList(geoms_list_revision_anterior) +
+                                    reactiveValuesToList(geoms_list_anterior_diskectomy) +
+                                    reactiveValuesToList(geoms_list_anterior_interbody) +
+                                    reactiveValuesToList(geoms_list_anterior_instrumentation),
                                   nrow = 1,
                                   rel_widths = c(1, -.1, 1))
       }else{
-        panel_2_plot <- plot_grid(spine_plan_plot_anterior_reactive(),
+        panel_2_plot <- plot_grid(spine_plan_plot_anterior_reactive()+
+                                    reactiveValuesToList(geoms_list_revision_anterior) +
+                                    reactiveValuesToList(geoms_list_anterior_diskectomy) +
+                                    reactiveValuesToList(geoms_list_anterior_interbody) +
+                                    reactiveValuesToList(geoms_list_anterior_instrumentation),
                                   NULL,
                                   (spine_plan_plot_posterior_reactive() +
                                      reactiveValuesToList(geoms_list_revision_posterior) +
