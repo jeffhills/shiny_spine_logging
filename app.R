@@ -6019,22 +6019,11 @@ server <- function(input, output, session) {
         if(any(str_detect(string = input$head_positioning_anterior, pattern = "Mayfield"))){
           additional_procedures_list$head_positioning_anterior <- "Application of Cranial Tongs using Mayfield head holder"
         }
-        
-        # if(any(str_detect(string = input$head_positioning_anterior, pattern = "Halo"))){
-        #   age <- as.double(if_else(paste(input$date_of_birth) == "1900-01-01", "0", as.character(round(interval(start = paste(input$date_of_birth), end = paste(input$date_of_surgery))/years(1), 0))))
-        #   if(age < 18 & age > 0){
-        #     additional_procedures_list$head_positioning_anterior <- "Application of Halo for thin skull osteology (pediatric)"
-        #   }else{
-        #     additional_procedures_list$head_positioning_anterior <- "Application of Halo"
-        #   }
-        # }
-        
+ 
         if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
           additional_procedures_list$fracture <- "Open treatment of vertebral fracture"
         }
-        # if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
-        #   additional_procedures_list$incision_drainage <- "Incision and Drainage"
-        # }
+
         if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
           additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
         }
@@ -6137,10 +6126,7 @@ server <- function(input, output, session) {
       if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "trauma")){
         additional_procedures_list$fracture <- "Open treatment of vertebral fracture"
       }
-      # if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "infection")){
-      #   additional_procedures_list$incision_drainage <- "Incision and Drainage"
-      # }
-      
+
       if(jh_determine_if_section_dx_function(diagnosis_vector = input$primary_diagnosis, section_to_determine = "tumor")){
         additional_procedures_list$tumor_biopsy <- "Open Biopsy of extradural spinal lesion"
       }

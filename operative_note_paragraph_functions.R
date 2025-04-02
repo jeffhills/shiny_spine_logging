@@ -1685,7 +1685,7 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
         i_d_cpt_code <- "22015"
     }
     
-    id_statement <- glue("Incision & Drainage of deep, subfascial spine abscess from {top_level} to {bottom_level} ({i_d_cpt_code)}")
+    id_statement <- glue("Incision & Drainage of deep, subfascial spine abscess from {top_level} to {bottom_level} ({i_d_cpt_code})")
     
     objects_added_df <- objects_added_df %>%
       filter(object != "incision_drainage")

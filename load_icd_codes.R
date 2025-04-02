@@ -69,5 +69,5 @@ jh_add_codes_to_diagnosis_function <- function(diagnosis_vector){
     replace_na(list(icd_10_code = "xx")) %>%
     mutate(diagnosis_codes = if_else(icd_10_code == "xx", paste(diagnosis), paste(diagnosis, " (", icd_10_code, ")", sep = "")))
   
-  return(codes_df$diagnosis_codes)
+  return(unique(codes_df$diagnosis_codes))
 }
