@@ -479,7 +479,7 @@ ui <- dashboardPage(skin = "black",
                                                       )
                                                     ),
                                                     plotOutput("spine_plan",
-                                                               height = 750,
+                                                               height = "750px", width = "100%",
                                                                click = "plot_click",
                                                                dblclick = "plot_double_click")
                                              )   
@@ -5632,7 +5632,7 @@ server <- function(input, output, session) {
 
         # theme_minimal_grid()
     }
-  }) 
+  }, res = 96) 
   
   # summary_spine_plot_reactive<- reactive({
   #   posterior_spine_ggdraw
