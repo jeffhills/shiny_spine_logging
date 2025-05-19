@@ -5619,10 +5619,10 @@ server <- function(input, output, session) {
         revision_geoms + 
         posterior_geoms + 
         posterior_screws_geoms +
-        rods_geoms +
-        coord_sf(xlim = c(x_left_limit, x_right_limit),
-                 ylim = input$crop_y, default = TRUE,
-                 clip = "on" ) 
+        rods_geoms 
+        # coord_sf(xlim = c(x_left_limit, x_right_limit),
+        #          ylim = input$crop_y, default = TRUE,
+        #          clip = "on" ) 
 
         # theme_minimal_grid()
     }
