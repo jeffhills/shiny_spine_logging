@@ -5530,8 +5530,9 @@ server <- function(input, output, session) {
         # coord_fixed() +
         coord_cartesian(xlim = c(x_left_limit, x_right_limit),
                         ylim = input$crop_y,
-                        clip = "off") 
-        # theme_minimal_grid()
+                        # clip = "off"
+                        ) 
+        theme_minimal_grid()
       # plan_table_geom   
     }
     
@@ -5591,8 +5592,9 @@ server <- function(input, output, session) {
       # ylim(input$crop_y) +
       # coord_fixed()+
       coord_cartesian(xlim = c(x_left_limit, x_right_limit),
-                        ylim = input$crop_y,
-                        clip = "off") 
+                        ylim = input$crop_y
+                        # clip = "off"
+                      ) 
       # theme_minimal_grid()
   })
   
@@ -5632,7 +5634,7 @@ server <- function(input, output, session) {
 
         # theme_minimal_grid()
     }
-  }, res = 96) 
+  }) 
   
   # summary_spine_plot_reactive<- reactive({
   #   posterior_spine_ggdraw
