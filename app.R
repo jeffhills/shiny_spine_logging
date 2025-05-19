@@ -1829,26 +1829,51 @@ server <- function(input, output, session) {
                                   button_proceed = "exit"
       ))
     }else{
-      removeModal()
-      showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = NULL,
-                                                     # primary_diagnosis_value = NULL,
-                                                     symptoms_initial_value = NULL,
-                                                     stage_number_value = input$stage_number,
-                                                     staged_procedure_initial_value = FALSE,
-                                                     multiple_approach_initial_value = FALSE,
-                                                     multi_approach_starting_position = input$multi_approach_starting_position,
-                                                     spinal_regions_selected = NULL,
-                                                     ##
-                                                     primary_or_revision = input$primary_revision,
-                                                     revision_indication = input$revision_indication,
-                                                     levels_with_prior_decompression = input$open_canal,
-                                                     prior_fusion_levels = input$prior_fusion_levels,
-                                                     prior_instrumentation = input$prior_instrumentation,
-                                                     left_prior_implants = input$left_revision_implants,
-                                                     right_prior_implants = input$right_revision_implants,
-                                                     left_rod_status = input$left_revision_rod_status,
-                                                     right_rod_status = input$right_revision_rod_status
-      ))
+      if(str_detect(str_to_lower(input$patient_first_name), "test")){
+        removeModal()
+        showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = 'deformity',
+                                                       # primary_diagnosis_value = NULL,
+                                                       symptoms_initial_value = 'Low Back Pain',
+                                                       stage_number_value = input$stage_number,
+                                                       staged_procedure_initial_value = FALSE,
+                                                       multiple_approach_initial_value = FALSE,
+                                                       multi_approach_starting_position = input$multi_approach_starting_position,
+                                                       spinal_regions_selected = 'lumbar',
+                                                       ##
+                                                       primary_or_revision = input$primary_revision,
+                                                       revision_indication = input$revision_indication,
+                                                       levels_with_prior_decompression = input$open_canal,
+                                                       prior_fusion_levels = input$prior_fusion_levels,
+                                                       prior_instrumentation = input$prior_instrumentation,
+                                                       left_prior_implants = input$left_revision_implants,
+                                                       right_prior_implants = input$right_revision_implants,
+                                                       left_rod_status = input$left_revision_rod_status,
+                                                       right_rod_status = input$right_revision_rod_status
+        ))
+      }else{
+        removeModal()
+        showModal(startup_modal_box_diagnosis_symptoms(diagnosis_category_value = NULL,
+                                                       # primary_diagnosis_value = NULL,
+                                                       symptoms_initial_value = NULL,
+                                                       stage_number_value = input$stage_number,
+                                                       staged_procedure_initial_value = FALSE,
+                                                       multiple_approach_initial_value = FALSE,
+                                                       multi_approach_starting_position = input$multi_approach_starting_position,
+                                                       spinal_regions_selected = NULL,
+                                                       ##
+                                                       primary_or_revision = input$primary_revision,
+                                                       revision_indication = input$revision_indication,
+                                                       levels_with_prior_decompression = input$open_canal,
+                                                       prior_fusion_levels = input$prior_fusion_levels,
+                                                       prior_instrumentation = input$prior_instrumentation,
+                                                       left_prior_implants = input$left_revision_implants,
+                                                       right_prior_implants = input$right_revision_implants,
+                                                       left_rod_status = input$left_revision_rod_status,
+                                                       right_rod_status = input$right_revision_rod_status
+        ))
+      }
+      
+
     }
   })
   
@@ -5471,7 +5496,9 @@ server <- function(input, output, session) {
         ) +
         geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
         coord_sf(xlim = c(x_left_limit, x_right_limit),
-                 ylim = input$crop_y, default = TRUE) 
+                 ylim = input$crop_y, default = TRUE)+
+        coord_fixed()
+        # theme_minimal_grid()
       # plan_table_geom   
     }
     
@@ -5527,7 +5554,8 @@ server <- function(input, output, session) {
                label = l6_statement) +
       coord_sf(xlim = c(x_left_limit, x_right_limit),
                ylim = input$crop_y, default = TRUE,
-               clip = "on" ) 
+               clip = "on" ) +
+      coord_fixed()
   })
   
   
