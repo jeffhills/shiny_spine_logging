@@ -5525,10 +5525,13 @@ server <- function(input, output, session) {
         geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
         # coord_sf(xlim = c(x_left_limit, x_right_limit),
         #          ylim = input$crop_y, default = TRUE) +
-        xlim(c(x_left_limit, x_right_limit)) +
-        ylim(input$crop_y) +
+        # xlim(c(x_left_limit, x_right_limit)) +
+        # ylim(input$crop_y) +
         # coord_fixed() +
-        theme_minimal_grid()
+        coord_cartesian(xlim = c(x_left_limit, x_right_limit),
+                        ylim = input$crop_y,
+                        clip = "off") 
+        # theme_minimal_grid()
       # plan_table_geom   
     }
     
@@ -5584,10 +5587,13 @@ server <- function(input, output, session) {
                label = l6_statement) +
       # coord_sf(xlim = c(x_left_limit, x_right_limit),
       #          ylim = input$crop_y, default = TRUE) +
-      xlim(c(x_left_limit, x_right_limit)) +
-      ylim(input$crop_y) +
+      # xlim(c(x_left_limit, x_right_limit)) +
+      # ylim(input$crop_y) +
       # coord_fixed()+
-      theme_minimal_grid()
+      coord_cartesian(xlim = c(x_left_limit, x_right_limit),
+                        ylim = input$crop_y,
+                        clip = "off") 
+      # theme_minimal_grid()
   })
   
   
