@@ -2867,7 +2867,7 @@ server <- function(input, output, session) {
  
   observeEvent(input$plot_click, {
 
-    troubleshooting_list$click_coordinates_text <- glue("X = {round(input$plot_click$x, 2)}  Y = {round(input$plot_click$y, 2)}\n")
+    troubleshooting_list$click_coordinates_text <- glue("X = {round(input$plot_click$x, 3)}  Y = {round(input$plot_click$y, 3)}\n")
 
   })
 
@@ -5523,9 +5523,11 @@ server <- function(input, output, session) {
           fontface = "bold"
         ) +
         geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
-        coord_sf(xlim = c(x_left_limit, x_right_limit),
-                 ylim = input$crop_y, default = TRUE)+
-        coord_fixed() +
+        # coord_sf(xlim = c(x_left_limit, x_right_limit),
+        #          ylim = input$crop_y, default = TRUE) +
+        xlim(c(x_left_limit, x_right_limit)) +
+        ylim(input$crop_y) +
+        # coord_fixed() +
         theme_minimal_grid()
       # plan_table_geom   
     }
@@ -5580,10 +5582,11 @@ server <- function(input, output, session) {
       annotate("text", x = 0.5, 
                y = input$crop_y[1] + 0.01, 
                label = l6_statement) +
-      coord_sf(xlim = c(x_left_limit, x_right_limit),
-               ylim = input$crop_y, default = TRUE,
-               clip = "on" ) +
-      coord_fixed()+
+      # coord_sf(xlim = c(x_left_limit, x_right_limit),
+      #          ylim = input$crop_y, default = TRUE) +
+      xlim(c(x_left_limit, x_right_limit)) +
+      ylim(input$crop_y) +
+      # coord_fixed()+
       theme_minimal_grid()
   })
   
