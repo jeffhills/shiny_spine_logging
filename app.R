@@ -365,7 +365,10 @@ ui <- dashboardPage(skin = "black",
                                                 hr(),
                                                 tableOutput(outputId = "revision_objects_table"),
                                                 circle = TRUE
-                                 )
+                                 ),
+                                 textOutput(outputId = "click_coordinates"),
+                                 br(),
+                                 tableOutput(outputId = "troubleshooting_plot_click_df")
                           ),
                           column(width = 9, 
                                  box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Surgical Procedures:"), solidHeader = TRUE, status = "primary",
@@ -2858,9 +2861,34 @@ server <- function(input, output, session) {
   ## TROUBLESHOOTING ##
   
   
-  # troubleshooting_list <- reactiveValues(click_tibble = tibble(), 
-  #                                        click_only_tibble = tibble())
-  # 
+  # troubleshooting_list <- reactiveValues(click_coordinates_text <- "-")
+  
+  troubleshooting_list <- reactiveValues()
+ 
+  observeEvent(input$plot_click, {
+
+    troubleshooting_list$click_coordinates_text <- glue("X = {round(input$plot_click$x, 2)}  Y = {round(input$plot_click$y, 2)}\n")
+
+  })
+
+  output$click_coordinates <- renderText({
+    troubleshooting_list$click_coordinates_text
+  })
+  
+  
+  output$troubleshooting_plot_click_df <- renderTable({
+      if(input$object_to_add == "pelvic_screw"){
+        object_currently_selected_to_add <- c("pelvic_screw_1", "pelvic_screw_2")
+      }else{
+        object_currently_selected_to_add <- input$object_to_add
+      }
+    
+      all_implants_constructed_df %>%
+        select(level, object, x, y)%>%
+        filter(object %in% object_currently_selected_to_add)
+  })
+
+  
   # observeEvent(input$plot_click, {
   #   if(input$object_to_add == "pelvic_screw"){
   #     object_currently_selected_to_add <- c("pelvic_screw_1", "pelvic_screw_2")
@@ -5497,8 +5525,8 @@ server <- function(input, output, session) {
         geom_sf(data = NULL) + #this is needed so that plot starts cropped correctly 
         coord_sf(xlim = c(x_left_limit, x_right_limit),
                  ylim = input$crop_y, default = TRUE)+
-        coord_fixed()
-        # theme_minimal_grid()
+        coord_fixed() +
+        theme_minimal_grid()
       # plan_table_geom   
     }
     
@@ -5555,7 +5583,8 @@ server <- function(input, output, session) {
       coord_sf(xlim = c(x_left_limit, x_right_limit),
                ylim = input$crop_y, default = TRUE,
                clip = "on" ) +
-      coord_fixed()
+      coord_fixed()+
+      theme_minimal_grid()
   })
   
   
