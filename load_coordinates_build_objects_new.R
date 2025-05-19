@@ -29,28 +29,29 @@ interspaces_vector_for_revision_rods <-  c('C1-C2', 'C2-C3', 'C3-C4', 'C4-C5', '
 
 spine_png <- image_read(path = "spine_posterior.png", density = 5)
 
-posterior_spine_ggdraw <- ggdraw() +
-  draw_image(
-    spine_png,
-    scale = 1,
-    y = 0,
-    valign = 0,
-    x = 0,
-    height = 1, clip = "on"
-  ) 
+# posterior_spine_ggdraw <- ggdraw() +
+#   draw_image(
+#     spine_png,
+#     scale = 1,
+#     y = 0,
+#     valign = 0,
+#     x = 0,
+#     height = 1, 
+#     clip = "on"
+#   ) 
 
 anterior_spine_jpg <- image_read(path = "spine_anterior.jpg")
 
-anterior_spine_ggdraw <- ggdraw() +
-  draw_image(
-    anterior_spine_jpg,
-    scale = 1,
-    y = 0,
-    valign = 0,
-    x = 0,
-    height = 1, clip = "on"
-    # width = 1
-  ) 
+# anterior_spine_ggdraw <- ggdraw() +
+#   draw_image(
+#     anterior_spine_jpg,
+#     scale = 1,
+#     y = 0,
+#     valign = 0,
+#     x = 0,
+#     height = 1, clip = "on"
+#     # width = 1
+#   ) 
 
 # implant_starts_df <- fread(file = "full_coordinates_no_empty.csv", header = TRUE, check.names = TRUE) 
 

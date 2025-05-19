@@ -72,6 +72,29 @@ source("operative_note_paragraph_functions.R", local = TRUE)
 source("screw_size_type_inputs.R", local = TRUE)
 source("redcap_table_functions.R", local = TRUE)
 
+posterior_spine_ggdraw <- ggdraw() +
+  draw_image(
+    spine_png,
+    scale = 1,
+    y = 0,
+    valign = 0,
+    x = 0,
+    height = 1, 
+    clip = "on"
+  ) 
+
+anterior_spine_ggdraw <- ggdraw() +
+  draw_image(
+    anterior_spine_jpg,
+    scale = 1,
+    y = 0,
+    valign = 0,
+    x = 0,
+    height = 1,
+    clip = "on"
+    # width = 1
+  ) 
+
 # anterior_body_constructed_df <- all_object_ids_df %>%
 #   filter(category == "anterior_body") %>%
 #   left_join(fread("coordinates/anterior_body.csv") %>%
@@ -480,8 +503,11 @@ ui <- dashboardPage(skin = "black",
                                                     ),
                                                     plotOutput("spine_plan",
                                                                height = 750,
-                                                               click = "plot_click",
-                                                               dblclick = "plot_double_click")
+                                                               click = clickOpts(id = "plot_click", clip = FALSE),
+                                                               dblclick = dblclickOpts(id = "plot_double_click", clip = FALSE)
+                                                               # click = "plot_click",
+                                                               # dblclick = "plot_double_click"
+                                                               )
                                              )   
                                            )
                                        ), # end of left box with spine plot
@@ -2999,9 +3025,6 @@ server <- function(input, output, session) {
         }
       }
     }
-    
-
-    
     object_added_df
     
   })
@@ -5526,9 +5549,9 @@ server <- function(input, output, session) {
         # coord_sf(xlim = c(x_left_limit, x_right_limit),
         #          ylim = input$crop_y, default = TRUE) +
         xlim(c(x_left_limit, x_right_limit)) +
-        ylim(input$crop_y) +
+        ylim(input$crop_y) 
         # coord_fixed() +
-        theme_minimal_grid()
+        # theme_minimal_grid()
       # plan_table_geom   
     }
     
@@ -5585,9 +5608,9 @@ server <- function(input, output, session) {
       # coord_sf(xlim = c(x_left_limit, x_right_limit),
       #          ylim = input$crop_y, default = TRUE) +
       xlim(c(x_left_limit, x_right_limit)) +
-      ylim(input$crop_y) +
+      ylim(input$crop_y) 
       # coord_fixed()+
-      theme_minimal_grid()
+      # theme_minimal_grid()
   })
   
   
