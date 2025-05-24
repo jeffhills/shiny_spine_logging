@@ -389,9 +389,11 @@ ui <- dashboardPage(skin = "black",
                                                 tableOutput(outputId = "revision_objects_table"),
                                                 circle = TRUE
                                  ),
+                                 dropdownButton(size = "xs",
                                  textOutput(outputId = "click_coordinates"),
                                  br(),
                                  tableOutput(outputId = "troubleshooting_plot_click_df")
+                                 )
                           ),
                           column(width = 9, 
                                  box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Surgical Procedures:"), solidHeader = TRUE, status = "primary",
@@ -503,8 +505,8 @@ ui <- dashboardPage(skin = "black",
                                                     ),
                                                     plotOutput("spine_plan",
                                                                height = 750,
-                                                               click = clickOpts(id = "plot_click", clip = FALSE),
-                                                               dblclick = dblclickOpts(id = "plot_double_click", clip = FALSE)
+                                                               click = clickOpts(id = "plot_click", clip = TRUE),
+                                                               dblclick = dblclickOpts(id = "plot_double_click", clip = TRUE)
                                                                # click = "plot_click",
                                                                # dblclick = "plot_double_click"
                                                                )
@@ -2893,8 +2895,20 @@ server <- function(input, output, session) {
  
   observeEvent(input$plot_click, {
 
-    troubleshooting_list$click_coordinates_text <- glue("X = {round(input$plot_click$x, 3)}  Y = {round(input$plot_click$y, 3)}\n")
-
+    # troubleshooting_list$click_coordinates_text <- glue("X = {round(input$plot_click$x, 3)}  Y = {round(input$plot_click$y, 3)}\n")
+    x <- input$plot_click$x
+    y <- input$plot_click$y
+    
+    # only proceed if x, y are numeric and within [0,1]
+    if (is.numeric(x) && is.numeric(y) &&
+        !is.na(x) && !is.na(y) &&
+        x >= 0 && x <= 1 &&
+        y >= 0 && y <= 1) {
+      troubleshooting_list$click_coordinates_text <-  glue("X = {round(x, 3)}   Y = {round(y, 3)}\n")
+    } else {
+      # optional: reset or show a warning instead of freezing
+      troubleshooting_list$click_coordinates_text <- "Click outside of spine image"
+    }
   })
 
   output$click_coordinates <- renderText({
@@ -4088,10 +4102,6 @@ server <- function(input, output, session) {
         select(vertebral_number, implant_label) %>%
         union_all(interspace_choices_df) %>%
         arrange(vertebral_number)
-      
-      # left_implant_choices <- as.list(left_implants_df$level)
-      # 
-      # names(left_implant_choices) <- left_implants_df$implant_label
       
       updatePickerInput(session = session, 
                         inputId = "left_custom_rod_1", 
@@ -7103,6 +7113,7 @@ server <- function(input, output, session) {
           screw_type == "P" ~ "Polyaxial",
           screw_type == "Red" ~ "Reduction",
           screw_type == "Offset" ~ "Offset",
+          screw_type == "Dual" ~ "Dual-Headed",
           screw_type == "Anterior" ~ "Anterior",
           screw_type == "Fixed Angle" ~ "fixed angle",
           screw_type == "Variable Angle" ~ "variable angle"
