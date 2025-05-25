@@ -625,7 +625,8 @@ ui <- dashboardPage(skin = "black",
                                              label = "Reset & Clear All",
                                              style = "simple",
                                              color = "danger"
-                                           )
+                                           ),
+                                           hr(),
                                        )## end of little box to the right of the spine
                                      ), # end of the fluid row for the 2 boxes containing spine and procedure inputs
                                      fluidRow(
@@ -667,6 +668,7 @@ ui <- dashboardPage(skin = "black",
                                            ),
                                            conditionalPanel(condition = "input.fusion_procedure_performed == true & input.spine_approach.indexOf('Posterior') > -1",
                                                             fluidRow(
+                                                              # uiOutput(outputId = "screw_types_ui"),
                                                               actionBttn(
                                                                 inputId = "add_rods",
                                                                 size = "md", 
@@ -829,6 +831,15 @@ ui <- dashboardPage(skin = "black",
                                                                                                                           options = list(`actions-box` = TRUE))
                                                                                              )
                                                                                       )
+                                                                     ),
+                                                                     dropdownButton(
+                                                                       uiOutput(outputId = "left_rod_adjustment_ui"),
+                                                                       circle = TRUE,label = "Adjust Rod Offset Position",
+                                                                       icon = icon("fas fa-cog", verify_fa = FALSE),
+                                                                       size = "sm",
+                                                                       inline = TRUE,
+                                                                       right = TRUE,
+                                                                       tooltip = tooltipOptions(title = "Adjust Rod Position")
                                                                      )
                                                               ),
                                                               column(width = 6,
@@ -867,7 +878,17 @@ ui <- dashboardPage(skin = "black",
                                                                                              )
                                                                                       )
                                                                      )
-                                                              )
+                                                              ),
+                                                                  dropdownButton(
+                                                                    uiOutput(outputId = "right_rod_adjustment_ui"),
+                                                                    circle = TRUE,
+                                                                    label = "Adjust Rods",
+                                                                    icon = icon("fas fa-cog", verify_fa = FALSE),
+                                                                    size = "sm",
+                                                                    inline = TRUE,
+                                                                    right = TRUE,
+                                                                    tooltip = tooltipOptions(title = "Adjust Rod Position")
+                                                                  )
                                                             )
                                                             # )
                                                             ##################### NEW
@@ -1348,11 +1369,12 @@ ui <- dashboardPage(skin = "black",
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Anterior: Objects passed to Op Note Generater:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
                               verbatimTextOutput(outputId = "full_objects_passed_to_anterior_op_note")),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Anterior: Objects passed to Op Note Generater/DATAFRAME:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
-                              tableOutput(outputId = "full_objects_passed_to_anterior_op_note_df")),
-                          box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs Not Logged:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
-                              tableOutput(outputId = "all_inputs_removed")
-                          )
-                          #         ###########################################
+                              tableOutput(outputId = "full_objects_passed_to_anterior_op_note_df"))
+                          # TROUBLESHOOTING: All implants removed # 
+                          #box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "All Inputs Not Logged:"), status = "success", collapsible = TRUE, solidHeader = TRUE, 
+                          #     tableOutput(outputId = "all_inputs_removed")
+                          # )
+                               ###########################################
                   )
                 )
                     )
@@ -2419,9 +2441,9 @@ server <- function(input, output, session) {
                                                if_else(str_detect(spine_regions_text, "lumbar"), 0.4, 
                                                        if_else(str_detect(spine_regions_text, "sacral"), 0.32, 0.4))))))
     
-    lower_y <- if_else(str_detect(spine_regions_text, "lumbosacral"), 0.1,
-                       if_else(str_detect(spine_regions_text, "lumbar"), 0.1, 
-                               if_else(str_detect(spine_regions_text, "thoracolumbar"), 0.1, 
+    lower_y <- if_else(str_detect(spine_regions_text, "lumbosacral"), 0.05,
+                       if_else(str_detect(spine_regions_text, "lumbar"), 0.05, 
+                               if_else(str_detect(spine_regions_text, "thoracolumbar"), 0.05, 
                                        if_else(str_detect(spine_regions_text, "cervicothoracic"), 0.6, 
                                                if_else(str_detect(spine_regions_text, "thoracic"), 0.35,
                                                        if_else(str_detect(spine_regions_text, "cervical|occ"), 0.71, 0.1))))))
@@ -4302,6 +4324,8 @@ server <- function(input, output, session) {
   
   ###### LEFT SUPPLEMENTAL ROD GEOM 
   ###### LEFT SUPPLEMENTAL ROD GEOM 
+  left_rod_list_pre_geoms <- reactiveValues()
+  
   observe({
     ##########RODS ############
     ############# left ROD #################
@@ -4403,24 +4427,74 @@ server <- function(input, output, session) {
                                                                          link_revision_rods_true_false = input$link_left_revision_rods_true_false,
                                                                          revision_rod_matrix = left_revision_rod_matrix_reactive()
         )
-        if(length(left_rods_connectors_list$rod_list) > 0){
-          rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$rod_list), alpha = 0.85)
-        }else{
-          rods_list$left_rod_list_sf_geom <- NULL
-        }
         
-        if(length(left_rods_connectors_list$connector_list) > 0){
-          rods_list$left_connector_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.95)
-        }else{
-          rods_list$left_connector_list_sf_geom <- NULL
-        }
+        left_rod_list_pre_geoms$left_rods_connectors_list <- left_rods_connectors_list
+        
+        # rods_list$left_rod_list_sf_geom <- NULL
+        # rods_list$left_connector_list_sf_geom <- NULL
+        
+        # if(length(left_rods_connectors_list$rod_list) > 0){
+        #   rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$rod_list), alpha = 0.85)
+        # }else{
+        #   rods_list$left_rod_list_sf_geom <- NULL
+        # }
+        # 
+        # if(length(left_rods_connectors_list$connector_list) > 0){
+        #   rods_list$left_connector_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.95)
+        # }else{
+        #   rods_list$left_connector_list_sf_geom <- NULL
+        # }
       }
     }
     
   })
   
+  output$left_rod_adjustment_ui <- renderUI({
+    # only trigger when we actually have rods
+    req(length(left_rod_list_pre_geoms$left_rods_connectors_list$rod_list) > 0)
+    
+    rods <- left_rod_list_pre_geoms$left_rods_connectors_list$rod_list
+    n    <- length(rods)
+    
+    sliders <- lapply(seq_len(n), function(i){
+      # grab the existing input value if present, otherwise default to 0
+      current_val <- isolate(input[[ glue::glue("left_rod_{i}_offset") ]])
+      sliderInput(
+        inputId = glue::glue("left_rod_{i}_offset"),
+        label   = glue::glue("Left Rod {i} Offset"),
+        min     = -0.01,
+        max     =  0.01,
+        step    =  0.001,
+        value   = if (is.null(current_val)) 0 else current_val
+      )
+    })
+    
+    # wrap in tagList so Shiny knows it’s a list of UI elements
+    do.call(shiny::tagList, sliders)
+  })
   
-  
+  observe({
+    rods_orig <- left_rod_list_pre_geoms$left_rods_connectors_list$rod_list
+    req(length(rods_orig) > 0)
+    
+    rods_translated <- lapply(seq_along(rods_orig), function(i) {
+      offset <- input[[ glue::glue("left_rod_{i}_offset") ]] %||% 0
+      rods_orig[[i]] + c(offset, 0)
+    })
+    
+    rods_list$left_rod_list_sf_geom       <- geom_sf(
+      data  = st_multipolygon(rods_translated),
+      alpha = 0.85
+    )
+    rods_list$left_connector_list_sf_geom <- geom_sf(
+      data  = st_multipolygon(
+        left_rod_list_pre_geoms$left_rods_connectors_list$connector_list
+      ),
+      fill  = "lightblue",
+      alpha = 0.95
+    )
+  })
+
   
   ###### LEFT SUPPLEMENTAL ROD GEOM END  ---
   ###### LEFT SUPPLEMENTAL ROD GEOM  END --
@@ -4921,16 +4995,7 @@ server <- function(input, output, session) {
   
   observe({
     if(input$add_right_custom_rods == TRUE){
-      # right_implants_df <- all_objects_to_add_list$objects_df %>%
-      #   select(level, side, object, x, y) %>%
-      #   filter(side == "right") %>%
-      #   filter(str_detect(string = object, pattern = "screw") | str_detect(string = object, pattern = "hook") | str_detect(string = object, pattern = "wire")) %>%
-      #   mutate(implant_label = glue("{level} {str_to_title(str_replace_all(object, '_', ' '))}"))
-      # 
-      # right_implant_choices <- as.list(right_implants_df$level)
-      # 
-      # names(right_implant_choices) <- right_implants_df$implant_label
-      
+
       right_implants_df <- all_objects_to_add_list$objects_df %>%
         select(level, vertebral_number, side, object, x, y) %>%
         filter(side == "right") %>%
@@ -5141,6 +5206,8 @@ server <- function(input, output, session) {
   ###### REVISION RODS END ---
   ###### REVISION RODS END ---
   
+  right_rod_list_pre_geoms <- reactiveValues()
+  
   ###### right SUPPLEMENTAL ROD GEOM 
   ###### right SUPPLEMENTAL ROD GEOM 
   observe({
@@ -5252,21 +5319,69 @@ server <- function(input, output, session) {
                                                                           link_revision_rods_true_false = input$link_right_revision_rods_true_false,
                                                                           revision_rod_matrix = right_revision_rod_matrix_reactive()
         )
-        if(length(right_rods_connectors_list$rod_list) > 0){
-          rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.85)
-        }else{
-          rods_list$right_rod_list_sf_geom <- NULL
-        }
-        if(length(right_rods_connectors_list$connector_list) > 0){
-          rods_list$right_connector_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.95)
-        }else{
-          rods_list$right_connector_list_sf_geom <- NULL
-        }
+        
+        right_rod_list_pre_geoms$right_rods_connectors_list <- right_rods_connectors_list
+        
+        # if(length(right_rods_connectors_list$rod_list) > 0){
+        #   rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.85)
+        # }else{
+        #   rods_list$right_rod_list_sf_geom <- NULL
+        # }
+        # if(length(right_rods_connectors_list$connector_list) > 0){
+        #   rods_list$right_connector_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.95)
+        # }else{
+        #   rods_list$right_connector_list_sf_geom <- NULL
+        # }
       }
     }
     
   })
   
+  output$right_rod_adjustment_ui <- renderUI({
+    # only trigger when we actually have rods
+    req(length(right_rod_list_pre_geoms$right_rods_connectors_list$rod_list) > 0)
+    
+    rods <- right_rod_list_pre_geoms$right_rods_connectors_list$rod_list
+    n    <- length(rods)
+    
+    sliders <- lapply(seq_len(n), function(i){
+      # grab the existing input value if present, otherwise default to 0
+      current_val <- isolate(input[[ glue::glue("right_rod_{i}_offset") ]])
+      sliderInput(
+        inputId = glue::glue("right_rod_{i}_offset"),
+        label   = glue::glue("Right Rod {i} Offset"),
+        min     = -0.01,
+        max     =  0.01,
+        step    =  0.001,
+        value   = if (is.null(current_val)) 0 else current_val
+      )
+    })
+    
+    # wrap in tagList so Shiny knows it’s a list of UI elements
+    do.call(shiny::tagList, sliders)
+  })
+  
+  observe({
+    rods_orig <- right_rod_list_pre_geoms$right_rods_connectors_list$rod_list
+    req(length(rods_orig) > 0)
+    
+    rods_translated <- lapply(seq_along(rods_orig), function(i) {
+      offset <- input[[ glue::glue("right_rod_{i}_offset") ]] %||% 0
+      rods_orig[[i]] + c(offset, 0)
+    })
+    
+    rods_list$right_rod_list_sf_geom       <- geom_sf(
+      data  = st_multipolygon(rods_translated),
+      alpha = 0.85
+    )
+    rods_list$right_connector_list_sf_geom <- geom_sf(
+      data  = st_multipolygon(
+        right_rod_list_pre_geoms$right_rods_connectors_list$connector_list
+      ),
+      fill  = "lightblue",
+      alpha = 0.95
+    )
+  })
   
   ###### RIGHT SUPPLEMENTAL ROD GEOM END  ---
   ###### RIGHT SUPPLEMENTAL ROD GEOM  END --
@@ -5503,6 +5618,19 @@ server <- function(input, output, session) {
     clear_reactive_values_function(geoms_list_anterior_interbody)
     clear_reactive_values_function(geoms_list_anterior_instrumentation)
   })
+  
+  # input$add_left_accessory_rod, 
+  # input$add_left_satellite_rod,
+  # input$add_left_intercalary_rod,
+  # input$add_left_linked_rod,
+  # input$add_left_kickstand_rod, 
+  # input$add_left_custom_rods, 
+  # input$add_right_accessory_rod, 
+  # input$add_right_satellite_rod,
+  # input$add_right_intercalary_rod,
+  # input$add_right_linked_rod,
+  # input$add_right_kickstand_rod, 
+  # input$add_right_custom_rods
   
   # ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS     ######### ~~~~~~~~~~~~~~  #############
   # ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS    ######### ~~~~~~~~~~~~~~  #############
@@ -6998,7 +7126,7 @@ server <- function(input, output, session) {
   
   output$screw_details_ui <- renderUI({
     if(length(input$screws_implanted_picker_for_ui) > 0){
-      all_screw_size_type_inputs_df <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df, 
+      all_screw_size_type_inputs_df <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df,
                                                                                 return_shiny_inputs_df = TRUE) ## this adds the needed 'left_object' and 'right_object' so that it matches the  screws_implanted_picker_for_ui format
       box(width = 12,
           title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
@@ -7088,9 +7216,115 @@ server <- function(input, output, session) {
           )
       )
     }
-  }) 
+  })
   
-  
+  # output$screw_details_ui <- renderUI({
+  #   if(length(input$screws_implanted_picker_for_ui) > 0){
+  #     all_screw_size_type_inputs_df <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df, 
+  #                                                                               return_shiny_inputs_df = TRUE) ## this adds the needed 'left_object' and 'right_object' so that it matches the  screws_implanted_picker_for_ui format
+  #     box(width = 12,
+  #         title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
+  #         jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
+  #                                          left_column_percent_width = 30,
+  #                                          input_type = "checkbox",
+  #                                          font_size = 16,
+  #                                          checkboxes_inline = TRUE,
+  #                                          input_id = "implant_manufacturer",
+  #                                          choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
+  #         ),
+  #         h4("Screw Sizes:"),
+  #         fluidRow(
+  #           column(4,
+  #                  "Implant"),
+  #           column(2,
+  #                  "Left Diameter"),
+  #           column(2,
+  #                  "Left Length"),
+  #           column(2,
+  #                  "Right Diameter"),
+  #           column(2,
+  #                  "Right Length")
+  #         ),
+  #         map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
+  #             .f = ~
+  #               fluidRow(
+  #                 column(4,
+  #                        all_screw_size_type_inputs_df$level_object_label[[.x]]
+  #                 ),
+  #                 ## LEFT DIAMETER ##
+  #                 column(2,
+  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+  #                                         all_screw_size_type_inputs_df$left_diameter_input[[.x]]
+  #                                         # )
+  #                        )
+  #                 ),
+  #                 ## LEFT LENGTH ##
+  #                 column(2,
+  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+  #                                         all_screw_size_type_inputs_df$left_length_input[[.x]]
+  #                        )
+  #                 ),
+  #                 ## RIGHT DIAMETER ##
+  #                 column(2,
+  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+  #                                         all_screw_size_type_inputs_df$right_diameter_input[[.x]]
+  #                        )
+  #                 ),
+  #                 ## RIGHT LENGTH ##
+  #                 column(2,
+  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+  #                                         all_screw_size_type_inputs_df$right_length_input[[.x]]
+  #                        )
+  #                 )
+  #               )
+  #         )
+  #     )
+  #   }
+  # }) 
+  # 
+  # ###### SCREW TYPES #############
+  # output$screw_types_ui <- renderUI({
+  #   # if(length(input$screws_implanted_picker_for_ui) > 0){
+  #   if(nrow(all_objects_to_add_list$objects_df)>0){
+  #     all_screw_size_type_inputs_df <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df, 
+  #                                                                               return_shiny_inputs_df = TRUE) ## this adds the needed 'left_object' and 'right_object' so that it matches the  screws_implanted_picker_for_ui format
+  #     if(nrow(all_screw_size_type_inputs_df)>0){
+  #       box(width = 12,
+  #         title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
+  #         h4("Screw Types:"),
+  #         fluidRow(
+  #           column(2,
+  #                  "Implant"),
+  #           column(5,
+  #                  "Left Screw Type"),
+  #           column(5,
+  #                  "Right Screw Type"),
+  #         ),
+  #         map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
+  #             .f = ~
+  #               # conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$level_object_label[[.x]]}') >-1"),
+  #               fluidRow(
+  #                 column(2,
+  #                        all_screw_size_type_inputs_df$level_object_label[[.x]]
+  #                 ),
+  #                 column(5,
+  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
+  #                                         all_screw_size_type_inputs_df$left_type_input[[.x]]
+  #                        )
+  #                 ),
+  #                 column(5,
+  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
+  #                                         all_screw_size_type_inputs_df$right_type_input[[.x]]
+  #                        )
+  #                 )
+  #               )
+  #             # )
+  #         )
+  #     )
+  #     }
+  #     
+  #   }
+  # }) 
   ################------------------  Screw Size RESULTS  ----------------------######################  
   ################------------------  Screw Size RESULTS  ----------------------######################  
   
@@ -9338,20 +9572,21 @@ server <- function(input, output, session) {
     
   })
   
-  
-  output$all_inputs_removed <- renderTable({
-    if(input$implants_complete > 0){
-      all_inputs_list <- reactiveValuesToList(input, all.names = FALSE)
-      
-      all_inputs_list <- keep(.x = all_inputs_list, .p = ~ !is.null(.x))
-      
-      all_inputs_to_log_df <- enframe(all_inputs_list) %>%
-        mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = "-AND-")))) %>%
-        select(-value) %>%
-        unnest(cols = result)
-      all_inputs_to_log_df
-    }
-  })
+  # TROUBLESHOOTING: All implants removed # 
+  # output$all_inputs_removed <- renderTable({
+  #   if(input$implants_complete > 0){
+  #     all_inputs_list <- reactiveValuesToList(input, all.names = FALSE)
+  #     
+  #     all_inputs_list <- keep(.x = all_inputs_list, .p = ~ !is.null(.x))
+  #     
+  #     all_inputs_to_log_df <- enframe(all_inputs_list) %>%
+  #       mutate(result = map(.x = value, .f = ~ as.character(glue_collapse(.x, sep = "-AND-")))) %>%
+  #       select(-value) %>%
+  #       unnest(cols = result)
+  #     
+  #     all_inputs_to_log_df
+  #   }
+  # })
   
   
   
