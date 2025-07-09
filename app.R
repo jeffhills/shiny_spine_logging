@@ -2798,6 +2798,21 @@ server <- function(input, output, session) {
         distinct()
     }
     
+    if(any(all_implants_constructed_df$object == "spinal_cord_stimulator") == FALSE){
+      spinal_cord_stimulator_df <- all_object_ids_df %>%
+        filter(category == "spinal_cord_stimulator") %>%
+        left_join(fread("coordinates/spinal_cord_stimulator.csv") %>%
+                    group_by(object_id) %>%
+                    nest() %>%
+                    mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+                    select(object_id, object_constructed))
+      
+      all_implants_constructed_df <<- all_implants_constructed_df %>%
+        bind_rows(incision_drainage_df)  %>%
+        bind_rows(spinal_cord_stimulator_df)  %>%
+        distinct()
+    }
+    
     # nerves_df <- all_implants_constructed_df %>%
     #   # tabyl(object)
     #   filter(object == "lateral_extraforaminal_approach") %>%
@@ -2841,7 +2856,10 @@ server <- function(input, output, session) {
                                         "Vertebral Augmentation (cavity creation, then cement)" = "vertebral_cement_augmentation",
                                         "Structural Allograft Strut" = "structural_allograft",
                                         "Incision & Drainage" = "incision_drainage", 
-                                        "Transection of Spinal Nerve" = "nerve_transection"
+                                        "Transection of Spinal Nerve" = "nerve_transection",
+                                        "Removal of SCS Paddle" = "removal_scs_paddle",
+                                        "Removal of SCS Perc Array" = "removal_scs_perc_array",
+                                        "Removal of SCS Receiver/Pulse Generator" = "removal_scs_receiver"
                             ),
                             checkIcon = list(
                               yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")

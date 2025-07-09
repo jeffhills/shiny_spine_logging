@@ -435,6 +435,40 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
     geoms_list_posterior$incision_drainage_sf_geom <- NULL
   }
   
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "removal_scs_paddle"))){
+    geoms_list_posterior$removal_scs_paddle_sf_geom <- ggpattern::geom_sf_pattern(
+      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "removal_scs_paddle"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+      pattern = "stripe",
+      pattern_colour = "lightblue",
+      alpha = 0.5,
+      pattern_spacing = 0.03
+    )
+  }else{
+    geoms_list_posterior$removal_scs_paddle_sf_geom <- NULL
+  }
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "removal_scs_perc_array"))){
+    geoms_list_posterior$removal_scs_perc_array_sf_geom <- ggpattern::geom_sf_pattern(
+      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "removal_scs_perc_array"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+      pattern = "stripe",
+      pattern_colour = "lightblue",
+      alpha = 0.5,
+      pattern_spacing = 0.03
+    )
+  }else{
+    geoms_list_posterior$removal_scs_perc_array_sf_geom <- NULL
+  }
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "removal_scs_receiver"))){
+    geoms_list_posterior$removal_scs_receiver_sf_geom <- ggpattern::geom_sf_pattern(
+      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "removal_scs_receiver"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+      pattern = "stripe",
+      pattern_colour = "lightblue",
+      alpha = 0.5,
+      pattern_spacing = 0.03
+    )
+  }else{
+    geoms_list_posterior$removal_scs_receiver_sf_geom <- NULL
+  }
+  
   
   return(geoms_list_posterior = geoms_list_posterior)
   

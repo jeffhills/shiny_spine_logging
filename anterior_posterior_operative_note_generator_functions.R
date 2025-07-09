@@ -1,8 +1,13 @@
 #### ADDING AN OBJECT: you must do the following:
+# - add object to 'all_object_ids_df.csv' and in load_coordinates_build_objects_new.R
+# - add the object to a csv file in the 'coordinates' folder or create a new csv file
 # - add the object to the "op_note_procedure_performed_summary_classifier_function"
 # - add the object to the "op_note_number_of_paragraphs_for_procedure_category"
 # - add the revision objects if needed
 # - add the geom
+# - in the app, if you made a new csv file in the coordinates folder, you need to load the new file. 
+# - add to app list for the button
+
 
 
 procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragraph_type, 
@@ -72,7 +77,11 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'anterior_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'anterior_plate_screw', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'anterior_buttress_plate', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
-                                        'screw_washer', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine')
+                                        'screw_washer', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
+                                        'removal_scs_paddle', 'Removal of spinal cord stimulator paddle', 'distinct',
+                                        'removal_scs_perc_array', 'Removal of spinal cord stimulator perutaneous array', 'distinct',
+                                        'removal_scs_receiver', 'Removal of spinal cord stimulator pulse generator/receiver', 'distinct'
+                                        )
 
 
 
@@ -1031,7 +1040,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     if(str_detect(procedure_details_list$procedures, "rods were connected bilaterally and the osteotomy was closed in a controlled fashion.")){
       if(any(str_detect(names(additional_rods_statement), "satellite"))){
         procedure_details_list$procedures <- str_replace_all(procedure_details_list$procedures, "rods were connected bilaterally and the osteotomy was closed in a controlled fashion.", 
-                        "rods were connected bilaterally using a satellite rod configuration, and the osteotomy was closed in a controlled fashion")
+                        "rods were connected bilaterally using a satellite rod configuration, and the osteotomy was closed in a controlled fashion.")
       }
     }
   }
