@@ -1278,7 +1278,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   procedures_listed <- jh_capitalize_spine_levels_function(procedures_performed_sentence)
   
   if(str_length(attending_assistant)>2){
-    attending_assistant_statement <- glue("Due to the complexity of the case and no immediately available qualified resident, Dr. {str_remove(attending_assistant, 'Dr. ')} assisted in all portions of the procedure, including the {procedures_listed}. Dr. {str_remove(attending_assistant, 'Dr. ')}'s assistance was critical to move the procedure along quicker and with less blood loss, and therefore safer.")
+    attending_assistant_statement <- glue("Due to the complexity of the procedure and the need for experienced, continuous intraoperative assistance, {attending_assistant} assisted in all portions of the procedure, including the {procedures_listed}, and their assistance was medically necessary, as no other available qualified resident was immediately available.")
   }else{
     attending_assistant_statement <- ""
   }

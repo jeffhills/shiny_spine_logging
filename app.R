@@ -8177,7 +8177,24 @@ server <- function(input, output, session) {
       
       # posterior_op_note_inputs_list_reactive$additional_procedures_vector
       ### PROCEDURES PERFORMED 
-      posterior_op_note_inputs_list_reactive$procedures_performed_sentence <- glue_collapse(str_to_lower(gsub("^\\d+\\.\\s+", "", str_split(input$procedures_numbered_confirm_edit_posterior, pattern = "\n")[[1]])), sep = ", ", last = ", and ")
+      
+      procedures_numbered_vector <- str_split(input$procedures_numbered_confirm_edit_posterior, pattern = "\n")[[1]]
+      
+      if(any(str_detect(procedures_numbered_vector, "Posterior spinal instrume"))){
+        instrumentation_position_number <- which(str_detect(procedures_numbered_vector, "Posterior spinal instrume"))
+        
+        procedures_numbered_vector[instrumentation_position_number] <-  jh_compress_spinal_levels_in_sentence(procedures_numbered_vector[instrumentation_position_number])
+      }
+      
+      if(any(str_detect(procedures_numbered_vector, "Posterior Spinal Fusion"))){
+        fusion_position_number <- which(str_detect(procedures_numbered_vector, "Posterior Spinal Fusion"))
+        
+        procedures_numbered_vector[fusion_position_number] <-  jh_compress_spinal_fusion_levels_in_sentence(procedures_numbered_vector[fusion_position_number])
+      }
+      
+      posterior_op_note_inputs_list_reactive$procedures_performed_sentence <- glue_collapse(str_to_lower(gsub("^\\d+\\.\\s+", "", procedures_numbered_vector)), sep = ", ", last = ", and ")
+      
+      # posterior_op_note_inputs_list_reactive$procedures_performed_sentence <- glue_collapse(str_to_lower(gsub("^\\d+\\.\\s+", "", str_split(input$procedures_numbered_confirm_edit_posterior, pattern = "\n")[[1]])), sep = ", ", last = ", and ")
       
     }
     

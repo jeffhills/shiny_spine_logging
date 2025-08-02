@@ -1655,6 +1655,74 @@ revision_implants_paragraph_function <- function(revision_implants_details_df){
 
 
 #############-----------------------   PROCEDURES PERFORMED NUMBERED SECTION  ----------------------###############
+jh_compress_spinal_levels_in_sentence <- function(sentence) {
+  vertebrae <- c(paste0("C", 1:7), paste0("T", 1:12), paste0("L", 1:5), "S1", "S2", "S2AI", "Ilium")
+  parts <- str_match(sentence, "^(\\d+\\.\\s*)?(.*? at )(.+)$")
+  if (is.na(parts[1,1])) return(sentence)
+  
+  prefix <- parts[2] %||% ""
+  intro <- parts[3]
+  levels <- str_replace_all(parts[4], " and ", ",") %>%
+    str_split(",\\s*") %>% unlist() %>%
+    str_remove("\\.+$") %>% str_trim() %>% unique()
+  
+  ord <- match(levels, vertebrae)
+  valid <- !is.na(ord)
+  levels <- levels[valid]
+  ord <- ord[valid]
+  if (length(ord) == 0) return(sentence)
+  
+  sorted_levels <- levels[order(ord)]
+  sorted_ord <- sort(ord)
+  
+  if (all(diff(sorted_ord) == 1)) {
+    return(glue::glue("{prefix}{intro}{sorted_levels[1]}-{sorted_levels[length(sorted_levels)]}"))
+  }
+  
+  runs <- rle(c(NA, diff(sorted_ord)) == 1)
+  ends <- cumsum(runs$lengths)
+  starts <- c(1, head(ends + 1, -1))
+  
+  compressed <- sapply(seq_along(starts), function(i) {
+    rng <- sorted_levels[starts[i]:ends[i]]
+    if (length(rng) <= 2) paste(rng, collapse = ", ") else paste0(rng[1], "-", rng[length(rng)])
+  })
+  
+  paste0(prefix, intro, glue::glue_collapse(compressed, sep = ", "))
+}
+
+jh_compress_spinal_fusion_levels_in_sentence <- function(sentence) {
+  vertebrae <- c(paste0("C", 1:7), paste0("T", 1:12), paste0("L", 1:5), "S1", "S2", "S2AI", "Ilium")
+  parts <- str_match(sentence, "^(\\d+\\.\\s*)?(.*? at )(.+)$")
+  if (is.na(parts[1,1])) return(sentence)
+  
+  prefix <- parts[2] %||% ""
+  intro <- parts[3]
+  segment_text <- str_replace_all(parts[4], " and ", ",")
+  segments <- str_split(segment_text, ",\\s*")[[1]] %>%
+    str_remove("\\.+$") %>% str_trim() %>% unique()
+  
+  # Extract individual vertebrae from each motion segment
+  split_levels <- str_split(segments, "-", simplify = TRUE)
+  upper_levels <- split_levels[,1]
+  lower_levels <- split_levels[,2]
+  
+  # Remove invalid or malformed entries
+  valid <- upper_levels %in% vertebrae & lower_levels %in% vertebrae
+  upper_levels <- upper_levels[valid]
+  lower_levels <- lower_levels[valid]
+  
+  # Full list of involved vertebrae: start + end
+  involved_levels <- unique(c(upper_levels[1], lower_levels))
+  involved_ord <- match(involved_levels, vertebrae)
+  
+  if (length(involved_ord) > 3 && all(diff(sort(involved_ord)) == 1)) {
+    compressed_range <- paste0(involved_levels[1], "-", involved_levels[length(involved_levels)])
+    return(glue::glue("{prefix}{intro}{compressed_range}"))
+  } else {
+    return(sentence)
+  }
+}
 
 op_note_procedures_performed_numbered_function <- function(objects_added_df,
                                                            revision_implants_df = tibble(level = character(), vertebral_number = double(), object = character(), x = double(), y = double(), prior_rod_connected = character(), remove_retain = character()),

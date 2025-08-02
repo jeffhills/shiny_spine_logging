@@ -1388,7 +1388,7 @@ addition_surgical_details_modal_box_function <-
                                                value = cosurgeon_yes_no)
                                    ),
                            tags$td(width = "30%",
-                                   tags$div(style = "font-size:16px; font-weight:bold; text-align:right; margin-top:auto; margin-bottom:auto", "Did an Attending Surgeon assist?")
+                                   tags$div(style = "font-size:16px; font-weight:bold; text-align:right; margin-top:auto; margin-bottom:auto", "Did an Attending/FA Surgeon assist?")
                            ),
                            tags$td(width = "10%", 
                                    switchInput(inputId = "attending_assistant_yes_no",
@@ -1413,7 +1413,7 @@ addition_surgical_details_modal_box_function <-
         conditionalPanel(condition = "input.attending_assistant_yes_no == true",
                          jh_make_shiny_table_row_function(
                            left_column_percent_width = left_column_percent_width,
-                           left_column_label = "Attending Assistant:",
+                           left_column_label = "Attending/FA Assistant:",
                            font_size = row_label_font_size,
                            input_type = "text",
                            input_id = "attending_assistant", 
