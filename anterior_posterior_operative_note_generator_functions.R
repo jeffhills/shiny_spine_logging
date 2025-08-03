@@ -80,7 +80,8 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'screw_washer', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'removal_scs_paddle', 'Removal of spinal cord stimulator paddle', 'distinct',
                                         'removal_scs_perc_array', 'Removal of spinal cord stimulator perutaneous array', 'distinct',
-                                        'removal_scs_receiver', 'Removal of spinal cord stimulator pulse generator/receiver', 'distinct'
+                                        'removal_scs_receiver', 'Removal of spinal cord stimulator pulse generator/receiver', 'distinct',
+                                        'nerve_transection', 'Transection of spinal nerve', 'distinct'
                                         )
 
 

@@ -2657,13 +2657,18 @@ server <- function(input, output, session) {
     )
     
     if(any(all_implants_constructed_df$object == "laminectomy") == FALSE){
+      
+      decompression_coords_df <- fread("coordinates/decompression.csv") %>%
+        filter(!str_detect(object_id, "nerve_transection")) %>%
+        group_by(object_id) %>%
+        nest() %>%
+        mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+        select(object_id, object_constructed)
+      
       decompression_df <- all_object_ids_df %>%
-        filter(category == "decompression") %>%
-        left_join(fread("coordinates/decompression.csv") %>%
-                    group_by(object_id) %>%
-                    nest() %>%
-                    mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
-                    select(object_id, object_constructed))
+        filter(category == "decompression", object != "nerve_transection") %>%
+        left_join(decompression_coords_df)
+      
       
       all_implants_constructed_df <<- all_implants_constructed_df %>%
         bind_rows(decompression_df)  %>%
@@ -2793,8 +2798,21 @@ server <- function(input, output, session) {
                     mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
                     select(object_id, object_constructed))
       
+      nerve_transection_coords_df <-   fread("coordinates/decompression.csv") %>%
+        filter(str_detect(object_id, "nerve_transection")) %>%
+        group_by(object_id) %>%
+        nest() %>%
+        mutate(object_constructed = map(.x = data, .f = ~ st_linestring(as.matrix(.x)))) %>%
+        select(object_id, object_constructed)
+      
+      nerve_transection_df <- all_object_ids_df %>%
+        filter(object == "nerve_transection") %>%
+        left_join(nerve_transection_coords_df)
+
+      
       all_implants_constructed_df <<- all_implants_constructed_df %>%
         bind_rows(incision_drainage_df)  %>%
+        bind_rows(nerve_transection_df)  %>%
         distinct()
     }
     
@@ -3079,6 +3097,9 @@ server <- function(input, output, session) {
         }
       }
     }
+    # print(object_added_df)
+    # print("NOT HERE")
+    
     object_added_df
     
   })
@@ -3324,10 +3345,12 @@ server <- function(input, output, session) {
                             
                           }else{
                             # geoms_list_posterior$geoms[object_added_reactive_df()$object_id] <- postorior_geoms[object_added_reactive_df()$object_id]
-                            
+                            print(toString(all_objects_to_add_list$objects_df$object))
                             geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
                                                                                              filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
                                                                                            plot_with_patterns = input$plot_with_patterns_true)
+                            
+                            print("NOT OK")
                           }
                         } 
                       }

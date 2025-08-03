@@ -295,6 +295,15 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }
   
   
+  if(any(str_detect(all_posterior_objects_df$object, pattern = "nerve_transection"))){
+    geoms_list_posterior$nerve_transection_sf_geom <- geom_sf(data = st_multilinestring((all_posterior_objects_df %>% filter(object == "nerve_transection"))$object_constructed), linewidth = 6, color = "yellow")
+
+  }else{
+    geoms_list_posterior$nerve_transection_sf_geom <- NULL
+  }
+  
+  # geom_sf(data = st_multilinestring(t4_nerve_df$object_constructed), size = 2, color = "red")
+  
   #### TUMOR
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "corpectomy_extracavitary_tumor"))){

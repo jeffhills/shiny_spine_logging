@@ -80,7 +80,8 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'screw_washer', 'Anterior spinal instrumentation (distinct from an interbody implant)', 'combine',
                                         'removal_scs_paddle', 'Removal of spinal cord stimulator paddle', 'distinct',
                                         'removal_scs_perc_array', 'Removal of spinal cord stimulator perutaneous array', 'distinct',
-                                        'removal_scs_receiver', 'Removal of spinal cord stimulator pulse generator/receiver', 'distinct'
+                                        'removal_scs_receiver', 'Removal of spinal cord stimulator pulse generator/receiver', 'distinct',
+                                        'nerve_transection', 'Transection of spinal nerve', 'distinct'
                                         )
 
 
@@ -1407,7 +1408,9 @@ op_note_distinct_technique_statement <- function(object, level, side, interbody_
     object == "intervertebral_cage" ~ glue("I then proceed with placement of the intervertebral cage. After ensuring the neural structures were completely free and the bony surfaces cranially and caudally were appropriately prepared, the intervertebral distance was measured. {interbody_statement} The implant was then inserted into the defect, abutting bone superiorly and inferiorly. Intraoperative X-ray was used to confirm appropriate size, fit, and alignment of the intervertebral implant spanning {level}."),
     object == "removal_scs_paddle" ~ glue("I then proceeded with removing the spinal cord stimulator paddle. Fluoroscopy was used to confirm the levels. The dissection was carried out until I encountered the leads. The leads were released from the soft tissue and the interspace was identified and. The leads were tracked down to the paddle device, which was then removed. This completed the removal of the spinal cord stimulator paddle."),
     object == "removal_scs_perc_array" ~ glue("I then proceeded with removing the spinal cord stimulator percutaneous array. Fluoroscopy was used to confirm the levels. The dissection was carried out until I encountered the leads. The leads were released from the soft tissue and the interspace was identified. The array was then removed without difficulty. This completed the removal of the spinal cord stimulator percutaneous array."),
-    object == "removal_scs_receiver" ~ glue("I then proceeded with removing the spinal cord stimulator pulse generator/receiver. The prior incision was used and dissection was carried down to the receiver. The soft tissue was released around the receiver and sutures excised until it was completely free and the device was removed. The pseudocapsule was partially excised. This completed the removal of the spinal cord stimulator pulse generator/receiver.")
+    object == "removal_scs_receiver" ~ glue("I then proceeded with removing the spinal cord stimulator pulse generator/receiver. The prior incision was used and dissection was carried down to the receiver. The soft tissue was released around the receiver and sutures excised until it was completely free and the device was removed. The pseudocapsule was partially excised. This completed the removal of the spinal cord stimulator pulse generator/receiver."),
+    object == "nerve_transection" ~ glue("I then proceeded with transection of the {side} {level} nerve root. The nerve root was clearly identified and silk sutures were passed medial and lateral to the DRG. The sutures were then tied and the nerve root transected. This completed the transection of the {side} {level} nerve root.")
+    
   )
   
   technique_statement

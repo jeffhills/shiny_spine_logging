@@ -84,6 +84,8 @@ implant_coordinates_df <- fread("coordinates/implant.csv") %>%
 construct_sf_object_helper_function <- function(df, object_id) {
   if (grepl("grade_1", object_id)) {
     st_linestring(as.matrix(df))
+  } else if(str_detect(object_id, "nerve_transection")){
+    st_linestring(as.matrix(df))
   } else {
     st_polygon(list(as.matrix(df)))
   }
