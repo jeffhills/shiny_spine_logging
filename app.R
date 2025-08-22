@@ -1268,6 +1268,30 @@ ui <- dashboardPage(skin = "black",
                                                  initial_value_selected = "***"
                                                )
                               ),
+                              fluidRow(
+                                column(
+                                  width = 12,
+                                div(
+                                style = "text-align: right;",
+                                    dropdownButton(
+                                      prettyCheckboxGroup(
+                                        inputId = "add_modifier",
+                                        label = "Add Modifiers:",
+                                        choices = list("Modifier 22 (Increased procedural Services)" = "mod22",
+                                                       "Modifier 66 (Team Surgery)" = "mod66",
+                                                       "Modifier 79 (Unrelated Procedure During Postoperative Period" = "mod79"
+                                                       ), 
+                                        fill = TRUE
+                                      ),
+                                      right = TRUE,
+                                      label = "Add Modifier",
+                                      circle = FALSE, 
+                                      status = "danger",
+                                      width = "350px"
+                                    )
+                                )
+                                )
+                              ),
                               actionBttn(
                                 inputId = "generate_operative_note",
                                 block = TRUE,
@@ -3829,6 +3853,30 @@ server <- function(input, output, session) {
   ######### LEFT REVISION IMPLANTS ENDS ######### 
   ######### LEFT REVISION IMPLANTS ENDS  ######### 
   
+  ################################################################# RODS ############################################################
+  
+  # observeEvent(input$add_left_accessory_rod,  ignoreInit = TRUE, {
+  #   if(input$add_left_accessory_rod == TRUE){
+  #   }
+  # }
+  
+  observeEvent(input$add_rods, ignoreNULL = TRUE, ignoreInit = TRUE, {
+    left_implants_to_connect <- nrow(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left"))
+    right_implants_to_connect <- nrow(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right"))
+    
+    if(left_implants_to_connect < 5){
+      updateAwesomeRadio(session = session, 
+                         inputId = "left_main_rod_contour", 
+                         selected = "Pre-contoured")
+    }
+    if(right_implants_to_connect < 5){
+      updateAwesomeRadio(session = session,
+                         inputId = "right_main_rod_contour", 
+                         selected = "Pre-contoured")
+    }
+  })
+  
+  
   ############### LEFT RODS ################# ############### LEFT RODS ################# ############### LEFT RODS #################
   ############### LEFT RODS ################# ############### LEFT RODS ################# ############### LEFT RODS #################
   
@@ -3839,27 +3887,6 @@ server <- function(input, output, session) {
   observeEvent(input$reset_all,ignoreNULL = TRUE, ignoreInit = TRUE, {
     updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = FALSE)
   })
-  
-  # observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
-  #   free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level, left_revision_implants_reactive_list()$free_revision_screws_vector))
-  #   # print(paste(free_screws_vector))
-  #   if(input$left_supplemental_rods_eligible == FALSE && length(free_screws_vector) > 2){
-  #     updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
-  #   }
-  # })
-  
-  # observeEvent(input$plot_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
-  #   
-  #   if(input$left_supplemental_rods_eligible == FALSE){
-  #     free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level, 
-  #                                         left_revision_implants_reactive_list()$free_revision_screws_vector))
-  #     # print(paste(free_screws_vector))
-  #     # if(input$left_supplemental_rods_eligible == FALSE && length(free_screws_vector) > 2){
-  #     if(length(free_screws_vector) > 2){
-  #       updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
-  #     } 
-  #   }
-  # })
   
   observeEvent(input$add_left_accessory_rod,  ignoreInit = TRUE, {
     if(input$add_left_accessory_rod == TRUE){
@@ -5363,16 +5390,7 @@ server <- function(input, output, session) {
         
         right_rod_list_pre_geoms$right_rods_connectors_list <- right_rods_connectors_list
         
-        # if(length(right_rods_connectors_list$rod_list) > 0){
-        #   rods_list$right_rod_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$rod_list), alpha = 0.85)
-        # }else{
-        #   rods_list$right_rod_list_sf_geom <- NULL
-        # }
-        # if(length(right_rods_connectors_list$connector_list) > 0){
-        #   rods_list$right_connector_list_sf_geom <- geom_sf(data = st_multipolygon(right_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.95)
-        # }else{
-        #   rods_list$right_connector_list_sf_geom <- NULL
-        # }
+
       }
     }
     
@@ -5830,49 +5848,7 @@ server <- function(input, output, session) {
     }
   }) 
   
-  # summary_spine_plot_reactive<- reactive({
-  #   posterior_spine_ggdraw
-  #   })%>%
-  #     bindEvent(input$implants_complete)
-  
-  # summary_spine_plot_reactive<- reactive({
-  #   approach_vector <- unique(all_objects_to_add_list$objects_df$approach)
-  #   
-  #   if(length(approach_vector) <2){
-  #     if(input$approach_sequence == "posterior"){
-  #       panel_2_plot <- spine_plan_plot_posterior_reactive() +
-  #         reactiveValuesToList(geoms_list_revision_posterior) +
-  #         reactiveValuesToList(geoms_list_posterior) +
-  #         reactiveValuesToList(rods_list) 
-  #     }else{
-  #       panel_2_plot <-spine_plan_plot_anterior_reactive()
-  #     }
-  #   }else{
-  #     if(approach_vector[[1]] == "posterior"){
-  #        
-  #       panel_2_plot <- plot_grid((spine_plan_plot_posterior_reactive() +
-  #                    reactiveValuesToList(geoms_list_revision_posterior) +
-  #                    reactiveValuesToList(geoms_list_posterior) +
-  #                    reactiveValuesToList(rods_list)), 
-  #                 NULL, 
-  #                 spine_plan_plot_anterior_reactive(), 
-  #                 nrow = 1, 
-  #                 rel_widths = c(1, -.1, 1))
-  #     }else{
-  #       panel_2_plot <- plot_grid(spine_plan_plot_anterior_reactive(), 
-  #                                 NULL,
-  #                                 (spine_plan_plot_posterior_reactive() +
-  #                                    reactiveValuesToList(geoms_list_revision_posterior) +
-  #                                    reactiveValuesToList(geoms_list_posterior) +
-  #                                    reactiveValuesToList(rods_list)),
-  #                                 nrow = 1, 
-  #                                 rel_widths = c(1, -.1, 1))
-  #     }
-  #   } 
-  #   
-  #   panel_2_plot
-  # }) %>%
-  #   bindEvent(input$implants_complete)
+
   
   
   output$spine_plot_for_implants_tab <- renderPlot({
@@ -6184,15 +6160,8 @@ server <- function(input, output, session) {
     }
   })
   
-  # observeEvent(list(input$date_of_birth, input$date_of_surgery), ignoreInit = TRUE, ignoreNULL = TRUE, {
-  
+
   observeEvent(age_reactive(), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    # if(length(input$date_of_birth) > 0 & length(input$date_of_surgery)> 0){
-    #   age <- round(interval(start = input$date_of_birth, end = input$date_of_surgery)/years(1))
-    # }else{
-    #   age <- 999
-    # }
-    
     age <- age_reactive()
     
     if(is.double(age) && age < 15){
@@ -6573,87 +6542,7 @@ server <- function(input, output, session) {
   })
   
   # ### NOW SHOW MODAL 2 IF THERE ARE INCOMPLETE VALUES ###
-  # observeEvent(input$additional_surgical_details_complete, ignoreInit = TRUE,
-  #              {
-  #                if(procedure_approach_reactive() == "anterior"){
-  #                  if(length(head_positioning_anterior) == 0 | length(input$closure_details_anterior) == 0 | length(input$dressing_details_anterior) == 0 | length(input$intraoperative_complications_yes_no) == 0){
-  #                    show_again <- TRUE
-  #                  }else{
-  #                    show_again <- FALSE
-  #                  }
-  #                }
-  # 
-  #                if(procedure_approach_reactive() == "posterior"){
-  #                  if(length(head_positioning_posterior) == 0 | length(input$closure_details_posterior) == 0 | length(input$dressing_details_posterior) == 0 | length(input$intraoperative_complications_yes_no) == 0){
-  #                    show_again <- TRUE
-  #                  }else{
-  #                    show_again <- FALSE
-  #                  }
-  #                }
-  # 
-  #                if(procedure_approach_reactive() == "combined"){
-  #                  if(length(head_positioning_anterior) == 0 | length(input$closure_details_anterior) == 0 | length(input$dressing_details_anterior) == 0 | length(input$intraoperative_complications_yes_no) == 0 | length(head_positioning_posterior) == 0 | length(input$closure_details_posterior) == 0 | length(input$dressing_details_posterior) == 0 | length(input$intraoperative_complications_yes_no) == 0){
-  #                    show_again <- TRUE
-  #                  }else{
-  #                    show_again <- FALSE
-  #                  }
-  #                }
-  # 
-  #                if(show_again == TRUE){
-  #                  showModal(
-  #                    addition_surgical_details_modal_box_2_function(required_options_missing = TRUE,
-  #                                                                   procedure_approach = procedure_approach_reactive(),
-  #                                                                   head_positioning_posterior = input$head_positioning_posterior,
-  #                                                                   head_positioning_anterior = input$head_positioning_anterior,
-  #                                                                   surgical_findings = input$surgical_findings,
-  #                                                                   specimens_removed = input$specimens_removed,
-  #                                                                   ebl = input$ebl,
-  #                                                                   urine_output = input$urine_output,
-  #                                                                   crystalloids_administered = input$crystalloids_administered,
-  #                                                                   colloids_administered = input$colloids_administered,
-  #                                                                   transfusion = input$transfusion,
-  #                                                                   cell_saver_transfused = input$cell_saver_transfused,
-  #                                                                   prbc_transfused = input$prbc_transfused,
-  #                                                                   ffp_transfused = input$ffp_transfused,
-  #                                                                   cryoprecipitate_transfused = input$cryoprecipitate_transfused,
-  #                                                                   platelets_transfused = input$platelets_transfused,
-  #                                                                   intraoperative_complications_yes_no = input$intraoperative_complications_yes_no,
-  #                                                                   intraoperative_complications_vector = input$intraoperative_complications_vector,
-  #                                                                   other_intraoperative_complications = input$other_intraoperative_complications,
-  #                                                                   durotomy_timing_input = input$durotomy_timing,
-  #                                                                   durotomy_instrument_input = input$durotomy_instrument,
-  #                                                                   durotomy_repair_method_input = input$durotomy_repair_method,
-  # 
-  #                                                                   additional_procedures_choices_anterior = additional_procedures_options_reactive_vector(),
-  #                                                                   additional_procedures_anterior = input$additional_procedures_anterior,
-  #                                                                   additional_procedures_other_anterior = input$additional_procedures_other_anterior,
-  #                                                                   additional_end_procedure_details_anterior = input$additional_end_procedure_details_anterior,
-  #                                                                   closure_details_anterior = input$closure_details_anterior,
-  #                                                                   dressing_details_anterior = input$dressing_details_anterior,
-  # 
-  #                                                                   additional_procedures_choices_posterior = additional_procedures_options_reactive_vector(),
-  #                                                                   additional_procedures_posterior = input$additional_procedures_posterior,
-  #                                                                   additional_procedures_other_posterior = input$additional_procedures_other_posterior,
-  #                                                                   additional_end_procedure_details_posterior = input$additional_end_procedure_details_posterior,
-  #                                                                   closure_details_posterior = input$closure_details_posterior,
-  #                                                                   dressing_details_posterior = input$dressing_details_posterior,
-  # 
-  #                                                                   postop_dispo = input$postop_dispo,
-  #                                                                   postop_abx = input$postop_abx,
-  #                                                                   postop_map_goals = input$postop_map_goals,
-  #                                                                   postop_transfusion_threshold = input$postop_transfusion_threshold,
-  #                                                                   postop_imaging = input$postop_imaging,
-  #                                                                   postop_pain = input$postop_pain,
-  #                                                                   postop_activity = input$postop_activity,
-  #                                                                   postop_brace = input$postop_brace,
-  #                                                                   postop_diet = input$postop_diet,
-  #                                                                   postop_dvt_ppx = input$postop_dvt_ppx,
-  #                                                                   postop_drains_dressing = input$postop_drains_dressing,
-  #                                                                   postop_followup = input$postop_followup
-  #                    )
-  #                  )
-  #                }
-  #              })
+
   
   
   ## NOW make a reactive modal for editing the info if needed ###
@@ -7259,113 +7148,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # output$screw_details_ui <- renderUI({
-  #   if(length(input$screws_implanted_picker_for_ui) > 0){
-  #     all_screw_size_type_inputs_df <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df, 
-  #                                                                               return_shiny_inputs_df = TRUE) ## this adds the needed 'left_object' and 'right_object' so that it matches the  screws_implanted_picker_for_ui format
-  #     box(width = 12,
-  #         title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
-  #         jh_make_shiny_table_row_function(left_column_label = "Screw/Rod Manufacturer:",
-  #                                          left_column_percent_width = 30,
-  #                                          input_type = "checkbox",
-  #                                          font_size = 16,
-  #                                          checkboxes_inline = TRUE,
-  #                                          input_id = "implant_manufacturer",
-  #                                          choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "Other")
-  #         ),
-  #         h4("Screw Sizes:"),
-  #         fluidRow(
-  #           column(4,
-  #                  "Implant"),
-  #           column(2,
-  #                  "Left Diameter"),
-  #           column(2,
-  #                  "Left Length"),
-  #           column(2,
-  #                  "Right Diameter"),
-  #           column(2,
-  #                  "Right Length")
-  #         ),
-  #         map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
-  #             .f = ~
-  #               fluidRow(
-  #                 column(4,
-  #                        all_screw_size_type_inputs_df$level_object_label[[.x]]
-  #                 ),
-  #                 ## LEFT DIAMETER ##
-  #                 column(2,
-  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
-  #                                         all_screw_size_type_inputs_df$left_diameter_input[[.x]]
-  #                                         # )
-  #                        )
-  #                 ),
-  #                 ## LEFT LENGTH ##
-  #                 column(2,
-  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
-  #                                         all_screw_size_type_inputs_df$left_length_input[[.x]]
-  #                        )
-  #                 ),
-  #                 ## RIGHT DIAMETER ##
-  #                 column(2,
-  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
-  #                                         all_screw_size_type_inputs_df$right_diameter_input[[.x]]
-  #                        )
-  #                 ),
-  #                 ## RIGHT LENGTH ##
-  #                 column(2,
-  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
-  #                                         all_screw_size_type_inputs_df$right_length_input[[.x]]
-  #                        )
-  #                 )
-  #               )
-  #         )
-  #     )
-  #   }
-  # }) 
-  # 
-  # ###### SCREW TYPES #############
-  # output$screw_types_ui <- renderUI({
-  #   # if(length(input$screws_implanted_picker_for_ui) > 0){
-  #   if(nrow(all_objects_to_add_list$objects_df)>0){
-  #     all_screw_size_type_inputs_df <- jh_make_screw_details_inputs_df_function(all_objects = all_objects_to_add_list$objects_df, 
-  #                                                                               return_shiny_inputs_df = TRUE) ## this adds the needed 'left_object' and 'right_object' so that it matches the  screws_implanted_picker_for_ui format
-  #     if(nrow(all_screw_size_type_inputs_df)>0){
-  #       box(width = 12,
-  #         title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Screw Details:"), collapsible = TRUE,
-  #         h4("Screw Types:"),
-  #         fluidRow(
-  #           column(2,
-  #                  "Implant"),
-  #           column(5,
-  #                  "Left Screw Type"),
-  #           column(5,
-  #                  "Right Screw Type"),
-  #         ),
-  #         map(.x = c(1:length(all_screw_size_type_inputs_df$level_object_label)),
-  #             .f = ~
-  #               # conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$level_object_label[[.x]]}') >-1"),
-  #               fluidRow(
-  #                 column(2,
-  #                        all_screw_size_type_inputs_df$level_object_label[[.x]]
-  #                 ),
-  #                 column(5,
-  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$left_object[[.x]]}') >-1"),
-  #                                         all_screw_size_type_inputs_df$left_type_input[[.x]]
-  #                        )
-  #                 ),
-  #                 column(5,
-  #                        conditionalPanel(condition = glue("input.screws_implanted_picker_for_ui.indexOf('{all_screw_size_type_inputs_df$right_object[[.x]]}') >-1"),
-  #                                         all_screw_size_type_inputs_df$right_type_input[[.x]]
-  #                        )
-  #                 )
-  #               )
-  #             # )
-  #         )
-  #     )
-  #     }
-  #     
-  #   }
-  # }) 
+
   ################------------------  Screw Size RESULTS  ----------------------######################  
   ################------------------  Screw Size RESULTS  ----------------------######################  
   
@@ -8444,6 +8227,42 @@ server <- function(input, output, session) {
   })
   
   
+  
+  ############# ASSEMBLE MODIFIER SECTION ######################
+  ### assemble additional cpt codes vector
+  modifiers_list_reactive <- reactiveValues(
+    mod22_sentence = NULL
+  )
+  
+  # Open modal when Modifier 22 is newly selected
+  observeEvent(input$add_modifier, ignoreInit = TRUE, {
+    sel <- input$add_modifier %||% character()
+    if (!("mod22" %in% sel) && !is.null(modifiers_list_reactive$mod22_sentence)) {
+      modifiers_list_reactive$mod22_sentence <- NULL
+    }
+    if ("mod22" %in% sel && is.null(modifiers_list_reactive$mod22_sentence)) {
+      showModal(mod22_modal_ui())
+    }
+  })
+  
+  # Compose and store sentence on apply
+  observeEvent(input$mod22_apply, ignoreInit = TRUE, {
+    req(input$mod22_reasons %||% input$mod22_other)
+    
+    reasons <- input$mod22_reasons %||% character()
+    other   <- trimws(input$mod22_other %||% "")
+    
+    modifiers_list_reactive$mod22_sentence <- compose_mod22_paragraph(
+      reasons = reasons,
+      typical_time = input$typical_case_time,
+      actual_time = input$actual_case_time,
+      other   = other
+      # , context = list(bmi = input$bmi, prior_revisions = input$prior_revisions)
+    )
+    removeModal()
+  })
+  
+  
   ########### NOW ASSEMBLE THE REACTIVE TEXT OF THE ENTIRE OP NOTE ###############
   
   approach_sequence_reactive <- reactive({
@@ -8727,9 +8546,14 @@ server <- function(input, output, session) {
     
     op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
     
+    if(!is.null(modifiers_list_reactive$mod22_sentence)){
+      op_note_list$"\nModifier 22:" <- "Increased Procedural Services requested. Detailed justification is noted below the procedure description."
+    }
+    
     if(length(input$implant_manufacturer)>0){
       op_note_list$"\n*Implant Manufacturer:" <- paste(glue_collapse(x = input$implant_manufacturer, sep = ", ", last = " and "))
     }
+    
     
     if(nrow(all_objects_to_add_list$objects_df) == 0 & nrow(revision_implants_df) == 0){
       
@@ -8747,12 +8571,14 @@ server <- function(input, output, session) {
       }else{
         op_note_list$"\n*Procedure  Description:" <- "***"
       }
-      
     }else{
-      
       op_note_list$"\n*Procedure  Description:" <- procedure_results_list$procedure_details_paragraph
-      
     }
+    
+    if(!is.null(modifiers_list_reactive$mod22_sentence)){
+      op_note_list$"\n*Procedure  Description:" <- glue("{op_note_list$'\n*Procedure  Description:'}\n\n{modifiers_list_reactive$mod22_sentence}") 
+    }
+    
     op_note_list$"\n*Postop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
     
     

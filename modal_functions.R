@@ -30,33 +30,61 @@ postop_imaging_choices_vector <- c("please obtain postop upright AP/Lateral C-sp
                                    "no postop imaging needed.",
                                    "***")
 
-postop_pain_choices_vector <- c("Ice pack to affected area, PRN",
-                                "Dilaudid PCA [0.2mg bolus, 8min lockout, no basal](in addition to all other pain medication orders) - DISCONTINUE on POD 1", 
-                                "Oxycodone 5mg q4h, ok to give additional dose if needed", 
-                                "Oxycodone 10mg q4h, ok to give additional dose if needed",
-                                "Oxycodone *** q4h, ok to give additional dose if needed",
-                                "Tylenol 1000mg q8h scheduled.", 
-                                "Tylenol 650mg q8h scheduled",
-                                "Tylenol ***",
-                                "Gabapentin 100mg q8h scheduled",
-                                "Gabapentin 300mg q8h scheduled",
-                                "Toradol 15mg q8h for 48-72hrs",
-                                "Toradol 30mg q8h for 48-72hrs",
-                                "Toradol ***",
-                                "Celebrex 100mg BID",
-                                "Celebrex 200mg BID",
-                                "Meloxicam 15mg daily",
-                                "Tizanidine 4mg q6h prn for muscle spasms (avoid in geriatric males/males w/ urinary retention)",
-                                "Cyclobenzabrine 5mg q8h prn for muscle spasms (strong anticholinergic, minimize in geriatric)",
-                                "Baclofen 10mg TID prn for muscle spasms",
-                                "Diazepam 2.5mg q8h prn for muscle spasms",
-                                "Diazepam *** for muscle spasms",
-                                "Journavyx",
-                                "Pain team consult",
-                                "Per Primary",
-                                "Continue home pain medications ***",
-                                "***"
-)
+# postop_pain_choices_vector <- c("Ice pack to affected area, PRN",
+#                                 "Dilaudid PCA [0.2mg bolus, 8min lockout, no basal](in addition to all other pain medication orders) - DISCONTINUE on POD 1", 
+#                                 "Oxycodone 5mg q4h, ok to give additional dose if needed", 
+#                                 "Oxycodone 10mg q4h, ok to give additional dose if needed",
+#                                 "Oxycodone *** q4h, ok to give additional dose if needed",
+#                                 "Tylenol 1000mg q8h scheduled.", 
+#                                 "Tylenol 650mg q8h scheduled",
+#                                 "Tylenol ***",
+#                                 "Gabapentin 100mg q8h scheduled",
+#                                 "Gabapentin 300mg q8h scheduled",
+#                                 "Toradol 15mg q8h for 48-72hrs",
+#                                 "Toradol 30mg q8h for 48-72hrs",
+#                                 "Toradol ***",
+#                                 "Celebrex 100mg BID",
+#                                 "Celebrex 200mg BID",
+#                                 "Meloxicam 15mg daily",
+#                                 "Tizanidine 4mg q6h prn for muscle spasms (avoid in geriatric males/males w/ urinary retention)",
+#                                 "Cyclobenzabrine 5mg q8h prn for muscle spasms (strong anticholinergic, minimize in geriatric)",
+#                                 "Baclofen 10mg TID prn for muscle spasms",
+#                                 "Diazepam 2.5mg q8h prn for muscle spasms",
+#                                 "Diazepam *** for muscle spasms",
+#                                 "Journavyx",
+#                                 "Pain team consult",
+#                                 "Per Primary",
+#                                 "Continue home pain medications ***",
+#                                 "***"
+# )
+
+postop_pain_choices_vector <- list('Ice pack to affected area, PRN' = 'Ice pack to affected area, PRN',
+     'Dilaudid PCA [0.2mg bolus, 8min lockout, no basal](in addition to all other pain medication orders) - DISCONTINUE on POD 1' = 'Dilaudid PCA [0.2mg bolus, 8min lockout, no basal](in addition to all other pain medication orders) - DISCONTINUE on POD 1',
+     'Oxycodone 5mg q4h, ok to give additional dose if needed' = 'Oxycodone 5mg q4h, ok to give additional dose if needed',
+     'Oxycodone 10mg q4h, ok to give additional dose if needed' = 'Oxycodone 10mg q4h, ok to give additional dose if needed',
+     'Oxycodone *** q4h, ok to give additional dose if needed' = 'Oxycodone *** q4h, ok to give additional dose if needed',
+     'Tylenol 1000mg q8h scheduled.' = 'Tylenol 1000mg q8h scheduled.',
+     'Tylenol 650mg q8h scheduled' = 'Tylenol 650mg q8h scheduled',
+     'Tylenol ***' = 'Tylenol ***',
+     'Gabapentin 100mg q8h scheduled' = 'Gabapentin 100mg q8h scheduled',
+     'Gabapentin 300mg q8h scheduled' = 'Gabapentin 300mg q8h scheduled',
+     'Toradol 15mg q8h for 48-72hrs' = 'Toradol 15mg q8h for 48-72hrs',
+     'Toradol 30mg q8h for 48-72hrs' = 'Toradol 30mg q8h for 48-72hrs',
+     'Toradol ***' = 'Toradol ***',
+     'Celebrex 100mg BID' = 'Celebrex 100mg BID',
+     'Celebrex 200mg BID' = 'Celebrex 200mg BID',
+     'Meloxicam 15mg daily' = 'Meloxicam 15mg daily',
+     'Tizanidine 4mg q6h prn for muscle spasms' = 'Tizanidine 4mg q6h prn for muscle spasms (avoid in geriatric males/males w/ urinary retention)',
+     'Cyclobenzabrine 5mg q8h prn for muscle spasms' = 'Cyclobenzabrine 5mg q8h prn for muscle spasms (strong anticholinergic, minimize in geriatric)',
+     'Baclofen 10mg TID prn for muscle spasms' = 'Baclofen 10mg TID prn for muscle spasms',
+     'Diazepam 2.5mg q8h prn for muscle spasms' = 'Diazepam 2.5mg q8h prn for muscle spasms',
+     'Diazepam *** for muscle spasms' = 'Diazepam *** for muscle spasms',
+     'Journavyx' = 'Journavyx',
+     'Pain team consult' = 'Pain team consult',
+     'Per Primary' = 'Per Primary',
+     'Continue home pain medications ***' = 'Continue home pain medications ***',
+     '***' = '***'
+     )
 
 postop_activity_choices_vector <- c("PT/OT daily",
                                     "please mobilize out of bed minimum 3x daily", 
@@ -70,19 +98,34 @@ postop_brace_choices_vector <- c("C collar at all times",
                                  "No brace needed",
                                  "***")
 
-postop_diet_choices_vector <- c("OK to resume normal diet", 
-                                "Start with clear liquid diet and advance as tolerated", 
-                                "Start with clear liquid diet and advance when passing flatus",
-                                "NPO until return of bowel sounds",
-                                "Please keep on maintenance fluids while NPO",
-                                "Please place Nutrition Consult",
-                                "Daily BMP to monitor electrolyes",
-                                "Please minimize opioids as tolerated",
-                                "Alvimopan 12mg BID x 5 days OR first BM (for GI motility)",
-                                "Pantoprazole 40mg daily",
-                                "Famotidine 20mg BID (elderly)",
-                                "Dexamethasone taper for dysphagia prevention (POD 0 = 10mg IV in PM then POD 1 = 4mg IV BID then POD 2 = 2mg IV BID",
-                                "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository")
+# postop_diet_choices_vector <- c("OK to resume normal diet", 
+#                                 "Start with clear liquid diet and advance as tolerated", 
+#                                 "Start with clear liquid diet and advance when passing flatus",
+#                                 "NPO until return of bowel sounds",
+#                                 "Please keep on maintenance fluids while NPO",
+#                                 "Please place Nutrition Consult",
+#                                 "Daily BMP to monitor electrolyes",
+#                                 "Please minimize opioids as tolerated",
+#                                 "Alvimopan 12mg BID x 5 days OR first BM (for GI motility)",
+#                                 "Pantoprazole 40mg daily",
+#                                 "Famotidine 20mg BID (elderly)",
+#                                 "Dexamethasone taper for dysphagia prevention (POD 0 = 10mg IV in PM then POD 1 = 4mg IV BID then POD 2 = 2mg IV BID",
+#                                 "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository")
+
+postop_diet_choices_vector <- list("OK to resume normal diet" = "OK to resume normal diet", 
+                                "Start with clear liquid diet and advance as tolerated" = "Start with clear liquid diet and advance as tolerated", 
+                                "Start with clear liquid diet and advance when passing flatus" = "Start with clear liquid diet and advance when passing flatus",
+                                "NPO until return of bowel sounds" = "NPO until return of bowel sounds",
+                                "Please keep on maintenance fluids while NPO" = "Please keep on maintenance fluids while NPO",
+                                "Please place Nutrition Consult" = "Please place Nutrition Consult",
+                                "Daily BMP to monitor electrolyes" = "Daily BMP to monitor electrolyes",
+                                "Please minimize opioids as tolerated" = "Please minimize opioids as tolerated",
+                                "Alvimopan 12mg BID x 5 days OR first BM (for GI motility)" = "Alvimopan 12mg BID x 5 days OR first BM (for GI motility)",
+                                "Pantoprazole 40mg daily" = "Pantoprazole 40mg daily",
+                                "Famotidine 20mg BID" = "Famotidine 20mg BID (elderly)",
+                                "Dexamethasone taper for dysphagia prevention (POD 0 = 10mg IV in PM then POD 1 = 4mg IV BID then POD 2 = 2mg IV BID" = "Dexamethasone taper for dysphagia prevention (POD 0 = 10mg IV in PM then POD 1 = 4mg IV BID then POD 2 = 2mg IV BID",
+                                "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository" = "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"
+                                )
 
 postop_foley_choices_vector <- c("Discontinue foley when able",
                                  "Discontinue foley once mobilizing with PT",
@@ -2494,5 +2537,267 @@ postop_plan_sections_list <- list("Postop Destination",
                                   "DVT PPX/Anticoag/Antiplatelet",
                                   "Drains & Dressing",
                                   "Follow-up")
+
+
+
+
+### FOR MODIFIER 22 ###
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+oxford_join <- function(x) {
+  x <- x[nzchar(x)]
+  n <- length(x)
+  if (!n) return("")
+  if (n == 1) return(x)
+  if (n == 2) return(paste(x, collapse = " and "))
+  paste0(paste(x[1:(n-1)], collapse = ", "), ", and ", x[n])
+}
+
+
+
+mod22_choices <- list(
+  ###EXPOSURE CHALLENGES:
+  "Revision surgery"                     = "revision surgery",
+  "Multiple prior revisions"             = "multiple prior revisions",
+  "Retained/removed implants"            = "retained/removed implants",
+  "Dense scar tissue"                    = "dense scar tissue",
+  "Prior infection"                      = "prior infection",
+  "Prior radiation"                      = "prior radiation",
+  "Obesity (BMI ≥30)"                    = "obesity (BMI ≥30)",
+  "Difficult exposure"                   = "difficult exposure",
+  
+  ### DECOMPRESSION CHALLENGES:
+  "Prior laminectomy defects"            = "prior laminectomy defects",
+  "Dural adhesions"                      = "dural adhesions",
+  "Altered anatomy"                      = "altered anatomy",
+
+  ### INSTRUMENTATION CHALLENGES:
+  "Small/Dysplastic pedicles"            = "small/dysplastic pedicles",
+  "Poor bone quality / osteoporosis"     = "poor bone quality / osteoporosis",
+  
+  ### FUSION/DEFORMITY CHALLENGES
+  "Rigid deformity"                      = "rigid deformity",
+  "Severe, multiplanar deformity"        = "severe deformity",
+  
+  ## INTRAOPERATIVE CHALLENGES
+  "High blood loss"                      = "high blood loss",
+  "Intraoperative durotomy repair"       = "intraoperative durotomy repair",
+  "Substantially prolonged operative time" = "substantially prolonged operative time"
+  
+)
+
+mod22_modal_ui <- function() {
+  modalDialog(
+    title = "Justify Modifier 22",
+    easyClose = FALSE,
+    footer = tagList(
+      modalButton("Cancel"),
+      actionButton("mod22_apply", "Add justification", class = "btn btn-primary")
+    ),
+    checkboxGroupInput(
+      inputId = "mod22_reasons",
+      label   = "Select all that apply:",
+      choices = mod22_choices,
+    ),
+    fluidRow(
+      column(width = 6, 
+             textAreaInput(
+               inputId = "typical_case_time",
+               label   = "Typical Case Time (hrs):"
+             )
+      ),
+      column(width = 6, 
+             textAreaInput(
+               inputId = "actual_case_time",
+               label   = "Actual Case Time (hrs):"
+             )
+      ),
+      
+    ),
+    textAreaInput(
+      inputId = "mod22_other",
+      label   = "Other details (optional):",
+      placeholder = "Add any case-specific nuance…",
+      rows = 3
+    )
+  )
+}
+
+
+
+compose_mod22_paragraph <- function(reasons,
+                                    typical_time = NULL,
+                                    actual_time  = NULL,
+                                    other        = NULL,
+                                    context      = list()) {
+  # expects helpers %||% and oxford_join() to be available; uses glue internally
+  # reasons should be the VALUES from mod22_choices
+  
+  # --- small helpers ---
+  trim_nz <- function(x) {
+    x <- trimws(paste0(x))
+    x[nzchar(x)]
+  }
+  num_or_na <- function(x) {
+    if (is.null(x)) return(NA_real_)
+    v <- suppressWarnings(readr::parse_number(paste0(x)))
+    ifelse(is.na(v) | v <= 0, NA_real_, v)
+  }
+  fmt_hr <- function(x) {
+    if (is.na(x)) return(NULL)
+    out <- round(x, 1)
+    # drop .0
+    if (abs(out - round(out)) < 1e-9) out <- as.integer(round(out))
+    paste0(out, " hours")
+  }
+
+  
+  sel <- unique(trim_nz(reasons %||% character()))
+  other_txt <- trimws(other %||% "")
+  if (nzchar(other_txt)) other_txt <- sub("[.]+\\s*$", "", other_txt)
+  
+  # --- canonical phrase map (past-tense friendly fragments) ---
+  phrase_map <- c(
+    # EXPOSURE
+    "revision surgery"               = "revision surgery",
+    "multiple prior revisions"       = "multiple prior revisions",
+    "retained/removed implants"      = "retained implants that required removal",
+    "dense scar tissue"              = "dense scar tissue",
+    "prior infection"                = "sequelae of prior infection",
+    "prior radiation"                = "fibrotic planes from prior radiation",
+    "obesity (BMI ≥30)"              = "obesity (BMI ≥30)",
+    "difficult exposure"             = "difficult exposure",
+    # DECOMPRESSION
+    "prior laminectomy defects"      = "prior laminectomy defects",
+    "dural adhesions"                = "dense dural adhesions",
+    "altered anatomy"                = "altered anatomy",
+    # INSTRUMENTATION
+    "small/dysplastic pedicles"      = "small/dysplastic pedicles",
+    "poor bone quality / osteoporosis" = "poor bone quality/osteoporosis",
+    # FUSION/DEFORMITY
+    "rigid deformity"                = "a rigid deformity",
+    "severe deformity"               = "a severe, multiplanar deformity",
+    # INTRAOPERATIVE
+    "high blood loss"                = "high blood loss",
+    "intraoperative durotomy repair" = "an intraoperative durotomy that required repair",
+    "substantially prolonged operative time" = "substantially prolonged operative time"
+  )
+  
+  # enrich obesity with numeric BMI if provided
+  if ("obesity (BMI ≥30)" %in% sel && !is.null(context$bmi)) {
+    bmi_num <- suppressWarnings(as.numeric(context$bmi))
+    if (!is.na(bmi_num) && bmi_num >= 30) {
+      phrase_map["obesity (BMI ≥30)"] <- glue::glue("obesity (BMI {round(bmi_num, 1)})")
+    }
+  }
+  
+  # --- buckets reflect your UI groups ---
+  bucket_exposure <- c("revision surgery","multiple prior revisions","retained/removed implants",
+                       "dense scar tissue","prior infection","prior radiation","obesity (BMI ≥30)",
+                       "difficult exposure")
+  
+  bucket_decomp   <- c("prior laminectomy defects","dural adhesions","altered anatomy")
+  
+  bucket_instr    <- c("small/dysplastic pedicles","poor bone quality / osteoporosis")
+  
+  bucket_deform   <- c("rigid deformity","severe deformity")
+  
+  bucket_intraop  <- c("high blood loss","intraoperative durotomy repair",
+                       "substantially prolonged operative time")
+  
+  # If times are provided, we can omit the literal "substantially prolonged operative time"
+  # from intraop to avoid redundancy with the numeric time sentence.
+  t_typ <- num_or_na(typical_time)
+  t_act <- num_or_na(actual_time)
+  intra_exclude <- if (!is.na(t_typ) || !is.na(t_act)) "substantially prolonged operative time" else character(0)
+  
+  # --- collect phrases per bucket in the original visual order of your choices ---
+  # keep only those selected, then map to phrases, drop empties
+  pick <- function(bucket, exclude = character(0)) {
+    hits <- sel[sel %in% setdiff(bucket, exclude)]
+    trim_nz(unname(phrase_map[hits]))
+  }
+  
+  exp_phr  <- pick(bucket_exposure)
+  dec_phr  <- pick(bucket_decomp)
+  inst_phr <- pick(bucket_instr)
+  def_phr  <- pick(bucket_deform)
+  int_phr  <- pick(bucket_intraop, exclude = intra_exclude)
+  
+  # --- craft grouped sentences (past tense, natural flow) ---
+  sents <- character(0)
+  
+  if (length(exp_phr)) {
+    
+    if (length(exp_phr)>1) {
+      exp_phr <- exp_phr[exp_phr != "difficult exposure"]
+      }
+    sents <- c(sents,
+               glue::glue("Exposure was substantially more difficult due to {oxford_join(exp_phr)}")
+    )
+  }
+  
+  if (length(dec_phr)) {
+    sents <- c(sents,
+               glue::glue("Decompression was technically demanding beyond typical due to {oxford_join(dec_phr)}")
+    )
+  }
+  if (length(inst_phr)) {
+    sents <- c(sents,
+               glue::glue("Instrumentation was unusually demanding due to {oxford_join(inst_phr)}")
+    )
+  }
+  
+  if (length(def_phr)) {
+    sents <- c(sents,
+               glue::glue("Deformity correction required additional time due to {oxford_join(def_phr)}")
+    )
+  }
+  
+  intraop_clause <- function(items) {
+    if (length(items) == 1L) {
+      glue::glue("{items} increased the overall complexity and effort")
+    } else {
+      glue::glue("{oxford_join(items)}, which increased the overall complexity and effort")
+    }
+  }
+  
+  if (length(int_phr)) {
+    sents <- c(sents, glue::glue("Intraoperatively, {intraop_clause(int_phr)}"))
+  }
+  
+  sents <- str_to_sentence(paste0(glue_collapse(sents, sep = "; ", last = "; and "), "."))
+  
+  if (nzchar(other_txt)) {
+    sents <- c(sents, paste0("Additional pertinent details included ", other_txt, "."))
+  }
+  
+  # --- time justification (past tense, concise) ---
+  time_sent <- NULL
+  if (!is.na(t_typ) && !is.na(t_act)) {
+    delta <- t_act - t_typ
+    if (is.finite(delta) && delta > 0) {
+      pct <- round((delta / t_typ) * 100)
+      time_sent <- glue::glue(
+        "Comparable cases typically require ~{fmt_hr(t_typ)}; this procedure required {fmt_hr(t_act)} (>{max(pct, 0)}% longer)."
+      )
+    } else if (is.finite(t_act)) {
+      time_sent <- glue::glue("This procedure required {fmt_hr(t_act)}.")
+    }
+  } else if (!is.na(t_act)) {
+    time_sent <- glue::glue("This procedure required {fmt_hr(t_act)}, longer than standard expectations.")
+  } else if (!is.na(t_typ)) {
+    time_sent <- glue::glue("Comparable cases typically require {fmt_hr(t_typ)}.")
+  }
+  if (!is.null(time_sent)) sents <- c(sents, time_sent)
+  
+  # --- opening + closing (past tense) ---
+  opening <- "Modifier 22 (Increased Procedural Services) is justified based on the following factors:"
+  closing <- "Accordingly, increased procedural services were provided."
+  
+  paragraph <- paste(c(opening, sents, closing), collapse = " ")
+  
+  paragraph
+}
 
 
