@@ -3130,137 +3130,12 @@ server <- function(input, output, session) {
   
   #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
   
-  # observeEvent(input$plot_click, {
-  #   all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-  #     bind_rows(object_added_reactive_df()) %>%
-  #     distinct()
-  #   
-  #   if(any(str_detect(object_added_reactive_df()$object, "grade_"))){
-  #     if(length(unique((all_objects_to_add_list$objects_df %>% filter(str_detect(object, "grade_")))$object)) > 1){
-  #       all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
-  #     }
-  #   }
-  #   
-  #   # jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")
-  #   
-  # })
   
   ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS     ######### ~~~~~~~~~~~~~~  #############
   ######### ~~~~~~~~~~~~~~  ############# MAKE THE GEOMS    ######### ~~~~~~~~~~~~~~  #############
   
   
-  # observeEvent(list(input$plot_click,
-  #                   input$plot_double_click,
-  #                   all_objects_to_add_list$objects_df), {
-  # 
-  #                     all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-  #                       bind_rows(object_added_reactive_df()) %>%
-  #                       distinct()
-  # 
-  #                     if(str_detect(input$object_to_add, "grade_")){
-  #                       if(length(unique((all_objects_to_add_list$objects_df %>% filter(str_detect(object, "grade_")))$object)) > 1){
-  #                         all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
-  #                       }
-  #                     }
-  # 
-  #                     if(input$left_supplemental_rods_eligible == FALSE){
-  #                       free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level,
-  #                                                           left_revision_implants_reactive_list()$free_revision_screws_vector))
-  #                       if(length(free_screws_vector) > 2){
-  #                         updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
-  #                       }
-  #                     }
-  #                     if(input$right_supplemental_rods_eligible == FALSE){
-  #                       free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level,
-  #                                                           right_revision_implants_reactive_list()$free_revision_screws_vector))
-  #                       if(length(free_screws_vector) > 2){
-  #                         updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
-  #                       }
-  #                     }
-  # 
-  # 
-  #                     if(input$spine_approach == "Anterior"){
-  #                       anterior_df <- all_objects_to_add_list$objects_df %>%
-  #                         filter(approach == "anterior")
-  # 
-  #                       anterior_geoms_list <- jh_make_anterior_geoms_function(all_anterior_objects_df = anterior_df)
-  # 
-  #                       geoms_list_anterior_diskectomy$geoms <- anterior_geoms_list$geoms_list_anterior_diskectomy
-  #                       geoms_list_anterior_interbody$geoms <- anterior_geoms_list$geoms_list_anterior_interbody
-  #                       geoms_list_anterior_instrumentation$geoms <- anterior_geoms_list$geoms_list_anterior_instrumentation
-  # 
-  #                     }else{
-  #                       if(str_detect(input$object_to_add, "screw")){
-  #                         # geoms_list_posterior$screws <- geoms_screws_list[(all_objects_to_add_list$objects_df %>%
-  #                         #                                                     filter(approach == "posterior", str_detect(object, "screw")))$object_id]
-  # 
-  #                         geoms_list_posterior$screws <- jh_make_posterior_screws_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
-  #                                                                                                  filter(approach == "posterior", str_detect(object, "screw")),
-  #                                                                                                plot_with_patterns = input$plot_with_patterns_true)
-  # 
-  #                       }else{
-  #                         geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
-  #                                                                                          filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
-  #                                                                                        plot_with_patterns = input$plot_with_patterns_true)
-  #                       }
-  #                     }
-  #                   })
-  
-  # observeEvent(list(input$plot_click,
-  #                   input$plot_double_click,
-  #                   all_objects_to_add_list$objects_df), ignoreInit = TRUE, ignoreNULL = TRUE, {
-  #                     all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-  #                       bind_rows(object_added_reactive_df()) %>%
-  #                       distinct()
-  # 
-  #                     if(str_detect(input$object_to_add, "grade_")){
-  #                       if(length(unique((all_objects_to_add_list$objects_df %>% filter(str_detect(object, "grade_")))$object)) > 1){
-  #                         all_objects_to_add_list$objects_df <- jh_filter_osteotomies_function(full_df_to_filter = all_objects_to_add_list$objects_df)
-  #                       }
-  #                     }
-  # 
-  #                   }
-  # )
-  
-  
-  # possible_geoms_reactive <- reactiveValues()
-  # 
-  # observeEvent(input$object_to_add, ignoreInit = TRUE, {
-  #   
-  # # possible_geoms_list_reactive <- reactive({
-  #   possible_objects_constructed_df <- all_implants_constructed_df %>%
-  #     filter(object == input$object_to_add) 
-  #   
-  #   possible_geoms_reactive$possible_geoms_list <- map2(.x = possible_objects_constructed_df$object_constructed, .y = possible_objects_constructed_df$object,
-  #                                 .f = ~ jh_make_single_posterior_geom_object_constructed_function(object_constructed = .x,
-  #                                                                                                  object = .y, 
-  #                                                                                                  plot_with_patterns = input$plot_with_patterns_true))
-  #   
-  #   names(possible_geoms_reactive$possible_geoms_list) <- possible_objects_constructed_df$object_id
-  #   
-  #   
-  #                   }
-  # )
-  
-  # observeEvent(input$object_to_add, ignoreInit = TRUE, {
-  # 
-  #  if(grepl("grade_", input$object_to_add)){
-  #    
-  #  }
-  #   
-  #   possible_objects_constructed_df <- all_implants_constructed_df %>%
-  #     filter(object == input$object_to_add)
-  # 
-  #   possible_geoms_reactive$possible_geoms_list <- map2(.x = possible_objects_constructed_df$object_constructed, .y = possible_objects_constructed_df$object,
-  #                                 .f = ~ jh_make_single_posterior_geom_object_constructed_function(object_constructed = .x,
-  #                                                                                                  object = .y,
-  #                                                                                                  plot_with_patterns = input$plot_with_patterns_true))
-  # 
-  #   names(possible_geoms_reactive$possible_geoms_list) <- possible_objects_constructed_df$object_id
-  # 
-  # 
-  #                   }
-  # )
+
   
   observeEvent(input$plot_double_click, ignoreNULL = TRUE, ignoreInit = TRUE, {
     implant_to_remove_df <- nearPoints(
@@ -3381,33 +3256,34 @@ server <- function(input, output, session) {
                     }
   )
   
-  # observeEvent(input$object_to_add, ignoreInit = TRUE, {
-  #   if(grepl("screw", input$object_to_add) == FALSE){
-  #     if(length(geoms_list_posterior_screws$left_screws)>6){
-  #       
-  #       geoms_list_posterior_screws$left_screws <- NULL
-  #       # clear_reactive_values_function()
-  #       geoms_list_posterior_screws$left_screws <- jh_make_posterior_screws_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
-  #                                                                                            filter(approach == "posterior", grepl("screw", object), side == "left"),
-  #                                                                                          plot_with_patterns = FALSE)
-  #     } 
-  #   }
-  #   
-  # })
+
   
-  # observeEvent(all_objects_to_add_list$objects_df, ignoreInit = TRUE, {
   observeEvent(input$add_rods, ignoreInit = TRUE, {
     if(input$left_supplemental_rods_eligible == FALSE){
       free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level,
                                           left_revision_implants_reactive_list()$free_revision_screws_vector))
-      if(length(free_screws_vector) > 2){
+      
+      screws_present_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level,
+                                             (left_revision_implants_reactive_list()$revision_implants_status_df %>% filter(remove_retain == "retain"))$level
+                                     )
+                                     )
+      
+      
+      # revision_implants_status_df
+      
+      if(length(free_screws_vector) > 2 | length(screws_present_vector) > 2){
         updateSwitchInput(session = session, inputId = "left_supplemental_rods_eligible", value = TRUE)
       }
     }
     if(input$right_supplemental_rods_eligible == FALSE){
-      free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level,
+      left_free_screws_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level,
                                           right_revision_implants_reactive_list()$free_revision_screws_vector))
-      if(length(free_screws_vector) > 2){
+      
+      right_screws_present_vector <- unique(append(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level,
+                                             (right_revision_implants_reactive_list()$revision_implants_status_df %>% filter(remove_retain == "retain"))$level
+      )
+      )
+      if(length(left_free_screws_vector) > 2 | length(right_screws_present_vector) > 2){
         updateSwitchInput(session = session, inputId = "right_supplemental_rods_eligible", value = TRUE)
       }
     }
@@ -3560,6 +3436,7 @@ server <- function(input, output, session) {
         decompression_df <- all_object_ids_df %>%
           filter(category == "decompression") %>%
           left_join(fread("coordinates/decompression.csv") %>%
+                      filter(str_detect(object_id, "nerve_transection") == FALSE) %>%
                       group_by(object_id) %>%
                       nest() %>%
                       mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
@@ -4392,6 +4269,19 @@ server <- function(input, output, session) {
   
   ###### LEFT SUPPLEMENTAL ROD GEOM 
   ###### LEFT SUPPLEMENTAL ROD GEOM 
+  
+  observeEvent(input$add_rods, {
+    # link_left_revision_rods_true_false
+    
+    if(nrow(left_revision_implants_reactive_list()$revision_implants_status_df)>0){
+      if(nrow(left_revision_implants_reactive_list()$revision_implants_status_df %>%
+              filter(remove_retain == "retain"))>1){
+        updateMaterialSwitch(session = session, inputId = "link_left_revision_rods_true_false", value = TRUE)
+      }
+    }
+  }
+  )
+  
   left_rod_list_pre_geoms <- reactiveValues()
   
   observe({
