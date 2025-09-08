@@ -1703,7 +1703,7 @@ additional_procedure_options_vector <- c("Robotic Assisted Spine Surgery",
                                          "Removal of tongs or Halo applied by another inidividual",
                                          "Spinal Cord Monitoring",
                                          "Secondary Closure of complex surgical wound (CPT: 13160)",
-                                         # "Incision and Drainage",
+                                         "Incision and Drainage of anterior neck deep abscess or hematoma (CPT 21501)",
                                          "Irrigation and Debridement",
                                          "Application of Wound Vac (negative pressure wound therapy; CPT 97605)",
                                          "Other"
