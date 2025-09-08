@@ -1287,6 +1287,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the {procedures_listed}. {attending_assistant_statement}")
   
+  test_procedure_details_list <- procedure_details_list
   
   if(lateral_mass_screws_after_decompression == "Yes"){
     procedure_paragraphs <- jh_make_lateral_mass_screws_after_decompression_op_note_function(procedure_details_list)
@@ -1314,8 +1315,13 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   procedure_paragraphs <- str_remove_all(procedure_paragraphs, "character(0)")
   
+  procedure_paragraphs <- str_replace_all(procedure_paragraphs, "\\.\\.", ".")
+  
+  # procedure_paragraphs <- str_replace_all(procedure_paragraphs, pattern = "..", replacement = ".")
+  
   return(list(procedure_details_paragraph = procedure_paragraphs, 
-              procedures_numbered_paragraph = procedures_numbered_list[[1]] 
+              procedures_numbered_paragraph = procedures_numbered_list[[1]],
+              test_procedure_details_list = test_procedure_details_list
               # procedure_details_list = procedure_details_list
   ))
   

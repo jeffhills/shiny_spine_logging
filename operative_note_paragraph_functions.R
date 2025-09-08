@@ -324,22 +324,22 @@ op_note_object_combine_paragraph_function <- function(object, levels_nested_df, 
 #############-----------------------   Building Paragraphs: Distinct Operations ----------------------###############
 distinct_anterior_procedure_paragraph_function <- function(level_input, object_input, side_input, implant_statement_input){
   
-  burr_statement <- if_else(jh_get_vertebral_number_function(level_to_get_number = level_input) < 20, " First, I smoothed the anterior disk space and resected any osteophyte using a combination of a rongeur and burr. ", " ")
+  burr_statement <- if_else(jh_get_vertebral_number_function(level_to_get_number = level_input) < 20, " First, I smoothed the anterior disk space and resected any osteophyte. ", " ")
   
   if(object_input == "anterior_disc_arthroplasty"){
-    paragraph <- glue("I then proceeded with total disk arthroplasty at the {level_input} interspace.{burr_statement}Using a combination of knife, curette, pituitary rongeur, and Kerrison rongeur, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. The endplates were distracted and the posterior longitudinal ligament was adequately excised, fully decompressing the central canal and thecal sac. To complete the bilateral foraminotomies, I worked laterally on the left and right with a Kerrison rongeur, resecting any residual disk or osteophyte and fully decompressing the left and the right exiting nerve roots. Once I was satisfied with the decompression and end plate preparation, I trialed the implants and selected an appropriately sized disk replacement. The final implant was then inserted into the interspace of {level_input}. This completed the total disc arthroplasty of the {level_input} interspace.")
+    paragraph <- glue("I then proceeded with total disk arthroplasty at the {level_input} interspace.{burr_statement}The disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. The endplates were distracted and the posterior longitudinal ligament was adequately excised, fully decompressing the central canal and thecal sac. To complete the bilateral foraminotomies, I worked laterally on the left and right with a Kerrison rongeur, resecting any residual disk or osteophyte and fully decompressing the left and the right exiting nerve roots. Once I was satisfied with the decompression and end plate preparation, I trialed the implants and selected an appropriately sized disk replacement. The final implant was then inserted into the interspace of {level_input}. This completed the total disc arthroplasty of the {level_input} interspace.")
   }
   
   if(object_input == "decompression_diskectomy_fusion"){
-    paragraph <- glue("I then proceeded with the discectomy, decompression, and interbody fusion of the {level_input} interspace.{burr_statement}Using a combination of knife, curette, pituitary rongeur, and Kerrison rongeur, the anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. The endplates were distracted and the posterior longitudinal ligament was adequately excised, fully decompressing the central canal. I worked laterally on the left and right with a Kerrison rongeur, resecting any residual disk or osteophyte and fully decompressing the left and the right exiting nerve roots to complete the bilateral foraminotomies. This completed the anterior discectomy with decompression of the {level_input} interspace and partially completed the fusion of {level_input}.")
+    paragraph <- glue("I then proceeded with the discectomy, decompression, and interbody fusion of the {level_input} interspace.{burr_statement} The anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. The endplates were distracted and the posterior longitudinal ligament was adequately excised, fully decompressing the central canal. I worked laterally on the left and right with a Kerrison rongeur, resecting any residual disk or osteophyte and fully decompressing the left and the right exiting nerve roots to complete the bilateral foraminotomies. This completed the anterior discectomy with decompression of the {level_input} interspace and partially completed the fusion of {level_input}.")
   }
   
   if(object_input == "diskectomy_fusion"){
-    paragraph <- glue("I then proceeded with the discectomy and interbody fusion of the {level_input} interspace.{burr_statement}Using a combination of knife, curette, pituitary rongeur, and Kerrison rongeur, the anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. This completed the anterior discectomy of {level_input} interspace and partially completed the fusion of {level_input}.")
+    paragraph <- glue("I then proceeded with the discectomy and interbody fusion of the {level_input} interspace.{burr_statement}The anterior longitudinal ligament was incised, the disc was excised and the superior and inferior endplates were decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. This completed the anterior discectomy of {level_input} interspace and partially completed the fusion of {level_input}.")
   }
   
   if(object_input == "diskectomy_fusion_no_interbody_device"){
-    paragraph <- glue("I then proceeded with the discectomy and interbody fusion of the {level_input} interspace.{burr_statement}Using a combination of knife, curette, pituitary rongeur, and Kerrison rongeur, the anterior longitudinal ligament was incised and the disc was excised. The endplates were distracted and the and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. Once I was satisfied with the endplate preparation, bone graft was placed into the disk space. ANTERIOR_INTERBODY_BIOLOGIC_STATEMENT This completed the anterior discectomy and interbody fusion of the {level_input} interspace.")
+    paragraph <- glue("I then proceeded with the discectomy and interbody fusion of the {level_input} interspace.{burr_statement}The anterior longitudinal ligament was incised and the disc was excised. The endplates were distracted and the and the superior and inferior endplates were lightly decorticated to prepare the endplates for fusion, taking care not to disrupt the cortical endplate. Once I was satisfied with the endplate preparation, bone graft was placed into the disk space. ANTERIOR_INTERBODY_BIOLOGIC_STATEMENT This completed the anterior discectomy and interbody fusion of the {level_input} interspace.")
   }
   
   if(object_input == "anterior_interbody_implant"){
@@ -715,7 +715,6 @@ jh_make_lateral_mass_screws_after_decompression_op_note_function <- function(pro
     mutate(order = row_number()) %>%
     select(order, everything())
   
-  
   lateral_mass_screw_intro <- "For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a burr and the screw path drilled incrementally to the far cortex and the dorsal cortex was then tapped. "
   
   
@@ -732,16 +731,27 @@ jh_make_lateral_mass_screws_after_decompression_op_note_function <- function(pro
   instrumentation_not_lateral_mass_df <- paragraph_string_split_df %>%
     filter(str_detect(string = procedure_text, pattern = "I then proceeded with the posterior spinal instrumentation")) %>%
     separate(col = procedure_text, into = c("procedure_text", "lateral_mass_screws"), sep = lateral_mass_screw_intro) %>%
-    mutate(procedure_text = paste(procedure_text, lateral_mass_screw_intro, "The length of the screws were recorded and bone wax was placed in the screw path. I waited to place the screws until after the decompression.")) %>%
-    select(-lateral_mass_screws)
+    # mutate(procedure_text = paste(procedure_text, lateral_mass_screw_intro, "The length of the screws were recorded and bone wax was placed in the screw path. I waited to place the screws until after the decompression.")) %>%
+    separate(col = lateral_mass_screws, into = c("lateral_mass_screws", "distal_screws"), sep = "This completed the lateral mass screws.") %>%
+    mutate(procedure_text = paste(procedure_text, lateral_mass_screw_intro, "The length of the screws were recorded and bone wax was placed in the screw path. I waited to place these screws until after the decompression.", distal_screws)) %>%
+    select(-lateral_mass_screws, -distal_screws)
   
-  lateral_mass_screws_text_df <- paragraph_string_split_df %>%
+  # lateral_mass_screws_text_df <- paragraph_string_split_df %>%
+  #   filter(str_detect(string = procedure_text, pattern = "I then proceeded with the posterior spinal instrumentation")) %>%
+  #   separate(col = procedure_text, into = c("procedure_text", "lateral_mass_screws"), sep = lateral_mass_screw_intro) %>%
+  #   mutate(procedure_text = paste(procedure_text, lateral_mass_screw_intro, "The length of the screws were recorded and bone wax was placed in the screw path. I waited to place the screws until after the decompression.")) %>%
+  #   select(sequence_of_procedures, procedure_text = lateral_mass_screws) %>%
+  #   mutate(procedure_text = paste("I then proceeded to place the lateral mass screws.", procedure_text)) %>%
+  #   mutate(sequence_of_procedures = as.integer(100))
+  
+  lateral_mass_screws_text_df <-  paragraph_string_split_df %>%
     filter(str_detect(string = procedure_text, pattern = "I then proceeded with the posterior spinal instrumentation")) %>%
     separate(col = procedure_text, into = c("procedure_text", "lateral_mass_screws"), sep = lateral_mass_screw_intro) %>%
-    mutate(procedure_text = paste(procedure_text, lateral_mass_screw_intro, "The length of the screws were recorded and bone wax was placed in the screw path. I waited to place the screws until after the decompression.")) %>%
-    select(sequence_of_procedures, procedure_text = lateral_mass_screws) %>%
+    separate(col = lateral_mass_screws, into = c("procedure_text", "distal_screws"), sep = "This completed the lateral mass screws.") %>%
+    select(sequence_of_procedures, procedure_text) %>%
     mutate(procedure_text = paste("I then proceeded to place the lateral mass screws.", procedure_text)) %>%
     mutate(sequence_of_procedures = as.integer(100))
+  
   
   new_procedures_separated_df <- paragraph_string_split_df %>%
     filter(str_detect(string = procedure_text, pattern = "I then proceeded with the posterior spinal instrumentation") == FALSE) %>%
@@ -759,6 +769,7 @@ jh_make_lateral_mass_screws_after_decompression_op_note_function <- function(pro
   glue_collapse(x = final_revised_all_paragraphs_df$value, sep = "\n\n")
 }
 
+
 ##########################-----------------------   POSTERIOR OPERATIVE NOTE PARAGRAPHS  ----------------------############################
 ##########################-----------------------   POSTERIOR OPERATIVE NOTE PARAGRAPHS  ----------------------############################
 ##########################-----------------------   POSTERIOR OPERATIVE NOTE PARAGRAPHS  ----------------------############################
@@ -789,55 +800,6 @@ jh_make_lateral_mass_screws_after_decompression_op_note_function <- function(pro
 ##########################-----------------------   POSTERIOR OPERATIVE NOTE PARAGRAPHS  ----------------------############################
 
 
-jh_make_lateral_mass_screws_after_decompression_op_note_function <- function(procedure_paragraph_list){
-  op_note_df <- enframe(procedure_paragraph_list) %>%
-    unnest(value) %>%
-    mutate(order = row_number()) %>%
-    select(order, everything())
-  
-  
-  lateral_mass_screw_intro <- "For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a burr and the screw path drilled incrementally to the far cortex and the dorsal cortex was then tapped. "
-  
-  
-  op_paragraphs_df <- op_note_df %>%
-    filter(name == "procedures") %>%
-    select(order, everything())
-  
-  
-  paragraph_string_split_df <- tibble(procedure_text = str_split(op_paragraphs_df$value, pattern = "\n\n")) %>%
-    unnest(procedure_text) %>%
-    mutate(sequence_of_procedures = row_number()) %>%
-    select(sequence_of_procedures, everything())
-  
-  instrumentation_not_lateral_mass_df <- paragraph_string_split_df %>%
-    filter(str_detect(string = procedure_text, pattern = "I then proceeded with the posterior spinal instrumentation")) %>%
-    separate(col = procedure_text, into = c("procedure_text", "lateral_mass_screws"), sep = lateral_mass_screw_intro) %>%
-    mutate(procedure_text = paste(procedure_text, lateral_mass_screw_intro, "The length of the screws were recorded and bone wax was placed in the screw path. I waited to place the screws until after the decompression.")) %>%
-    select(-lateral_mass_screws)
-  
-  lateral_mass_screws_text_df <- paragraph_string_split_df %>%
-    filter(str_detect(string = procedure_text, pattern = "I then proceeded with the posterior spinal instrumentation")) %>%
-    separate(col = procedure_text, into = c("procedure_text", "lateral_mass_screws"), sep = lateral_mass_screw_intro) %>%
-    mutate(procedure_text = paste(procedure_text, lateral_mass_screw_intro, "The length of the screws were recorded and bone wax was placed in the screw path. I waited to place the screws until after the decompression.")) %>%
-    select(sequence_of_procedures, procedure_text = lateral_mass_screws) %>%
-    mutate(procedure_text = paste("I then proceeded to place the lateral mass screws.", procedure_text)) %>%
-    mutate(sequence_of_procedures = as.integer(100))
-  
-  new_procedures_separated_df <- paragraph_string_split_df %>%
-    filter(str_detect(string = procedure_text, pattern = "I then proceeded with the posterior spinal instrumentation") == FALSE) %>%
-    bind_rows(instrumentation_not_lateral_mass_df) %>%
-    bind_rows(lateral_mass_screws_text_df) %>%
-    arrange(sequence_of_procedures)
-  
-  
-  final_revised_all_paragraphs_df <- op_note_df %>%
-    filter(name == "procedures") %>%
-    mutate(value = glue_collapse(x = new_procedures_separated_df$procedure_text, sep = "\n\n")) %>%
-    bind_rows(op_note_df %>% filter(name != "procedures")) %>%
-    arrange(order)
-  
-  glue_collapse(x = final_revised_all_paragraphs_df$value, sep = "\n\n")
-}
 
 
 
@@ -1335,7 +1297,7 @@ op_note_technique_combine_statement <- function(object,
     object == "laminar_upgoing_hook" ~ glue("For upgoing laminar hooks, the inferior edge of the cranial lamina was identified and the plane between the lamina and ligamentum was developed and the upgoing hook is then placed within this plane, secured to the lamina aimed cranially {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
     object == "tp_hook" ~ glue("For transverse process hooks, the cranial edge of the transverse process was identified. A transverse process finder was used to develop the plane and a transverse process hook was placed securely into position along the superior edge of the transverse process. A transverse process hook was placed {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),  
     object == "c1_lateral_mass_screw" ~ glue("For C1 lateral mass screw placement, after the exposure of the C1-C2 joint space was complete, the medial and lateral edges of the C1 lateral masses were identified and the articular surfaces of the C1-C2 joint were decorticated to allow for fusion. A burr was then used to create a start point in the center of the lateral mass. The path was then drilled incrementally to the anterior cortex. X-ray was used to confirm the drill was just up to the posterior cortex of the C1 tubercle on the lateral X-ray, and the path was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
-    object == "lateral_mass_screw" ~ glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a burr and the screw path drilled incrementally to the far cortex and the dorsal cortex was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
+    object == "lateral_mass_screw" ~ glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a burr and the screw path drilled incrementally to the far cortex and the dorsal cortex was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}. This completed the lateral mass screws."), 
     object == "occipital_screw" ~ glue("An appropriately sized occipital plate was selected and was placed centered in the midline and just caudal to the external occipital protuberance, but cranial to the foramen magnum. The plate was held in place to identify the appropriate start points for the occipital screws. The occipital screws were drilled incrementally until the anterior cortex was penetrated. The length of the path was measured to acheive bicortical fixation. The screw paths were then tapped and the screws placed, securing the plate to the occiput."), 
     object == "pars_screw" ~ glue("For pars screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. {start_point_identification_text} Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming as dorsal as possible while not perforating the dorsal cortex of the pars. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
     object == "pedicle_screw" ~ glue("{screw_technique_statement} {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 

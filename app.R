@@ -4270,17 +4270,17 @@ server <- function(input, output, session) {
   ###### LEFT SUPPLEMENTAL ROD GEOM 
   ###### LEFT SUPPLEMENTAL ROD GEOM 
   
-  observeEvent(input$add_rods, {
-    # link_left_revision_rods_true_false
-    
-    if(nrow(left_revision_implants_reactive_list()$revision_implants_status_df)>0){
-      if(nrow(left_revision_implants_reactive_list()$revision_implants_status_df %>%
-              filter(remove_retain == "retain"))>1){
-        updateMaterialSwitch(session = session, inputId = "link_left_revision_rods_true_false", value = TRUE)
-      }
-    }
-  }
-  )
+  # observeEvent(input$add_rods, {
+  #   # link_left_revision_rods_true_false
+  #   
+  #   if(nrow(left_revision_implants_reactive_list()$revision_implants_status_df)>0){
+  #     if(nrow(left_revision_implants_reactive_list()$revision_implants_status_df %>%
+  #             filter(remove_retain == "retain"))>1){
+  #       updateMaterialSwitch(session = session, inputId = "link_left_revision_rods_true_false", value = TRUE)
+  #     }
+  #   }
+  # }
+  # )
   
   left_rod_list_pre_geoms <- reactiveValues()
   
@@ -7473,13 +7473,12 @@ server <- function(input, output, session) {
       
       ##########   postop transfusion threshold  #############
       if(length(input$postop_transfusion_threshold) > 0){
-        postop_plan$postop_transfusion_threshold_label <- paste("  - Postop Anemia: ", glue_collapse(input$postop_transfusion_threshold, sep = "; ", last = "; and "))
+        postop_plan$postop_transfusion_threshold_label <- paste("  - Postop Acute Blood Loss Anemia (expected): ", glue_collapse(input$postop_transfusion_threshold, sep = "; ", last = "; and "))
       }
       
       ##########   postop_imaging  #############
       if(length(input$postop_imaging) > 0){
         postop_plan$postop_imaging_label <- format_plan_list_function(plan_label = "Postop Imaging", input_vector = input$postop_imaging)
-        # postop_plan$postop_imaging_label <- paste("  - Postop Imaging: ", glue_collapse(input$postop_imaging, sep = "; ", last = "; and "))
       }
       ##########   postop_pain  #############
       if(length(input$postop_pain) >0){
