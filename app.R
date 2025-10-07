@@ -959,10 +959,10 @@ ui <- dashboardPage(skin = "black",
                                                             prettyCheckboxGroup(inputId = "posterior_biologics",
                                                                                 shape = "curve", outline = TRUE, status = "primary", width = "95%",bigger = TRUE,
                                                                                 label = NULL,
-                                                                                choices = c("Bone Marrow Aspirate",
-                                                                                            "Cell Based Allograft",
-                                                                                            "DBM", 
+                                                                                choices = c("DBM", 
                                                                                             "iFactor", 
+                                                                                            "PearlMatrix",
+                                                                                            "Cell Based Allograft",
                                                                                             "Other"
                                                                                 )
                                                             ),
@@ -994,16 +994,16 @@ ui <- dashboardPage(skin = "black",
                                                      ),
                                                      column(6,
                                                             conditionalPanel(
-                                                              condition = "input.posterior_biologics.indexOf('Bone Marrow Aspirate') > -1",
-                                                              jh_make_shiny_table_row_function(left_column_label = "Bone Marrow Aspirate Volume (cc):",bottom_margin = "5px",
+                                                              condition = "input.posterior_biologics.indexOf('PearlMatrix') > -1",
+                                                              jh_make_shiny_table_row_function(left_column_label = "PearlMatrix Volumne (cc):",bottom_margin = "5px",
                                                                                                left_column_percent_width = 60,
                                                                                                font_size = 16,
                                                                                                input_type = "numeric",
-                                                                                               input_id = "posterior_bone_marrow_aspirate_volume",
+                                                                                               input_id = "posterior_pearlmatrix_volume",
                                                                                                initial_value_selected = 0,
                                                                                                min = 0,
-                                                                                               max = 500,
-                                                                                               step = 5)
+                                                                                               max = 50,
+                                                                                               step = 1)
                                                             ),
                                                             conditionalPanel(
                                                               condition = "input.posterior_biologics.indexOf('Cell Based Allograft') > -1",
@@ -7778,7 +7778,7 @@ server <- function(input, output, session) {
       } 
       posterior_biologics_list <- list()
       posterior_biologics_list$posterior_allograft <- biologics_generate_list_item_function(biologic_volume = input$posterior_allograft_amount, biologic_label = "morselized allograft")
-      posterior_biologics_list$posterior_bone_marrow_aspirate <- biologics_generate_list_item_function(biologic_volume = input$posterior_bone_marrow_aspirate_volume, biologic_label = "bone marrow aspirate")
+      posterior_biologics_list$posterior_pearlmatrix <- biologics_generate_list_item_function(biologic_volume = input$posterior_pearlmatrix_volume, biologic_label = "PearlMatrix (P15)")
       posterior_biologics_list$posterior_cell_based_allograft <- biologics_generate_list_item_function(biologic_volume = input$posterior_cell_based_allograft_volume, biologic_label = "cell-based allograft")
       posterior_biologics_list$posterior_dbm <- biologics_generate_list_item_function(biologic_volume = input$posterior_dbm_volume, biologic_label = "demineralized bone matrix")
       posterior_biologics_list$posterior_ifactor <- biologics_generate_list_item_function(biologic_volume = input$posterior_ifactor_volume, biologic_label = "iFactor")
@@ -8703,7 +8703,7 @@ server <- function(input, output, session) {
                                                                        posterior_bmp_dose_reactive_input = posterior_bmp_dose_reactive(),
                                                                        posterior_bone_graft_input = input$posterior_bone_graft,
                                                                        posterior_allograft_amount_input = input$posterior_allograft_amount,
-                                                                       posterior_bone_marrow_aspirate_volume_input = input$posterior_bone_marrow_aspirate_volume,
+                                                                       posterior_pearlmatrix_volume_input = input$posterior_pearlmatrix_volume,
                                                                        posterior_cell_based_allograft_volume_input = input$posterior_cell_based_allograft_volume,
                                                                        posterior_dbm_volume_input = input$posterior_dbm_volume,
                                                                        posterior_ifactor_volume_input = input$posterior_ifactor_volume,
