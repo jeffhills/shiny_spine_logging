@@ -247,6 +247,7 @@ redcap_table_surgical_details_df_function <- function(all_objects_df_input = tib
                                                       posterior_biologics_input = c(),
                                                       posterior_bone_graft_input = "",
                                                       posterior_allograft_amount_input = "",
+                                                      posterior_pearlmatrix_volume_input = "",
                                                       posterior_bone_marrow_aspirate_volume_input = "",
                                                       posterior_cell_based_allograft_volume_input = "",
                                                       posterior_dbm_volume_input = "",
@@ -703,6 +704,10 @@ redcap_table_surgical_details_df_function <- function(all_objects_df_input = tib
           posterior_biologics_list$posterior_cell_based <- if_else("Cell Based Allograft" %in% posterior_biologics_input, glue("Cell Based Allograft ({posterior_cell_based_allograft_volume_input})cc"), glue("xx"))
           posterior_biologics_list$posterior_dbm <- if_else("DBM" %in% posterior_biologics_input, glue("DBM ({posterior_dbm_volume_input})cc"), glue("xx"))
           posterior_biologics_list$posterior_ifactor <- if_else("iFactor" %in% posterior_biologics_input, glue("iFactor ({posterior_ifactor_volume_input})cc"), glue("xx"))
+          posterior_biologics_list$posterior_pearlmatrix <- if_else("pearlmatrix" %in% str_to_lower(posterior_biologics_input), glue("PearlMatrix ({posterior_pearlmatrix_volume_input})cc"), glue("xx"))
+          
+          # posterior_pearlmatrix_volume_input
+          
           posterior_biologics_list$posterior_other_biologic <- if_else("Other" %in% posterior_biologics_input, glue("{posterior_biologics_other_input}"), glue("xx"))
           
           posterior_biologics_list <- discard(posterior_biologics_list, .p = ~ .x == "xx")
