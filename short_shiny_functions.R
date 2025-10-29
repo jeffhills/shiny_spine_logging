@@ -1088,6 +1088,7 @@ jh_make_shiny_table_column_function <- function(input_type,
 ##########################################  DETERMINE ANTERIOR FUSION LEVELS ##################### #####################
 
 fusion_levels_df_function <- function(all_objects_to_add_df){
+  
   if(any(all_objects_to_add_df$fusion == "yes")){
     fusion_range_df <- all_objects_to_add_df %>%
       filter(fusion == "yes") %>%

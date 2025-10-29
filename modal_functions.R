@@ -1023,7 +1023,9 @@ lateral_mass_screws_after_decompression_modal_function <- function(implant_objec
 ################################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 ###############################################    FUSION AND TECHNIQUE DETAILS MODAL  ######################################
 
-confirm_fusion_levels_and_technique_details_modal_box_function <- function(implants_placed = "no",
+confirm_fusion_levels_and_technique_details_modal_box_function <- function(objects_added_df = tibble(),
+                                                                           # implants_placed = "no",
+                                                                           # rods_placed = "no",
                                                                            procedure_approach = "",
                                                                            # fusion_levels_confirmed = c(),
                                                                            posterior_fusion_levels_confirmed = c(),
@@ -1045,6 +1047,29 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                                                                            posterior_approach,
                                                                            anterior_cervical_approach_details_checkbox = c(),
                                                                            posterior_additional_approach_details_checkbox = c()){
+  
+  # implants_placed <- "yes"
+  # rods_placed <- "no"
+  if(any(str_detect(objects_added_df$object, "screw|anterior_plate"))){
+    implants_placed <- "yes"
+  }else{
+    implants_placed <- "no"
+  }
+
+  if (!is.null(objects_added_df) && "object" %in% colnames(objects_added_df)) {
+    rods_placed <- if (
+      any(
+        stringr::str_detect(
+          objects_added_df$object[!stringr::str_detect(objects_added_df$object, "si_fusion")],
+          "screw"
+        ),
+        na.rm = TRUE
+      )
+    ) "yes" else "no"
+  } else {
+    rods_placed <- "no"
+  }
+
   
   modalDialog(title = "Confirm Surgical Details:", 
               size = "l",
@@ -1152,7 +1177,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                     )
                   },
                   hr(),
-                  if(implants_placed == "yes"){
+                  if(rods_placed == "yes"){
                     if(str_detect(procedure_approach, "posterior")){
                       prettyCheckboxGroup(inputId = "alignment_correction_method", 
                                           label = "Select any techniques for alignment correction:", 
@@ -1162,7 +1187,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                                           inline = FALSE)
                     }
                   },
-                  if(implants_placed == "yes" && str_detect(procedure_approach, "posterior")){
+                  if(rods_placed == "yes" && str_detect(procedure_approach, "posterior")){
                     conditionalPanel(condition = "input.alignment_correction_method.indexOf('Other') > -1",
                                      textInput(inputId = "alignment_correction_method_other", 
                                                label = "Enter 'Other' Method as a full sentence:", 

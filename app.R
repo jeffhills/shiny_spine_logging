@@ -2453,7 +2453,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$implants_complete,ignoreNULL = TRUE, ignoreInit = TRUE, {
     # updateTabItems(session = session, inputId = "tabs", selected = "implant_details")
-    print(paste("input$fusion_procedure_performed = ", input$fusion_procedure_performed))
+    # print(paste("input$fusion_procedure_performed = ", input$fusion_procedure_performed))
     if(input$fusion_procedure_performed == TRUE && input$add_rods == 0 && nrow(all_objects_to_add_list$objects_df %>% filter(str_detect(object, "screw|hook|wire")))>0){
       sendSweetAlert(
         session = session,
@@ -3230,12 +3230,12 @@ server <- function(input, output, session) {
                             
                           }else{
                             # geoms_list_posterior$geoms[object_added_reactive_df()$object_id] <- postorior_geoms[object_added_reactive_df()$object_id]
-                            print(toString(all_objects_to_add_list$objects_df$object))
+                            # print(toString(all_objects_to_add_list$objects_df$object))
                             geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
                                                                                              filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
                                                                                            plot_with_patterns = input$plot_with_patterns_true)
                             
-                            print("NOT OK")
+                            # print("NOT OK")
                           }
                         } 
                       }
@@ -5827,11 +5827,19 @@ server <- function(input, output, session) {
   ########################################### Build REACTIVE DATAFRAMES FOR IMPLANTS CONNECTING TO THE RODS ###########################################
   
   observeEvent(input$implants_complete, ignoreInit = TRUE, {
-    estimated_fusion_levels_posterior <- fusion_levels_df_function(all_objects_to_add_df = all_objects_to_add_list$objects_df %>% filter(approach == "posterior"))
+    estimated_fusion_levels_posterior_df <- fusion_levels_df_function(all_objects_to_add_df = all_objects_to_add_list$objects_df %>% filter(approach == "posterior"))
+    
+    if(all(str_detect(all_objects_to_add_list$objects_df$object, "si_fusion"))){
+      estimated_fusion_levels_posterior_df <- estimated_fusion_levels_posterior_df %>%
+        filter(level != "Sacro-iliac")
+    }
+    
+    
+    # all_objects_to_add_list$objects_df
     
     updatePrettyCheckboxGroup(session = session, 
                               inputId = "posterior_fusion_levels_confirmed", 
-                              selected = estimated_fusion_levels_posterior$level 
+                              selected = estimated_fusion_levels_posterior_df$level 
     )
   })
   
@@ -5876,11 +5884,11 @@ server <- function(input, output, session) {
   #####################   #####################   #########   RUN CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION ##################### #####################
   
   observeEvent(input$implants_complete, ignoreNULL = TRUE, ignoreInit = TRUE, once = TRUE, {
-    if(any(str_detect(all_objects_to_add_list$objects_df$object, "screw|anterior_plate"))){
-      implants_placed_yes_no <- "yes"  
-    }else{
-      implants_placed_yes_no <- "no" 
-    }
+    # if(any(str_detect(all_objects_to_add_list$objects_df$object, "screw|anterior_plate"))){
+    #   implants_placed_yes_no <- "yes"
+    # }else{
+    #   implants_placed_yes_no <- "no"
+    # }
     
     if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
       anterior_approach_yes_no <- "yes"  
@@ -5916,11 +5924,11 @@ server <- function(input, output, session) {
     
     
     showModal(
-      confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no,
+      confirm_fusion_levels_and_technique_details_modal_box_function(objects_added_df = all_objects_to_add_list$objects_df,
+                                                                     # implants_placed = "yes",
+                                                                     # rods_placed = "no",
                                                                      deformity_correction_choices = deformity_correction_techniques_vector,
                                                                      procedure_approach = input$approach_sequence,
-                                                                     # procedure_approach = procedure_approach_reactive(),
-                                                                     # fusion_levels_confirmed = fusion_levels_computed_reactive_input,
                                                                      anterior_approach = anterior_approach_yes_no,
                                                                      posterior_approach = posterior_approach_yes_no
       )
@@ -5933,11 +5941,11 @@ server <- function(input, output, session) {
   observeEvent(input$implants_complete, ignoreInit = TRUE, {
     if(input$implants_complete > 1){
       # print("wrong observe event observed")
-      if(any(str_detect(all_objects_to_add_list$objects_df$object, "screw|anterior_plate"))){
-        implants_placed_yes_no <- "yes"  
-      }else{
-        implants_placed_yes_no <- "no" 
-      }
+      # if(any(str_detect(all_objects_to_add_list$objects_df$object, "screw|anterior_plate"))){
+      #   implants_placed_yes_no <- "yes"  
+      # }else{
+      #   implants_placed_yes_no <- "no" 
+      # }
       
       if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
         anterior_approach_yes_no <- "yes"  
@@ -5950,6 +5958,7 @@ server <- function(input, output, session) {
       }else{
         posterior_approach_yes_no <- "no" 
       }
+      
       if(any(input$diagnosis_category == "deformity")){
         deformity_correction_techniques_vector <- c(
           "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place. ",
@@ -5970,7 +5979,8 @@ server <- function(input, output, session) {
       }
       
       showModal(
-        confirm_fusion_levels_and_technique_details_modal_box_function(implants_placed = implants_placed_yes_no, 
+        confirm_fusion_levels_and_technique_details_modal_box_function(objects_added_df = all_objects_to_add_list$objects_df,
+                                                                       # implants_placed = implants_placed_yes_no, 
                                                                        deformity_correction_choices = deformity_correction_techniques_vector,
                                                                        # procedure_approach = procedure_approach_reactive(),
                                                                        procedure_approach = input$approach_sequence,
@@ -5997,6 +6007,8 @@ server <- function(input, output, session) {
     }
   }
   )
+  
+  
   observeEvent(input$fusion_levels_technique_details_modal_complete_button, ignoreNULL = TRUE, ignoreInit = TRUE, {
     removeModal()
   }
@@ -8186,6 +8198,7 @@ server <- function(input, output, session) {
               ignoreInit = TRUE,
               ignoreNULL = TRUE
     )
+
   
   ##### Assemble and update the procedures performed section for POSTERIOR #########
   
