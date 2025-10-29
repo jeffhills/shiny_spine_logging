@@ -205,7 +205,7 @@ implant_levels_numbered_df <- all_object_ids_df %>%
   distinct() %>%
   arrange(vertebral_number)
 
-all_screw_coordinates_df <- fread("all_screw_coordinates_df.csv")
+all_screw_coordinates_df <- fread("all_screw_coordinates_df.csv")   ## this is really just used for the rods connectors section, I think
 
 all_cages_df <- all_object_ids_df %>%
   filter(

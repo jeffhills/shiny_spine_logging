@@ -1032,7 +1032,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                                                                            approach_open_mis = "Open",
                                                                            approach_robot_navigation = "NA",
                                                                            approach_specified_anterior = "Left-sided",
-                                                                           implant_start_point_method = "Implant start points were identified using anatomic landmarks.",
+                                                                           implant_technique_method = "Implant start points were identified using anatomic landmarks.",
                                                                            implant_position_confirmation_method = "Intraoperative fluoroscopy was used to confirm position of all implants.",
                                                                            deformity_correction_choices = c("The rods were secured into place with set screws. "), 
                                                                            alignment_correction_method = c("The rods were secured into place with set screws. "), 
@@ -1110,65 +1110,28 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(impla
                     )
                     },
                   hr(),
-                    if(posterior_approach == "yes"){
-                      jh_make_shiny_table_row_function(
-                        left_column_label = "Select any modality used:",
-                        input_type = "prettyRadioButtons",
-                        text_align = question_text_align,
-                        input_id = "approach_robot_navigation",
-                        left_column_percent_width = question_label_column_width,
-                        font_size = row_label_font_size,
-                        checkboxes_inline = TRUE,
-                        choices_vector = c("Fluoroscopy-guided",
-                                           "Navigated", 
-                                           "Robotic (using intraop CT)", 
-                                           "Robotic (using preop CT)", 
-                                           "NA"),
-                        initial_value_selected = approach_robot_navigation
-                      )
-                      },
-                  hr(),
-                  # if(anterior_approach == "yes"){
-                  #   jh_make_shiny_table_row_function(
-                  #     left_column_label = "ANTERIOR Approach was:",
-                  #     input_type = "prettyRadioButtons",
-                  #     text_align = question_text_align,
-                  #     input_id = "approach_specified_anterior",
-                  #     left_column_percent_width = question_label_column_width,
-                  #     font_size = row_label_font_size,
-                  #     checkboxes_inline = TRUE,
-                  #     choices_vector = c("Left-sided", 
-                  #                        "Right-sided",
-                  #                        "Paramedian",
-                  #                        "Lateral Transpsoas",
-                  #                        "Lateral Antepsoas",
-                  #                        "Thoracoabdominal",
-                  #                        "Thoracotomy",
-                  #                        "Transperitoneal",
-                  #                        "Retroperitoneal"),
-                  #     initial_value_selected = approach_specified_anterior
-                  #   )
-                  # },
-                  # hr(),
                   if(implants_placed == "yes"){
                     if(str_detect(procedure_approach, "posterior")){
-                    # if(procedure_approach == "posterior" | procedure_approach == "combined"){
-                    jh_make_shiny_table_row_function(
-                      input_type = "awesomeRadio",
-                      left_column_label = "Method for identifying screw start point:",
-                      text_align = question_text_align,
-                      input_id = "implant_start_point_method",
-                      left_column_percent_width = question_label_column_width,
-                      font_size = row_label_font_size,
-                      checkboxes_inline = FALSE,
-                      choices_vector = c(
-                        "Implant start points were identified using anatomic landmarks.",
-                        "Intraoperative fluoroscopy and pedicle markers were used to confirm screw start points..", 
-                        "Intraoperative fluoroscopy was used to identify and confirm implant start points.",
-                        "Intraoperative navigation was used for identifying start points.",
-                        "NA"),
-                      initial_value_selected = implant_start_point_method
-                    )
+                      prettyCheckboxGroup(inputId = "implant_technique_method", 
+                                          label = "Modalities used for placing screws:", 
+                                          choices = list(
+                                            "Anatomic landmarks and free-hand technique" = "free_hand",
+                                            "Fluoroscopy for percutaneous screw placement" = "fluoro_perc",
+                                            "Fluoroscopy with pedicle markers" = "fluoro_pedicle_markers",
+                                            "Navigation" = "navigation",
+                                            "Navigation was used for the upper construct screws" = "navigation_upper_screws",
+                                            "Navigation was used for the lower construct screws" = "navigation_lower_screws",
+                                            "Navigation was used for select screws" = "navigation_portion_screws",
+                                            "Navigation with robotic guidance (using intraoperative CT)" = "nav_robot_intra_ct",
+                                            "Navigation with robotic guidance (using preoperative CT)" = "nav_robot_pre_ct",
+                                            "3D navigation with surface mapping (e.g., 7D)" = "nav_3d_surface_map",
+                                            "S2AI or iliac screws placed using navigation guidance" = "nav_pelvic_screws",
+                                            "Not applicable" = "na"
+                                          ),
+                                          selected = implant_technique_method, 
+                                          status = "primary",
+                                          inline = FALSE
+                                          )
                     }
                   },
                   hr(),
@@ -1521,6 +1484,7 @@ addition_surgical_details_modal_box_function <-
                            choices_vector = c("No", 
                                               "Triggered EMG was used to test screws and all responses were above 10mA.", 
                                               "Triggered EMG was used to test screws and all responses were above 20mA.", 
+                                              "Triggered EMG was used to test screws and all responses were above ***mA.", 
                                               "Triggered EMG was used to test screws and showed a response of *** at ***."),
                            checkboxes_inline = FALSE,
                            initial_value_selected = triggered_emg
@@ -1696,7 +1660,6 @@ additional_procedure_options_vector <- c("Robotic Assisted Spine Surgery",
                                          "Open treatment of vertebral fracture",
                                          "Open treatment of posterior pelvic ring fracture/dislocation (CPT 27218)",
                                          "Intraoperative use of microscope for microdissection",
-                                         "Use of stereotactic navigation system for screw placement",
                                          "Application of Cranial Tongs",
                                          "Application of Cranial Tongs using Mayfield head holder",
                                          "Application of Halo",

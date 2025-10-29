@@ -988,6 +988,14 @@ S2AI,27,body,posterior,implant,yes,pelvic_screw_1,left,0.466,0.166,yes,no,yes,,S
 S2AI_2,27.5,body,posterior,implant,yes,pelvic_screw_2,left,0.467,0.158,yes,no,yes,,S2AI_left_pelvic_screw_2_1
 S2AI,27,body,posterior,implant,yes,pelvic_screw_1,right,0.534,0.166,yes,no,yes,,S2AI_right_pelvic_screw_1_1
 S2AI_2,27.5,body,posterior,implant,yes,pelvic_screw_2,right,0.533,0.158,yes,no,yes,,S2AI_right_pelvic_screw_2_1
+SI,25.5,body,posterior,implant,yes,si_fusion_screw_1,left,0.45,0.195,yes,no,no,,si_left_si_fusion_screw_1_1
+SI,25.5,body,posterior,implant,yes,si_fusion_screw_2,left,0.45,0.185,yes,no,no,,si_left_si_fusion_screw_2_1
+SI,25.5,body,posterior,implant,yes,si_fusion_screw_3,left,0.45,0.165,yes,no,no,,si_left_si_fusion_screw_3_1
+SI,25.5,body,posterior,implant,yes,si_fusion_screw_4,left,0.45,0.14,yes,no,no,,si_left_si_fusion_screw_4_1
+SI,25.5,body,posterior,implant,yes,si_fusion_screw_1,right,0.55,0.195,yes,no,no,,si_right_si_fusion_screw_1_1
+SI,25.5,body,posterior,implant,yes,si_fusion_screw_2,right,0.55,0.185,yes,no,no,,si_right_si_fusion_screw_2_1
+SI,25.5,body,posterior,implant,yes,si_fusion_screw_3,right,0.55,0.165,yes,no,no,,si_right_si_fusion_screw_3_1
+SI,25.5,body,posterior,implant,yes,si_fusion_screw_4,right,0.55,0.14,yes,no,no,,si_right_si_fusion_screw_4_1
 C1-C2,1.5,interspace,posterior,decompression,no,sublaminar_decompression,central,0.5,0.8785,no,no,no,,C1-C2_central_sublaminar_decompression_1
 C2-C3,2.5,interspace,posterior,decompression,no,sublaminar_decompression,central,0.5,0.8585,no,no,no,,C2-C3_central_sublaminar_decompression_1
 C3-C4,3.5,interspace,posterior,decompression,no,sublaminar_decompression,central,0.5,0.8405,no,no,no,,C3-C4_central_sublaminar_decompression_1

@@ -91,6 +91,12 @@ jh_make_op_note_test_df_function <- function(lumbar_pso_example = FALSE, posteri
     selected_objects_df <- selected_objects_df %>%
       mutate(direction = " ")
   }
+  
+  if(any(str_detect(selected_objects_df$object, "screw"))){
+    selected_objects_df <- selected_objects_df %>%
+      mutate(screw_size_type = if_else(object == "pedicle_screw", "5.5x50mm Polyaxial", screw_size_type)) %>%
+      mutate(screw_size_type = if_else(str_detect(object, "pelvic_screw"), "8.5x100mm Polyaxial", screw_size_type))
+  }
 
   return(selected_objects_df)
 }
@@ -134,6 +140,7 @@ extract_levels_function <- function(input_df){
 jh_filter_posterior_implants_by_side_function <- function(all_objects_df, side_to_filter){
   all_objects_df %>%
     filter(approach == "posterior", side == side_to_filter, str_detect(object, "screw|hook|wire"))%>%
+    filter(str_detect(object, "si_fusion") == FALSE) %>%
     select(level, vertebral_number, x, y, side, object) %>%
     arrange(y) 
 }
@@ -301,6 +308,7 @@ jh_get_vertebral_number_function <- function(level_to_get_number){
       # level_to_get_number == 'L6-S1' ~ 24.75,
       level_to_get_number == 'S1' ~ 25,
       level_to_get_number == "Sacro-iliac" ~ 25.5,
+      level_to_get_number == "SI" ~ 25.5,
       level_to_get_number == 'Iliac' ~ 26,
       level_to_get_number == 'Iliac 2' ~ 26.5,
       level_to_get_number == 'Iliac_2' ~ 26.5,

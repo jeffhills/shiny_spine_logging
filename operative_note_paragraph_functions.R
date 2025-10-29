@@ -30,6 +30,12 @@ procedure_classifier_type_df <- tribble(~object_name, ~procedure_label, ~paragra
                                         'pelvic_screw', 'Pelvic instrumentation', 'combine',
                                         'pelvic_screw_1', 'Pelvic instrumentation', 'combine',
                                         'pelvic_screw_2', 'Pelvic instrumentation', 'combine',
+                                        
+                                        'si_fusion_screw_1', 'SI Fusion', 'combine',
+                                        'si_fusion_screw_2', 'SI Fusion', 'combine',
+                                        'si_fusion_screw_3', 'SI Fusion', 'combine',
+                                        'si_fusion_screw_4', 'SI Fusion', 'combine',
+                                        
                                         'reinsertion_screw', 'Reinsertion of spinal fixation', 'combine',
                                         'tether', 'Spinous process posterior tethering/wiring', 'combine',
                                         'costovertebral_approach', 'Costovertebral approach with decompression of the spinal cord', 'distinct',
@@ -653,6 +659,7 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
     unnest(levels) %>%
     mutate(procedure_performed_statement = glue("{procedure_class} at {levels}")) %>%
     mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation", paste("Instrumentation of the Pelvis with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
+    mutate(procedure_performed_statement = if_else(procedure_class == "SI Fusion", paste("SI Fusion with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
     select(procedure_class, procedure_performed_statement)
   
   added_procedures_df <- tibble(procedure_performed_statement = additional_procedures_performed_vector) 
@@ -808,9 +815,9 @@ jh_make_lateral_mass_screws_after_decompression_op_note_function <- function(pro
 op_note_procedure_paragraphs_function <- function(objects_added_df, 
                                                   revision_decompression_vector = c(), 
                                                   approach_technique = "Na", 
-                                                  image_guidance = "Na", 
+                                                  # image_guidance = "Na", 
                                                   neuromonitoring_emg_statement = "No", 
-                                                  implant_start_point_method = "NA",
+                                                  implant_technique_method = "NA",
                                                   implant_confirmation_method = "NA"){
   
   if("implant_statement" %in% names(objects_added_df) == FALSE){ 
@@ -824,7 +831,7 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
   }
   
   
-  
+  #### NOW WE CREATE A TIBBLE THAT HAS EACH PARAGRAPH'S DATA NESTED into 1 ROW. IE, each row represents a new paragraph
   if(length(revision_decompression_vector) > 0){
     if(nrow(objects_added_df)>0){
       df_for_paragraphs <- objects_added_df %>%
@@ -890,8 +897,8 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
   # THIS CREATES A DATAFRAME WITH NESTED DATAFRAMES.... full dataframe names = 'procedure_category, procedures_combine, nested_data'
   # nested df names ('nested_data') = 'object, level, vertebral_number, side, implant_statement, screw_size_type'
   
-  if(is.na(implant_start_point_method) | is.null(implant_start_point_method)){
-    implant_start_point_method <- "NA"
+  if(is.na(implant_technique_method) | is.null(implant_technique_method)){
+    implant_technique_method <- "NA"
   }
   if(is.na(implant_confirmation_method) | is.null(implant_confirmation_method)){
     implant_confirmation_method <- "NA"
@@ -899,9 +906,9 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
   
   paragraph_df_prepped_df <- df_for_paragraphs %>%
     mutate(approach_technique_input = approach_technique,
-           image_guidance_technique_input = image_guidance[1], 
+           # image_guidance_technique_input = image_guidance[1], 
            neuromonitoring_emg_statement_input = neuromonitoring_emg_statement, 
-           method_implant_start_point = implant_start_point_method, 
+           method_implant_start_point = implant_technique_method, 
            method_implant_confirmation = implant_confirmation_method)
     
     if(any(df_for_paragraphs$procedure_category == "pelvic instrumentation") & any(df_for_paragraphs$procedure_category == "posterior spinal instrumentation")){
@@ -918,18 +925,18 @@ procedures_op_full_df <-  paragraph_df_prepped_df %>%
                                          ..2 = nested_data,
                                          ..3 = procedures_combine,
                                          ..4 = approach_technique_input,
-                                         ..5 = image_guidance_technique_input,
-                                         ..6 = neuromonitoring_emg_statement_input,
-                                         ..7 = method_implant_start_point,
-                                         ..8 = method_implant_confirmation),
+                                         # ..5 = image_guidance_technique_input,
+                                         ..5 = neuromonitoring_emg_statement_input,
+                                         ..6 = method_implant_start_point,
+                                         ..7 = method_implant_confirmation),
                                     .f = ~create_full_paragraph_statement_function(procedure_paragraph_intro = ..1,
                                                                                    df_with_levels_object_nested = ..2,
                                                                                    paragraphs_combined_or_distinct = ..3,
                                                                                    approach_technique = ..4,
-                                                                                   image_guidance = ..5,
-                                                                                   neuromonitoring_emg = ..6,
-                                                                                   implant_start_point_method = ..7,
-                                                                                   implant_confirmation_method = ..8))) %>%
+                                                                                   # image_guidance = ..5,
+                                                                                   neuromonitoring_emg = ..5,
+                                                                                   implant_technique_method = ..6,
+                                                                                   implant_confirmation_method = ..7))) %>%
   select(procedure_category, procedures_combine, procedure_statement) %>%
   unnest(procedure_statement)
 
@@ -948,8 +955,8 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
                                                      df_with_levels_object_nested, 
                                                      paragraphs_combined_or_distinct, 
                                                      approach_technique = "NA", 
-                                                     image_guidance = "NA", 
-                                                     implant_start_point_method = "NA",
+                                                     # image_guidance = "NA", 
+                                                     implant_technique_method = "NA",
                                                      implant_confirmation_method = "NA",
                                                      neuromonitoring_emg = "No"){
   
@@ -961,26 +968,41 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
     df_with_levels_object_nested <- df_with_levels_object_nested %>%
       unnest(data)
   }
-  
-  # if("data" %in% names(df_with_levels_object_nested[[1]])){
-  #   df_with_levels_object_nested <- df_with_levels_object_nested[[1]] %>%
-  #     unnest(data)
-  # }
+
   
   if(paragraphs_combined_or_distinct == "combine"){
     
     #IMAGING MODALITY USED FOR STARTPOINTS?:
-    if(procedure_paragraph_intro == "posterior spinal instrumentation" && str_length(implant_start_point_method) > 5){
-      implant_start_point_method_text <- implant_start_point_method
-    }else{
-      implant_start_point_method_text <- ""
-    }
+    # if(procedure_paragraph_intro == "posterior spinal instrumentation" && str_length(implant_technique_method) > 5){
+    #   implant_technique_method_text <- implant_technique_method
+    # }else{
+    #   implant_technique_method_text <- ""
+    # }
+    implant_technique_method_text <- if_else(
+      procedure_paragraph_intro == "posterior spinal instrumentation" & str_length(implant_technique_method) > 5,
+      implant_technique_method,
+      ""
+    )
     
-    if(any(str_detect(df_with_levels_object_nested$object, "pelvic_screw"))){
-      df_with_levels_object_nested <- df_with_levels_object_nested %>%
-        arrange(side) %>%
-        mutate(object = "pelvic_screw")
-    }
+    ## 2) Normalize pelvic screw labeling (only change pelvic screws, not every row)
+    df_with_levels_object_nested <- df_with_levels_object_nested %>%
+      arrange(side) %>%
+      mutate(object = if_else(str_detect(object, "pelvic_screw"), "pelvic_screw", object))%>%
+      mutate(object = if_else(str_detect(object, "si_fusion"), "si_fusion_screw", object))
+    
+    # if(any(str_detect(df_with_levels_object_nested$object, "pelvic_screw"))){
+    #   df_with_levels_object_nested <- df_with_levels_object_nested %>%
+    #     arrange(side) %>%
+    #     mutate(object = "pelvic_screw")
+    # }
+    
+    # print(dput(df_with_levels_object_nested %>%
+    #              # mutate(object = if_else(str_detect(object, "pelvic_screw"), "pelvic_screw", object)) %>%
+    #              group_by(object) %>%
+    #              nest() %>% 
+    #              mutate(object_levels_side_df = data)))
+    
+    # print(dput(df_with_levels_object_nested))
     
     df_with_statement <- df_with_levels_object_nested %>%
       # mutate(object = if_else(str_detect(object, "pelvic_screw"), "pelvic_screw", object)) %>%
@@ -989,18 +1011,18 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       mutate(object_levels_side_df = data) %>%  ### this creates a dataframe with only two columns: 'object' and 'object_levels_side_df'. #The nested dataframe has columns: level, vertebral_number, side, implant_statement, screw_size_type
       select(-data) %>%
       mutate(approach = approach_technique, 
-             image_guidance_used = image_guidance, 
-             implant_start_point_method = implant_start_point_method_text) %>%
+             # image_guidance_used = image_guidance, 
+             implant_technique_method = implant_technique_method_text) %>%
       mutate(tech_statement = pmap(list(..1 = object,
                                         ..2 = object_levels_side_df, 
                                         ..3 = approach, 
-                                        ..4 = image_guidance_used,
-                                        ..5 = implant_start_point_method),
+                                        # ..4 = image_guidance_used,
+                                        ..4 = implant_technique_method),
                                    .f = ~op_note_technique_combine_statement(object = ..1,
                                                                              levels_side_df = ..2, 
                                                                              approach_technique = ..3, 
-                                                                             image_guidance = ..4, 
-                                                                             implant_start_point_identification = ..5)
+                                                                             # image_guidance = ..4, 
+                                                                             implant_technique_method = ..4)
       )
       ) %>%
       select(object, tech_statement) %>%
@@ -1013,56 +1035,100 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       distinct() %>%
       arrange(vertebral_number)
     
+    levels_txt <- glue::glue_collapse(unique(df_levels$level), sep = ", ", last = ", and ")
     
     ## EMG USED:
-    if(neuromonitoring_emg != "No"){
-      emg_statement <- neuromonitoring_emg
-    }else{
-      emg_statement <- ""
-    }
+    # if(neuromonitoring_emg != "No"){
+    #   emg_statement <- neuromonitoring_emg
+    # }else{
+    #   emg_statement <- ""
+    # }
+    emg_statement <- if_else(neuromonitoring_emg != "No", neuromonitoring_emg, "")
     
-    if(procedure_paragraph_intro == "posterior spinal instrumentation" | procedure_paragraph_intro == "pelvic instrumentation"){
-    # if(procedure_paragraph_intro %in% c("posterior spinal instrumentation", "pelvic instrumentation")){
-      if(str_length(implant_confirmation_method) > 6){
-        implant_confirmation_method_text <- implant_confirmation_method
-      }else{
-        implant_confirmation_method_text <- ""
-      }
-    }else{
-      implant_confirmation_method_text <- ""
-    }
+    # if(procedure_paragraph_intro == "posterior spinal instrumentation" | procedure_paragraph_intro == "pelvic instrumentation"){
+    # # if(procedure_paragraph_intro %in% c("posterior spinal instrumentation", "pelvic instrumentation")){
+    #   if(str_length(implant_confirmation_method) > 6){
+    #     implant_confirmation_method_text <- implant_confirmation_method
+    #   }else{
+    #     implant_confirmation_method_text <- ""
+    #   }
+    # }else{
+    #   implant_confirmation_method_text <- ""
+    # }
+    implant_confirmation_method_text <- if_else(
+      procedure_paragraph_intro %in% c("posterior spinal instrumentation", "pelvic instrumentation", "si fusion") &
+        str_length(implant_confirmation_method) > 6,
+      implant_confirmation_method,
+      ""
+    )
     
-    ## Completion statement:
-    if(procedure_paragraph_intro == "posterior spinal instrumentation"){
-      procedure_completion <- glue("{implant_confirmation_method_text} {emg_statement} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
-    }else if(procedure_paragraph_intro == "incision and drainage"){
-      procedure_completion <- glue("This completed the {procedure_paragraph_intro}.")
-    }else if(procedure_paragraph_intro == "inferior facetectomies"){
-      procedure_completion <- glue(" ")
-    }else if(procedure_paragraph_intro == "posterior column osteotomy" & length(unique(x = df_levels$level))>1){
-      procedure_completion <- glue("This completed the posterior column osteotomies at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
-    }else if(procedure_paragraph_intro == "reinsertion of spinal fixation"){
-      procedure_completion <- glue("This completed the reinsertion of spinal fixation at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
-    }else if(procedure_paragraph_intro == "pelvic instrumentation"){
-      procedure_completion <- glue("{implant_confirmation_method_text} This completed the instrumentation of the pelvis.")
-    }else{
-      procedure_completion <- glue("This completed the {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
-    }
+    ## 6) Completion sentence via case_when (handles special cases first, then default)
+    procedure_completion <- case_when(
+      procedure_paragraph_intro == "posterior spinal instrumentation" ~
+        glue("{implant_confirmation_method_text} {emg_statement} This partially completed the {procedure_paragraph_intro} of {levels_txt}."),
+      procedure_paragraph_intro == "incision and drainage" ~
+        glue("This completed the {procedure_paragraph_intro}."),
+      procedure_paragraph_intro == "inferior facetectomies" ~
+        glue(" "),
+      procedure_paragraph_intro == "posterior column osteotomy" & length(unique(df_levels$level)) > 1 ~
+        glue("This completed the posterior column osteotomies at {levels_txt}."),
+      procedure_paragraph_intro == "reinsertion of spinal fixation" ~
+        glue("This completed the reinsertion of spinal fixation at {levels_txt}."),
+      procedure_paragraph_intro == "pelvic instrumentation" ~
+        glue("{implant_confirmation_method_text} This completed the instrumentation of the pelvis."),
+      procedure_paragraph_intro == "si fusion" ~
+        glue("{implant_confirmation_method_text} This completed the fusion of the SI joint with transfixation device."),
+      TRUE ~
+        glue("This completed the {procedure_paragraph_intro} at {levels_txt}.")
+    )
     
-    # print(paste("Made it to 1064 for ", procedure_paragraph_intro))
+    ## 7) Opening sentence (statement) via case_when; default falls back to your original
+    statement <- case_when(
+      procedure_paragraph_intro == "pelvic instrumentation" ~
+        glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}"),
+      procedure_paragraph_intro == "inferior facetectomies" ~
+        glue("I first performed {procedure_paragraph_intro} at {levels_txt}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')}"),
+      procedure_paragraph_intro == "posterior column osteotomy" & length(unique(df_levels$level)) > 1 ~
+        glue("I then proceeded with posterior column osteotomies at {levels_txt}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}"),
+      procedure_paragraph_intro == "reinsertion of spinal fixation" ~
+        glue("I reinserted screws at {levels_txt}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}"),
+      procedure_paragraph_intro == "si fusion" ~
+        glue("I then proceeded with the SI fusion with fixation device. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}"),
+      TRUE ~
+        glue("I then proceeded with the {procedure_paragraph_intro} at {levels_txt}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
+    )
     
-    ##CREATE THE STATEMENT
-    if(procedure_paragraph_intro == "pelvic instrumentation"){
-      statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
-    }else if(procedure_paragraph_intro == "inferior facetectomies"){
-      statement <- glue("I first performed {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')}")
-    }else if(procedure_paragraph_intro == "posterior column osteotomy" & length(unique(x = df_levels$level))>1){
-      statement <- glue("I then proceeded with posterior column osteotomies at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
-    }else if(procedure_paragraph_intro == "reinsertion of spinal fixation"){
-      statement <- glue("I reinserted screws at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
-    }else{
-      statement <- glue("I then proceeded with the {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
-    }
+    # ## Completion statement:
+    # if(procedure_paragraph_intro == "posterior spinal instrumentation"){
+    #   procedure_completion <- glue("{implant_confirmation_method_text} {emg_statement} This partially completed the {procedure_paragraph_intro} of {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    # }else if(procedure_paragraph_intro == "incision and drainage"){
+    #   procedure_completion <- glue("This completed the {procedure_paragraph_intro}.")
+    # }else if(procedure_paragraph_intro == "inferior facetectomies"){
+    #   procedure_completion <- glue(" ")
+    # }else if(procedure_paragraph_intro == "posterior column osteotomy" & length(unique(x = df_levels$level))>1){
+    #   procedure_completion <- glue("This completed the posterior column osteotomies at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    # }else if(procedure_paragraph_intro == "reinsertion of spinal fixation"){
+    #   procedure_completion <- glue("This completed the reinsertion of spinal fixation at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    # }else if(procedure_paragraph_intro == "pelvic instrumentation"){
+    #   procedure_completion <- glue("{implant_confirmation_method_text} This completed the instrumentation of the pelvis.")
+    # }else{
+    #   procedure_completion <- glue("This completed the {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}.")
+    # }
+    # 
+    # # print(paste("Made it to 1064 for ", procedure_paragraph_intro))
+    # 
+    # ##CREATE THE STATEMENT
+    # if(procedure_paragraph_intro == "pelvic instrumentation"){
+    #   statement <- glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
+    # }else if(procedure_paragraph_intro == "inferior facetectomies"){
+    #   statement <- glue("I first performed {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')}")
+    # }else if(procedure_paragraph_intro == "posterior column osteotomy" & length(unique(x = df_levels$level))>1){
+    #   statement <- glue("I then proceeded with posterior column osteotomies at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
+    # }else if(procedure_paragraph_intro == "reinsertion of spinal fixation"){
+    #   statement <- glue("I reinserted screws at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
+    # }else{
+    #   statement <- glue("I then proceeded with the {procedure_paragraph_intro} at {glue_collapse(unique(x = df_levels$level), sep = ', ', last = ', and ')}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}")
+    # }
    
     # print(paste("Made it to 1079 for ", procedure_paragraph_intro))
     
@@ -1095,137 +1161,757 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
 
 
 #############-----------------------   Building Paragraphs that are combined (e.g. pedicle screws, decompressions) ----------------------###############
+# op_note_technique_combine_statement <- function(
+#     object,
+#     levels_side_df,
+#     approach_technique = "Open",
+#     image_guidance = "NA",
+#     implant_technique_method = "NA"
+# ) {
+#   
+#   # -------------------- small utilities --------------------
+#   .nzchr     <- function(x) ifelse(length(x) == 0 || all(is.na(x)) || all(x == ""), "", x)
+#   .a_an      <- function(x) ifelse(str_detect(str_to_lower(x), "^[aeiou]"), "an", "a")
+#   .collapse  <- function(x, sep = ", ", last = " and ") {
+#     x <- x[!is.na(x) & x != ""]
+#     if (!length(x)) return("")
+#     if (length(x) == 1) return(x)
+#     paste(paste0(x[-length(x)], collapse = sep), x[length(x)], sep = last)
+#   }
+#   .pluralize <- function(n, singular, plural = paste0(singular, "s")) ifelse(n == 1, singular, plural)
+#   
+#   `%||%` <- function(x, y) if (is.null(x) || length(x) == 0 || all(is.na(x))) y else x
+#   
+#   .canon_key <- function(x) {
+#     k <- stringr::str_to_lower(stringr::str_squish(x %||% ""))
+#     if (k %in% c("", "na", "n/a", "none")) return("none")
+#     k
+#   }
+#   
+#   .safe_pick <- function(map, key, default = "") {
+#     k  <- .canon_key(key)
+#     nm <- stringr::str_to_lower(names(map))
+#     idx <- match(k, nm)
+#     if (!is.na(idx)) return(map[[idx]])
+#     # fuzzy fallbacks
+#     if (stringr::str_detect(k, "pedicle.*marker|marker")) return(map[[which(nm == "fluoroscopy and pedicle markers")]])
+#     if (stringr::str_detect(k, "fluoro"))                 return(map[[which(nm == "fluoroscopy was used to identify")]])
+#     if (stringr::str_detect(k, "nav|stealth|7d|arcas"))   return(map[[which(nm == "navigation")]])
+#     default
+#   }
+#   
+#   .collapse_parts <- function(x) {
+#     v <- unlist(purrr::compact(x), use.names = FALSE)    # drops NULLs
+#     v <- v[!is.na(v) & v != ""]                          # drop NA / empty
+#     if (!length(v)) return("")
+#     glue::glue_collapse(v, sep = " ")
+#   }
+#   
+#   # -------------------- normalize input --------------------
+#   if (ncol(levels_side_df) == 1 && "data" %in% names(levels_side_df)) {
+#     levels_side_df <- tidyr::unnest(levels_side_df, data)
+#   }
+#   levels_side_df <- levels_side_df %>%
+#     mutate(
+#       across(where(is.factor), as.character),
+#       across(where(is.character), ~str_squish(.x))
+#     )
+#   
+#   # Ensure required columns exist (defensive)
+#   req_cols <- c("level", "side", "screw_size_type")
+#   for (nm in req_cols) if (!nm %in% names(levels_side_df)) levels_side_df[[nm]] <- NA_character_
+#   
+#   # Single place to compute vertebral order & clean duplicates
+#   levels_side_df <- levels_side_df %>%
+#     mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+#     arrange(vertebral_number, side, level)
+#   
+#   # -------------------- start-point identification text --------------------
+#   start_point_identification_text <- case_when(
+#     str_detect(implant_technique_method, "NA") ~ "",
+#     str_detect(implant_technique_method, "anatomic landmarks") ~ "",
+#     str_detect(implant_technique_method, "fluoroscopy and pedicle markers") ~ "...",
+#     str_detect(implant_technique_method, "fluoroscopy was used to identify") ~ "...",
+#     str_detect(implant_technique_method, "navigation") ~ "..."
+#   )
+#   
+#   start_point_ident_map <- c(
+#     "none"                                 = "",
+#     "anatomic landmarks"                   = "",
+#     "fluoroscopy and pedicle markers"      = "Pedicle markers were then placed and intraoperative fluoroscopy was used to confirm screw start points and make any necessary adjustments. ",
+#     "fluoroscopy was used to identify"     = "Intraoperative fluoroscopy was used to confirm screw start points and trajectory. ",
+#     "navigation"                           = "Intraoperative Navigation was used for placing screws. "
+#   )
+#   start_point_identification_text <- .safe_pick(start_point_ident_map, implant_technique_method, default = "")
+#   
+#   
+#   
+#   # -------------------- image guidance screw technique --------------------
+#   screw_tech_map <- list(
+#     "na"                         = glue("For pedicle screws, ... {start_point_identification_text} ..."),
+#     "fluoroscopy-guided"         = "For pedicle screws, the TP was palpated ...",
+#     "navigated"                  = "An intraoperative CT scan was obtained ...",
+#     "robotic (using intraop ct)" = "Pedicle screws were placed with robotic assistance. ... 3D spin ...",
+#     "robotic (using preop ct)"   = "Pedicle screws were placed with robotic assistance. ... merged with the preoperative CT ..."
+#   )
+#   screw_technique_statement <- purrr::pluck(
+#     screw_tech_map,
+#     .canon_key(image_guidance),
+#     .default = screw_tech_map[["na"]]
+#   )
+#   
+#   
+#   
+#   
+#   # SI-specific start-point identification text (vendor-agnostic, non-pedicle phrasing)
+#   si_start_point_ident_map <- c(
+#     "none"                                 = "",
+#     "anatomic landmarks"                   = "",
+#     "fluoroscopy and pedicle markers"      = "Guide pins were then placed and intraoperative fluoroscopy (AP, inlet, and outlet) was used to confirm entry points and make any necessary adjustments. ",
+#     "fluoroscopy was used to identify"     = "Intraoperative fluoroscopy (AP, inlet, and outlet) was used to confirm entry points and trajectories. ",
+#     "navigation"                           = "Intraoperative navigation was used to plan trajectories and confirm entry points. "
+#   )
+#   si_start_point_identification_text <- .safe_pick(si_start_point_ident_map, implant_technique_method, default = "")
+#   
+#   
+#   
+#   # -------------------- helper: screw statements (non-pelvic) --------------------
+#   build_screw_statements <- function(df) {
+#     if (!stringr::str_detect(object, "screw") || identical(object, "pelvic_screw")) {
+#       return(tibble::tibble(screw_statement = " "))
+#     }
+#     
+#     wide <- df %>%
+#       dplyr::filter(!is.na(side), side %in% c("left", "right")) %>%
+#       dplyr::mutate(
+#         side = factor(side, levels = c("left", "right")),
+#         unilateral = stringr::str_to_lower(glue::glue(
+#           "{ifelse(stringr::str_detect(stringr::str_to_lower(screw_size_type), '^[aeiou]'), 'an', 'a')} {screw_size_type} screw was inserted on the {side}"
+#         ))
+#       ) %>%
+#       dplyr::select(level, side, unilateral) %>%
+#       tidyr::pivot_wider(
+#         names_from  = side,
+#         values_from = unilateral,
+#         values_fn   = list(unilateral = ~ paste(.x, collapse = " and "))
+#       )
+#     
+#     # --- ensure columns exist even if a whole side is missing ---
+#     if (!"left"  %in% names(wide)) wide$left  <- NA_character_
+#     if (!"right" %in% names(wide)) wide$right <- NA_character_
+#     
+#     # If there were no rows at all (e.g., df empty or all sides filtered out)
+#     if (!nrow(wide)) return(tibble::tibble(screw_statement = " "))
+#     
+#     out <- wide %>%
+#       dplyr::transmute(
+#         level,
+#         screw_statement = dplyr::case_when(
+#           !is.na(left)  & !is.na(right) ~ glue::glue("At {level}, {left} and {right}."),
+#           is.na(left)  & !is.na(right) ~ glue::glue("At {level}, {right}."),
+#           !is.na(left)  &  is.na(right) ~ glue::glue("At {level}, {left}."),
+#           TRUE                           ~ ""
+#         ),
+#         vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)
+#       ) %>%
+#       dplyr::arrange(vertebral_number)
+#     
+#     if (!nrow(out)) tibble::tibble(screw_statement = " ") else out
+#   }
+#   
+#   
+#   
+#   screw_statements_df <- build_screw_statements(levels_side_df)
+#   
+#   
+#   # -------------------- SI fusion block --------------------
+#   si_guidance_map <- list(
+#     "na"                         = paste0(
+#       "For sacroiliac (SI) joint fusion, the SI joint was identified under fluoroscopic guidance. ",
+#       "A guide pin was advanced across the SI joint from the posterior ilium toward the sacral ala within safe osseous corridors. ",
+#       "The tract was prepared per standard technique and implants were seated across the SI joint under AP, inlet, and outlet views to confirm position, depth, and trajectory. "
+#     ),
+#     "fluoroscopy-guided"         = paste0(
+#       "Under fluoroscopic guidance, AP, inlet, and outlet views were used to identify the SI joint corridor and confirm trajectory. ",
+#       "Guide pins were advanced across the joint and tracts were prepared per standard technique. ",
+#       "Implants were seated across the SI joint with fluoroscopic confirmation of position, depth, and trajectory. "
+#     ),
+#     "navigated"                  = paste0(
+#       "An intraoperative reference was secured and a 3D dataset was registered to enable navigation. ",
+#       "Navigated instruments were used to plan and confirm SI joint entry points and trajectories. ",
+#       "Guide pins and implants were advanced across the SI joint with navigation and fluoroscopic confirmation (AP, inlet, outlet) of position, depth, and trajectory. "
+#     ),
+#     "robotic (using intraop ct)" = paste0(
+#       "Robotic guidance was used. A pelvic reference frame was secured and an intraoperative 3D spin was obtained for planning SI implant trajectories. ",
+#       "After confirming the plan, guide pins were placed robotically along the planned paths, the tracts were prepared, and implants were seated across the SI joint. ",
+#       "Fluoroscopy (AP, inlet, outlet) confirmed position, depth, and trajectory. "
+#     ),
+#     "robotic (using preop ct)"   = paste0(
+#       "Robotic guidance was used. A pelvic reference frame was secured and intraoperative fluoroscopy was merged with the preoperative CT to enable guidance. ",
+#       "After confirming the registration and plan, guide pins were placed robotically along the planned paths, the tracts were prepared, and implants were seated across the SI joint. ",
+#       "Fluoroscopy (AP, inlet, outlet) confirmed position, depth, and trajectory. "
+#     )
+#   )
+#   si_guidance_text <- purrr::pluck(
+#     si_guidance_map,
+#     .canon_key(image_guidance),
+#     .default = si_guidance_map[["na"]]
+#   )
+#   
+#   
+#   # -------------------- SI fusion block (guidance-aware) --------------------
+#   si_fusion_statement <- {
+#     if (!stringr::str_detect(object, "si_fusion")) {
+#       " "
+#     } else {
+#       df <- levels_side_df %>% mutate(level = stringr::str_squish(level))
+#       parts <- list()
+#       
+#       # Technique paragraph that reflects image_guidance + SI-specific start-point text
+#       parts$technique <- paste0(
+#         si_guidance_text,
+#         si_start_point_identification_text
+#       )
+#       
+#       # Per-side size statements
+#       side_stmt <- function(side_df, side_lab) {
+#         if (!nrow(side_df)) return(NULL)
+#         sizes <- side_df$screw_size_type
+#         sizes <- sizes[!is.na(sizes) & sizes != ""]
+#         if (!length(sizes)) {
+#           return(stringr::str_to_sentence(glue::glue("SI fusion implants were placed on the {side_lab}.")))
+#         }
+#         sizes_collapsed <- glue::glue_collapse(sizes, sep = " and ", last = " and ")
+#         if (length(sizes) == 1) {
+#           art <- ifelse(stringr::str_detect(stringr::str_to_lower(sizes_collapsed), "^[aeiou]"), "An", "A")
+#           stringr::str_to_sentence(glue::glue("{art} {stringr::str_to_lower(sizes_collapsed)} SI fusion implant was placed on the {side_lab}."))
+#         } else {
+#           stringr::str_to_sentence(glue::glue("On the {side_lab}, {stringr::str_to_lower(sizes_collapsed)} SI fusion implants were placed."))
+#         }
+#       }
+#       
+#       parts$left_implants  <- side_stmt(dplyr::filter(df, side == "left"),  "left")
+#       parts$right_implants <- side_stmt(dplyr::filter(df, side == "right"), "right")
+#       
+#       .collapse_parts(parts)
+#     }
+#   }
+#   
+#   
+#   
+#   # -------------------- pelvic screws block --------------------
+#   pelvic_screw_statement <- {
+#     if (!str_detect(object, "pelvic_screw")) {
+#       " "
+#     } else {
+#       df <- levels_side_df %>% mutate(level = str_remove_all(level, "_2"))
+#       
+#       parts <- list()
+#       
+#       # Iliac technique + sides
+#       if (any(df$level == "Iliac")) {
+#         parts$iliac_technique <- glue(
+#           "For iliac screw insertion, the posterior iliac crest was identified and the entry point was countersunk. ",
+#           "A probe was used to bore the path of the screw between the two cortices, aimed toward the anterior inferior iliac spine. ",
+#           "Once the path was created, the walls of the path were palpated for breaches and the length of the path measured."
+#         )
+#         
+#         side_stmt <- function(side_df, side_lab) {
+#           if (!nrow(side_df)) return(NULL)
+#           sizes <- .collapse(side_df$screw_size_type, sep = " and ", last = " and ")
+#           if (length(side_df$screw_size_type) > 1) {
+#             str_to_sentence(glue("On the {side_lab}, {sizes} iliac screws were placed."))
+#           } else {
+#             str_to_sentence(glue("{str_to_sentence(.a_an(sizes))} {sizes} iliac screw was placed on the {side_lab}."))
+#           }
+#         }
+#         parts$left_iliac  <- side_stmt(filter(df, level == "Iliac", side == "left"),  "left")
+#         parts$right_iliac <- side_stmt(filter(df, level == "Iliac", side == "right"), "right")
+#       }
+#       
+#       # S2AI technique text (one vs two per side overall)
+#       n_s2ai_mentions <- sum(str_detect(df$level, "S2AI"))
+#       if (n_s2ai_mentions >= 1) {
+#         base <- "For S2AI screw insertion, the starting point was identified at the inferior and lateral border of the S1 foramen. A probe was used to bore the path of the screw between the two cortices, across the sacroiliac joint, and aimed toward the anterior inferior iliac spine. Once the path was created, the walls of the path were palpated for breaches and the length of the path measured."
+#         parts$s2ai_technique <- if (n_s2ai_mentions >= 2) {
+#           paste0(base, " To fit two S2AI screws, the start point was moved slightly proximal and distal to a traditional start point.")
+#         } else base
+#       }
+#       
+#       # S2AI sizes/sides
+#       if (any(df$level == "S2AI")) {
+#         s2ai_sizes <- df %>%
+#           filter(level == "S2AI") %>%
+#           mutate(statement = glue("{.a_an(str_to_lower(screw_size_type))} {str_to_lower(screw_size_type)} S2AI screw was placed on the {side}")) %>%
+#           pull(statement) %>% .collapse(sep = ", ", last = " and ")
+#         parts$s2ai_sizes <- glue("Using this technique, {s2ai_sizes}.")
+#       }
+#       
+#       glue_collapse(keep(.nzchr(unlist(parts))), sep = " ")
+#     }
+#   }
+#   
+#   pelvic_screw_statement <- as.character(pelvic_screw_statement)
+#   
+#   # -------------------- nerve roots for diskectomy --------------------
+#   nerve_roots_list <- {
+#     if (identical(object, "diskectomy")) {
+#       nr <- levels_side_df %>%
+#         tidyr::separate(level, into = c("exiting_root", "traversing_root"), remove = FALSE) %>%
+#         mutate(
+#           exiting_root    = paste(side, exiting_root),
+#           traversing_root = paste(side, traversing_root)
+#         )
+#       list(
+#         traversing_roots = paste(.collapse(nr$traversing_root), .pluralize(nrow(nr), "nerve root", "nerve roots")),
+#         exiting_roots    = paste(.collapse(nr$exiting_root),    .pluralize(nrow(nr), "nerve root", "nerve roots"))
+#       )
+#     } else list(traversing_roots = " ", exiting_roots = " ")
+#   }
+#   
+#   # Exiting roots statement for facetectomy text
+#   exiting_roots_df <- levels_side_df %>%
+#     mutate(exiting_root = purrr::map(level, jh_get_exiting_nerve_root_function)) %>%
+#     tidyr::unnest(exiting_root) %>%
+#     dplyr::filter(!is.na(exiting_root)) %>%
+#     dplyr::select(level, exiting_root, side) %>%
+#     dplyr::group_by(level, exiting_root) %>%
+#     dplyr::summarize(
+#       n_sides = dplyr::n_distinct(side[!is.na(side)]),
+#       side_one = {
+#         tmp <- unique(side[!is.na(side)])
+#         if (length(tmp) == 1) tmp else NA_character_
+#       },
+#       .groups = "drop"
+#     ) %>%
+#     dplyr::mutate(
+#       statement = dplyr::if_else(
+#         !is.na(side_one) & n_sides == 1,
+#         glue::glue("the {side_one} {exiting_root} exiting nerve root"),
+#         glue::glue("the left and right {exiting_root} exiting nerve roots")
+#       ),
+#       vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)
+#     ) %>%
+#     dplyr::arrange(vertebral_number)
+#   
+#   # Side/level phrase like "on the left and on the right at L4"
+#   level_side_df <- levels_side_df %>%
+#     count(level, side, name = "n_per_side") %>%
+#     group_by(level) %>%
+#     mutate(n_sides = n_distinct(side)) %>%
+#     summarize(
+#       level_side = if_else(n_sides == 1,
+#                            glue("on the {first(side)} at {first(level)}"),
+#                            glue("on the left and on the right at {first(level)}")),
+#       vertebral_number = jh_get_vertebral_number_function(level_to_get_number = first(level)),
+#       .groups = "drop"
+#     ) %>%
+#     arrange(vertebral_number)
+#   
+#   # -------------------- long technique case_when (kept; uses improved pieces) --------------------
+#   technique_statement <- dplyr::case_when(
+#     object == "incision_drainage" ~
+#       "The wound was inspected thoroughly and any necrotic appearing tissue was excised. Tissue samples were sent for cultures. The wound bed was thoroughly irrigated and the bone, deep muscle, fascia and subcutaneous tissue was debrided. Devitalized muscle, fascia and subcutaneous tissue was excised. The wound was irrigated thoroughly until I felt the wound was clean and an adequate debridement had been completed.",
+#     object == "vertebroplasty" ~
+#       glue("For vertebral body cement augmentation, a cannula was inserted into the vertebral body through the pedicle. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebroplasty was performed at {.collapse(levels_side_df$level)}."),
+#     object == "vertebral_cement_augmentation" ~
+#       glue("For vertebral body cement augmentation, I first created a cavity within the vertebral body. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebral augmentation was performed at {.collapse(levels_side_df$level)}."),
+#     object == "laminar_downgoing_hook" ~
+#       glue("For downgoing laminar hooks, the ligamentum flavum was removed at the site of the hook insertion. A hook was then inserted securely under the lamina {.collapse(level_side_df$level_side)}."),
+#     object == "laminar_upgoing_hook" ~
+#       glue("For upgoing laminar hooks, the inferior edge of the cranial lamina was identified and the plane between the lamina and ligamentum was developed and the upgoing hook is then placed within this plane, secured to the lamina aimed cranially {.collapse(level_side_df$level_side)}."),
+#     object == "tp_hook" ~
+#       glue("For transverse process hooks, the cranial edge of the transverse process was identified. A transverse process finder was used to develop the plane and a transverse process hook was placed securely into position along the superior edge of the transverse process. A transverse process hook was placed {.collapse(level_side_df$level_side)}."),
+#     object == "c1_lateral_mass_screw" ~
+#       glue("For C1 lateral mass screw placement, after the exposure of the C1-C2 joint space was complete, the medial and lateral edges of the C1 lateral masses were identified and the articular surfaces of the C1-C2 joint were decorticated to allow for fusion. A burr was then used to create a start point in the center of the lateral mass. The path was then drilled incrementally to the anterior cortex. X-ray was used to confirm the drill was just up to the posterior cortex of the C1 tubercle on the lateral X-ray, and the path was then tapped. {.collapse(screw_statements_df$screw_statement, sep=' ')}"),
+#     object == "lateral_mass_screw" ~
+#       glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a burr and the screw path drilled incrementally to the far cortex and the dorsal cortex was then tapped. {.collapse(screw_statements_df$screw_statement, sep=' ')} This completed the lateral mass screws."),
+#     object == "occipital_screw" ~
+#       "An appropriately sized occipital plate was selected and was placed centered in the midline and just caudal to the external occipital protuberance, but cranial to the foramen magnum. The plate was held in place to identify the appropriate start points for the occipital screws. The occipital screws were drilled incrementally until the anterior cortex was penetrated. The length of the path was measured to acheive bicortical fixation. The screw paths were then tapped and the screws placed, securing the plate to the occiput.",
+#     object == "pars_screw" ~
+#       glue("For pars screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. {start_point_identification_text} Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming as dorsal as possible while not perforating the dorsal cortex of the pars. The path was then tapped and the length measured and pars screw placed. {.collapse(screw_statements_df$screw_statement, sep=' ')}"),
+#     object == "pedicle_screw" ~
+#       glue("{screw_technique_statement} {.collapse(screw_statements_df$screw_statement, sep=' ')}"),
+#     object == "reinsertion_screw" ~
+#       glue("The prior screw tracks were palpated for any breaches or defects and the trajectory of the screw was modified as needed. {.collapse(screw_statements_df$screw_statement, sep=' ')}"),
+#     object == "translaminar_screw" ~
+#       glue("For translaminar screw fixation, the starting point was identified using the spinolaminar junction and in the central plane of the contralateral lamina. A burr hole was made to open the superficial cortex, the path was then cannulated and intralaminar screw placed. {.collapse(screw_statements_df$screw_statement, sep=' ')}"),
+#     object == "transarticular_screw" ~
+#       glue("For transarticular screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. {start_point_identification_text} Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming toward the C1 lateral mass. The path was then tapped and the length measured and pars screw placed. {.collapse(screw_statements_df$screw_statement, sep=' ')}"),
+#     object == "pedicle_hook" ~
+#       glue("For pedicle hooks, a pedicle finder was carefully placed just under the inferior facet and above the superior facet, until the pedicle was found. Once the pedicle was identified, a pedicle hook was inserted directly toward the inferior pedicle, secured within the residual facet joint {.collapse(level_side_df$level_side)}."),
+#     object %in% c("pelvic_screw", "pelvic_screw_1", "pelvic_screw_2") ~
+#       pelvic_screw_statement,
+#     str_detect(object, "si_fusion") ~ si_fusion_statement,
+#     object == "sublaminar_wire" ~
+#       glue("For sublaminar wiring, the doubled-up sublaminar was was bent into a hook shape and and passed under the inferior lamina from a caudal to cranial direction. Once the wire was safely passed, the tip of the wire was cut and the two strands were directed in opposite directions of the midline to be attached to the rods on the left and right side. Wires were passed under {.collapse(levels_side_df$level)}."),
+#     object == "tether" ~
+#       glue("For spinous process tethering/wiring, a hole was drilled in the spinous processes over the lamina. A band was then threaded through the hole and appropriately tensioned and secured in place, tethering {.collapse(levels_side_df$level)}."),
+#     object == "complete_facetectomy" ~
+#       glue("For a complete facetectomy, the inferior, superior, medial and lateral borders of the inferior and superior facet were identified. Both the superior and inferior facet were completely excised and the underlying exiting nerve root decompressed. I performed a complete facetectomy {.collapse(level_side_df$level_side)}. This effectively decompressed {.collapse(exiting_roots_df$statement)}."),
+#     object == "grade_1" ~
+#       glue("The inferior, superior, medial and lateral borders of the inferior facet were identified. The inferior facets {.collapse(level_side_df$level_side)} were excised and the bone was morselized to be used as morselized autograft."),
+#     object == "grade_2" ~
+#       glue("The borders of the inferior facet were identified and the inferior facets were adequately resected. A plane was then developed between the ligamentum and the dura centrally. This was carried out laterally in both directions until the facets were encountered. The superior facets were both adequately resected along with any necessary lamina to fully release the posterior column. {if_else(length(levels_side_df$level)>1, 'I performed posterior column (Smith-Peterson) osteotomies at', '')} {if_else(length(levels_side_df$level)>1, .collapse(levels_side_df$level), '')}{if_else(length(levels_side_df$level)>1, '.', '')}"),
+#     object == "diskectomy" ~
+#       glue("For the discectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. Using a high-speed burr and Kerrison rongeur, I first performed a laminotomy, exposing the ligamentum flavum. I then carefully excised the ligamentum flavum, exposing the dura and traversing {nerve_roots_list$traversing_roots}. The dural sac was identified and traversing root was protected. The annulus was then incised and the diseased disk material was removed.  I performed a discectomy with partial medial facetectomy and foraminotomy {.collapse(level_side_df$level_side)} interspace to fully decompress the {nerve_roots_list$traversing_roots}. Following the decompression, the canal and foramen and lateral recess were palpated to confirm an appropriate decompression had been completed."),
+#     object == "laminotomy" ~
+#       glue("For the laminotomy, the cranial and caudal laminar edges, pars, and facet joints were used as landmarks. Once I had determined the laminotomy site, I used a combination of a high-speed burr and Kerrison rongeur to resect the bone dorsal to the nerve root. I performed a laminotomy {.collapse(level_side_df$level_side)} interspace to fully decompress the nerve root. Following the decompression, the foramen was palpated to confirm an adequate decompression had been completed."),
+#     object == "cervical_foraminotomy" ~
+#       glue("For the posterior cervical foraminotomy at {.collapse(levels_side_df$level)}, the superior and inferior facet and joint line was clearly identified. I used a combination of a high-speed burr to resect roughly 50% of the overlying medial inferior facet, which exposed the superior facet. I then proceeded with the high-speed burr, resecting the superior articular facet out to the lateral border of the pedicles. Copious irrigation was used during the resection. After removing the superior facet, the exiting nerve root was identified. A Kerrison 1 was used to remove any remaining overlying tissue. I performed a posterior cervical foraminotomy {.collapse(level_side_df$level_side)} interspace to fully decompress the nerve root. Following the decompression, the hemostasis was obtained and I was able to palpate the lateral walls of the cranial and caudal pedicles, confirming adequate decompression."),
+#     object == "laminectomy" ~
+#       glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {.collapse(levels_side_df$level)}. First, using a combination of a high-speed burr and Kerrison rongeur, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. Following the decompression, the canal was palpated to confirm an adequate decompression had been completed."),
+#     object == "laminectomy_for_facet_cyst" ~
+#       glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {.collapse(levels_side_df$level)} in order to excise the underlying facet cyst. First, using a combination of a high-speed burr and Kerrison rongeur, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. This allowed exposure to the underlying facet cyst, which was fully excised. I then adequately resected amount of medial facet to fully decompress the lateral recess. Following the decompression, the canal was palpated to confirm an adequate decompression had been completed."),
+#     object == "laminectomy_for_tumor" ~
+#       glue("Using the cranial and caudal edges of the lamina and pars as landmarks, I performed a laminectomy at {.collapse(levels_side_df$level)} in order to perform an open biopsy and excise the intraspinal extradural tumor. First, using a combination of a high-speed burr and Kerrison rongeur, I resected the dorsal lamina. I then excised the underlying ligamentum flavum. At this point, I encountered the extradural lesion which measured roughly {length(levels_side_df$level)*3.5}cm long by ~2-3cm wide. I obtained a biopsy of the tissue and then proceeded to excise any visible tumor in order to adequately create separation between visible tumor and the dura. Following the laminectomy and excision of the lesion, the canal was palpated to confirm an adequate decompression had been completed."),
+#     object == "sublaminar_decompression" ~
+#       glue("Using a combination of a high-speed burr and Kerrison rongeur, I performed a partial laminectomy bilaterally at the {.collapse(levels_side_df$level)} interspace. First, I resected the dorsal lamina and then excised the ligamentum flavum, exposing the dura. To fully decompress the exiting and traversing nerve roots within the neural foramen and lateral recess, the medial facet was partially excised and a foraminotomy performed on the left and right at the {.collapse(levels_side_df$level)} interspace. Following the decompression, the canal and foramen were palpated to confirm an adequate decompression had been completed."),
+#     object == "revision_diskectomy" ~
+#       glue("For the revision discectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. I performed a revision and reexploration with discectomy and partial medial facetectomy and foraminotomy {.collapse(level_side_df$level_side)} interspace to fully decompress the nerve root. I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. Using a high-speed burr and Kerrison rongeur, I performed a foraminotomy and excised the scar and ligamentum. The dural sac was identified and traversing root was protected. The annulus and disk space were identified and the diseased disk material was excised. Following the revision decompression, the canal and foramen and lateral recess were palpated to confirm an adequate decompression had been completed."),
+#     object == "revision_laminotomy" ~
+#       glue("For the revision laminotomy, the cranial and caudal laminar edges, pars, and facet joints were used as landmarks. I carefully exposed the dorsal elements until I had identified the edges of the laminar defect. Once I determined the laminotomy site, I used a combination of a high-speed burr and Kerrison rongeur to resect the bone dorsal to the nerve root. I performed a revision laminotomy {.collapse(level_side_df$level_side)} interspace to fully decompress the nerve root. Following the decompression, the foramen was palpated to confirm an adequate decompression had been completed."),
+#     object == "revision_laminectomy" ~
+#       glue("I first identified the edge of the pars as a landmark at {.collapse(levels_side_df$level)}. Using a combination of a high-speed burr, curettes and Kerrison rongeur, I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. I removed any dorsal lamina, ligamentum flavum and scar. Following the revision decompression, the canal was palpated to confirm an adequate decompression had been completed."),
+#     object == "revision_sublaminar_decompression" ~
+#       glue("Using a combination of a high-speed burr and Kerrison rongeur, I performed a reexploration and revision decompression bilaterally at the {.collapse(levels_side_df$level)} interspace. First, I carefully dissected off the scar until I was able to safely identify the bony edges and develop a plane between the dura and scar. I proceeded with partial laminectomies and excised the scar and underlying ligamentum flavum. The medial facet was partially excised and a foraminotomy performed on the left and right at the {.collapse(levels_side_df$level)} interspace, to fully decompress the exiting and traversing nerve roots within the neural foramen and lateral recess. Following the revision decompression, the canal and foramen were palpated to confirm an adequate decompression had been completed."),
+#     object == "revision_complete_facetectomy" ~
+#       glue("The cranial and caudal laminar edges, pars, and facet joints were used as landmarks to perform the reexploration and revision laminotomy and complete facetectomy. The bony edges were carefully identified and overlying scar excised. Once I was satisfied with the exposure and landmarks, a combination of a high-speed burr and rongeur were used and the superior and inferior facet were completely excised and the underlying exiting nerve root decompressed. I performed a complete facetectomy {.collapse(level_side_df$level_side)}. This effectively decompressed {.collapse(exiting_roots_df$statement)}."),
+#     object == "costotransversectomy" ~
+#       glue("For the costotransversectomy, the rib was identified and a subperiosteal dissection was carried out laterally 6-7cm. Once the medial rib was skeletonized and a safe, subperiorsteal plane was confirmed, 5-6cm of the medial rib was transected. This process was completed {.collapse(level_side_df$level_side)}, allowing a safe costovertebral approach to the anterior vertebral body."),
+#     object == "lateral_extracavitary_approach" ~
+#       glue("For the modified lateral extracavitary approach at {.collapse(levels_side_df$level)}, the pedicle of {.collapse(levels_side_df$level)} was identified and using a combination of a high-speed burr, Kerrison rongeur and osteotome, the inferior and superior facets were fully resected, allowing access to the interspace. The lateral border of the disk space was identified and the dissection was carried out anteriorly around the entire anterior portion of the vertebral body. This was carried out {.collapse(level_side_df$level_side)} and allowed safe access to the anterior longitudinal ligament and the most anterior portion of the vertbral body."),
+#     object == "laminoplasty" ~
+#       glue("For laminoplasty, an opening and hinge trough was created with a high-speed burr angled perpendicular to the lamina at the lateral mass-lamina junction. This was performed at {.collapse(levels_side_df$level)}. After all troughs were completed, greenstick fractures were created to open the lamina at the laminoplasty levels, the ligamentum flavum at the proximal and distal levels was excised, and laminoplasty plates were sequentially secured into place. The spinous processes were trimmed and the canal was palpated to confirm an adequate decompression had been completed."),
+#     TRUE ~ ""
+#   )
+#   
+#   # clean small “a na” artifact (rare)
+#   technique_statement <- str_replace_all(technique_statement, "a na ", "a ")
+#   
+#   technique_statement
+# }
 
-op_note_technique_combine_statement <- function(object, 
+
+op_note_technique_combine_statement <- function(object,
                                                 levels_side_df,
                                                 approach_technique = "Open",
-                                                image_guidance = "NA", 
-                                                implant_start_point_identification = "NA"){
-  
+                                                # image_guidance = "NA",
+                                                implant_technique_method = "NA"){
+
   if(ncol(levels_side_df)==1){
     levels_side_df <- levels_side_df%>%
       unnest(data)
   }
+
+if(str_detect(object, "si_fusion")){
+  
+  # # START POINT IDENTIFICATION
+  # si_implant_technique_method_text <- case_when(
+  #   str_detect(implant_technique_method, "NA") ~ "",
+  #   str_detect(implant_technique_method, "anatomic landmarks") ~ "",
+  #   str_detect(implant_technique_method, "fluoroscopy and markers") ~ 
+  #     "Under intraoperative fluoroscopy, guide pins were advanced across the SI joint from the posterior ilium toward the sacral ala to confirm start points and trajectories. ",
+  #   str_detect(implant_technique_method, "fluoroscopy was used to identify") ~ 
+  #     "Intraoperative fluoroscopy was used to identify the SI joint and confirm the start point and trajectory for each implant. ",
+  #   str_detect(implant_technique_method, "navigation") ~ 
+  #     "Intraoperative navigation was used to identify the start point and trajectory for SI fusion implant placement. "
+  # )
+  # 
+  # # SCREW TECHNIQUE STATEMENT
+  # si_implant_technique_statement <- case_when(
+  #   image_guidance == "NA" ~ 
+  #     paste(glue("For SI fusion screws, the posterior ilium and sacral ala were used as landmarks to identify the appropriate starting point. The superficial cortex was drilled at each start point. {si_implant_technique_method_text} A guide pin was then advanced across the SI joint toward the sacral ala under direct visualization. The tract was prepared, measured, and tapped prior to implant placement.")),
+  #   image_guidance == "Fluoroscopy-guided" ~ 
+  #     "Under fluoroscopic guidance, guide pins were advanced across the SI joint from the posterior ilium toward the sacral ala. AP and lateral X-rays were used to confirm trajectory and depth. The tracts were then prepared and the SI fusion implants were placed over the guidewires across the SI joint.",
+  #   image_guidance == "Navigated" ~ 
+  #     "An intraoperative CT scan was obtained with a reference frame secured to the patient. Navigated instruments were used to identify the start point and trajectory for each SI fusion implant. The SI joint was cannulated with navigation assistance, and each tract was prepared and measured prior to placement of the fusion implants across the joint.",
+  #   image_guidance == "Robotic (using intraop CT)" ~ 
+  #     "SI fusion implants were placed with robotic assistance. A reference frame was secured to the patient’s ilium and an intraoperative 3D spin was obtained. Trajectories across the SI joint were planned on the robotic workstation. Once the plan was confirmed, I proceeded with robotic-assisted SI fusion implant placement. Each tract was prepared using a drill prior to implant insertion across the joint.",
+  #   image_guidance == "Robotic (using preop CT)" ~ 
+  #     "SI fusion implants were placed with robotic assistance. A reference frame was secured to the patient’s ilium, and intraoperative fluoroscopic images were merged with the preoperative CT scan. Once the merge and screw trajectories were confirmed, robotic-assisted SI fusion implants were placed through small incisions at each tract across the SI joint."
+  # )
+  
+  si_implant_technique_statement <- case_when(
+    "na" %in% implant_technique_method ~ 
+      "For SI fusion screws, the posterior ilium and sacral ala were used as landmarks to identify the appropriate starting point. The superficial cortex was drilled at each start point. A guide pin was then advanced across the SI joint toward the sacral ala under direct visualization. The tract was prepared, measured, and tapped prior to implant placement.",
+    "free_hand" %in% implant_technique_method ~ 
+      "For SI fusion screws, the posterior ilium and sacral ala were used as landmarks to identify the appropriate starting point. The superficial cortex was drilled at each start point, and guide pins were advanced across the SI joint toward the sacral ala under direct visualization. The tracts were prepared, measured, and tapped prior to implant placement.",
+    "fluoro_perc" %in% implant_technique_method ~ 
+      "Under fluoroscopic guidance, guide pins were advanced across the SI joint from the posterior ilium toward the sacral ala. AP and lateral X-rays were used to confirm trajectory and depth. The tracts were then prepared and the SI fusion implants were placed over the guidewires across the SI joint.",
+    "fluoro_pedicle_markers" %in% implant_technique_method ~ 
+      "Under intraoperative fluoroscopy, guide pins were advanced across the SI joint from the posterior ilium toward the sacral ala to confirm start points and trajectories. Once confirmed, the tracts were prepared and the SI fusion implants were placed across the SI joint.",
+    "navigation" %in% implant_technique_method ~ 
+      "Intraoperative navigation was used to identify the start point and trajectory for each SI fusion implant. The SI joint was cannulated with navigation assistance, and each tract was prepared and measured prior to implant placement across the joint.",
+    "nav_robot_intra_ct" %in% implant_technique_method ~ 
+      "SI fusion implants were placed with robotic assistance. A reference frame was secured to the patient’s ilium and an intraoperative 3D spin was obtained. Trajectories across the SI joint were planned on the robotic workstation, and each tract was prepared using a drill prior to implant insertion across the joint.",
+    "nav_robot_pre_ct" %in% implant_technique_method ~ 
+      "SI fusion implants were placed with robotic assistance. A reference frame was secured to the patient’s ilium, and intraoperative fluoroscopic images were merged with the preoperative CT scan. Once the merge and trajectories were confirmed, robotic-assisted SI fusion implants were placed through small incisions across the SI joint.",
+    "nav_3d_surface_map" %in% implant_technique_method ~ 
+      "3D surface-mapping navigation (e.g., 7D system) was used to identify start points and guide SI fusion implant trajectories. Each tract was drilled, measured, and prepared prior to implant placement across the SI joint.",
+    "nav_pelvic_screws" %in% implant_technique_method ~ 
+      "Navigation guidance was used to identify the start points for each SI fusion implant. Trajectories were confirmed in multiple planes, and implants were advanced across the SI joint under navigation guidance.",
+    TRUE ~ 
+      "SI fusion implants were placed using standard technique with intraoperative imaging to confirm start points, trajectories, and final implant position."
+  )
   
   
+ si_screws_wide <- levels_side_df %>%
+    select(level, side) %>%
+    mutate(count = row_number()) %>%
+    pivot_wider(names_from = side, values_from = count) %>%
+    unnest(everything())
+
+ si_screws_statement_list <- list()
+ # si_screws_statement_list$technique <- glue("")
+ 
+ left_si_screws_df <- levels_side_df %>%
+   filter(level == "SI", side == "left")
+ 
+ 
+ if(nrow(left_si_screws_df)>0){
+   left_si_screw_sizes <- glue_collapse(left_si_screws_df$screw_size_type, sep = " and ")
+   
+   if(length(left_si_screws_df$screw_size_type)>1){
+     si_screws_statement_list$left_si_screws <- str_to_sentence(glue("On the left, {left_si_screw_sizes} implants were placed across the SI joint."))
+   }else{
+     si_screws_statement_list$left_si_screws <- str_to_sentence(glue("An {left_si_screw_sizes} SI joint fixation implant was placed across the SI joint."))
+   }
+ }
+ 
+ right_si_screws_df <- levels_side_df %>%
+   filter(level == "SI", side == "right")
+ 
+ if(nrow(right_si_screws_df)>0){
+   right_si_screw_sizes <- glue_collapse(right_si_screws_df$screw_size_type, sep = " and ")
+   
+   if(length(right_si_screws_df$screw_size_type)>1){
+     si_screws_statement_list$right_si_screws <- str_to_sentence(glue("On the right, {right_si_screw_sizes} implants were placed across the SI joint."))
+   }else{
+     si_screws_statement_list$right_si_screws <- str_to_sentence(glue("An {right_si_screw_sizes} SI joint fixation implant was placed across the SI joint."))
+   }
+ }
+ 
+ si_fusion_screw_statement <- paste(si_implant_technique_statement, glue_collapse(si_screws_statement_list, sep = " "))
+} else{
+  si_fusion_screw_statement <- glue(" ")
+  
+}
+  
+ 
+
   ### PELVIC SCREWS:
-  if(str_detect(object, "pelvic_screw")){
+  # if(str_detect(object, "pelvic_screw")){
+  #   levels_side_df <- levels_side_df %>%
+  #     mutate(level = str_remove_all(level, "_2"))
+  # 
+  #   pelvic_screws_wide <- levels_side_df %>%
+  #     mutate(level = str_remove_all(level, "_2")) %>%
+  #     select(level, side) %>%
+  #     mutate(count = row_number()) %>%
+  #     pivot_wider(names_from = side, values_from = count) %>%
+  #     unnest(everything())
+  # 
+  #   pelvic_screws_statement_list <- list()
+  # 
+  #   if(any(levels_side_df$level == "Iliac")){
+  #     pelvic_screws_statement_list$iliac_technique <- glue("For iliac screw insertion, the posterior iliac crest was identified and the entry point was countersunk. A probe was used to bore the path of the screw between the two cortices, aimed toward the anterior inferior iliac spine. Once the path was created, the walls of the path were palpated for breaches and the length of the path measured.")
+  # 
+  #     left_iliac_screws_df <- levels_side_df %>%
+  #       filter(level == "Iliac", side == "left")
+  # 
+  #     if(nrow(left_iliac_screws_df)>0){
+  #       left_iliac_screw_sizes <- glue_collapse(left_iliac_screws_df$screw_size_type, sep = " and ")
+  # 
+  #       if(length(left_iliac_screws_df$screw_size_type)>1){
+  #         pelvic_screws_statement_list$left_iliac_screws <- str_to_sentence(glue("On the left, {left_iliac_screw_sizes} iliac screws were placed."))
+  #       }else{
+  #         pelvic_screws_statement_list$left_iliac_screws <- str_to_sentence(glue("An {left_iliac_screw_sizes} iliac screw was placed on the left."))
+  #       }
+  #     }
+  # 
+  #     right_iliac_screws_df <- levels_side_df %>%
+  #       filter(level == "Iliac", side == "right")
+  # 
+  #     if(nrow(right_iliac_screws_df)>0){
+  #       right_iliac_screw_sizes <- glue_collapse(right_iliac_screws_df$screw_size_type, sep = " and ")
+  # 
+  #       if(length(right_iliac_screws_df$screw_size_type)>1){
+  #         pelvic_screws_statement_list$right_iliac_screws <- str_to_sentence(glue("On the right, {right_iliac_screw_sizes} iliac screws were placed."))
+  #       }else{
+  #         pelvic_screws_statement_list$right_iliac_screws <- str_to_sentence(glue("An {right_iliac_screw_sizes} iliac screw was placed on the right."))
+  #       }
+  #     }
+  # 
+  #   }
+  # 
+  #   if(sum(str_count(string = pelvic_screws_wide$level, "S2AI")) == 1){
+  #     pelvic_screws_statement_list$s2ai_technique <- glue("For S2AI screw insertion, the starting point was identified at the inferior and lateral border of the S1 foramen. A probe was used to bore the path of the screw between the two cortices, across the sacroiliac joint, and aimed toward the anterior inferior iliac spine. Once the path was created, the walls of the path were palpated for breaches and the length of the path measured.")
+  #   }
+  #   if(sum(str_count(string = pelvic_screws_wide$level, "S2AI")) == 2){
+  #     pelvic_screws_statement_list$s2ai_technique <- glue("For S2AI screw insertion, the starting point was identified at the inferior and lateral border of the S1 foramen. A probe was used to bore the path of the screw between the two cortices, across the sacroiliac joint, and aimed toward the anterior inferior iliac spine. Once the path was created, the walls of the path were palpated for breaches and the length of the path measured. To fit two S2AI screws, the start point was moved slightly proximal and distal to a traditional start point.")
+  #   }
+  # 
+  #   if(sum(str_count(string = levels_side_df$level, "S2AI")) > 0){
+  #     s2ai_screws_df <- levels_side_df %>%
+  #       filter(level == "S2AI") %>%
+  #       mutate(statement = glue("a {str_to_lower(screw_size_type)} S2AI screw was placed on the {side}"))
+  # 
+  #     pelvic_screws_statement_list$s2ai_sizes_statement <- glue("Using this technique, {glue_collapse(x = s2ai_screws_df$statement, sep = ', ', last = ' and ')}.")
+  #   }
+  # 
+  #   pelvic_screw_statement <- glue_collapse(pelvic_screws_statement_list, sep = " ")
+  # 
+  # }else{
+  #   pelvic_screw_statement <- glue(" ")
+  # 
+  # }
+  ### PELVIC SCREWS (Iliac + S2AI), driven by implant_technique_method ####
+  if (str_detect(object, "pelvic_screw")) {
+    
+    # normalize duplicated levels like "S2AI_2"
     levels_side_df <- levels_side_df %>%
       mutate(level = str_remove_all(level, "_2"))
     
-    pelvic_screws_wide <- levels_side_df %>%
-      mutate(level = str_remove_all(level, "_2")) %>%
-      select(level, side) %>%
-      mutate(count = row_number()) %>%
-      pivot_wider(names_from = side, values_from = count) %>%
-      unnest(everything())
+    # --- helper: map your checkbox values -> concise phrasing parts ----
+    pelvic_method_text <- {
+      m <- implant_technique_method %||% "na"
+      
+      # prefer most specific → most general
+      case_when(
+        any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) &
+          any(m %in% c("navigation", "nav_3d_surface_map")) &
+          any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
+          "Robotic navigation with fluoroscopic confirmation",
+        
+        any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) &
+          any(m %in% c("navigation", "nav_3d_surface_map")) ~
+          "Robotic navigation",
+        
+        any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) &
+          any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
+          "Robotic guidance with fluoroscopic confirmation",
+        
+        any(m %in% c("navigation", "nav_3d_surface_map")) &
+          any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
+          "Navigation with fluoroscopic confirmation",
+        
+        any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) ~
+          if_else(any(m == "nav_robot_intra_ct"),
+                  "Robotic guidance (intraoperative CT)",
+                  "Robotic guidance (preoperative CT merge)"),
+        
+        any(m %in% c("navigation", "nav_3d_surface_map")) ~
+          if_else(any(m == "nav_3d_surface_map"),
+                  "3D surface-mapping navigation",
+                  "Intraoperative navigation"),
+        
+        any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
+          "Fluoroscopic guidance",
+        
+        any(m == "free_hand") ~
+          "Free-hand technique using anatomic landmarks",
+        
+        TRUE ~ "Standard technique with intraoperative imaging"
+      )
+    }
     
+    # --- technique boilerplate (Iliac vs S2AI), augmented with method text ----
+    iliac_technique <- glue(
+      "{pelvic_method_text} was used for iliac screw insertion. ",
+      "The posterior iliac crest was identified and the entry point was countersunk. ",
+      "A probe was used to bore a bicortical path between the inner and outer tables, ",
+      "aimed toward the anterior inferior iliac spine. ",
+      "The walls were palpated to confirm no breaches and the length measured prior to screw placement."
+    )
     
+    s2ai_base <- "The starting point was identified at the inferior–lateral border of the S1 foramen. A probe was advanced across the sacroiliac joint toward the anterior inferior iliac spine, the tract was palpated circumferentially for breach, and the length was measured prior to screw placement."
+    s2ai_technique_single <- glue("{pelvic_method_text} was used for S2AI screw insertion. {s2ai_base}")
+    s2ai_technique_double <- glue("{pelvic_method_text} was used for S2AI screw insertion. {s2ai_base} To accommodate two S2AI screws, the start points were offset slightly proximal and distal from the traditional point.")
+    
+    # --- size statements: clean pluralization & sides -------------------------
+    say_sizes <- function(df, level_label) {
+      if (nrow(df) == 0) return(NULL)
+      df %>%
+        arrange(side) %>%
+        group_by(side) %>%
+        summarise(
+          sizes = glue_collapse(screw_size_type, sep = " and "),
+          n = n(),
+          .groups = "drop"
+        ) %>%
+        mutate(
+          side_phrase = case_when(
+            n > 1 ~ glue("On the {side}, {sizes} {level_label} screws were placed."),
+            TRUE ~ glue("An {sizes} {level_label} screw was placed on the {side}.")
+          )
+        ) %>%
+        pull(side_phrase)
+    }
     
     pelvic_screws_statement_list <- list()
     
-    # if(sum(str_count(string = pelvic_screws_wide$level, "Iliac")) == 1){
-    #   pelvic_screws_statement_list$iliac_technique <- glue("For iliac screw insertion, the posterior iliac crest was identified and the entry point was countersunk. A probe was used to bore the path of the screw between the two cortices, aimed toward the anterior inferior iliac spine. Once the path was created, the walls of the path were palpated for breaches and the length of the path measured.")
-    # }
-    # if(sum(str_count(string = pelvic_screws_wide$level, "Iliac")) == 2){
-    #   pelvic_screws_statement_list$iliac_technique <- glue("For iliac screw insertion, the posterior iliac crest was identified and the entry point was countersunk. A probe was used to bore the path of the screw between the two cortices, aimed toward the anterior inferior iliac spine. Once the path was created, the walls of the path were palpated for breaches and the length of the path measured. To fit two iliac screws, the start point was moved slightly proximal and distal to a traditional start point.")
-    # }
-    # 
-    # if(sum(str_count(string = levels_side_df$level, "Iliac")) > 0){
-    #   iliac_screws_df <- levels_side_df %>%
-    #     filter(level == "Iliac") %>%
-    #     mutate(statement = glue("a {str_to_lower(screw_size_type)} iliac screw was placed on the {side}")) 
-    #   
-    #   pelvic_screws_statement_list$iliac_sizes_statement <- glue("Using this technique, {glue_collapse(x = iliac_screws_df$statement, sep = ', ', last = ' and ')}.")
-    # }
-    
-    if(any(levels_side_df$level == "Iliac")){
-      pelvic_screws_statement_list$iliac_technique <- glue("For iliac screw insertion, the posterior iliac crest was identified and the entry point was countersunk. A probe was used to bore the path of the screw between the two cortices, aimed toward the anterior inferior iliac spine. Once the path was created, the walls of the path were palpated for breaches and the length of the path measured.")
-      
-      left_iliac_screws_df <- levels_side_df %>%
-        filter(level == "Iliac", side == "left")
-      
-      if(nrow(left_iliac_screws_df)>0){
-        left_iliac_screw_sizes <- glue_collapse(left_iliac_screws_df$screw_size_type, sep = " and ")
-        
-        if(length(left_iliac_screws_df$screw_size_type)>1){
-          pelvic_screws_statement_list$left_iliac_screws <- str_to_sentence(glue("On the left, {left_iliac_screw_sizes} iliac screws were placed."))
-        }else{
-          pelvic_screws_statement_list$left_iliac_screws <- str_to_sentence(glue("An {left_iliac_screw_sizes} iliac screw was placed on the left."))
-        }
-      }
-      
-      right_iliac_screws_df <- levels_side_df %>%
-        filter(level == "Iliac", side == "right")
-      
-      if(nrow(right_iliac_screws_df)>0){
-        right_iliac_screw_sizes <- glue_collapse(right_iliac_screws_df$screw_size_type, sep = " and ")
-        
-        if(length(right_iliac_screws_df$screw_size_type)>1){
-          pelvic_screws_statement_list$right_iliac_screws <- str_to_sentence(glue("On the right, {right_iliac_screw_sizes} iliac screws were placed."))
-        }else{
-          pelvic_screws_statement_list$right_iliac_screws <- str_to_sentence(glue("An {right_iliac_screw_sizes} iliac screw was placed on the right."))
-        }
-      }
-      
+    # ILIAC
+    iliac_df <- levels_side_df %>% filter(level == "Iliac")
+    if (nrow(iliac_df) > 0) {
+      pelvic_screws_statement_list$iliac_technique <- iliac_technique
+      pelvic_screws_statement_list$iliac_sizes <- say_sizes(iliac_df, "iliac")
     }
     
-    if(sum(str_count(string = pelvic_screws_wide$level, "S2AI")) == 1){
-      pelvic_screws_statement_list$s2ai_technique <- glue("For S2AI screw insertion, the starting point was identified at the inferior and lateral border of the S1 foramen. A probe was used to bore the path of the screw between the two cortices, across the sacroiliac joint, and aimed toward the anterior inferior iliac spine. Once the path was created, the walls of the path were palpated for breaches and the length of the path measured.")
-    }
-    if(sum(str_count(string = pelvic_screws_wide$level, "S2AI")) == 2){
-      pelvic_screws_statement_list$s2ai_technique <- glue("For S2AI screw insertion, the starting point was identified at the inferior and lateral border of the S1 foramen. A probe was used to bore the path of the screw between the two cortices, across the sacroiliac joint, and aimed toward the anterior inferior iliac spine. Once the path was created, the walls of the path were palpated for breaches and the length of the path measured. To fit two S2AI screws, the start point was moved slightly proximal and distal to a traditional start point.")
-    }
-    
-    if(sum(str_count(string = levels_side_df$level, "S2AI")) > 0){
-      s2ai_screws_df <- levels_side_df %>%
-        filter(level == "S2AI") %>%
-        mutate(statement = glue("a {str_to_lower(screw_size_type)} S2AI screw was placed on the {side}")) 
-      
-      pelvic_screws_statement_list$s2ai_sizes_statement <- glue("Using this technique, {glue_collapse(x = s2ai_screws_df$statement, sep = ', ', last = ' and ')}.")
+    # S2AI (detect whether 1 vs 2 total)
+    s2ai_df <- levels_side_df %>% filter(level == "S2AI")
+    if (nrow(s2ai_df) > 0) {
+      total_s2ai <- nrow(s2ai_df)
+      pelvic_screws_statement_list$s2ai_technique <- if (total_s2ai >= 2) s2ai_technique_double else s2ai_technique_single
+      pelvic_screws_statement_list$s2ai_sizes <- say_sizes(s2ai_df, "S2AI")
     }
     
-    pelvic_screw_statement <- glue_collapse(pelvic_screws_statement_list, sep = " ")
+    # collapse to single paragraph
+    pelvic_screw_statement <- glue_collapse(
+      compact(pelvic_screws_statement_list),
+      sep = " "
+    ) %>% as.character()
     
-  }else{
-    pelvic_screw_statement <- glue(" ")
-    
+  } else {
+    pelvic_screw_statement <- " "
   }
+  
+  
   pelvic_screw_statement <- as.character(pelvic_screw_statement)
-  
-  
-  
+
+
+
   if(str_detect(string = object, pattern = "screw") & object != "pelvic_screw"){
     screw_statements_wide_df <- levels_side_df %>%
       mutate(unilateral_screw_statement = str_to_lower(glue("a {screw_size_type} screw was inserted on the {side}"))) %>%
       select(level, side, unilateral_screw_statement) %>%
       pivot_wider(names_from = side, values_from = unilateral_screw_statement) %>%
-      unnest(everything()) 
-    
+      unnest(everything())
+
     screw_statements_df <- tibble(level = character(), left = character(), right = character(), unilateral_screw_statement = character()) %>%
       bind_rows(screw_statements_wide_df) %>%
       mutate(left = if_else(is.na(left), "xx", left)) %>%
       mutate(right = if_else(is.na(right), "xx", right)) %>%
       # replace_na(replace = list(left = "xx", right = "xx")) %>%
       mutate(screw_statement = case_when(
-        left != "xx" & right != "xx" ~ glue("At {level}, {left} and {right}."), 
-        left == "xx" & right != "xx" ~ glue("At {level}, {right}."), 
-        left != "xx" & right == "xx" ~ glue("At {level}, {left}."), 
+        left != "xx" & right != "xx" ~ glue("At {level}, {left} and {right}."),
+        left == "xx" & right != "xx" ~ glue("At {level}, {right}."),
+        left != "xx" & right == "xx" ~ glue("At {level}, {left}."),
         left == "xx" & right == "xx" ~ glue(""))) %>%
       mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-      arrange(vertebral_number) 
+      arrange(vertebral_number)
   }else{
     screw_statements_df <- tibble(screw_statement = c(" "))
   }
-  
-  
+
+
   if(object == 'diskectomy'){
     nerve_roots_df <- levels_side_df %>%
       separate(col = level, into = c("exiting_root", "traversing_root")) %>%
-      mutate(exiting_root = paste(side, exiting_root), 
+      mutate(exiting_root = paste(side, exiting_root),
              traversing_root = paste(side, traversing_root))
-    
-    nerve_roots_list <- list() 
+
+    nerve_roots_list <- list()
     if(nrow(nerve_roots_df) >1){
       nerve_roots_list$traversing_roots <- paste(glue_collapse(nerve_roots_df$traversing_root, sep = ", ", last = " and "), "nerve roots")
     }else{
@@ -1236,13 +1922,13 @@ op_note_technique_combine_statement <- function(object,
     }else{
       nerve_roots_list$exiting_roots <- paste(glue_collapse(nerve_roots_df$exiting_root, sep = ", ", last = " and "), "nerve root")
     }
-    
+
   }else{
-    nerve_roots_list <- list() 
-    nerve_roots_list$traversing_roots <- " " 
+    nerve_roots_list <- list()
+    nerve_roots_list$traversing_roots <- " "
     nerve_roots_list$exiting_roots <- " "
   }
-  
+
   exiting_roots_df <- levels_side_df %>%
     mutate(exiting_root = map(.x = level, .f = ~jh_get_exiting_nerve_root_function(.x))) %>%
     unnest(exiting_root) %>%
@@ -1256,7 +1942,7 @@ op_note_technique_combine_statement <- function(object,
     distinct() %>%
     mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
     arrange(vertebral_number)
-  
+
   levels_side_df <- levels_side_df %>%
     group_by(level) %>%
     add_tally(name = "number_per_level") %>%
@@ -1265,53 +1951,142 @@ op_note_technique_combine_statement <- function(object,
     select(-side) %>%
     distinct() %>%
     mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-    arrange(vertebral_number)   
-  
-  
-  
-  start_point_identification_text <- case_when(
-    str_detect(implant_start_point_identification, "NA") ~ "",
-    str_detect(implant_start_point_identification, "anatomic landmarks") ~ "",
-    str_detect(implant_start_point_identification, "fluoroscopy and pedicle markers") ~ "Pedicle markers were then placed and intraoperative fluoroscopy was used to confirm screw start points and make any necessary adjustments. ",
-    str_detect(implant_start_point_identification, "fluoroscopy was used to identify") ~ "Intraoperative fluoroscopy was used to confirm screw start points and trajectory. ",
-    str_detect(implant_start_point_identification, "navigation") ~ "Intraoperative Navigation was used for placing screws. ",
-  )
-  
+    arrange(vertebral_number)
+
+
+
+  # start_point_identification_text <- case_when(
+  #   str_detect(implant_technique_method, "NA") ~ "",
+  #   str_detect(implant_technique_method, "anatomic landmarks") ~ "",
+  #   str_detect(implant_technique_method, "fluoroscopy and pedicle markers") ~ "Pedicle markers were then placed and intraoperative fluoroscopy was used to confirm screw start points and make any necessary adjustments. ",
+  #   str_detect(implant_technique_method, "fluoroscopy was used to identify") ~ "Intraoperative fluoroscopy was used to confirm screw start points and trajectory. ",
+  #   str_detect(implant_technique_method, "navigation") ~ "Intraoperative Navigation was used for placing screws. ",
+  # )
+
   # screw technique:
-  screw_technique_statement <- case_when(
-    image_guidance == "NA" ~ paste(glue("For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a burr. {start_point_identification_text} A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate.")),
-    image_guidance == "Fluoroscopy-guided" ~ "For pedicle screws, the TP was palpated and a Jamshidi needle was placed at the junction of the TP and superior facet. AP and lateral X-rays were used to identify and confirm an appropriate start point and trajectory. The Jamshidi needle was then advanced down the pedicle and a wire placed through the pedicle and into the vertebral body. With the wire in place, the pedicles were then sequentially tapped to allow for screw placement. X-ray was used frequently throughout the procedure to confirm the position.",
-    image_guidance == "Navigated" ~ "An intraoperative CT scan was obtained with a reference point attached to the patient. Navigated instruments were then used in conjunction with the navigation system to identify the appropriate starting point and trajectory for each screw. The pedicle was cannulated with navigation assistance and then palpated for a medial, inferior, superior and lateral wall to confirm a safe trajectory for placement of the screw.",
-    image_guidance == "Robotic (using intraop CT)" ~ "Pedicle screws were placed with robotic assistance. A reference frame was secured to the patient's ilium and an intraoperative 3D spin was obtained. The pedicle screw trajectory and position were then planned. Once the plan for all screws was confirmed, I proceeded with robotic-assisted pedicle screw placement. An incision was made in the skin followed by a burr, drill and tap of the pedicle screw tract. ",
-    image_guidance == "Robotic (using preop CT)" ~ "Pedicle screws were placed with robotic assistance. A reference frame was secured to the patient's ilium and AP and lateral intraop xrays were obtained and merged with the preoperative CT scan. Once an appropriate merge was confirmed and the plan for the screws was finalized, I proceeded with robotic-assisted pedicle screw placement. An incision was made in the skin followed by a burr, drill and tap of the pedicle screw tract. "
+  
+  # screw_technique_statement <- case_when(
+  #   image_guidance == "NA" ~ paste(glue("For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a burr. {start_point_identification_text} A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate.")),
+  #   image_guidance == "Fluoroscopy-guided" ~ "For pedicle screws, the TP was palpated and a Jamshidi needle was placed at the junction of the TP and superior facet. AP and lateral X-rays were used to identify and confirm an appropriate start point and trajectory. The Jamshidi needle was then advanced down the pedicle and a wire placed through the pedicle and into the vertebral body. With the wire in place, the pedicles were then sequentially tapped to allow for screw placement. X-ray was used frequently throughout the procedure to confirm the position.",
+  #   image_guidance == "Navigated" ~ "An intraoperative CT scan was obtained with a reference point attached to the patient. Navigated instruments were then used in conjunction with the navigation system to identify the appropriate starting point and trajectory for each screw. The pedicle was cannulated with navigation assistance and then palpated for a medial, inferior, superior and lateral wall to confirm a safe trajectory for placement of the screw.",
+  #   image_guidance == "Robotic (using intraop CT)" ~ "Pedicle screws were placed with robotic assistance. A reference frame was secured to the patient's ilium and an intraoperative 3D spin was obtained. The pedicle screw trajectory and position were then planned. Once the plan for all screws was confirmed, I proceeded with robotic-assisted pedicle screw placement. An incision was made in the skin followed by a burr, drill and tap of the pedicle screw tract. ",
+  #   image_guidance == "Robotic (using preop CT)" ~ "Pedicle screws were placed with robotic assistance. A reference frame was secured to the patient's ilium and AP and lateral intraop xrays were obtained and merged with the preoperative CT scan. Once an appropriate merge was confirmed and the plan for the screws was finalized, I proceeded with robotic-assisted pedicle screw placement. An incision was made in the skin followed by a burr, drill and tap of the pedicle screw tract. "
+  # 
+  # )
+
+  # if(str_detect(object, "screw")){
+  #   screw_technique_statement <- case_when(
+  #     implant_technique_method == "NA" ~ paste(glue("For pedicle screws, the transverse process, pars, and superior facet were used as landmarks to identify the appropriate starting point. After identifying the start point, the superficial cortex was opened at each entry point using a burr. {start_point_identification_text} A pedicle probe was then used to navigate down the pedicle, followed by palpating a medial, lateral, superior and inferior pedicle wall, measuring, and tapping if appropriate.")),
+  #     implant_technique_method == "Fluoroscopy-guided" ~ "For pedicle screws, the TP was palpated and a Jamshidi needle was placed at the junction of the TP and superior facet. AP and lateral X-rays were used to identify and confirm an appropriate start point and trajectory. The Jamshidi needle was then advanced down the pedicle and a wire placed through the pedicle and into the vertebral body. With the wire in place, the pedicles were then sequentially tapped to allow for screw placement. X-ray was used frequently throughout the procedure to confirm the position.",
+  #     implant_technique_method == "Navigated" ~ "An intraoperative CT scan was obtained with a reference point attached to the patient. Navigated instruments were then used in conjunction with the navigation system to identify the appropriate starting point and trajectory for each screw. The pedicle was cannulated with navigation assistance and then palpated for a medial, inferior, superior and lateral wall to confirm a safe trajectory for placement of the screw.",
+  #     implant_technique_method == "Robotic (using intraop CT)" ~ "Pedicle screws were placed with robotic assistance. A reference frame was secured to the patient's ilium and an intraoperative 3D spin was obtained. The pedicle screw trajectory and position were then planned. Once the plan for all screws was confirmed, I proceeded with robotic-assisted pedicle screw placement. An incision was made in the skin followed by a burr, drill and tap of the pedicle screw tract. ",
+  #     implant_technique_method == "Robotic (using preop CT)" ~ "Pedicle screws were placed with robotic assistance. A reference frame was secured to the patient's ilium and AP and lateral intraop xrays were obtained and merged with the preoperative CT scan. Once an appropriate merge was confirmed and the plan for the screws was finalized, I proceeded with robotic-assisted pedicle screw placement. An incision was made in the skin followed by a burr, drill and tap of the pedicle screw tract. "
+  #     
+  #   )
+  # }
+  
+  screw_technique_statement <- " "
+  
+  if (str_detect(object, "screw")) {
     
-  )
-  
-  
-  
+    # derive a readable screw label from the object
+    screw_label <- dplyr::case_when(
+      object == "pedicle_screw"       ~ "pedicle screws",
+      object == "lateral_mass_screw"  ~ "lateral mass screws",
+      object == "pars_screw"          ~ "pars screws",
+      object == "translaminar_screw"  ~ "translaminar screws",
+      object == "occipital_screw"     ~ "occipital screws",
+      object == "reinsertion_screw"   ~ "pedicle screws",
+      object == "transarticular_screw"~ "transarticular screws",
+      TRUE                            ~ "screws"
+    )
+    
+    # normalize method vector; handle multiple selections safely
+    m <- tolower(if (is.null(implant_technique_method) || length(implant_technique_method) == 0) {
+      "na"
+    } else implant_technique_method)
+    
+    # only mention pedicle markers when actually placing pedicle screws
+    ped_marker_addon <- if (any(m == "fluoro_pedicle_markers") && object == "pedicle_screw") {
+      " Pedicle markers were used and fluoroscopy confirmed start points with adjustments as needed."
+    } else ""
+    
+    # simple start-point add-on used by some fallbacks
+    start_point_identification_text <- dplyr::case_when(
+      any(m == "fluoro_pedicle_markers") && object == "pedicle_screw" ~
+        "Pedicle markers and fluoroscopy were used to confirm start points and trajectory. ",
+      any(m == "fluoro_perc") ~
+        "Fluoroscopy was used to confirm start points and trajectory. ",
+      any(m %in% c("navigation","nav_3d_surface_map","nav_robot_intra_ct","nav_robot_pre_ct",
+                   "navigation_upper_screws","navigation_lower_screws","navigation_portion_screws")) ~
+        "Navigated instruments were used to burr a start point, identify the trajectory, and place the screws. ",
+      TRUE ~ ""
+    )
+    
+    screw_technique_statement <- dplyr::case_when(
+      
+      # Robotic guidance (keep implant-focused only)
+      any(m == "nav_robot_intra_ct") | any(m == "nav_robot_pre_ct") ~ paste0(
+        "Robotic guidance was used to burr the start point, align to the planned trajectory, and place the ", screw_label, ". ",
+        "Each tract was prepared with burr, drill, and tap prior to screw insertion."
+      ),
+      
+      # 3D surface-mapping navigation
+      any(m == "nav_3d_surface_map") ~ paste0(
+        "Navigation with surface-mapping guidance was used to burr the start point, identify the trajectory, and place the ", screw_label, ". ",
+        "Each tract was drilled, palpated, measured, tapped, and the screws were inserted under navigation."
+      ),
+      
+      # Standard navigation (including scoped nav flags)
+      any(m %in% c("navigation","navigation_upper_screws","navigation_lower_screws","navigation_portion_screws")) ~ paste0(
+        "Navigated instruments were used to burr the start point, identify the trajectory, and place the ", screw_label, ". ",
+        "Each tract was palpated circumferentially, measured, and tapped prior to screw insertion."
+      ),
+      
+      # Fluoroscopy (generic wording so it works for all screw types)
+      any(m %in% c("fluoro_perc","fluoro_pedicle_markers")) ~ paste0(
+        "Under fluoroscopic guidance, the start point was identified and the working tract was created along the planned trajectory. ",
+        "AP and lateral images were used to confirm trajectory and depth. The tract was tapped and the ", screw_label,
+        " were inserted with intermittent fluoroscopic confirmation.", ped_marker_addon
+      ),
+      
+      # Free-hand / NA fallback (landmark-based)
+      any(m %in% c("free_hand","na")) ~ paste0(
+        "Using anatomic landmarks, the start point for the ", screw_label, " was identified and burred. ",
+        "A probe was advanced to develop the tract, the walls were palpated, the tract was measured, and tapped prior to screw insertion. ",
+        start_point_identification_text
+      ),
+      
+      # Final safeguard
+      TRUE ~ paste0(
+        "The ", screw_label, " were placed using standard technique. ",
+        "The start point was burred, the tract was developed and palpated, measured, and tapped prior to screw insertion."
+      )
+    )
+  }
+
   technique_statement <- case_when(
-    object == "incision_drainage" ~ glue("The wound was inspected thoroughly and any necrotic appearing tissue was excised. Tissue samples were sent for cultures. The wound bed was thoroughly irrigated and the bone, deep muscle, fascia and subcutaneous tissue was debrided. Devitalized muscle, fascia and subcutaneous tissue was excised. The wound was irrigated thoroughly until I felt the wound was clean and an adequate debridement had been completed."), 
-    object == "vertebroplasty" ~ glue("For vertebral body cement augmentation, a cannula was inserted into the vertebral body through the pedicle. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebroplasty was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
-    object == "vertebral_cement_augmentation" ~ glue("For vertebral body cement augmentation, I first created a cavity within the vertebral body. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebral augmentation was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
-    object == "laminar_downgoing_hook" ~ glue("For downgoing laminar hooks, the ligamentum flavum was removed at the site of the hook insertion. A hook was then inserted securely under the lamina {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
-    object == "laminar_upgoing_hook" ~ glue("For upgoing laminar hooks, the inferior edge of the cranial lamina was identified and the plane between the lamina and ligamentum was developed and the upgoing hook is then placed within this plane, secured to the lamina aimed cranially {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
-    object == "tp_hook" ~ glue("For transverse process hooks, the cranial edge of the transverse process was identified. A transverse process finder was used to develop the plane and a transverse process hook was placed securely into position along the superior edge of the transverse process. A transverse process hook was placed {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),  
-    object == "c1_lateral_mass_screw" ~ glue("For C1 lateral mass screw placement, after the exposure of the C1-C2 joint space was complete, the medial and lateral edges of the C1 lateral masses were identified and the articular surfaces of the C1-C2 joint were decorticated to allow for fusion. A burr was then used to create a start point in the center of the lateral mass. The path was then drilled incrementally to the anterior cortex. X-ray was used to confirm the drill was just up to the posterior cortex of the C1 tubercle on the lateral X-ray, and the path was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
-    object == "lateral_mass_screw" ~ glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a burr and the screw path drilled incrementally to the far cortex and the dorsal cortex was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}. This completed the lateral mass screws."), 
-    object == "occipital_screw" ~ glue("An appropriately sized occipital plate was selected and was placed centered in the midline and just caudal to the external occipital protuberance, but cranial to the foramen magnum. The plate was held in place to identify the appropriate start points for the occipital screws. The occipital screws were drilled incrementally until the anterior cortex was penetrated. The length of the path was measured to acheive bicortical fixation. The screw paths were then tapped and the screws placed, securing the plate to the occiput."), 
-    object == "pars_screw" ~ glue("For pars screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. {start_point_identification_text} Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming as dorsal as possible while not perforating the dorsal cortex of the pars. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
-    object == "pedicle_screw" ~ glue("{screw_technique_statement} {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), 
+    object == "incision_drainage" ~ glue("The wound was inspected thoroughly and any necrotic appearing tissue was excised. Tissue samples were sent for cultures. The wound bed was thoroughly irrigated and the bone, deep muscle, fascia and subcutaneous tissue was debrided. Devitalized muscle, fascia and subcutaneous tissue was excised. The wound was irrigated thoroughly until I felt the wound was clean and an adequate debridement had been completed."),
+    object == "vertebroplasty" ~ glue("For vertebral body cement augmentation, a cannula was inserted into the vertebral body through the pedicle. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebroplasty was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."),
+    object == "vertebral_cement_augmentation" ~ glue("For vertebral body cement augmentation, I first created a cavity within the vertebral body. The cement was then injected under x-ray guidance until an appropriate amount of cement had been injected into the vertebral body. Vertebral augmentation was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."),
+    object == "laminar_downgoing_hook" ~ glue("For downgoing laminar hooks, the ligamentum flavum was removed at the site of the hook insertion. A hook was then inserted securely under the lamina {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
+    object == "laminar_upgoing_hook" ~ glue("For upgoing laminar hooks, the inferior edge of the cranial lamina was identified and the plane between the lamina and ligamentum was developed and the upgoing hook is then placed within this plane, secured to the lamina aimed cranially {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
+    object == "tp_hook" ~ glue("For transverse process hooks, the cranial edge of the transverse process was identified. A transverse process finder was used to develop the plane and a transverse process hook was placed securely into position along the superior edge of the transverse process. A transverse process hook was placed {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
     object == "reinsertion_screw" ~ glue("The prior screw tracks were palpated for any breaches or defects and the trajectory of the screw was modified as needed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
+    object == "c1_lateral_mass_screw" ~ glue("For C1 lateral mass screw placement, after the exposure of the C1-C2 joint space was complete, the medial and lateral edges of the C1 lateral masses were identified and the articular surfaces of the C1-C2 joint were decorticated to allow for fusion. A burr was then used to create a start point in the center of the lateral mass. The path was then drilled incrementally to the anterior cortex. X-ray was used to confirm the drill was just up to the posterior cortex of the C1 tubercle on the lateral X-ray, and the path was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
+    object == "lateral_mass_screw" ~ glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a burr and the screw path drilled incrementally to the far cortex and the dorsal cortex was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}. This completed the lateral mass screws."),
+    object == "occipital_screw" ~ glue("An appropriately sized occipital plate was selected and was placed centered in the midline and just caudal to the external occipital protuberance, but cranial to the foramen magnum. The plate was held in place to identify the appropriate start points for the occipital screws. The occipital screws were drilled incrementally until the anterior cortex was penetrated. The length of the path was measured to acheive bicortical fixation. The screw paths were then tapped and the screws placed, securing the plate to the occiput."),
+    object == "pars_screw" ~ glue("For pars screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. {screw_technique_statement} Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming as dorsal as possible while not perforating the dorsal cortex of the pars. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
+    object == "pedicle_screw" ~ glue("{screw_technique_statement} {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
     object == "translaminar_screw" ~ glue("For translaminar screw fixation, the starting point was identified using the spinolaminar junction and in the central plane of the contralateral lamina. A burr hole was made to open the superficial cortex, the path was then cannulated and intralaminar screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
-    object == "transarticular_screw" ~ glue("For transarticular screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. {start_point_identification_text} Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming toward the C1 lateral mass. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),     object == "pedicle_hook" ~ glue("For pedicle hooks, a pedicle finder was carefully placed just under the inferior facet and above the superior facet, until the pedicle was found. Once the pedicle was identified, a pedicle hook was inserted directly toward the inferior pedicle, secured within the residual facet joint {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."), 
-    object == "pelvic_screw" ~ glue("{pelvic_screw_statement}"), 
-    object == "pelvic_screw_1" ~ glue("{pelvic_screw_statement}"),
-    object == "pelvic_screw_2" ~ glue("{pelvic_screw_statement}"),
-    object == "sublaminar_wire" ~ glue("For sublaminar wiring, the doubled-up sublaminar was was bent into a hook shape and and passed under the inferior lamina from a caudal to cranial direction. Once the wire was safely passed, the tip of the wire was cut and the two strands were directed in opposite directions of the midline to be attached to the rods on the left and right side. Wires were passed under {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
-    object == "tether" ~ glue("For spinous process tethering/wiring, a hole was drilled in the spinous processes over the lamina. A band was then threaded through the hole and appropriately tensioned and secured in place, tethering {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."), 
+    object == "transarticular_screw" ~ glue("For transarticular screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. {screw_technique_statement} Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming toward the C1 lateral mass. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),     object == "pedicle_hook" ~ glue("For pedicle hooks, a pedicle finder was carefully placed just under the inferior facet and above the superior facet, until the pedicle was found. Once the pedicle was identified, a pedicle hook was inserted directly toward the inferior pedicle, secured within the residual facet joint {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
+    str_detect(object, "pelvic_screw") ~ glue("{pelvic_screw_statement}"),
+    str_detect(object, "si_fusion") ~ glue("{si_fusion_screw_statement}"),
+    object == "sublaminar_wire" ~ glue("For sublaminar wiring, the doubled-up sublaminar was was bent into a hook shape and and passed under the inferior lamina from a caudal to cranial direction. Once the wire was safely passed, the tip of the wire was cut and the two strands were directed in opposite directions of the midline to be attached to the rods on the left and right side. Wires were passed under {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."),
+    object == "tether" ~ glue("For spinous process tethering/wiring, a hole was drilled in the spinous processes over the lamina. A band was then threaded through the hole and appropriately tensioned and secured in place, tethering {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}."),
     object == 'complete_facetectomy' ~ glue("For a complete facetectomy, the inferior, superior, medial and lateral borders of the inferior and superior facet were identified. Both the superior and inferior facet were completely excised and the underlying exiting nerve root decompressed. I performed a complete facetectomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}. This effectively decompressed {glue_collapse(x = exiting_roots_df$exiting_roots_statement, sep = ', ', last = ' and ')}."),
     object == 'grade_1' ~ glue("The inferior, superior, medial and lateral borders of the inferior facet were identified. The inferior facets {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} were excised and the bone was morselized to be used as morselized autograft."),
-    object == 'grade_2' ~ glue("The borders of the inferior facet were identified and the inferior facets were adequately resected. A plane was then developed between the ligamentum and the dura centrally. This was carried out laterally in both directions until the facets were encountered. The superior facets were both adequately resected along with any necessary lamina to fully release the posterior column. {if_else(length(levels_side_df$level)>1, 'I performed posterior column (Smith-Peterson) osteotomies at', '')} {if_else(length(levels_side_df$level)>1, glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and '), '')}{if_else(length(levels_side_df$level)>1, '.', '')}"),   
+    object == 'grade_2' ~ glue("The borders of the inferior facet were identified and the inferior facets were adequately resected. A plane was then developed between the ligamentum and the dura centrally. This was carried out laterally in both directions until the facets were encountered. The superior facets were both adequately resected along with any necessary lamina to fully release the posterior column. {if_else(length(levels_side_df$level)>1, 'I performed posterior column (Smith-Peterson) osteotomies at', '')} {if_else(length(levels_side_df$level)>1, glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and '), '')}{if_else(length(levels_side_df$level)>1, '.', '')}"),
     object == 'diskectomy' ~ glue("For the discectomy, I used the cranial and caudal laminar edges, pars, and facet joints as landmarks. Using a high-speed burr and Kerrison rongeur, I first performed a laminotomy, exposing the ligamentum flavum. I then carefully excised the ligamentum flavum, exposing the dura and traversing {nerve_roots_list$traversing_roots} nerve root. The dural sac was identified and traversing root was protected. The annulus was then incised and the diseased disk material was removed.  I performed a discectomy with partial medial facetectomy and foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the {nerve_roots_list$traversing_roots}. Following the decompression, the canal and foramen and lateral recess were palpated to confirm an appropriate decompression had been completed."),
     object == 'laminotomy' ~ glue("For the laminotomy, the cranial and caudal laminar edges, pars, and facet joints were used as landmarks. Once I had determined the laminotomy site, I used a combination of a high-speed burr and Kerrison rongeur to resect the bone dorsal to the nerve root. I performed a laminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Following the decompression, the foramen was palpated to confirm an adequate decompression had been completed."),
     object == 'cervical_foraminotomy' ~ glue("For the posterior cervical foraminotomy at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}, the superior and inferior facet and joint line was clearly identified. I used a combination of a high-speed burr to resect roughly 50% of the overlying medial inferior facet, which exposed the superior facet. I then proceeded with the high-speed burr, resecting the superior articular facet out to the lateral border of the pedicles. Copious irrigation was used during the resection. After removing the superior facet, the exiting nerve root was identified. A Kerrison 1 was used to remove any remaining overlying tissue. I performed a posterior cervical foraminotomy {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')} interspace to fully decompress the nerve root. Following the decompression, the hemostasis was obtained and I was able to palpate the lateral walls of the cranial and caudal pedicles, confirming adequate decompression."),
@@ -1328,10 +2103,10 @@ op_note_technique_combine_statement <- function(object,
     object == 'lateral_extracavitary_approach' ~ glue("For the modified lateral extracavitary approach at {glue_collapse(levels_side_df$level, sep = ', ', last = ' and ')}, the pedicle of {glue_collapse(levels_side_df$level, sep = ', ', last = ' and ')} was identified and using a combination of a high-speed burr, Kerrison rongeur and osteotome, the inferior and superior facets were fully resected, allowing access to the interspace. The lateral border of the disk space was identified and the dissection was carried out anteriorly around the entire anterior portion of the vertebral body. This was carried out {glue_collapse(levels_side_df$level_side, sep = ', ', last = ' and ')} and allowed safe access to the anterior longitudinal ligament and the most anterior portion of the vertbral body."),
     object == 'laminoplasty' ~ glue("For laminoplasty, an opening and hinge trough was created with a high-speed burr angled perpendicular to the lamina at the lateral mass-lamina junction. This was performed at {glue_collapse(x = levels_side_df$level, sep = ', ', last = ' and ')}. After all troughs were completed, greenstick fractures were created to open the lamina at the laminoplasty levels, the ligamentum flavum at the proximal and distal levels was excised, and laminoplasty plates were sequentially secured into place. The spinous processes were trimmed and the canal was palpated to confirm an adequate decompression had been completed.")
   )
-  
+
   technique_statement <- str_replace_all(string = technique_statement, pattern = "a na ", replacement = "a ")
 
-  
+
   technique_statement
 }
 
@@ -1696,6 +2471,10 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
                                                            additional_procedures_performed_vector = NULL){
   
   
+  if(any(unique(fusion_levels_vector) == "Sacro-iliac") & any(str_detect(objects_added_df$object, "si_fusion"))){
+    fusion_levels_vector <- fusion_levels_vector[fusion_levels_vector != "Sacro-iliac"]
+  }
+  
   ##### THIS IS WHAT CREATES the "REINSERTION OF SPINAL FIXATION" procedure
   # if(nrow(revision_implants_df)>0 & nrow(objects_added_df)>0){
   #   implant_removal_df <- revision_implants_df %>%
@@ -1806,7 +2585,13 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     select(-data) %>%
     unnest(levels) %>%
     mutate(procedure_performed_statement = glue("{procedure_class} at {levels}")) %>%
-    mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation", paste("Instrumentation of the Pelvis with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
+    mutate(procedure_performed_statement = case_when(
+      procedure_class == "Pelvic instrumentation" ~ paste("Instrumentation of the Pelvis with", levels, "fixation"),
+      procedure_class == "SI Fusion" ~ "SI Fusion with transfixing device (27279)",
+      TRUE ~ as.character(procedure_performed_statement)
+    )
+    ) %>%
+    # mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation", paste("Instrumentation of the Pelvis with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
     select(procedure_class, procedure_performed_statement)%>%
     mutate(across(everything(), .fns = ~ as.character(.)))
   

@@ -448,12 +448,16 @@ redcap_table_surgical_details_df_function <- function(all_objects_df_input = tib
       
       ##########   UPPER & LOWER TREATED  #############
       
+      # print(all_objects_df_input$level)
       spine_treated_df <- all_objects_df_input %>%
-        filter(str_detect(level, "S2AI") == FALSE, 
-               str_detect(level, "Iliac") == FALSE) %>%
+        filter(str_detect(level, "S2AI|Iliac|SI") == FALSE) %>%
         filter(level != "Occiput")
+        # filter(level %in% c('C1', 'C1-C2', 'C2', 'C2-C3', 'C3', 'C3-C4', 'C4', 'C4-C5', 'C5', 'C5-C6', 'C6', 'C6-C7', 'C7', 'C7-T1', 'T1', 'T1-T2', 'T2', 'T2-T3', 'T3', 'T3-T4', 'T4', 'T4-T5', 'T5', 'T5-T6', 'T6', 'T6-T7', 'T7', 'T7-T8', 'T8', 'T8-T9', 'T9', 'T9-T10', 'T10', 'T10-T11', 'T11', 'T11-T12', 'T12', 'T12-L1', 'L1', 'L1-L2', 'L2', 'L2-L3', 'L3', 'L3-L4', 'L4', 'L4-L5', 'L5', 'L5-S1', 'S1')
+        #        )
       
       spine_treated <- if_else(nrow(spine_treated_df) > 0, TRUE, FALSE)
+      
+      # print(spine_treated)
       
       if(nrow(spine_treated_df) > 0){
         ##### UPPER TREATED #####
