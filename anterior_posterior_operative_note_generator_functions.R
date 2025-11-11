@@ -181,6 +181,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                       dressing = NULL,
                                       multiple_position_procedure = "NA", 
                                       sex = "The patient", 
+                                      attending_assistant = "",
                                       procedures_performed_sentence = " "){
   
   he_or_she <- case_when(str_to_lower(sex) == "male" ~ "he", 
@@ -444,11 +445,39 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   # procedures_performed_sentence
   procedures_listed <- jh_capitalize_spine_levels_function(procedures_performed_sentence)
   
+  if(str_length(attending_assistant)>2){
+    
+    assistant_procedures_assisted_list <- list()
+    
+    assistant_procedures_assisted_list$positioning <- "positioning"
+    assistant_procedures_assisted_list$exposure <- "exposure"
+    
+    # if(any(str_detect(str_to_lower(implant_technique_method_input), "nav"))){
+    #   assistant_procedures_assisted_list$navigation <- "setup of intraoperative navigation"
+    # }
+    
+    if(any(all_objects_to_add_df$implant == "yes")){
+      assistant_procedures_assisted_list$instrumentation <- "instrumentation"
+    }
+    
+    assistant_procedures_assisted_list$closure <- "layered closure"
+    
+    if(any(str_detect(str_to_lower(procedure_details_list$closure), "vac"))){
+      assistant_procedures_assisted_list$vac <- "application of wound vac"
+    }
+    
+    procedures_assisted_summary <- glue_collapse(assistant_procedures_assisted_list, sep = ", ", last = ", and ")
+    
+    attending_assistant_statement <- glue("Due to the complexity of the procedure and the need for experienced assistance throughout all critical portions of the case—including {procedures_assisted_summary}—{attending_assistant} assisted in all phases of the operation. Their participation was medically necessary to ensure patient safety and operative efficiency. In this case, an adequately experienced qualified resident was not continuously available to provide the required assistance.")
+  }else{
+    attending_assistant_statement <- ""
+  }
+  
   
   if(multiple_position_procedure == "anterior_first"){
-    procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} I was personally present for the entirety of the anterior portion, including the {procedures_listed}.")
+    procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} I was personally present for the entirety of the anterior portion, including the {procedures_listed}. {attending_assistant_statement}")
   }else{
-    procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was transferred to the hospital bed. I was personally present for the entirety of the {procedures_listed}.")
+    procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was transferred to the hospital bed. I was personally present for the entirety of the {procedures_listed}. {attending_assistant_statement}")
   }
   
   procedure_paragraphs <- glue_collapse(x = procedure_details_list, sep = "\n\n")

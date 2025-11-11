@@ -8119,6 +8119,14 @@ server <- function(input, output, session) {
       #######
       anterior_op_note_inputs_list_reactive$sex <- input$sex
       
+      #### attending assistant
+      if(input$attending_assistant_yes_no == TRUE){
+        anterior_op_note_inputs_list_reactive$attending_assistant <- input$attending_assistant
+      }else{
+        anterior_op_note_inputs_list_reactive$attending_assistant <- " "
+      }
+      
+      
     }
     
     anterior_op_note_inputs_list_reactive
@@ -8420,6 +8428,7 @@ server <- function(input, output, session) {
                                                                    dressing = anterior_op_note_inputs_list_reactive()$dressing_details,
                                                                    multiple_position_procedure = anterior_op_note_inputs_list_reactive()$multiple_approach,
                                                                    sex = anterior_op_note_inputs_list_reactive()$sex,
+                                                                   attending_assistant = anterior_op_note_inputs_list_reactive()$attending_assistant,
                                                                    procedures_performed_sentence = anterior_op_note_inputs_list_reactive()$procedures_performed_sentence
       )
     }
