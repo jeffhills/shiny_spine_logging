@@ -1393,107 +1393,199 @@ if(str_detect(object, "si_fusion")){
   ### PELVIC SCREWS (Iliac + S2AI), driven by implant_technique_method ####
   if (str_detect(object, "pelvic_screw")) {
     
+    pelvic_screws_list <- list()
+
+    if("nav_pelvic_screws" %in% implant_technique_method){
+      pelvic_screws_list$nav_technique <- "Pelvic screws were placed using navigation guidance. "
+    }
+  
     # normalize duplicated levels like "S2AI_2"
-    levels_side_df <- levels_side_df %>%
-      mutate(level = str_remove_all(level, "_2"))
+    levels_side_pelvic_screws_df <- levels_side_df %>%
+      mutate(level = str_remove_all(level, "_2")) %>%
+      mutate(screw_size_type_text = paste(screw_size_type, level, "screw")) 
     
-    # --- helper: map your checkbox values -> concise phrasing parts ----
-    pelvic_method_text <- {
-      m <- implant_technique_method %||% "na"
-      
-      # prefer most specific → most general
-      case_when(
-        any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) &
-          any(m %in% c("navigation", "nav_3d_surface_map")) &
-          any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
-          "Robotic navigation with fluoroscopic confirmation",
-        
-        any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) &
-          any(m %in% c("navigation", "nav_3d_surface_map")) ~
-          "Robotic navigation",
-        
-        any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) &
-          any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
-          "Robotic guidance with fluoroscopic confirmation",
-        
-        any(m %in% c("navigation", "nav_3d_surface_map")) &
-          any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
-          "Navigation with fluoroscopic confirmation",
-        
-        any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) ~
-          if_else(any(m == "nav_robot_intra_ct"),
-                  "Robotic guidance (intraoperative CT)",
-                  "Robotic guidance (preoperative CT merge)"),
-        
-        any(m %in% c("navigation", "nav_3d_surface_map")) ~
-          if_else(any(m == "nav_3d_surface_map"),
-                  "3D surface-mapping navigation",
-                  "Intraoperative navigation"),
-        
-        any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
-          "Fluoroscopic guidance",
-        
-        any(m == "free_hand") ~
-          "Free-hand technique using anatomic landmarks",
-        
-        TRUE ~ "Standard technique with intraoperative imaging"
+    
+    if(any(str_detect(levels_side_pelvic_screws_df$level, "Iliac"))){
+      pelvic_screws_list$iliac_technique <- paste(
+        "For iliac screws, the medial posterior iliac crest was identified, the entry point was countersunk, and a probe was used to bore a path toward the anterior inferior iliac spine.",
+        "The walls were palpated to confirm no breaches and the length measured."
       )
     }
     
-    # --- technique boilerplate (Iliac vs S2AI), augmented with method text ----
-    iliac_technique <- glue(
-      "{pelvic_method_text} was used for iliac screw insertion. ",
-      "The posterior iliac crest was identified and the entry point was countersunk. ",
-      "A probe was used to bore a path aimed toward the anterior inferior iliac spine. ",
-      "The walls were palpated to confirm no breaches and the length measured."
-    )
-    
-    s2ai_base <- "The starting point was identified at the inferior–lateral border of the S1 foramen. A probe was advanced across the sacroiliac joint toward the anterior inferior iliac spine, the tract was palpated circumferentially for breach, and the length was measured prior to screw placement."
-    s2ai_technique_single <- glue("{pelvic_method_text} was used for S2AI screw insertion. {s2ai_base}")
-    s2ai_technique_double <- glue("{pelvic_method_text} was used for S2AI screw insertion. {s2ai_base} To accommodate two S2AI screws, the start points were offset slightly proximal and distal from the traditional point.")
-    
-    # --- size statements: clean pluralization & sides -------------------------
-    say_sizes <- function(df, level_label) {
-      if (nrow(df) == 0) return(NULL)
-      df %>%
-        arrange(side) %>%
-        group_by(side) %>%
-        summarise(
-          sizes = glue_collapse(screw_size_type, sep = " and "),
-          n = n(),
-          .groups = "drop"
-        ) %>%
-        mutate(
-          side_phrase = case_when(
-            n > 1 ~ glue("On the {side}, {sizes} {level_label} screws were placed."),
-            TRUE ~ glue("An {sizes} {level_label} screw was placed on the {side}.")
-          )
-        ) %>%
-        pull(side_phrase)
+    if(any(str_detect(levels_side_pelvic_screws_df$level, "S2AI"))){
+      pelvic_screws_list$s2ai_technique <- paste(
+        "For S2AI screws, the starting point was identified at the inferior–lateral border of the S1 foramen and a probe was advanced across the sacroliliac joint, toward the anterior inferior iliac spine. The path was palpated, tapped, and the length measured. "
+      )
     }
     
-    pelvic_screws_statement_list <- list()
+    levels_side_pelvic_screws_df_left <- levels_side_pelvic_screws_df %>%
+      arrange(level) %>%
+      filter(side == "left")
     
-    # ILIAC
-    iliac_df <- levels_side_df %>% filter(level == "Iliac")
-    if (nrow(iliac_df) > 0) {
-      pelvic_screws_statement_list$iliac_technique <- iliac_technique
-      pelvic_screws_statement_list$iliac_sizes <- say_sizes(iliac_df, "iliac")
+    levels_side_pelvic_screws_df_right <- levels_side_pelvic_screws_df %>%
+      arrange(level) %>%
+      filter(side == "right")
+    
+    
+    if(nrow(levels_side_pelvic_screws_df_left)>0){
+      left_pelvis_screws_text_df <- levels_side_pelvic_screws_df_left  %>%
+        group_by(screw_size_type_text) %>%
+        add_tally() %>%
+        ungroup() %>%
+        select(screw_size_type_text, n) %>%
+        distinct() %>%
+        arrange(n) %>%
+        mutate(screw_size_type_text = case_when(
+          n == 1 ~ paste("a", screw_size_type_text),
+          n == 2 ~ paste0("two ", screw_size_type_text, "s"),
+          n == 3 ~ paste0("three ", screw_size_type_text, "s"),
+          n == 4 ~ paste0("four ", screw_size_type_text, "s"),
+          TRUE ~ paste0(n, " ", screw_size_type_text, "s")
+        )) %>%
+        mutate(screw_size_type_text = str_replace_all(screw_size_type_text, "a 8", "an 8"))
+      
+      
+      pelvic_screws_list$left_screws <- paste("On the left,",
+                                              glue_collapse(left_pelvis_screws_text_df$screw_size_type_text, sep = ", ", last = " and "),
+                                              if_else(sum(left_pelvis_screws_text_df$n)>1, "were placed. ", "was placed. "))
+      
     }
     
-    # S2AI (detect whether 1 vs 2 total)
-    s2ai_df <- levels_side_df %>% filter(level == "S2AI")
-    if (nrow(s2ai_df) > 0) {
-      total_s2ai <- nrow(s2ai_df)
-      pelvic_screws_statement_list$s2ai_technique <- if (total_s2ai >= 2) s2ai_technique_double else s2ai_technique_single
-      pelvic_screws_statement_list$s2ai_sizes <- say_sizes(s2ai_df, "S2AI")
+    if(nrow(levels_side_pelvic_screws_df_right)>0){
+      right_pelvis_screws_text_df <- levels_side_pelvic_screws_df_right  %>%
+        group_by(screw_size_type_text) %>%
+        add_tally() %>%
+        ungroup() %>%
+        select(screw_size_type_text, n) %>%
+        distinct() %>%
+        arrange(n) %>%
+        mutate(screw_size_type_text = case_when(
+          n == 1 ~ paste("a", screw_size_type_text),
+          n == 2 ~ paste0("two ", screw_size_type_text, "s"),
+          n == 3 ~ paste0("three ", screw_size_type_text, "s"),
+          n == 4 ~ paste0("four ", screw_size_type_text, "s"),
+          TRUE ~ paste0(n, " ", screw_size_type_text, "s")
+        )) %>%
+        mutate(screw_size_type_text = str_replace_all(screw_size_type_text, "a 8", "an 8"))
+      
+      
+      pelvic_screws_list$right_screws <- paste("On the right,",
+                                               glue_collapse(right_pelvis_screws_text_df$screw_size_type_text, sep = ", ", last = " and "),
+                                               if_else(sum(right_pelvis_screws_text_df$n)>1, "were placed. ", "was placed. "))
+      
     }
     
-    # collapse to single paragraph
     pelvic_screw_statement <- glue_collapse(
-      compact(pelvic_screws_statement_list),
+      compact(pelvic_screws_list),
       sep = " "
     ) %>% as.character()
+    
+    
+    # implant_technique_method
+    # nav_pelvic_screws
+    # print(dput(levels_side_df))
+    # 
+    # # normalize duplicated levels like "S2AI_2"
+    # levels_side_df <- levels_side_df %>%
+    #   mutate(level = str_remove_all(level, "_2"))
+    # 
+    # # --- helper: map your checkbox values -> concise phrasing parts ----
+    # pelvic_method_text <- {
+    #   m <- implant_technique_method %||% "na"
+    #   
+    #   # prefer most specific → most general
+    #   case_when(
+    #     any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) &
+    #       any(m %in% c("navigation", "nav_3d_surface_map")) &
+    #       any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
+    #       "Robotic navigation with fluoroscopic confirmation",
+    #     
+    #     any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) &
+    #       any(m %in% c("navigation", "nav_3d_surface_map")) ~
+    #       "Robotic navigation",
+    #     
+    #     any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) &
+    #       any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
+    #       "Robotic guidance with fluoroscopic confirmation",
+    #     
+    #     any(m %in% c("navigation", "nav_3d_surface_map")) &
+    #       any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
+    #       "Navigation with fluoroscopic confirmation",
+    #     
+    #     any(m %in% c("nav_robot_intra_ct", "nav_robot_pre_ct")) ~
+    #       if_else(any(m == "nav_robot_intra_ct"),
+    #               "Robotic guidance (intraoperative CT)",
+    #               "Robotic guidance (preoperative CT merge)"),
+    #     
+    #     any(m %in% c("navigation", "nav_3d_surface_map")) ~
+    #       if_else(any(m == "nav_3d_surface_map"),
+    #               "3D surface-mapping navigation",
+    #               "Intraoperative navigation"),
+    #     
+    #     any(m %in% c("fluoro_perc", "fluoro_pedicle_markers")) ~
+    #       "Fluoroscopic guidance",
+    #     
+    #     any(m == "free_hand") ~
+    #       "Free-hand technique using anatomic landmarks",
+    #     
+    #     TRUE ~ "Standard technique with intraoperative imaging"
+    #   )
+    # }
+    # 
+    # # --- technique boilerplate (Iliac vs S2AI), augmented with method text ----
+    # iliac_technique <- glue(
+    #   "{pelvic_method_text} was used for iliac screw insertion. ",
+    #   "The posterior iliac crest was identified and the entry point was countersunk. ",
+    #   "A probe was used to bore a path aimed toward the anterior inferior iliac spine. ",
+    #   "The walls were palpated to confirm no breaches and the length measured."
+    # )
+    # 
+    # s2ai_base <- "The starting point was identified at the inferior–lateral border of the S1 foramen. A probe was advanced across the sacroiliac joint toward the anterior inferior iliac spine, the tract was palpated circumferentially for breach, and the length was measured prior to screw placement."
+    # s2ai_technique_single <- glue("{pelvic_method_text} was used for S2AI screw insertion. {s2ai_base}")
+    # s2ai_technique_double <- glue("{pelvic_method_text} was used for S2AI screw insertion. {s2ai_base} To accommodate two S2AI screws, the start points were offset slightly proximal and distal from the traditional point.")
+    # 
+    # # --- size statements: clean pluralization & sides -------------------------
+    # say_sizes <- function(df, level_label) {
+    #   if (nrow(df) == 0) return(NULL)
+    #   df %>%
+    #     arrange(side) %>%
+    #     group_by(side) %>%
+    #     summarise(
+    #       sizes = glue_collapse(screw_size_type, sep = " and "),
+    #       n = n(),
+    #       .groups = "drop"
+    #     ) %>%
+    #     mutate(
+    #       side_phrase = case_when(
+    #         n > 1 ~ glue("On the {side}, {sizes} {level_label} screws were placed."),
+    #         TRUE ~ glue("An {sizes} {level_label} screw was placed on the {side}.")
+    #       )
+    #     ) %>%
+    #     pull(side_phrase)
+    # }
+    # 
+    # pelvic_screws_statement_list <- list()
+    # 
+    # # ILIAC
+    # iliac_df <- levels_side_df %>% filter(level == "Iliac")
+    # if (nrow(iliac_df) > 0) {
+    #   pelvic_screws_statement_list$iliac_technique <- iliac_technique
+    #   pelvic_screws_statement_list$iliac_sizes <- say_sizes(iliac_df, "iliac")
+    # }
+    # 
+    # # S2AI (detect whether 1 vs 2 total)
+    # s2ai_df <- levels_side_df %>% filter(level == "S2AI")
+    # if (nrow(s2ai_df) > 0) {
+    #   total_s2ai <- nrow(s2ai_df)
+    #   pelvic_screws_statement_list$s2ai_technique <- if (total_s2ai >= 2) s2ai_technique_double else s2ai_technique_single
+    #   pelvic_screws_statement_list$s2ai_sizes <- say_sizes(s2ai_df, "S2AI")
+    # }
+    # 
+    # # collapse to single paragraph
+    # pelvic_screw_statement <- glue_collapse(
+    #   compact(pelvic_screws_statement_list),
+    #   sep = " "
+    # ) %>% as.character()
     
   } else {
     pelvic_screw_statement <- " "

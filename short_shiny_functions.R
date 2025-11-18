@@ -726,7 +726,6 @@ jh_make_shiny_table_row_function <- function(required_option = FALSE,
     )  
   }
   
-  # textAreaInput(inputId = "operative_note_text", label = "Operative Note:", width = "100%", height = 750),
   if(input_type == "picker"){
     row <- tags$tr(width = "100%",
                    if(required_option == TRUE){

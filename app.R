@@ -5884,12 +5884,6 @@ server <- function(input, output, session) {
   #####################   #####################   #########   RUN CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION ##################### #####################
   
   observeEvent(input$implants_complete, ignoreNULL = TRUE, ignoreInit = TRUE, once = TRUE, {
-    # if(any(str_detect(all_objects_to_add_list$objects_df$object, "screw|anterior_plate"))){
-    #   implants_placed_yes_no <- "yes"
-    # }else{
-    #   implants_placed_yes_no <- "no"
-    # }
-    
     if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
       anterior_approach_yes_no <- "yes"  
     }else{
@@ -6962,7 +6956,7 @@ server <- function(input, output, session) {
                                            font_size = 16,
                                            checkboxes_inline = TRUE,
                                            input_id = "implant_manufacturer",
-                                           choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix", "Zimmer Bioment", "SI Bone", "Other")
+                                           choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix/Seaspine", "SI Bone", "Zimmer Bioment", "Other")
           ),
           h4("Screw Sizes:"),
           fluidRow(
@@ -9239,11 +9233,28 @@ server <- function(input, output, session) {
   #################  SURGICAL DETAILS TABLE ##################
   output$surgical_details_redcap_table <- renderTable({
     surgical_details_redcap_table_reactive()
+    # surgical_details_redcap_table_reactive() %>%
+    #   pivot_wider(names_from = name, values_from = value) %>%
+    #   mutate(record_id = record_number) %>%
+    #   mutate(redcap_event_name = "surgery_arm_1") %>%
+    #   mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
+    #   mutate(redcap_repeat_instrument = "surgical_details") %>%
+    #   mutate(surgical_details_complete = "Complete") %>%
+    #   select(record_id, redcap_event_name, everything())
   })
   
   #################  INTRAOP DETAILS TABLE ##################
   output$intraoperative_details_redcap_table <- renderTable({
     intraoperative_details_redcap_table_reactive()
+    
+    # intraoperative_details_redcap_table_reactive() %>%
+    #   pivot_wider(names_from = name, values_from = value) %>%
+    #   mutate(record_id = record_number) %>%
+    #   mutate(redcap_event_name = "surgery_arm_1") %>%
+    #   mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
+    #   mutate(redcap_repeat_instrument = "intraoperative_details") %>%
+    #   mutate(intraoperative_details_complete = "Complete") %>%
+    #   select(record_id, redcap_event_name, everything())
   })
   
   #################  RODS CROSSING BY LEVEL TABLE ##################
@@ -9720,7 +9731,14 @@ server <- function(input, output, session) {
           select(record_id, redcap_event_name, everything())
         
         if(all(names(surgical_details_instrument %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
+          
+          # print("got here")
+          # print(surgical_details_instrument$redcap_repeat_instance)
+          # print(dput(surgical_details_instrument))
+          
           importRecords(rcon = rcon_reactive$rcon, data = surgical_details_instrument, returnContent = "count")
+          print("got here too")
+          
         }else{
           tables_not_uploaded_list$surgical_details_instrument <- "surgical_details_instrument"
         }

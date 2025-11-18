@@ -1034,7 +1034,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(objec
                                                                            approach_open_mis = "Open",
                                                                            approach_robot_navigation = "NA",
                                                                            approach_specified_anterior = "Left-sided",
-                                                                           implant_technique_method = "Implant start points were identified using anatomic landmarks.",
+                                                                           implant_technique_method = "free_hand",
                                                                            implant_position_confirmation_method = "Intraoperative fluoroscopy was used to confirm position of all implants.",
                                                                            deformity_correction_choices = c("The rods were secured into place with set screws. "), 
                                                                            alignment_correction_method = c("The rods were secured into place with set screws. "), 
@@ -1137,26 +1137,50 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(objec
                   hr(),
                   if(implants_placed == "yes"){
                     if(str_detect(procedure_approach, "posterior")){
-                      prettyCheckboxGroup(inputId = "implant_technique_method", 
-                                          label = "Modalities used for placing screws:", 
-                                          choices = list(
-                                            "Anatomic landmarks and free-hand technique" = "free_hand",
-                                            "Fluoroscopy for percutaneous screw placement" = "fluoro_perc",
-                                            "Fluoroscopy with pedicle markers" = "fluoro_pedicle_markers",
-                                            "Navigation" = "navigation",
-                                            "Navigation was used for the upper construct screws" = "navigation_upper_screws",
-                                            "Navigation was used for the lower construct screws" = "navigation_lower_screws",
-                                            "Navigation was used for select screws" = "navigation_portion_screws",
-                                            "Navigation with robotic guidance (using intraoperative CT)" = "nav_robot_intra_ct",
-                                            "Navigation with robotic guidance (using preoperative CT)" = "nav_robot_pre_ct",
-                                            "3D navigation with surface mapping (e.g., 7D)" = "nav_3d_surface_map",
-                                            "S2AI or iliac screws placed using navigation guidance" = "nav_pelvic_screws",
-                                            "Not applicable" = "na"
-                                          ),
-                                          selected = implant_technique_method, 
-                                          status = "primary",
-                                          inline = FALSE
-                                          )
+                      jh_make_shiny_table_row_function(
+                        input_type = "prettyCheckboxGroup",
+                        left_column_label = "Modalities used for placing screws:",
+                        text_align = question_text_align,
+                        input_id = "implant_technique_method",
+                        left_column_percent_width = question_label_column_width,
+                        font_size = row_label_font_size,
+                        checkboxes_inline = FALSE,
+                        choices_vector = list(
+                          "Anatomic landmarks and free-hand technique" = "free_hand",
+                          "Fluoroscopy for percutaneous screw placement" = "fluoro_perc",
+                          "Fluoroscopy with pedicle markers" = "fluoro_pedicle_markers",
+                          "Navigation" = "navigation",
+                          "Navigation was used for the upper construct screws" = "navigation_upper_screws",
+                          "Navigation was used for the lower construct screws" = "navigation_lower_screws",
+                          "Navigation was used for select screws" = "navigation_portion_screws",
+                          "Navigation with robotic guidance (using intraoperative CT)" = "nav_robot_intra_ct",
+                          "Navigation with robotic guidance (using preoperative CT)" = "nav_robot_pre_ct",
+                          "3D navigation with surface mapping (e.g., 7D)" = "nav_3d_surface_map",
+                          "S2AI or iliac screws placed using navigation guidance" = "nav_pelvic_screws",
+                          "Not applicable" = "na"
+                        ),
+                        initial_value_selected = implant_technique_method
+                      )
+                      # prettyCheckboxGroup(inputId = "implant_technique_method", 
+                      #                     label = "Modalities used for placing screws:", 
+                      #                     choices = list(
+                      #                       "Anatomic landmarks and free-hand technique" = "free_hand",
+                      #                       "Fluoroscopy for percutaneous screw placement" = "fluoro_perc",
+                      #                       "Fluoroscopy with pedicle markers" = "fluoro_pedicle_markers",
+                      #                       "Navigation" = "navigation",
+                      #                       "Navigation was used for the upper construct screws" = "navigation_upper_screws",
+                      #                       "Navigation was used for the lower construct screws" = "navigation_lower_screws",
+                      #                       "Navigation was used for select screws" = "navigation_portion_screws",
+                      #                       "Navigation with robotic guidance (using intraoperative CT)" = "nav_robot_intra_ct",
+                      #                       "Navigation with robotic guidance (using preoperative CT)" = "nav_robot_pre_ct",
+                      #                       "3D navigation with surface mapping (e.g., 7D)" = "nav_3d_surface_map",
+                      #                       "S2AI or iliac screws placed using navigation guidance" = "nav_pelvic_screws",
+                      #                       "Not applicable" = "na"
+                      #                     ),
+                      #                     selected = implant_technique_method, 
+                      #                     status = "primary",
+                      #                     inline = FALSE
+                      #                     )
                     }
                   },
                   hr(),
@@ -2008,7 +2032,7 @@ addition_surgical_details_modal_box_2_function <-
                          input_id = "durotomy_instrument",
                          left_column_percent_width = 45,
                          font_size = 18,
-                         choices_vector = c("Burr", "Kerrison", "Rongeur", "Bovie", "Other"),
+                         choices_vector = c("Burr", "Kerrison", "Rongeur", "Bovie", "Curette", "Osteotome", "Other"),
                          initial_value_selected = durotomy_instrument_input,
                          checkboxes_inline = FALSE,
                          return_as_full_table = TRUE
