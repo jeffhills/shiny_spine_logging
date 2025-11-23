@@ -975,7 +975,7 @@ ui <- dashboardPage(skin = "black",
                                                                                 choices = c("Morselized Allograft",
                                                                                             "Local Autograft",
                                                                                             "Morselized Autograft (separate fascial incision)",
-                                                                                            "Structural Autograft (harvested through separate fascial incision)"
+                                                                                            "Structural Autograft (separate fascial incision)"
                                                                                 )
                                                             )
                                                      ),
@@ -1083,7 +1083,7 @@ ui <- dashboardPage(skin = "black",
                                                                                 choices = c("Morselized Allograft",
                                                                                             "Local Autograft",
                                                                                             "Morselized Autograft (separate fascial incision)",
-                                                                                            "Structural Autograft (harvested through separate fascial incision)"
+                                                                                            "Structural Autograft (separate fascial incision)"
                                                                                 )
                                                             )
                                                      ),
@@ -6214,8 +6214,8 @@ server <- function(input, output, session) {
         additional_procedures_list$removal_instrumentation <- "Removal of spinal instrumentation"
       }
       
-      if(length(input$posterior_bone_graft) > 0 & any(input$posterior_bone_graft == "Structural Autograft (harvested through separate fascial incision)")){
-        additional_procedures_list$structural_autograft_separate <- "Structural Autograft (harvested through separate fascial incision)"
+      if(length(input$posterior_bone_graft) > 0 & any(input$posterior_bone_graft == "Structural Autograft (separate fascial incision)")){
+        additional_procedures_list$structural_autograft_separate <- "Structural Autograft (separate fascial incision)"
       }
       
       if(length(input$prior_fusion_levels)>0){
@@ -7800,7 +7800,7 @@ server <- function(input, output, session) {
       }
       
       #######
-      if(any(input$posterior_bone_graft == "Structural Autograft (harvested through separate fascial incision)")){
+      if(any(input$posterior_bone_graft == "Structural Autograft (separate fascial incision)")){
         posterior_op_note_inputs_list_reactive$structural_autograft_separate <- TRUE
       }else{
         posterior_op_note_inputs_list_reactive$structural_autograft_separate <- FALSE

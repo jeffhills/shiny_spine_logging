@@ -1241,7 +1241,14 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     fusion_statement_list$fusion_begin_statement <- glue("I then proceeded with the spinal fusion portion of the procedure. The posterior elements of {glue_collapse(fusion_segments_df$level, sep = ', ', last = ', and ')} were decorticated.")
     
     if(length(biologics_list)>0){
-      fusion_statement_list$biologics <- paste("After the fusion bed was prepared,", glue_collapse(x = biologics_list, sep = ", ", last = " and "), "was impacted into the fusion bed.")
+      
+      if (isTRUE("interbody_fusion" %in% names(all_objects_to_add_df)) &&
+          any(all_objects_to_add_df$interbody_fusion == "yes")) {
+        fusion_statement_list$biologics <- paste("In total, ", glue_collapse(x = biologics_list, sep = ", ", last = " and "), "was appropriately divided between the interbody fusion and posterolateral fusion beds.")
+      }else{
+        fusion_statement_list$biologics <- paste("In total, ", glue_collapse(x = biologics_list, sep = ", ", last = " and "), "was impacted into the fusion bed.")
+      }
+      
     }
     
     if(bmp > 0){
