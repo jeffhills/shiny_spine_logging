@@ -8878,7 +8878,8 @@ server <- function(input, output, session) {
     }
     data_wide %>%
       ungroup() %>%
-      mutate(across(everything(), ~ replace_na(.x, " "))) %>%
+      # mutate(across(everything(), ~ replace_na(.x, " "))) %>%
+      mutate(across(where(is.character), ~ replace_na(.x, " "))) %>%
       mutate(redcap_repeat_instance = row_number()) %>%
       mutate(redcap_repeat_instrument = "procedures_by_level_repeating") %>%
       mutate(dos_surg_repeating = as.character(input$date_of_surgery)) %>%
