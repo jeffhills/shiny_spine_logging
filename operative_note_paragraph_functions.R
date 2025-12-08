@@ -831,6 +831,14 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
       mutate(screw_size_type = " ")
   }
   
+  if(is.na(implant_technique_method) | is.null(implant_technique_method)){
+    implant_technique_method <- "NA"
+  }
+  if(is.na(implant_confirmation_method) | is.null(implant_confirmation_method)){
+    implant_confirmation_method <- "NA"
+  }
+  
+  
   
   #### NOW WE CREATE A TIBBLE THAT HAS EACH PARAGRAPH'S DATA NESTED into 1 ROW. IE, each row represents a new paragraph
   if(length(revision_decompression_vector) > 0){
@@ -898,13 +906,7 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
   # THIS CREATES A DATAFRAME WITH NESTED DATAFRAMES.... full dataframe names = 'procedure_category, procedures_combine, nested_data'
   # nested df names ('nested_data') = 'object, level, vertebral_number, side, implant_statement, screw_size_type'
   
-  if(is.na(implant_technique_method) | is.null(implant_technique_method)){
-    implant_technique_method <- "NA"
-  }
-  if(is.na(implant_confirmation_method) | is.null(implant_confirmation_method)){
-    implant_confirmation_method <- "NA"
-  }
-  
+
   paragraph_df_prepped_df <- df_for_paragraphs %>%
     mutate(approach_technique_input = approach_technique,
            # image_guidance_technique_input = image_guidance[1], 

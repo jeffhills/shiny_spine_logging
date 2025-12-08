@@ -2813,6 +2813,7 @@ server <- function(input, output, session) {
       decompression_df <- all_object_ids_df %>%
         filter(category == "decompression") %>%
         left_join(fread("coordinates/decompression.csv") %>%
+                    filter(str_detect(object_id, "nerve_transection") == FALSE) %>%
                     group_by(object_id) %>%
                     nest() %>%
                     mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
@@ -7589,7 +7590,13 @@ server <- function(input, output, session) {
       posterior_op_note_inputs_list_reactive$approach_specified_posterior <- input$approach_specified_posterior
       
       #######
-      posterior_op_note_inputs_list_reactive$approach_open_mis <- input$approach_open_mis
+      if(is.null(input$approach_open_mis)){
+        posterior_op_note_inputs_list_reactive$approach_open_mis <- "NA"
+      }else{
+        posterior_op_note_inputs_list_reactive$approach_open_mis <-  input$approach_open_mis
+      }
+      
+      
       
       #######
       # posterior_op_note_inputs_list_reactive$approach_robot_navigation <- input$approach_robot_navigation
