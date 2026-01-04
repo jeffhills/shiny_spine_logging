@@ -418,7 +418,8 @@ ui <- dashboardPage(skin = "black",
                                                 br()
                                                 # h5("all_objects_to_add_list$objects_df:"),
                                                 # tableOutput("objects_df")
-                                 )
+                                 ),
+                                 textOutput(outputId = "computed_bone_graft_cc"),
                           ),
                           column(width = 9, 
                                  box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Surgical Procedures:"), solidHeader = TRUE, status = "primary",
@@ -5824,6 +5825,38 @@ server <- function(input, output, session) {
   })%>%
     bindEvent(input$implants_complete)
   
+  ########################################### COMPUTE PROPOSED BONE GRAFT BY LEVELS ###########################################
+  allograft_needed_reactive_cc <- reactive({
+    posterior_df <- all_objects_to_add_list$objects_df %>%
+      dplyr::filter(approach == "posterior")
+    fusion_levels <- tryCatch(
+      nrow(fusion_levels_df_function(posterior_df)),
+      error = function(e) 0
+    )
+    
+    obj <- if ("object" %in% names(posterior_df)) posterior_df$object else character()
+    
+    base_cc <- fusion_levels * 15
+    
+    subtract_cc <-
+      sum(obj == "laminectomy", na.rm = TRUE) * 15 +
+      sum(grepl("^grade_[3-6]$", obj), na.rm = TRUE) * 30
+    
+    max(0, base_cc - subtract_cc)
+  })
+  
+  output$computed_bone_graft_cc <- renderText({
+    cc <- allograft_needed_reactive_cc()
+    if (is.null(cc) || cc <= 0) return("")
+    cc_rounded <- ceiling(cc / 30) * 30
+    glue::glue("Allograft cc: {cc_rounded}")
+    
+  })
+  
+
+  
+  
+  ########################################### Build REACTIVE DATAFRAMES FOR IMPLANTS CONNECTING TO THE RODS ###########################################
   
   ########################################### Build REACTIVE DATAFRAMES FOR IMPLANTS CONNECTING TO THE RODS ###########################################
   
@@ -6341,15 +6374,22 @@ server <- function(input, output, session) {
     age <- trunc((input$date_of_birth %--% input$date_of_surgery) / years(1))
     
     if(existing_patient_data$match_found == TRUE){
+      # print("match found")
       if(str_to_lower(input$primary_revision) == "revision"){
         
         most_recent_surgery_df <- existing_patient_data$prior_surgical_summary %>%
           filter(main_approach == input$revision_approach) %>%
           filter(date_of_surgery == max(date_of_surgery))
         
+        # print(paste(dput(most_recent_surgery_df)))
+        
         most_recent_surgery <- format(most_recent_surgery_df$date_of_surgery, "%m/%d/%y")
         
+        # print(most_recent_surgery)
+        
         prior_surgery_for_revision_statement <- glue(" that underwent surgery most recently on {most_recent_surgery}, from {most_recent_surgery_df$upper_treated_vertebrae} to {most_recent_surgery_df$lower_treated_vertebrae}")
+        
+        # print(prior_surgery_for_revision_statement)
         
       }else{
         prior_surgery_for_revision_statement <- ""

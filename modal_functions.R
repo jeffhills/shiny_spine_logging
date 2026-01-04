@@ -1147,6 +1147,7 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(objec
                         checkboxes_inline = FALSE,
                         choices_vector = list(
                           "Anatomic landmarks and free-hand technique" = "free_hand",
+                          "Prior screw tracts" = "prior_screw_tracts",
                           "Fluoroscopy for percutaneous screw placement" = "fluoro_perc",
                           "Fluoroscopy with pedicle markers" = "fluoro_pedicle_markers",
                           "Navigation" = "navigation",
