@@ -2648,18 +2648,7 @@ server <- function(input, output, session) {
   })
   
   
-  observeEvent(input$add_intervertebral_cage, ignoreNULL = TRUE, ignoreInit = TRUE,{
-    updateRadioGroupButtons(session = session, 
-                            inputId = "object_to_add",
-                            choices = c(
-                              "Intervertebral Cage" = "intervertebral_cage"
-                            ),
-                            checkIcon = list(
-                              yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
-                            ),
-                            selected = "intervertebral_cage"
-    )
-  })
+
   
   observeEvent(list(input$add_implants, input$spinal_regions, input$spine_approach, input$crop_y),ignoreNULL = TRUE, {
     if(input$spine_approach == "Posterior"){
@@ -2691,7 +2680,7 @@ server <- function(input, output, session) {
                               checkIcon = list(
                                 yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
                               ),
-                              selected = "pedicle_screw"
+                              selected = input$object_to_add
       )
     }
   })
@@ -2808,6 +2797,35 @@ server <- function(input, output, session) {
     )
   })
   
+  observeEvent(input$add_intervertebral_cage, ignoreNULL = TRUE, ignoreInit = TRUE,{
+    if(any(all_implants_constructed_df$object == "intervertebral_cage") == FALSE){
+      interbody_df <- all_object_ids_df %>%
+        filter(category == "interbody") %>%
+        left_join(fread("coordinates/interbody.csv") %>%
+                    group_by(object_id) %>%
+                    nest() %>%
+                    mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+                    select(object_id, object_constructed))
+      
+      all_implants_constructed_df <<- all_implants_constructed_df %>%
+        bind_rows(interbody_df)  %>%
+        distinct()
+    }
+    
+    updateRadioGroupButtons(session = session, 
+                            inputId = "object_to_add",
+                            choices = c(
+                              "Intervertebral Cage" = "intervertebral_cage"
+                            ),
+                            checkIcon = list(
+                              yes = tags$i(class = "fas fa-screwdriver", style = "color: steelblue")
+                            ),
+                            selected = "intervertebral_cage"
+    )
+    
+  })
+  
+  
   observeEvent(input$add_special_approach,ignoreNULL = TRUE, ignoreInit = TRUE, {
     
     if(any(all_implants_constructed_df$object == "transpedicular_approach") == FALSE){
@@ -2883,7 +2901,7 @@ server <- function(input, output, session) {
                     select(object_id, object_constructed))
       
       all_implants_constructed_df <<- all_implants_constructed_df %>%
-        bind_rows(incision_drainage_df)  %>%
+        # bind_rows(incision_drainage_df)  %>%
         bind_rows(spinal_cord_stimulator_df)  %>%
         distinct()
     }
@@ -3032,6 +3050,7 @@ server <- function(input, output, session) {
   
   
   output$troubleshooting_plot_click_df <- renderTable({
+    # print(paste("currently_selected object_to_addd:", input$object_to_add))
       if(input$object_to_add == "pelvic_screw"){
         object_currently_selected_to_add <- c("pelvic_screw_1", "pelvic_screw_2")
       }else if(input$object_to_add == "si_fusion_screw"){
@@ -3065,6 +3084,7 @@ server <- function(input, output, session) {
   #### OBSERVE THE PLOT CLICK AND ADD APPROPRIATE object ####
   object_added_reactive_df <- reactive({
     
+    req(input$object_to_add)
     if(input$object_to_add == "pelvic_screw"){
       object_currently_selected_to_add <- c("pelvic_screw_1", "pelvic_screw_2")
     }else if(input$object_to_add == "si_fusion_screw"){
@@ -5930,21 +5950,34 @@ server <- function(input, output, session) {
       posterior_approach_yes_no <- "no" 
     }
     
+    # if(any(input$diagnosis_category == "deformity")){
+    #   deformity_correction_techniques_vector <- c(
+    #     "The rods were secured into place with set screws. ",
+    #     "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place with set screws. ",
+    #     "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
+    #     "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
+    #     "In situ rod benders were used to aide in correcting the alignment. ",
+    #     "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
+    #     "Compression and distraction off the kickstand rod was used to aide in correcting the alignment. ",
+    #     "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
+    #     "Other")
+    # }else{
+    #   deformity_correction_techniques_vector <- c(
+    #     "The rods were secured into place with set screws. ",
+    #     "In situ rod benders were used to aide in correcting the alignment. ",
+    #     "Other")
+    # }
     if(any(input$diagnosis_category == "deformity")){
-      deformity_correction_techniques_vector <- c(
-        "The rods were secured into place with set screws. ",
-        "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place with set screws. ",
-        "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
-        "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
-        "In situ rod benders were used to aide in correcting the alignment. ",
-        "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
-        "Compression and distraction off the kickstand rod was used to aide in correcting the alignment. ",
-        "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
-        "Other")
+      deformity_correction_techniques_vector <- deformity_correction_techniques_vector_all
     }else{
       deformity_correction_techniques_vector <- c(
-        "The rods were secured into place with set screws. ",
-        "In situ rod benders were used to aide in correcting the alignment. ",
+        "Pro-axis bed was bent",
+        "in situ rod benders",
+        "Compression", 
+        "Distraction",
+        "reduction towers",
+        "temporary rod",
+        "The set screws were final tightened.",
         "Other")
     }
     
@@ -7880,19 +7913,40 @@ server <- function(input, output, session) {
       }
       
       
-      #######
-      if(length(input$alignment_correction_method)>0){
-        if(any(input$alignment_correction_method == "Other")){
-          # posterior_op_note_inputs_list_reactive$alignment_correction_method <- gsub("Other", input$alignment_correction_method_other, input$alignment_correction_method, ignore.case = TRUE)
-          posterior_op_note_inputs_list_reactive$alignment_correction_method <- glue_collapse(gsub("Other", input$alignment_correction_method_other, input$alignment_correction_method, ignore.case = TRUE), sep = "")
+      deformity_correction_sentence_function <- function(techniques_used) {
+        techniques_used <-  str_to_lower(techniques_used[techniques_used != "Not applicable"])
+        
+        if (length(techniques_used) > 0){
+          if(any(techniques_used == "Other")){
+            techniques_used <-  techniques_used[techniques_used != "Other"]
+            correction_sentence <-  glue("Deformity correction was performed using a combination of {glue::glue_collapse(techniques_used, sep = ', ', last = ' and ')}. {input$alignment_correction_method_other}. After confirming final positioning, the screws were final tightened.  ")
+          }else{
+            correction_sentence <-  glue("Deformity correction was performed using a combination of {glue::glue_collapse(techniques_used, sep = ', ', last = ' and ')}. After confirming final positioning, the screws were final tightened. ")
+          }
           
         }else{
-          if(length(input$alignment_correction_method)>0){
-            posterior_op_note_inputs_list_reactive$alignment_correction_method <- glue_collapse(input$alignment_correction_method, sep = "")
-          }else{
-            posterior_op_note_inputs_list_reactive$alignment_correction_method <- "The rods were set into place and secured with set screws. "
-          }
+          correction_sentence <-  "The rods were set into place and secured with set screws. "
         }
+        return(correction_sentence)
+      }
+      
+      #######
+      if(length(input$alignment_correction_method)>0){
+        
+        posterior_op_note_inputs_list_reactive$alignment_correction_method <- deformity_correction_sentence_function(techniques_used = input$alignment_correction_method)
+        
+        # if(any(input$alignment_correction_method == "Other")){
+        #   # posterior_op_note_inputs_list_reactive$alignment_correction_method <- glue_collapse(gsub("Other", input$alignment_correction_method_other, input$alignment_correction_method, ignore.case = TRUE), sep = "")
+        #   
+        # }else{
+        #   if(length(input$alignment_correction_method)>0){
+        #     
+        #     
+        #     posterior_op_note_inputs_list_reactive$alignment_correction_method <- glue_collapse(input$alignment_correction_method, sep = "")
+        #   }else{
+        #     posterior_op_note_inputs_list_reactive$alignment_correction_method <- "The rods were set into place and secured with set screws. "
+        #   }
+        # }
       }else{
         posterior_op_note_inputs_list_reactive$alignment_correction_method <- ""
       }

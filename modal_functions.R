@@ -1,3 +1,21 @@
+##### DEFORMITY CORRECTION OPTIONS VECTOR #########
+deformity_correction_techniques_vector_all <- c(
+  # "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
+  # "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
+  "bending the Pro-axis bed",
+  "in situ rod benders",
+  "Compression", 
+  "Distraction",
+  "reduction towers",
+  "a temporary rod",
+  "working rod was secured on the concavity and rotated,",
+  "sequential reduction using connectors and nuts",
+  # "The set screws were final tightened.",
+  "Other", 
+  "Not applicable"
+  )
+
+
 ##### POSTOP PLANS OPTIONS VECTOR ######
 postop_dispo_choices_vector <- c("discharge to home. Monitor in recovery for 4hrs for difficulty swallowing, breathing, other issues.", 
                                  "admit to floor.", 
