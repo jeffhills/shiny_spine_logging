@@ -585,101 +585,101 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df,
 
 #############-----------------------   PROCEDURES PERFORMED NUMBERED SECTION  ----------------------###############
 
-anterior_op_note_procedures_performed_numbered_function <- function(objects_added_df,
-                                                                    revision_decompression_vector = NULL,
-                                                                    fusion_levels_vector = NULL,
-                                                                    additional_procedures_performed_vector = NULL){
-  
-  plate_levels_df <- objects_added_df %>%
-    filter(object == "anterior_plate") %>%
-    mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level)) %>%
-    bind_rows(objects_added_df %>%
-                filter(object == "anterior_plate")%>%
-                mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level))) %>%
-    unnest(level) %>%
-    select(-vertebral_number) %>%
-    mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
-    select(level,vertebral_number, approach, category, object, side) %>%
-    distinct() %>%
-    arrange(vertebral_number)
-  
-  objects_added_df <- objects_added_df %>%
-    filter(str_detect(string = object, pattern = "anterior_plate") == FALSE) %>%
-    bind_rows(plate_levels_df)
-  
-  if(length(revision_decompression_vector) > 0){
-    
-    if(nrow(objects_added_df)>0){
-      summary_nested_df <- objects_added_df %>%
-        mutate(revision_levels_vector = list(revision_decompression_vector)) %>%
-        select(level, vertebral_number, approach, category, object, side, revision_levels_vector) %>%
-        mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
-        select(-revision_levels_vector) %>%
-        mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
-        unnest(revision_level) %>%
-        mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), paste0(object))) %>%
-        select(level, object, vertebral_number) %>%
-        # mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
-        mutate(procedure_class = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
-        unnest(procedure_class) %>%
-        # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
-        mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
-        unnest(procedures_per_line) 
-    }else{
-      summary_nested_df <- objects_added_df %>%
-        select(level, object, vertebral_number) %>%
-        mutate(procedure_class = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
-        unnest(procedure_class) %>%
-        mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
-        unnest(procedures_per_line) 
-    }
-    
-  }else{
-    summary_nested_df <- objects_added_df %>%
-      select(level, object, vertebral_number) %>%
-      mutate(procedure_class = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
-      unnest(procedure_class) %>%
-      mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
-      unnest(procedures_per_line) 
-  }
-  
-  
-  summary_single_statements <- summary_nested_df %>%
-    filter(procedures_per_line == "distinct") %>%
-    mutate(procedure_performed_statement = glue("{procedure_class} at {level}"))%>%
-    select(procedure_class, procedure_performed_statement)
-  
-  summary_multiple_nested <- summary_nested_df %>%
-    filter(procedures_per_line == "combine") %>%
-    group_by(procedure_class) %>%
-    nest() %>%
-    ungroup() %>%
-    mutate(count = row_number()) %>%
-    mutate(levels = map(.x = data, .f = ~ extract_levels_function(input_df = .x))) %>%
-    select(-data) %>%
-    unnest(levels) %>%
-    mutate(procedure_performed_statement = glue("{procedure_class} at {levels}")) %>%
-    mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation", paste("Instrumentation of the Pelvis with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
-    mutate(procedure_performed_statement = if_else(procedure_class == "SI Fusion", paste("SI Fusion with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
-    select(procedure_class, procedure_performed_statement)
-  
-  added_procedures_df <- tibble(procedure_performed_statement = additional_procedures_performed_vector) 
-  
-  procedures_numbered_df <- summary_nested_df %>%
-    select(procedure_class) %>%
-    distinct() %>%
-    left_join(summary_single_statements %>%
-                bind_rows(summary_multiple_nested)) %>%
-    select(procedure_performed_statement) %>%
-    add_row(procedure_performed_statement = if_else(is.null(fusion_levels_vector), "", paste("Posterior Spinal Fusion at", glue_collapse(fusion_levels_vector, sep = ", ", last = " and ")))) %>%
-    bind_rows(added_procedures_df) %>%
-    filter(procedure_performed_statement !="") %>%
-    mutate(count = row_number()) %>%
-    mutate(procedures_performed_numbered = glue("{count}. {procedure_performed_statement}")) %>%
-    select(procedures_performed_numbered)
-  
-  glue_collapse(procedures_numbered_df$procedures_performed_numbered, sep = "\n")
-}
+# anterior_op_note_procedures_performed_numbered_function <- function(objects_added_df,
+#                                                                     revision_decompression_vector = NULL,
+#                                                                     fusion_levels_vector = NULL,
+#                                                                     additional_procedures_performed_vector = NULL){
+#   
+#   plate_levels_df <- objects_added_df %>%
+#     filter(object == "anterior_plate") %>%
+#     mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$cranial_level)) %>%
+#     bind_rows(objects_added_df %>%
+#                 filter(object == "anterior_plate")%>%
+#                 mutate(level = map(.x = level, .f = ~ jh_get_cranial_caudal_interspace_body_list_function(level = .x)$caudal_level))) %>%
+#     unnest(level) %>%
+#     select(-vertebral_number) %>%
+#     mutate(vertebral_number = jh_get_vertebral_number_function(level_to_get_number = level)) %>%
+#     select(level,vertebral_number, approach, category, object, side) %>%
+#     distinct() %>%
+#     arrange(vertebral_number)
+#   
+#   objects_added_df <- objects_added_df %>%
+#     filter(str_detect(string = object, pattern = "anterior_plate") == FALSE) %>%
+#     bind_rows(plate_levels_df)
+#   
+#   if(length(revision_decompression_vector) > 0){
+#     
+#     if(nrow(objects_added_df)>0){
+#       summary_nested_df <- objects_added_df %>%
+#         mutate(revision_levels_vector = list(revision_decompression_vector)) %>%
+#         select(level, vertebral_number, approach, category, object, side, revision_levels_vector) %>%
+#         mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
+#         select(-revision_levels_vector) %>%
+#         mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
+#         unnest(revision_level) %>%
+#         mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), paste0(object))) %>%
+#         select(level, object, vertebral_number) %>%
+#         # mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
+#         mutate(procedure_class = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
+#         unnest(procedure_class) %>%
+#         # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) 
+#         mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+#         unnest(procedures_per_line) 
+#     }else{
+#       summary_nested_df <- objects_added_df %>%
+#         select(level, object, vertebral_number) %>%
+#         mutate(procedure_class = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
+#         unnest(procedure_class) %>%
+#         mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+#         unnest(procedures_per_line) 
+#     }
+#     
+#   }else{
+#     summary_nested_df <- objects_added_df %>%
+#       select(level, object, vertebral_number) %>%
+#       mutate(procedure_class = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
+#       unnest(procedure_class) %>%
+#       mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
+#       unnest(procedures_per_line) 
+#   }
+#   
+#   
+#   summary_single_statements <- summary_nested_df %>%
+#     filter(procedures_per_line == "distinct") %>%
+#     mutate(procedure_performed_statement = glue("{procedure_class} at {level}"))%>%
+#     select(procedure_class, procedure_performed_statement)
+#   
+#   summary_multiple_nested <- summary_nested_df %>%
+#     filter(procedures_per_line == "combine") %>%
+#     group_by(procedure_class) %>%
+#     nest() %>%
+#     ungroup() %>%
+#     mutate(count = row_number()) %>%
+#     mutate(levels = map(.x = data, .f = ~ extract_levels_function(input_df = .x))) %>%
+#     select(-data) %>%
+#     unnest(levels) %>%
+#     mutate(procedure_performed_statement = glue("{procedure_class} at {levels}")) %>%
+#     mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation", paste("Instrumentation of the Pelvis with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
+#     mutate(procedure_performed_statement = if_else(procedure_class == "SI Fusion", paste("SI Fusion with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
+#     select(procedure_class, procedure_performed_statement)
+#   
+#   added_procedures_df <- tibble(procedure_performed_statement = additional_procedures_performed_vector) 
+#   
+#   procedures_numbered_df <- summary_nested_df %>%
+#     select(procedure_class) %>%
+#     distinct() %>%
+#     left_join(summary_single_statements %>%
+#                 bind_rows(summary_multiple_nested)) %>%
+#     select(procedure_performed_statement) %>%
+#     add_row(procedure_performed_statement = if_else(is.null(fusion_levels_vector), "", paste("Posterior Spinal Fusion at", glue_collapse(fusion_levels_vector, sep = ", ", last = " and ")))) %>%
+#     bind_rows(added_procedures_df) %>%
+#     filter(procedure_performed_statement !="") %>%
+#     mutate(count = row_number()) %>%
+#     mutate(procedures_performed_numbered = glue("{count}. {procedure_performed_statement}")) %>%
+#     select(procedures_performed_numbered)
+#   
+#   glue_collapse(procedures_numbered_df$procedures_performed_numbered, sep = "\n")
+# }
 
 ################-------------------------#################### -------- POSTERIOR -----------################-------------------------#################### 
 ################-------------------------#################### -------- POSTERIOR -----------################-------------------------#################### 
@@ -1651,9 +1651,9 @@ op_note_distinct_technique_statement <- function(object, level, side, interbody_
     object == 'plif' ~ glue("I then proceeded with the posterior lumbar interbody fusion (PLIF) procedure and placement of interbody implant at the level of {level}. The inferior and superior facets of {str_replace_all(level, '-', ' and ')}, respectively, were partially resected and the exiting and traversing nerve roots were appropriately protected. The dura was retracted in order to access the disc space. The annulus was incised, allowing access to the disk space. The disk was excised and endplates were prepped using a combination of curettes, shavers, and pituitary rongeur. Once the endplates were adequately prepped, trials were used to determine the appropriate size of the implant. Once I was satisfied with the size of the trial, the interbody implant was placed into the interbody space along with the bone graft. {interbody_statement} The final position of the implant was confirmed using intraoperative X-ray."),
     object == "tlif" ~ glue("I then proceeded with the transforaminal interbody fusion (TLIF) procedure and placement of interbody implant from the {side} side at the level of {level}. The inferior and superior facets of {str_replace_all(level, '-', ' and ')}, respectively, were resected and the exiting and traversing nerve roots were appropriately protected. The annulus was incised, allowing access to the disk space. The disk was excised and endplates were prepped using a combination of curettes, shavers, and pituitary rongeur. Once the endplates were adequately prepped, trials/shavers were used to determine the appropriate size of the implant. Once I was satisfied with the size of the trial, the interbody implant was placed into the interbody space along with the bone graft. {interbody_statement} The final position of the implant was confirmed using intraoperative X-ray."),
     object == "intervertebral_cage" ~ glue("I then proceed with placement of the intervertebral cage. After ensuring the neural structures were completely free and the bony surfaces cranially and caudally were appropriately prepared, the intervertebral distance was measured. {interbody_statement} The implant was then inserted into the defect, abutting bone superiorly and inferiorly. Intraoperative X-ray was used to confirm appropriate size, fit, and alignment of the intervertebral implant spanning {level}."),
-    object == "removal_scs_paddle" ~ glue("I then proceeded with removing the spinal cord stimulator paddle. Fluoroscopy was used to confirm the levels. The dissection was carried out until I encountered the leads. The leads were released from the soft tissue and the interspace was identified and. The leads were tracked down to the paddle device, which was then removed. This completed the removal of the spinal cord stimulator paddle."),
-    object == "removal_scs_perc_array" ~ glue("I then proceeded with removing the spinal cord stimulator percutaneous array. Fluoroscopy was used to confirm the levels. The dissection was carried out until I encountered the leads. The leads were released from the soft tissue and the interspace was identified. The array was then removed without difficulty. This completed the removal of the spinal cord stimulator percutaneous array."),
-    object == "removal_scs_receiver" ~ glue("I then proceeded with removing the spinal cord stimulator pulse generator/receiver. The prior incision was used and dissection was carried down to the receiver. The soft tissue was released around the receiver and sutures excised until it was completely free and the device was removed. The pseudocapsule was partially excised. This completed the removal of the spinal cord stimulator pulse generator/receiver."),
+    object == "removal_scs_paddle" ~ glue("I then proceeded with removing the spinal cord stimulator paddle. The dissection was carried out until I encountered the leads. The leads were released from the soft tissue and the interspace was identified and. The leads were tracked down to the paddle device, which was then removed."),
+    object == "removal_scs_perc_array" ~ glue("I then proceeded with removing the spinal cord stimulator percutaneous array. The dissection was carried out until I encountered the leads. The leads were released from the soft tissue and the interspace was identified. The array was then removed without difficulty."),
+    object == "removal_scs_receiver" ~ glue("I then proceeded with removing the spinal cord stimulator pulse generator/receiver. The prior incision was used and dissection was carried down to the receiver. The soft tissue was released around the receiver and sutures excised until it was completely free and the device was removed. The dead space was then adequately closed."),
     # object == "nerve_transection" ~ glue("I then proceeded with transection of the {side} {level} nerve root. The nerve root was clearly identified and silk sutures were passed medial and lateral to the DRG. The sutures were then tied and the nerve root transected. This completed the transection of the {side} {level} nerve root.")
     
   )
@@ -2075,13 +2075,6 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
       mutate(across(everything(), .fns = ~ as.character(.)))
   }
   
-  
-  summary_single_statements <- summary_nested_df %>%
-    filter(procedures_per_line == "distinct") %>%
-    mutate(procedure_performed_statement = glue("{procedure_class} at {level}"))%>%
-    select(procedure_class, procedure_performed_statement) %>%
-    mutate(across(everything(), .fns = ~ as.character(.)))
-  
   summary_multiple_nested <- summary_nested_df %>%
     # mutate(vertebral_number = as.double(vertebral_number)) %>%
     filter(procedures_per_line == "combine") %>%
@@ -2103,8 +2096,89 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     select(procedure_class, procedure_performed_statement)%>%
     mutate(across(everything(), .fns = ~ as.character(.)))
   
+  # summary_single_statements <- summary_nested_df %>%
+  #   filter(procedures_per_line == "distinct") %>%
+  #   mutate(procedure_performed_statement = case_when(
+  #     str_detect(str_to_lower(procedure_class), "spinal cord stimulator") ~ glue("{procedure_class}"),
+  #     TRUE ~ glue("{procedure_class} at {level}")
+  #   ))%>%
+  #   # mutate(procedure_performed_statement = glue("{procedure_class} at {level}"))%>%
+  #   select(procedure_class, procedure_performed_statement) %>%
+  #   mutate(across(everything(), .fns = ~ as.character(.)))
+  
+
+  summary_single_statements_pre_fusion_corrected <- summary_nested_df %>%
+    filter(procedures_per_line == "distinct") 
+  
+  
+  if(length(fusion_levels_vector)>0){
+    interbody_fusions_vector <- summary_nested_df %>%
+      filter(object %in% c("tlif", "plif", "no_implant_interbody_fusion")) %>%
+      arrange(vertebral_number) %>%
+      pull(level)
+    
+    if(length(interbody_fusions_vector)>0){
+      summary_nested_df <- summary_nested_df %>%
+        filter(object != "no_implant_interbody_fusion") %>%
+        mutate(procedure_class = if_else(object == "tlif" | object == "plif", "Insertion of interbody biomechanical device", procedure_class))
+      
+      summary_single_statements_pre_fusion_corrected <- summary_single_statements_pre_fusion_corrected %>%
+        filter(object != "no_implant_interbody_fusion") %>%
+        mutate(procedure_class = if_else(object == "tlif" | object == "plif", "Insertion of interbody biomechanical device", procedure_class))
+      
+      posterolateral_fusions <- setdiff(fusion_levels_vector, interbody_fusions_vector)
+      
+      print(paste("posterolateral_fusions:", posterolateral_fusions))
+      
+      if(length(posterolateral_fusions)>0){
+        posterior_fusion_statement <- glue("Combined interbody + posterolateral fusion at {glue_collapse(interbody_fusions_vector, sep = ', ', last = ' and ')} + posterior spinal fusion at {glue_collapse(posterolateral_fusions, sep = ', ', last = ' and ')}")
+      }else{
+        posterior_fusion_statement <- glue("Combined interbody + posterolateral fusion at {glue_collapse(interbody_fusions_vector, sep = ', ', last = ' and ')}")
+      }
+      
+      
+    }else{
+      posterior_fusion_statement <- glue("Posterior spinal fusion at {glue_collapse(fusion_levels_vector, sep = ', ', last = ' and ')}")
+    }
+  }else{
+    posterior_fusion_statement <- "xx"
+  }
+  
+  summary_single_statements <- summary_single_statements_pre_fusion_corrected %>% 
+    mutate(procedure_performed_statement = case_when(
+      str_detect(str_to_lower(procedure_class), "spinal cord stimulator") ~ glue("{procedure_class}"),
+      TRUE ~ glue("{procedure_class} at {level}")
+    ))  %>%
+    select(procedure_class, procedure_performed_statement) %>%
+    mutate(across(everything(), .fns = ~ as.character(.)))
+  
+  
+  
   added_procedures_df <- tibble(procedure_performed_statement = additional_procedures_performed_vector)%>%
     mutate(across(everything(), .fns = ~ as.character(.))) 
+  
+  # if(length(fusion_levels_vector)>0){
+  #   if(length(interbody_fusions_vector)>0){
+  #     interbody_fusions_vector <- summary_nested_df %>%
+  #       filter(object %in% c("tlif", "plif", "no_implant_interbody_fusion")) %>%
+  #       arrange(vertebral_number) %>%
+  #       pull(level)
+  #     
+  #     summary_nested_df <- summary_nested_df %>%
+  #       filter(object != "no_implant_interbody_fusion") %>%
+  #       mutate(procedure_class = if_else(object == "tlif" | object == "plif", "Insertion of interbody device", procedure_class))
+  #     
+  #     
+  #     posterolateral_fusions <- setdiff(fusion_levels_vector, interbody_fusions_vector)
+  #     
+  #     posterior_fusion_statement <- glue("Combined interbody + posterolateral fusion at {glue_collapse(interbody_fusions_vector, sep = ', ', last = ' and ')}", 
+  #                                        " + posterior spinal fusion at {glue_collapse(posterolateral_fusions, sep = ', ', last = ' and ')}")
+  #   }else{
+  #     posterior_fusion_statement <- glue("Posterior spinal fusion at {glue_collapse(fusion_levels_vector, sep = ', ', last = ' and ')}")
+  #   }
+  # }else{
+  #   posterior_fusion_statement <- "xx"
+  # }
   
   procedures_numbered_df <- summary_nested_df %>%
     select(procedure_class) %>%
@@ -2113,7 +2187,8 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     left_join(summary_single_statements %>%
                 bind_rows(summary_multiple_nested)) %>%
     select(procedure_performed_statement) %>%
-    add_row(procedure_performed_statement = if_else(length(fusion_levels_vector) == 0, "xx", paste("Posterior Spinal Fusion at", glue_collapse(fusion_levels_vector, sep = ", ", last = " and ")))) %>%
+    add_row(procedure_performed_statement = posterior_fusion_statement) %>%
+    # add_row(procedure_performed_statement = if_else(length(fusion_levels_vector) == 0, "xx", paste("Posterior Spinal Fusion at", glue_collapse(fusion_levels_vector, sep = ", ", last = " and ")))) %>%
     add_row(procedure_performed_statement = id_statement) %>%
     bind_rows(added_procedures_df) %>%
     filter(procedure_performed_statement !="xx") %>%

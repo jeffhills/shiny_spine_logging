@@ -2905,43 +2905,7 @@ server <- function(input, output, session) {
         bind_rows(spinal_cord_stimulator_df)  %>%
         distinct()
     }
-    
-    # nerves_df <- all_implants_constructed_df %>%
-    #   # tabyl(object)
-    #   filter(object == "lateral_extraforaminal_approach") %>%
-    #   # select(level, vertebral_number, side, approach, x, y) %>%
-    #   mutate(object = "transection_spinal_nerve") %>%
-    #   rename(x1 = x, y1 = y) %>%
-    #   mutate(y1 = y1 + 0.003) %>%
-    #   mutate(x1 = if_else(side == "left", x1 + 0.003, x1 - 0.003)) %>% 
-    #   mutate(x2 = if_else(side == "left", x1 - 0.008, x1 + 0.008), 
-    #          y2 = y1 - 0.003) %>%
-    #   mutate(object_constructed = pmap(.l = list(..1 = x1, 
-    #                                              ..2 = x2, 
-    #                                              ..3 = y1, 
-    #                                              ..4 = y2), 
-    #                                    .f = ~ st_buffer(st_linestring(as.matrix(tibble(x = c(..1, ..2), y = c(..3, ..4)))), dist = 0.005)
-    #   ))
-    # 
-    # nerve_objects <- nerves_df$object_constructed
-    # 
-    # transection_line <- st_multipolygon(x = list(st_buffer(st_linestring(as.matrix(nerves_df %>%
-    #                                                                                  filter(side == "right") %>%
-    #                                                                                  group_by(level) %>%
-    #                                                                                  mutate(x = mean(x1, x2)) %>%
-    #                                                                                  ungroup() %>%
-    #                                                                                  select(x, y = y1))), dist = 0.002), 
-    #                                              st_buffer(st_linestring(as.matrix(nerves_df %>%
-    #                                                                                  filter(side == "left") %>%
-    #                                                                                  group_by(level) %>%
-    #                                                                                  mutate(x = mean(x1, x2)) %>%
-    #                                                                                  ungroup() %>%
-    #                                                                                  select(x, y = y1))
-    #                                              ), dist = 0.002)))
-    # 
-    # transected_nerve_objects <- map(.x = nerve_objects, .f =  ~ st_difference(x = .x, y = transection_line))
-    # 
-    # nerve_geoms <- map(.x = transected_nerve_objects, .f =  ~ geom_sf(data = .x, fill = "red"))
+
     
     updateRadioGroupButtons(session = session, 
                             inputId = "object_to_add", 
@@ -3051,6 +3015,7 @@ server <- function(input, output, session) {
   
   output$troubleshooting_plot_click_df <- renderTable({
     # print(paste("currently_selected object_to_addd:", input$object_to_add))
+    req(input$object_to_add)
       if(input$object_to_add == "pelvic_screw"){
         object_currently_selected_to_add <- c("pelvic_screw_1", "pelvic_screw_2")
       }else if(input$object_to_add == "si_fusion_screw"){
@@ -3067,6 +3032,7 @@ server <- function(input, output, session) {
   
   ### ADDING OBJECT ###
   object_to_add_choices_df_reactive <- reactive({
+    req(input$object_to_add)
     if(input$object_to_add == "pelvic_screw"){
       object_currently_selected_to_add <- c("pelvic_screw_1", "pelvic_screw_2")
     }else if(input$object_to_add == "si_fusion_screw"){
@@ -3093,6 +3059,7 @@ server <- function(input, output, session) {
       object_currently_selected_to_add <- input$object_to_add
     }
     
+    
     object_added_df <- nearPoints(
       df = object_to_add_choices_df_reactive(),
       coordinfo = input$plot_click,
@@ -3113,6 +3080,14 @@ server <- function(input, output, session) {
       object_added_df <- object_added_df %>%
         bind_rows(anterior_interbody_df)
     }
+    
+    if(input$object_to_add == "removal_scs_receiver"){
+
+      object_added_df <- object_added_df %>%
+        mutate(x = if_else(input$plot_click$x > 0.5, 0.1, -0.1)) %>%
+        mutate(object_constructed = map2(.x = object_constructed, .y = x, .f = ~ .x + c(.y, 0)))
+    }
+    
     
     if(nrow(object_added_df)>0){
       all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
@@ -3251,8 +3226,6 @@ server <- function(input, output, session) {
                             }
                             
                           }else{
-                            # geoms_list_posterior$geoms[object_added_reactive_df()$object_id] <- postorior_geoms[object_added_reactive_df()$object_id]
-                            # print(toString(all_objects_to_add_list$objects_df$object))
                             geoms_list_posterior$geoms <- jh_make_posterior_geoms_function(all_posterior_objects_df = all_objects_to_add_list$objects_df %>%
                                                                                              filter(approach == "posterior", str_detect(object, "screw", negate = TRUE)),
                                                                                            plot_with_patterns = input$plot_with_patterns_true)
@@ -3308,7 +3281,7 @@ server <- function(input, output, session) {
   
   ##### Modal to select whether the C2 nerve root was spared or transected.
   observeEvent(input$plot_click, ignoreInit = TRUE, {
-    
+    req(input$object_to_add)
     if(input$object_to_add == "lateral_mass_screw"){
       if(nrow(object_added_reactive_df())>0){
         if(object_added_reactive_df()$object[1] == "lateral_mass_screw" & object_added_reactive_df()$level[1] == "C1"& object_added_reactive_df()$side[1] == "left"){
@@ -7030,7 +7003,7 @@ server <- function(input, output, session) {
                                            font_size = 16,
                                            checkboxes_inline = TRUE,
                                            input_id = "implant_manufacturer",
-                                           choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix/Seaspine", "SI Bone", "Zimmer Bioment", "Other")
+                                           choices_vector = c("Alphatec", "Depuy Synthes", "Globus Medical", "K2 Stryker", "Medicrea", "Medtronic", "NuVasive", "Orthofix/Seaspine", "SI Bone", "SMAIO/Kheiron", "Zimmer Biomet", "Other")
           ),
           h4("Screw Sizes:"),
           fluidRow(
@@ -7935,18 +7908,6 @@ server <- function(input, output, session) {
         
         posterior_op_note_inputs_list_reactive$alignment_correction_method <- deformity_correction_sentence_function(techniques_used = input$alignment_correction_method)
         
-        # if(any(input$alignment_correction_method == "Other")){
-        #   # posterior_op_note_inputs_list_reactive$alignment_correction_method <- glue_collapse(gsub("Other", input$alignment_correction_method_other, input$alignment_correction_method, ignore.case = TRUE), sep = "")
-        #   
-        # }else{
-        #   if(length(input$alignment_correction_method)>0){
-        #     
-        #     
-        #     posterior_op_note_inputs_list_reactive$alignment_correction_method <- glue_collapse(input$alignment_correction_method, sep = "")
-        #   }else{
-        #     posterior_op_note_inputs_list_reactive$alignment_correction_method <- "The rods were set into place and secured with set screws. "
-        #   }
-        # }
       }else{
         posterior_op_note_inputs_list_reactive$alignment_correction_method <- ""
       }
@@ -8414,18 +8375,26 @@ server <- function(input, output, session) {
     op_note_list$"*Patient:" <- paste(input$patient_first_name, input$patient_last_name)
     op_note_list$"\n*Date of Surgery:" <- as.character(input$date_of_surgery)
     op_note_list$"\n*Primary Surgeon:" <- paste(input$primary_surgeon_first_name, input$primary_surgeon_last_name)
+    
     if(input$cosurgeon_yes_no == TRUE){
       op_note_list$'\n*Co-Surgeon:' <- input$cosurgeon 
     }
+    
     if(input$attending_assistant_yes_no == TRUE){
-      op_note_list$'\nSurgical Assistants:' <- paste(as.character(input$attending_assistant), 
-                                                     if_else(!is.null(input$surgical_assistants), 
-                                                             as.character(input$surgical_assistants),
-                                                             " "),
-                                                     sep = "; ")
-    }else{
-      op_note_list$"\nSurgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
+      req(input$attending_assistant)
+      op_note_list$'\n*Attending/FA Surgical Assistant:' <- if_else(!is.null(input$attending_assistant), as.character(input$attending_assistant), " ")
     }
+    op_note_list$"\n*Surgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
+    
+    # if(input$attending_assistant_yes_no == TRUE){
+    #   op_note_list$'\n*Surgical Assistants:' <- paste(as.character(input$attending_assistant), 
+    #                                                  if_else(!is.null(input$surgical_assistants), 
+    #                                                          as.character(input$surgical_assistants),
+    #                                                          " "),
+    #                                                  sep = "; ")
+    # }else{
+    #   op_note_list$"\n*Surgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
+    # }
     
     op_note_list$"\n*Preprocedure ASA Class:" <- input$asa_class
     op_note_list$"\n*Anesthesia:" <- input$anesthesia
@@ -8584,16 +8553,17 @@ server <- function(input, output, session) {
     
     op_note_list$"\n*Postop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
     
+    op_note_list
     
-    secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
-      unnest(result) %>%
-      mutate(row = row_number()) %>%
-      pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
-      select(row, full_text_vector)
-    
-    op_note_text <- glue_collapse(secion_headers_df$full_text_vector, sep = "\n")
-    
-    op_note_text
+    # secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
+    #   unnest(result) %>%
+    #   mutate(row = row_number()) %>%
+    #   pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
+    #   select(row, full_text_vector)
+    # 
+    # op_note_text <- glue_collapse(secion_headers_df$full_text_vector, sep = "\n")
+    # 
+    # op_note_text
   })
   
   
@@ -8601,9 +8571,20 @@ server <- function(input, output, session) {
   
   observeEvent(input$generate_operative_note, {
     
+    secion_headers_df <- enframe(op_note_text_reactive(), name = "section", value = "result") %>%
+      unnest(result) %>%
+      mutate(row = row_number()) %>%
+      pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
+      select(row, full_text_vector)
+    
+    op_note_text <- glue_collapse(secion_headers_df$full_text_vector, sep = "\n")
+    
+    # op_note_text
+    
     updateTextAreaInput(session = session,
                         inputId = "operative_note_text",
-                        value = HTML(op_note_text_reactive())
+                        value = HTML(op_note_text)
+                        # value = HTML(op_note_text_reactive())
                         # value = HTML(op_note_text_reactive_testing())
     )
     
@@ -8613,6 +8594,15 @@ server <- function(input, output, session) {
   observeEvent(input$operative_note_text, ignoreNULL = TRUE, {
     
     output$operative_note_formatted <-  renderText({
+      
+      # secion_headers_df <- enframe(op_note_text_reactive(), name = "section", value = "result") %>%
+      #   unnest(result) %>%
+      #   mutate(row = row_number()) %>%
+      #   pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
+      #   select(row, full_text_vector)
+      # 
+      # # op_note_text <- glue_collapse(secion_headers_df$full_text_vector, sep = "\n")
+      print(names(op_note_text_reactive()))
       
       op_note <- input$operative_note_text
       
@@ -8624,6 +8614,10 @@ server <- function(input, output, session) {
       op_note <- str_replace_all(string = op_note, pattern = "Date of Surgery:", replacement = "<B>Date of Surgery:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Primary Surgeon:", replacement = "<B>Primary Surgeon:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Co-Surgeon:", replacement = "<B>Co-Surgeon:</B>")
+      op_note <- str_replace_all(string = op_note, pattern = "Attending/FA Surgical Assistant:", replacement = "<B>Attending/FA Surgical Assistant:</B>")
+
+      
+      # Implant Manufacturer:
       op_note <- str_replace_all(string = op_note, pattern = "Surgical Assistants:", replacement = "<B>Surgical Assistants:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Preprocedure ASA Class:", replacement = "<B>Preprocedure ASA Class:</B>")
       op_note <- str_replace_all(string = op_note, pattern = "Anesthesia:", replacement = "<B>Anesthesia:</B>")

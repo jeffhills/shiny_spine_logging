@@ -531,7 +531,7 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
         select(-revision_levels_vector) %>%
         mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
         unnest(revision_level) %>%
-        mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), object)) %>%
+        mutate(object = if_else(category == "decompression" & revision_level == TRUE, paste0("revision_", object), paste0(object))) %>%
         select(level, object, vertebral_number) %>%
         # mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
         mutate(procedure_class = map(.x = object, .f = ~op_note_procedure_performed_summary_classifier_function(.x))) %>%
@@ -557,7 +557,6 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
       unnest(procedures_per_line) 
   }
   
-  
   summary_single_statements <- summary_nested_df %>%
     filter(procedures_per_line == "distinct") %>%
     mutate(procedure_performed_statement = glue("{procedure_class} at {level}"))%>%
@@ -573,14 +572,11 @@ anterior_op_note_procedures_performed_numbered_function <- function(objects_adde
     select(-data) %>%
     unnest(levels) %>%
     mutate(procedure_performed_statement = glue("{procedure_class} at {levels}")) %>%
-    mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation",
-                                                   paste("Instrumentation of the Pelvis with", levels, "fixation"), 
-                                                   as.character(procedure_performed_statement))) %>%
+    mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation", paste("Instrumentation of the Pelvis with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
+    mutate(procedure_performed_statement = if_else(procedure_class == "SI Fusion", paste("SI Fusion with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
     select(procedure_class, procedure_performed_statement)
   
   added_procedures_df <- tibble(procedure_performed_statement = additional_procedures_performed_vector) 
-  
-  
   
   procedures_numbered_df <- summary_nested_df %>%
     select(procedure_class) %>%

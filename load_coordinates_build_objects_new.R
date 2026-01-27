@@ -100,7 +100,8 @@ jh_load_all_possible_objects_function <- function(){
                                      incision_drainage = "coordinates/incision_drainage.csv",
                                      interbody = "coordinates/interbody.csv",
                                      osteotomy = "coordinates/osteotomy.csv",
-                                     tumor = "coordinates/tumor.csv")
+                                     tumor = "coordinates/tumor.csv", 
+                                     spinal_cord_stimulator = "coordinates/spinal_cord_stimulator.csv")
 
   
   coordinates_df_list <- map(coordinate_file_names_list, .f = ~ fread(.x) %>%
@@ -119,6 +120,19 @@ jh_load_all_possible_objects_function <- function(){
   
 }
 
+# spinal_cord_stimulator_df <- all_object_ids_df %>%
+#   filter(category == "spinal_cord_stimulator") %>%
+#   left_join(fread("coordinates/spinal_cord_stimulator.csv") %>%
+#               group_by(object_id) %>%
+#               nest() %>%
+#               mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+#               select(object_id, object_constructed))
+# 
+# all_implants_constructed_df <<- all_implants_constructed_df %>%
+#   # bind_rows(incision_drainage_df)  %>%
+#   bind_rows(spinal_cord_stimulator_df)  %>%
+#   distinct()
+
 
 coordinate_file_names_list_all <- list(anterior_body = "coordinates/anterior_body.csv",
                                    anterior_disc = "coordinates/anterior_disc.csv",
@@ -128,7 +142,8 @@ coordinate_file_names_list_all <- list(anterior_body = "coordinates/anterior_bod
                                    incision_drainage = "coordinates/incision_drainage.csv",
                                    interbody = "coordinates/interbody.csv",
                                    osteotomy = "coordinates/osteotomy.csv",
-                                   tumor = "coordinates/tumor.csv")
+                                   tumor = "coordinates/tumor.csv", 
+                                   spinal_cord_stimulator = "coordinates/spinal_cord_stimulator.csv")
 
 
 coordinates_df_list_all <- map(coordinate_file_names_list_all, .f = ~ fread(.x))
@@ -136,37 +151,6 @@ coordinates_df_list_all <- map(coordinate_file_names_list_all, .f = ~ fread(.x))
 all_objects_coordinates_df <- bind_rows(coordinates_df_list_all)
 
 
-# coordinate_file_names_list <- list(anterior_body = "coordinates/anterior_body.csv",
-#                                    anterior_disc = "coordinates/anterior_disc.csv",
-#                                    anterior_interbody_fusion = "coordinates/anterior_interbody_fusion.csv",
-#                                    decompression = "coordinates/decompression.csv",
-#                                    implant = "coordinates/implant.csv",
-#                                    incision_drainage = "coordinates/incision_drainage.csv",
-#                                    interbody = "coordinates/interbody.csv",
-#                                    osteotomy = "coordinates/osteotomy.csv",
-#                                    tumor = "coordinates/tumor.csv")
-# 
-# load_and_bind_coordinates_function <- function(all_implants_df, coordinate_file_name = "x"){
-#   coordinate_objects_constructed_df <- all_object_ids_df %>%
-#     filter(category == str_remove_all(coordinate_file_name, "coordinates/|.csv")) %>%
-#     left_join(fread(paste0(coordinate_file_name)) %>%
-#                 group_by(object_id) %>%
-#                 nest() %>%
-#                 mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
-#                 select(object_id, object_constructed))
-# 
-#   all_implants_df %>%
-#     bind_rows(coordinate_objects_constructed_df) %>%
-#     distinct()
-# 
-# }
-# 
-# for (i in coordinate_file_names_list) {
-# 
-#   all_implants_constructed_df <- load_and_bind_coordinates_function(all_implants_df = all_implants_constructed_df,
-#                                                                     coordinate_file_name = i)
-# 
-# }
 
 #############-----------------------   Build Key Dataframes  ----------------------###############
 
