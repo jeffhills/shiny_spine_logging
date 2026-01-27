@@ -8602,7 +8602,7 @@ server <- function(input, output, session) {
       #   select(row, full_text_vector)
       # 
       # # op_note_text <- glue_collapse(secion_headers_df$full_text_vector, sep = "\n")
-      print(names(op_note_text_reactive()))
+      # print(names(op_note_text_reactive()))
       
       op_note <- input$operative_note_text
       
@@ -9833,7 +9833,7 @@ server <- function(input, output, session) {
           # print(dput(surgical_details_instrument))
           
           importRecords(rcon = rcon_reactive$rcon, data = surgical_details_instrument, returnContent = "count")
-          print("got here too")
+          # print("got here too")
           
         }else{
           tables_not_uploaded_list$surgical_details_instrument <- "surgical_details_instrument"
