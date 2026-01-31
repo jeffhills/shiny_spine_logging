@@ -1401,8 +1401,10 @@ ui <- dashboardPage(skin = "black",
                               tableOutput(outputId = "all_objects_table"), 
                               br(), 
                               actionButton("copy_op_note_list_reproducing_text", "Copy dput() to Clipboard"),
-                              verbatimTextOutput("op_note_list_reproducing_text")
-                              
+                              verbatimTextOutput("op_note_list_reproducing_text"),
+                              br(),
+                              actionButton("copy_op_note_list_reproducing_text_anterior", "Copy dput() to Clipboard"),
+                              verbatimTextOutput("op_note_list_reproducing_text_anterior"),
                           ),
                           box(width = 12, title = div(style = "font-size:22px; font-weight:bold; text-align:center", "Revision Implants table:"), status = "success", collapsible = TRUE,solidHeader = TRUE,
                               tableOutput(outputId = "revision_implants_table")
@@ -9454,7 +9456,7 @@ server <- function(input, output, session) {
   #                                                                procedures_performed_sentence =  posterior_op_note_inputs_list_reactive()$procedures_performed_sentence
   # )
   
-  
+  ## POSTERIOR OP NOTE TEXT: ##
   dput_text <- reactive({
     req(posterior_op_note_inputs_list_reactive())
     clean_list <- sanitize_for_dput(posterior_op_note_inputs_list_reactive())
@@ -9472,7 +9474,22 @@ server <- function(input, output, session) {
     showNotification("Copied dput() text to clipboard!", type = "message", duration = 2)
   })
   
+  ## ANTERIOR OP NOTE TEXT: ##
+  dput_text_anterior_reactive <- reactive({
+    req(anterior_op_note_inputs_list_reactive())
+    clean_list <- sanitize_for_dput(anterior_op_note_inputs_list_reactive())
+    paste(capture.output(dput(clean_list)), collapse = "\n")
+  })
+  output$op_note_list_reproducing_text_anterior <- renderText(dput_text_anterior_reactive())
   
+  observeEvent(input$copy_op_note_list_reproducing_text_anterior, {
+    # pass a plain string; JS also guards against array-wrapping
+    js$copyText(dput_text_anterior_reactive())
+  })
+  
+  # observeEvent(input$copied_at, {
+  #   showNotification("Copied dput() text to clipboard!", type = "message", duration = 2)
+  # })
   
   ######## Render "Revision Implants" for side tab:"    ######## 
   output$revision_implants_table <- renderTable({
