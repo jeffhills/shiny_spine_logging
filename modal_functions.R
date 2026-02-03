@@ -1495,9 +1495,10 @@ addition_surgical_details_modal_box_function <-
           input_type = "awesomeRadio",
           choices_vector = c("ASA I", "ASA II", "ASA III", "ASA IV", "ASA V", "ASA VI", "Emergent Surgery"),
           input_id = "asa_class",
-          checkboxes_inline = TRUE,
+          checkboxes_inline = FALSE,
           initial_value_selected = asa_class
         ),
+        hr(),
         jh_make_shiny_table_row_function(
           left_column_percent_width = left_column_percent_width,
           left_column_label = "Anesthesia Type:",
@@ -1510,7 +1511,7 @@ addition_surgical_details_modal_box_function <-
             "Monitored Anesthesia Care (MAC)"
           ),
           input_id = "anesthesia",
-          checkboxes_inline = TRUE,
+          checkboxes_inline = FALSE,
           initial_value_selected = anesthesia
         ),
         hr(),
@@ -1673,46 +1674,6 @@ addition_surgical_details_modal_box_function <-
             text_align = "right",
           )
         )
-        # hr(),
-        # jh_make_shiny_table_row_function(
-        #   left_column_label = "Microscope",
-        #   input_type = "checkbox",
-        #   input_id = "anterior_cervical_approach_details_checkbox",
-        #   left_column_percent_width = left_column_percent_width,
-        #   font_size = row_label_font_size,
-        #   choices_vector = c(
-        #     "Microscope was utilized",
-        #     "Caspar Pins were utilized"
-        #   ),
-        #   initial_value_selected = anterior_cervical_approach_details_checkbox,
-        # ),
-        # conditionalPanel(condition = "input.approach_sequence.indexOf('anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior-posterior') > -1 || input.approach_sequence.indexOf('anterior-posterior') > -1",
-        #                  jh_make_shiny_table_row_function(
-        #                    left_column_label = "Microscope",
-        #                    input_type = "checkbox",
-        #                    input_id = "anterior_cervical_approach_details_checkbox",
-        #                    left_column_percent_width = left_column_percent_width,
-        #                    font_size = row_label_font_size,
-        #                    choices_vector = c(
-        #                      "Microscope was utilized",
-        #                      "Caspar Pins were utilized"
-        #                    ),
-        #                    initial_value_selected = anterior_cervical_approach_details_checkbox,
-        #                  )
-        # ),
-        # conditionalPanel(condition = "input.approach_sequence.indexOf('posterior') > -1 || input.approach_sequence.indexOf('posterior-anterior') > -1 || input.approach_sequence.indexOf('posterior-anterior-posterior') > -1 || input.approach_sequence.indexOf('anterior-posterior') > -1",
-        #                  jh_make_shiny_table_row_function(
-        #                    left_column_label = "Microscope",
-        #                    input_type = "checkbox",
-        #                    input_id = "posterior_additional_approach_details_checkbox",
-        #                    left_column_percent_width = left_column_percent_width,
-        #                    font_size = row_label_font_size,
-        #                    choices_vector = c(
-        #                      "Microscope was utilized"
-        #                    ),
-        #                    initial_value_selected = posterior_additional_approach_details_checkbox,
-        #                  )
-        # )
       )
     )
   }
@@ -1727,12 +1688,12 @@ additional_procedure_options_vector <- c("Robotic Assisted Spine Surgery",
                                          "Removal of spinal instrumentation",
                                          "Open treatment of vertebral fracture",
                                          "Open treatment of posterior pelvic ring fracture/dislocation (CPT 27218)",
-                                         "Intraoperative use of microscope for microdissection",
-                                         "Application of Cranial Tongs",
-                                         "Application of Cranial Tongs using Mayfield head holder",
+                                         # "Intraoperative use of microscope for microdissection",
+                                         # "Application of Cranial Tongs",
+                                         # "Application of Cranial Tongs using Mayfield head holder",
                                          "Application of Halo",
                                          "Removal of tongs or Halo applied by another inidividual",
-                                         "Spinal Cord Monitoring",
+                                         # "Spinal Cord Monitoring",
                                          "Secondary Closure of complex surgical wound (CPT: 13160)",
                                          "Incision and Drainage of anterior neck deep abscess or hematoma (CPT 21501)",
                                          "Irrigation and Debridement",

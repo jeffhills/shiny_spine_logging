@@ -222,13 +222,13 @@ ui <- dashboardPage(skin = "black",
                 max-width: -webkit-fill-available;
                         text-align: left;
                 }"),
-                tags$style(
-                  "#posterior_bmp_number {
+                        tags$style(
+                          "#posterior_bmp_number {
                         width: -webkit-fill-available;
                         text-align: center;
                 }"),
-                tags$style(
-                  "#posterior_bmp_dosage {
+                        tags$style(
+                          "#posterior_bmp_dosage {
                         width: -webkit-fill-available;
                 text-align: center;
                 font-size: medium;
@@ -256,6 +256,28 @@ ui <- dashboardPage(skin = "black",
                 border-style: solid;
                 border-color: burlywood;
                         }"),
+                tags$style(HTML("
+    /* Local anesthesia awesomeRadio: align radio + wrapping label text */
+    #local_anesthesia .awesome-radio {
+      display: flex !important;
+      align-items: flex-start;      /* keeps radio aligned with first line */
+      gap: 0px;                    /* spacing between radio and text */
+    }
+
+    /* Fixed-width left column for the radio itself */
+    #local_anesthesia .awesome-radio > input[type='radio'] {
+      flex: 0 0 22px;               /* tweak 18–28px depending on your theme */
+      margin-top: 2px;              /* vertical tweak */
+    }
+
+    /* Let the label wrap, but keep its left edge aligned */
+    #local_anesthesia .awesome-radio > label {
+      flex: 1 1 auto;
+      min-width: 0;                 /* IMPORTANT: allows wrapping in flex */
+      white-space: normal !important;
+      margin: 0 !important;         /* remove default label margins */
+    }
+  ")),
                 tags$style(
                   "#patient_details_redcap_table {
                         overflow-x: auto;
@@ -355,7 +377,6 @@ ui <- dashboardPage(skin = "black",
                   tabItem(tabName = "patient_details_procedures",
                           column(width = 3, 
                                  box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Patient Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE,
-                                     # uiOutput(outputId = "patient_details_ui"),
                                      tags$div(style = "font-size:24px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", 
                                               htmlOutput(outputId = "patient_details_text")
                                      ),
@@ -364,7 +385,6 @@ ui <- dashboardPage(skin = "black",
                                  ),
                                  br(),
                                  box(width = 12, title = tags$div(style = "font-size:22px; font-weight:bold", "Diagnosis, Symptoms, Procedure Details:"), solidHeader = TRUE, status = "info",collapsible = TRUE,
-                                     # uiOutput(outputId = "diagnosis_symptoms_ui"),
                                      tags$div(style = "font-size:20px; font-weight:bold; color:darkblue; font-family:sans-serif; font-style:italic", 
                                               htmlOutput(outputId = "diagnosis_symptoms_text")
                                      ),
@@ -6165,9 +6185,6 @@ server <- function(input, output, session) {
           additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
         }
         
-        # if("Microscopic" %in% input$approach_robot_navigation){
-        #   additional_procedures_list$microscope <- "Intraoperative use of microscope for microdissection"
-        # }
         
         if(length(input$prior_anterior_plate_removed_levels)>0){
           additional_procedures_list$removal_instrumentation <- "Removal of anterior spinal instrumentation"
@@ -6200,10 +6217,7 @@ server <- function(input, output, session) {
     if(all(additional_procedures_performed_anterior_reactive() %in% additional_procedure_options_vector) == FALSE){
       additional_procedure_options_vector <<- union(additional_procedure_options_vector, additional_procedures_performed_anterior_reactive())
     }
-    # updateAwesomeCheckboxGroup(session = session,
-    #                            inputId = "additional_procedures_anterior",
-    #                            choices = unique(append(additional_procedure_options_vector, additional_procedures_performed_anterior_reactive())),
-    #                            selected = additional_procedures_performed_anterior_reactive())
+
   })
   
   additional_anterior_procedures_vector_for_op_note_reactive <- reactive({
@@ -6234,20 +6248,7 @@ server <- function(input, output, session) {
     # if(procedure_approach_reactive() == "posterior" | procedure_approach_reactive() == "combined"){
     if(!is.null(input$approach_sequence) && str_detect(input$approach_sequence, "posterior")){
       additional_procedures_list <- as.list(input$additional_procedures_posterior)
-      
-      # if("Robotic" %in% input$approach_robot_navigation){
-      #   additional_procedures_list$robot <- "Robotic Assisted Spine Surgery"
-      # }
-      # if(any(str_detect(input$approach_robot_navigation, "Robotic"))){
-      #   additional_procedures_list$robot <- "Robotic Assisted Spine Surgery"
-      # }
-      # if("Navigated" %in% input$approach_robot_navigation){
-      #   additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
-      # }
-      # 
-      # if("Microscopic" %in% input$approach_robot_navigation){
-      #   additional_procedures_list$microscope <- "Intraoperative use of microscope for microdissection"
-      # }
+
       if(any(str_detect(input$implant_technique_method, "nav"))){
         additional_procedures_list$navigation <- "Use of stereotactic navigation system for screw placement"
       }
@@ -6389,16 +6390,9 @@ server <- function(input, output, session) {
           filter(main_approach == input$revision_approach) %>%
           filter(date_of_surgery == max(date_of_surgery))
         
-        # print(paste(dput(most_recent_surgery_df)))
-        
         most_recent_surgery <- format(most_recent_surgery_df$date_of_surgery, "%m/%d/%y")
         
-        # print(most_recent_surgery)
-        
         prior_surgery_for_revision_statement <- glue(" that underwent surgery most recently on {most_recent_surgery}, from {most_recent_surgery_df$upper_treated_vertebrae} to {most_recent_surgery_df$lower_treated_vertebrae}")
-        
-        # print(prior_surgery_for_revision_statement)
-        
       }else{
         prior_surgery_for_revision_statement <- ""
       }
@@ -6408,15 +6402,24 @@ server <- function(input, output, session) {
     
     indications_list$opening <- glue("This is a {age} year-old {str_to_lower(input$sex)}{prior_surgery_for_revision_statement} that presented with {symptoms} and imaging consistent with ***.")
     
-    if(length(input$diagnosis_category)>0){
-      if(any(input$diagnosis_category == "msk") | any(input$diagnosis_category == "deformity")){
-        indications_list$conservative_attempted <- glue("{he_she} has exhausted conservative measures.")
-      } 
-    }
+    # if(length(input$diagnosis_category)>0){
+    #   if(any(input$diagnosis_category == "msk") | any(input$diagnosis_category == "deformity")){
+    #     indications_list$conservative_attempted <- glue("{he_she} has exhausted conservative measures.")
+    #   } 
+    # }
+    # 
+    # if(any(input$diagnosis_category == "trauma")){
+    #   
+    # }
     
     title_name <- if_else(input$sex == "Male", glue("Mr. {input$patient_last_name}"), glue("Ms. {input$patient_last_name}"))
     
-    indications_list$risks <- glue("Risks and benefits of operative intervention were considered and discussed in detail and {title_name} has elected to proceed with surgery. I believe adequate informed consent was obtained.")
+    
+    if(any(input$diagnosis_category == "trauma")){
+      indications_list$risks <- glue("Risks and benefits of operative intervention were considered and discussed in detail. I believe adequate informed consent was obtained.")
+    }else{
+      indications_list$risks <- glue("Risks and benefits of operative intervention were considered and discussed in detail and {title_name} has elected to proceed with surgery. I believe adequate informed consent was obtained.")
+    }
     
     procedure_indications <- glue_collapse(indications_list, sep = " ")
     
@@ -6424,7 +6427,8 @@ server <- function(input, output, session) {
       addition_surgical_details_modal_box_function(
         preoperative_diagnosis = preop_dx, 
         postoperative_diagnosis = postop_dx,
-        indications = procedure_indications,
+        indications = procedure_indications, 
+        anesthesia = "General Endotracheal Anesthesia",
         neuromonitoring = c("SSEP", "tc MEP"), 
         preop_antibiotics = c("Cefazolin (Ancef)"))
     )

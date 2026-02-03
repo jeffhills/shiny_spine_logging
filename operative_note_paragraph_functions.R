@@ -849,8 +849,8 @@ jh_implant_technique_method_statement <- function(implant_technique_method = NUL
     modality_phrases <- c(modality_phrases,
                           "anatomic landmarks")
     
-    modality_descriptive_sentences <- c(modality_descriptive_sentences,
-                                        "Start points were identified at the junction of the superior facet and the TP.")
+    # modality_descriptive_sentences <- c(modality_descriptive_sentences,
+    #                                     "Start points were identified at the junction of the superior facet and the TP.")
   }
   if (has_fluoro_markers) {
     modality_phrases <- c(modality_phrases,
@@ -859,10 +859,10 @@ jh_implant_technique_method_statement <- function(implant_technique_method = NUL
     modality_descriptive_sentences <- c(modality_descriptive_sentences,
                                         "Start points and trajectories were identified with pedicle markers and X-ray.")
   }
-  if (has_free_hand|has_fluoro_markers) {
-    modality_descriptive_sentences <- c(modality_descriptive_sentences,
-                                        "The superficial cortex was opened and the screw tract was cannulated and palpated for any breaches and tapped as needed.")
-  }
+  # if (has_free_hand|has_fluoro_markers) {
+    # modality_descriptive_sentences <- c(modality_descriptive_sentences,
+    #                                     "The superficial cortex was opened and the screw tract was cannulated and palpated for any breaches and tapped as needed.")
+  # }
   if (has_fluoro_perc) {
     modality_phrases <- c(modality_phrases,
                           "fluoroscopy for percutaneous screw placement")
@@ -883,11 +883,11 @@ jh_implant_technique_method_statement <- function(implant_technique_method = NUL
     
     if("navigation_upper_screws" %in% techniques){
       modality_descriptive_sentences <- c(modality_descriptive_sentences,
-                                          "Navigated instruments were used for placing the more cranial screws.")
+                                          "Navigated instruments were used for placing the cranial screws.")
     }
     if("navigation_lower_screws" %in% techniques){
       modality_descriptive_sentences <- c(modality_descriptive_sentences,
-                                          "Navigated instruments were used for placing the more caudal screws.")
+                                          "Navigated instruments were used for placing the caudal screws.")
     }
     if("navigation_portion_screws" %in% techniques){
       modality_descriptive_sentences <- c(modality_descriptive_sentences,
@@ -1084,12 +1084,17 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
     procedures_op_full_df <- procedures_op_full_df %>%
       mutate(procedure_statement = str_replace_all(procedure_statement, "PELVIC_SCREW_NAVIGATION_PLACEHOLDER", pelvic_screws_nav_technique))
   }
+
+  # if(any(str_detect(procedures_op_full_df$procedure_statement, "SCREW_TECHNIQUE_PLACEHOLDER"))){
+  #   procedures_op_full_df <- procedures_op_full_df %>%
+  #     mutate(procedure_statement = str_replace_all(procedure_statement, "SCREW_TECHNIQUE_PLACEHOLDER", jh_implant_technique_method_statement(implant_technique_method = implant_technique_method)))
+  # }
   
   if(any(str_detect(procedures_op_full_df$procedure_statement, "SCREW_TECHNIQUE_PLACEHOLDER"))){
     procedures_op_full_df <- procedures_op_full_df %>%
-      mutate(procedure_statement = str_replace_all(procedure_statement, "SCREW_TECHNIQUE_PLACEHOLDER", jh_implant_technique_method_statement(implant_technique_method = implant_technique_method)))
+      mutate(procedure_statement = str_replace(procedure_statement, "SCREW_TECHNIQUE_PLACEHOLDER", jh_implant_technique_method_statement(implant_technique_method = implant_technique_method))) %>%
+      mutate(procedure_statement = str_remove_all(procedure_statement, "SCREW_TECHNIQUE_PLACEHOLDER"))
   }
-  
   
   glue_collapse(x = procedures_op_full_df$procedure_statement, sep = "\n\n")
   
@@ -1263,8 +1268,6 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
 op_note_technique_combine_statement <- function(object,
                                                 levels_side_df,
                                                 approach_technique = "Open"
-                                                # image_guidance = "NA",
-                                                # implant_technique_method = "NA"
                                                 ){
 
   if(ncol(levels_side_df)==1){
@@ -1519,7 +1522,7 @@ if(str_detect(object, "si_fusion")){
     object == "lateral_mass_screw" ~ glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a burr and the screw path drilled incrementally to the far cortex and the dorsal cortex was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}. This completed the lateral mass screws."),
     object == "occipital_screw" ~ glue("An appropriately sized occipital plate was selected and was placed centered in the midline and just caudal to the external occipital protuberance, but cranial to the foramen magnum. The plate was held in place to identify the appropriate start points for the occipital screws. The occipital screws were drilled incrementally until the anterior cortex was penetrated. The length of the path was measured to acheive bicortical fixation. The screw paths were then tapped and the screws placed, securing the plate to the occiput."),
     object == "pars_screw" ~ glue("For pars screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming as dorsal as possible while not perforating the dorsal cortex of the pars. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
-    object == "pedicle_screw" ~ glue("{glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
+    object == "pedicle_screw" ~ glue("For pedicle screws, the start point was identified at the junction of the TP and SAP. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
     object == "translaminar_screw" ~ glue("For translaminar screw fixation, the starting point was identified using the spinolaminar junction and in the central plane of the contralateral lamina. A burr hole was made to open the superficial cortex, the path was then cannulated and intralaminar screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
     object == "transarticular_screw" ~ glue("For transarticular screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming toward the C1 lateral mass. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),     object == "pedicle_hook" ~ glue("For pedicle hooks, a pedicle finder was carefully placed just under the inferior facet and above the superior facet, until the pedicle was found. Once the pedicle was identified, a pedicle hook was inserted directly toward the inferior pedicle, secured within the residual facet joint {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
     str_detect(object, "pelvic_screw") ~ glue("{pelvic_screw_statement}"),
