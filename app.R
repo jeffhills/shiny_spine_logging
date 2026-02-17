@@ -3376,20 +3376,19 @@ server <- function(input, output, session) {
   
   ##### Modal to report whether the PLL was taken down
   observeEvent(input$plot_click, ignoreInit = TRUE, {
-    # object_added <- object_added_reactive_df()$object[1]
-    # level_added <- object_added_reactive_df()$level[1]
     if(nrow(object_added_reactive_df())>0){
       if(object_added_reactive_df()$object[1] == "decompression_diskectomy_fusion"){
         # if(object_added_reactive_df()$level[1] %in% c("C2-C3", "C3-C4", "C4-C5", "C5-C6", "C6-C7", "C7-T1", "T1-T2", "T2-T3")){
         if(input$plot_click$y > 0.7){
           showModal(
             modalDialog(
-              size = "l",
+              size = "s",
               easyClose = FALSE,
-              awesomeRadio(inputId = paste0(str_replace_all(str_to_lower(object_added_reactive_df()$level[1]), pattern = "-", "_"), "_pll"),
+              radioGroupButtons(inputId = paste0(str_replace_all(str_to_lower(object_added_reactive_df()$level[1]), pattern = "-", "_"), "_pll"),
                            label = glue("Was the PLL at {object_added_reactive_df()$level[1]} taken down?"), 
                            choices = c("No", "Yes"), 
-                           inline = TRUE,
+                           size = "lg",
+                           # inline = TRUE,
                            width = "100%")
             )
           )
@@ -8306,7 +8305,7 @@ server <- function(input, output, session) {
   ##### Assemble and update the procedures performed section for ANTERIOR #########
   
   op_note_procedures_numbered_anterior_reactive <- reactive({
-    if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df) >0 && input$implants_complete > 0){
+    if(nrow(anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df) > 0 && input$implants_complete > 0){
       primary_procedures_numbered_paragraph_anterior <- anterior_op_note_procedures_performed_numbered_function(objects_added_df = anterior_op_note_inputs_list_reactive()$anterior_approach_objects_df, 
                                                                                                                 additional_procedures_performed_vector = anterior_op_note_inputs_list_reactive()$additional_procedures_vector)
     }else{

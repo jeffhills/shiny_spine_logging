@@ -2106,7 +2106,8 @@ addition_surgical_details_modal_box_2_function <-
             choices_vector = c("Vancomycin Powder",
                                "Antibiotic Beads", 
                                "Acellular Collagen Matrix", 
-                               "Hydrolyzed Collagen Powder", 
+                               "Hydrolyzed Collagen Powder",
+                               "Decadron",
                                "Other"),
             initial_value_selected = additional_end_procedure_details_anterior,
             return_as_full_table = TRUE
