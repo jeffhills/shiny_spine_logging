@@ -1968,7 +1968,8 @@ server <- function(input, output, session) {
                                                        multiple_approach_initial_value = FALSE,
                                                        multi_approach_starting_position = input$multi_approach_starting_position,
                                                        spinal_regions_selected = 'lumbar',
-                                                       ##
+                                                       ## 
+                                                       unplanned_reoperation = input$unplanned_reoperation,
                                                        primary_or_revision = input$primary_revision,
                                                        revision_indication = input$revision_indication,
                                                        levels_with_prior_decompression = input$open_canal,
@@ -8726,8 +8727,8 @@ server <- function(input, output, session) {
     patient_details_df <- tibble(last_name = input$patient_last_name,
                                  first_name = input$patient_first_name,
                                  date_of_birth = as.character(paste(input$date_of_birth)),
-                                 # date_of_birth = if_else(paste(input$date_of_birth) == "1900-01-01", "--", paste(input$date_of_birth)),
-                                 sex = input$sex)
+                                 sex = input$sex, 
+                                 mrn = input$hospital_mrn)
     patient_details_df
   })
   
@@ -8749,8 +8750,9 @@ server <- function(input, output, session) {
                                                                        primary_diagnosis_input = input$primary_diagnosis,
                                                                        indications_input = input$indications,
                                                                        asa_class_input = input$asa_class,
-                                                                       anesthesia_input = input$anesthesia,
-                                                                       primary_revision_input = input$primary_revision,
+                                                                       anesthesia_input = input$anesthesia, 
+                                                                       unplanned_reoperation = input$unplanned_reoperation,
+                                                                       primary_revision_input = input$primary_revision, 
                                                                        revision_indication_input = input$revision_indication,
                                                                        prior_fusion_levels_input = input$prior_fusion_levels,
                                                                        left_revision_implants_removed_input = input$left_revision_implants_removed,
@@ -9334,28 +9336,12 @@ server <- function(input, output, session) {
   #################  SURGICAL DETAILS TABLE ##################
   output$surgical_details_redcap_table <- renderTable({
     surgical_details_redcap_table_reactive()
-    # surgical_details_redcap_table_reactive() %>%
-    #   pivot_wider(names_from = name, values_from = value) %>%
-    #   mutate(record_id = record_number) %>%
-    #   mutate(redcap_event_name = "surgery_arm_1") %>%
-    #   mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
-    #   mutate(redcap_repeat_instrument = "surgical_details") %>%
-    #   mutate(surgical_details_complete = "Complete") %>%
-    #   select(record_id, redcap_event_name, everything())
   })
   
   #################  INTRAOP DETAILS TABLE ##################
   output$intraoperative_details_redcap_table <- renderTable({
     intraoperative_details_redcap_table_reactive()
     
-    # intraoperative_details_redcap_table_reactive() %>%
-    #   pivot_wider(names_from = name, values_from = value) %>%
-    #   mutate(record_id = record_number) %>%
-    #   mutate(redcap_event_name = "surgery_arm_1") %>%
-    #   mutate(redcap_repeat_instance = row_number() + surgical_details_instance_add) %>%
-    #   mutate(redcap_repeat_instrument = "intraoperative_details") %>%
-    #   mutate(intraoperative_details_complete = "Complete") %>%
-    #   select(record_id, redcap_event_name, everything())
   })
   
   #################  RODS CROSSING BY LEVEL TABLE ##################
@@ -9909,7 +9895,8 @@ server <- function(input, output, session) {
             mutate(redcap_repeat_instance = row_number() + screw_details_repeating_instance_add) %>%
             mutate(redcap_repeat_instrument = "screw_details_repeating") %>%
             mutate(screw_details_repeating_complete = "Complete") %>%
-            select(record_id, redcap_event_name, everything())
+            select(record_id, redcap_event_name, everything()) %>%
+            filter(screw_level != "x")
           
           if(all(names(screw_details_repeating %>% select(-contains("redcap"))) %in% redcap_names_df$redcap_field_names)){
             importRecords(rcon = rcon_reactive$rcon, data = screw_details_repeating, returnContent = "count")

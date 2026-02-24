@@ -699,12 +699,12 @@ startup_modal_box_diagnosis_symptoms <-
                 checkboxes_inline = TRUE,
                 individual_buttons = TRUE
               ), 
-              conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
+              # conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
                                fluidRow(column(
                                  width = 12,
                                  jh_make_shiny_table_row_function(
-                                   left_column_label = "Unplanned Reoperation?",
-                                   input_type = "awesomeRadio",
+                                   left_column_label = "Unplanned Reoperation within 90 Days?",
+                                   input_type = "radioGroupButtons",
                                    input_id = "unplanned_reoperation",
                                    left_column_percent_width = 50,
                                    font_size = 16,
@@ -714,7 +714,7 @@ startup_modal_box_diagnosis_symptoms <-
                                    individual_buttons = TRUE
                                  )
                                )
-                               )
+                               # )
               ),
               conditionalPanel(condition = "input.primary_revision.indexOf('Revision') > -1",
                                fluidRow(column(

@@ -184,6 +184,7 @@ redcap_table_surgical_details_df_function <- function(all_objects_df_input = tib
                                                       indications_input = "na",
                                                       asa_class_input = "na",
                                                       anesthesia_input = "na",
+                                                      unplanned_reoperation = "tbd",
                                                       primary_revision_input = "na",
                                                       revision_indication_input = "na",
                                                       prior_fusion_levels_input = NULL,
@@ -660,6 +661,16 @@ redcap_table_surgical_details_df_function <- function(all_objects_df_input = tib
       }else{
         surgery_details_list$spine_region <- "lumbar"
       }
+      
+      
+      
+      ############### UNPLANNED REOPERATION #############
+      if(!is.na(unplanned_reoperation)){
+        surgery_details_list$unplanned_reoperation <- unplanned_reoperation
+      }else{
+        surgery_details_list$unplanned_reoperation <- "NA"
+      }
+      
       
       #################### BMP & ALLOGRAFT  #######################
 
