@@ -450,25 +450,32 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     assistant_procedures_assisted_list <- list()
     
     assistant_procedures_assisted_list$positioning <- "positioning"
-    assistant_procedures_assisted_list$exposure <- "exposure"
     
-    # if(any(str_detect(str_to_lower(implant_technique_method_input), "nav"))){
-    #   assistant_procedures_assisted_list$navigation <- "setup of intraoperative navigation"
-    # }
+    assistant_procedures_assisted_list$exposure <- "exposure"
+
     
     if(any(all_objects_to_add_df$implant == "yes")){
       assistant_procedures_assisted_list$instrumentation <- "instrumentation"
+    }
+    if(any(all_objects_to_add_df$object %in% c("grade_3", "grade_4", "grade_5", "grade_6"))){
+      assistant_procedures_assisted_list$osteotomy <- "three column osteotomy"
+    }
+    
+    if(any(all_objects_to_add_df$category == 'decompression')){
+      assistant_procedures_assisted_list$decompression <- 'decompression'
     }
     
     assistant_procedures_assisted_list$closure <- "layered closure"
     
     if(any(str_detect(str_to_lower(procedure_details_list$closure), "vac"))){
-      assistant_procedures_assisted_list$vac <- "application of wound vac"
+      if(str_detect(str_to_lower(attending_assistant), "md|dr|m.d.") == FALSE){
+        assistant_procedures_assisted_list$vac <- "application of wound vac"
+      }
     }
     
     procedures_assisted_summary <- glue_collapse(assistant_procedures_assisted_list, sep = ", ", last = ", and ")
     
-    attending_assistant_statement <- glue("Due to the complexity of the procedure and the need for experienced assistance throughout all critical portions of the case—including {procedures_assisted_summary}—{attending_assistant} assisted in all phases of the operation. Their participation was medically necessary to ensure patient safety and operative efficiency. In this case, an adequately experienced qualified resident was not continuously available to provide the required assistance.")
+    attending_assistant_statement <- glue("Due to the complexity of the procedure and the need for experienced assistance throughout all critical portions of the case including {procedures_assisted_summary}, {attending_assistant} assisted in all phases of the operation. Their participation was medically necessary to ensure patient safety and operative efficiency. In this case, an adequately experienced qualified resident was not continuously available to provide the required assistance.")
   }else{
     attending_assistant_statement <- ""
   }
@@ -1363,7 +1370,46 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     attending_assistant_statement <- glue("Due to the complexity of the procedure and the need for experienced assistance throughout all critical portions of the case—including {procedures_assisted_summary}—{attending_assistant} assisted in all phases of the operation. Their participation was medically necessary to ensure patient safety and operative efficiency. In this case, an adequately experienced qualified resident was not continuously available to provide the required assistance.")
     }else{
     attending_assistant_statement <- ""
+    }
+  
+  if(str_length(attending_assistant)>2){
+    
+    assistant_procedures_assisted_list <- list()
+    
+    assistant_procedures_assisted_list$positioning <- "positioning"
+    
+    if(length(revision_decompression_vector) > 1){
+      assistant_procedures_assisted_list$exposure <- "exposure in the setting of a prior laminectomy defect"
+    } else{
+      assistant_procedures_assisted_list$exposure <- "exposure"
+    }
+
+    if(any(all_objects_to_add_df$implant == "yes")){
+      assistant_procedures_assisted_list$instrumentation <- "instrumentation"
+    }
+    if(any(all_objects_to_add_df$object %in% c("grade_3", "grade_4", "grade_5", "grade_6"))){
+      assistant_procedures_assisted_list$osteotomy <- "three column osteotomy"
+    }
+    
+    if(any(all_objects_to_add_df$category == 'decompression')){
+      assistant_procedures_assisted_list$decompression <- 'decompression'
+    }
+    
+    assistant_procedures_assisted_list$closure <- "layered closure"
+    
+    if(any(str_detect(str_to_lower(procedure_details_list$closure), "vac"))){
+      if(str_detect(str_to_lower(attending_assistant), "md|dr|m.d.") == FALSE){
+        assistant_procedures_assisted_list$vac <- "application of wound vac"
+      }
+    }
+    
+    procedures_assisted_summary <- glue_collapse(assistant_procedures_assisted_list, sep = ", ", last = ", and ")
+    
+    attending_assistant_statement <- glue("Due to the complexity of the procedure and the need for experienced assistance throughout all critical portions of the case including {procedures_assisted_summary}, {attending_assistant} assisted throughout the operation. Their assistance was medically necessary to ensure patient safety and operative efficiency. In this case, an adequately experienced qualified resident was not continuously available to provide the necessary assistance.")
+  }else{
+    attending_assistant_statement <- ""
   }
+  
   
   
   procedure_details_list$final_paragraph <- glue("At the conclusion, all counts were correct. {neuromonitoring_list$neuromonitoring_signal_stability} The drapes were removed and {he_or_she} was turned uneventfully. I was personally present for the {procedures_listed}. {attending_assistant_statement}")

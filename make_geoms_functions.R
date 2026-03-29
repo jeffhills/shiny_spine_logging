@@ -116,29 +116,40 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_3"))){
-    geoms_list_posterior$osteotomy_3_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_3"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.6,
-      pattern_angle = 10,
-      pattern_spacing = 0.03,
-      pattern_density = 0.1
+    geoms_list_posterior$osteotomy_3_sf_geom <- geom_sf(
+      data = st_union(st_combine(st_multipolygon(filter(all_posterior_objects_df, object == "grade_3")$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+      fill = "red",
+      alpha = 0.75
     )
+    
+    # geoms_list_posterior$osteotomy_3_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_3"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.6,
+    #   pattern_angle = 10,
+    #   pattern_spacing = 0.03,
+    #   pattern_density = 0.1
+    # )
   }else{
     geoms_list_posterior$osteotomy_3_sf_geom <- NULL
   }
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "grade_4"))){
-    geoms_list_posterior$osteotomy_4_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_4"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.6,
-      pattern_angle = 10,
-      pattern_spacing = 0.02,
-      pattern_density = 0.02
+    geoms_list_posterior$osteotomy_4_sf_geom <- geom_sf(
+      data = st_union(st_combine(st_multipolygon(filter(all_posterior_objects_df, object == "grade_4")$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+      fill = "red",
+      alpha = 0.75
     )
+    # geoms_list_posterior$osteotomy_4_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_4"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+    #   pattern = "stripe",
+    #   pattern_colour = "pink",
+    #   alpha = 0.6,
+    #   pattern_angle = 10,
+    #   pattern_spacing = 0.02,
+    #   pattern_density = 0.02
+    # )
   }else{
     geoms_list_posterior$osteotomy_4_sf_geom <- NULL
   }
@@ -147,7 +158,7 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
     geoms_list_posterior$osteotomy_5_sf_geom <- ggpattern::geom_sf_pattern(
       data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "grade_5"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
       pattern = "crosshatch",
-      pattern_colour = "red",
+      pattern_colour = "pink",
       alpha = 0.6,
       pattern_angle = 10,
       pattern_spacing = 0.02,
@@ -158,14 +169,22 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   }
   
   ## Decompresions ##
+  
   if(any(str_detect(all_posterior_objects_df$object, pattern = "laminectomy_for_facet_cyst"))){
-    geoms_list_posterior$laminectomy_for_facet_cyst_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy_for_facet_cyst"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
-      pattern = "stripe",
-      pattern_colour = "orange",
-      alpha = 0.7,
-      pattern_spacing = 0.01
+    
+    geoms_list_posterior$laminectomy_for_facet_cyst_sf_geom <- geom_sf(
+      data = st_multipolygon(filter(all_posterior_objects_df, object == "laminectomy_for_facet_cyst")$object_constructed),
+      fill = "red",
+      alpha = 0.75
     )
+    
+    # geoms_list_posterior$laminectomy_for_facet_cyst_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy_for_facet_cyst"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
+    #   pattern = "stripe",
+    #   pattern_colour = "orange",
+    #   alpha = 0.7,
+    #   pattern_spacing = 0.01
+    # )
   }else{
     geoms_list_posterior$laminectomy_for_facet_cyst_sf_geom <- NULL
   }
@@ -174,109 +193,153 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
 
     geoms_list_posterior$laminectomy_sf_geom <- geom_sf(
       data = st_union(st_combine(st_multipolygon((all_posterior_objects_df %>% filter(object == "laminectomy"))$object_constructed)), by_feature = TRUE, is_coverage = TRUE),
-      # pattern = "stripe",
-      # pattern_colour = "red",
       fill = "red",
       alpha = 0.75
-      # pattern_spacing = 0.01
     )
   }else{
     geoms_list_posterior$laminectomy_sf_geom <- NULL
   }
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "sublaminar_decompression"))){
-    geoms_list_posterior$sublaminar_decompression_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "sublaminar_decompression"))$object_constructed),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.75,
-      pattern_spacing = 0.05
-      # alpha = 0.6,
-      # pattern_angle = 10,
-      # pattern_spacing = 0.03,
-      # pattern_density = 0.1
+    geoms_list_posterior$sublaminar_decompression_sf_geom <- geom_sf(
+      data = st_multipolygon(filter(all_posterior_objects_df, object == "sublaminar_decompression")$object_constructed),
+      fill = "red",
+      alpha = 0.75
     )
+    
+    # geoms_list_posterior$sublaminar_decompression_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_multipolygon((all_posterior_objects_df %>% filter(object == "sublaminar_decompression"))$object_constructed),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.75,
+    #   pattern_spacing = 0.05
+    #   # alpha = 0.6,
+    #   # pattern_angle = 10,
+    #   # pattern_spacing = 0.03,
+    #   # pattern_density = 0.1
+    # )
   }else{
     geoms_list_posterior$sublaminar_decompression_sf_geom <- NULL
   }
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "laminotomy"))){
-    geoms_list_posterior$laminotomy_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "laminotomy"))$object_constructed),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.7,
-      pattern_spacing = 0.01
+    geoms_list_posterior$laminotomy_sf_geom <- geom_sf(
+      data = st_multipolygon(filter(all_posterior_objects_df, object == "laminotomy")$object_constructed),
+      fill = "red",
+      alpha = 0.75
     )
+    
+    # geoms_list_posterior$laminotomy_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_multipolygon((all_posterior_objects_df %>% filter(object == "laminotomy"))$object_constructed),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.7,
+    #   pattern_spacing = 0.01
+    # )
   }else{
     geoms_list_posterior$laminotomy_sf_geom <- NULL
   }
   if(any(str_detect(all_posterior_objects_df$object, pattern = "cervical_foraminotomy"))){
-    geoms_list_posterior$cervical_foraminotomy_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "cervical_foraminotomy"))$object_constructed),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.7,
-      pattern_spacing = 0.01
+    geoms_list_posterior$cervical_foraminotomy_sf_geom <- geom_sf(
+      data = st_multipolygon(filter(all_posterior_objects_df, object == "cervical_foraminotomy")$object_constructed),
+      fill = "red",
+      alpha = 0.75
     )
+    # geoms_list_posterior$cervical_foraminotomy_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_multipolygon((all_posterior_objects_df %>% filter(object == "cervical_foraminotomy"))$object_constructed),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.7,
+    #   pattern_spacing = 0.01
+    # )
   }else{
     geoms_list_posterior$cervical_foraminotomy_sf_geom <- NULL
   }
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "transpedicular_approach"))){
-    geoms_list_posterior$transpedicular_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "transpedicular_approach"))$object_constructed),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.7,
-      pattern_spacing = 0.01
+    geoms_list_posterior$transpedicular_sf_geom <- geom_sf(
+      data = st_multipolygon(filter(all_posterior_objects_df, object == "transpedicular_approach")$object_constructed),
+      fill = "red",
+      alpha = 0.75
     )
+    
+    # geoms_list_posterior$transpedicular_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_multipolygon((all_posterior_objects_df %>% filter(object == "transpedicular_approach"))$object_constructed),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.7,
+    #   pattern_spacing = 0.01
+    # )
   }else{
     geoms_list_posterior$transpedicular_sf_geom <- NULL
   }
   if(any(str_detect(all_posterior_objects_df$object, pattern = "costo"))){
-    geoms_list_posterior$costovertebral_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "costovertebral_approach" | object == "costotransversectomy"))$object_constructed),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.7,
-      pattern_spacing = 0.01
+    geoms_list_posterior$costovertebral_sf_geom <- geom_sf(
+      data = st_multipolygon(filter(all_posterior_objects_df, object == "costovertebral_approach" | object == "costotransversectomy")$object_constructed),
+      fill = "red",
+      alpha = 0.75
     )
+    
+    # geoms_list_posterior$costovertebral_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_multipolygon((all_posterior_objects_df %>% filter(object == "costovertebral_approach" | object == "costotransversectomy"))$object_constructed),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.7,
+    #   pattern_spacing = 0.01
+    # )
   }else{
     geoms_list_posterior$costovertebral_sf_geom <- NULL
   }
   if(any(str_detect(all_posterior_objects_df$object, pattern = "lateral_extracavitary"))){
-    geoms_list_posterior$lateral_extracavitary_approach_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "lateral_extracavitary_approach"))$object_constructed),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.7,
-      pattern_spacing = 0.01
+    geoms_list_posterior$lateral_extracavitary_approach_sf_geom <- geom_sf(
+      data = st_multipolygon(filter(all_posterior_objects_df, object == "lateral_extracavitary_approach")$object_constructed),
+      fill = "red",
+      alpha = 0.75
     )
+    
+    # geoms_list_posterior$lateral_extracavitary_approach_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_multipolygon((all_posterior_objects_df %>% filter(object == "lateral_extracavitary_approach"))$object_constructed),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.7,
+    #   pattern_spacing = 0.01
+    # )
   }else{
     geoms_list_posterior$lateral_extracavitary_approach_sf_geom <- NULL
   }
   
   if(any(str_detect(all_posterior_objects_df$object, pattern = "lateral_extraforaminal_approach"))){
-    geoms_list_posterior$lateral_extraforaminal_approach_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "lateral_extraforaminal_approach"))$object_constructed),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.7,
-      pattern_spacing = 0.01
+    geoms_list_posterior$lateral_extraforaminal_approach_sf_geom <- geom_sf(
+      data = st_multipolygon(filter(all_posterior_objects_df, object == "lateral_extraforaminal_approach")$object_constructed),
+      fill = "red",
+      alpha = 0.75
     )
+    
+    # geoms_list_posterior$lateral_extraforaminal_approach_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_multipolygon((all_posterior_objects_df %>% filter(object == "lateral_extraforaminal_approach"))$object_constructed),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.7,
+    #   pattern_spacing = 0.01
+    # )
   }else{
     geoms_list_posterior$lateral_extraforaminal_approach_sf_geom <- NULL
   }
   
   if(any(all_posterior_objects_df$object == "diskectomy")){
-    geoms_list_posterior$diskectomy_sf_geom <- ggpattern::geom_sf_pattern(
-      data = st_multipolygon((all_posterior_objects_df %>% filter(object == "diskectomy"))$object_constructed),
-      pattern = "stripe",
-      pattern_colour = "red",
-      alpha = 0.7,
-      pattern_spacing = 0.01
+    geoms_list_posterior$diskectomy_sf_geom <- geom_sf(
+      data = st_multipolygon(filter(all_posterior_objects_df, object == "diskectomy")$object_constructed),
+      fill = "red",
+      alpha = 0.75
     )
+    
+    # geoms_list_posterior$diskectomy_sf_geom <- ggpattern::geom_sf_pattern(
+    #   data = st_multipolygon((all_posterior_objects_df %>% filter(object == "diskectomy"))$object_constructed),
+    #   pattern = "stripe",
+    #   pattern_colour = "red",
+    #   alpha = 0.7,
+    #   pattern_spacing = 0.01
+    # )
   }else{
     geoms_list_posterior$diskectomy_sf_geom <- NULL
   }
@@ -332,7 +395,17 @@ jh_make_posterior_geoms_function <- function(all_posterior_objects_df, plot_with
   
   ## INTERBODY
   if(any(all_posterior_objects_df$object == "tlif") || any(all_posterior_objects_df$object == "llif") ||any(all_posterior_objects_df$object == "plif")){
-    geoms_list_posterior$interbody_device_sf_geom <- geom_sf(data = st_multipolygon((all_posterior_objects_df %>% filter(object == "tlif" | object == "plif" | object == "llif"))$object_constructed), fill = "red")
+    geoms_list_posterior$interbody_device_sf_geom <-  ggpattern::geom_sf_pattern(
+      data =  st_multipolygon(filter(all_posterior_objects_df, object == "tlif" | object == "plif" | object == "llif")$object_constructed),
+      pattern = "crosshatch",
+      pattern_fill = "grey90",
+      fill = "#7899F5",
+      alpha = 0.3,
+      pattern_spacing = 0.01,
+      pattern_density = 0.7
+    )
+    
+    # geoms_list_posterior$interbody_device_sf_geom <- geom_sf(data = st_multipolygon(filter(all_posterior_objects_df, object == "tlif" | object == "plif" | object == "llif")$object_constructed), fill = "red")
   }else{
     geoms_list_posterior$interbody_device_sf_geom <- NULL
   }
