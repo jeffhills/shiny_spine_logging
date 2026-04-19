@@ -1069,13 +1069,6 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
   
   ################### PROCEDURE PARAGRAPHS ##################
   
-    # implant_technique_method_input <- ifelse(
-    #   length(implant_technique_method_input) > 0,
-    #   implant_technique_method_input,
-    #   "NA"
-    # )
-  # print(glue("ALL IMPLANT METHODS SHOULD PRINT HERE000: {glue_collapse(implant_technique_method_input, sep = ', ')} "))
-  
   if(length(implant_technique_method_input) == 0){
     implant_technique_method_input <- "NA"
   }
@@ -1095,7 +1088,7 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
                         "rods were connected bilaterally using a satellite rod configuration, and the osteotomy was closed in a controlled fashion.")
       }
     }
-  # }
+
   
   if(length(complications_list) > 0){
     if(any(names(complications_list) == "durotomy")){
@@ -1127,13 +1120,9 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     posterior_implant_df <- posterior_implants_all_df %>%
       filter(procedure_category != "pelvic instrumentation") %>%
       mutate(level = if_else(str_detect(str_to_lower(level), "iliac|s2ai"), "Pelvis", level))
-      # mutate(level = if_else(level == "Iliac", "Pelvis", level)) %>%
-      # mutate(level = if_else(level == "S2AI", "Pelvis", level))
-    
+
     instrumented_levels_vector <- unique((posterior_implants_all_df %>% 
                                             mutate(level = if_else(str_detect(str_to_lower(level), "iliac|s2ai"), "Pelvis", level)) %>%
-                                            # mutate(level = if_else(level == "Iliac", "the pelvis", level)) %>%
-                                            # mutate(level = if_else(level == "S2AI", "the pelvis", level)) %>%
                                             distinct())$level)
   }else{
     posterior_implant_df <- tibble(level = character(), side = character(), object = character())
@@ -1145,13 +1134,15 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
     
     if(any(str_detect(posterior_implant_df$side, "bilateral"))){
       
-      rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} {left_main_rod_contour} for the left and a {right_main_rod_size} {right_main_rod_material} {right_main_rod_contour} for the right. ") 
+      if(left_main_rod_size == right_main_rod_size & left_main_rod_material == right_main_rod_material){
+        rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} {left_main_rod_contour} for the left and right. ") 
+        
+      }else{
+        rod_statements_list$rod_contouring <- glue("To complete the spinal instrumentation, a {left_main_rod_size} {left_main_rod_material} {left_main_rod_contour} for the left and a {right_main_rod_size} {right_main_rod_material} {right_main_rod_contour} for the right. ") 
+        
+      }
       
-      # rod_statements_list$alignment_and_rod_placement <-  case_when(
-      #   length(alignment_correction_technique) == 0 ~ paste("The rods were placed into position and secured with set screws."),
-      #   alignment_correction_technique[1] == "NA" ~ paste("The rods were placed into position and secured with set screws."),
-      #   length(alignment_correction_technique) > 0 ~ paste(glue_collapse(alignment_correction_technique, sep = " "))
-      # )
+
       if(str_length(alignment_correction_technique)>5){
         rod_statements_list$alignment_and_rod_placement <- alignment_correction_technique
       }else{
@@ -1168,7 +1159,6 @@ op_note_posterior_function <- function(all_objects_to_add_df = tibble(level = ch
         rod_statements_list$additional_rods_statement <- glue_collapse(additional_rods_statement, sep = " ") 
       }
       
-      # if(any(additional_procedures_vector == "Open treatment of vertebral fracture")){
         if(any(str_detect(additional_procedures_vector, "fracture"))){
         rod_statements_list$set_screws <- glue("The rod was used to correct the alignment due to the fracture. Set screws were then tightened with a final tightener to the appropriate torque.")
       }else{

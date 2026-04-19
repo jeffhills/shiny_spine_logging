@@ -44,7 +44,7 @@ postop_transfusion_threshold_choices_vector <- c("Please check daily CBC & trans
 postop_imaging_choices_vector <- c("please obtain postop upright AP/Lateral C-spine xrays",
                                    "please obtain postop upright AP/Lateral T-spine xrays prior to discharge when able to stand & after drains out",
                                    "please obtain postop upright AP/Lateral L-spine xrays prior to discharge when able to stand & after drains out",
-                                   "please obtain postop upright AP/Lateral standing scoliosis xrays prior to discharge when able to stand & after drains out",
+                                   "please obtain postop AP/Lateral standing scoliosis xrays when able to stand",
                                    "no postop imaging needed.",
                                    "***")
 
@@ -108,6 +108,7 @@ postop_diet_choices_vector <- list("OK to resume normal diet" = "OK to resume no
 
 postop_foley_choices_vector <- c("Discontinue foley when able",
                                  "Discontinue foley once mobilizing with PT",
+                                 "Discontinue foley once ambulating >20 ft with PT (not before POD 2)",
                                  "***"
 )
 
@@ -240,7 +241,7 @@ startup_modal_box <-
                    3,
                    actionBttn(
                      inputId = "test_patient_button",
-                     label = "Use Test Patient",
+                     label = "Skip to Templating",
                      size = "sm"
                    )
                  ),),
@@ -1757,7 +1758,7 @@ addition_surgical_details_modal_box_2_function <-
                                "No bending, twisting, lifting > 10lbs"),
            postop_brace = c(""),
            postop_diet = c("Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
-           postop_foley = c("Discontinue foley once mobilizing with PT"),
+           postop_foley = c("Discontinue foley once ambulating >20 ft with PT (not before POD 2)"),
            postop_dvt_ppx = c("SCD's while in bed", "Hold any chemical dvt ppx for minimum 72hrs"),
            postop_drains_dressing = c(""),
            postop_followup = c("")) {

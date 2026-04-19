@@ -9352,15 +9352,6 @@ server <- function(input, output, session) {
       select(-dos_rods_crossing_repeating) %>%
       select(rods_crossing_level, total_rods_crossing, everything())
     
-    # rods_crossing_by_level_repeating <- rods_crossing_by_level_redcap_table_reactive() %>%
-    #   mutate(record_id = "record number will go here") %>%
-    #   select(record_id, everything()) %>%
-    #   mutate(redcap_event_name = "surgery_arm_1") %>%
-    #   mutate(redcap_repeat_instance = paste(row_number(), "repeat instance will go here")) %>%
-    #   mutate(redcap_repeat_instrument = "rods_crossing_by_level_repeating") %>%
-    #   mutate(rods_crossing_by_level_repeating_complete = "Complete") %>%
-    #   mutate(across(everything(), ~ paste0(as.character(.x)))) %>%
-    #   select(record_id, redcap_event_name, redcap_repeat_instrument, redcap_repeat_instance, dos_rods_crossing_repeating, rods_crossing_level, left_rod_count, left_rods_crossing, right_rod_count, right_rods_crossing, total_rods_crossing, rods_crossing_by_level_repeating_complete)
   })
   
   #################  PROCEDURES BY LEVEL TABLE ##################
@@ -9400,50 +9391,7 @@ server <- function(input, output, session) {
   })
   
   # ---- build clean, reproducible dput text for reproducing op note list ----
-  # procedure_results_list_posterior <- op_note_posterior_function(all_objects_to_add_df = posterior_op_note_inputs_list_reactive()$posterior_approach_objects_df,
-  #                                                                fusion_levels_df = posterior_op_note_inputs_list_reactive()$fusions_df,
-  #                                                                c2_nerve_transection = posterior_op_note_inputs_list_reactive()$c2_nerve_transection,
-  #                                                                head_position = posterior_op_note_inputs_list_reactive()$head_positioning_posterior,
-  #                                                                surgical_approach = posterior_op_note_inputs_list_reactive()$approach_specified_posterior,
-  #                                                                approach_mis_open = posterior_op_note_inputs_list_reactive()$approach_open_mis,
-  #                                                                approach_microscope = posterior_op_note_inputs_list_reactive()$approach_microscope,
-  #                                                                approach_robot_nav_xray = posterior_op_note_inputs_list_reactive()$approach_robot_navigation,
-  #                                                                neuromonitoring_list = posterior_op_note_inputs_list_reactive()$neuromonitoring_input_list, ## this is a named list with names: modalities, emg, and pre_positioning_motors
-  #                                                                implant_technique_method_input = posterior_op_note_inputs_list_reactive()$implant_technique_method,
-  #                                                                implant_confirmation_method = posterior_op_note_inputs_list_reactive()$implant_position_confirmation_method,
-  #                                                                local_anesthesia = posterior_op_note_inputs_list_reactive()$local_anesthesia,
-  #                                                                complications_list = posterior_op_note_inputs_list_reactive()$complications_list,
-  #                                                                revision_decompression_vector = posterior_op_note_inputs_list_reactive()$open_canal,
-  #                                                                revision_implants_df = posterior_op_note_inputs_list_reactive()$revision_implants_df,
-  #                                                                left_main_rod_size = posterior_op_note_inputs_list_reactive()$left_main_rod_size,
-  #                                                                left_main_rod_material = posterior_op_note_inputs_list_reactive()$left_main_rod_material,
-  #                                                                left_main_rod_contour = posterior_op_note_inputs_list_reactive()$left_main_rod_contour,
-  #                                                                right_main_rod_size = posterior_op_note_inputs_list_reactive()$right_main_rod_size,
-  #                                                                right_main_rod_material = posterior_op_note_inputs_list_reactive()$right_main_rod_material,
-  #                                                                right_main_rod_contour = posterior_op_note_inputs_list_reactive()$right_main_rod_contour,
-  #                                                                additional_rods_statement = posterior_op_note_inputs_list_reactive()$added_rods_statement,
-  #                                                                antibiotics = posterior_op_note_inputs_list_reactive()$preop_antibiotics,
-  #                                                                antifibrinolytic = posterior_op_note_inputs_list_reactive()$antifibrinolytic,
-  #                                                                additional_procedures_vector = posterior_op_note_inputs_list_reactive()$additional_procedures_vector,
-  #                                                                prior_fusion_levels_vector = posterior_op_note_inputs_list_reactive()$prior_fusion_levels,
-  #                                                                instrumentation_removal_vector = posterior_op_note_inputs_list_reactive()$instrumentation_removed_vector,
-  #                                                                bmp = posterior_op_note_inputs_list_reactive()$posterior_bmp_dose_reactive,
-  #                                                                biologics_list = posterior_op_note_inputs_list_reactive()$posterior_biologics_list,
-  #                                                                morselized_autograft_separate = posterior_op_note_inputs_list_reactive()$morselized_autograft_separate,
-  #                                                                structural_autograft_separate = posterior_op_note_inputs_list_reactive()$structural_autograft_separate,
-  #                                                                deep_drains = posterior_op_note_inputs_list_reactive()$deep_drains_posterior,
-  #                                                                superficial_drains = posterior_op_note_inputs_list_reactive()$superficial_drains_posterior,
-  #                                                                end_procedure_details = posterior_op_note_inputs_list_reactive()$additional_end_procedure_details,
-  #                                                                closure = posterior_op_note_inputs_list_reactive()$closure_details,
-  #                                                                dressing = posterior_op_note_inputs_list_reactive()$dressing_details,
-  #                                                                multiple_position_procedure = posterior_op_note_inputs_list_reactive()$multiple_approach,
-  #                                                                alignment_correction_technique = posterior_op_note_inputs_list_reactive()$alignment_correction_method,
-  #                                                                sex = posterior_op_note_inputs_list_reactive()$sex,
-  #                                                                lateral_mass_screws_after_decompression = posterior_op_note_inputs_list_reactive()$lateral_mass_screws_after_decompression,
-  #                                                                instruments_used_for_bony_work = posterior_op_note_inputs_list_reactive()$instruments_used_for_bony_work,
-  #                                                                attending_assistant = posterior_op_note_inputs_list_reactive()$attending_assistant,
-  #                                                                procedures_performed_sentence =  posterior_op_note_inputs_list_reactive()$procedures_performed_sentence
-  # )
+
   
   ## POSTERIOR OP NOTE TEXT: ##
   dput_text <- reactive({
