@@ -51,8 +51,8 @@ postop_imaging_choices_vector <- c("please obtain postop upright AP/Lateral C-sp
 
 postop_pain_choices_vector <- list('Ice pack to affected area, PRN' = 'Ice pack to affected area, PRN',
      'Dilaudid PCA [0.2mg bolus, 8min lockout, no basal](in addition to all other pain medication orders) - DISCONTINUE on POD 1' = 'Dilaudid PCA [0.2mg bolus, 8min lockout, no basal](in addition to all other pain medication orders) - DISCONTINUE on POD 1',
-     'Oxycodone 5mg q4h, ok to give additional dose if needed' = 'Oxycodone 5mg q4h, ok to give additional dose if needed',
-     'Oxycodone 10mg q4h, ok to give additional dose if needed' = 'Oxycodone 10mg q4h, ok to give additional dose if needed',
+     'Oxycodone 5mg q4h prn, ok to give additional dose if needed' = 'Oxycodone 5mg q4h, ok to give additional dose if needed',
+     'Oxycodone 10mg q4h prn, ok to give additional dose if needed' = 'Oxycodone 10mg q4h, ok to give additional dose if needed',
      'Oxycodone *** q4h, ok to give additional dose if needed' = 'Oxycodone *** q4h, ok to give additional dose if needed',
      'Tylenol 1000mg q8h scheduled.' = 'Tylenol 1000mg q8h scheduled.',
      'Tylenol 650mg q8h scheduled' = 'Tylenol 650mg q8h scheduled',
