@@ -4288,12 +4288,51 @@ server <- function(input, output, session) {
   left_rod_list_pre_geoms <- reactiveValues()
   
   observeEvent(input$add_rods, {
-    if(length(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level) == 1 & nrow(left_revision_rod_matrix_reactive())>1){
+    left_implants_df <- jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")
+    if(length(left_implants_df$level) == 1 & nrow(left_revision_rod_matrix_reactive())>1){
       updateMaterialSwitch(session = session, inputId = "link_left_revision_rods_true_false", value = TRUE)
+      
+      if(input$left_main_rod_size == "None"){
+        updatePickerInput(session = session,
+                          inputId = "left_main_rod_size",
+                          selected = if_else(max(left_implants_df$vertebral_number) < 11, "4.0mm", "6.0mm")
+        )
+      }
+      if(input$left_main_rod_material == "Non-instrumented"){
+        updateAwesomeRadio(session = session,
+                           inputId = "left_main_rod_material",
+                           inline = TRUE,
+                           choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
+                           selected = "Titanium"
+        )
+      }
     }
   }
   )
   
+  # observeEvent(input$add_rods, ignoreNULL = TRUE, ignoreInit = TRUE, {
+  #   if(nrow(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")) > 1){
+  #     if(max(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$vertebral_number) < 11){
+  #       rod_size <- "4.0mm"  
+  #     }else{
+  #       rod_size <- "6.0mm"  
+  #     }
+  #     if(input$left_main_rod_size == "None"){
+  #       updatePickerInput(session = session, 
+  #                         inputId = "left_main_rod_size", 
+  #                         selected = rod_size
+  #       )
+  #     }
+  #     if(input$left_main_rod_material == "Non-instrumented"){
+  #       updateAwesomeRadio(session = session, 
+  #                          inputId = "left_main_rod_material",
+  #                          inline = TRUE,
+  #                          choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
+  #                          selected = "Titanium"
+  #       )
+  #     }
+  #   }
+  # })
   
   observe({
     ##########RODS ############
@@ -5169,9 +5208,26 @@ server <- function(input, output, session) {
   
   right_rod_list_pre_geoms <- reactiveValues()
   
+
   observeEvent(input$add_rods, {
-    if(length(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level) == 1 & nrow(right_revision_rod_matrix_reactive())>1){
+    right_implants_df <- jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")
+    if(length(right_implants_df$level) == 1 & nrow(right_revision_rod_matrix_reactive())>1){
       updateMaterialSwitch(session = session, inputId = "link_right_revision_rods_true_false", value = TRUE)
+      
+      if(input$right_main_rod_size == "None"){
+        updatePickerInput(session = session,
+                          inputId = "right_main_rod_size",
+                          selected = if_else(max(right_implants_df$vertebral_number) < 11, "4.0mm", "6.0mm")
+        )
+      }
+      if(input$right_main_rod_material == "Non-instrumented"){
+        updateAwesomeRadio(session = session,
+                           inputId = "right_main_rod_material",
+                           inline = TRUE,
+                           choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
+                           selected = "Titanium"
+        )
+      }
     }
   }
   )
