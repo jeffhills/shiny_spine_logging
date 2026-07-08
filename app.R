@@ -4287,6 +4287,14 @@ server <- function(input, output, session) {
   
   left_rod_list_pre_geoms <- reactiveValues()
   
+  observeEvent(input$add_rods, {
+    if(length(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level) == 1 & nrow(left_revision_rod_matrix_reactive())>1){
+      updateMaterialSwitch(session = session, inputId = "link_left_revision_rods_true_false", value = TRUE)
+    }
+  }
+  )
+  
+  
   observe({
     ##########RODS ############
     ############# left ROD #################
@@ -4370,6 +4378,12 @@ server <- function(input, output, session) {
       
       if(length(left_implants_df$level) > 0){
         ############# MAKE THE RODS #############
+        ### in case there is only 1 screw added. 
+        if(length(left_implants_df$level) == 1 & nrow(left_revision_rod_matrix_reactive())>1){
+          link_left_revision_rods_true_false <- TRUE
+        }else{
+          link_left_revision_rods_true_false <- input$link_left_revision_rods_true_false
+        }
         left_rods_connectors_list <- build_unilateral_rods_list_function(unilateral_full_implant_df = left_implants_df,
                                                                          rod_side = "left",
                                                                          add_accessory_rod = input$add_left_accessory_rod,
@@ -4385,26 +4399,12 @@ server <- function(input, output, session) {
                                                                          kickstand_rod_vector = left_kickstand_rod_vector,
                                                                          add_custom_rods = input$add_left_custom_rods,
                                                                          custom_rods_vector_list = custom_rods_vector_list,
-                                                                         link_revision_rods_true_false = input$link_left_revision_rods_true_false,
+                                                                         link_revision_rods_true_false = link_left_revision_rods_true_false,
                                                                          revision_rod_matrix = left_revision_rod_matrix_reactive()
         )
         
         left_rod_list_pre_geoms$left_rods_connectors_list <- left_rods_connectors_list
         
-        # rods_list$left_rod_list_sf_geom <- NULL
-        # rods_list$left_connector_list_sf_geom <- NULL
-        
-        # if(length(left_rods_connectors_list$rod_list) > 0){
-        #   rods_list$left_rod_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$rod_list), alpha = 0.85)
-        # }else{
-        #   rods_list$left_rod_list_sf_geom <- NULL
-        # }
-        # 
-        # if(length(left_rods_connectors_list$connector_list) > 0){
-        #   rods_list$left_connector_list_sf_geom <- geom_sf(data = st_multipolygon(left_rods_connectors_list$connector_list), fill = "lightblue", alpha = 0.95)
-        # }else{
-        #   rods_list$left_connector_list_sf_geom <- NULL
-        # }
       }
     }
     
@@ -5169,6 +5169,13 @@ server <- function(input, output, session) {
   
   right_rod_list_pre_geoms <- reactiveValues()
   
+  observeEvent(input$add_rods, {
+    if(length(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level) == 1 & nrow(right_revision_rod_matrix_reactive())>1){
+      updateMaterialSwitch(session = session, inputId = "link_right_revision_rods_true_false", value = TRUE)
+    }
+  }
+  )
+  
   ###### right SUPPLEMENTAL ROD GEOM 
   ###### right SUPPLEMENTAL ROD GEOM 
   observe({
@@ -5262,6 +5269,14 @@ server <- function(input, output, session) {
       
       if(length(right_implants_df$level) > 0){
         ############# MAKE THE RODS #############
+        ### in case there is only 1 screw added. 
+        if(length(right_implants_df$level) == 1 & nrow(right_revision_rod_matrix_reactive())>1){
+          link_right_revision_rods_true_false <- TRUE
+        }else{
+          link_right_revision_rods_true_false <- input$link_right_revision_rods_true_false
+        }
+        
+        
         right_rods_connectors_list <- build_unilateral_rods_list_function(unilateral_full_implant_df = right_implants_df,
                                                                           rod_side = "right",
                                                                           add_accessory_rod = input$add_right_accessory_rod,
@@ -5277,7 +5292,7 @@ server <- function(input, output, session) {
                                                                           kickstand_rod_vector = right_kickstand_rod_vector,
                                                                           add_custom_rods = input$add_right_custom_rods,
                                                                           custom_rods_vector_list = custom_rods_vector_list,
-                                                                          link_revision_rods_true_false = input$link_right_revision_rods_true_false,
+                                                                          link_revision_rods_true_false = link_right_revision_rods_true_false,
                                                                           revision_rod_matrix = right_revision_rod_matrix_reactive()
         )
         
@@ -7214,6 +7229,12 @@ server <- function(input, output, session) {
       }
       
       if(length(left_implants_df$level) > 0){
+        ### in case there is only 1 screw added. 
+        if(length(left_implants_df$level) == 1 & nrow(left_revision_rod_matrix_reactive())>1){
+          link_left_revision_rods_true_false <- TRUE
+        }else{
+          link_left_revision_rods_true_false <- input$link_left_revision_rods_true_false
+        }
         ############# MAKE THE RODS #############
         left_rods_connectors_list <- build_unilateral_rods_list_function(unilateral_full_implant_df = left_implants_df,
                                                                          rod_side = "left",
@@ -7231,7 +7252,7 @@ server <- function(input, output, session) {
                                                                          kickstand_rod_vector = input$left_kickstand_rod,
                                                                          add_custom_rods = input$add_left_custom_rods,
                                                                          custom_rods_vector_list = custom_rods_vector_list,
-                                                                         link_revision_rods_true_false = input$link_left_revision_rods_true_false,
+                                                                         link_revision_rods_true_false = link_left_revision_rods_true_false,
                                                                          revision_rod_matrix = left_revision_rod_matrix_reactive()
         )
       }else{
@@ -7328,6 +7349,14 @@ server <- function(input, output, session) {
       
       if(length(right_implants_df$level) > 0){
         ############# MAKE THE RODS #############
+        ### in case there is only 1 screw added. 
+        if(length(right_implants_df$level) == 1 & nrow(right_revision_rod_matrix_reactive())>1){
+          link_right_revision_rods_true_false <- TRUE
+        }else{
+          link_right_revision_rods_true_false <- input$link_right_revision_rods_true_false
+        }
+        
+        
         right_rods_connectors_list <- build_unilateral_rods_list_function(unilateral_full_implant_df = right_implants_df,
                                                                           rod_side = "right",
                                                                           include_revision_rods_in_list = TRUE,
@@ -7344,7 +7373,7 @@ server <- function(input, output, session) {
                                                                           kickstand_rod_vector = input$right_kickstand_rod,
                                                                           add_custom_rods = input$add_right_custom_rods,
                                                                           custom_rods_vector_list = custom_rods_vector_list,
-                                                                          link_revision_rods_true_false = input$link_right_revision_rods_true_false,
+                                                                          link_revision_rods_true_false = link_right_revision_rods_true_false,
                                                                           revision_rod_matrix = right_revision_rod_matrix_reactive()
         )
       }else{
@@ -8886,7 +8915,7 @@ server <- function(input, output, session) {
     data_wide <- tibble()
     if(nrow(all_objects_to_add_list$objects_df)>0 && input$implants_complete > 0){
       fusion_df <- jh_fusion_category_function(fusion_vector = union(input$posterior_fusion_levels_confirmed, input$anterior_fusion_levels_confirmed), 
-                                               all_objects_df = all_objects_to_add_list$objects_df)%>%
+                                               all_objects_df = all_objects_to_add_list$objects_df) %>%
         mutate(side = "central")
       
       data_wide <- all_objects_to_add_list$objects_df %>%

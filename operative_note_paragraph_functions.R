@@ -966,6 +966,14 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
   }
   
   #### NOW WE CREATE A TIBBLE THAT HAS EACH PARAGRAPH'S DATA NESTED into 1 ROW. IE, each row represents a new paragraph
+  no_revision_decompression_options_vector <- c('costotransversectomy', 
+                                                'laminoplasty', 
+                                                'cervical_foraminotomy', 
+                                                'lateral_extracavitary_approach',
+                                                'lateral_extraforaminal_approach', 
+                                                'laminectomy_for_facet_cyst', 
+                                                'nerve_transection')
+  
   if(length(revision_decompression_vector) > 0){
     if(nrow(objects_added_df)>0){
       df_for_paragraphs <- objects_added_df %>%
@@ -978,6 +986,7 @@ op_note_procedure_paragraphs_function <- function(objects_added_df,
         unnest(revision_level) %>%
         replace_na(list(implant_statement = " ", screw_size_type = " ", revision_level = FALSE)) %>%
         mutate(revision_label = paste0("revision_", object)) %>%
+        mutate(revision_label = if_else(object %in% no_revision_decompression_options_vector, object, revision_label)) %>%
         mutate(object = if_else(revision_level == FALSE, object, if_else(category == "decompression", revision_label, object))) %>%
         select(-revision_label) %>%
         mutate(procedure_category = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
@@ -2090,10 +2099,29 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     mutate(level = if_else(level == "Iliac_2", "Iliac", level))%>%
     mutate(level = if_else(level == "S2AI_2", "S2AI", level))
   }
-  
+   
+  no_revision_decompression_options_vector <- c('costotransversectomy', 
+                                                'laminoplasty', 
+                                                'cervical_foraminotomy', 
+                                                'lateral_extracavitary_approach',
+                                                'lateral_extraforaminal_approach', 
+                                                'laminectomy_for_facet_cyst', 
+                                                'nerve_transection')
   
   if(length(revision_decompression_vector) > 0){
     if(nrow(objects_added_df)>0){
+      # testing_here <<- objects_added_df %>%
+      #   mutate(revision_levels_vector = list(revision_decompression_vector)) %>%
+      #   select(level, vertebral_number, approach, category, object, side, revision_levels_vector, implant_statement, screw_size_type) %>%
+      #   mutate(revision_level = map2(.x = level, .y = revision_levels_vector, .f = ~ str_detect(string = .x, pattern = .y))) %>%
+      #   select(-revision_levels_vector) %>%
+      #   mutate(revision_level = map(.x = revision_level, .f = ~ any(.x))) %>%
+      #   unnest(revision_level) %>%
+      #   replace_na(list(implant_statement = " ", screw_size_type = " ", revision_level = FALSE)) %>%
+      #   mutate(revision_label = paste0("revision_", object)) %>%
+      #   mutate(revision_label = if_else(object %in% no_revision_decompression_options_vector, object, revision_label))
+      
+      print("Made it here")
       summary_nested_df <- objects_added_df %>%
         mutate(revision_levels_vector = list(revision_decompression_vector)) %>%
         select(level, vertebral_number, approach, category, object, side, revision_levels_vector, implant_statement, screw_size_type) %>%
@@ -2103,15 +2131,15 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
         unnest(revision_level) %>%
         replace_na(list(implant_statement = " ", screw_size_type = " ", revision_level = FALSE)) %>%
         mutate(revision_label = paste0("revision_", object)) %>%
+        mutate(revision_label = if_else(object %in% no_revision_decompression_options_vector, object, revision_label)) %>%
         mutate(object = if_else(revision_level == FALSE, object, if_else(category == "decompression", revision_label, object))) %>%
         select(-revision_label) %>%
-        # mutate(procedure_class = op_note_procedure_performed_summary_classifier_function(object = object)) %>%
         mutate(procedure_class = map(.x = object, .f = ~ op_note_procedure_performed_summary_classifier_function(.x))) %>%
         unnest(procedure_class) %>%
-        # mutate(procedures_per_line = op_note_number_of_paragraphs_for_procedure_category(procedure_cat = procedure_class)) %>%
         mutate(procedures_per_line = map(.x = procedure_class, .f = ~op_note_number_of_paragraphs_for_procedure_category(.x))) %>%
         unnest(procedures_per_line) %>%
         mutate(across(everything(), .fns = ~ as.character(.)))
+      
     }else{
       summary_nested_df <- objects_added_df %>%
         select(level, object, vertebral_number) %>%
@@ -2155,16 +2183,7 @@ op_note_procedures_performed_numbered_function <- function(objects_added_df,
     # mutate(procedure_performed_statement = if_else(procedure_class == "Pelvic instrumentation", paste("Instrumentation of the Pelvis with", levels, "fixation"), as.character(procedure_performed_statement))) %>%
     select(procedure_class, procedure_performed_statement)%>%
     mutate(across(everything(), .fns = ~ as.character(.)))
-  
-  # summary_single_statements <- summary_nested_df %>%
-  #   filter(procedures_per_line == "distinct") %>%
-  #   mutate(procedure_performed_statement = case_when(
-  #     str_detect(str_to_lower(procedure_class), "spinal cord stimulator") ~ glue("{procedure_class}"),
-  #     TRUE ~ glue("{procedure_class} at {level}")
-  #   ))%>%
-  #   # mutate(procedure_performed_statement = glue("{procedure_class} at {level}"))%>%
-  #   select(procedure_class, procedure_performed_statement) %>%
-  #   mutate(across(everything(), .fns = ~ as.character(.)))
+
   
 
   summary_single_statements_pre_fusion_corrected <- summary_nested_df %>%
