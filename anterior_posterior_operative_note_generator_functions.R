@@ -367,7 +367,6 @@ op_note_anterior_function <- function(all_objects_to_add_df,
                                  filter(prior_plate_status == "removed"))$level
       
       plate_removal_statement <- glue("I then proceeded with the removal of the prior instrumentation. Once the plate was fully exposed, the screws were removed from the {glue_collapse(x = plate_removed_vertebral_bodies_vector, sep = ', ', last = ' and ')} bodies without difficulty. The plate spanning {glue_collapse(x = plate_removed_levels, sep = ', ', last = ' and ')} was then removed. ")
-      
     }else{
       plate_removal_statement <- " "
     }
@@ -380,8 +379,7 @@ op_note_anterior_function <- function(all_objects_to_add_df,
     }else{
       plate_retained_statement <- " "
     }
-    
-    
+
     procedure_details_list$revision_paragraph <- glue("{plate_removal_statement} {plate_retained_statement}")
     
   }

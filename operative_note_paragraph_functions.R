@@ -384,7 +384,7 @@ anterior_op_note_distinct_paragraph_function <- function(levels_nested_df){
   
   
   paragraphs <- object_statement_paragraphs_df %>%
-    select(level, paragraph)
+    select(level, object, paragraph)
   
   paragraphs <- glue_collapse(object_statement_paragraphs_df$paragraph, sep = "\n\n")
   
