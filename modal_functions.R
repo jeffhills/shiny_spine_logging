@@ -15,6 +15,16 @@ deformity_correction_techniques_vector_all <- c(
   "Not applicable"
   )
 
+alignment_correction_lookup <- tribble(
+  ~key,                         ~choice_label,                                              ~short_phrase,
+  "proaxis_bending",            "Bending the Pro-axis bed",                                 "bending the Pro-axis bed",
+  "rod_correction",             "The rod was used to correct the alignment",                "utilizing a contoured rod to correct the alignment",
+  "temporary_rod",              "A temporary rod",                                          "using a temporary rod in the concavity of the deformity",
+  "in_situ_benders",            "In situ rod benders",                                      "using in situ rod benders",
+  "reduction_towers",           "Reduction towers",                                         "using reduction towers",
+  "compression_distraction",    "Compression/distraction",                                  "using a series of compression/distraction",
+  "precontoured_seq_reduction", "Patient-specific pre-contoured rod with sequential reduction", "utilizing a patient-specific pre-contoured rod with sequential reduction"
+)
 
 ##### POSTOP PLANS OPTIONS VECTOR ######
 postop_dispo_choices_vector <- c("discharge to home. Monitor in recovery for 4hrs for difficulty swallowing, breathing, other issues.", 
@@ -70,7 +80,7 @@ postop_pain_choices_vector <- list('Ice pack to affected area, PRN' = 'Ice pack 
      'Baclofen 10mg TID prn for muscle spasms' = 'Baclofen 10mg TID prn for muscle spasms',
      'Diazepam 2.5mg q8h prn for muscle spasms' = 'Diazepam 2.5mg q8h prn for muscle spasms',
      'Diazepam *** for muscle spasms' = 'Diazepam *** for muscle spasms',
-     'Journavyx' = 'Journavyx',
+     'Journavyx 50mg q12h' = 'Journavyx 50mg q12h',
      'Pain team consult' = 'Pain team consult',
      'Per Primary' = 'Per Primary',
      'Continue home pain medications ***' = 'Continue home pain medications ***',
@@ -1056,7 +1066,8 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(objec
                                                                            implant_technique_method = "free_hand",
                                                                            implant_position_confirmation_method = "Intraoperative fluoroscopy was used to confirm position of all implants.",
                                                                            deformity_correction_choices = c("The rods were secured into place with set screws. "), 
-                                                                           alignment_correction_method = c("The rods were secured into place with set screws. "), 
+                                                                           # alignment_correction_method = c("The rods were secured into place with set screws. "),  
+                                                                           alignment_correction_method = c("rod_correction"), 
                                                                            alignment_correction_method_other = "", 
                                                                            instruments_used_for_bony_work = "High-speed burr only", 
                                                                            row_label_font_size = 16, 
@@ -1225,7 +1236,9 @@ confirm_fusion_levels_and_technique_details_modal_box_function <- function(objec
                     if(str_detect(procedure_approach, "posterior")){
                       prettyCheckboxGroup(inputId = "alignment_correction_method", 
                                           label = "Select any techniques for alignment correction:", 
-                                          choices = deformity_correction_choices,
+                                          # choices = deformity_correction_choices,
+                                          choiceNames = c(alignment_correction_lookup$choice_label, "Other", "NA"),
+                                          choiceValues = c(alignment_correction_lookup$key, "Other", "NA"),
                                           selected = alignment_correction_method, 
                                           status = "primary",
                                           inline = FALSE)

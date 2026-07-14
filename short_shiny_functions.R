@@ -2707,6 +2707,44 @@ jh_code_header_maker_function <- function(code_header = ""){
 #############################################################################################
 #############################################################################################
 
-
+alignment_correction_sentence_function <- function(method_keys, other_text = NULL) {
+  
+  method_keys <- method_keys[method_keys != "NA"]
+  
+  if (length(method_keys) == 0) {
+    return("The rods were secured into place with set screws. ")
+  }
+  
+  used_other <- "Other" %in% method_keys
+  method_keys <- method_keys[method_keys != "Other"]
+  
+  methods <- alignment_correction_lookup %>%
+    filter(key %in% method_keys) %>%
+    arrange(match(key, method_keys))
+  
+  short_phrases <- methods$short_phrase
+  
+  if (length(short_phrases) == 0 && !used_other) {
+    return("The rods were secured into place with set screws. ")
+  }
+  
+  summary_sentence <- if (length(short_phrases) == 1) {
+    glue("Alignment correction was acheived by {short_phrases}. ")
+  } else if (length(short_phrases) > 1) {
+    glue("Alignment correction was acheived by {glue_collapse(short_phrases, sep = ', ', last = ' and ')}. ")
+  } else {
+    ""  # only "Other" was selected, no listed techniques
+  }
+  
+  other_sentence <- if (used_other && !is.null(other_text) && nzchar(other_text)) {
+    glue("{other_text} ")
+  } else {
+    ""
+  }
+  
+  closing_sentence <- "After confirming final positioning, the screws were final tightened. "
+  
+  glue("{summary_sentence}{other_sentence}{closing_sentence}")
+}
 
 

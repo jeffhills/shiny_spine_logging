@@ -1491,6 +1491,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$close_startup_modal, ignoreInit = TRUE, once = TRUE, {
     logging_timer_reactive_list$start_time <- as.numeric(Sys.time())
+    # print(paste(logging_timer_reactive_list$start_time))
   })
   
   observeEvent(input$preview_redcap_upload, ignoreInit = TRUE, {
@@ -3458,7 +3459,8 @@ server <- function(input, output, session) {
       open_canal_for_plotting_df <- open_df %>%
       filter(between(y, input$crop_y[1], input$crop_y[2]))
       
-      geoms_list_revision_posterior$open_canal_sf <- geom_sf(data = st_union(st_combine(st_multipolygon(open_canal_for_plotting_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE), fill = "lightblue", alpha = 0.5)
+      geoms_list_revision_posterior$open_canal_sf <- geom_sf(data = st_union(st_combine(st_multipolygon(open_canal_for_plotting_df$object_constructed)), by_feature = TRUE, is_coverage = TRUE), 
+                                                             fill = "lightblue", alpha = 0.5)
       
     }
   }
@@ -3504,36 +3506,22 @@ server <- function(input, output, session) {
     }
     
     if(nrow(left_revision_implants_reactive_list()$retained_df)>0){
-      # keep(.x =  left_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))
-      
       geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  left_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))), fill = "black")
-      
-      # left_rev_implants_retained_for_plotting_df <- left_revision_implants_reactive_list()$retained_df %>%
-      #   filter(between(y, input$crop_y[1], input$crop_y[2]))
-      # 
-      # geoms_list_revision_posterior$left_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  left_rev_implants_retained_for_plotting_df$object_constructed, .p = ~ !is.null(.x))), fill = "black")
       
     }
   })
   
   observeEvent(input$close_startup_modal_2, ignoreInit = TRUE, ignoreNULL = TRUE, {
     if(nrow(right_revision_implants_reactive_list()$removed_df)>0){
-      # keep(.x =  right_revision_implants_reactive_list()$removed_df$object_constructed, .p = ~ !is.null(.x))
-      
       geoms_list_revision_posterior$right_revision_implants_removed_sf_geom <- geom_sf(data = st_multipolygon(map(.x = keep(.x =  right_revision_implants_reactive_list()$removed_df$object_constructed, .p = ~ !is.null(.x)), .f = ~ .x + c(0.025, 0))), 
                                                                                        color = "black",
                                                                                        fill = NA)
     }
     
     if(nrow(right_revision_implants_reactive_list()$retained_df)>0){
-      # keep(.x =  right_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))
-      
-      # right_rev_implants_retained_for_plotting_df <- right_revision_implants_reactive_list()$retained_df %>%
-      #   filter(between(y, input$crop_y[1], input$crop_y[2]))
-      
-      geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  right_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))), fill = "black")
-      # geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  right_rev_implants_retained_for_plotting_df$object_constructed, .p = ~ !is.null(.x))), fill = "black")
-      
+      geoms_list_revision_posterior$right_revision_implants_sf_geom <- geom_sf(data = st_multipolygon(keep(.x =  right_revision_implants_reactive_list()$retained_df$object_constructed, .p = ~ !is.null(.x))), 
+                                                                               fill = "black")
+
       }
   })
   
@@ -3735,10 +3723,6 @@ server <- function(input, output, session) {
   
   ################################################################# RODS ############################################################
   
-  # observeEvent(input$add_left_accessory_rod,  ignoreInit = TRUE, {
-  #   if(input$add_left_accessory_rod == TRUE){
-  #   }
-  # }
   
   observeEvent(input$add_rods, ignoreNULL = TRUE, ignoreInit = TRUE, {
     left_implants_to_connect <- nrow(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left"))
@@ -4030,7 +4014,7 @@ server <- function(input, output, session) {
                ignoreInit = TRUE, {
                  if(input$add_left_kickstand_rod == TRUE){
                    
-                   if(any(str_detect(str_to_lower(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level), "iliac"))){
+                   if(any(str_detect(str_to_lower(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$level), "iliac|s2ai"))){
                      start_list <- jh_supplementary_rods_choices_function(all_objects_df = jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left"),
                                                                           revision_objects_retained_df = left_revision_implants_reactive_list()$revision_implants_status_df,
                                                                           rod_type = "kickstand_rod")
@@ -4162,9 +4146,6 @@ server <- function(input, output, session) {
         
         # left_revision_rod_matrix <- all_screw_coordinates_df %>%
         left_revision_rod_matrix <- tibble(level = input$left_revision_implants, side = "left") %>%
-          # filter(side == "left") %>%
-          # select(level, object) %>%
-          #   mutate(side == "left") %>%
           left_join(revision_screws_df) %>%
           filter(between(vertebral_number, level_min, level_max))%>%
           mutate(y = if_else(y == max(y), y + 0.005, y)) %>%
@@ -4310,30 +4291,7 @@ server <- function(input, output, session) {
   }
   )
   
-  # observeEvent(input$add_rods, ignoreNULL = TRUE, ignoreInit = TRUE, {
-  #   if(nrow(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")) > 1){
-  #     if(max(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "left")$vertebral_number) < 11){
-  #       rod_size <- "4.0mm"  
-  #     }else{
-  #       rod_size <- "6.0mm"  
-  #     }
-  #     if(input$left_main_rod_size == "None"){
-  #       updatePickerInput(session = session, 
-  #                         inputId = "left_main_rod_size", 
-  #                         selected = rod_size
-  #       )
-  #     }
-  #     if(input$left_main_rod_material == "Non-instrumented"){
-  #       updateAwesomeRadio(session = session, 
-  #                          inputId = "left_main_rod_material",
-  #                          inline = TRUE,
-  #                          choices = c("Titanium", "Cobalt Chrome", "Stainless Steel"),
-  #                          selected = "Titanium"
-  #       )
-  #     }
-  #   }
-  # })
-  
+
   observe({
     ##########RODS ############
     ############# left ROD #################
@@ -4484,6 +4442,7 @@ server <- function(input, output, session) {
     
     rods_list$left_rod_list_sf_geom       <- geom_sf(
       data  = st_multipolygon(rods_translated),
+      fill = "lightgrey",
       alpha = 0.85
     )
     rods_list$left_connector_list_sf_geom <- geom_sf(
@@ -4971,7 +4930,7 @@ server <- function(input, output, session) {
                ignoreInit = TRUE, {
                  if(input$add_right_kickstand_rod == TRUE){
                    
-                   if(any(str_detect(str_to_lower(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level), "iliac"))){
+                   if(any(str_detect(str_to_lower(jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right")$level), "iliac|s2ai"))){
                      start_list <- jh_supplementary_rods_choices_function(all_objects_df = jh_filter_posterior_implants_by_side_function(all_objects_df = all_objects_to_add_list$objects_df, side_to_filter = "right"),
                                                                           revision_objects_retained_df = right_revision_implants_reactive_list()$revision_implants_status_df,
                                                                           rod_type = "kickstand_rod")
@@ -5393,8 +5352,9 @@ server <- function(input, output, session) {
       rods_orig[[i]] + c(offset, 0)
     })
     
-    rods_list$right_rod_list_sf_geom       <- geom_sf(
+    rods_list$right_rod_list_sf_geom <- geom_sf(
       data  = st_multipolygon(rods_translated),
+      fill = "lightgrey",
       alpha = 0.85
     )
     rods_list$right_connector_list_sf_geom <- geom_sf(
@@ -5599,7 +5559,6 @@ server <- function(input, output, session) {
   observeEvent(input$crosslink_connectors,  ignoreInit = TRUE, {
     if(length(input$crosslink_connectors) > 0){
       all_objects_to_add_list$objects_df <- all_objects_to_add_list$objects_df  %>%
-        # filter(object != "crosslink") %>%
         bind_rows(all_implants_constructed_df %>%
                     filter(object == "crosslink", 
                            level %in% input$crosslink_connectors)
@@ -5982,7 +5941,6 @@ server <- function(input, output, session) {
                           inputId = "fusion_procedure_performed", 
                           value = TRUE)
       }
-
     }
     
     if(any((all_objects_to_add_list$objects_df %>% filter(approach == "anterior"))$fusion == "yes")  && input$anterior_fusion_performed == FALSE){
@@ -6016,45 +5974,13 @@ server <- function(input, output, session) {
       posterior_approach_yes_no <- "no" 
     }
     
-    # if(any(input$diagnosis_category == "deformity")){
-    #   deformity_correction_techniques_vector <- c(
-    #     "The rods were secured into place with set screws. ",
-    #     "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place with set screws. ",
-    #     "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
-    #     "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
-    #     "In situ rod benders were used to aide in correcting the alignment. ",
-    #     "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
-    #     "Compression and distraction off the kickstand rod was used to aide in correcting the alignment. ",
-    #     "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
-    #     "Other")
-    # }else{
-    #   deformity_correction_techniques_vector <- c(
-    #     "The rods were secured into place with set screws. ",
-    #     "In situ rod benders were used to aide in correcting the alignment. ",
-    #     "Other")
-    # }
-    if(any(input$diagnosis_category == "deformity")){
-      deformity_correction_techniques_vector <- deformity_correction_techniques_vector_all
-    }else{
-      deformity_correction_techniques_vector <- c(
-        "Pro-axis bed was bent",
-        "in situ rod benders",
-        "Compression", 
-        "Distraction",
-        "reduction towers",
-        "temporary rod",
-        "The set screws were final tightened.",
-        "Other")
-    }
-    
-    # print(glue("Correct Observe.\n implants_placed_yes_no = {implants_placed_yes_no} \n deformity_correction_techniques_vector = {deformity_correction_techniques_vector}\n procedure_approach_reactive = {input$approach_sequence}\nanterior_approach_yes_no = {anterior_approach_yes_no}"))
-    
+
     
     showModal(
       confirm_fusion_levels_and_technique_details_modal_box_function(objects_added_df = all_objects_to_add_list$objects_df,
                                                                      # implants_placed = "yes",
                                                                      # rods_placed = "no",
-                                                                     deformity_correction_choices = deformity_correction_techniques_vector,
+                                                                     # deformity_correction_choices = deformity_correction_techniques_vector,
                                                                      procedure_approach = input$approach_sequence,
                                                                      anterior_approach = anterior_approach_yes_no,
                                                                      posterior_approach = posterior_approach_yes_no
@@ -6067,12 +5993,6 @@ server <- function(input, output, session) {
   
   observeEvent(input$implants_complete, ignoreInit = TRUE, {
     if(input$implants_complete > 1){
-      # print("wrong observe event observed")
-      # if(any(str_detect(all_objects_to_add_list$objects_df$object, "screw|anterior_plate"))){
-      #   implants_placed_yes_no <- "yes"  
-      # }else{
-      #   implants_placed_yes_no <- "no" 
-      # }
       
       if(any(all_objects_to_add_list$objects_df$approach == "anterior")){
         anterior_approach_yes_no <- "yes"  
@@ -6086,29 +6006,29 @@ server <- function(input, output, session) {
         posterior_approach_yes_no <- "no" 
       }
       
-      if(any(input$diagnosis_category == "deformity")){
-        deformity_correction_techniques_vector <- c(
-          "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place. ",
-          "The rods were secured into place with set screws. ",
-          "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
-          "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
-          "In situ rod benders were used to aide in correcting the alignment. ",
-          "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
-          "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
-          "Other",
-          "NA")
-      }else{
-        deformity_correction_techniques_vector <- c(
-          "The rods were secured into place with set screws. ",
-          "In situ rod benders were used to aide in correcting the alignment. ",
-          "Other",
-          "NA")
-      }
+      # if(any(input$diagnosis_category == "deformity")){
+      #   deformity_correction_techniques_vector <- c(
+      #     "The Pro-axis bed was bent to achieve the desired sagittal plane alignment and the rods were then secured into place. ",
+      #     "The rods were secured into place with set screws. ",
+      #     "The working rod was secured into place on the concavity and rotated to corrected the coronal plane. ",
+      #     "The concave rod was secured proximally and distally with set screws and reduction clips were used to sequentially reduce the curve. ",
+      #     "In situ rod benders were used to aide in correcting the alignment. ",
+      #     "The set screws at the neutral vertebrae were tightened, and the adjacenet vertebrae were sequentially derotated. ",
+      #     "A series of compression along the convexity and distraction along the concavity was performed to further correct the coronal plane and balance the screws. ",
+      #     "Other",
+      #     "NA")
+      # }else{
+      #   deformity_correction_techniques_vector <- c(
+      #     "The rods were secured into place with set screws. ",
+      #     "In situ rod benders were used to aide in correcting the alignment. ",
+      #     "Other",
+      #     "NA")
+      # }
       
       showModal(
         confirm_fusion_levels_and_technique_details_modal_box_function(objects_added_df = all_objects_to_add_list$objects_df,
                                                                        # implants_placed = implants_placed_yes_no, 
-                                                                       deformity_correction_choices = deformity_correction_techniques_vector,
+                                                                       # deformity_correction_choices = deformity_correction_techniques_vector,
                                                                        # procedure_approach = procedure_approach_reactive(),
                                                                        procedure_approach = input$approach_sequence,
                                                                        # screws_selected_df_reactive = screws_selected_df_reactive(), 
@@ -6145,21 +6065,7 @@ server <- function(input, output, session) {
     lateral_mass_screws_after_decompression_modal_function(implant_objects_df = all_objects_to_add_list$objects_df)
   }
   )
-  
-  # observeEvent(input$approach_robot_navigation, ignoreInit = TRUE, {
-  #   if(input$approach_robot_navigation == "Fluoroscopy-guided"){
-  #     updateAwesomeRadio(session = session, 
-  #                        inputId = "implant_technique_method", 
-  #                        selected = "Intraoperative fluoroscopy was used to identify and confirm implant start points." 
-  #     )  
-  #   }
-  #   if(input$approach_robot_navigation == "Navigated" | str_detect(input$approach_robot_navigation, "Robotic")){
-  #     updateAwesomeRadio(session = session, 
-  #                        inputId = "implant_technique_method", 
-  #                        selected = "Intraoperative navigation was used for identifying start points."
-  #     )  
-  #   }
-  # })
+
   
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   COMPLETED CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
   ###~~~~~~~~~~~~~~~ #########    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   #########   COMPLETED CONFIRM FUSION LEVELS and TECHNIQUE DETAILS MODAL FUNCTION  #########    !!!!!!!!!!!!!
@@ -7976,29 +7882,13 @@ server <- function(input, output, session) {
         posterior_op_note_inputs_list_reactive$multiple_approach <- "anterior_first"
       }
       
-      
-      deformity_correction_sentence_function <- function(techniques_used) {
-        techniques_used <-  str_to_lower(techniques_used[techniques_used != "Not applicable"])
-        
-        if (length(techniques_used) > 0){
-          if(any(techniques_used == "Other")){
-            techniques_used <-  techniques_used[techniques_used != "Other"]
-            correction_sentence <-  glue("Deformity correction was performed using a combination of {glue::glue_collapse(techniques_used, sep = ', ', last = ' and ')}. {input$alignment_correction_method_other}. After confirming final positioning, the screws were final tightened.  ")
-          }else{
-            correction_sentence <-  glue("Deformity correction was performed using a combination of {glue::glue_collapse(techniques_used, sep = ', ', last = ' and ')}. After confirming final positioning, the screws were final tightened. ")
-          }
-          
-        }else{
-          correction_sentence <-  "The rods were set into place and secured with set screws. "
-        }
-        return(correction_sentence)
-      }
-      
+
       #######
       if(length(input$alignment_correction_method)>0){
-        
-        posterior_op_note_inputs_list_reactive$alignment_correction_method <- deformity_correction_sentence_function(techniques_used = input$alignment_correction_method)
-        
+        posterior_op_note_inputs_list_reactive$alignment_correction_method <-    alignment_correction_sentence_function(method_keys = input$alignment_correction_method,
+                                                                                                                        other_text = input$alignment_correction_method_other
+                                                                                                                        )
+          
       }else{
         posterior_op_note_inputs_list_reactive$alignment_correction_method <- ""
       }
@@ -8686,15 +8576,7 @@ server <- function(input, output, session) {
     
     output$operative_note_formatted <-  renderText({
       
-      # secion_headers_df <- enframe(op_note_text_reactive(), name = "section", value = "result") %>%
-      #   unnest(result) %>%
-      #   mutate(row = row_number()) %>%
-      #   pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
-      #   select(row, full_text_vector)
-      # 
-      # # op_note_text <- glue_collapse(secion_headers_df$full_text_vector, sep = "\n")
-      # print(names(op_note_text_reactive()))
-      
+
       op_note <- input$operative_note_text
       
       op_note <- str_replace_all(string = op_note, pattern = "\\n\\n", replacement = "<br><br>")

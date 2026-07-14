@@ -116,6 +116,17 @@ jh_load_all_possible_objects_function <- function(){
                 left_join(bind_rows(coordinates_df_list))) %>%
     distinct()
   
+  revision_screws_df <<- all_object_ids_df %>%
+    filter(object == "pedicle_screw" | str_detect(object, "pelvic_screw") | object == "occipital_screw" | object == "lateral_mass_screw") %>%
+    filter((str_detect(string = level, pattern = "C1|C3|C4|C5|C6") & object == "pedicle_screw") == FALSE) %>%
+    arrange(vertebral_number) %>%
+    left_join(fread("coordinates/implant.csv") %>%
+                # mutate(x = if_else(x < 0.5, x - 0.025, x + 0.025)) %>%
+                group_by(object_id) %>%
+                nest() %>%
+                mutate(object_constructed = map(.x = data, .f = ~ st_polygon(list(as.matrix(.x))))) %>%
+                select(object_id, object_constructed))
+  
   all_implants_constructed_df
   
 }
