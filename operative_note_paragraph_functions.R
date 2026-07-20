@@ -440,9 +440,6 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
       unnest(tech_statement) %>%
       distinct()
     
-    # mutate(tech_statement = map(.x = data, 
-    #                             .f = ~ op_note_object_combine_paragraph_function(object = object, 
-    #                                                                              levels_nested_df = .x))) %>%
     
     end_statement <- glue("This completed the {procedure_paragraph_intro} at {glue_collapse(levels_df$level, sep = (', '), last = ' and ')}.")
     
@@ -453,7 +450,25 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
   
   
   if(paragraphs_combined_or_distinct == "distinct"){
-    paragraph <- anterior_op_note_distinct_paragraph_function(levels_nested_df = df_with_levels_object_nested)
+    # paragraph <- anterior_op_note_distinct_paragraph_function(levels_nested_df = df_with_levels_object_nested)
+    
+    object_statement_paragraphs_df <- df_with_levels_object_nested %>%
+      mutate(paragraph = pmap(.l = list(..1 = object, 
+                                        ..2 = level, 
+                                        ..3 = side, 
+                                        ..4 = implant_statement), 
+                              .f = ~ distinct_anterior_procedure_paragraph_function(level_input = ..2,
+                                                                                    object_input = ..1,
+                                                                                    side_input = ..3, 
+                                                                                    implant_statement_input = ..4))
+      ) %>%
+      mutate(paragraph = as.character(paragraph))
+    
+    
+    paragraph <- object_statement_paragraphs_df %>%
+      select(level, object, paragraph)
+    
+    # paragraph <- glue_collapse(object_statement_paragraphs_df$paragraph, sep = "\n\n")
     
   }
   
@@ -524,6 +539,13 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df,
                                                         "anterior_plate_screw")) %>%
     mutate(order_of_operation = row_number())
   
+  anterior_procedures_ordered_df <- anterior_df %>%
+    left_join(anterior_order_of_operations_df) %>%
+    arrange(order_of_operation) %>%
+    mutate(object = fct_inorder(object)) %>%
+    select(level, object, order_of_operation) %>%
+    mutate(level = fct_inorder(level)) %>%
+    arrange(level, order_of_operation)
   
   anterior_df <- anterior_df %>%
     left_join(anterior_order_of_operations_df) %>%
@@ -561,10 +583,18 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df,
                                                                                       approach = ..4))) %>%
     select(-data)
   
+  level_object_paragraph_statements_df <- paragraphs_df%>%
+    mutate(paragraph_length = map(.x = paragraphs, .f = ~ length(.x))) %>%
+    unnest(paragraph_length) %>%
+    unnest(paragraphs)
+  
+  final_anterior_procedure_paragraphs_ordered_df <- anterior_procedures_ordered_df %>%
+    left_join(level_object_paragraph_statements_df)
+  
   ##################
   
-  procedure_paragraphs <- glue_collapse(x = paragraphs_df$paragraphs, sep = "\n\n")
-  
+  # procedure_paragraphs <- glue_collapse(x = paragraphs_df$paragraphs, sep = "\n\n")
+  procedure_paragraphs <- glue_collapse(x = final_anterior_procedure_paragraphs_ordered_df$paragraph, sep = "\n\n")
   
 
   if(!is.null(anterior_bmp) && anterior_bmp > 0){
