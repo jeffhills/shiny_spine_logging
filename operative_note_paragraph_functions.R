@@ -443,9 +443,13 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
     
     end_statement <- glue("This completed the {procedure_paragraph_intro} at {glue_collapse(levels_df$level, sep = (', '), last = ' and ')}.")
     
-    paragraph <- paste(start_statement, 
+    paragraph_statement <- paste(start_statement, 
                        glue_collapse(df_with_statement$tech_statement, sep = " "), 
                        end_statement)
+    
+    paragraph_df <-  tibble(level = toString(unique(df_with_levels_object_nested$level)),
+                            object = toString(unique(df_with_levels_object_nested$object)), 
+           paragraph = paragraph_statement)
   }
   
   
@@ -465,14 +469,14 @@ anterior_create_full_paragraph_statement_function <- function(procedure_paragrap
       mutate(paragraph = as.character(paragraph))
     
     
-    paragraph <- object_statement_paragraphs_df %>%
+    paragraph_df <- object_statement_paragraphs_df %>%
       select(level, object, paragraph)
     
     # paragraph <- glue_collapse(object_statement_paragraphs_df$paragraph, sep = "\n\n")
     
   }
   
-  return(paragraph)
+  return(paragraph_df)
   
 }
 
@@ -581,15 +585,40 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df,
                                                                                       df_with_levels_object_nested = ..2, 
                                                                                       paragraphs_combined_or_distinct = ..3, 
                                                                                       approach = ..4))) %>%
-    select(-data)
+    select(-data) %>%
+    ungroup() %>%
+    mutate(procedure_sequence = row_number()) %>%
+    select(procedure_sequence, everything())
+  
   
   level_object_paragraph_statements_df <- paragraphs_df%>%
     mutate(paragraph_length = map(.x = paragraphs, .f = ~ length(.x))) %>%
     unnest(paragraph_length) %>%
     unnest(paragraphs)
   
-  final_anterior_procedure_paragraphs_ordered_df <- anterior_procedures_ordered_df %>%
-    left_join(level_object_paragraph_statements_df)
+  distinct_paragraph_statements_df <- anterior_procedures_ordered_df %>%
+    left_join(filter(level_object_paragraph_statements_df, paragraphs_combine_or_distinct == "distinct"))%>%
+    filter(!is.na(procedure_category))%>%
+    select(paragraph) %>%
+    distinct()
+  
+  
+  combine_paragraph_statements_df <-  anterior_procedures_ordered_df %>%
+    left_join(select(filter(level_object_paragraph_statements_df, paragraphs_combine_or_distinct == "combine"), -level)) %>%
+    filter(!is.na(procedure_category)) %>%
+    select(paragraph) %>%
+    distinct()
+  
+  final_anterior_procedure_paragraphs_ordered_df <- distinct_paragraph_statements_df %>%
+    bind_rows(combine_paragraph_statements_df)
+  
+  # level_object_paragraph_statements_df <- paragraphs_df%>%
+  #   mutate(paragraph_length = map(.x = paragraphs, .f = ~ length(.x))) %>%
+  #   unnest(paragraph_length) %>%
+  #   unnest(paragraphs)
+  # 
+  # final_anterior_procedure_paragraphs_ordered_df <- anterior_procedures_ordered_df %>%
+  #   left_join(level_object_paragraph_statements_df)
   
   ##################
   
@@ -1559,7 +1588,7 @@ if(str_detect(object, "si_fusion")){
     object == "reinsertion_screw" ~ glue("The prior screw tracks were palpated for any breaches or defects and the trajectory of the screw was modified as needed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
     object == "c1_lateral_mass_screw" ~ glue("For C1 lateral mass screw placement, the medial and lateral edges of the C1 lateral masses were identified. A start point was then created at the midpoint of the lateral mass of C1. The path was then drilled incrementally to the anterior cortex. X-ray was used to confirm the drill was just up to the posterior cortex of the C1 tubercle on the lateral X-ray, and the path was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
     object == "lateral_mass_screw" ~ glue("For lateral mass screw placement, the entry point was identified using the lateral and medial borders of the lateral mass and superior and inferior borders of the facet. The superficial cortex was opened at each entry point using a burr and the screw path drilled incrementally to the far cortex and the dorsal cortex was then tapped. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}. This completed the lateral mass screws."),
-    object == "occipital_screw" ~ glue("An appropriately sized occipital plate was selected and was placed centered in the midline and just caudal to the external occipital protuberance, but cranial to the foramen magnum. The plate was held in place to identify the appropriate start points for the occipital screws. The occipital screws were drilled incrementally until the anterior cortex was penetrated. The length of the path was measured to acheive bicortical fixation. The screw paths were then tapped and the screws placed, securing the plate to the occiput."),
+    object == "occipital_screw" ~ glue("An appropriately sized occipital plate was selected and was placed centered in the midline and just caudal to the external occipital protuberance, but cranial to the foramen magnum. The plate was held in place to identify the appropriate start points for the occipital screws. The occipital screws were drilled incrementally until the anterior cortex was penetrated. The length of the path was measured to achieve bicortical fixation. The screw paths were then tapped and the screws placed, securing the plate to the occiput."),
     object == "pars_screw" ~ glue("For pars screws, the start point was identified just 3-4mm cranial to the inferior facet joint and in the midpoint of the pars from medial to lateral. Once the start point was identified, the superficial cortex was opened at the entry point using the burr. The screw path was then cannulated, aiming as dorsal as possible while not perforating the dorsal cortex of the pars. The path was then tapped and the length measured and pars screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
     object == "pedicle_screw" ~ glue("For pedicle screws, the start point was identified at the junction of the TP and SAP. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"),
     object == "translaminar_screw" ~ glue("For translaminar screw fixation, the starting point was identified using the spinolaminar junction and in the central plane of the contralateral lamina. A burr hole was made to open the superficial cortex, the path was then cannulated and intralaminar screw placed. {glue_collapse(x = screw_statements_df$screw_statement, sep = ' ')}"), # {glue_collapse(x = levels_side_df$level_side, sep = ', ', last = ' and ')}."),
