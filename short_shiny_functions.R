@@ -2729,12 +2729,13 @@ alignment_correction_sentence_function <- function(method_keys, other_text = NUL
   }
   
   summary_sentence <- if (length(short_phrases) == 1) {
-    glue("Alignment correction was acheived by {short_phrases}. ")
+    glue("Alignment correction was achieved by {short_phrases}. ")
   } else if (length(short_phrases) > 1) {
-    glue("Alignment correction was acheived by {glue_collapse(short_phrases, sep = ', ', last = ' and ')}. ")
+    glue("Alignment correction was achieved by {glue_collapse(short_phrases, sep = ', ', last = ' and ')}. ")
   } else {
     ""  # only "Other" was selected, no listed techniques
   }
+  
   
   other_sentence <- if (used_other && !is.null(other_text) && nzchar(other_text)) {
     glue("{other_text} ")
