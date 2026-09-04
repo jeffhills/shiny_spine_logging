@@ -1286,7 +1286,7 @@ create_full_paragraph_statement_function <- function(procedure_paragraph_intro,
       procedure_paragraph_intro == "pelvic instrumentation" ~
         glue("I then proceeded with instrumentation of the pelvis. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}"),
       procedure_paragraph_intro == "inferior facetectomies" ~
-        glue("I first performed {procedure_paragraph_intro} at {levels_txt}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')}"),
+        glue("I performed {procedure_paragraph_intro} at {levels_txt}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')}"),
       procedure_paragraph_intro == "posterior column osteotomy" & length(unique(df_levels$level)) > 1 ~
         glue("I then proceeded with posterior column osteotomies at {levels_txt}. {glue_collapse(df_with_statement$tech_statement, sep = ' ')} {procedure_completion}"),
       procedure_paragraph_intro == "reinsertion of spinal fixation" ~

@@ -61,9 +61,10 @@ postop_imaging_choices_vector <- c("please obtain postop upright AP/Lateral C-sp
 
 postop_pain_choices_vector <- list('Ice pack to affected area, PRN' = 'Ice pack to affected area, PRN',
      'Dilaudid PCA [0.2mg bolus, 8min lockout, no basal](in addition to all other pain medication orders) - DISCONTINUE on POD 1' = 'Dilaudid PCA [0.2mg bolus, 8min lockout, no basal](in addition to all other pain medication orders) - DISCONTINUE on POD 1',
-     'Oxycodone 5mg q4h prn, ok to give additional dose if needed' = 'Oxycodone 5mg q4h, ok to give additional dose if needed',
-     'Oxycodone 10mg q4h prn, ok to give additional dose if needed' = 'Oxycodone 10mg q4h, ok to give additional dose if needed',
+     'Oxycodone 5mg q4h PRN, ok to give additional dose if needed' = 'Oxycodone 5mg q4h, ok to give additional dose if needed',
+     'Oxycodone 10mg q4h PRN, ok to give additional dose if needed' = 'Oxycodone 10mg q4h, ok to give additional dose if needed',
      'Oxycodone *** q4h, ok to give additional dose if needed' = 'Oxycodone *** q4h, ok to give additional dose if needed',
+     'Dilaudid 0.5mg IV q3h PRN for breakthrough pain', 
      'Tylenol 1000mg q8h scheduled.' = 'Tylenol 1000mg q8h scheduled.',
      'Tylenol 650mg q8h scheduled' = 'Tylenol 650mg q8h scheduled',
      'Tylenol ***' = 'Tylenol ***',
@@ -75,10 +76,10 @@ postop_pain_choices_vector <- list('Ice pack to affected area, PRN' = 'Ice pack 
      'Celebrex 100mg BID' = 'Celebrex 100mg BID',
      'Celebrex 200mg BID' = 'Celebrex 200mg BID',
      'Meloxicam 15mg daily' = 'Meloxicam 15mg daily',
-     'Tizanidine 4mg q6h prn for muscle spasms(avoid in geriatric males/males w/ urinary retention)' = 'Tizanidine 4mg q6h prn for muscle spasms',
-     'Cyclobenzabrine 5mg q8h prn for muscle spasms (strong anticholinergic, minimize in geriatric)' = 'Cyclobenzabrine 5mg q8h prn for muscle spasms',
-     'Baclofen 10mg TID prn for muscle spasms' = 'Baclofen 10mg TID prn for muscle spasms',
-     'Diazepam 2.5mg q8h prn for muscle spasms' = 'Diazepam 2.5mg q8h prn for muscle spasms',
+     'Tizanidine 4mg q6h PRN for muscle spasms(avoid in geriatric males/males w/ urinary retention)' = 'Tizanidine 4mg q6h PRN for muscle spasms',
+     'Cyclobenzabrine 5mg q8h PRN for muscle spasms (strong anticholinergic, minimize in geriatric)' = 'Cyclobenzabrine 5mg q8h PRN for muscle spasms',
+     'Baclofen 10mg TID PRN for muscle spasms' = 'Baclofen 10mg TID PRN for muscle spasms',
+     'Diazepam 2.5mg q8h PRN for muscle spasms' = 'Diazepam 2.5mg q8h PRN for muscle spasms',
      'Diazepam *** for muscle spasms' = 'Diazepam *** for muscle spasms',
      'Journavyx 50mg q12h' = 'Journavyx 50mg q12h',
      'Pain team consult' = 'Pain team consult',
@@ -113,7 +114,7 @@ postop_diet_choices_vector <- list("OK to resume normal diet" = "OK to resume no
                                 "Pantoprazole 40mg daily" = "Pantoprazole 40mg daily",
                                 "Famotidine 20mg BID (elderly)" = "Famotidine 20mg BID",
                                 "Dexamethasone taper for dysphagia prevention (POD 0 = 10mg IV in PM then POD 1 = 4mg IV BID then POD 2 = 2mg IV BID" = "Dexamethasone taper for dysphagia prevention (POD 0 = 10mg IV in PM then POD 1 = 4mg IV BID then POD 2 = 2mg IV BID",
-                                "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository" = "Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"
+                                "Senokot-S daily + PRN suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository" = "Senokot-S daily + PRN suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"
                                 )
 
 postop_foley_choices_vector <- c("Discontinue foley when able",
@@ -1770,7 +1771,7 @@ addition_surgical_details_modal_box_2_function <-
                                "please mobilize out of bed minimum 3x daily", 
                                "No bending, twisting, lifting > 10lbs"),
            postop_brace = c(""),
-           postop_diet = c("Senokot-S daily + prn suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
+           postop_diet = c("Senokot-S daily + PRN suppository daily if no BM in 24hrs + administer enema if no BM within 24hrs of suppository"),
            postop_foley = c("Discontinue foley once ambulating >20 ft with PT (not before POD 2)"),
            postop_dvt_ppx = c("SCD's while in bed", "Hold any chemical dvt ppx for minimum 72hrs"),
            postop_drains_dressing = c(""),

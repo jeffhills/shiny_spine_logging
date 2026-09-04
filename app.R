@@ -7784,16 +7784,31 @@ server <- function(input, output, session) {
       
       
       ####### Antifibrinolytic
-      if(length(input$anti_fibrinolytic)>0 & any(input$anti_fibrinolytic == "Tranexamic Acid (TXA)")){
-        if(length(input$txa_maintenance)>0 & input$txa_maintenance > 0){
+      if("Tranexamic Acid (TXA)" %in% input$anti_fibrinolytic) {
+        if(isTRUE(input$txa_maintenance > 0)) {
           maintenance_gtt <- glue(" with a {input$txa_maintenance}mg/kg/hr maintenance drip.")
-        }else{
+        } else {
           maintenance_gtt <- "."
         }
-        posterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered for an antifibrinolytic{maintenance_gtt}")
-      }else{
+        
+        posterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered ",
+                                                                        "for an antifibrinolytic{maintenance_gtt}"
+                                                                        )
+      } else {
         posterior_op_note_inputs_list_reactive$antifibrinolytic <- " "
       }
+      
+      
+      # if(length(input$anti_fibrinolytic)>0 & any(input$anti_fibrinolytic == "Tranexamic Acid (TXA)")){
+      #   if(length(input$txa_maintenance)>0 & input$txa_maintenance > 0){
+      #     maintenance_gtt <- glue(" with a {input$txa_maintenance}mg/kg/hr maintenance drip.")
+      #   }else{
+      #     maintenance_gtt <- "."
+      #   }
+      #   posterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered for an antifibrinolytic{maintenance_gtt}")
+      # }else{
+      #   posterior_op_note_inputs_list_reactive$antifibrinolytic <- " "
+      # }
       
       #######
       
@@ -8034,16 +8049,29 @@ server <- function(input, output, session) {
                                                                                                               replacement_text = input$preop_antibiotics_other)
       
       ####### Antifibrinolytic
-      if(length(input$anti_fibrinolytic)>0 & any(input$anti_fibrinolytic == "Tranexamic Acid (TXA)")){ 
-        if(input$txa_maintenance > 0){
+      if("Tranexamic Acid (TXA)" %in% input$anti_fibrinolytic) {
+        if(isTRUE(input$txa_maintenance > 0)) {
           maintenance_gtt <- glue(" with a {input$txa_maintenance}mg/kg/hr maintenance drip.")
-        }else{
+        } else {
           maintenance_gtt <- "."
         }
-        anterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered for an antifibrinolytic{maintenance_gtt}")
-      }else{
+        
+        anterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered ",
+                                                                        "for an antifibrinolytic{maintenance_gtt}"
+        )
+      } else {
         anterior_op_note_inputs_list_reactive$antifibrinolytic <- " "
       }
+      # if(length(input$anti_fibrinolytic)>0 & any(input$anti_fibrinolytic == "Tranexamic Acid (TXA)")){ 
+      #   if(input$txa_maintenance > 0){
+      #     maintenance_gtt <- glue(" with a {input$txa_maintenance}mg/kg/hr maintenance drip.")
+      #   }else{
+      #     maintenance_gtt <- "."
+      #   }
+      #   anterior_op_note_inputs_list_reactive$antifibrinolytic <- glue("A loading dose of {input$txa_loading}mg/kg of TXA was administered for an antifibrinolytic{maintenance_gtt}")
+      # }else{
+      #   anterior_op_note_inputs_list_reactive$antifibrinolytic <- " "
+      # }
       
       ####### ADDITIONAL PROCEDURES
       
