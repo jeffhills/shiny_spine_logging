@@ -8395,15 +8395,7 @@ server <- function(input, output, session) {
     }
     op_note_list$"\n*Surgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
     
-    # if(input$attending_assistant_yes_no == TRUE){
-    #   op_note_list$'\n*Surgical Assistants:' <- paste(as.character(input$attending_assistant), 
-    #                                                  if_else(!is.null(input$surgical_assistants), 
-    #                                                          as.character(input$surgical_assistants),
-    #                                                          " "),
-    #                                                  sep = "; ")
-    # }else{
-    #   op_note_list$"\n*Surgical Assistants:" <- if_else(!is.null(input$surgical_assistants), as.character(input$surgical_assistants), " ") 
-    # }
+
     
     op_note_list$"\n*Preprocedure ASA Class:" <- input$asa_class
     op_note_list$"\n*Anesthesia:" <- input$anesthesia
@@ -8520,9 +8512,12 @@ server <- function(input, output, session) {
     procedure_results_list$procedures_numbered_paragraph <- case_when(
       input$approach_sequence == "posterior" ~ glue("{input$procedures_numbered_confirm_edit_posterior}"),
       input$approach_sequence == "anterior" ~ glue("{input$procedures_numbered_confirm_edit_anterior}"),
-      input$approach_sequence == "posterior-anterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}"),
-      input$approach_sequence == "anterior-posterior" ~ glue("Anterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph} \n\nPosterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph}"),
-      input$approach_sequence == "posterior-anterior-posterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_paragraph} \n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_paragraph}")
+      input$approach_sequence == "posterior-anterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_confirm_edit_posterior}",
+                                                             "\n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_confirm_edit_anterior}"),
+      input$approach_sequence == "anterior-posterior" ~ glue("Anterior:\n{procedure_results_list_posterior$procedures_numbered_confirm_edit_anterior}",
+                                                             "\n\nPosterior:\n{procedure_results_list_anterior$procedures_numbered_confirm_edit_posterior}"),
+      input$approach_sequence == "posterior-anterior-posterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_confirm_edit_posterior}",
+                                                                       "\n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_confirm_edit_anterior}")
     )
     
     op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
@@ -8563,16 +8558,7 @@ server <- function(input, output, session) {
     op_note_list$"\n*Postop Plan:" <- if_else(length(postop_plan_list_reactive()) >0, glue_collapse(postop_plan_list_reactive(), sep = "\n"), " ")
     
     op_note_list
-    
-    # secion_headers_df <- enframe(op_note_list, name = "section", value = "result") %>%
-    #   unnest(result) %>%
-    #   mutate(row = row_number()) %>%
-    #   pivot_longer(cols = c(section, result), names_to = "text", values_to = "full_text_vector") %>%
-    #   select(row, full_text_vector)
-    # 
-    # op_note_text <- glue_collapse(secion_headers_df$full_text_vector, sep = "\n")
-    # 
-    # op_note_text
+
   })
   
   
