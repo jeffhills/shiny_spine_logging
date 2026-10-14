@@ -8508,18 +8508,29 @@ server <- function(input, output, session) {
       input$approach_sequence == "anterior-posterior" ~ glue("Anterior:\n{procedure_results_list_anterior$procedure_details_paragraph} \n\nWe then turned to the posterior portion of the case.\n\n{procedure_results_list_posterior$procedure_details_paragraph}"),
       input$approach_sequence == "posterior-anterior-posterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedure_details_paragraph} \n\nWe then turned to the anterior portion of the case.\n\n{procedure_results_list_anterior$procedure_details_paragraph}")
     )
+    procedure_results_list_posterior$procedures_numbered_confirm_edit_anterior
     
-    procedure_results_list$procedures_numbered_paragraph <- case_when(
-      input$approach_sequence == "posterior" ~ glue("{input$procedures_numbered_confirm_edit_posterior}"),
-      input$approach_sequence == "anterior" ~ glue("{input$procedures_numbered_confirm_edit_anterior}"),
-      input$approach_sequence == "posterior-anterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_confirm_edit_posterior}",
-                                                             "\n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_confirm_edit_anterior}"),
-      input$approach_sequence == "anterior-posterior" ~ glue("Anterior:\n{procedure_results_list_posterior$procedures_numbered_confirm_edit_anterior}",
-                                                             "\n\nPosterior:\n{procedure_results_list_anterior$procedures_numbered_confirm_edit_posterior}"),
-      input$approach_sequence == "posterior-anterior-posterior" ~ glue("Posterior:\n{procedure_results_list_posterior$procedures_numbered_confirm_edit_posterior}",
-                                                                       "\n\nAnterior:\n{procedure_results_list_anterior$procedures_numbered_confirm_edit_anterior}")
+
+    procedure_results_list$procedures_numbered_paragraph <- switch(
+      str_to_lower(input$approach_sequence),
+      "posterior" = input$procedures_numbered_confirm_edit_posterior,
+      "anterior" = input$procedures_numbered_confirm_edit_anterior,
+      "posterior-anterior" = glue(
+        "Posterior:\n{input$procedures_numbered_confirm_edit_posterior}",
+        "\n\nAnterior:\n{input$procedures_numbered_confirm_edit_anterior}"
+      ),
+      "anterior-posterior" = glue(
+        "Anterior:\n{input$procedures_numbered_confirm_edit_anterior}",
+        "\n\nPosterior:\n{input$procedures_numbered_confirm_edit_posterior}"
+      ),
+      "posterior-anterior-posterior" = glue(
+        "Posterior:\n{input$procedures_numbered_confirm_edit_posterior}",
+        "\n\nAnterior:\n{input$procedures_numbered_confirm_edit_anterior}"
+      ),
+      ""
     )
     
+
     op_note_list$"\n*Procedures Performed:" <- procedure_results_list$procedures_numbered_paragraph
     
     if(!is.null(modifiers_list_reactive$mod22_sentence)){
