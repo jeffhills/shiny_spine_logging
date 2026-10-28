@@ -603,9 +603,15 @@ all_anterior_procedures_paragraphs_function <- function(all_objects_to_add_df,
     distinct()
   
   
-  combine_paragraph_statements_df <-  anterior_procedures_ordered_df %>%
-    left_join(select(filter(level_object_paragraph_statements_df, paragraphs_combine_or_distinct == "combine"), -level)) %>%
-    filter(!is.na(procedure_category)) %>%
+  # combine_paragraph_statements_df <-  anterior_procedures_ordered_df %>%
+  #   left_join(select(filter(level_object_paragraph_statements_df, paragraphs_combine_or_distinct == "combine"), -level)) %>%
+  #   filter(!is.na(procedure_category)) %>%
+  #   select(paragraph) %>%
+  #   distinct()
+  
+  combine_paragraph_statements_df <- level_object_paragraph_statements_df %>%
+    filter(paragraphs_combine_or_distinct == "combine") %>%
+    arrange(procedure_sequence) %>%
     select(paragraph) %>%
     distinct()
   

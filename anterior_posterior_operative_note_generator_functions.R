@@ -207,9 +207,23 @@ op_note_anterior_function <- function(all_objects_to_add_df,
   
   procedures_numbered_list <- list()
   
-  additional_procedures_for_numbered_list <- c(as.character(glue("Application of {glue_collapse(bone_graft_vector, sep = ', ', last = ', and ')}")))
+  additional_procedures_for_numbered_list <- additional_procedures_vector
   
-  additional_procedures_for_numbered_list <- append(additional_procedures_for_numbered_list, additional_procedures_vector)
+  bone_graft_items <- as.character(bone_graft_vector)
+  bone_graft_items <- bone_graft_items[
+    !is.na(bone_graft_items) & nzchar(trimws(bone_graft_items))
+  ]
+  
+  if (length(bone_graft_items) > 0) {
+    additional_procedures_for_numbered_list <- c(
+      as.character(glue("Application of {glue_collapse(bone_graft_items, sep = ', ', last = ' and ')}")),
+      additional_procedures_for_numbered_list
+    )
+  }
+  
+  # additional_procedures_for_numbered_list <- c(as.character(glue("Application of {glue_collapse(bone_graft_vector, sep = ', ', last = ', and ')}")))
+  # 
+  # additional_procedures_for_numbered_list <- append(additional_procedures_for_numbered_list, additional_procedures_vector)
   
   procedures_numbered_list$primary_procedures <- anterior_op_note_procedures_performed_numbered_function(objects_added_df = all_objects_to_add_df, 
                                                                                                          additional_procedures_performed_vector = additional_procedures_for_numbered_list)
